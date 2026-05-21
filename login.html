@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>THE BROKERS TERMINAL — Subscriber Login</title>
+  <link rel="stylesheet" href="site.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.0"></script>
+</head>
+<body>
+
+<nav class="site-nav">
+  <a class="nav-brand" href="index.html">█ THE BROKERS TERMINAL</a>
+  <ul class="nav-links">
+    <li><a href="index.html">HOME</a></li>
+    <li><a href="pricing.html">PRICING</a></li>
+    <li><a href="download.html">SAMPLE REPORT</a></li>
+    <li><a href="login.html">LOGIN</a></li>
+    <li><a href="signup.html">SIGN UP</a></li>
+  </ul>
+</nav>
+
+<div class="form-wrap">
+  <div class="form-panel form-panel-sm">
+    <div class="form-title">█ WELCOME BACK</div>
+    <div class="form-subtitle">YOUR INTELLIGENCE IS WAITING — LOG IN TO ACCESS THE DESK</div>
+    <div id="session-warning" style="display:none; background:rgba(233,113,50,0.12); border-left:3px solid #E97132; padding:10px 14px; margin-bottom:16px; font-size:11px; letter-spacing:0.1em; color:#E97132;">
+      ⚠ YOUR SESSION WAS ENDED — THIS ACCOUNT WAS ACCESSED FROM ANOTHER DEVICE OR BROWSER.
+    </div>
+    <p class="form-intro">Your weekly reports, scripts, training modules, and vault are ready. Log in and get to work.</p>
+    <form novalidate>
+      <div class="form-group">
+        <label class="form-label" for="email">EMAIL ADDRESS</label>
+        <input class="form-input" id="email" type="email" placeholder="broker@domain.com" autocomplete="email" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="password">PASSWORD</label>
+        <input class="form-input" id="password" type="password" placeholder="••••••••••••" autocomplete="current-password" required>
+      </div>
+      <div class="form-error" id="login-error"></div>
+      <button class="btn btn-full btn-solid btn-submit" type="submit" style="margin-top: 20px;">█ ACCESS THE DESK</button>
+    </form>
+    <div class="form-links" style="margin-top: 20px;">
+      <a href="#" id="forgot-password-link" onclick="openForgotPasswordModal(event)">Forgot password?</a>
+      <span class="sep">|</span>
+      <a href="pricing.html">Not yet a subscriber? Start your free trial</a>
+    </div>
+  </div>
+</div>
+
+<!-- ══ FORGOT PASSWORD MODAL ═════════════════════════════ -->
+<div id="forgot-password-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.92); z-index: 9999; flex-direction: column; align-items: center; justify-content: center;">
+  <div class="form-panel form-panel-sm" style="margin: 0;">
+    <div class="form-title">█ RESET YOUR PASSWORD</div>
+    <div class="form-subtitle">WE'LL SEND YOU A RESET LINK</div>
+    <p class="form-intro">Enter your email address and we'll send you a link to create a new password.</p>
+    <form id="forgot-password-form" novalidate>
+      <div class="form-group">
+        <label class="form-label" for="reset-email">EMAIL ADDRESS</label>
+        <input class="form-input" id="reset-email" type="email" placeholder="broker@domain.com" autocomplete="email" required>
+      </div>
+      <div class="form-error" id="reset-error"></div>
+      <button class="btn btn-full btn-solid btn-submit" type="submit" style="margin-top: 20px;">█ SEND RESET LINK</button>
+    </form>
+    <div id="reset-success" style="display: none; padding: 16px; background: rgba(0,255,0,0.1); border-left: 3px solid #4CAF50; margin-top: 16px;">
+      <p style="color: #4CAF50; font-size: 12px; margin: 0; line-height: 1.6;">✓ Reset link sent! Check your email for instructions. You can close this window.</p>
+    </div>
+    <button onclick="closeForgotPasswordModal()" class="btn btn-dim" style="width: 100%; margin-top: 12px;">BACK TO LOGIN</button>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <div class="footer-row">
+    <span class="footer-brand">█ THE BROKERS TERMINAL</span>
+    <span class="footer-center">BROKERS EYES ONLY</span>
+    <span class="footer-right">© 2026 — ALL RIGHTS RESERVED</span>
+  </div>
+  <p class="footer-disclaimer">This publication is distributed for informational purposes only. Not financial advice. For professional use only.</p>
+</footer>
+
+<script src="site.js"></script>
+
+<!-- SUPABASE AUTH ═════════════════════════════════════════ -->
+<script>
+  const SUPABASE_URL = 'https://oqpodikelxhwcnjdwojw.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_hJjmJ5MYAj8aCpXL6vCMTQ_zJlxUehl';
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  /* ── Check if already logged in ─────────────────────────── */
+  (async function () {
+    // Show concurrent session warning if redirected here for that reason
+    if (new URLSearchParams(window.location.search).get('reason') === 'session') {
+      document.getElementById('session-warning').style.display = 'block';
+    }
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+      window.location.href = 'dashboard.html';
+    }
+  })();
+
+  /* ── Handle login form ──────────────────────────────────── */
+  document.addEventListener('DOMContentLoaded', function () {
+    var form = document.querySelector('form');
+    if (!form) return;
+
+    form.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      var email = document.querySelector('input[type="email"]').value.trim();
+      var password = document.querySelector('input[type="password"]').value;
+      var errorDiv = document.getElementById('login-error');
+      var submitBtn = form.querySelector('button[type="submit"]');
+      var originalText = submitBtn.textContent;
+
+      if (!email || !password) {
+        if (errorDiv) {
+          errorDiv.textContent = 'Please enter email and password';
+          errorDiv.classList.add('visible');
+        }
+        return;
+      }
+
+      submitBtn.textContent = 'AUTHENTICATING...';
+      submitBtn.disabled = true;
+
+      try {
+        // Attempt login
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: email,
+          password: password
+        });
+
+        if (error) {
+          throw new Error(error.message);
+        }
+
+        // Check if email is confirmed
+        if (!data.user.email_confirmed_at) {
+          // Email not confirmed — sign out and show error
+          await supabase.auth.signOut();
+          throw new Error('Please confirm your email before logging in. Check your inbox for a confirmation email.');
+        }
+
+        // Check if user's firm is active
+        const userEmail = data.user.email;
+        const domain = userEmail.split('@')[1]; // extract domain from email
+
+        const { data: firmData, error: firmError } = await supabase
+          .from('firms')
+          .select('id, status, access')
+          .eq('domain', domain)
+          .single();
+
+        if (firmError || !firmData || firmData.status !== 'active') {
+          // Firm not found or inactive — sign out and show error
+          await supabase.auth.signOut();
+          throw new Error('Your firm subscription is not active. Contact support.');
+        }
+
+        // Firm is active — login successful
+        if (errorDiv) errorDiv.classList.remove('visible');
+
+        // Generate unique session ID — overwrites any existing session in DB
+        // This kicks out anyone else already logged in on this account
+        var sessionId = (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36));
+        localStorage.setItem('sessionId', sessionId);
+        localStorage.setItem('firmId', firmData.id);
+        localStorage.setItem('userEmail', userEmail);
+
+        // Write session ID to database — invalidates all other active sessions
+        await supabase.from('users')
+          .update({ current_session_id: sessionId })
+          .eq('email', userEmail);
+
+        // Log login activity
+        supabase.from('activity_log').insert({
+          user_email: userEmail,
+          firm_id: firmData.id,
+          action: 'login'
+        }).then(function(){}).catch(function(){});
+
+        // Redirect to dashboard
+        setTimeout(function () {
+          window.location.href = 'dashboard.html';
+        }, 500);
+
+      } catch (err) {
+        if (errorDiv) {
+          errorDiv.textContent = err.message || 'Login failed. Please try again.';
+          errorDiv.classList.add('visible');
+        }
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+      }
+    });
+  });
+
+  /* ── Forgot Password Modal ──────────────────────────────── */
+  function openForgotPasswordModal(e) {
+    e.preventDefault();
+    document.getElementById('forgot-password-modal').style.display = 'flex';
+    document.getElementById('reset-email').focus();
+  }
+
+  function closeForgotPasswordModal() {
+    document.getElementById('forgot-password-modal').style.display = 'none';
+    document.getElementById('reset-email').value = '';
+    document.getElementById('reset-error').textContent = '';
+    document.getElementById('reset-error').classList.remove('visible');
+    document.getElementById('reset-success').style.display = 'none';
+  }
+
+  /* ── Handle password reset form ─────────────────────────── */
+  document.addEventListener('DOMContentLoaded', function () {
+    var resetForm = document.getElementById('forgot-password-form');
+    if (!resetForm) return;
+
+    resetForm.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      var email = document.getElementById('reset-email').value.trim();
+      var errorDiv = document.getElementById('reset-error');
+      var successDiv = document.getElementById('reset-success');
+      var submitBtn = resetForm.querySelector('button[type="submit"]');
+      var originalText = submitBtn.textContent;
+
+      if (!email) {
+        errorDiv.textContent = 'Please enter your email address';
+        errorDiv.classList.add('visible');
+        return;
+      }
+
+      submitBtn.textContent = 'SENDING...';
+      submitBtn.disabled = true;
+
+      try {
+        // Send password reset email
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: window.location.origin + '/reset-password.html'
+        });
+
+        if (error) {
+          throw new Error(error.message);
+        }
+
+        // Success — show confirmation
+        errorDiv.classList.remove('visible');
+        successDiv.style.display = 'block';
+        resetForm.style.display = 'none';
+
+        // Auto-close after 5 seconds
+        setTimeout(closeForgotPasswordModal, 5000);
+
+      } catch (err) {
+        errorDiv.textContent = err.message || 'Failed to send reset link. Please try again.';
+        errorDiv.classList.add('visible');
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+      }
+    });
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,1422 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>THE BROKERS TERMINAL — Admin</title>
+  <link rel="stylesheet" href="site.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.0"></script>
+  <style>
+
+    /* ── ADMIN LAYOUT ─────────────────────────────────────────── */
+    .admin-masthead {
+      background: var(--bg-raised);
+      border-bottom: 2px solid var(--border);
+      padding: 0 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 48px;
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+    .admin-masthead-left  { color: var(--accent); font-weight: 700; }
+    .admin-masthead-right { color: var(--text-faint); font-size: 10px; }
+
+    /* ── STATS BAR ────────────────────────────────────────────── */
+    .admin-stats-bar {
+      background: var(--bg-deep);
+      border-bottom: 1px solid var(--border-dim);
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+    }
+    .admin-stat {
+      padding: 20px 24px;
+      border-right: 1px solid var(--border-dim);
+      text-align: center;
+    }
+    .admin-stat:last-child { border-right: none; }
+    .admin-stat-num   { color: var(--accent); font-size: 28px; font-weight: 700; line-height: 1; margin-bottom: 4px; }
+    .admin-stat-num.green { color: #6BCB77; }
+    .admin-stat-num.amber { color: #f0a500; }
+    .admin-stat-label { color: var(--text-faint); font-size: 9px; letter-spacing: 0.20em; text-transform: uppercase; }
+
+    /* ── ADMIN TABS ───────────────────────────────────────────── */
+    .admin-tabs {
+      background: var(--bg);
+      border-bottom: 2px solid var(--border-dim);
+      padding: 0 40px;
+      display: flex;
+    }
+    .admin-tab {
+      font-family: var(--font);
+      font-size: 10px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: var(--text-faint);
+      background: transparent;
+      border: none;
+      border-bottom: 3px solid transparent;
+      padding: 14px 24px;
+      cursor: pointer;
+      transition: color 150ms, border-color 150ms;
+      margin-bottom: -2px;
+    }
+    .admin-tab:hover { color: var(--text); }
+    .admin-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    /* ── ADMIN CONTENT ────────────────────────────────────────── */
+    .admin-content { max-width: 1300px; margin: 0 auto; padding: 32px 40px 80px; }
+    .admin-section { display: none; }
+    .admin-section.active { display: block; }
+
+    /* ── SECTION LABEL ────────────────────────────────────────── */
+    .admin-section-label {
+      color: var(--accent); font-size: 10px; letter-spacing: 0.26em; text-transform: uppercase;
+      font-weight: 700; padding: 6px 0; border-bottom: 1px solid var(--border-dim);
+      margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;
+    }
+    .admin-section-label span { color: var(--text-faint); font-size: 9px; letter-spacing: 0.14em; font-weight: 400; }
+
+    /* ── CHECKLIST ────────────────────────────────────────────── */
+    .checklist { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 32px; }
+    .check-item {
+      border: 1px solid var(--border-dim);
+      background: var(--bg-raised);
+      padding: 16px 18px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .check-item.done  { border-left: 3px solid #6BCB77; }
+    .check-item.missing { border-left: 3px solid var(--border-dim); opacity: 0.6; }
+    .check-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .check-dot.done    { background: #6BCB77; }
+    .check-dot.missing { background: var(--border-dim); }
+    .check-dot.urgent  { background: var(--accent); }
+    .check-name  { color: var(--text); font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+    .check-sub   { color: var(--text-faint); font-size: 10px; letter-spacing: 0.10em; margin-top: 2px; }
+
+    /* ── UPLOAD GRID ──────────────────────────────────────────── */
+    .upload-grid { display: grid; grid-template-columns: 1fr 360px; gap: 24px; }
+
+    /* ── FORM ELEMENTS ────────────────────────────────────────── */
+    .form-group  { margin-bottom: 16px; }
+    .form-label  { display: block; color: var(--text-faint); font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; margin-bottom: 6px; font-weight: 700; }
+    .form-input  { width: 100%; background: var(--bg-deep); border: 1px solid var(--border-dim); color: var(--text); font-family: var(--font); font-size: 13px; padding: 10px 14px; transition: border-color 150ms; box-sizing: border-box; }
+    .form-input:focus { outline: none; border-color: var(--accent); }
+    .form-select { appearance: none; cursor: pointer; }
+    .form-success { color: #6BCB77; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; padding: 10px 14px; border-left: 3px solid #6BCB77; background: rgba(107,203,119,0.06); margin-bottom: 16px; display: none; }
+    .form-err    { color: var(--accent); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; padding: 10px 14px; border-left: 3px solid var(--accent); background: rgba(233,113,50,0.06); margin-bottom: 16px; display: none; }
+
+    /* ── FLASH QUICK UPLOAD ───────────────────────────────────── */
+    .flash-panel {
+      border: 1px solid var(--accent);
+      background: #0F0A06;
+      padding: 20px;
+    }
+    .flash-panel-title { color: var(--accent); font-size: 10px; letter-spacing: 0.26em; text-transform: uppercase; font-weight: 700; margin-bottom: 16px; }
+
+    /* ── ADMIN TABLE ──────────────────────────────────────────── */
+    .admin-table-wrap { overflow-x: auto; border: 1px solid var(--border-dim); margin-bottom: 32px; }
+    .admin-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .admin-table th { background: var(--bg-deep); color: var(--text-faint); font-size: 9px; letter-spacing: 0.20em; text-transform: uppercase; padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border-dim); white-space: nowrap; }
+    .admin-table td { padding: 12px 14px; border-bottom: 1px solid var(--border-dim); color: var(--text-muted); vertical-align: middle; }
+    .admin-table tr:last-child td { border-bottom: none; }
+    .admin-table tr:hover td { background: var(--bg-raised); }
+    .admin-table td:first-child { color: var(--text); font-weight: 600; }
+
+    /* ── BADGES & STATUS ──────────────────────────────────────── */
+    .badge-asset { border: 1px solid var(--border); color: var(--accent); font-size: 8px; letter-spacing: 0.20em; text-transform: uppercase; padding: 2px 7px; display: inline-block; white-space: nowrap; }
+    .badge-type  { border: 1px solid var(--border-dim); color: var(--text-faint); font-size: 8px; letter-spacing: 0.18em; text-transform: uppercase; padding: 2px 7px; display: inline-block; white-space: nowrap; }
+    .status-active   { color: #6BCB77; font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; font-weight: 700; }
+    .status-inactive { color: var(--text-faint); font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; }
+    .status-past-due { color: #f0a500; font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; font-weight: 700; }
+
+    /* ── FILTER BAR ───────────────────────────────────────────── */
+    .filter-bar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
+    .filter-bar select, .filter-bar input { background: var(--bg-deep); border: 1px solid var(--border-dim); color: var(--text-muted); font-family: var(--font); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; padding: 7px 12px; cursor: pointer; }
+    .filter-bar select:focus, .filter-bar input:focus { outline: none; border-color: var(--accent); }
+
+    /* ── BUTTONS ──────────────────────────────────────────────── */
+    .btn { display: inline-block; border: 1px solid var(--border); color: var(--accent); background: transparent; font-family: var(--font); font-size: 12px; letter-spacing: 0.20em; text-transform: uppercase; padding: 13px 28px; cursor: pointer; transition: background 150ms, color 150ms; white-space: nowrap; text-decoration: none; }
+    .btn:hover { background: var(--accent); color: var(--bg); }
+    .btn-sm    { padding: 6px 14px; font-size: 10px; }
+    .btn-full  { width: 100%; text-align: center; display: block; }
+    .btn-solid { background: var(--accent); color: var(--bg); font-weight: 700; border-color: var(--accent); }
+    .btn-solid:hover { background: #fff; border-color: #fff; color: var(--bg); }
+    .btn-danger { border-color: var(--accent); color: var(--accent); }
+    .btn-danger:hover { background: var(--accent); color: var(--bg); }
+    .btn-green  { border-color: #6BCB77; color: #6BCB77; }
+    .btn-green:hover { background: #6BCB77; color: var(--bg); }
+
+    /* ── PANEL BOX ────────────────────────────────────────────── */
+    .admin-box { border: 1px solid var(--border-dim); background: var(--bg-raised); padding: 24px; margin-bottom: 20px; }
+    .admin-box-title { color: var(--accent); font-size: 10px; letter-spacing: 0.24em; text-transform: uppercase; font-weight: 700; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid var(--border-dim); }
+
+    /* ── EMPTY ────────────────────────────────────────────────── */
+    .admin-empty { text-align: center; padding: 40px; color: var(--text-faint); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; border: 1px dashed var(--border-dim); }
+
+    /* ── LOADING ──────────────────────────────────────────────── */
+    .loading-row td { color: var(--text-faint); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; text-align: center; padding: 32px; }
+
+  </style>
+</head>
+<body>
+
+<!-- ══ NAV ══════════════════════════════════════════════════════ -->
+<nav class="site-nav">
+  <a class="nav-brand" href="index.html">█ THE BROKERS TERMINAL</a>
+  <ul class="nav-links">
+    <li><a href="dashboard.html">SUBSCRIBER DESK</a></li>
+    <li><a href="login.html">LOG OUT</a></li>
+  </ul>
+</nav>
+
+<!-- ══ PASSWORD GATE ═════════════════════════════════════════════ -->
+<div id="admin-gate" class="form-wrap">
+  <div class="form-panel form-panel-sm">
+    <div class="form-title">█ ADMIN ACCESS</div>
+    <div class="form-subtitle">OWNER ACCESS ONLY — NOT LINKED PUBLICLY</div>
+    <form id="gate-form">
+      <div class="form-group">
+        <label class="form-label" for="admin-pw">ADMIN PASSWORD</label>
+        <input class="form-input" id="admin-pw" type="password" placeholder="Enter admin password" autocomplete="off">
+      </div>
+      <div class="form-err" id="gate-error"></div>
+      <button class="btn btn-full btn-solid" type="submit">█ ENTER ADMIN PANEL</button>
+    </form>
+  </div>
+</div>
+
+<!-- ══ ADMIN PANEL ════════════════════════════════════════════════ -->
+<div id="admin-panel" style="display:none;">
+
+  <!-- Masthead -->
+  <div class="admin-masthead">
+    <span class="admin-masthead-left">█ ADMIN PANEL — THE BROKERS TERMINAL</span>
+    <span class="admin-masthead-right">OWNER ACCESS ONLY</span>
+  </div>
+
+  <!-- Stats bar — live from Supabase -->
+  <div class="admin-stats-bar">
+    <div class="admin-stat">
+      <div class="admin-stat-num green" id="stat-subscribers">—</div>
+      <div class="admin-stat-label">Active Subscribers</div>
+    </div>
+    <div class="admin-stat">
+      <div class="admin-stat-num green" id="stat-firms">—</div>
+      <div class="admin-stat-label">Active Firms</div>
+    </div>
+    <div class="admin-stat">
+      <div class="admin-stat-num" id="stat-reports">—</div>
+      <div class="admin-stat-label">Reports in Vault</div>
+    </div>
+    <div class="admin-stat">
+      <div class="admin-stat-num amber" id="stat-flash-count">—</div>
+      <div class="admin-stat-label">Flash Alerts</div>
+    </div>
+    <div class="admin-stat">
+      <div class="admin-stat-num" id="stat-new-this-week">—</div>
+      <div class="admin-stat-label">Uploaded This Week</div>
+    </div>
+  </div>
+
+  <!-- Navigation tabs -->
+  <div class="admin-tabs">
+    <button class="admin-tab active" data-tab="overview">OVERVIEW</button>
+    <button class="admin-tab" data-tab="upload">UPLOAD DOCUMENT</button>
+    <button class="admin-tab" data-tab="reports">REPORTS</button>
+    <button class="admin-tab" data-tab="subscribers">SUBSCRIBERS</button>
+    <button class="admin-tab" data-tab="firms">FIRMS</button>
+    <button class="admin-tab" data-tab="activity">ACTIVITY</button>
+    <button class="admin-tab" data-tab="create-account">+ CREATE ACCOUNT</button>
+  </div>
+
+  <div class="admin-content">
+
+    <!-- ═══════════ OVERVIEW ═══════════════════════════════════ -->
+    <div class="admin-section active" id="tab-overview">
+
+      <!-- This week checklist -->
+      <div class="admin-section-label">
+        ▸ THIS WEEK — CONTENT CHECKLIST
+        <span id="checklist-week-label">W18 · WEEK OF 04 MAY 2026</span>
+      </div>
+      <div class="checklist" id="content-checklist">
+        <!-- populated by JS -->
+      </div>
+
+      <!-- Two column layout -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+
+        <!-- Recent uploads -->
+        <div>
+          <div class="admin-section-label">▸ RECENT UPLOADS <span>LAST 5 DOCUMENTS</span></div>
+          <div class="admin-table-wrap">
+            <table class="admin-table">
+              <thead><tr><th>TITLE</th><th>TYPE</th><th>DATE</th></tr></thead>
+              <tbody id="recent-uploads-tbody">
+                <tr class="loading-row"><td colspan="3">LOADING...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Flash alerts removed -->
+
+      </div>
+    </div>
+
+    <!-- ═══════════ UPLOAD ══════════════════════════════════════ -->
+    <div class="admin-section" id="tab-upload">
+
+      <div class="upload-grid">
+
+        <!-- Upload form -->
+        <div class="admin-box">
+          <div class="admin-box-title">UPLOAD NEW DOCUMENT</div>
+          <div class="form-success" id="upload-success">█ DOCUMENT UPLOADED SUCCESSFULLY</div>
+          <div class="form-err"     id="upload-error"></div>
+
+          <form id="upload-form">
+            <div class="form-group">
+              <label class="form-label" for="doc-title">DOCUMENT TITLE</label>
+              <input class="form-input" id="doc-title" type="text" placeholder="e.g. Gold Desk — Weekly W18" required>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+              <div class="form-group">
+                <label class="form-label" for="doc-asset">ASSET CLASS</label>
+                <select class="form-input form-select" id="doc-asset" required>
+                  <option value="" disabled selected>Select asset</option>
+                  <option value="gold">Gold Bullion</option>
+                  <option value="whisky">Whisky Market</option>
+                  <option value="macro">Macro</option>
+                  <option value="all">All Markets</option>
+                  <option value="psychology">Sales Psychology</option>
+                  <option value="alternatives">Alternative Assets</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="doc-type">DOCUMENT TYPE</label>
+                <select class="form-input form-select" id="doc-type" required>
+                  <option value="" disabled selected>Select type</option>
+                  <optgroup label="── WEEKLY ──">
+                    <option value="weekly">Weekly Report</option>
+                    <option value="pitch_pack">Pitch Pack</option>
+                    <option value="objection_file">Objection File</option>
+                  </optgroup>
+                  <optgroup label="── MONTHLY / QUARTERLY ──">
+                    <option value="monthly">Monthly Deep-Dive</option>
+                    <option value="quarterly">Quarterly Review</option>
+                    <option value="hit_list">Hit List</option>
+                  </optgroup>
+                  <optgroup label="── TRAINING ──">
+                    <option value="training">Training Module</option>
+                    <option value="psychology">Psychology Desk</option>
+                  </optgroup>
+                  <optgroup label="── ALERTS ──">
+                    <option value="morning_line">Morning Line</option>
+                  </optgroup>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="doc-date">ISSUE DATE</label>
+              <input class="form-input" id="doc-date" type="date" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="doc-tags">SEARCH TAGS <span style="color:var(--text-faint); font-weight:400;">(comma separated — helps subscribers find this)</span></label>
+              <input class="form-input" id="doc-tags" type="text" placeholder="e.g. inflation, interest rates, objection, gold price, recession, pitch">
+              <div style="color: var(--text-faint); font-size: 10px; margin-top: 6px; letter-spacing: 0.10em;">These tags power The Vault search. Add the key topics, objections and themes covered in this report.</div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="doc-file">HTML FILE</label>
+              <input class="form-input" id="doc-file" type="file" accept=".html" required style="padding: 10px 14px; cursor: pointer;">
+              <div style="color: var(--text-faint); font-size: 10px; margin-top: 6px; letter-spacing: 0.10em;">HTML files only. Max recommended size: 5MB.</div>
+            </div>
+
+            <button class="btn btn-full btn-solid" type="submit" id="upload-submit">█ UPLOAD DOCUMENT</button>
+          </form>
+        </div>
+
+        <!-- Upload guide -->
+        <div>
+          <div class="admin-box">
+            <div class="admin-box-title">WEEKLY PUBLISHING GUIDE</div>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+              <div style="border-left: 3px solid var(--accent); padding: 8px 12px; background: var(--bg-deep);">
+                <div style="color: var(--text); font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 2px;">SUNDAY</div>
+                <div style="color: var(--text-faint); font-size: 11px; line-height: 1.5;">Upload Gold Weekly + Whisky Weekly</div>
+              </div>
+              <div style="border-left: 3px solid var(--border-dim); padding: 8px 12px; background: var(--bg-deep);">
+                <div style="color: var(--text); font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 2px;">MONDAY</div>
+                <div style="color: var(--text-faint); font-size: 11px; line-height: 1.5;">Upload Pitch Pack, Objection File, Week Ahead Calendar</div>
+              </div>
+              <div style="border-left: 3px solid var(--border-dim); padding: 8px 12px; background: var(--bg-deep);">
+                <div style="color: var(--text); font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 2px;">AS NEEDED</div>
+                <div style="color: var(--text-faint); font-size: 11px; line-height: 1.5;">Flash Alerts via the Overview tab — publish immediately</div>
+              </div>
+              <div style="border-left: 3px solid var(--border-dim); padding: 8px 12px; background: var(--bg-deep);">
+                <div style="color: var(--text); font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 2px;">END OF MONTH</div>
+                <div style="color: var(--text-faint); font-size: 11px; line-height: 1.5;">Monthly Deep-Dive, Hit List, Psychology Desk</div>
+              </div>
+              <div style="border-left: 3px solid var(--border-dim); padding: 8px 12px; background: var(--bg-deep);">
+                <div style="color: var(--text); font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 2px;">END OF QUARTER</div>
+                <div style="color: var(--text-faint); font-size: 11px; line-height: 1.5;">Quarterly Review</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="admin-box">
+            <div class="admin-box-title">AFTER UPLOADING</div>
+            <p style="color: var(--text-faint); font-size: 12px; line-height: 1.7;">
+              Documents appear on subscriber dashboards immediately after upload. The content ticker automatically shows new uploads for 7 days. Flash alerts appear in the ticker until a new one replaces them.
+            </p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ═══════════ REPORTS ═════════════════════════════════════ -->
+    <div class="admin-section" id="tab-reports">
+
+      <div class="filter-bar">
+        <select id="reports-filter-type" onchange="filterReportsTable()">
+          <option value="all">ALL TYPES</option>
+          <option value="weekly">Weekly</option>
+          <option value="pitch_pack">Pitch Pack</option>
+          <option value="objection_file">Objection File</option>
+          <option value="monthly">Monthly</option>
+          <option value="quarterly">Quarterly</option>
+          <option value="training">Training</option>
+          <option value="psychology">Psychology</option>
+          <option value="hit_list">Hit List</option>
+          <option value="flash">Flash Alert</option>
+        </select>
+        <select id="reports-filter-asset" onchange="filterReportsTable()">
+          <option value="all">ALL ASSETS</option>
+          <option value="gold">Gold</option>
+          <option value="whisky">Whisky</option>
+          <option value="macro">Macro</option>
+          <option value="all">All Markets</option>
+        </select>
+        <span style="color: var(--text-faint); font-size: 10px; letter-spacing: 0.14em; margin-left: 8px;" id="reports-count"></span>
+      </div>
+
+      <div class="admin-table-wrap">
+        <table class="admin-table" id="reports-table">
+          <thead>
+            <tr>
+              <th>TITLE</th>
+              <th>ASSET</th>
+              <th>TYPE</th>
+              <th>ISSUE DATE</th>
+              <th>STATUS</th>
+              <th>ACTIONS</th>
+            </tr>
+          </thead>
+          <tbody id="reports-tbody">
+            <tr class="loading-row"><td colspan="6">LOADING REPORTS...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ═══════════ SUBSCRIBERS ═════════════════════════════════ -->
+    <div class="admin-section" id="tab-subscribers">
+
+      <div class="filter-bar">
+        <input type="text" id="sub-search" placeholder="Search name or email..." oninput="filterSubscribers()" style="min-width: 240px;">
+        <select id="sub-filter-status" onchange="filterSubscribers()">
+          <option value="all">ALL STATUS</option>
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
+        <span style="color: var(--text-faint); font-size: 10px; letter-spacing: 0.14em; margin-left: 8px;" id="subs-count"></span>
+      </div>
+
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>ONLINE</th>
+              <th>NAME</th>
+              <th>EMAIL</th>
+              <th>FIRM</th>
+              <th>PLAN</th>
+              <th>STATUS</th>
+              <th>LAST SEEN</th>
+              <th>JOINED</th>
+            </tr>
+          </thead>
+          <tbody id="subscribers-tbody">
+            <tr class="loading-row"><td colspan="6">LOADING SUBSCRIBERS...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ═══════════ FIRMS ════════════════════════════════════════ -->
+    <div class="admin-section" id="tab-firms">
+
+      <div class="filter-bar">
+        <select id="firms-filter-status" onchange="filterFirms()">
+          <option value="all">ALL STATUS</option>
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+          <option value="past_due">Past Due</option>
+        </select>
+        <select id="firms-filter-plan" onchange="filterFirms()">
+          <option value="all">ALL PLANS</option>
+          <option value="individual">Individual (£49)</option>
+          <option value="corporate">Corporate (£400)</option>
+        </select>
+        <span style="color: var(--text-faint); font-size: 10px; letter-spacing: 0.14em; margin-left: 8px;" id="firms-count"></span>
+      </div>
+
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>FIRM / NAME</th>
+              <th>DOMAIN</th>
+              <th>PLAN</th>
+              <th>USERS</th>
+              <th>ACCESS</th>
+              <th>STATUS</th>
+              <th>STRIPE ID</th>
+              <th>CREATED</th>
+            </tr>
+          </thead>
+          <tbody id="firms-tbody">
+            <tr class="loading-row"><td colspan="7">LOADING FIRMS...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ═══════════ ACTIVITY ══════════════════════════════════════ -->
+    <div class="admin-section" id="tab-activity">
+      <div class="section-header">
+        <div class="section-title">ACTIVITY LOG</div>
+        <div class="section-subtitle">Real-time login history and report views across all subscribers.</div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-bottom:32px;">
+        <!-- Recent logins -->
+        <div>
+          <div class="admin-section-label">▸ RECENT LOGINS</div>
+          <div class="admin-table-wrap">
+            <table class="admin-table">
+              <thead><tr><th>USER</th><th>FIRM</th><th>TIME</th></tr></thead>
+              <tbody id="activity-logins-tbody">
+                <tr><td colspan="3" style="text-align:center;color:var(--text-faint);padding:20px;font-size:10px;">LOADING...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <!-- Recent report views -->
+        <div>
+          <div class="admin-section-label">▸ RECENT REPORT VIEWS</div>
+          <div class="admin-table-wrap">
+            <table class="admin-table">
+              <thead><tr><th>USER</th><th>REPORT</th><th>TIME</th></tr></thead>
+              <tbody id="activity-views-tbody">
+                <tr><td colspan="3" style="text-align:center;color:var(--text-faint);padding:20px;font-size:10px;">LOADING...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Most popular reports -->
+      <div class="admin-section-label">▸ MOST VIEWED REPORTS</div>
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead><tr><th>REPORT</th><th>ASSET</th><th>TYPE</th><th>TOTAL VIEWS</th></tr></thead>
+          <tbody id="activity-popular-tbody">
+            <tr><td colspan="4" style="text-align:center;color:var(--text-faint);padding:20px;font-size:10px;">LOADING...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Downloads -->
+      <div class="admin-section-label" style="margin-top:32px;">▸ OPENED IN NEW TAB</div>
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead><tr><th>USER</th><th>FIRM</th><th>REPORT</th><th>ASSET</th><th>WHEN</th></tr></thead>
+          <tbody id="activity-downloads-tbody">
+            <tr><td colspan="5" style="text-align:center;color:var(--text-faint);padding:20px;font-size:10px;">LOADING...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ═══════════ CREATE ACCOUNT ═══════════════════════════════ -->
+    <div class="admin-section" id="tab-create-account">
+      <div class="section-header">
+        <div class="section-title">CREATE ACCOUNT</div>
+        <div class="section-subtitle">Manually create a subscriber account — no payment required. They'll receive an email to set their password.</div>
+      </div>
+
+      <div class="form-panel" style="max-width:560px; margin:0;">
+        <form id="create-account-form" novalidate>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+            <div class="form-group">
+              <label class="form-label">FIRST NAME</label>
+              <input class="form-input" id="ca-first" type="text" placeholder="e.g. James" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">LAST NAME</label>
+              <input class="form-input" id="ca-last" type="text" placeholder="e.g. Robertson" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">EMAIL ADDRESS</label>
+            <input class="form-input" id="ca-email" type="email" placeholder="broker@theirfirm.com" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">FIRM / COMPANY NAME</label>
+            <input class="form-input" id="ca-firm" type="text" placeholder="e.g. Robertson & Co" required>
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+            <div class="form-group">
+              <label class="form-label">CONTENT ACCESS</label>
+              <select class="form-input" id="ca-access">
+                <option value="both">Both (Gold + Whisky)</option>
+                <option value="gold">Gold Only</option>
+                <option value="whisky">Whisky Only</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">PLAN</label>
+              <select class="form-input" id="ca-plan">
+                <option value="corporate">Corporate (£400/mo)</option>
+                <option value="individual">Individual (£49/mo)</option>
+                <option value="demo">Demo / Free Trial</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-error" id="ca-error"></div>
+          <div id="ca-success" style="display:none; color:#4CAF50; font-size:12px; letter-spacing:0.12em; padding:12px 0;">
+            ✓ Account created. Password setup email sent.
+          </div>
+
+          <button class="btn btn-full btn-solid btn-submit" type="submit" style="margin-top:20px;" id="ca-submit">
+            █ CREATE ACCOUNT & SEND INVITE
+          </button>
+        </form>
+      </div>
+    </div>
+
+  </div><!-- /admin-content -->
+
+</div><!-- /admin-panel -->
+
+<!-- ══ FOOTER ════════════════════════════════════════════════════ -->
+<footer class="site-footer">
+  <div class="footer-row">
+    <span class="footer-brand">█ THE BROKERS TERMINAL</span>
+    <span class="footer-center">ADMIN PANEL</span>
+    <span class="footer-right">© 2026 — ALL RIGHTS RESERVED</span>
+  </div>
+</footer>
+
+<script src="site.js"></script>
+<script>
+  const SUPABASE_URL = 'https://oqpodikelxhwcnjdwojw.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_hJjmJ5MYAj8aCpXL6vCMTQ_zJlxUehl';
+  const SUPABASE_SERVICE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9xcG9kaWtlbHhod2NuamR3b2p3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NzQ2NDMyMSwiZXhwIjoyMDkzMDQwMzIxfQ.e-NAEbB0Ick5NeBVT2U4Dy9kw7X1O2BcKlxptbqZNVI';
+  const supabase      = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const supabaseAdmin = window.supabase.createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
+    auth: { autoRefreshToken: false, persistSession: false, detectSessionInUrl: false }
+  });
+
+  const ADMIN_PASSWORD = 'Terminal2026';
+
+  // ── All loaded data ─────────────────────────────────────────
+  var allReports     = [];
+  var allSubscribers = [];
+  var allFirms       = [];
+
+  // ══ PASSWORD GATE ═══════════════════════════════════════════
+  document.getElementById('gate-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var pw  = document.getElementById('admin-pw').value;
+    var err = document.getElementById('gate-error');
+    if (pw === ADMIN_PASSWORD) {
+      document.getElementById('admin-gate').style.display  = 'none';
+      document.getElementById('admin-panel').style.display = 'block';
+      initialLoad();
+    } else {
+      err.textContent  = 'Incorrect password';
+      err.style.display = 'block';
+    }
+  });
+
+  // ══ TAB SWITCHING ═══════════════════════════════════════════
+  document.querySelectorAll('.admin-tab').forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+      this.classList.add('active');
+      var tabName = this.getAttribute('data-tab');
+      document.getElementById('tab-' + tabName).classList.add('active');
+      if (tabName === 'activity') loadActivity();
+    });
+  });
+
+  // ══ INITIAL LOAD ════════════════════════════════════════════
+  async function initialLoad() {
+    await Promise.all([
+      loadStats(),
+      loadReports(),
+      loadSubscribers(),
+      loadFirms()
+    ]);
+    // Refresh subscribers every 30 seconds to keep presence dots live
+    setInterval(loadSubscribers, 30000);
+  }
+
+  // ══ STATS ═══════════════════════════════════════════════════
+  async function loadStats() {
+    try {
+      var [reportsRes, usersRes, firmsRes] = await Promise.all([
+        supabase.from('reports').select('id, report_type, published_date, status'),
+        supabase.from('users').select('id'),
+        supabase.from('firms').select('id, status')
+      ]);
+
+      var reports = reportsRes.data || [];
+      var users   = usersRes.data   || [];
+      var firms   = firmsRes.data   || [];
+
+      var sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+      var published    = reports.filter(r => r.status === 'published');
+      var flashAlerts  = published.filter(r => r.report_type === 'flash');
+      var newThisWeek  = published.filter(r => new Date(r.published_date) >= sevenDaysAgo);
+      var activeFirms  = firms.filter(f => f.status === 'active');
+
+      document.getElementById('stat-subscribers').textContent  = users.length;
+      document.getElementById('stat-firms').textContent        = activeFirms.length;
+      document.getElementById('stat-reports').textContent      = published.length;
+      document.getElementById('stat-flash-count').textContent  = flashAlerts.length;
+      document.getElementById('stat-new-this-week').textContent = newThisWeek.length;
+
+    } catch (err) { console.error('Stats error:', err); }
+  }
+
+  // ══ REPORTS ═════════════════════════════════════════════════
+  async function loadReports() {
+    try {
+      var { data, error } = await supabase
+        .from('reports').select('*').order('published_date', { ascending: false });
+      if (error) throw error;
+
+      allReports = data || [];
+      renderReportsTable(allReports);
+      renderChecklist(allReports);
+      renderRecentUploads(allReports);
+
+    } catch (err) { console.error('Reports error:', err); }
+  }
+
+  function renderReportsTable(reports) {
+    var tbody = document.getElementById('reports-tbody');
+    document.getElementById('reports-count').textContent = reports.length + ' DOCUMENTS';
+
+    if (!reports.length) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--text-faint); padding:32px; font-size:10px; letter-spacing:0.18em; text-transform:uppercase;">NO REPORTS YET</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = reports.map(function (r) {
+      var date      = new Date(r.published_date).toLocaleDateString('en-GB', { year:'numeric', month:'short', day:'2-digit'}).toUpperCase();
+      var typeLabel = r.report_type.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+      var assetLabel = r.asset_class.toUpperCase();
+      var statusHtml = r.status === 'published'
+        ? '<span class="status-active">PUBLISHED</span>'
+        : '<span class="status-inactive">DRAFT</span>';
+      return `<tr data-type="${r.report_type}" data-asset="${r.asset_class}" data-status="${r.status}">
+        <td>${r.title}</td>
+        <td><span class="badge-asset">${assetLabel}</span></td>
+        <td><span class="badge-type">${typeLabel}</span></td>
+        <td>${date}</td>
+        <td>${statusHtml}</td>
+        <td style="display:flex; gap:6px;">
+          <button class="btn btn-sm" onclick="previewReport('${r.file_path}', '${r.title.replace(/'/g,"\\'")}')">PREVIEW</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteReport('${r.id}', '${r.file_path.replace(/'/g,"\\'")}')">DELETE</button>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+
+  function filterReportsTable() {
+    var typeFilter  = document.getElementById('reports-filter-type').value;
+    var assetFilter = document.getElementById('reports-filter-asset').value;
+    var filtered = allReports.filter(function (r) {
+      var typeMatch  = typeFilter  === 'all' || r.report_type  === typeFilter;
+      var assetMatch = assetFilter === 'all' || r.asset_class  === assetFilter;
+      return typeMatch && assetMatch;
+    });
+    renderReportsTable(filtered);
+  }
+
+  function renderRecentUploads(reports) {
+    var tbody = document.getElementById('recent-uploads-tbody');
+    var recent = reports.slice(0, 5);
+    if (!recent.length) {
+      tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:var(--text-faint); padding:20px; font-size:10px; letter-spacing:0.16em; text-transform:uppercase;">NO UPLOADS YET</td></tr>';
+      return;
+    }
+    tbody.innerHTML = recent.map(function (r) {
+      var date = new Date(r.published_date).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' }).toUpperCase();
+      var typeLabel = r.report_type.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+      return `<tr><td>${r.title}</td><td><span class="badge-type">${typeLabel}</span></td><td style="color:var(--text-faint)">${date}</td></tr>`;
+    }).join('');
+  }
+
+  // ══ THIS WEEK CHECKLIST ══════════════════════════════════════
+  function renderChecklist(reports) {
+    var sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    var recent = reports.filter(r => new Date(r.published_date) >= sevenDaysAgo);
+
+    var has = function(type, asset) {
+      return recent.some(r => r.report_type === type && (!asset || r.asset_class === asset));
+    };
+
+    var items = [
+      { label: 'Gold Weekly',        done: has('weekly','gold'),        sub: 'Gold Desk — Weekly Report' },
+      { label: 'Whisky Weekly',      done: has('weekly','whisky'),      sub: 'Whisky Desk — Weekly Report' },
+      { label: 'Pitch Pack',         done: has('pitch_pack'),           sub: 'This week\'s scripts' },
+      { label: 'Objection File',     done: has('objection_file'),       sub: 'Top 3 objections + responses' },
+      { label: 'Flash Alert',        done: has('flash'),                sub: 'Same-day event briefing' },
+    ];
+
+    var now = new Date();
+    var weekNum = Math.ceil((((now - new Date(now.getFullYear(), 0, 1)) / 86400000) + 1) / 7);
+    document.getElementById('checklist-week-label').textContent = 'W' + weekNum + ' · WEEK OF ' + now.toLocaleDateString('en-GB', { day:'2-digit', month:'long', year:'numeric' }).toUpperCase();
+
+    document.getElementById('content-checklist').innerHTML = items.map(function (item) {
+      var cls = item.done ? 'done' : 'missing';
+      return `<div class="check-item ${cls}">
+        <div class="check-dot ${cls}"></div>
+        <div>
+          <div class="check-name">${item.label}</div>
+          <div class="check-sub">${item.done ? '✓ UPLOADED' : item.sub}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // ══ PREVIEW REPORT ══════════════════════════════════════════
+  function previewReport(filePath, title) {
+    var url = 'https://oqpodikelxhwcnjdwojw.supabase.co/storage/v1/object/public/Reports/' + filePath;
+    window.open(url, '_blank');
+  }
+
+  // ══ DELETE REPORT ════════════════════════════════════════════
+  async function deleteReport(reportId, filePath) {
+    if (!confirm('Delete this report? This cannot be undone.')) return;
+    try {
+      await supabaseAdmin.storage.from('Reports').remove([filePath]);
+      var { error } = await supabaseAdmin.from('reports').delete().eq('id', reportId);
+      if (error) throw error;
+      await loadReports();
+      await loadStats();
+    } catch (err) { alert('Error deleting: ' + err.message); }
+  }
+
+  // ══ SUBSCRIBERS ═════════════════════════════════════════════
+  async function loadSubscribers() {
+    try {
+      var { data, error } = await supabaseAdmin
+        .from('users')
+        .select('*, firms(company_name, subscription_type, status)')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      allSubscribers = data || [];
+      renderSubscribersTable(allSubscribers);
+
+    } catch (err) { console.error('Subscribers error:', err); }
+  }
+
+  function renderSubscribersTable(subs) {
+    var tbody = document.getElementById('subscribers-tbody');
+    document.getElementById('subs-count').textContent = subs.length + ' SUBSCRIBERS';
+
+    if (!subs.length) {
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:var(--text-faint); padding:32px; font-size:10px; letter-spacing:0.18em; text-transform:uppercase;">NO SUBSCRIBERS YET</td></tr>';
+      return;
+    }
+
+    var now = new Date();
+    tbody.innerHTML = subs.map(function (u) {
+      var firmName   = u.firms ? u.firms.company_name : '—';
+      var plan       = u.firms ? (u.firms.subscription_type || 'individual').toUpperCase() : '—';
+      var firmStatus = u.firms ? u.firms.status : 'inactive';
+      var statusHtml = firmStatus === 'active'
+        ? '<span class="status-active">ACTIVE</span>'
+        : firmStatus === 'past_due'
+          ? '<span class="status-past-due">PAST DUE</span>'
+          : '<span class="status-inactive">INACTIVE</span>';
+      var joined = u.created_at
+        ? new Date(u.created_at).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' }).toUpperCase()
+        : '—';
+      var fullName = ((u.first_name || '') + ' ' + (u.last_name || '')).trim() || u.email;
+
+      // Presence dot — online if last_seen within 2 minutes
+      var isOnline = false;
+      var lastSeenText = 'Never';
+      if (u.last_seen) {
+        var lastSeen = new Date(u.last_seen);
+        var diffMs = now - lastSeen;
+        isOnline = diffMs < 2 * 60 * 1000; // 2 minutes
+        if (diffMs < 60000)           lastSeenText = 'Just now';
+        else if (diffMs < 3600000)    lastSeenText = Math.floor(diffMs/60000) + 'm ago';
+        else if (diffMs < 86400000)   lastSeenText = Math.floor(diffMs/3600000) + 'h ago';
+        else                          lastSeenText = lastSeen.toLocaleDateString('en-GB', { day:'2-digit', month:'short' }).toUpperCase();
+      }
+      var dot = isOnline
+        ? '<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#4CAF50;box-shadow:0 0 6px #4CAF50;" title="Online now"></span>'
+        : '<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#555;" title="Offline"></span>';
+
+      return `<tr data-status="${firmStatus}" data-search="${fullName.toLowerCase()} ${u.email.toLowerCase()}">
+        <td style="text-align:center;">${dot}</td>
+        <td>${fullName}</td>
+        <td style="color:var(--text-muted)">${u.email}</td>
+        <td style="color:var(--text-muted)">${firmName}</td>
+        <td><span class="badge-type">${plan}</span></td>
+        <td>${statusHtml}</td>
+        <td style="color:var(--text-muted);font-size:10px;">${lastSeenText}</td>
+        <td style="color:var(--text-muted)">${joined}</td>
+        <td style="text-align:right;"><button class="btn btn-sm btn-danger" onclick="deleteUser('${u.id}', '${u.email.replace(/'/g, "\\'")}', '${fullName.replace(/'/g, "\\'")}')" style="font-size:9px;">DELETE</button></td>
+      </tr>`;
+    }).join('');
+  }
+
+  function filterSubscribers() {
+    var search    = document.getElementById('sub-search').value.toLowerCase();
+    var statusF   = document.getElementById('sub-filter-status').value;
+    var filtered  = allSubscribers.filter(function (u) {
+      var fullName = ((u.first_name || '') + ' ' + (u.last_name || '')).trim().toLowerCase();
+      var email    = u.email.toLowerCase();
+      var status   = u.firms ? u.firms.status : 'inactive';
+      var matchSearch = !search || fullName.includes(search) || email.includes(search);
+      var matchStatus = statusF === 'all' || status === statusF;
+      return matchSearch && matchStatus;
+    });
+    renderSubscribersTable(filtered);
+  }
+
+  // ══ FIRMS ════════════════════════════════════════════════════
+  async function loadFirms() {
+    try {
+      var { data, error } = await supabase
+        .from('firms')
+        .select('*, users(count)')
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+
+      allFirms = data || [];
+      renderFirmsTable(allFirms);
+
+    } catch (err) { console.error('Firms error:', err); }
+  }
+
+  function renderFirmsTable(firms) {
+    var tbody = document.getElementById('firms-tbody');
+    document.getElementById('firms-count').textContent = firms.length + ' FIRMS';
+
+    if (!firms.length) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--text-faint); padding:32px; font-size:10px; letter-spacing:0.18em; text-transform:uppercase;">NO FIRMS YET</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = firms.map(function (f) {
+      var statusHtml = f.status === 'active'
+        ? '<span class="status-active">ACTIVE</span>'
+        : f.status === 'past_due'
+          ? '<span class="status-past-due">PAST DUE</span>'
+          : '<span class="status-inactive">INACTIVE</span>';
+      var plan = f.subscription_type
+        ? (f.subscription_type === 'corporate' ? 'CORPORATE · £400' : 'INDIVIDUAL · £49')
+        : '—';
+      var userCount = f.users ? f.users.length : '—';
+      var maxUsers  = f.max_users || '—';
+      var created   = f.created_at
+        ? new Date(f.created_at).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' }).toUpperCase()
+        : '—';
+      var stripeId  = f.stripe_customer_id
+        ? '<span style="font-size:10px; color:var(--text-faint); letter-spacing:0;">' + f.stripe_customer_id.substring(0, 18) + '...</span>'
+        : '<span style="color:var(--text-faint)">—</span>';
+      var access = f.access || 'both';
+      var accessHtml = `<select onchange="updateFirmAccess('${f.id}', this.value)" style="background:#111;color:#E97132;border:1px solid #333;padding:3px 6px;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;border-radius:2px;">
+        <option value="both"  ${access==='both'  ?'selected':''}>BOTH</option>
+        <option value="gold"  ${access==='gold'  ?'selected':''}>GOLD ONLY</option>
+        <option value="whisky"${access==='whisky'?'selected':''}>WHISKY ONLY</option>
+      </select>`;
+      return `<tr data-status="${f.status}" data-plan="${f.subscription_type || ''}">
+        <td>${f.company_name || '—'}</td>
+        <td style="color:var(--text-muted)">${f.domain || '—'}</td>
+        <td><span class="badge-type">${plan}</span></td>
+        <td style="color:var(--text-muted)">${userCount} / ${maxUsers}</td>
+        <td>${accessHtml}</td>
+        <td>${statusHtml}</td>
+        <td>${stripeId}</td>
+        <td style="color:var(--text-muted)">${created}</td>
+        <td><button class="btn btn-sm btn-danger" onclick="deleteFirm('${f.id}', '${(f.company_name||'').replace(/'/g,"\\'")}', '${f.domain||''}')">DELETE</button></td>
+      </tr>`;
+    }).join('');
+  }
+
+  // ══ DELETE FIRM ═════════════════════════════════════════════
+  async function deleteFirm(firmId, firmName, domain) {
+    if (!confirm('DELETE FIRM: ' + firmName + ' (' + domain + ')?\n\nThis will also delete all users linked to this firm. This cannot be undone.')) return;
+
+    try {
+      // 1. Get all users in this firm to delete their Auth accounts
+      var { data: firmUsers } = await supabaseAdmin
+        .from('users')
+        .select('id, email')
+        .eq('firm_id', firmId);
+
+      // 2. Delete each Auth user
+      if (firmUsers && firmUsers.length > 0) {
+        for (var user of firmUsers) {
+          try {
+            await supabaseAdmin.auth.admin.deleteUser(user.id);
+          } catch (e) {
+            console.log('Could not delete auth user ' + user.email + ': ' + e.message);
+          }
+        }
+      }
+
+      // 3. Delete all users from database
+      var { error: usersErr } = await supabaseAdmin
+        .from('users')
+        .delete()
+        .eq('firm_id', firmId);
+      if (usersErr) throw new Error('Failed to delete users: ' + usersErr.message);
+
+      // 4. Delete the firm
+      var { error: firmErr } = await supabaseAdmin
+        .from('firms')
+        .delete()
+        .eq('id', firmId);
+      if (firmErr) throw new Error('Failed to delete firm: ' + firmErr.message);
+
+      alert('Firm and all associated users permanently deleted.');
+      loadFirms();
+      loadSubscribers();
+    } catch (err) {
+      alert('Error: ' + err.message);
+    }
+  }
+
+  async function deleteUser(userId, email, fullName) {
+    if (!confirm('DELETE USER: ' + fullName + ' (' + email + ')?\n\nThis cannot be undone.')) return;
+
+    try {
+      // 1. Delete Supabase Auth user
+      await supabaseAdmin.auth.admin.deleteUser(userId);
+
+      // 2. Delete user from database
+      var { error: userErr } = await supabaseAdmin
+        .from('users')
+        .delete()
+        .eq('id', userId);
+      if (userErr) throw new Error('Failed to delete user: ' + userErr.message);
+
+      alert('User ' + fullName + ' permanently deleted.');
+      loadSubscribers();
+    } catch (err) {
+      alert('Error: ' + err.message);
+    }
+  }
+
+  // ══ ACTIVITY ════════════════════════════════════════════════
+  async function loadActivity() {
+    try {
+      // Recent logins
+      var { data: logins } = await supabaseAdmin
+        .from('activity_log')
+        .select('user_email, firm_id, created_at')
+        .eq('action', 'login')
+        .order('created_at', { ascending: false })
+        .limit(20);
+
+      var loginsTbody = document.getElementById('activity-logins-tbody');
+      if (logins && logins.length) {
+        var now = new Date();
+        loginsTbody.innerHTML = logins.map(function(l) {
+          var diff = now - new Date(l.created_at);
+          var when = diff < 60000 ? 'Just now'
+            : diff < 3600000 ? Math.floor(diff/60000) + 'm ago'
+            : diff < 86400000 ? Math.floor(diff/3600000) + 'h ago'
+            : new Date(l.created_at).toLocaleDateString('en-GB', { day:'2-digit', month:'short' }).toUpperCase();
+          var name = l.user_email.split('@')[0];
+          var firm = l.user_email.split('@')[1];
+          return `<tr>
+            <td>${name}</td>
+            <td style="color:var(--text-faint);font-size:10px;">@${firm}</td>
+            <td style="color:var(--text-muted);font-size:10px;">${when}</td>
+          </tr>`;
+        }).join('');
+      } else {
+        loginsTbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-faint);padding:20px;font-size:10px;">NO LOGINS YET</td></tr>';
+      }
+
+      // Recent report views
+      var { data: views } = await supabaseAdmin
+        .from('activity_log')
+        .select('user_email, report_title, asset_class, created_at')
+        .eq('action', 'view_report')
+        .order('created_at', { ascending: false })
+        .limit(20);
+
+      var viewsTbody = document.getElementById('activity-views-tbody');
+      if (views && views.length) {
+        var now2 = new Date();
+        viewsTbody.innerHTML = views.map(function(v) {
+          var diff = now2 - new Date(v.created_at);
+          var when = diff < 60000 ? 'Just now'
+            : diff < 3600000 ? Math.floor(diff/60000) + 'm ago'
+            : diff < 86400000 ? Math.floor(diff/3600000) + 'h ago'
+            : new Date(v.created_at).toLocaleDateString('en-GB', { day:'2-digit', month:'short' }).toUpperCase();
+          var name = v.user_email.split('@')[0];
+          return `<tr>
+            <td>${name}</td>
+            <td style="color:var(--text-muted);font-size:10px;">${v.report_title || '—'}</td>
+            <td style="color:var(--text-faint);font-size:10px;">${when}</td>
+          </tr>`;
+        }).join('');
+      } else {
+        viewsTbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-faint);padding:20px;font-size:10px;">NO VIEWS YET</td></tr>';
+      }
+
+      // Most popular reports
+      var { data: allViews } = await supabaseAdmin
+        .from('activity_log')
+        .select('report_title, asset_class, report_type')
+        .eq('action', 'view_report');
+
+      var popularTbody = document.getElementById('activity-popular-tbody');
+      if (allViews && allViews.length) {
+        var counts = {};
+        allViews.forEach(function(v) {
+          if (!v.report_title) return;
+          var key = v.report_title;
+          if (!counts[key]) counts[key] = { title: v.report_title, asset: v.asset_class, type: v.report_type, count: 0 };
+          counts[key].count++;
+        });
+        var sorted = Object.values(counts).sort(function(a,b) { return b.count - a.count; }).slice(0, 10);
+        popularTbody.innerHTML = sorted.map(function(r) {
+          return `<tr>
+            <td>${r.title}</td>
+            <td style="color:var(--text-muted)">${(r.asset||'').toUpperCase()}</td>
+            <td style="color:var(--text-muted)">${(r.type||'').replace(/_/g,' ').toUpperCase()}</td>
+            <td style="color:#E97132;font-weight:700;">${r.count}</td>
+          </tr>`;
+        }).join('');
+      } else {
+        popularTbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-faint);padding:20px;font-size:10px;">NO VIEWS YET</td></tr>';
+      }
+
+      // Downloads
+      var { data: downloads } = await supabaseAdmin
+        .from('activity_log')
+        .select('user_email, report_title, asset_class, report_type, created_at')
+        .eq('action', 'download_report')
+        .order('created_at', { ascending: false })
+        .limit(50);
+
+      var dlTbody = document.getElementById('activity-downloads-tbody');
+      if (downloads && downloads.length) {
+        var now3 = new Date();
+        dlTbody.innerHTML = downloads.map(function(d) {
+          var diff = now3 - new Date(d.created_at);
+          var when = diff < 60000 ? 'Just now'
+            : diff < 3600000 ? Math.floor(diff/60000) + 'm ago'
+            : diff < 86400000 ? Math.floor(diff/3600000) + 'h ago'
+            : new Date(d.created_at).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' }).toUpperCase();
+          var name = d.user_email.split('@')[0];
+          var firm = d.user_email.split('@')[1];
+          return `<tr>
+            <td>${name}</td>
+            <td style="color:var(--text-faint);font-size:10px;">@${firm}</td>
+            <td style="color:var(--text-muted);font-size:10px;">${d.report_title || '—'}</td>
+            <td style="color:var(--text-muted);font-size:10px;">${(d.asset_class||'').toUpperCase()}</td>
+            <td style="color:var(--text-faint);font-size:10px;">${when}</td>
+          </tr>`;
+        }).join('');
+      } else {
+        dlTbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-faint);padding:20px;font-size:10px;">NO DOWNLOADS YET</td></tr>';
+      }
+
+    } catch (err) { console.error('Activity error:', err); }
+  }
+
+  // ══ CREATE ACCOUNT ══════════════════════════════════════════
+  document.getElementById('create-account-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    var firstName = document.getElementById('ca-first').value.trim();
+    var lastName  = document.getElementById('ca-last').value.trim();
+    var email     = document.getElementById('ca-email').value.trim().toLowerCase();
+    var firmName  = document.getElementById('ca-firm').value.trim();
+    var access    = document.getElementById('ca-access').value;
+    var plan      = document.getElementById('ca-plan').value;
+    var errorDiv  = document.getElementById('ca-error');
+    var successDiv = document.getElementById('ca-success');
+    var submitBtn  = document.getElementById('ca-submit');
+
+    errorDiv.textContent = '';
+    errorDiv.classList.remove('visible');
+    successDiv.style.display = 'none';
+
+    if (!firstName || !lastName || !email || !firmName) {
+      errorDiv.textContent = 'Please fill in all fields.';
+      errorDiv.classList.add('visible');
+      return;
+    }
+
+    submitBtn.textContent = 'CREATING...';
+    submitBtn.disabled = true;
+
+    try {
+      var domain = email.split('@')[1];
+
+      // Access values: 'gold', 'whisky', 'both' (constraint allows these)
+      var dbAccess = access || 'both';
+
+      // Set subscription type and user limits based on plan
+      var subscriptionType = plan;
+      var maxUsers = plan === 'corporate' ? 15 : 1;  // Individual and demo = 1 user
+
+      // 1. Create or find the firm
+      var { data: existingFirm } = await supabaseAdmin
+        .from('firms')
+        .select('id')
+        .eq('domain', domain)
+        .maybeSingle();
+
+      var firmId;
+      if (existingFirm) {
+        firmId = existingFirm.id;
+      } else {
+        var { data: newFirm, error: firmErr } = await supabaseAdmin
+          .from('firms')
+          .insert({
+            company_name: firmName,
+            domain: domain,
+            status: 'active',
+            subscription_type: subscriptionType,
+            max_users: maxUsers,
+            access: dbAccess
+          })
+          .select('id')
+          .single();
+        if (firmErr) throw new Error('Could not create firm: ' + firmErr.message);
+        firmId = newFirm.id;
+      }
+
+      // 2. Create the Supabase auth user (email pre-confirmed)
+      // If auth user already exists (from deleted account), just reuse it
+      var authUser;
+      var { data: newAuth, error: authErr } = await supabaseAdmin.auth.admin.createUser({
+        email: email,
+        email_confirm: true,
+        user_metadata: { first_name: firstName, last_name: lastName }
+      });
+
+      if (authErr) {
+        // Email already registered - look it up
+        if (authErr.message && (authErr.message.includes('already registered') || authErr.message.includes('already exists'))) {
+          // Try to get the existing user by email
+          try {
+            var { data: { users }, error: listErr } = await supabaseAdmin.auth.admin.listUsers();
+            authUser = users ? users.find(u => u.email === email) : null;
+            if (!authUser) {
+              throw new Error('Could not find existing auth user with email ' + email);
+            }
+          } catch (e) {
+            throw new Error('Email already registered. Please log in with this email or use a different email.');
+          }
+        } else {
+          throw new Error('Could not create auth account: ' + authErr.message);
+        }
+      } else {
+        authUser = newAuth.user;
+      }
+
+      // 3. Add to public users table
+      var { error: userErr } = await supabaseAdmin
+        .from('users')
+        .insert({
+          id: authUser.id,
+          email: email,
+          firm_id: firmId,
+          first_name: firstName,
+          last_name: lastName,
+          role: 'subscriber'
+        });
+      if (userErr) throw new Error('Could not add user record: ' + userErr.message);
+
+      // 4. Send password setup email
+      await supabaseAdmin.auth.resetPasswordForEmail(email, {
+        redirectTo: 'https://thebrokersterminal.com/reset-password.html'
+      });
+
+      // Success
+      successDiv.style.display = 'block';
+      document.getElementById('create-account-form').reset();
+      await loadStats();
+
+    } catch (err) {
+      errorDiv.textContent = err.message || 'Something went wrong. Please try again.';
+      errorDiv.classList.add('visible');
+    } finally {
+      submitBtn.textContent = '█ CREATE ACCOUNT & SEND INVITE';
+      submitBtn.disabled = false;
+    }
+  });
+
+  async function updateFirmAccess(firmId, newAccess) {
+    var { error } = await supabaseAdmin
+      .from('firms')
+      .update({ access: newAccess })
+      .eq('id', firmId);
+    if (error) {
+      alert('Failed to update access: ' + error.message);
+    } else {
+      // Update local cache too
+      var firm = allFirms.find(function(f) { return f.id === firmId; });
+      if (firm) firm.access = newAccess;
+    }
+  }
+
+  function filterFirms() {
+    var statusF = document.getElementById('firms-filter-status').value;
+    var planF   = document.getElementById('firms-filter-plan').value;
+    var filtered = allFirms.filter(function (f) {
+      var matchStatus = statusF === 'all' || f.status === statusF;
+      var matchPlan   = planF   === 'all' || (f.subscription_type || '') === planF;
+      return matchStatus && matchPlan;
+    });
+    renderFirmsTable(filtered);
+  }
+
+  // ══ UPLOAD HANDLER ═══════════════════════════════════════════
+  document.getElementById('upload-form').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    await handleUpload({
+      title:       document.getElementById('doc-title').value.trim(),
+      assetClass:  document.getElementById('doc-asset').value,
+      reportType:  document.getElementById('doc-type').value,
+      publishedDate: document.getElementById('doc-date').value,
+      tags:        document.getElementById('doc-tags').value.trim(),
+      file:        document.getElementById('doc-file').files[0],
+      successEl:   'upload-success',
+      errorEl:     'upload-error',
+      submitEl:    'upload-submit',
+      form:        this
+    });
+  });
+
+
+  // ══ SHARED UPLOAD LOGIC ══════════════════════════════════════
+  async function handleUpload({ title, assetClass, reportType, publishedDate, tags, file, successEl, errorEl, submitEl, form }) {
+    var successDiv = document.getElementById(successEl);
+    var errorDiv   = document.getElementById(errorEl);
+    var submitBtn  = document.getElementById(submitEl);
+    var origText   = submitBtn.textContent;
+
+    successDiv.style.display = 'none';
+    errorDiv.style.display   = 'none';
+
+    if (!file) { errorDiv.textContent = 'Please select an HTML file'; errorDiv.style.display = 'block'; return; }
+
+    submitBtn.textContent = 'UPLOADING...';
+    submitBtn.disabled    = true;
+
+    try {
+      var filename = title.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').substring(0, 40)
+        + '-' + publishedDate + '.html';
+
+      // Map report types to folder names with proper capitalization
+      var typeMapping = {
+        'pitch_pack': 'Pitch Pack',
+        'hit_list': 'HIT List',
+        'objection_file': 'Objection Pack',
+        'flash': 'Flash Updates'
+      };
+      var typeFolder = typeMapping[reportType] || (reportType.charAt(0).toUpperCase() + reportType.substring(1));
+
+      // Capitalize asset class for folder name
+      var assetFolder = assetClass.charAt(0).toUpperCase() + assetClass.substring(1);
+      var folderPath = assetFolder + '/' + typeFolder + '/';
+
+      var { error: uploadError } = await supabaseAdmin.storage
+        .from('Reports').upload(folderPath + filename, file, { upsert: true });
+      if (uploadError) throw new Error('Upload failed: ' + uploadError.message);
+
+      // Extract plain text from HTML for full-text search
+      var contentText = '';
+      try {
+        var fileText = await file.text();
+        var parser = new DOMParser();
+        var doc = parser.parseFromString(fileText, 'text/html');
+        // Remove script/style tags
+        doc.querySelectorAll('script, style').forEach(el => el.remove());
+        contentText = (doc.body ? doc.body.innerText || doc.body.textContent : '').replace(/\s+/g, ' ').trim().substring(0, 50000);
+      } catch(e) { console.warn('Could not extract text:', e); }
+
+      var { error: dbError } = await supabaseAdmin.from('reports').insert([{
+        title:          title,
+        report_type:    reportType,
+        asset_class:    assetClass,
+        published_date: publishedDate,
+        file_path:      folderPath + filename,
+        status:         'published',
+        tags:           tags || null,
+        content_text:   contentText || null
+      }]);
+      if (dbError) throw new Error('Database error: ' + dbError.message);
+
+      successDiv.style.display = 'block';
+      form.reset();
+      setTimeout(() => { successDiv.style.display = 'none'; }, 3000);
+      await loadReports();
+      await loadStats();
+
+    } catch (err) {
+      errorDiv.textContent   = err.message;
+      errorDiv.style.display = 'block';
+    } finally {
+      submitBtn.textContent = origText;
+      submitBtn.disabled    = false;
+    }
+  }
+
+</script>
+</body>
+</html>

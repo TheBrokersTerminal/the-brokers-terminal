@@ -1,0 +1,15 @@
+# Netlify
+.netlify
+
+# macOS
+.DS_Store
+
+# Python scripts (internal tooling only)
+*.py
+
+# Sensitive / internal files
+*.jsonl
+.claude/
+
+# Node
+node_modules/

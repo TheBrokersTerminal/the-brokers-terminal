@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tab Preview</title>
+  <link rel="stylesheet" href="site.css">
+  <style>
+    body { background: #0a0a0a; padding: 40px 24px; }
+
+    /* ── CURRENT STYLE ── */
+    .label { color: #555; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 12px; font-family: 'IBM Plex Mono', monospace; }
+
+    /* ── NEW STYLE ── */
+    .filter-tabs-new {
+      display: flex;
+      gap: 6px;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      padding-bottom: 24px;
+      margin-bottom: 32px;
+      scrollbar-width: none;
+    }
+    .filter-tabs-new::-webkit-scrollbar { display: none; }
+    .filter-tab-new {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: #ffffff;
+      background: transparent;
+      border: 1px solid #e8470a;
+      padding: 8px 14px;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: all 150ms ease;
+    }
+    .filter-tab-new:hover {
+      background: rgba(232,71,10,0.15);
+      color: #ffffff;
+    }
+    .filter-tab-new.active {
+      background: #e8470a;
+      color: #ffffff;
+      border-color: #e8470a;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="label" style="margin-bottom:20px;">▸ NEW STYLE — WHITE TEXT · ORANGE BOXES</div>
+
+  <div class="filter-tabs-new">
+    <button class="filter-tab-new active">ALL</button>
+    <button class="filter-tab-new">GOLD</button>
+    <button class="filter-tab-new">WHISKY</button>
+    <button class="filter-tab-new">WEEKLY</button>
+    <button class="filter-tab-new">PITCH PACK</button>
+    <button class="filter-tab-new">OBJECTION FILE</button>
+    <button class="filter-tab-new">MONTHLY</button>
+    <button class="filter-tab-new">QUARTERLY</button>
+    <button class="filter-tab-new">TRAINING</button>
+    <button class="filter-tab-new">HIT LIST</button>
+    <button class="filter-tab-new">FLASH ALERTS</button>
+  </div>
+
+  <div class="label" style="margin-top:40px; margin-bottom:20px;">▸ CURRENT STYLE — for comparison</div>
+
+  <div class="filter-tabs">
+    <button class="filter-tab active">ALL</button>
+    <button class="filter-tab">GOLD</button>
+    <button class="filter-tab">WHISKY</button>
+    <button class="filter-tab">WEEKLY</button>
+    <button class="filter-tab">PITCH PACK</button>
+    <button class="filter-tab">OBJECTION FILE</button>
+    <button class="filter-tab">MONTHLY</button>
+    <button class="filter-tab">QUARTERLY</button>
+    <button class="filter-tab">TRAINING</button>
+    <button class="filter-tab">HIT LIST</button>
+    <button class="filter-tab">FLASH ALERTS</button>
+  </div>
+
+</body>
+</html>

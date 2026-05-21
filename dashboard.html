@@ -1,0 +1,1436 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>THE BROKERS TERMINAL — Subscriber Desk</title>
+  <link rel="stylesheet" href="site.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.0"></script>
+  <style>
+
+    /* ── CONTENT TICKER ───────────────────────────────────────── */
+    .content-ticker {
+      background: #060606;
+      border-bottom: 1px solid var(--border-dim);
+      display: flex;
+      align-items: center;
+      height: 34px;
+      overflow: hidden;
+    }
+    .ticker-label {
+      color: var(--accent);
+      font-size: 9px;
+      letter-spacing: 0.26em;
+      text-transform: uppercase;
+      font-weight: 700;
+      white-space: nowrap;
+      padding: 0 16px;
+      border-right: 1px solid var(--border-dim);
+      flex-shrink: 0;
+      height: 100%;
+      display: flex;
+      align-items: center;
+    }
+    .ticker-track-wrap { flex: 1; overflow: hidden; position: relative; }
+    .ticker-track {
+      display: flex;
+      gap: 0;
+      white-space: nowrap;
+      animation: ticker-scroll 40s linear infinite;
+    }
+    .ticker-track:hover { animation-play-state: paused; }
+    @keyframes ticker-scroll {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    .ticker-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 32px;
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      border-right: 1px solid var(--border-dim);
+    }
+    .ticker-item.is-flash { color: var(--accent); font-weight: 700; }
+    .ticker-item.is-new   { color: var(--text-muted); }
+    .ticker-dot-flash { color: var(--accent); font-size: 8px; }
+    .ticker-dot-new   { color: var(--text-faint); font-size: 8px; }
+
+    /* ── MASTHEAD ─────────────────────────────────────────────── */
+    .dashboard-masthead {
+      background: var(--bg-raised);
+      border-bottom: 2px solid var(--border);
+      padding: 0 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 48px;
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+    .dashboard-masthead-left  { color: var(--accent); font-weight: 700; }
+    .dashboard-masthead-center{ color: var(--text-muted); }
+    .dashboard-masthead-right { display: flex; align-items: center; gap: 20px; color: var(--text-muted); }
+    .dashboard-masthead-right a { color: var(--text-faint); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; text-decoration: none; }
+    .dashboard-masthead-right a:hover { color: var(--accent); }
+
+    /* ── THIS WEEK BANNER ─────────────────────────────────────── */
+    .this-week-banner {
+      background: var(--bg-deep);
+      border-bottom: 1px solid var(--border-dim);
+      padding: 20px 40px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 24px;
+    }
+    .this-week-tag    { color: var(--accent); font-size: 9px; letter-spacing: 0.28em; text-transform: uppercase; font-weight: 700; margin-bottom: 4px; }
+    .this-week-heading{ color: var(--text); font-size: 15px; font-weight: 700; letter-spacing: 0.10em; text-transform: uppercase; margin-bottom: 6px; }
+    .this-week-sub    { color: var(--text-faint); font-size: 11px; letter-spacing: 0.08em; line-height: 1.6; }
+    .this-week-sub span { color: var(--accent); }
+    .this-week-right  { display: flex; gap: 24px; flex-shrink: 0; }
+    .this-week-stat   { text-align: center; border-left: 1px solid var(--border-dim); padding-left: 24px; }
+    .this-week-stat-num  { color: var(--accent); font-size: 22px; font-weight: 700; line-height: 1; }
+    .this-week-stat-label{ color: var(--text-faint); font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; margin-top: 3px; }
+
+    /* ── THIS WEEK LINKS STRIP ────────────────────────────────── */
+    .this-week-links {
+      background: var(--bg-raised);
+      border-bottom: 1px solid var(--border-dim);
+      padding: 0 40px;
+      display: flex;
+      align-items: stretch;
+      gap: 0;
+    }
+    .this-week-links-label { color: var(--text-faint); font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; display: flex; align-items: center; padding-right: 20px; border-right: 1px solid var(--border-dim); margin-right: 4px; flex-shrink: 0; }
+    .week-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 20px;
+      color: var(--text-muted);
+      font-size: 10px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      text-decoration: none;
+      border-right: 1px solid var(--border-dim);
+      cursor: pointer;
+      transition: background 150ms ease, color 150ms ease;
+    }
+    .week-link:hover { background: var(--bg-deep); color: var(--accent); }
+    .week-link-asset { color: var(--accent); font-size: 9px; font-weight: 700; letter-spacing: 0.22em; display: block; margin-bottom: 2px; }
+    .week-link-title { display: block; color: var(--text); font-size: 11px; font-weight: 700; letter-spacing: 0.08em; }
+    .week-link-type  { display: block; color: var(--text-faint); font-size: 9px; letter-spacing: 0.16em; margin-top: 1px; }
+    .week-link .new-dot { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; display: inline-block; flex-shrink: 0; }
+
+    /* ── ASSET TABS ───────────────────────────────────────────── */
+    .asset-tabs { background: var(--bg); border-bottom: 2px solid var(--border-dim); padding: 0 40px; display: flex; }
+    .asset-tab {
+      font-family: var(--font);
+      font-size: 11px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: var(--text-faint);
+      background: transparent;
+      border: none;
+      border-bottom: 3px solid transparent;
+      padding: 12px 28px;
+      cursor: pointer;
+      transition: color 150ms ease, border-color 150ms ease;
+      margin-bottom: -2px;
+      line-height: 1.3;
+      text-align: left;
+    }
+    .asset-tab:hover { color: var(--text); }
+    .asset-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .asset-tab-sub { font-size: 8px; letter-spacing: 0.14em; color: var(--text-faint); opacity: 0.55; display: block; font-weight: 400; margin-top: 2px; }
+
+    /* ── ASSET PANELS ─────────────────────────────────────────── */
+    .asset-panel { display: none; }
+    .asset-panel.active { display: block; }
+
+    /* ── SECTION DIVIDER ──────────────────────────────────────── */
+    .dash-section-label {
+      color: var(--accent); font-size: 10px; letter-spacing: 0.26em; text-transform: uppercase;
+      font-weight: 700; padding: 6px 0; border-bottom: 1px solid var(--border-dim);
+      margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;
+    }
+    .dash-section-label span { color: var(--text-faint); font-size: 9px; letter-spacing: 0.14em; }
+
+    /* ── FEATURED CARD ────────────────────────────────────────── */
+    .featured-card {
+      border: 1px solid var(--border); background: var(--bg-raised);
+      display: grid; grid-template-columns: 1fr auto;
+      align-items: center; padding: 28px 32px; margin-bottom: 24px; gap: 24px;
+    }
+    .featured-card-badges { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+    .featured-new { background: var(--accent); color: var(--bg); font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; font-weight: 700; padding: 3px 10px; }
+    .featured-card-title { color: var(--text); font-size: 18px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 6px; line-height: 1.3; }
+    .featured-card-meta  { color: var(--text-faint); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; margin-bottom: 12px; }
+    .featured-card-desc  { color: var(--text-muted); font-size: 13px; line-height: 1.65; max-width: 600px; }
+    .featured-card-desc strong { color: var(--text); }
+    .featured-card-right { display: flex; flex-direction: column; align-items: center; gap: 10px; flex-shrink: 0; min-width: 180px; text-align: center; }
+    .featured-card-right .btn { width: 100%; text-align: center; }
+    .featured-card-note  { color: var(--text-faint); font-size: 10px; letter-spacing: 0.10em; line-height: 1.5; }
+
+    /* ── FILTER TABS ──────────────────────────────────────────── */
+    .filter-tabs { display: flex; border-bottom: 1px solid var(--border-dim); margin-bottom: 24px; overflow-x: auto; scrollbar-width: none; }
+    .filter-tabs::-webkit-scrollbar { display: none; }
+    .filter-tab { font-family: var(--font); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-faint); background: transparent; border: none; border-bottom: 2px solid transparent; padding: 10px 16px; cursor: pointer; white-space: nowrap; transition: color 150ms ease, border-color 150ms ease; margin-bottom: -1px; }
+    .filter-tab:hover { color: var(--text); }
+    .filter-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    /* ── DOC GRID ─────────────────────────────────────────────── */
+    .doc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 40px; }
+
+    /* ── DOC CARD ─────────────────────────────────────────────── */
+    .doc-card { border: 1px solid var(--border-dim); background: var(--bg-raised); padding: 20px; transition: border-color 150ms ease; display: flex; flex-direction: column; }
+    .doc-card:hover { border-color: var(--border); }
+    .doc-card.is-new   { border-left: 3px solid var(--accent); }
+    .doc-card.is-flash { border-color: var(--accent); background: #0F0A06; }
+    .doc-card.is-flash .doc-card-title { color: var(--accent); }
+    .doc-card-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px; gap: 8px; }
+    .doc-card-badges { display: flex; flex-wrap: wrap; gap: 6px; }
+    .badge-asset { border: 1px solid var(--border); color: var(--accent); font-size: 9px; letter-spacing: 0.20em; text-transform: uppercase; padding: 2px 8px; display: inline-block; }
+    .badge-type  { border: 1px solid var(--border-dim); color: var(--text-faint); font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; padding: 2px 8px; display: inline-block; }
+    .badge-new   { background: var(--accent); color: var(--bg); font-size: 8px; letter-spacing: 0.22em; text-transform: uppercase; padding: 2px 7px; font-weight: 700; display: inline-block; }
+    .doc-card-title { color: var(--text); font-size: 13px; font-weight: 700; letter-spacing: 0.04em; margin-bottom: 6px; line-height: 1.4; }
+    .doc-card-meta  { color: var(--text-faint); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 10px; }
+    .doc-card-desc  { color: var(--text-muted); font-size: 12px; line-height: 1.6; margin-bottom: 16px; flex: 1; }
+    .doc-card-footer{ border-top: 1px solid var(--border-dim); padding-top: 14px; display: flex; justify-content: space-between; align-items: center; margin-top: auto; }
+    .doc-card-date  { color: var(--text-faint); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; }
+
+    /* ── BUTTONS ──────────────────────────────────────────────── */
+    .btn { display: inline-block; border: 1px solid var(--border); color: var(--accent); background: transparent; font-family: var(--font); font-size: 12px; letter-spacing: 0.20em; text-transform: uppercase; padding: 13px 28px; cursor: pointer; transition: background 150ms ease, color 150ms ease; white-space: nowrap; text-decoration: none; }
+    .btn:hover { background: var(--accent); color: var(--bg); }
+    .btn-sm   { padding: 8px 16px; font-size: 10px; }
+    .btn-solid{ background: var(--accent); color: var(--bg); font-weight: 700; border-color: var(--accent); }
+    .btn-solid:hover { background: #fff; border-color: #fff; color: var(--bg); }
+
+    /* ── DASHBOARD WRAP ───────────────────────────────────────── */
+    .dashboard-wrap { max-width: 1200px; margin: 0 auto; padding: 32px 40px 64px; }
+
+    /* ── EMPTY STATE ──────────────────────────────────────────── */
+    .empty-state { text-align: center; padding: 64px 24px; border: 1px dashed var(--border-dim); }
+    .empty-state-icon  { color: var(--border-dim); font-size: 32px; margin-bottom: 16px; }
+    .empty-state-title { color: var(--text-faint); font-size: 12px; letter-spacing: 0.22em; text-transform: uppercase; margin-bottom: 8px; }
+    .empty-state-sub   { color: var(--text-faint); font-size: 12px; opacity: 0.6; }
+
+    /* ── MODAL ────────────────────────────────────────────────── */
+    .report-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.92); z-index: 9999; flex-direction: column; }
+    .report-modal.open { display: flex; }
+    .modal-header { background: var(--bg-raised); border-bottom: 2px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; height: 48px; flex-shrink: 0; }
+    .modal-header-left { display: flex; align-items: center; gap: 0; }
+    .modal-brand  { color: var(--accent); font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; font-weight: 700; }
+    .modal-report-name { color: var(--text-muted); font-size: 11px; letter-spacing: 0.10em; margin-left: 20px; }
+    .modal-close  { background: transparent; border: 1px solid var(--border); color: var(--accent); font-family: var(--font); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; padding: 8px 20px; cursor: pointer; }
+    .modal-close:hover { background: var(--accent); color: var(--bg); }
+    .modal-iframe-wrap { flex: 1; background: white; }
+    .modal-iframe-wrap iframe { width: 100%; height: 100%; border: none; display: block; }
+
+    /* ── OFFLINE BANNER ───────────────────────────────────────── */
+    .offline-banner { background: var(--accent); color: var(--bg); text-align: center; padding: 8px; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; font-weight: 700; }
+
+    /* ══ RESPONSIVE — TABLET (≤1024px) ════════════════════════ */
+    @media (max-width: 1024px) {
+      .dashboard-masthead { padding: 0 24px; }
+      .this-week-banner { padding: 18px 24px; }
+      .this-week-links { padding: 0 24px; }
+      .asset-tabs { padding: 0 24px; }
+      .dashboard-wrap { padding: 28px 24px 56px; }
+      .doc-grid { grid-template-columns: repeat(2, 1fr); }
+      .featured-card { padding: 22px 24px; }
+    }
+
+    /* ══ RESPONSIVE — MOBILE (≤768px) ═════════════════════════ */
+    @media (max-width: 768px) {
+
+      /* Masthead */
+      .dashboard-masthead {
+        padding: 10px 16px;
+        height: auto;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .dashboard-masthead-center { display: none; }
+      .dashboard-masthead-left { font-size: 10px; letter-spacing: 0.12em; }
+      .dashboard-masthead-right { font-size: 10px; gap: 12px; }
+
+      /* Ticker */
+      .ticker-label { padding: 0 10px; font-size: 8px; letter-spacing: 0.16em; }
+      .ticker-item { padding: 0 18px; font-size: 9px; letter-spacing: 0.10em; }
+
+      /* This Week Banner */
+      .this-week-banner {
+        grid-template-columns: 1fr;
+        padding: 16px;
+        gap: 14px;
+      }
+      .this-week-tag { font-size: 8px; }
+      .this-week-heading { font-size: 13px; letter-spacing: 0.06em; }
+      .this-week-sub { font-size: 10px; }
+      .this-week-right {
+        justify-content: flex-start;
+        gap: 0;
+        border-top: 1px solid var(--border-dim);
+        padding-top: 14px;
+      }
+      .this-week-stat { padding-left: 20px; }
+      .this-week-stat-num { font-size: 20px; }
+      .this-week-stat-label { font-size: 8px; }
+
+      /* This Week Links — horizontal scroll */
+      .this-week-links {
+        padding: 0;
+        overflow-x: auto;
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+        flex-wrap: nowrap;
+      }
+      .this-week-links::-webkit-scrollbar { display: none; }
+      .this-week-links-label {
+        padding: 0 12px;
+        font-size: 8px;
+        letter-spacing: 0.14em;
+        flex-shrink: 0;
+        white-space: nowrap;
+      }
+      .week-link { padding: 10px 14px; flex-shrink: 0; }
+      .week-link-title { font-size: 10px; }
+      .week-link-type { font-size: 8px; }
+
+      /* Asset Tabs — horizontal scroll */
+      .asset-tabs {
+        padding: 0;
+        overflow-x: auto;
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+      }
+      .asset-tabs::-webkit-scrollbar { display: none; }
+      .asset-tab {
+        padding: 10px 18px;
+        font-size: 10px;
+        letter-spacing: 0.12em;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+
+      /* Dashboard wrap */
+      .dashboard-wrap { padding: 16px 16px 48px; }
+
+      /* Section label */
+      .dash-section-label { font-size: 9px; letter-spacing: 0.16em; }
+
+      /* Featured card — stack vertically */
+      .featured-card {
+        grid-template-columns: 1fr;
+        padding: 18px 16px;
+        gap: 16px;
+      }
+      .featured-card-title { font-size: 15px; letter-spacing: 0.04em; }
+      .featured-card-desc { font-size: 12px; }
+      .featured-card-right {
+        min-width: auto;
+        width: 100%;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      .featured-card-right .btn { width: auto; flex: 1; text-align: center; }
+      .featured-card-note { font-size: 9px; text-align: left; flex: 1; }
+
+      /* Doc grid — single column */
+      .doc-grid { grid-template-columns: 1fr; gap: 12px; }
+
+      /* Doc cards */
+      .doc-card { padding: 16px; }
+      .doc-card-title { font-size: 12px; }
+
+      /* Filter tabs */
+      .filter-tabs { margin-bottom: 16px; }
+      .filter-tab { padding: 8px 10px; font-size: 9px; letter-spacing: 0.10em; }
+
+      /* Modal — full screen, touch-friendly */
+      .report-modal { position: fixed; }
+      .modal-header { padding: 0 12px; height: 48px; }
+      .modal-brand { font-size: 9px; letter-spacing: 0.12em; }
+      .modal-report-name { display: none; }
+      .modal-close { padding: 8px 14px; font-size: 9px; letter-spacing: 0.10em; }
+      .modal-iframe-wrap {
+        overflow: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      .modal-iframe-wrap iframe {
+        min-height: 100%;
+        width: 100%;
+      }
+    }
+
+  </style>
+</head>
+<body>
+
+<!-- ══ NAV ══════════════════════════════════════════════════════ -->
+<nav class="site-nav">
+  <a class="nav-brand" href="index.html">█ THE BROKERS TERMINAL</a>
+  <ul class="nav-links">
+    <li><a href="index.html">HOME</a></li>
+    <li><a href="dashboard.html">MY DESK</a></li>
+    <li><a href="#" id="nav-logout-btn">LOG OUT</a></li>
+  </ul>
+</nav>
+
+<!-- ══ MASTHEAD ══════════════════════════════════════════════════ -->
+<div class="dashboard-masthead">
+  <span class="dashboard-masthead-left">█ THE BROKERS TERMINAL</span>
+  <span class="dashboard-masthead-center">SUBSCRIBER DESK</span>
+  <div class="dashboard-masthead-right">
+    <span>Welcome, <strong style="color: var(--text);" id="user-name">loading...</strong></span>
+    <a href="#" id="manage-subscription-btn" style="color:var(--text-muted); font-size:11px; letter-spacing:0.08em; margin-right:4px;">MANAGE SUBSCRIPTION</a>
+    <span style="color:var(--text-faint);">|</span>
+    <a href="#" id="logout-btn">LOG OUT</a>
+  </div>
+</div>
+
+<!-- ══ OFFLINE BANNER ════════════════════════════════════════════ -->
+<div id="offline-banner" class="offline-banner" style="display:none;"></div>
+
+<!-- ══ CONTENT TICKER ════════════════════════════════════════════ -->
+<div class="content-ticker" id="content-ticker" style="display:none;">
+  <div class="ticker-label">▸ UPDATES</div>
+  <div class="ticker-track-wrap">
+    <div class="ticker-track" id="ticker-track">
+      <!-- populated by JS after reports load -->
+    </div>
+  </div>
+</div>
+
+<!-- ══ THIS WEEK BANNER ══════════════════════════════════════════ -->
+<div class="this-week-banner">
+  <div>
+    <div class="this-week-tag" id="week-tag">▸ LOADING...</div>
+    <div class="this-week-heading">Your intelligence is ready. Your desk is loaded.</div>
+    <div class="this-week-sub" id="week-sub">Loading latest issues...</div>
+  </div>
+  <div class="this-week-right">
+    <div class="this-week-stat">
+      <div class="this-week-stat-num" id="stat-new">—</div>
+      <div class="this-week-stat-label">New This Week</div>
+    </div>
+    <div class="this-week-stat">
+      <div class="this-week-stat-num" id="stat-vault">—</div>
+      <div class="this-week-stat-label">In Your Vault</div>
+    </div>
+    <div class="this-week-stat">
+      <div class="this-week-stat-num" id="stat-flash">—</div>
+      <div class="this-week-stat-label">Psychology &amp; Training</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ THIS WEEK LINKS ═══════════════════════════════════════════ -->
+<div class="this-week-links" id="this-week-links">
+  <div class="this-week-links-label">THIS WEEK</div>
+  <!-- populated by JS -->
+</div>
+
+<!-- ══ ASSET TABS ════════════════════════════════════════════════ -->
+<div class="asset-tabs">
+  <button class="asset-tab active" data-panel="all">
+    ALL CONTENT
+    <span class="asset-tab-sub" id="all-content-sub"></span>
+  </button>
+  <button class="asset-tab" data-panel="gold">
+    █ GOLD DESK
+    <span class="asset-tab-sub">GOLD SUBSCRIBERS</span>
+  </button>
+  <button class="asset-tab" data-panel="whisky">
+    █ WHISKY DESK
+    <span class="asset-tab-sub">WHISKY SUBSCRIBERS</span>
+  </button>
+</div>
+
+<!-- ══ DASHBOARD CONTENT ═════════════════════════════════════════ -->
+<div class="dashboard-wrap">
+
+  <!-- ════════════════ VAULT SEARCH ═══════════════════════════ -->
+  <div style="margin-bottom: 28px;">
+    <div style="position: relative;">
+      <input
+        type="text"
+        id="vault-search"
+        placeholder="▸ SEARCH THE VAULT — try 'inflation', 'objection', 'gold', 'interest rates'..."
+        style="
+          width: 100%;
+          box-sizing: border-box;
+          background: var(--bg-raised);
+          border: 1px solid var(--accent);
+          color: var(--text);
+          font-family: var(--font);
+          font-size: 11px;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          padding: 12px 16px 12px 40px;
+          outline: none;
+          transition: border-color var(--transition);
+        "
+      >
+      <span style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--accent); font-size:14px; pointer-events:none;">⌕</span>
+    </div>
+    <div id="search-results-count" style="display:none; color:var(--text-faint); font-size:10px; letter-spacing:0.16em; text-transform:uppercase; margin-top:8px;"></div>
+  </div>
+
+  <!-- ════════════════ ALL CONTENT PANEL ══════════════════════ -->
+  <div class="asset-panel active" id="panel-all">
+    <div class="filter-tabs" id="filter-tabs-all">
+      <button class="filter-tab active" data-filter="all">ALL</button>
+      <button class="filter-tab" data-filter="gold">GOLD</button>
+      <button class="filter-tab" data-filter="whisky">WHISKY</button>
+      <button class="filter-tab" data-filter="weekly">WEEKLY</button>
+      <button class="filter-tab" data-filter="pitch_pack">PITCH PACK</button>
+      <button class="filter-tab" data-filter="objection_file">OBJECTION FILE</button>
+      <button class="filter-tab" data-filter="monthly">MONTHLY</button>
+      <button class="filter-tab" data-filter="quarterly">QUARTERLY</button>
+      <button class="filter-tab" data-filter="training">TRAINING</button>
+      <button class="filter-tab" data-filter="hit_list">HIT LIST</button>
+    </div>
+    <div class="doc-grid" id="doc-grid">
+      <!-- Reports loaded dynamically -->
+    </div>
+    <div id="empty-state" class="empty-state" style="display:none;">
+      <div class="empty-state-icon">░</div>
+      <div class="empty-state-title">NO DOCUMENTS IN THIS CATEGORY YET</div>
+      <p class="empty-state-sub">New documents are published weekly and at month end.</p>
+    </div>
+  </div>
+
+  <!-- ════════════════ GOLD PANEL ═════════════════════════════ -->
+  <div class="asset-panel" id="panel-gold">
+    <div class="dash-section-label" id="gold-featured-label" style="display:none;">
+      ▸ GOLD DESK — LATEST ISSUE
+      <span id="gold-featured-date"></span>
+    </div>
+    <div id="gold-featured-card"></div>
+
+    <div class="dash-section-label" style="margin-top: 8px;">
+      ▸ GOLD DESK — VAULT
+      <span>MOST RECENT FIRST</span>
+    </div>
+    <div class="filter-tabs" id="filter-tabs-gold">
+      <button class="filter-tab active" data-filter-gold="all">ALL</button>
+      <button class="filter-tab" data-filter-gold="weekly">WEEKLY</button>
+      <button class="filter-tab" data-filter-gold="pitch_pack">PITCH PACK</button>
+      <button class="filter-tab" data-filter-gold="objection_file">OBJECTION FILE</button>
+      <button class="filter-tab" data-filter-gold="monthly">MONTHLY</button>
+      <button class="filter-tab" data-filter-gold="quarterly">QUARTERLY</button>
+      <button class="filter-tab" data-filter-gold="training">TRAINING</button>
+      <button class="filter-tab" data-filter-gold="hit_list">HIT LIST</button>
+    </div>
+    <div class="doc-grid" id="doc-grid-gold"></div>
+    <div id="empty-state-gold" class="empty-state" style="display:none;">
+      <div class="empty-state-icon">░</div>
+      <div class="empty-state-title">NO GOLD DOCUMENTS IN THIS CATEGORY YET</div>
+      <p class="empty-state-sub">Gold reports are published weekly and at month end.</p>
+    </div>
+  </div>
+
+  <!-- ════════════════ WHISKY PANEL ═══════════════════════════ -->
+  <div class="asset-panel" id="panel-whisky">
+    <div class="dash-section-label" id="whisky-featured-label" style="display:none;">
+      ▸ WHISKY DESK — LATEST ISSUE
+      <span id="whisky-featured-date"></span>
+    </div>
+    <div id="whisky-featured-card"></div>
+
+    <div class="dash-section-label" style="margin-top: 8px;">
+      ▸ WHISKY DESK — VAULT
+      <span>MOST RECENT FIRST</span>
+    </div>
+    <div class="filter-tabs" id="filter-tabs-whisky">
+      <button class="filter-tab active" data-filter-whisky="all">ALL</button>
+      <button class="filter-tab" data-filter-whisky="weekly">WEEKLY</button>
+      <button class="filter-tab" data-filter-whisky="pitch_pack">PITCH PACK</button>
+      <button class="filter-tab" data-filter-whisky="objection_file">OBJECTION FILE</button>
+      <button class="filter-tab" data-filter-whisky="monthly">MONTHLY</button>
+      <button class="filter-tab" data-filter-whisky="quarterly">QUARTERLY</button>
+      <button class="filter-tab" data-filter-whisky="training">TRAINING</button>
+      <button class="filter-tab" data-filter-whisky="hit_list">HIT LIST</button>
+    </div>
+    <div class="doc-grid" id="doc-grid-whisky"></div>
+    <div id="empty-state-whisky" class="empty-state" style="display:none;">
+      <div class="empty-state-icon">░</div>
+      <div class="empty-state-title">NO WHISKY DOCUMENTS IN THIS CATEGORY YET</div>
+      <p class="empty-state-sub">Whisky reports are published weekly and at month end.</p>
+    </div>
+  </div>
+
+</div><!-- /dashboard-wrap -->
+
+<!-- ══ TEMPLATE (hidden) ══════════════════════════════════════════ -->
+<template id="doc-card-template">
+  <div class="doc-card" data-type="REPORT_TYPE" data-asset="ASSET_CLASS" data-title="REPORT_TITLE" data-tags="REPORT_TAGS">
+    <div class="doc-card-top">
+      <div class="doc-card-badges">
+        <span class="badge-asset">ASSET_CLASS</span>
+        <span class="badge-type">REPORT_TYPE</span>
+      </div>
+      <span class="badge-new" style="display:none;">NEW</span>
+    </div>
+    <div class="doc-card-title">REPORT_TITLE</div>
+    <div class="doc-card-meta">PUBLISHED_DATE</div>
+    <div class="doc-card-desc">View the complete report.</div>
+    <div class="doc-card-footer">
+      <span class="doc-card-date">PUBLISHED_DATE</span>
+      <a class="btn btn-sm" href="#" onclick="openReport(event)">█ VIEW REPORT</a>
+    </div>
+  </div>
+</template>
+
+<!-- ══ REPORT MODAL ═══════════════════════════════════════════════ -->
+<div id="report-modal" class="report-modal">
+  <div class="modal-header">
+    <div class="modal-header-left">
+      <span class="modal-brand">█ THE BROKERS TERMINAL</span>
+      <span class="modal-report-name" id="modal-report-name">— REPORT VIEWER</span>
+    </div>
+    <button class="modal-close" onclick="closeReport()">× CLOSE REPORT</button>
+  </div>
+  <div class="modal-iframe-wrap">
+    <iframe id="report-iframe" style="width:100%;height:100%;border:none;display:block;"></iframe>
+  </div>
+</div>
+
+<!-- ══ FOOTER ════════════════════════════════════════════════════ -->
+<footer class="site-footer">
+  <div class="footer-row">
+    <span class="footer-brand">█ THE BROKERS TERMINAL</span>
+    <span class="footer-center">BROKERS EYES ONLY</span>
+    <span class="footer-right">© 2026 — ALL RIGHTS RESERVED</span>
+  </div>
+  <p class="footer-disclaimer">This publication is distributed for informational purposes only. Not financial advice. For professional use only.</p>
+</footer>
+
+<script src="site.js"></script>
+
+<!-- ══ SUPABASE + DASHBOARD JS ════════════════════════════════════ -->
+<script>
+  const SUPABASE_URL = 'https://oqpodikelxhwcnjdwojw.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_hJjmJ5MYAj8aCpXL6vCMTQ_zJlxUehl';
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  /* ── Mobile CSS injected into every report ─────────────────── */
+  var MOBILE_REPORT_CSS = `<style id="mobile-inject">
+
+  /* ── Global: prevent any banner/ticker overflowing the page width ── */
+  html, body { max-width: 100% !important; overflow-x: hidden !important; }
+  .ticker-bar, [class*="ticker"], [class*="data-strip"], [class*="banner-strip"] {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+  }
+
+@media screen and (max-width: 768px) {
+
+  /* ── Body ── */
+  body { font-size: 10pt !important; overflow-x: hidden !important; }
+
+  /* ── Cover pages ── */
+  .cover {
+    margin: 6px !important;
+    padding: 32px 16px !important;
+    min-height: auto !important;
+  }
+  .cover::before { inset: 4px !important; }
+  .cover-title, [class*="cover-title"] {
+    font-size: 26pt !important;
+    letter-spacing: 2px !important;
+    line-height: 1.1 !important;
+  }
+  .cover-badge, .cover-label, .cover-sub,
+  [class*="cover-badge"], [class*="cover-label"] {
+    font-size: 7pt !important;
+    letter-spacing: 2px !important;
+  }
+  .cover-subtitle, [class*="cover-subtitle"] {
+    font-size: 10pt !important;
+    letter-spacing: 2px !important;
+  }
+
+  /* ── Section containers ── */
+  .page, .section, .content, .report-section,
+  [class*="-section"], [class*="section-"],
+  [class*="-page"], [class*="page-"],
+  [class*="-wrap"], [class*="wrap-"],
+  [class*="-container"], [class*="container-"] {
+    padding: 18px 14px !important;
+    margin: 8px !important;
+  }
+
+  /* ── Headings ── */
+  h1, .h1, [class*="title"]:not(.cover-title):not([class*="cover-title"]) {
+    font-size: 16pt !important;
+    letter-spacing: 2px !important;
+  }
+  h2, .h2, [class*="heading"] { font-size: 13pt !important; letter-spacing: 1px !important; }
+  h3, .h3, [class*="subheading"] { font-size: 11pt !important; }
+  h4, h5, h6 { font-size: 10pt !important; }
+
+  /* ── Pitch boxes ── */
+  [class*="pitch"], [class*="pitch-box"],
+  [class*="call-out"], [class*="callout"],
+  [class*="highlight"], [class*="tip"],
+  [class*="note-box"], [class*="insight"] {
+    padding: 14px 12px !important;
+    margin: 10px 0 !important;
+  }
+
+  /* ── Tables — force horizontal scroll ── */
+  table {
+    font-size: 9pt !important;
+    min-width: 0 !important;
+  }
+  td, th { padding: 6px 8px !important; font-size: 9pt !important; }
+  .table-wrap, [class*="table-wrap"], [class*="table-container"] {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    display: block !important;
+  }
+
+  /* ── Grids — stack to single column ── */
+  [class*="grid"],
+  [class*="-cols"], [class*="cols-"],
+  [class*="-row"], [class*="row-"] {
+    display: block !important;
+  }
+  [style*="grid-template-columns"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* ── Flex rows that should stack ── */
+  [class*="flex-row"], [class*="row-flex"],
+  [class*="two-col"], [class*="split"] {
+    flex-direction: column !important;
+  }
+
+  /* ── Stats / data bars ── */
+  [class*="stat-bar"], [class*="stats-row"] {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  /* ── Prevent horizontal overflow globally ── */
+  *, *::before, *::after {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    word-break: break-word !important;
+  }
+
+  /* ── Allow images to scale ── */
+  img, svg { height: auto !important; width: auto !important; max-width: 100% !important; }
+
+  /* ── Letter spacing reduction on small text ── */
+  [style*="letter-spacing: 0."] { letter-spacing: 0.08em !important; }
+
+}
+</style>`;
+
+  /* ── Open Report in Modal ──────────────────────────────────── */
+  /* ── Open a report by URL + title directly (no click event needed) ── */
+  var currentReport = { url: '', title: '', asset: '', type: '' };
+
+  function openReportNewTab() {
+    if (!currentReport.url) return;
+
+    // Open the report directly from storage in a new tab
+    window.open(currentReport.url, '_blank');
+
+    // Log as a tracked open
+    var logEmail  = localStorage.getItem('userEmail') || '';
+    var logFirmId = localStorage.getItem('firmId') || null;
+    if (logEmail) {
+      supabase.from('activity_log').insert({
+        user_email:   logEmail,
+        firm_id:      logFirmId,
+        action:       'download_report',
+        report_title: currentReport.title || '',
+        asset_class:  currentReport.asset  || '',
+        report_type:  currentReport.type   || ''
+      }).then(function(){}).catch(function(){});
+    }
+
+    var btn = document.getElementById('download-btn');
+    btn.textContent = '✓ OPENED';
+    setTimeout(function() { btn.textContent = '↗ OPEN IN NEW TAB'; }, 2000);
+  }
+
+  function openReportDirectly(reportUrl, reportTitle, reportAsset, reportType) {
+    if (!reportUrl) return;
+    currentReport = { url: reportUrl, title: reportTitle || '', asset: reportAsset || '', type: reportType || '' };
+    document.getElementById('modal-report-name').textContent = '— ' + (reportTitle || 'REPORT').toUpperCase();
+
+    // Log report view to activity log
+    var logEmail = localStorage.getItem('userEmail') || '';
+    var logFirmId = localStorage.getItem('firmId') || null;
+    if (logEmail) {
+      supabase.from('activity_log').insert({
+        user_email: logEmail,
+        firm_id: logFirmId,
+        action: 'view_report',
+        report_title: reportTitle || '',
+        asset_class: reportAsset || '',
+        report_type: reportType || ''
+      }).then(function() {}).catch(function() {});
+    }
+
+    fetch(reportUrl)
+      .then(function(response) {
+        if (!response.ok) throw new Error('HTTP ' + response.status);
+        return response.text();
+      })
+      .then(function(html) {
+        var injected;
+        if (html.includes('</head>')) {
+          injected = html.replace('</head>', MOBILE_REPORT_CSS + '</head>');
+        } else if (html.includes('<body')) {
+          injected = html.replace('<body', MOBILE_REPORT_CSS + '<body');
+        } else {
+          injected = MOBILE_REPORT_CSS + html;
+        }
+        if (!injected.includes('name="viewport"')) {
+          injected = injected.replace('<head>', '<head><meta name="viewport" content="width=device-width, initial-scale=1.0">');
+        }
+        var iframe = document.getElementById('report-iframe');
+        iframe.srcdoc = injected;
+        document.getElementById('report-modal').classList.add('open');
+        iframe.onload = function() { try { iframe.contentWindow.scrollTo(0, 0); } catch(e) {} };
+      })
+      .catch(function(err) {
+        alert('Could not load report: ' + err.message);
+      });
+  }
+
+  /* ── Handle postMessage from reports rendered inside the iframe ── */
+  window.addEventListener('message', function(e) {
+    if (!e.data || e.data.action !== 'openLatestReport') return;
+    var asset = (e.data.asset || '').toLowerCase();
+    var type  = (e.data.type  || '').toLowerCase();
+
+    // Find the most recent report matching asset + type
+    var match = (allReports || []).find(function(r) {
+      return r.asset_class === asset && r.report_type === type;
+    });
+
+    if (match) {
+      var url = 'https://oqpodikelxhwcnjdwojw.supabase.co/storage/v1/object/public/Reports/' + match.file_path;
+      openReportDirectly(url, match.title);
+    } else {
+      // Fallback: open the most recent report for that asset regardless of type
+      var fallback = (allReports || []).find(function(r) {
+        return r.asset_class === asset;
+      });
+      if (fallback) {
+        var fbUrl = 'https://oqpodikelxhwcnjdwojw.supabase.co/storage/v1/object/public/Reports/' + fallback.file_path;
+        openReportDirectly(fbUrl, fallback.title);
+      }
+    }
+  });
+
+  function openReport(event) {
+    event.preventDefault();
+    var el = event.target.closest ? event.target.closest('[data-url]') : event.target;
+    var reportUrl   = el ? el.getAttribute('data-url')    : null;
+    var reportTitle = el ? el.getAttribute('data-title')   : 'REPORT';
+    var reportAsset = el ? el.getAttribute('data-asset')   : '';
+    var reportType  = el ? el.getAttribute('data-type')    : '';
+    if (!reportUrl) return;
+    openReportDirectly(reportUrl, reportTitle, reportAsset, reportType);
+  }
+
+  function closeReport() {
+    document.getElementById('report-modal').classList.remove('open');
+    document.getElementById('report-iframe').srcdoc = '';
+    currentReport = { url: '', title: '', asset: '', type: '' };
+    var btn = document.getElementById('download-btn');
+    btn.textContent = '↗ OPEN IN NEW TAB'; btn.disabled = false;
+  }
+
+  /* ── Auth Check ────────────────────────────────────────────── */
+  (async function () {
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (!session) {
+      window.location.href = 'login.html';
+      return;
+    }
+
+    var userEmail = session.user.email;
+
+    // Get user's name
+    const { data: userData } = await supabase
+      .from('users')
+      .select('first_name, last_name')
+      .eq('email', userEmail)
+      .single();
+
+    var userName;
+    if (userData && userData.first_name && userData.last_name) {
+      userName = (userData.first_name + ' ' + userData.last_name).toUpperCase();
+    } else {
+      userName = userEmail.split('@')[0].toUpperCase();
+    }
+
+    var userNameEl = document.getElementById('user-name');
+    if (userNameEl) userNameEl.textContent = userName;
+
+    // ── Fetch access level via firm_id from users table (most reliable) ──
+    var domain = userEmail.split('@')[1];
+    var firmAccess = 'both'; // safe default
+    var firmRow = null;
+
+    // Step 1: get firm_id from users table
+    const { data: userRow } = await supabase
+      .from('users')
+      .select('firm_id')
+      .eq('email', userEmail)
+      .maybeSingle();
+
+    if (userRow && userRow.firm_id) {
+      // Step 2: fetch firm directly by ID — always correct regardless of domain
+      const { data: firmById } = await supabase
+        .from('firms')
+        .select('access, stripe_customer_id, subscription_type')
+        .eq('id', userRow.firm_id)
+        .single();
+      firmRow = firmById;
+    } else {
+      // Fallback: look up by domain (corporate accounts)
+      const { data: firmByDomain } = await supabase
+        .from('firms')
+        .select('access, stripe_customer_id, subscription_type')
+        .eq('domain', domain)
+        .eq('subscription_type', 'corporate')
+        .maybeSingle();
+      firmRow = firmByDomain;
+    }
+
+    if (firmRow && firmRow.access) firmAccess = firmRow.access;
+
+    // Hide "Manage Subscription" button if no Stripe customer linked (e.g. admin/manual accounts)
+    var manageSubBtn = document.getElementById('manage-subscription-btn');
+    var manageSep = manageSubBtn ? manageSubBtn.nextElementSibling : null;
+    if (manageSubBtn && (!firmRow || !firmRow.stripe_customer_id)) {
+      manageSubBtn.style.display = 'none';
+      if (manageSep) manageSep.style.display = 'none';
+    }
+    window.firmAccess = firmAccess; // store globally for report loader
+
+    // Update "ALL CONTENT" subtitle to reflect actual access
+    var allSub = document.getElementById('all-content-sub');
+    if (allSub) {
+      if (firmAccess === 'gold')   allSub.textContent = 'GOLD INTELLIGENCE';
+      else if (firmAccess === 'whisky') allSub.textContent = 'WHISKY INTELLIGENCE';
+      // 'both' — leave blank, no subtitle needed
+    }
+
+    if (firmAccess === 'gold') {
+      // Hide Whisky Desk tab and panel entirely
+      var whiskyTab = document.querySelector('.asset-tab[data-panel="whisky"]');
+      var whiskyPanel = document.getElementById('panel-whisky');
+      if (whiskyTab)  whiskyTab.style.display = 'none';
+      if (whiskyPanel) whiskyPanel.style.display = 'none';
+      // Hide whisky filter in All panel
+      var whiskyFilter = document.querySelector('#filter-tabs-all .filter-tab[data-filter="whisky"]');
+      if (whiskyFilter) whiskyFilter.style.display = 'none';
+
+    } else if (firmAccess === 'whisky') {
+      // Hide Gold Desk tab and panel entirely
+      var goldTab = document.querySelector('.asset-tab[data-panel="gold"]');
+      var goldPanel = document.getElementById('panel-gold');
+      if (goldTab)  goldTab.style.display = 'none';
+      if (goldPanel) goldPanel.style.display = 'none';
+      // Hide gold filter in All panel
+      var goldFilter = document.querySelector('#filter-tabs-all .filter-tab[data-filter="gold"]');
+      if (goldFilter) goldFilter.style.display = 'none';
+      // Default tab to All (already default, but ensure)
+      document.querySelectorAll('.asset-tab').forEach(function(t) { t.classList.remove('active'); });
+      document.querySelectorAll('.asset-panel').forEach(function(p) { p.classList.remove('active'); });
+      var allTab = document.querySelector('.asset-tab[data-panel="all"]');
+      var allPanel = document.getElementById('panel-all');
+      if (allTab) allTab.classList.add('active');
+      if (allPanel) allPanel.classList.add('active');
+    }
+
+    // Manage Subscription
+    var manageBtn = document.getElementById('manage-subscription-btn');
+    if (manageBtn) {
+      manageBtn.addEventListener('click', async function(e) {
+        e.preventDefault();
+        manageBtn.textContent = 'LOADING...';
+        try {
+          const response = await fetch('https://oqpodikelxhwcnjdwojw.functions.supabase.co/create-portal-session', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_email: userEmail })
+          });
+          const data = await response.json();
+          if (data.url) {
+            window.location.href = data.url;
+          } else if (data.error === 'NO_STRIPE_CUSTOMER') {
+            alert('Your account was created manually. To cancel or manage your subscription, please contact us at desk@thebrokersterminal.com');
+          } else {
+            alert('Could not open subscription portal. Please contact desk@thebrokersterminal.com');
+          }
+        } catch(err) {
+          alert('Could not open subscription portal. Please contact desk@thebrokersterminal.com');
+        }
+        manageBtn.textContent = 'MANAGE SUBSCRIPTION';
+      });
+    }
+
+    // Logout (single handler)
+    var logoutBtn = document.getElementById('logout-btn');
+    async function doLogout(e) {
+      e.preventDefault();
+      try { await supabase.from('users').update({ last_seen: null }).eq('email', userEmail); } catch(e) {}
+      await supabase.auth.signOut();
+      localStorage.clear();
+      sessionStorage.clear();
+      window.location.href = 'login.html';
+    }
+
+    if (logoutBtn) logoutBtn.addEventListener('click', doLogout, { once: true });
+
+    var navLogoutBtn = document.getElementById('nav-logout-btn');
+    if (navLogoutBtn) navLogoutBtn.addEventListener('click', doLogout);
+
+    // ── Session guard: kick out if another device logs in ────────
+    var storedSessionId = localStorage.getItem('sessionId');
+    if (storedSessionId) {
+      setInterval(async function () {
+        try {
+          var { data: sessionCheck } = await supabase
+            .from('users')
+            .select('current_session_id')
+            .eq('email', userEmail)
+            .single();
+
+          if (sessionCheck && sessionCheck.current_session_id !== storedSessionId) {
+            await supabase.auth.signOut();
+            localStorage.clear();
+            window.location.href = 'login.html?reason=session';
+          }
+        } catch (e) {}
+      }, 30000);
+    }
+
+    // ── Presence ping: update last_seen every 30 seconds ─────────
+    async function pingPresence() {
+      try {
+        await supabase.from('users')
+          .update({ last_seen: new Date().toISOString() })
+          .eq('email', userEmail);
+      } catch (e) {}
+    }
+    pingPresence();
+    setInterval(pingPresence, 30000);
+
+    await loadReportsFromDatabase();
+  })();
+
+  /* ── Report type descriptions ─────────────────────────────── */
+  var REPORT_DESCRIPTIONS = {
+    weekly:         'Your core weekly briefing. Covers the latest price action, macro shifts, key data releases, and the narrative you need to lead client conversations this week. Read this first every Monday.',
+    monthly:        'The deep-dive monthly intelligence report. Full macro analysis, business cycle positioning, sector breakdowns, and the strategic outlook for the month ahead. Essential reading for building your longer-term client case.',
+    quarterly:      'The big-picture quarterly review. Covers major macro trends, asset class performance, and forward-looking strategy for the quarter. Use this to frame your annual client reviews and portfolio positioning conversations.',
+    pitch_pack:     'A ready-to-use sales presentation pack. Contains structured talking points, market data, and client-facing narratives designed to open new conversations and move prospects from interest to commitment.',
+    objection_file: 'Your complete objection-handling reference. Every common pushback a client or prospect is likely to raise — answered with data-backed, confidence-building responses. Study this before every call.',
+    hit_list:       'The curated target list for this period. High-probability prospects, key re-engagement opportunities, and the specific triggers that make them worth calling right now. Work this list systematically.',
+    flash:          'Time-sensitive market update. Issued between regular reports when significant price moves, breaking macro events, or urgent sales opportunities arise. Act on these immediately — they are built for same-day conversations.',
+    training:       'Broker skills and product knowledge training material. Covers sales technique, market knowledge, compliance awareness, and the professional edge that separates top performers from the rest.',
+    psychology:     'The Psychology Desk. Behavioural finance insights, investor psychology breakdowns, and the mental frameworks that explain why clients make decisions — and how to guide them toward the right ones.'
+  };
+
+  /* ── Helper: build a single doc-card element ──────────────── */
+  function buildCard(report, pubDateStr, isNew, isFlash, reportUrl) {
+    var template   = document.getElementById('doc-card-template');
+    var typeLabel  = report.report_type.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+    var assetLabel = report.asset_class.toUpperCase();
+    var asset      = (report.asset_class || '').toLowerCase();
+
+    var frag = template.content.cloneNode(true);
+    var card = frag.querySelector('.doc-card');
+
+    card.setAttribute('data-id',    report.id);
+    card.setAttribute('data-type',  report.report_type);
+    card.setAttribute('data-asset', asset);
+    card.setAttribute('data-title', (report.title || '').toLowerCase());
+    card.setAttribute('data-tags',  (report.tags || '').toLowerCase());
+    if (isFlash)     card.classList.add('is-flash');
+    else if (isNew)  card.classList.add('is-new');
+
+    frag.querySelector('.badge-asset').textContent     = assetLabel;
+    frag.querySelector('.badge-type').textContent      = typeLabel;
+    frag.querySelector('.doc-card-title').textContent  = report.title;
+    frag.querySelector('.doc-card-meta').textContent   = pubDateStr;
+    frag.querySelector('.doc-card-date').textContent   = pubDateStr;
+    frag.querySelector('.doc-card-desc').textContent   = REPORT_DESCRIPTIONS[report.report_type] || 'View the complete report.';
+
+    var badgeNew = frag.querySelector('.badge-new');
+    if (isFlash)     { badgeNew.style.display = ''; badgeNew.textContent = 'FLASH'; }
+    else if (isNew)  { badgeNew.style.display = ''; }
+
+    var btn = frag.querySelector('.btn');
+    btn.setAttribute('data-url',   reportUrl);
+    btn.setAttribute('data-title', report.title);
+    btn.href = '#';
+
+    return frag;
+  }
+
+  /* ══ LOAD REPORTS ════════════════════════════════════════════ */
+  async function loadReportsFromDatabase() {
+    try {
+      const { data: reports, error } = await supabase
+        .from('reports')
+        .select('*')
+        .eq('status', 'published')
+        .order('published_date', { ascending: false });
+
+      if (error) { console.error('Error loading reports:', error); return; }
+
+      // Filter reports to only what this firm can access (fetched live from DB — not cached)
+      var firmAccess = window.firmAccess || 'both';
+      var filteredReports = (reports || []).filter(function(r) {
+        if (firmAccess === 'gold')   return r.asset_class === 'gold';
+        if (firmAccess === 'whisky') return r.asset_class === 'whisky';
+        return true; // 'both'
+      });
+
+      allReports = filteredReports;
+
+      var docGrid    = document.getElementById('doc-grid');
+      var goldGrid   = document.getElementById('doc-grid-gold');
+      var whiskyGrid = document.getElementById('doc-grid-whisky');
+
+      docGrid.innerHTML    = '';
+      goldGrid.innerHTML   = '';
+      whiskyGrid.innerHTML = '';
+
+      var sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+      var newCount = 0, flashCount = 0, trainingCount = 0;
+      var latestGold = null, latestWhisky = null, latestObjFile = null, latestPitchPack = null;
+      var tickerItems = [];
+
+      filteredReports.forEach(function (report) {
+        var pubDate    = new Date(report.published_date);
+        var pubDateStr = pubDate.toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: '2-digit' }).toUpperCase();
+        var isNew      = pubDate >= sevenDaysAgo;
+        var isFlash    = report.report_type === 'flash';
+        var asset      = (report.asset_class || '').toLowerCase();
+        var reportUrl  = 'https://oqpodikelxhwcnjdwojw.supabase.co/storage/v1/object/public/Reports/' + report.file_path;
+
+        if (isNew)   newCount++;
+        if (isFlash) flashCount++;
+        if (report.report_type === 'psychology' || report.report_type === 'training') trainingCount++;
+
+        // Track latest items for "This Week" strip — pick most recent of ANY type per asset
+        if (!latestGold   && asset === 'gold')   latestGold   = report;
+        if (!latestWhisky && asset === 'whisky') latestWhisky = report;
+        if (!latestObjFile    && report.report_type === 'objection_file')               latestObjFile    = report;
+        if (!latestPitchPack  && report.report_type === 'pitch_pack')                   latestPitchPack  = report;
+
+        // Ticker items
+        if (isFlash)     tickerItems.push({ label: 'FLASH ALERT', title: report.title, flash: true });
+        else if (isNew)  tickerItems.push({ label: 'NEW',         title: report.title, flash: false });
+
+        // Add to All panel
+        docGrid.appendChild(buildCard(report, pubDateStr, isNew, isFlash, reportUrl));
+
+        // Add to asset panel (Gold or Whisky only)
+        if (asset === 'gold')   goldGrid.appendChild(buildCard(report, pubDateStr, isNew, isFlash, reportUrl));
+        if (asset === 'whisky') whiskyGrid.appendChild(buildCard(report, pubDateStr, isNew, isFlash, reportUrl));
+      });
+
+      // Populate stats
+      document.getElementById('stat-new').textContent   = newCount;
+      document.getElementById('stat-vault').textContent = reports.length;
+      document.getElementById('stat-flash').textContent = trainingCount;
+
+      // Week tag
+      var now = new Date();
+      var weekNum = Math.ceil((((now - new Date(now.getFullYear(), 0, 1)) / 86400000) + 1) / 7);
+      document.getElementById('week-tag').textContent = '▸ WEEK OF ' + now.toLocaleDateString('en-GB', { day:'2-digit', month:'long', year:'numeric' }).toUpperCase() + ' — W' + weekNum;
+
+      // Week sub-heading
+      var subParts = [];
+      if (latestGold)   subParts.push('Gold — ' + (latestGold.title || 'Latest Issue'));
+      if (latestWhisky) subParts.push('Whisky — ' + (latestWhisky.title || 'Latest Issue'));
+      document.getElementById('week-sub').innerHTML = '<span>' + newCount + ' new item' + (newCount !== 1 ? 's' : '') + ' this week</span>' + (subParts.length ? ' &nbsp;•&nbsp; ' + subParts.join(' &nbsp;•&nbsp; ') : '');
+
+      // Populate "This Week" quick links
+      buildThisWeekLinks(latestGold, latestWhisky, latestObjFile, latestPitchPack);
+
+      // Build ticker
+      buildTicker(tickerItems);
+
+      // Setup filters
+      setupFilterTabs();
+      setupVaultSearch();
+      setupPanelFilters('filter-tabs-gold',   'doc-grid-gold',   'data-filter-gold',   'empty-state-gold');
+      setupPanelFilters('filter-tabs-whisky', 'doc-grid-whisky', 'data-filter-whisky', 'empty-state-whisky');
+
+      // Featured cards in Gold/Whisky panels
+      buildFeaturedCard('gold',   latestGold);
+      buildFeaturedCard('whisky', latestWhisky);
+
+    } catch (err) {
+      console.error('Error:', err);
+    }
+  }
+
+  /* ── Build "This Week" strip ───────────────────────────────── */
+  function buildThisWeekLinks(gold, whisky, objFile, pitchPack) {
+    var strip = document.getElementById('this-week-links');
+
+    function linkHtml(report, assetLabel, typeLabel) {
+      if (!report) return '';
+      var url = 'https://oqpodikelxhwcnjdwojw.supabase.co/storage/v1/object/public/Reports/' + report.file_path;
+      return '<a class="week-link" href="#" data-url="' + url + '" data-title="' + report.title + '" onclick="openReport(event)">' +
+        '<span class="new-dot"></span>' +
+        '<span><span class="week-link-asset">' + assetLabel + '</span>' +
+        '<span class="week-link-title">' + report.title + '</span>' +
+        '<span class="week-link-type">' + typeLabel + ' · OPEN REPORT</span></span>' +
+        '</a>';
+    }
+
+    function typeLabel(report) {
+      if (!report) return '';
+      return report.report_type.replace(/_/g, ' ').toUpperCase();
+    }
+
+    var html = '<div class="this-week-links-label">THIS WEEK</div>';
+    html += linkHtml(gold,      'GOLD',   'LATEST ' + typeLabel(gold));
+    html += linkHtml(whisky,    'WHISKY', 'LATEST ' + typeLabel(whisky));
+    html += linkHtml(pitchPack, 'ALL',    'PITCH PACK');
+    html += linkHtml(objFile,   'ALL',    'OBJECTION FILE');
+
+    // If nothing is available yet, show a placeholder
+    var hasAny = gold || whisky || objFile || pitchPack;
+    if (!hasAny) html += '<span style="color: var(--text-faint); font-size: 10px; letter-spacing: 0.14em; padding: 0 20px; display: flex; align-items: center;">No documents uploaded yet</span>';
+
+    strip.innerHTML = html;
+  }
+
+  /* ── Build ticker ──────────────────────────────────────────── */
+  function buildTicker(items) {
+    if (!items.length) return;
+    var track  = document.getElementById('ticker-track');
+    var ticker = document.getElementById('content-ticker');
+
+    function buildItemHtml(item) {
+      var cls = item.flash ? 'ticker-item is-flash' : 'ticker-item is-new';
+      var dot = item.flash ? '<span class="ticker-dot-flash">⚡</span>' : '<span class="ticker-dot-new">▸</span>';
+      return '<span class="' + cls + '">' + dot + ' ' + item.label + ': ' + item.title + '</span>';
+    }
+
+    // Repeat items enough times so one set always fills the screen, even with 1 item
+    var reps = Math.max(1, Math.ceil(8 / items.length));
+    var setHtml = '';
+    for (var r = 0; r < reps; r++) {
+      items.forEach(function(item) { setHtml += buildItemHtml(item); });
+    }
+
+    // Duplicate the full set for seamless loop (translateX -50%)
+    track.innerHTML = setHtml + setHtml;
+    ticker.style.display = 'flex';
+
+    // Speed: scale with total item count so it feels consistent
+    var duration = Math.max(20, reps * items.length * 6);
+    track.style.animationDuration = duration + 's';
+  }
+
+  /* ── Build featured card for Gold / Whisky panel ───────────── */
+  function buildFeaturedCard(asset, report) {
+    var label = document.getElementById(asset + '-featured-label');
+    var wrap  = document.getElementById(asset + '-featured-card');
+    if (!report || !label || !wrap) return;
+
+    var pubDate = new Date(report.published_date).toLocaleDateString('en-GB', { year:'numeric', month:'long', day:'2-digit' }).toUpperCase();
+    var assetLabel = report.asset_class.toUpperCase();
+    var typeLabel  = report.report_type.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+    var url = 'https://oqpodikelxhwcnjdwojw.supabase.co/storage/v1/object/public/Reports/' + report.file_path;
+
+    label.style.display = '';
+    document.getElementById(asset + '-featured-date').textContent = 'PUBLISHED ' + pubDate;
+
+    wrap.innerHTML =
+      '<div class="featured-card">' +
+        '<div>' +
+          '<div class="featured-card-badges">' +
+            '<span class="featured-new">NEW</span>' +
+            '<span class="badge-asset">' + assetLabel + '</span>' +
+            '<span class="badge-type">' + typeLabel + '</span>' +
+          '</div>' +
+          '<div class="featured-card-title">' + report.title + '</div>' +
+          '<div class="featured-card-meta">' + pubDate + '</div>' +
+          '<p class="featured-card-desc">Your latest ' + assetLabel.toLowerCase() + ' intelligence report. Full analysis, market data, and <strong>complete pitch scripts</strong> ready for the phones today.</p>' +
+        '</div>' +
+        '<div class="featured-card-right">' +
+          '<a class="btn btn-solid" href="#" data-url="' + url + '" data-title="' + report.title + '" onclick="openReport(event)">█ OPEN REPORT</a>' +
+          '<p class="featured-card-note">Opens in full-screen viewer.<br>Searchable. Printable.</p>' +
+        '</div>' +
+      '</div>';
+  }
+
+  /* ── Filter matching — 'training' tab catches psychology too ── */
+  function filterMatch(filter, type, asset) {
+    if (filter === 'all') return true;
+    if (filter === 'training' && (type === 'training' || type === 'psychology')) return true;
+    return type === filter || asset === filter;
+  }
+
+  /* ══ FILTER TABS — All panel ══════════════════════════════════ */
+  function setupFilterTabs() {
+    var filterTabs = document.querySelectorAll('#filter-tabs-all .filter-tab');
+    var docCards   = document.querySelectorAll('#doc-grid .doc-card');
+    var emptyState = document.getElementById('empty-state');
+
+    filterTabs.forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        var filter = this.getAttribute('data-filter');
+        filterTabs.forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
+
+        var visible = 0;
+        docCards.forEach(function (card) {
+          var type  = card.getAttribute('data-type');
+          var asset = card.getAttribute('data-asset');
+          var show  = filterMatch(filter, type, asset);
+          card.style.display = show ? '' : 'none';
+          if (show) visible++;
+        });
+
+        emptyState.style.display = visible === 0 ? 'block' : 'none';
+      });
+    });
+
+    var allTab = document.querySelector('#filter-tabs-all [data-filter="all"]');
+    if (allTab) allTab.classList.add('active');
+  }
+
+  /* ══ VAULT SEARCH ════════════════════════════════════════════ */
+  function setupVaultSearch() {
+    var searchInput   = document.getElementById('vault-search');
+    var resultsCount  = document.getElementById('search-results-count');
+    var docGrid       = document.getElementById('doc-grid');
+    var filterTabsAll = document.getElementById('filter-tabs-all');
+    var emptyState    = document.getElementById('empty-state');
+    if (!searchInput) return;
+
+    var searchTimeout = null;
+
+    function clearSearch() {
+      resultsCount.style.display = 'none';
+      filterTabsAll.style.display = '';
+      document.querySelectorAll('#doc-grid .doc-card').forEach(function(c) { c.style.display = ''; });
+      emptyState.style.display = 'none';
+      var allTab = document.querySelector('#filter-tabs-all [data-filter="all"]');
+      if (allTab) allTab.click();
+    }
+
+    async function runSearch(rawQuery) {
+      var query = rawQuery.trim().toLowerCase();
+      if (!query) { clearSearch(); return; }
+
+      // Hide filter tabs while searching
+      filterTabsAll.style.display = 'none';
+      document.querySelectorAll('#filter-tabs-all .filter-tab').forEach(function(t) { t.classList.remove('active'); });
+      resultsCount.style.display = 'block';
+      resultsCount.textContent = 'SEARCHING...';
+
+      try {
+        // Query Supabase — search title, tags AND full report content
+        var searchTerm = '%' + query + '%';
+        var { data: matched, error } = await supabase
+          .from('reports')
+          .select('id')
+          .eq('status', 'published')
+          .or('title.ilike.' + searchTerm + ',tags.ilike.' + searchTerm + ',content_text.ilike.' + searchTerm);
+
+        if (error) throw error;
+
+        var matchedIds = new Set((matched || []).map(function(r) { return r.id; }));
+
+        // Apply access filter
+        var cards = document.querySelectorAll('#doc-grid .doc-card');
+        var visible = 0;
+        cards.forEach(function(card) {
+          var id = card.getAttribute('data-id');
+          var show = matchedIds.has(id);
+          card.style.display = show ? '' : 'none';
+          if (show) visible++;
+        });
+
+        resultsCount.textContent = visible + ' result' + (visible !== 1 ? 's' : '') + ' for "' + rawQuery.trim() + '"';
+        emptyState.style.display = visible === 0 ? 'block' : 'none';
+
+      } catch(err) {
+        resultsCount.textContent = 'Search error — please try again';
+        console.error('Search error:', err);
+      }
+    }
+
+    searchInput.addEventListener('input', function () {
+      clearTimeout(searchTimeout);
+      var val = this.value;
+      if (!val.trim()) { clearSearch(); return; }
+      searchTimeout = setTimeout(function() { runSearch(val); }, 300);
+    });
+  }
+
+  /* ══ FILTER TABS — Gold / Whisky panels ══════════════════════ */
+  function setupPanelFilters(tabsId, gridId, attr, emptyId) {
+    var tabs   = document.querySelectorAll('#' + tabsId + ' .filter-tab');
+    var cards  = document.querySelectorAll('#' + gridId + ' .doc-card');
+    var empty  = document.getElementById(emptyId);
+
+    tabs.forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        var filter = this.getAttribute(attr);
+        tabs.forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
+
+        var visible = 0;
+        cards.forEach(function (card) {
+          var type = card.getAttribute('data-type');
+          var show = filter === 'all' || type === filter || (filter === 'training' && type === 'psychology');
+          card.style.display = show ? '' : 'none';
+          if (show) visible++;
+        });
+        if (empty) empty.style.display = visible === 0 ? 'block' : 'none';
+      });
+    });
+  }
+
+  /* ══ ASSET PANEL TABS ════════════════════════════════════════ */
+  document.querySelectorAll('.asset-tab').forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      document.querySelectorAll('.asset-tab').forEach(t => t.classList.remove('active'));
+      this.classList.add('active');
+      document.querySelectorAll('.asset-panel').forEach(p => p.classList.remove('active'));
+      document.getElementById('panel-' + this.getAttribute('data-panel')).classList.add('active');
+    });
+  });
+
+</script>
+</body>
+</html>

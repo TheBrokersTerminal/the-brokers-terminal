@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<title>The Brokers Weekly — Whisky Market — 24 April 2026</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: #0A0A0A; color: #FFFFFF;
+    font-family: "Consolas","Menlo","DejaVu Sans Mono","Courier New",monospace;
+    font-size: 11.5pt; line-height: 1.55; letter-spacing: 0.01em;
+  }
+  .page { max-width: 860px; margin: 0 auto; padding: 36px 40px 48px 40px; border-bottom: 1px dashed #2a2a2a; }
+  .cover { min-height: 96vh; display: flex; flex-direction: column; justify-content: space-between; align-items: center; padding: 40px 30px; text-align: center; background: #0A0A0A; border: 1px solid #E97132; }
+  .cover .top-strip, .cover .bottom-strip { width: 100%; font-size: 9pt; letter-spacing: 0.25em; color: #E97132; display: flex; justify-content: space-between; text-transform: uppercase; }
+  .cover .middle { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 22px; }
+  .cover h1 { font-size: 44pt; margin: 0; color: #E97132; letter-spacing: 0.18em; font-weight: 700; line-height: 1.1; }
+  .cover h2 { font-size: 14pt; margin: 6px 0 0 0; color: #FFFFFF; letter-spacing: 0.28em; font-weight: 400; }
+  .cover .asset-badge { margin-top: 22px; padding: 10px 28px; border: 1px solid #E97132; color: #E97132; letter-spacing: 0.32em; font-size: 12pt; }
+  .cover .date { color: #E97132; font-size: 11pt; letter-spacing: 0.4em; margin-top: 14px; }
+  .cover .ribbon { font-size: 9pt; color: #FFFFFF; letter-spacing: 0.18em; opacity: 0.6; }
+  h3.section { color: #E97132; border-top: 1px solid #E97132; border-bottom: 1px solid #E97132; padding: 6px 0; margin: 28px 0 14px 0; font-size: 12.5pt; letter-spacing: 0.22em; text-transform: uppercase; display: flex; justify-content: space-between; align-items: center; }
+  h3.section::after { content: "█"; color: #E97132; }
+  h4.sub { color: #E97132; margin: 18px 0 8px 0; font-size: 11pt; letter-spacing: 0.16em; text-transform: uppercase; border-left: 3px solid #E97132; padding-left: 10px; }
+  p { margin: 8px 0; color: #FFFFFF; }
+  strong { color: #E97132; letter-spacing: 0.02em; }
+  em { color: #E6E6E6; }
+  ul { padding-left: 22px; margin: 6px 0 12px 0; }
+  ul li { margin: 4px 0; }
+  ul li::marker { color: #E97132; }
+  .masthead { display: flex; justify-content: space-between; align-items: center; border-top: 2px solid #E97132; border-bottom: 2px solid #E97132; padding: 8px 0; margin-bottom: 18px; font-size: 9.5pt; letter-spacing: 0.24em; }
+  .masthead .left { color: #E97132; }
+  .masthead .middle { color: #FFFFFF; }
+  .masthead .right { color: #E97132; }
+  .dashboard { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 12px 0 16px 0; }
+  .tile { border: 1px solid #E97132; padding: 10px 12px; background: #121212; }
+  .tile .label { color: #E97132; font-size: 8.5pt; letter-spacing: 0.18em; margin-bottom: 4px; }
+  .tile .value { color: #FFFFFF; font-size: 15pt; font-weight: 700; }
+  .tile .delta { font-size: 8.5pt; margin-top: 2px; color: #E6E6E6; }
+  .tile .delta.up { color: #6BCB77; }
+  .tile .delta.down { color: #E97132; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 10pt; }
+  th { background: #121212; color: #E97132; border-bottom: 1px solid #E97132; padding: 6px 8px; text-align: left; letter-spacing: 0.12em; font-size: 9pt; text-transform: uppercase; }
+  td { border-bottom: 1px dotted #333; padding: 6px 8px; color: #FFFFFF; }
+  td.rt { text-align: right; }
+  td.accent { color: #E97132; }
+  td.down { color: #E97132; }
+  .news-block { border-left: 3px solid #E97132; padding: 10px 14px; margin: 18px 0; background: #0E0E0E; }
+  .news-block h4 { color: #E97132; margin: 0 0 6px 0; font-size: 11pt; letter-spacing: 0.14em; text-transform: uppercase; }
+  .news-block .body { color: #FFFFFF; }
+  .pitch-thought { margin: 12px 0 8px 0; padding: 8px 12px; border: 1px dashed #E97132; color: #E6E6E6; }
+  .pitch-thought span.tag { color: #E97132; letter-spacing: 0.18em; font-size: 9pt; display: block; margin-bottom: 4px; }
+  .pitch { margin: 10px 0; padding: 10px 14px; background: #101010; border-top: 1px solid #E97132; border-bottom: 1px solid #333; }
+  .pitch .head { color: #E97132; font-size: 9.5pt; letter-spacing: 0.2em; margin-bottom: 6px; text-transform: uppercase; }
+  .pitch .quote { color: #FFFFFF; font-style: italic; padding: 4px 6px 6px 14px; border-left: 2px solid #E97132; margin: 6px 0; }
+  .pitch .reason { color: #E6E6E6; font-size: 9.5pt; margin-top: 6px; }
+  .pitch .reason span.l { color: #E97132; }
+  .teach { border: 1px solid #E97132; padding: 14px 18px; margin: 16px 0; background: #0E0E0E; }
+  .teach h4 { color: #E97132; margin: 0 0 8px 0; letter-spacing: 0.16em; font-size: 11pt; text-transform: uppercase; }
+  .formula { font-family: "Consolas",monospace; background: #141414; border: 1px dotted #E97132; padding: 8px 12px; color: #E97132; margin: 10px 0; letter-spacing: 0.06em; }
+  .footer-bar { margin-top: 18px; padding: 6px 0; border-top: 1px solid #E97132; font-size: 8.5pt; color: #E97132; letter-spacing: 0.22em; display: flex; justify-content: space-between; }
+  .ascii { background: #101010; border: 1px dotted #E97132; padding: 10px 12px; color: #E97132; white-space: pre; font-size: 9pt; margin: 12px 0; line-height: 1.2; }
+  .warn { border: 1px solid #E97132; padding: 10px 14px; margin: 10px 0; color: #FFFFFF; background: #1a0f06; }
+  .warn span.tag { color: #E97132; letter-spacing: 0.2em; font-size: 9pt; display: block; margin-bottom: 4px; text-transform: uppercase; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .gloss { border: 1px dotted #444; padding: 12px 16px; margin: 16px 0; background: #0d0d0d; }
+  .gloss h5 { color: #E97132; margin: 0 0 8px 0; font-size: 9.5pt; letter-spacing: 0.22em; text-transform: uppercase; }
+  .gloss table th { background: #111; font-size: 8.5pt; }
+  .gloss table td { font-size: 9pt; padding: 5px 8px; color: #E0E0E0; }
+  .disclosure { border: 1px solid #444; padding: 14px 18px; margin: 16px 0; background: #0d0d0d; }
+  .disclosure h4 { color: #E97132; margin: 0 0 8px 0; font-size: 9.5pt; letter-spacing: 0.22em; text-transform: uppercase; }
+  .disclosure p { color: #999; font-size: 8.5pt; line-height: 1.6; margin: 5px 0; }
+  .week-ahead table td { font-size: 9pt; }
+  .week-ahead table td.date-col { color: #E97132; white-space: nowrap; }
+
+  /* ── PRINT / SAVE-AS-PDF ─────────────────────────────────────────────
+     Open in Chrome → File → Print (⌘P) → Destination: Save as PDF
+     More settings: Paper size A4 · Margins: None · Scale 100%
+     Uncheck "Headers and footers"
+     Result: one continuous long page — no content split across pages.
+  ─────────────────────────────────────────────────────────────────── */
+  @media print {
+    @page { size: A4 auto; margin: 14mm 16mm; }
+    html, body { background: #0A0A0A !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .page { border-bottom: none; page-break-inside: avoid; break-inside: avoid; }
+    .cover { min-height: auto; page-break-inside: avoid; break-inside: avoid; border: 1px solid #E97132 !important; }
+    .news-block, .pitch, .pitch-thought, .teach, .warn, .gloss, .disclosure, .tile, table, .dashboard { page-break-inside: avoid; break-inside: avoid; }
+    .section, h4.sub { page-break-after: avoid; break-after: avoid; }
+    .footer-bar { page-break-before: avoid; break-before: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ==================== FRONT COVER ==================== -->
+<section class="page">
+  <div class="cover">
+    <div class="top-strip">
+      <span>█ INTERNAL &nbsp; CONFIDENTIAL</span>
+      <span>BROKERS EYES ONLY</span>
+    </div>
+    <div class="middle">
+      <div class="ribbon">▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬</div>
+      <h1>THE BROKERS<br>WEEKLY</h1>
+      <h2>MACRO &nbsp;•&nbsp; SALES &nbsp;•&nbsp; STRATEGY</h2>
+      <div class="asset-badge">WHISKY MARKET</div>
+      <div class="date">WEEK ENDED 24 APRIL 2026</div>
+      <div class="ribbon">▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬</div>
+    </div>
+    <div class="bottom-strip">
+      <span>VOL. WHISKY / W17</span>
+      <span>THE BROKERAGE REPORT</span>
+      <span>BROKERS EYES ONLY</span>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== DESK MEMO ==================== -->
+<section class="page">
+  <div class="masthead">
+    <div class="left">█ WHISKY DESK</div>
+    <div class="middle">THE BROKERS WEEKLY — 24 APR 2026</div>
+    <div class="right">PAGE 02 █</div>
+  </div>
+
+  <h3 class="section">DESK MEMO — READ THIS FIRST</h3>
+
+  <p>The whisky investment market enters the second quarter of 2026 in what informed participants are describing as a <strong>strategic reset</strong> — and in the language of long-duration alternative assets, a strategic reset at the right moment in the cycle is not a warning. It is an invitation. The correction from the 2022–2023 speculative peak has done exactly what corrections are supposed to do: it has cleared the weak hands, reset expectations, and returned the market to the hands of capital that understands what it owns.</p>
+
+  <p>Physical trade cask sales grew <strong>13% in Q1 2026</strong>. Distilleries across Scotland, the United States, and Ireland are <strong>cutting production</strong>, managing inventory, and baking in supply constraints that will not fully materialise until the next decade. Meanwhile, the macro environment has intensified: US CPI re-accelerated to <strong>3.3% in March</strong> — the highest print since mid-2025 — driven by the Middle East conflict pushing energy to three-year highs. Consumer confidence has collapsed to a <strong>74-year historic low</strong>. The monetary environment — structural debasement, a genuine liquidity unlock from the eSLR reform, and a geopolitical backdrop that keeps reminding investors what systemic fragility looks like — is building the structural case for real, tangible, scarce assets faster than at any point in this decade.</p>
+
+  <p>This is not a price memo. Price is what the newspaper reports. The <em>story</em> — the reason a client should be <strong>owning</strong> whisky rather than observing it — runs on five structural forces that have not reversed:</p>
+
+  <ul>
+    <li><strong>Monetary debasement</strong> — the quiet, relentless dilution of purchasing power that every savings account is experiencing, whether or not the client has noticed it yet.</li>
+    <li><strong>Supply contraction</strong> — major producers globally are reducing barrel fills. The market is deliberately engineering scarcity for the 2030s and beyond.</li>
+    <li><strong>Emerging market demand explosion</strong> — India imported 220 million bottles of Scotch in the past year. China just halved its whisky tariff. That number is going higher.</li>
+    <li><strong>Buyers' market entry point</strong> — the most dangerous time to buy an alternative asset is at peak euphoria. That moment has passed.</li>
+    <li><strong>Macro Summer confirmed</strong> — ISM Manufacturing at 52.4 and in expansion. The business cycle is accelerating. Historically, this is where real assets are bought, not sold.</li>
+  </ul>
+
+  <p>This report does two things. It delivers the macro context and the market intelligence. Then, under every news item, it gives you <strong>two to three fully developed ways to pitch it</strong> — logical, emotional, scarcity, fear-of-loss — with a note on <em>why</em> that angle fits that story. Teach first. Pitch second. Never lead with price. Lead with the <strong>principle of owning something real</strong> in a world that is actively diluting the paper alternative.</p>
+
+  <div class="footer-bar">
+    <span>█ DESK MEMO</span>
+    <span>WHISKY • W17 • 2026</span>
+  </div>
+</section>
+
+<!-- ==================== MARKET DASHBOARD ==================== -->
+<section class="page">
+  <div class="masthead">
+    <div class="left">█ MARKETS</div>
+    <div class="middle">GLOBAL DASHBOARD — WEEK ENDED 24 APR 2026</div>
+    <div class="right">PAGE 03 █</div>
+  </div>
+
+  <h3 class="section">GLOBAL MACRO — KEY PRINTS</h3>
+
+  <div class="dashboard">
+    <div class="tile">
+      <div class="label">ISM MFG</div>
+      <div class="value">52.4</div>
+      <div class="delta up">▲ EXPANSION</div>
+    </div>
+    <div class="tile">
+      <div class="label">NMI SERVICES (PMI)</div>
+      <div class="value">56.1</div>
+      <div class="delta up">▲ ACCELERATING</div>
+    </div>
+    <div class="tile">
+      <div class="label">FED FUNDS</div>
+      <div class="value">3.50–3.75%</div>
+      <div class="delta">ON HOLD</div>
+    </div>
+    <div class="tile">
+      <div class="label">BOE BASE RATE</div>
+      <div class="value">3.75%</div>
+      <div class="delta">ON HOLD — 30 APR DECISION</div>
+    </div>
+
+    <div class="tile">
+      <div class="label">US CPI Y/Y (MAR)</div>
+      <div class="value">3.3%</div>
+      <div class="delta down">▼ RE-ACCELERATING</div>
+    </div>
+    <div class="tile">
+      <div class="label">UMCSI APR (FINAL)</div>
+      <div class="value">49.8</div>
+      <div class="delta down">▼ HISTORIC LOW</div>
+    </div>
+    <div class="tile">
+      <div class="label">ISM PRICES PAID</div>
+      <div class="value">78.3</div>
+      <div class="delta down">▼ PIPELINE HOT</div>
+    </div>
+    <div class="tile">
+      <div class="label">GDP NOWCAST Q1</div>
+      <div class="value">~1.2%</div>
+      <div class="delta">ADV EST. 30 APR</div>
+    </div>
+
+    <div class="tile">
+      <div class="label">DXY (USD INDEX)</div>
+      <div class="value">98.59</div>
+      <div class="delta down">▼ BELOW 100</div>
+    </div>
+    <div class="tile">
+      <div class="label">US 10YR YIELD</div>
+      <div class="value">4.302%</div>
+      <div class="delta">REAL YIELD ~1.0%</div>
+    </div>
+    <div class="tile">
+      <div class="label">INIT. CLAIMS (US)</div>
+      <div class="value">213k</div>
+      <div class="delta">LABOUR TIGHT</div>
+    </div>
+    <div class="tile">
+      <div class="label">SKEW INDEX</div>
+      <div class="value">140.84</div>
+      <div class="delta down">▼ TAIL RISK BID</div>
+    </div>
+  </div>
+
+  <div class="gloss">
+    <h5>█ WHAT THESE INDICATORS MEAN — BROKER EDUCATION</h5>
+    <table>
+      <thead><tr><th>Indicator</th><th>What It Measures</th><th>Why It Matters to Investors</th></tr></thead>
+      <tbody>
+        <tr><td class="accent">ISM Manufacturing (PMI)</td><td>A monthly survey of purchasing managers at US manufacturing firms. A reading above 50 means the sector is expanding; below 50 means contracting.</td><td>One of the most reliable leading indicators of economic health. Rising ISM = growing business activity = demand for assets. The current 52.4 confirms the economy is in expansion, not recession.</td></tr>
+        <tr><td class="accent">NMI (Services PMI)</td><td>The Non-Manufacturing Index surveys purchasing managers in service-sector businesses (finance, hospitality, retail, etc.). Same 50-threshold rule applies.</td><td>The service sector makes up the bulk of Western economies. A reading of 56.1 means it is growing at a healthy pace — supporting household income and consumer spending.</td></tr>
+        <tr><td class="accent">Fed Funds Rate</td><td>The interest rate at which US banks lend money to each other overnight. Set by the Federal Reserve. Currently 3.50–3.75%.</td><td>The single most watched interest rate in the world. It sets the floor for all borrowing costs globally. When it falls, money becomes cheaper — boosting asset prices. When it rises, money becomes more expensive — compressing valuations.</td></tr>
+        <tr><td class="accent">BoE Base Rate</td><td>The Bank of England's benchmark rate for the UK. Currently 3.75%. The MPC next meets 30 April 2026.</td><td>Determines UK savings rates, mortgage rates, and the opportunity cost of holding cash vs. owning assets. The gap between the BoE rate and real inflation is the real return on UK savings — currently near zero.</td></tr>
+        <tr><td class="accent">CPI (Y/Y)</td><td>The Consumer Price Index measures the year-on-year percentage change in a basket of goods and services. March 2026: US CPI jumped to 3.3%, up from 2.4% in February — driven by the Middle East conflict pushing energy prices sharply higher.</td><td>The official inflation measure. But it understates the true erosion of purchasing power — it does not capture monetary debasement from money supply expansion. The re-acceleration to 3.3% confirms inflation is not resolved — it is rebuilding. Think of CPI as the visible part of the iceberg.</td></tr>
+        <tr><td class="accent">UMCSI</td><td>University of Michigan Consumer Sentiment Index. A monthly survey of US households on their financial conditions and outlook. Scaled 0–100.</td><td>April 2026 final reading: 49.8 — the lowest level in the survey's 74-year history. Year-ahead inflation expectations surged to 4.7%. Households feel materially worse off and expect prices to accelerate further. This is debasement made personal — and it is the emotional backdrop against which every pitch for real asset ownership lands.</td></tr>
+        <tr><td class="accent">ISM Prices Paid</td><td>A sub-component of the ISM survey asking purchasing managers whether the prices they pay for inputs are rising or falling. 78.3 = significant price pressure.</td><td>A leading indicator of future goods inflation. When businesses are paying more for inputs, those costs eventually get passed to consumers. High Prices Paid = inflation is not over — it is rebuilding in the pipeline.</td></tr>
+        <tr><td class="accent">DXY (US Dollar Index)</td><td>Measures the value of the US dollar against a basket of six major currencies (EUR, JPY, GBP, CAD, SEK, CHF). Below 100 is historically significant.</td><td>A weaker dollar makes dollar-denominated assets (including Scotch exported to the US) relatively cheaper in other currencies, supporting global demand. It also reflects global confidence in US fiscal and monetary policy.</td></tr>
+        <tr><td class="accent">SKEW Index</td><td>The CBOE SKEW Index measures the price of out-of-the-money options on the S&P 500 — in plain terms, how much traders are paying for protection against a sudden market crash. Range roughly 100–150+.</td><td>A SKEW above 135 means professional money managers are quietly paying up for downside insurance. At 140.84, equities are near highs but the smart money is hedging. This divergence historically precedes periods of volatility — and is precisely when tangible alternative assets earn their place in a portfolio.</td></tr>
+        <tr><td class="accent">Real Yield</td><td>The nominal bond yield minus the inflation rate. With the US 10-year at 4.302% and March CPI at 3.3%, the real yield is approximately ~1.0% before tax. For a UK higher-rate taxpayer on nominal income, the after-tax real return is near zero or below.</td><td>The true return on fixed income after inflation. After UK income tax at the higher rate, the real after-tax yield on bonds or savings falls sharply — potentially approaching zero or below. This is the number clients should be asked to focus on, not the headline savings rate.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="footer-bar">
+    <span>█ DASHBOARD + GLOSSARY</span>
+    <span>WHISKY • W17 • 2026</span>
+  </div>
+</section>
+
+<!-- ==================== WHISKY MARKET SNAPSHOT ==================== -->
+<section class="page">
+  <div class="masthead">
+    <div class="left">█ WHISKY MARKETS</div>
+    <div class="middle">MARKET SNAPSHOT — SCOTCH / BOURBON / IRISH</div>
+    <div class="right">PAGE 04 █</div>
+  </div>
+
+  <h3 class="section">WHISKY MARKET SNAPSHOT — Q1 / APRIL 2026</h3>
+
+  <table>
+    <thead><tr><th>Market</th><th>Current State</th><th>Key Data Point</th><th>Broker Implication</th></tr></thead>
+    <tbody>
+      <tr><td class="accent">Scotch — Cask</td><td>Strategic reset. Buyers' market emerging.</td><td>Q1 cask sales +13% YoY</td><td>Volume recovering. Institutional buyers accumulating at reset prices.</td></tr>
+      <tr><td class="accent">Scotch — Bottle</td><td>Quality outperforms. Speculative brands weak.</td><td>Macallan 1963 15YO: £7,200 at auction</td><td>Provenance and rarity rewarded. Generic "limited edition" under pressure.</td></tr>
+      <tr><td class="accent">Bourbon</td><td>Supply tightening. Premium aged expressions firm.</td><td>Pappy Van Winkle 23YO: $4,200+</td><td>US production cuts beginning to bite. Hold premium aged stock.</td></tr>
+      <tr><td class="accent">Irish</td><td>Export growth. India deal catalytic.</td><td>Exports +18% to Asia in 12 months</td><td>India tariff reduction to 75% opens major new demand channel.</td></tr>
+      <tr><td class="accent">Japanese</td><td>Supply severe. Premium prices firm.</td><td>Ichiro's Malt Card series: £56,000+ per set</td><td>Japanese production cannot meet global demand. Scarcity premium structural.</td></tr>
+    </tbody>
+  </table>
+
+  <h4 class="sub">THE MARKET CYCLE IN PLAIN ENGLISH</h4>
+  <p>The whisky investment market peaked in late 2022 and corrected through 2024. The correction removed speculative capital that had entered during the COVID-era boom — buyers who purchased on momentum rather than fundamental thesis. What remains is a market of authentic demand: collectors, long-term holders, and investors who understand the supply-demand mechanics of the underlying asset. Cask sales growing 13% in Q1 2026 against this backdrop is not a coincidence. It is the structural bull market re-establishing itself beneath the noise.</p>
+
+  <div class="two-col">
+    <div class="teach">
+      <h4>SUPPLY IN ONE PARAGRAPH</h4>
+      <p>Teaninich and Roseisle — two of Scotland's highest-volume distilleries — have cut production through June 2026 to manage global inventory. This is not weakness. This is the industry deliberately reducing future supply to protect long-term value. A barrel filled in 2026 is a bottle that cannot exist before 2036. By filling fewer barrels today, the industry is baking in a supply vacuum for the next decade. The client who owns a cask today owns a finite share of that deliberately constrained future supply.</p>
+    </div>
+    <div class="teach">
+      <h4>DEMAND IN ONE PARAGRAPH</h4>
+      <p>India is now the world's number one Scotch whisky market by volume — 220 million bottles in the past twelve months. The UK-India Free Trade Agreement, effective April 2026, cuts the import tariff from 150% to 75%, with a path to 40% within ten years. China halved its whisky tariff in the same period. Two of the world's largest emerging consumer economies just became dramatically easier to sell Scotch into. The supply side is shrinking. The demand side is expanding. The arithmetic is simple.</p>
+    </div>
+  </div>
+
+  <div class="footer-bar">
+    <span>█ WHISKY SNAPSHOT</span>
+    <span>WHISKY • W17 • 2026</span>
+  </div>
+</section>
+
+<!-- ==================== TEACHING 01 — DEBASEMENT ==================== -->
+<section class="page">
+  <div class="masthead">
+    <div class="left">█ TEACHING</div>
+    <div class="middle">MONETARY DEBASEMENT — THE CASE FOR TANGIBLE ASSETS</div>
+    <div class="right">PAGE 05 █</div>
+  </div>
+
+  <h3 class="section">TEACHING 01 — WHY TANGIBLE ASSETS EXIST: THE CASE FROM MONEY ITSELF</h3>
+
+  <p>Before you pitch a single number about whisky, you must build something more important: the <strong>logical foundation for why owning any real, tangible asset matters</strong>. Every client has been taught to save. Very few have been taught to understand what saving actually does to their money over time. The broker who teaches this clearly earns a client for life. The broker who skips it is pitching a commodity.</p>
+
+  <div class="teach">
+    <h4>THE THREE LAYERS OF LOSING MONEY WITHOUT LOSING MONEY</h4>
+    <p><strong>LAYER 1 — NOMINAL INFLATION.</strong> Prices in the shops go up. The official CPI print measures this at 3.3% in the US as of March 2026 — having re-accelerated sharply from 2.4% in February as the Middle East conflict drove energy costs to three-year highs. Your client's salary may or may not have kept pace. Most people understand this layer — it is visible and discussed in the press. But it is only the tip of the iceberg.</p>
+    <p><strong>LAYER 2 — MONETARY DEBASEMENT.</strong> This is the layer almost nobody talks about, and it is far more destructive than headline inflation alone. When a central bank expands its balance sheet — via quantitative easing, deficit monetisation, emergency lending, or regulatory changes that free up lending capacity (such as the eSLR reform on 1 April 2026, which released over a trillion dollars of new lending room in the US alone) — the total supply of money grows faster than the economy it represents. Your individual pound or dollar now represents a smaller claim on the finite stock of real things in the world: homes, land, rare commodities, productive assets. The number on the bank statement stays the same. The <em>world it can buy</em> shrinks. Silently. Without a notification.</p>
+    <p><strong>LAYER 3 — THE CANTILLON EFFECT.</strong> New money does not arrive evenly at every doorstep. It arrives first at the institutions closest to its creation — banks, large corporates, asset owners — and only reaches the ordinary saver once the price of assets has already adjusted upward. The person who owns assets before the new money arrives sees their net worth marked up. The person holding cash sees the cost of living marked up against a static balance. This is not conspiracy theory. It is the documented, mechanical consequence of how monetary systems are plumbed. Think of it like being last in a queue for tickets — by the time you reach the counter, the best seats are already repriced.</p>
+    <p class="formula">PURCHASING POWER  ≈  (REAL GOODS &amp; SERVICES IN THE WORLD)  ÷  (TOTAL MONEY IN CIRCULATION)</p>
+    <p>When the denominator expands faster than the numerator — which it has done, without interruption, across every major economy since the 1970s — each unit of currency owns a progressively thinner slice of the world. The pound in your client's current account is doing exactly this, right now, silently, without a single alert.</p>
+  </div>
+
+  <h4 class="sub">REAL YIELDS — THE HONEST MATHS A CLIENT NEVER SEES</h4>
+
+  <div class="formula">US 10Y YIELD (4.302%)  −  US CPI MAR 2026 (3.3%)  =  REAL YIELD (~1.0%) — BEFORE TAX</div>
+  <div class="formula">UK: BoE RATE (3.75%)  −  UK CPI MAR 2026 (3.3%)  =  REAL CASH RETURN (~0.45%) — BEFORE TAX</div>
+
+  <p>After UK income tax at the higher rate (40%), the real after-tax return on a standard savings account is <em>negative</em> — and that is before accounting for monetary debasement running above the official CPI figure. The client who is proud of their 3.75% savings rate is earning essentially nothing in real, post-tax, post-debasement terms. With March 2026 CPI printing at 3.3% and consumer inflation expectations now at 4.7%, the purchasing power erosion is no longer hypothetical — it is accelerating. The whisky cask competing for that capital does not pay a coupon. It grows. The distinction is not whether an asset pays income. The distinction is whether it preserves, and grows, the purchasing power of the original capital committed.</p>
+
+  <div class="footer-bar">
+    <span>█ TEACHING 01</span>
+    <span>WHISKY • W17 • 2026</span>
+  </div>
+</section>
+
+<!-- ==================== NEWS 01 — US TARIFFS ==================== -->
+<section class="page">
+  <div class="masthead">
+    <div class="left">█ NEWS + PITCH</div>
+    <div class="middle">US TARIFFS — SUPPLY CHAIN — SCOTCH EXPORTS</div>
+    <div class="right">PAGE 06 █</div>
+  </div>
+
+  <h3 class="section">NEWS 01 — US TARIFFS: £4 MILLION A WEEK AND A POTENTIAL 35% THREAT</h3>
+
+  <div class="news-block">
+    <h4>THE PARAGRAPH</h4>
+    <p class="body">The United States remains Scotch whisky's largest export market by value. US tariff uncertainty — stemming from ongoing trade friction between Washington and its trading partners — currently costs the Scotch whisky industry an estimated <strong>£4 million per week</strong> in additional costs and disruption. A potential 35% tariff on Scotch whisky exports to the US has been under discussion, which would represent a significant additional burden on an industry that exported over £2 billion to the US in the most recent full year. The irony is structural and directly relevant to the investment case: tariff friction reduces the availability of aged Scotch in the US market, constraining supply at precisely the moment when American demand for premium aged expressions continues to grow. Supply friction does not reduce the value of existing mature stock — it increases it. The bottle that cannot be easily replaced commands a higher premium. The cask maturing in a Scottish bonded warehouse becomes more valuable, not less, when the path to the world's largest export market becomes more complicated.</p>
+  </div>
+
+  <div class="pitch-thought">
+    <span class="tag">█ PITCH THOUGHT</span>
+    Most clients hear "tariffs" and think "bad news." Your job is to reframe the narrative immediately. Tariffs are bad for producers and consumers of whisky. They are not bad for holders of existing mature stock. In fact, supply friction is one of the oldest value drivers in collectibles and commodities. The client who owns a cask before the tariff environment tightens is positioned on the right side of the disruption.
+  </div>
+
+  <div class="pitch">
+    <div class="head">PITCH A — LOGICAL / SUPPLY ANALYSIS</div>
+    <div class="quote">"There is a distinction worth drawing here that most people miss entirely. US tariff friction is unequivocally bad for the whisky industry — for distilleries trying to export, for importers trying to plan, for the supply chain in general. But it is not bad for the holder of existing mature Scottish cask stock. Think about what tariff friction actually does: it reduces the flow of aged whisky into the world's largest premium market. It makes the bottles and casks that are already in existence — already aged, already in bond, already in the hands of owners — relatively more valuable, not less. Supply disruption in any commodity market has historically compressed available supply, which supports the price of existing stock. The cask you own in a Scottish bonded warehouse is not being exported anywhere. It is sitting, ageing, and becoming more valuable against an increasingly complex supply backdrop."</div>
+    <div class="reason"><span class="l">Why logical:</span> this pitch flips the frame from negative news to structural advantage using cause-and-effect logic the client can verify independently. It works precisely because it initially sounds counterintuitive — which makes it memorable.</div>
+  </div>
+
+  <div class="pitch">
+    <div class="head">PITCH B — SCARCITY / THE AGEING ADVANTAGE</div>
+    <div class="quote">"Here is the thing about aged Scotch that the tariff conversation actually clarifies rather nicely. You cannot fast-track the ageing process. You cannot produce a 12-year-old whisky any faster than 12 years. When tariffs complicate the export of premium aged stock, those bottles do not get produced elsewhere — they simply become harder to obtain through normal retail and distribution channels. The collector market, the auction market, the private cask market — these are the channels that thrive in exactly this environment. The person who owns the cask is not subject to the tariff. The person trying to ship finished bottles through customs is. We are on the comfortable side of that equation."</div>
+    <div class="reason"><span class="l">Why scarcity:</span> the ageing constraint is the most powerful scarcity argument in whisky — it is physical, undeniable, and immune to policy decisions. Connecting it to the tariff story adds a layer of contemporary urgency to a permanent structural reality.</div>
+  </div>
+
+  <div class="pitch">
+    <div class="head">PITCH C — FEAR-OF-LOSS / PORTFOLIO REFRAME</div>
+    <div class="quote">"Let me ask you something. If the export environment for Scotch becomes more complicated — if it costs more and takes longer to get premium aged whisky into the US market — what happens to the value of the premium aged whisky that is already in private hands, already bonded, already fully matured? It goes up. Not because of speculation or sentiment, but because the supply that would normally meet the demand is being constrained at source. The client who waits for the tariff situation to resolve before buying the cask has, by definition, missed the most advantageous moment to acquire at pre-disruption prices. These windows between 'the supply story is emerging' and 'the market has fully priced the supply story' are precisely where the intelligent investor positions."</div>
+    <div class="reason"><span class="l">Why fear-of-loss:</span> the reframe from "tariffs are bad" to "tariffs are a reason to own now" creates a genuine sense that waiting carries its own cost. The fear is not fabricated — it is the real arithmetic of supply and timing.</div>
+  </div>
+
+  <div class="footer-bar">
+    <span>█ NEWS 01</span>
+    <span>WHISKY • W17 • 2026</span>
+  </div>
+</section>
+
+<!-- ==================== NEWS 02 — INDIA & CHINA ==================== -->
+<section class="page">
+  <div class="masthead">
+    <div class="left">█ NEWS + PITCH</div>
+    <div class="middle">INDIA FTA — CHINA TARIFF — EASTERN DEMAND EXPANSION</div>
+    <div class="right">PAGE 07 █</div>
+  </div>
+
+  <h3 class="section">NEWS 02 — INDIA: 220 MILLION BOTTLES. CHINA TARIFF HALVED. THE EAST IS BUYING.</h3>
+
+  <div class="news-block">
+    <h4>THE PARAGRAPH</h4>
+    <p class="body">Two demand-side developments of structural significance have landed in the same quarter. First, India — now confirmed as the world's largest whisky market by volume — imported <strong>220 million bottles</strong> of Scotch whisky in the twelve months to April 2026, and the UK-India Free Trade Agreement (effective April 2026) has cut the import tariff from <strong>150% to 75%</strong>, with a scheduled reduction to 40% within ten years. The Scotch Whisky Association estimates the deal has the potential to add <strong>£1 billion per year</strong> in exports and 1,200 UK jobs within five years. Second, China halved its whisky import tariff in the same period, reopening a market that had been functionally closed to premium Western spirits. Taken together, two of the world's most populous consumer economies — with rapidly expanding wealthy middle classes and documented appetite for premium Western goods as status expressions — have simultaneously become dramatically easier to sell into. The supply side is being deliberately contracted. The demand side has just structurally expanded. This is the arithmetic of price appreciation.</p>
+  </div>
+
+  <div class="pitch-thought">
+    <span class="tag">█ PITCH THOUGHT</span>
+    This is one of the cleanest macro-to-asset pitches in the whisky space: a trade policy change with a quantifiable economic impact, a documented market size, and a clear supply-demand implication. The broker who can deliver this calmly, with numbers, in under 90 seconds sounds like the most credible voice in the room. Do not rush it. Let the numbers land.
+  </div>
+
+  <div class="pitch">
+    <div class="head">PITCH A — LOGICAL / DEMAND-SUPPLY ARITHMETIC</div>
+    <div class="quote">"Let me give you a number. India imported 220 million bottles of Scotch whisky last year. That is the world's largest whisky market by volume — and until April 2026, it had a 150% import tariff on Scotch. That tariff has just been cut in half. The path to 40% has been written into the agreement. Meanwhile, China — whose wealthy consumers have a documented appetite for premium Western goods — also halved its whisky tariff. Two of the largest consumer economies in the world just became dramatically easier to sell into. On the supply side, major Scottish distilleries are simultaneously cutting production. The barrels being filled today are fewer than they were two years ago. More buyers are arriving. Fewer bottles are being produced. If you were to design the ideal supply-demand setup for an alternative asset, this would be it."</div>
+    <div class="reason"><span class="l">Why logical:</span> trade data and tariff percentages are third-party verifiable facts. This pitch builds entirely on data the client can independently confirm, which means it survives scrutiny and builds lasting credibility.</div>
+  </div>
+
+  <div class="pitch">
+    <div class="head">PITCH B — EMOTIONAL / THE GENERATIONAL DEMAND SHIFT</div>
+    <div class="quote">"There is a generational shift happening in Asia right now that does not get reported in the financial pages but matters enormously to the long-term value of premium Scotch whisky. The emerging wealthy class in India and China — people in their thirties and forties who have accumulated wealth through a generation of extraordinary economic growth — are acquiring the same things that their counterparts in Europe and America acquired at the same stage of wealth: premium goods with history, provenance, and scarcity. A Macallan 30-year-old is not a bottle of whisky to this demographic. It is a statement of arrival, a collector's object, a store of real value that cannot be replicated. India is 220 million bottles a year and rising. China is reopening. The people who own the bottles these new collectors will want to own in ten years are the people buying them now."</div>
+    <div class="reason"><span class="l">Why emotional:</span> aspirational demand — wanting what the wealthy want — is one of the most powerful emotional drivers in collectibles markets. By connecting the data to human aspiration rather than pure economics, the pitch becomes a story rather than a statistic.</div>
+  </div>
+
+  <div class="pitch">
+    <div class="head">PITCH C — URGENCY / THE TREATY WINDOW</div>
+    <div class="quote">"The India trade deal became effective April 2026. The first wave of lower-tariff exports is landing now. Indian consumers who have never been able to afford premium Scotch at 150% tariff will, for the first time, be able to buy it at 75% — and within a decade at 40%. What happens to demand for a product when it becomes structurally cheaper for 1.4 billion people? It expands. Permanently. The window between 'the treaty just came into force' and 'the market has fully priced the demand expansion' is the window we are in right now. The cask that is affordable in April 2026 will be measured against a global demand pool that did not previously exist. These inflection points do not repeat themselves."</div>
+    <div class="reason"><span class="l">Why urgency:</span> policy windows are real and time-limited. The urgency here is not fabricated — there is a genuine first-mover advantage in owning ahead of a structural demand expansion. Deliver this at measured pace. Urgency is most persuasive when it is calm.</div>
+  </div>
+
+  <div class="footer-bar">
+    <span>█ NEWS 02</span>
+    <span>WHISKY • W17 • 2026</span>
+  </div>
+</section>
+
+<!-- ==================== NEWS 03 — SUPPLY CUTS ==================== -->
+<section class="page">
+  <div class="masthead">
+    <div class="left">█ NEWS + PITCH</div>
+    <div class="middle">PRODUCTION CUTS — DELIBERATE SCARCITY — 2030s SUPPLY VACUUM</div>
+    <div class="right">PAGE 08 █</div>
+  </div>
+
+  <h3 class="section">NEWS 03 — THE INDUSTRY IS ENGINEERING ITS OWN SCARCITY. DELIBERATELY.</h3>
+
+  <div class="news-block">
+    <h4>THE PARAGRAPH</h4>
+    <p class="body">In a move that would be described as supply management in any other commodity market, major Scotch whisky producers — including high-volume distilleries Teaninich and Roseisle — have cut production through June 2026 to manage global inventory levels. The mechanism is straightforward and its consequences long-dated: whisky that is not distilled in 2026 cannot become a 10-year-old whisky until 2036. The production cuts being made today are baking in a supply constraint that will not fully manifest for a decade. Simultaneously, the Scotch Whisky Association's data confirms that pre-2000 stock — the genuinely aged, historically significant expressions that collector markets prize above all others — is finite and diminishing with every bottle consumed. No amount of capital, no scale of investment in distillery capacity, and no change in production practice can manufacture aged stock. Time cannot be accelerated. The industry is making less. What already exists is becoming proportionally more scarce with every year that passes. This is not a narrative. It is arithmetic.</p>
+  </div>
+
+  <div class="pitch-thought">
+    <span class="tag">█ PITCH THOUGHT</span>
+    The deliberate scarcity argument is one of the most powerful and underused pitch elements in the whisky space. Most clients have never considered the time-lag between production and maturity. When you explain it clearly — "the cuts being made today cannot affect supply until 2036" — the client's investment horizon shifts immediately. They are not thinking about next quarter. They are thinking about a decade from now.
+  </div>
+
+  <div class="pitch">
+    <div class="head">PITCH A — LOGICAL / THE TIME-LAG ARGUMENT</div>
+    <div class="quote">"Here is something worth understanding about the whisky supply chain that is completely unlike any other market. The decisions being made about production today will not affect the supply of matured whisky available to consumers and collectors until 2034 at the earliest — probably 2036 or beyond. Teaninich and Roseisle, two of Scotland's largest production sites, have reduced output through June 2026. That is not a temporary blip. Those are barrels that will not exist in 2036. Meanwhile, the demand side — India, China, institutional collectors, the growing global HNW population — is expanding now. The supply contraction is happening now. The impact meets the market in a decade. The intelligent investor does not wait for the decade. They position during the contraction."</div>
+    <div class="reason"><span class="l">Why logical:</span> the time-lag argument is specific, fact-based, and entirely immune to counter-argument. You cannot argue that whisky matures faster than it does. The logic locks in on its own terms.</div>
+  </div>
+
+  <div class="pitch">
+    <div class="head">PITCH B — SCARCITY / DELIBERATE RARITY</div>
+    <div class="quote">"There is a meaningful distinction between scarcity that happens accidentally and scarcity that is engineered deliberately. Accidental scarcity — a flood, a fire, a harvest failure — is unpredictable and unreliable. Deliberate scarcity is different. It is the most powerful force in luxury markets. The watchmaker who limits production. The artist who destroys work. The distillery that decides the brand is worth more than the volume. Scotch whisky producers are making that decision actively, right now, at scale. They understand that their product is worth more per bottle if fewer bottles exist. That is not an opinion. That is the stated logic behind the production cuts. You, as the owner of a cask or a rare bottle, are the direct beneficiary of that decision — not the distillery, not the retailer, not the government. You."</div>
+    <div class="reason"><span class="l">Why scarcity:</span> distinguishing between accidental and deliberate scarcity elevates the argument from commodity risk to luxury asset logic. Deliberate scarcity is what powers every major luxury brand on earth. Connecting whisky to that principle makes the investment thesis feel institutional rather than speculative.</div>
+  </div>
+
+  <div class="pitch">
+    <div class="head">PITCH C — FEAR-OF-LOSS / LOOKING BACK FROM 2036</div>
+    <div class="quote">"Imagine it is 2036. You are looking back at 2026. The industry made the production cuts. India and China came online as major demand markets. Pre-2000 stock continued to be consumed without replacement. In that 2036 world, what is the price of a well-provenanced, aged single malt from a respected Scottish distillery? It is not the 2026 price. The question to ask in April 2026 is not 'will this be worth more in 2036?' The answer to that question is almost certainly yes if the supply-demand thesis holds. The question is: are you in the position of the person who owns it and benefits from that repricing, or the person who reads about it in the financial press and wonders why they did not act when the production cuts were being reported?"</div>
+    <div class="reason"><span class="l">Why fear-of-loss:</span> future-pacing — projecting the client into a future where the decision has already been made — is among the most powerful close techniques. The emotion is regret-avoidance: a far stronger motivator than anticipated gain. Deliver the final sentence slowly, and let it land.</div>
+  </div>
+
+  <div class="footer-bar">
+    <span>█ NEWS 03</span>
+    <span>WHISKY • W17 • 2026</span>
+  </div>
+</section>
+
+<!-- ==================== NEWS 04 — BUYERS' MARKET ==================== -->
+<section class="page">
+  <div class="masthead">
+    <div class="left">█ NEWS + PITCH</div>
+    <div class="middle">MARKET CORRECTION — ENTRY POINT — CYCLE TURNING</div>
+    <div class="right">PAGE 09 █</div>
+  </div>
+
+  <h3 class="section">NEWS 04 — BUYERS' MARKET: Q1 CASK SALES +13%, PRICES RESET FROM 2023 PEAK</h3>
+
+  <div class="news-block">
+    <h4>THE PARAGRAPH</h4>
+    <p class="body">The whisky investment market experienced a significant correction from its 2022–2023 speculative peak, with some market indices recording declines of <strong>40–55%</strong> from peak to trough across the 2023–2025 period. This correction did what corrections are designed to do: it removed speculative capital, reset valuations closer to fundamental long-term value, and transferred ownership from momentum traders to long-term investors with genuine thesis conviction. Q1 2026 physical cask sales grew <strong>13% year-on-year</strong>, the clearest data signal yet that structural buyers are accumulating at reset prices. The auction market continues to distinguish sharply between quality and speculation: the Macallan 1963 15-year-old achieved <strong>£7,200</strong> at auction in Q1 2026; Ichiro's Malt Card Series exceeded <strong>£56,000 per set</strong>; Brora 34-year-old reached <strong>£1,400</strong>. Meanwhile, purely speculative releases — bottles that were bought on hype rather than provenance — continue to underperform. The message is clear: the market is valuing fundamentals. Brokers who position clients in provenance, rarity, and genuine scarcity are operating with the market cycle, not against it.</p>
+  </div>
+
+  <div class="pitch-thought">
+    <span class="tag">█ PITCH THOUGHT</span>
+    The correction is the single most important data point for overcoming the "I've missed it" objection. The peak was 2022–23. The bottom was 2024–25. The Q1 2026 recovery in volume is the leading indicator. The broker who can position clients "at the reset, not at the peak" is making a factually accurate statement that directly addresses the most common hesitation.
+  </div>
+
+  <div class="pitch">
+    <div class="head">PITCH A — LOGICAL / CYCLE POSITIONING</div>
+    <div class="quote">"The cycle story here is actually quite clean when you look at the data. Whisky investment prices peaked in 2022–2023 during a period when the market attracted significant speculative capital — people buying on momentum, not on thesis. When speculative capital leaves a market, prices correct. That correction happened: 40–55% from peak across various indices. What we are looking at now, in Q1 2026, is cask sales growing 13% year-on-year. That is not a market in distress. That is the structural investor accumulating at reset prices after the speculators exited. In every asset class, the investors who buy at the cycle reset — not the peak, not the euphoria — are the ones who reflect on those purchases most favourably a decade later. The clock on that window is running."</div>
+    <div class="reason"><span class="l">Why logical:</span> cycle positioning is the professional investor's language. It frames the entry as intelligent rather than opportunistic, which resonates particularly strongly with analytically-minded clients who want to feel they are acting on evidence rather than being sold to.</div>
+  </div>
+
+  <div class="pitch">
+    <div class="head">PITCH B — EMOTIONAL / "YOU HAVE NOT MISSED IT"</div>
+    <div class="quote">"I want to address something I hear fairly regularly, because it is worth confronting directly. People sometimes feel they have missed the whisky opportunity — that prices ran, the cycle peaked, and the moment is gone. I understand why it feels that way. But let me show you what the data actually says. The peak was 2022–23. The correction removed the speculation. The prices that are available today, in Q1 2026, are reset prices — the prices that long-term holders are buying at, not the prices that momentum traders paid at the top. You have not missed it. You are being offered the entry point that the people who bought at the peak wished they had waited for. The question is whether you use it."</div>
+    <div class="reason"><span class="l">Why emotional:</span> "you have not missed it" is one of the most powerful reframes in sales because it directly addresses a deeply held fear (being late, making a bad decision) and converts it into an advantage. Deliver it with warmth and certainty. The certainty is what carries the close.</div>
+  </div>
+
+  <div class="pitch">
+    <div class="head">PITCH C — URGENCY / THE WINDOW BETWEEN RESET AND REPRICING</div>
+    <div class="quote">"There is a specific window in every market cycle that is the most valuable time to buy — and it is almost never obvious when you are inside it. It is the window between the end of the correction and the beginning of the recovery. In that window, assets trade at reset prices, volume is recovering, structural buyers are accumulating, and the narrative in the media is still slightly negative — because the press always lags the cycle. We are in that window right now in whisky. Q1 cask sales are up 13%. Auction results for quality stock are firm. Institutional awareness of the asset class is building. The India and China demand expansion is confirmed and effective. These windows have a duration. They are not permanent. The client who acts during the window and the client who waits until the recovery is obvious in every newspaper are, over a five-year horizon, not in the same position."</div>
+    <div class="reason"><span class="l">Why urgency:</span> the cycle window is the honest version of urgency — you are not manufacturing scarcity or pressure. You are describing the genuine reality that entry price determines return, and that optimal entry prices exist within specific time boundaries.</div>
+  </div>
+
+  <div class="footer-bar">
+    <span>█ NEWS 04</span>
+    <span>WHISKY • W17 • 2026</span>
+  </div>
+</section>
+
+<!-- ==================== NEWS 05 — INFLATION & DEBASEMENT ==================== -->
+<section class="page">
+  <div class="masthead">
+    <div class="left">█ NEWS + PITCH</div>
+    <div class="middle">INFLATION — REAL YIELDS — PORTFOLIO DIVERSIFICATION</div>
+    <div class="right">PAGE 10 █</div>
+  </div>
+
+  <h3 class="section">NEWS 05 — INFLATION RE-ACCELERATES, REAL YIELDS COMPRESS, AND THE CASE FOR OWNING SOMETHING REAL</h3>
+
+  <div class="news-block">
+    <h4>THE PARAGRAPH</h4>
+    <p class="body">The macro environment of April 2026 has shifted from "stuck-flation" to outright re-acceleration. US CPI for March 2026 — released 10 April — jumped to <strong>3.3% year-on-year</strong>, up sharply from 2.4% in February, as the Middle East conflict drove energy prices to their highest in three years. The Federal Reserve remains on hold with its target range at <strong>3.50–3.75%</strong>. The Bank of England holds at <strong>3.75%</strong> ahead of its 30 April meeting. The US 10-year yield at <strong>4.302%</strong> now produces a real yield of approximately <strong>1.0% before tax</strong> — and near zero or below for a UK higher-rate taxpayer once income tax on nominal interest is applied. The ISM Prices Paid component printed a hot <strong>78.3</strong>, signalling structural pipeline cost pressure that pre-dates the energy spike and remains intact. University of Michigan Consumer Sentiment for April 2026 collapsed to a final reading of <strong>49.8 — a historic low in the survey's 74-year history</strong> — while year-ahead inflation expectations surged to <strong>4.7%</strong>. Households are not just concerned about prices. They have priced in a further acceleration. The mechanism at work is the deepest structural one: purchasing power is being eroded by visible price rises and by the ongoing expansion of the money supply — and consumers now feel it acutely.</p>
+  </div>
+
+  <div class="pitch-thought">
+    <span class="tag">█ PITCH THOUGHT</span>
+    Do not argue with the client who says inflation is "coming down." It is no longer coming down — it re-accelerated in March to 3.3%. But even when it was at 2.4%, the purchasing power lost over the prior three years had not returned. Now it is rising again. Consumer confidence is at a 74-year low. Inflation expectations among households have surged to 4.7%. These are not abstractions — they are the lived experience of every client you speak to. The only rational response is to own assets that preserve and grow purchasing power in real terms, regardless of what central banks do or don't do. Whisky, a tangible, globally demanded, maturing asset, exists entirely outside the paper monetary system that is producing this environment.
+  </div>
+
+  <div class="pitch">
+    <div class="head">PITCH A — EDUCATIONAL / REFRAME INFLATION</div>
+    <div class="quote">"Some clients have said: 'I thought inflation was coming down — so I stopped worrying.' I understand that entirely. But the March 2026 data changed the picture. US CPI rose to 3.3% — sharply up from February's 2.4%. The Middle East conflict has driven energy prices to three-year highs, and 17 out of 18 manufacturing sectors are reporting higher input costs. Meanwhile, University of Michigan Consumer Sentiment just hit a historic low — the lowest reading in 74 years of surveys — and household inflation expectations jumped to 4.7%. Consumers feel this. They feel it before the official data is even published. The question is not whether inflation is over. It very clearly is not. The question is how you position savings in a world where purchasing power is actively declining — not slowly and silently, but visibly and fast. Whisky is a tangible asset that sits outside the paper monetary system causing this problem. It benefits from the very forces eroding everything else."</div>
+    <div class="reason"><span class="l">Why educational / reframe:</span> you are not contradicting the client's data point — you are upgrading their framework with the very latest data. The March CPI re-acceleration is powerful precisely because clients thought the story was over. It is not. When a client feels genuinely taught something they did not know, the decision becomes their own. They will repeat this logic to their spouse, their accountant, their peers.</div>
+  </div>
+
+  <div class="pitch">
+    <div class="head">PITCH B — EMOTIONAL / THE COST OF DOING NOTHING</div>
+    <div class="quote">"Imagine you placed £100,000 in a savings account ten years ago. Nominally, the number is still £100,000. But think about what £100,000 purchased a decade ago — a meaningful deposit on a property, a year of school fees for two children, a material addition to a pension that felt secure. Price those same things today. The money has not moved. The world has. That is debasement — it does not arrive with a warning letter or take money from your account with an invoice. It does it silently, over years, by making the unit you saved in worth less of the world. The families who understood this did not sit in cash. They owned things. A whisky cask sits in a bonded warehouse and matures — not because markets are cooperative, not because central banks behave, but because time passes and chemistry works regardless of who is in power."</div>
+    <div class="reason"><span class="l">Why emotional:</span> quantifying the cost of debasement in human terms — a school fee, a deposit, a pension contribution — is the most powerful way to make the invisible visible. The brain does not feel abstract percentage points. It feels missing a deposit or a school fee. Deliver slowly. Pause fully after "The world has."</div>
+  </div>
+
+  <div class="pitch">
+    <div class="head">PITCH C — LOGICAL / PORTFOLIO CONSTRUCTION</div>
+    <div class="quote">"From a portfolio construction perspective, whisky as an asset class has historically demonstrated low correlation to equities and bonds. Its value does not reprice because a central bank official used an unexpected phrase in a press conference. Its appreciation is driven by physical ageing, global consumer demand, and the structural scarcity of the underlying commodity — none of which are influenced by the interest rate cycle in any direct way. In a macro environment defined by re-accelerating inflation, uncertain monetary policy, and elevated geopolitical risk, an asset with genuinely low correlation to the rest of a portfolio is not a luxury. It is a structural requirement. The question is not whether whisky belongs in the mix. The question is what proportion of a portfolio currently 100% exposed to the same interest rate and equity cycle should be repositioned into something that grows through that cycle rather than because of it."</div>
+    <div class="reason"><span class="l">Why logical / portfolio theory:</span> the "what percentage" framing is far easier for a client to answer than "should I invest at all?" It converts a binary decision into a calibration exercise — and the answer to a calibration question is almost always "some." Deliver this calmly. The restraint is the persuasion.</div>
+  </div>
+
+  <div class="footer-bar">
+    <span>█ NEWS 05</span>
+    <span>WHISKY • W17 • 2026</span>
+  </div>
+</section>
+
+<!-- ==================== NEWS 06 — eSLR & MACRO SUMMER ==================== -->
+<section class="page">
+  <div class="masthead">
+    <div class="left">█ NEWS + PITCH</div>
+    <div class="middle">LIQUIDITY — MACRO CYCLE — REAL ASSETS</div>
+    <div class="right">PAGE 11 █</div>
+  </div>
+
+  <h3 class="section">NEWS 06 — eSLR TRILLION-DOLLAR UNLOCK + MACRO SUMMER: WHERE WHISKY FITS</h3>
+
+  <div class="news-block">
+    <h4>THE PARAGRAPH</h4>
+    <p class="body">Two major macro developments — both substantially underreported in mainstream media — are shaping the investment backdrop entering Q2 2026. First, the enhanced Supplementary Leverage Ratio (eSLR) reform came into force on <strong>1 April 2026</strong>, releasing an estimated <strong>$1 trillion or more of additional repo capacity</strong> across the US banking system. This is neither a rate cut nor a QE programme — it is a regulatory change that loosens the monetary plumbing of the world's largest financial system without a press conference or public announcement. Its practical effect: more balance-sheet capacity, more credit creation, more liquidity seeking real returns. Second, the macro business cycle data confirms what leading-indicator models had anticipated since late 2025. ISM Manufacturing at <strong>52.4</strong>, services at <strong>56.1</strong>, temporary employment turning higher (a leading employment indicator), and ISM Prices Paid at a hot <strong>78.3</strong>. This configuration — expanding real activity, rising pipeline costs, and a loosening monetary environment — is, historically, the phase in which real, tangible, hard assets attract the most structural capital.</p>
+  </div>
+
+  <div class="pitch-thought">
+    <span class="tag">█ PITCH THOUGHT</span>
+    Most retail clients track the news. Few understand the plumbing underneath — that a regulatory rule change can inject the equivalent of a QE programme into the system without a single headline. The broker who can explain this clearly, in plain English, in under 60 seconds, sounds like the most informed professional the client has ever spoken to. Then connect it to whisky: expanding liquidity chases finite real assets. That is a repeatedly observed historical pattern, not a theory.
+  </div>
+
+  <div class="pitch">
+    <div class="head">PITCH A — EDUCATIONAL / AUTHORITY</div>
+    <div class="quote">"Let me tell you about something that happened on 1 April that almost no retail investor is aware of. A regulatory change in the US banking system — called the eSLR reform — freed up more than a trillion dollars of balance-sheet capacity inside the largest American banks. No press conference. No new QE programme. Just a rule change — and suddenly there is significantly more money available in the global financial plumbing. Every major liquidity expansion in recent decades has, within 12 to 24 months, been followed by a meaningful repricing of hard assets — those finite, physical things that cannot be manufactured by a rule change. Whisky casks are precisely that kind of asset. The supply cannot be increased by regulation. The ageing cannot be accelerated. When liquidity expands, it eventually chases finite real things. That dynamic is building now."</div>
+    <div class="reason"><span class="l">Why authority:</span> teaching a client something they genuinely could not have known shifts the dynamic from salesperson to trusted advisor. That shift — from pitch to education — is the foundation of the second certainty: certainty in you as a broker. It is harder to acquire and far more durable than any product pitch.</div>
+  </div>
+
+  <div class="pitch">
+    <div class="head">PITCH B — LOGICAL / CYCLE TIMING</div>
+    <div class="quote">"The business cycle data right now is confirming something important: we are in expansion, not recession. ISM manufacturing is at 52.4 and rising. Services are at 56.1. Labour data is firm. In the language of macro cycle analysis, this is the phase analysts call 'Macro Summer' — where activity is growing, cost pressures are rising, and the environment begins to favour hard assets over paper assets. Historically, when real activity is expanding and monetary conditions are simultaneously loosening, tangible alternative assets with genuine scarcity and global demand outperform financial assets. Whisky sits in that category. The current macro configuration is not a guarantor of any specific return. But it is as tailored a macro backdrop as this asset class has seen."</div>
+    <div class="reason"><span class="l">Why logical:</span> the cycle-timing argument is evidence-based and unemotional. The client who respects economic data responds to a clear description of where we are in the cycle and what has historically followed. You are describing a pattern — not making a promise.</div>
+  </div>
+
+  <div class="pitch">
+    <div class="head">PITCH C — SCARCITY / BEFORE THE FLOW IS OBVIOUS</div>
+    <div class="quote">"The problem with following capital flows into hard assets is this: by the time the move is obvious enough for the financial press to write about it, the entry price has already moved to reflect the flow. The eSLR reform happened on 1 April. Its impact on real asset pricing is still building. Whisky is niche enough as an alternative asset that it reprices later than more liquid hard assets — which means the window between 'the macro tailwind is here' and 'the price already reflects it' is still open. These windows tend to be in the six-to-eighteen-month range before broader capital begins to flow visibly into an asset class. You are being offered the early-mover phase. That phase always closes."</div>
+    <div class="reason"><span class="l">Why scarcity:</span> the scarcity here is informational — very few investors have connected a banking regulation change to a niche alternative asset class. The window is genuine and time-limited. Speak it honestly and without drama. The restraint is more persuasive than urgency.</div>
+  </div>
+
+  <div class="gloss">
+    <h5>█ WHAT IS THE eSLR? — BROKER EDUCATION</h5>
+    <table>
+      <thead><tr><th>Term</th><th>Plain English Explanation</th></tr></thead>
+      <tbody>
+        <tr><td class="accent">eSLR (Enhanced Supplementary Leverage Ratio)</td><td>A US banking regulation that limits how much exposure the largest US banks can hold relative to their total assets. Think of it as a limit on how far a bank can "stretch" its balance sheet. When the eSLR is tightened, banks are constrained. When it is loosened — as on 1 April 2026 — banks can lend and invest more, injecting significant new capacity into the financial system.</td></tr>
+        <tr><td class="accent">Repo Market</td><td>The repurchase agreement market — where financial institutions borrow money overnight or short-term, using government bonds as collateral. It is the "plumbing" of the financial system. When repo capacity expands (as with the eSLR reform), more money flows through the system, supporting risk assets and eventually real assets.</td></tr>
+        <tr><td class="accent">Macro Summer</td><td>A term used by macro cycle analysts to describe the phase of the business cycle where both growth (ISM above 50) and inflation (Prices Paid rising) are simultaneously expanding. It is the "warm" phase — activity is healthy, costs are rising, and the optimal allocation historically shifts toward real assets, commodities, and hard stores of value.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="footer-bar">
+    <span>█ NEWS 06</span>
+    <span>WHISKY • W17 • 2026</span>
+  </div>
+</section>
+
+<!-- ==================== HISTORICAL ANALOGUES ==================== -->
+<section class="page">
+  <div class="masthead">
+    <div class="left">█ HISTORY</div>
+    <div class="middle">ANALOGUES — BUSINESS CYCLE — DEBASEMENT HISTORY</div>
+    <div class="right">PAGE 12 █</div>
+  </div>
+
+  <h3 class="section">HISTORICAL ANALOGUES — WHERE ARE WE, AND WHO BENEFITED LAST TIME?</h3>
+
+  <p>A broker who can place the current moment in historical context sounds institutional. A broker who cannot sounds like every other voice on a phone. The present configuration — re-accelerating inflation, structural liquidity expansion, geopolitical uncertainty, and an expanding business cycle against a backdrop of monetary debasement — rhymes with several identifiable historical moments. They are not identical. History rhymes; it does not repeat. But it rhymes loudly enough to be instructive.</p>
+
+  <h4 class="sub">ANALOGUE 1 — THE 1970s: WHEN TANGIBLES BECAME THE ONLY GAME</h4>
+  <p>The collapse of the Bretton Woods gold standard in 1971 severed the final link between paper currency and a hard anchor. What followed was a decade of structural inflation, a collapse in the real purchasing power of savings, and a dramatic appreciation in the value of tangible assets — oil, land, precious metals, fine goods. The mechanism was identical to what is building now: an unprecedented expansion of the money supply against a finite stock of real goods. The lesson is not that history will repeat precisely. The lesson is that when currencies are structurally debased, tangible assets become the natural destination for capital seeking preservation.</p>
+
+  <h4 class="sub">ANALOGUE 2 — 2008–2012: THE ALTERNATIVE ASSET RENAISSANCE</h4>
+  <p>In the aftermath of the Global Financial Crisis, a combination of near-zero interest rates, extraordinary central bank balance sheet expansion, and profound distrust of financial institutions drove meaningful capital flows into alternative assets — art, fine wine, whisky, and collectibles. The structured whisky investment market as it exists today largely emerged from this period. Investors who recognised that the monetary policy response had fundamentally altered the risk landscape of financial assets and sought genuine tangibles were rewarded as alternative asset prices appreciated materially through the following decade. The current eSLR-driven liquidity expansion is structurally comparable to the post-GFC monetary environment.</p>
+
+  <h4 class="sub">ANALOGUE 3 — 2020–2022: THE LIQUIDITY SURGE AND ITS CORRECTION</h4>
+  <p>The extraordinary monetary expansion of 2020–2021, when central banks globally expanded balance sheets at unprecedented rates, drove dramatic appreciation across all real and alternative assets. In the whisky market, this produced a speculative peak — a period when prices detached from fundamental long-term value and short-term buyers entered seeking quick returns. The correction followed. But the long-term investors who had entered in 2018 and 2019 — before the surge made the trade obvious and crowded — held through the boom, held through the correction, and remain materially profitable. The pattern is the same across every cycle: buy before the liquidity makes the trade obvious, hold through the cycle, exit into the next wave of demand.</p>
+
+  <div class="warn">
+    <span class="tag">Synthesis — The Pitch in One Sentence</span>
+    Every major period of monetary expansion in modern history has produced the same outcome: the purchasing power of currency falls, and the price of tangible, scarce, globally demanded assets rises in nominal terms. We are in the early phase of the next such expansion. The client who owns the asset before the pattern completes tends to look back a decade later and wonder why it was not more obvious at the time. It never is — until it is.
+  </div>
+
+  <div class="footer-bar">
+    <span>█ HISTORY</span>
+    <span>WHISKY • W17 • 2026</span>
+  </div>
+</section>
+
+<!-- ==================== BROKER TOOLKIT ==================== -->
+<section class="page">
+  <div class="masthead">
+    <div class="left">█ TOOLKIT</div>
+    <div class="middle">CERTAINTY — TONALITY — OBJECTIONS — LANGUAGE</div>
+    <div class="right">PAGE 13 █</div>
+  </div>
+
+  <h3 class="section">BROKER TOOLKIT — THE MECHANICS OF CLOSING WITH INTEGRITY</h3>
+
+  <h4 class="sub">THE THREE CERTAINTIES EVERY CLOSE REQUIRES</h4>
+  <p>Before any client acts, three separate beliefs must align simultaneously:</p>
+  <ul>
+    <li><strong>Certainty in the asset</strong> — "Does owning whisky make sense for me, right now?" Built by the teaching sections and news analysis in this report. Requires both a logical case and an emotional picture.</li>
+    <li><strong>Certainty in you</strong> — "Do I trust this broker's knowledge and intentions?" Built by preparation, consistency, and the fact that you taught them something valuable before you asked for anything.</li>
+    <li><strong>Certainty in the firm</strong> — "Is this company credible, reliable, and trustworthy to manage my investment?" Built by brand, process, and follow-through on every commitment.</li>
+  </ul>
+  <p>A call that moves one certainty but neglects the other two will not close — or will close and immediately reverse. Build all three. In sequence: teach first (certainty 1), build rapport (certainty 2), demonstrate process (certainty 3), then ask.</p>
+
+  <h4 class="sub">LOGICAL vs. EMOTIONAL CERTAINTY — THE TWO ENGINES</h4>
+  <div class="formula">LOGICAL CASE FIRST  →  SILENCES THE CRITICAL MIND  →  EMOTIONAL IMAGE CLOSES</div>
+  <p><strong>Logical certainty:</strong> the client can explain the case to someone else — to their spouse, their accountant — without embarrassment. Not "it sounds good" but "it makes sense because the supply is constrained here, demand is growing there, and the macro backdrop means tangible assets outperform cash over any meaningful time horizon." If they can say something close to that, you have logical certainty.</p>
+  <p><strong>Emotional certainty:</strong> the client can see themselves as the owner of this asset in the future and feel settled about that picture. Not excited about a price — settled, secure, satisfied that they have acted intelligently. Build this through future pacing: gently moving the client's imagination forward so they are already living the outcome before they have committed to it.</p>
+
+  <h4 class="sub">OBJECTION HANDLERS — THE COMMON SIX</h4>
+  <table>
+    <thead><tr><th>Objection</th><th>Real Fear Underneath</th><th>Your Move</th></tr></thead>
+    <tbody>
+      <tr><td>"It's had a big run — I've missed it."</td><td>Resignation; feels too late</td><td>The speculative peak was 2022–23. The correction is done. Q1 2026 cask sales are +13%. The reset is active, the structural bull thesis is intact. You are being offered the cycle reset, not the euphoria.</td></tr>
+      <tr><td>"I don't understand whisky."</td><td>Intellectual discomfort</td><td>You do not need to understand the spirit. You need to understand: time creates scarcity, global demand is growing, supply is constrained. The rest is detail that sits beneath a thesis that stands independently.</td></tr>
+      <tr><td>"My cash earns nearly 4%."</td><td>Comfort with visible yield</td><td>BoE rate is 3.75%. Minus UK CPI 3.3% (March 2026) = ~0.45% real before tax. After 40% income tax on the nominal interest, the after-tax real return is negative. Cash is not earning 4% in any meaningful sense — it is losing purchasing power while appearing safe.</td></tr>
+      <tr><td>"What if I need the money?"</td><td>Liquidity anxiety</td><td>Whisky is a long-duration asset. Not appropriate for capital needed within 12–18 months. Very appropriate for the portion of a portfolio that can be committed for five to ten years — precisely the portion currently losing purchasing power in cash.</td></tr>
+      <tr><td>"Whisky prices fell in 2024."</td><td>Recency bias</td><td>Correct. Speculative prices fell. Clients who entered at the 2021–23 peak paid peak prices. Long-term holders who entered pre-2020 remain materially profitable through the correction. Cycle entry timing determines outcome — not whether to own the asset.</td></tr>
+      <tr><td>"Let me think about it."</td><td>Incomplete certainty — usually logical</td><td>Do not close here. Loop back: "Does the underlying case make sense to you — the supply is constrained, global demand is growing, and the macro backdrop favours tangible assets?" If yes: move to emotional certainty. If no: you have logical work to complete.</td></tr>
+    </tbody>
+  </table>
+
+  <h4 class="sub">LANGUAGE UPGRADES</h4>
+  <table>
+    <thead><tr><th>Don't Say</th><th>Say Instead</th></tr></thead>
+    <tbody>
+      <tr><td>"Whisky has gone up a lot."</td><td>"Whisky has appreciated structurally over every decade since the investment market in it developed — driven by physical maturation and growing global demand, not speculation."</td></tr>
+      <tr><td>"It's a great investment."</td><td>"It is a tangible asset with a documented history of preserving and growing purchasing power in precisely the macro environment we are currently in."</td></tr>
+      <tr><td>"You should put some money in."</td><td>"The question worth asking is what portion of a portfolio entirely exposed to monetary debasement should be repositioned into something that benefits from those same forces."</td></tr>
+      <tr><td>"Prices are down — now is the time."</td><td>"The speculative premium has cleared, the structural thesis is intact, and Q1 physical demand data is already showing the next cycle beginning."</td></tr>
+      <tr><td>"Don't miss out."</td><td>"The window between a buyers' market and the next repricing cycle is always shorter than it appears from inside it."</td></tr>
+    </tbody>
+  </table>
+
+  <h4 class="sub">PROSPECTING OPENER — CURIOSITY-BASED</h4>
+  <div class="pitch">
+    <div class="head">OPENING LINE — COLD OR WARM</div>
+    <div class="quote">"I have a question, and I'm genuinely curious about your answer. When you think about the portion of your savings sitting in cash right now — what do you think it's actually earning, once you strip out inflation and tax? Most people, when they do that calculation honestly, find the answer is surprisingly close to nothing. The reason I ask is that there is a category of real, tangible asset that has, historically, done what cash promises but consistently fails to deliver — preserved and grown purchasing power over time. That is what I'd like to talk with you about today."</div>
+    <div class="reason"><span class="l">Why this works:</span> it opens with a question the client cannot answer without uncomfortable reflection. That reflection creates the problem — the first step toward any decision. It does not lead with the product. It leads with the client's own situation. Control, curiosity, intelligence-gathering — all three in under 60 seconds.</div>
+  </div>
+
+  <div class="footer-bar">
+    <span>█ TOOLKIT</span>
+    <span>WHISKY • W17 • 2026</span>
+  </div>
+</section>
+
+<!-- ==================== WEEK AHEAD ==================== -->
+<section class="page week-ahead">
+  <div class="masthead">
+    <div class="left">█ FORWARD VIEW</div>
+    <div class="middle">EVENTS CALENDAR — 28 APR – 02 MAY 2026</div>
+    <div class="right">PAGE 14 █</div>
+  </div>
+
+  <h3 class="section">WEEK AHEAD — WHAT TO WATCH, 28 APR — 02 MAY 2026</h3>
+
+  <p>The following events and data points carry direct relevance to the whisky investment case — primarily through their impact on monetary policy expectations, consumer purchasing power, and the broader macro backdrop for real asset allocation. Brokers should use this section to stay ahead of client questions and to contextualise any inbound market news.</p>
+
+  <table>
+    <thead><tr><th>Date</th><th>Event</th><th>Relevance to Whisky Investment Case</th></tr></thead>
+    <tbody>
+      <tr>
+        <td class="date-col">Mon 28 Apr</td>
+        <td>Dallas Fed Manufacturing Survey</td>
+        <td>A regional manufacturing read that complements the national ISM. A firm print reinforces the Macro Summer expansion thesis — healthy activity supports consumer demand for premium goods and real asset allocation.</td>
+      </tr>
+      <tr>
+        <td class="date-col">Tue 29 Apr</td>
+        <td>US Consumer Confidence (Conference Board)</td>
+        <td>Pairs with UMCSI already at a 74-year historic low of 49.8 in April, with household inflation expectations surging to 4.7%. Two deeply depressed confidence readings together tell the broker: households feel acutely squeezed — and they expect it to get worse. This is the debasement argument made viscerally real in data — and the most powerful opening for the purchasing power pitch.</td>
+      </tr>
+      <tr>
+        <td class="date-col">Tue 29 Apr</td>
+        <td>FOMC Meeting — Day 1</td>
+        <td>Rhetoric watch. The Fed is widely expected to hold at 3.50–3.75%. Any softening of tone on inflation risks is a tailwind for all hard assets. Any hawkish surprise is short-term noise — the long-term debasement thesis does not change with a single meeting outcome.</td>
+      </tr>
+      <tr>
+        <td class="date-col">Wed 30 Apr</td>
+        <td>US GDP Advance Estimate Q1 2026</td>
+        <td>The Atlanta Fed GDPNow model points to ~1.2% growth. A soft print validates the "Macro Summer but not overheating" thesis — the sweet spot for real assets. A stronger-than-expected print confirms expansion without triggering hawkish Fed re-pricing.</td>
+      </tr>
+      <tr>
+        <td class="date-col">Wed 30 Apr</td>
+        <td>FOMC Rate Decision + Press Conference</td>
+        <td>Hold universally expected. Focus is entirely on the forward language: does the Fed acknowledge inflation re-acceleration (3.3% March CPI)? Any signal of "higher for longer" reinforces the real yield compression argument — cash earns negative real returns, tangibles benefit.</td>
+      </tr>
+      <tr>
+        <td class="date-col">Thu 30 Apr</td>
+        <td>Bank of England Rate Decision</td>
+        <td>BoE expected to hold at 3.75%. UK CPI at 3.3% means the real BoE rate is effectively 0.45% before tax and negative after income tax. The BoE press conference is likely to acknowledge energy-driven inflation risk. Every statement that confirms "real returns on cash are zero" is a pitch point.</td>
+      </tr>
+      <tr>
+        <td class="date-col">Fri 2 May</td>
+        <td>US Non-Farm Payrolls + Unemployment Rate</td>
+        <td>Labour market health is the key variable in the Fed's reaction function. A firm jobs number means the Fed cannot cut — which sustains the "cash earns nothing real" narrative. A weak number raises recession risk — which increases demand for defensive stores of value. Both outcomes support the whisky investment case, from different directions.</td>
+      </tr>
+      <tr>
+        <td class="date-col">Ongoing</td>
+        <td>Sotheby's Spring Whisky Auction Season</td>
+        <td>Spring is prime auction season. Monitor sell-through rates and hammer prices for Macallan 25YO+, Brora, and Japanese expressions. Strong results are direct confirmation of the collector demand thesis — and provide live, name-able data points for client conversations.</td>
+      </tr>
+      <tr>
+        <td class="date-col">Ongoing</td>
+        <td>India FTA Implementation — First Shipments</td>
+        <td>Monitor trade press for first Scotch shipments under the new 75% tariff rate. Early adoption data will provide the first concrete numbers on demand expansion in the world's largest whisky market. Any positive shipment data is an immediate pitch update.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="warn">
+    <span class="tag">Broker Note — How to Use This Section</span>
+    When a client calls about "what's happening in the markets this week," this calendar is your script. You are not speculating about outcomes. You are demonstrating preparation. A broker who knows what the FOMC is saying on Wednesday, what the BoE decides on Thursday, and what the payrolls print means for real yields on Friday sounds institutional. That preparation is certainty number two — certainty in you.
+  </div>
+
+  <div class="footer-bar">
+    <span>█ WEEK AHEAD</span>
+    <span>WHISKY • W17 • 2026</span>
+  </div>
+</section>
+
+<!-- ==================== TEACHING 02 — THE BIG PICTURE ==================== -->
+<section class="page">
+  <div class="masthead">
+    <div class="left">█ TEACHING</div>
+    <div class="middle">OWNERSHIP — ASSETS — THE BIG PICTURE</div>
+    <div class="right">PAGE 15 █</div>
+  </div>
+
+  <h3 class="section">TEACHING 02 — THE BIG PICTURE: ASSETS VERSUS MONEY</h3>
+
+  <p>Somewhere in every successful whisky sale, the conversation has to move from <em>the product</em> to <em>the principle</em>. The product is a whisky cask. The principle is something far larger: the enduring difference between people who own things and people who hold claims on things. This is the frame that turns a transaction into a conviction — and conviction is what keeps a client invested through noise, through corrections, through the years when the asset does not make the front page. Convictions compound. Transactions do not.</p>
+
+  <div class="teach">
+    <h4>THE SIMPLE TRUTH THE WEALTHY HAVE ALWAYS KNOWN</h4>
+    <p>Every significant debt cycle in recorded economic history has followed the same arc. Debt grows beyond the economy's ability to service it. The monetary authority expands the currency supply to manage the burden. The purchasing power of that currency falls over time. Assets — tangible, productive, scarce, physical things — reprice upward in nominal terms, because the unit of measurement has become smaller. The people who owned assets before this repricing preserved or grew their real wealth. The people who held the currency lost purchasing power quietly, over years, without a single dramatic event to point to.</p>
+    <p>We are inside one of these cycles right now. Sovereign debt across every major economy is at historic highs. Deficits are structurally entrenched. The eSLR reform is a microcosm of a broader pattern: when the financial system needs more room to operate, regulation is adjusted to provide it, and the purchasing power of existing currency units adjusts accordingly. This is not pessimism. It is observation. The correct response to that observation is preparation — owning a portion of wealth in assets that sit outside the paper system, that mature, that are physically finite, and that a growing global middle class increasingly desires.</p>
+  </div>
+
+  <div class="pitch">
+    <div class="head">THE OWNERSHIP PITCH — USE ONCE, USE WELL</div>
+    <div class="quote">"There are two kinds of wealth in the world. The first is a claim on money — a number in a bank account, a bond promising a return, a currency representing someone else's obligation. The second is ownership of something — something physical, something scarce, something the world genuinely wants and cannot manufacture at will. Whisky is the second kind. When you own a maturing cask, you own the thing itself — not a promise, not a claim, not a number in a system that can be adjusted. You own the physical result of years of natural chemistry, stored under legal bond, with a documented provenance and a global market that is growing. The history of wealth preservation across economic cycles comes back to the same observation: the people who owned things fared better than the people who held claims on things. That is the choice in front of you — and it tends to be clearest, in retrospect, at exactly the moments when it seemed least necessary to make it."</div>
+    <div class="reason"><span class="l">Why this closes:</span> this pitch operates at conviction level, not product level. The client who agrees is not buying a cask — they are affirming a principle that will sustain the investment through every future event. This is the pitch that generates referrals — because the client now has a framework they want to share with people they care about.</div>
+  </div>
+
+  <div class="footer-bar">
+    <span>█ TEACHING 02</span>
+    <span>WHISKY • W17 • 2026</span>
+  </div>
+</section>
+
+<!-- ==================== DISCLOSURE ==================== -->
+<section class="page">
+  <div class="masthead">
+    <div class="left">█ COMPLIANCE</div>
+    <div class="middle">DISCLOSURE &amp; USAGE NOTES</div>
+    <div class="right">PAGE 16 █</div>
+  </div>
+
+  <h3 class="section">DISCLOSURE &amp; USAGE NOTES</h3>
+
+  <div class="disclosure">
+    <h4>DOCUMENT PURPOSE &amp; DISTRIBUTION</h4>
+    <p>This document is produced by The Brokerage Report for the internal use of brokers only. It is not a marketing communication, a personal recommendation, or investment advice as defined under applicable UK regulation. It is an educational and analytical resource designed to support informed broker-client conversations. Distribution outside of the intended brokerage recipient is not permitted.</p>
+
+    <h4>NOT INVESTMENT ADVICE</h4>
+    <p>Nothing contained in this report constitutes a personal recommendation or solicitation to buy, sell, or hold any investment. Every client's circumstances differ. Any allocation decision must be made with full knowledge of the client's investment objectives, risk tolerance, time horizon, financial situation, and regulatory status. No specific percentage of a client's capital is recommended within this document — allocation guidance belongs between the broker, the client, and the compliance framework of the employing firm.</p>
+
+    <h4>WHISKY AS AN UNREGULATED ASSET CLASS</h4>
+    <p>Whisky cask investment is not regulated by the Financial Conduct Authority (FCA) in the United Kingdom. The value of a whisky cask investment is variable and can fall as well as rise. Past performance data cited in this report — including any industry-cited average return figures — is historical in nature and is not indicative of future results. Individual cask performance varies materially by distillery, fill type, age, market conditions at exit, and timing of purchase and sale. Fees, storage costs, and duty implications will affect the net return achieved.</p>
+
+    <h4>MARKET DATA &amp; SOURCES</h4>
+    <p>All macro data is drawn from institutional data feeds, government publications, and verified industry reports as of the date of publication. All macro commentary reflects the authors' interpretation of that data as of the publication date and may change without notice. Historical analogues are presented for educational context only.</p>
+
+    <h4>PITCH TEMPLATES — COMPLIANCE NOTE</h4>
+    <p>The pitch templates contained in this report are educational examples of framing, tonality, and structure. They are not scripts. They are starting points for brokers to adapt to the individual client, the specific product being offered, and the regulatory expectations of their firm. Nothing in this report should be repeated verbatim to a client without adaptation, compliance review, and a good-faith assessment of suitability. Brokers remain individually responsible for ensuring all client communications comply with applicable FCA rules and the regulatory framework of their employing firm.</p>
+
+    <h4>FORWARD-LOOKING STATEMENTS</h4>
+    <p>Certain statements in this report contain forward-looking elements — references to projected demand growth, trade agreement impacts, and supply constraints. These are based on publicly available projections from industry bodies and government sources. They are not guarantees. Economic, political, and market conditions can and do change in ways that are not predictable. No reliance should be placed on forward-looking statements as the basis for an investment decision.</p>
+  </div>
+
+  <div class="footer-bar">
+    <span>█ DISCLOSURE</span>
+    <span>WHISKY • W17 • 2026 • THE BROKERAGE REPORT</span>
+  </div>
+</section>
+
+<!-- ==================== BACK COVER ==================== -->
+<section class="page">
+  <div class="cover">
+    <div class="top-strip">
+      <span>█ INTERNAL &nbsp; CONFIDENTIAL</span>
+      <span>BROKERS EYES ONLY</span>
+    </div>
+    <div class="middle">
+      <div class="ribbon">▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬</div>
+      <h1 style="font-size:28pt;">THE BROKERS<br>WEEKLY</h1>
+      <h2>WHISKY MARKET EDITION</h2>
+      <div class="asset-badge">WEEK ENDED 24 APRIL 2026</div>
+      <div style="margin-top:28px; color:#FFFFFF; font-size:10pt; letter-spacing:0.1em; max-width:500px; text-align:center; line-height:2.0;">
+        <p style="color:#E97132; letter-spacing:0.2em; font-size:9pt; margin-bottom:16px;">█ THIS WEEK'S KEY THEMES</p>
+        <p>US TARIFFS — SUPPLY FRICTION, NOT VALUE DESTRUCTION</p>
+        <p>INDIA 220M BOTTLES · CHINA TARIFF HALVED · THE EAST IS BUYING</p>
+        <p>SCOTCH · BOURBON · IRISH — PRODUCTION CUTS BAKING IN 2030s SCARCITY</p>
+        <p>Q1 2026 CASK SALES +13% — BUYERS' MARKET: THE CYCLE IS TURNING</p>
+        <p>eSLR $1TRN UNLOCK + MACRO SUMMER — REAL ASSET TAILWIND BUILDING</p>
+        <p>DEBASEMENT: THE ENEMY OF CASH — THE FUEL OF TANGIBLES</p>
+        <p>US CPI RE-ACCELERATES TO 3.3% · UMCSI 74-YEAR HISTORIC LOW · REAL YIELD NEAR ZERO</p>
+        <p>FED 3.50–3.75% · BOE 3.75% · FOMC + BOE DECISIONS 28–30 APR</p>
+      </div>
+      <div class="ribbon" style="margin-top:24px;">▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬</div>
+      <p style="color:#E97132; font-size:8.5pt; letter-spacing:0.28em; margin-top:8px;">THE BROKERAGE REPORT  •  MACRO • SALES • STRATEGY</p>
+    </div>
+    <div class="bottom-strip">
+      <span>VOL. WHISKY / W17 / 2026</span>
+      <span>THE BROKERAGE REPORT</span>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>

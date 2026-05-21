@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>THE BROKERS TERMINAL — Request Access</title>
+  <link rel="stylesheet" href="site.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.0"></script>
+</head>
+<body>
+
+<nav class="site-nav">
+  <a class="nav-brand" href="index.html">█ THE BROKERS TERMINAL</a>
+  <ul class="nav-links">
+    <li><a href="index.html">HOME</a></li>
+    <li><a href="pricing.html">PRICING</a></li>
+    <li><a href="download.html">SAMPLE REPORT</a></li>
+    <li><a href="login.html">LOGIN</a></li>
+    <li><a href="signup.html">SIGN UP</a></li>
+  </ul>
+</nav>
+
+<div class="form-wrap">
+  <div class="form-panel form-panel-md">
+    <div class="form-title">█ START YOUR FREE TRIAL</div>
+    <div class="form-subtitle">7 DAYS FREE — NO CHARGE — CANCEL ANYTIME</div>
+    <p class="form-intro">You're one minute away from full access. Choose your plan, create your account, and everything unlocks immediately. Your card is required but <strong style="color: var(--accent);">will not be charged for 7 days.</strong></p>
+    <form novalidate>
+
+      <!-- TIER SELECTION — PLAN CARDS -->
+      <div class="form-group">
+        <label class="form-label">STEP 1 — CHOOSE YOUR PLAN</label>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 8px; margin-bottom: 4px;">
+
+          <label style="cursor: pointer; display: block;" id="card-individual">
+            <input type="radio" name="subscription-tier" value="individual" required style="display: none;">
+            <div class="plan-card" id="plan-individual" style="border: 1px solid var(--border-dim); padding: 16px; transition: border-color 150ms ease;">
+              <div style="color: var(--accent); font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; font-weight: 700; margin-bottom: 6px;">INDIVIDUAL</div>
+              <div style="color: var(--text); font-size: 28px; font-weight: 700; line-height: 1; margin-bottom: 4px;"><span style="font-size: 14px; color: var(--accent); vertical-align: top; margin-top: 4px; display: inline-block;">£</span>49</div>
+              <div style="color: var(--text-faint); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; margin-bottom: 8px;">PER MONTH · 1 USER</div>
+              <div style="color: var(--text-muted); font-size: 11px; line-height: 1.5;">Solo professionals. Full access to everything.</div>
+            </div>
+          </label>
+
+          <label style="cursor: pointer; display: block;" id="card-corporate">
+            <input type="radio" name="subscription-tier" value="corporate" required style="display: none;">
+            <div class="plan-card" id="plan-corporate" style="border: 1px solid var(--border-dim); padding: 16px; transition: border-color 150ms ease;">
+              <div style="color: var(--accent); font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; font-weight: 700; margin-bottom: 6px;">CORPORATE</div>
+              <div style="color: var(--text); font-size: 28px; font-weight: 700; line-height: 1; margin-bottom: 4px;"><span style="font-size: 14px; color: var(--accent); vertical-align: top; margin-top: 4px; display: inline-block;">£</span>400</div>
+              <div style="color: var(--text-faint); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; margin-bottom: 8px;">PER MONTH · UP TO 15 USERS</div>
+              <div style="color: var(--text-muted); font-size: 11px; line-height: 1.5;">Teams and firms. Your entire desk covered.</div>
+            </div>
+          </label>
+
+        </div>
+      </div>
+
+      <!-- STEP 2 — ASSET CLASS -->
+      <div style="color: var(--accent); font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; font-weight: 700; margin-bottom: 12px; padding-top: 8px; border-top: 1px solid var(--border-dim);">STEP 2 — CHOOSE YOUR MARKET</div>
+      <div class="form-group">
+        <label class="form-label">WHICH DESK DO YOU WANT ACCESS TO?</label>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 8px; margin-bottom: 4px; align-items: stretch;">
+
+          <label style="cursor: pointer; display: block; height: 100%;" id="card-gold">
+            <input type="radio" name="asset-class" value="gold" required style="display: none;">
+            <div class="plan-card" id="plan-gold" style="border: 1px solid var(--border-dim); padding: 16px; transition: border-color 150ms ease; height: 100%; box-sizing: border-box;">
+              <div style="color: var(--accent); font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; font-weight: 700; margin-bottom: 6px;">GOLD DESK</div>
+              <div style="color: #ffffff; font-size: 11px; line-height: 1.5;">Gold bullion, precious metals &amp; macro intelligence. Weekly reports, pitch packs, objection handlers.</div>
+            </div>
+          </label>
+
+          <label style="cursor: pointer; display: block; height: 100%;" id="card-whisky">
+            <input type="radio" name="asset-class" value="whisky" required style="display: none;">
+            <div class="plan-card" id="plan-whisky" style="border: 1px solid var(--border-dim); padding: 16px; transition: border-color 150ms ease; height: 100%; box-sizing: border-box;">
+              <div style="color: var(--accent); font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; font-weight: 700; margin-bottom: 6px;">WHISKY DESK</div>
+              <div style="color: #ffffff; font-size: 11px; line-height: 1.5;">Rare whisky, cask investment &amp; alternative asset intelligence. Weekly reports, pitch packs, objection handlers.</div>
+            </div>
+          </label>
+
+        </div>
+      </div>
+
+      <!-- STEP 3 — DETAILS -->
+      <div style="color: var(--accent); font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; font-weight: 700; margin-bottom: 16px; padding-top: 8px; border-top: 1px solid var(--border-dim);">STEP 3 — YOUR DETAILS</div>
+
+      <div class="form-group">
+        <label class="form-label" for="firstname">FIRST NAME</label>
+        <input class="form-input" id="firstname" type="text" placeholder="John" autocomplete="given-name" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="lastname">LAST NAME</label>
+        <input class="form-input" id="lastname" type="text" placeholder="Broker" autocomplete="family-name" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="email">EMAIL ADDRESS</label>
+        <input class="form-input" id="email" type="email" placeholder="broker@domain.com" autocomplete="email" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="password">CREATE A PASSWORD</label>
+        <input class="form-input" id="password" type="password" placeholder="••••••••••••" autocomplete="new-password" required>
+      </div>
+      <div class="form-group" id="company-group" style="display: none;">
+        <label class="form-label" for="company">COMPANY / FIRM NAME</label>
+        <input class="form-input" id="company" type="text" placeholder="Your brokerage or firm" autocomplete="organization">
+      </div>
+
+      <div class="form-error" id="signup-error"></div>
+      <button class="btn btn-full btn-solid btn-submit" type="submit">█ CREATE MY ACCOUNT — START FREE TRIAL</button>
+    </form>
+    <p class="form-disclaimer" style="margin-top: 16px;">No charge for 7 days. Cancel anytime with one click. By signing up you confirm you are a financial professional. This publication is not intended for retail investors.</p>
+    <a class="form-disclaimer-link" href="login.html">Already a subscriber? Log in here</a>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <div class="footer-row">
+    <span class="footer-brand">█ THE BROKERS TERMINAL</span>
+    <span class="footer-center">BROKERS EYES ONLY</span>
+    <span class="footer-right">© 2026 — ALL RIGHTS RESERVED</span>
+  </div>
+  <p class="footer-disclaimer">This publication is distributed for informational purposes only. Not financial advice. For professional use only.</p>
+</footer>
+
+<script src="site.js"></script>
+
+<!-- SUPABASE SIGNUP ═════════════════════════════════════════ -->
+<script>
+  const SUPABASE_URL = 'https://oqpodikelxhwcnjdwojw.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_hJjmJ5MYAj8aCpXL6vCMTQ_zJlxUehl';
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  document.addEventListener('DOMContentLoaded', function () {
+    var form = document.querySelector('form');
+    if (!form) return;
+
+    // If returning from Stripe payment, auto-select individual and show message
+    var urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('paid') === '1') {
+      var indRadio = document.querySelector('input[name="subscription-tier"][value="individual"]');
+      if (indRadio) indRadio.checked = true;
+      var errorDiv = document.getElementById('signup-error');
+      if (errorDiv) {
+        errorDiv.textContent = '✓ Payment confirmed! Now create your account below to get access.';
+        errorDiv.classList.add('visible');
+        errorDiv.style.color = 'var(--accent)';
+        errorDiv.style.borderColor = 'var(--accent)';
+      }
+    }
+
+    // Highlight selected plan card
+    var tierRadios = document.querySelectorAll('input[name="subscription-tier"]');
+    var assetRadios = document.querySelectorAll('input[name="asset-class"]');
+    var companyGroup = document.getElementById('company-group');
+    var companyInput = document.getElementById('company');
+
+    function updatePlanCards() {
+      document.getElementById('plan-individual').style.borderColor = '';
+      document.getElementById('plan-corporate').style.borderColor = '';
+      var checked = document.querySelector('input[name="subscription-tier"]:checked');
+      if (checked) {
+        var cardId = checked.value === 'individual' ? 'plan-individual' : 'plan-corporate';
+        document.getElementById(cardId).style.borderColor = 'var(--accent)';
+      }
+    }
+
+    function updateAssetCards() {
+      document.getElementById('plan-gold').style.borderColor = '';
+      document.getElementById('plan-whisky').style.borderColor = '';
+      var checked = document.querySelector('input[name="asset-class"]:checked');
+      if (checked) {
+        document.getElementById('plan-' + checked.value).style.borderColor = 'var(--accent)';
+      }
+    }
+
+    // Pre-select asset from URL param OR sessionStorage (restored after Stripe redirect)
+    var urlAsset = new URLSearchParams(window.location.search).get('asset') || sessionStorage.getItem('pendingAsset');
+    if (urlAsset === 'gold' || urlAsset === 'whisky') {
+      var preAsset = document.querySelector('input[name="asset-class"][value="' + urlAsset + '"]');
+      if (preAsset) { preAsset.checked = true; updateAssetCards(); }
+      sessionStorage.removeItem('pendingAsset');
+    }
+
+    tierRadios.forEach(function (radio) {
+      radio.addEventListener('change', function () {
+        updatePlanCards();
+        if (this.value === 'corporate') {
+          companyGroup.style.display = 'block';
+          companyInput.setAttribute('required', 'required');
+        } else {
+          companyGroup.style.display = 'none';
+          companyInput.removeAttribute('required');
+          companyInput.value = '';
+        }
+      });
+    });
+
+    assetRadios.forEach(function (radio) {
+      radio.addEventListener('change', updateAssetCards);
+    });
+
+    form.addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      var tierChecked  = document.querySelector('input[name="subscription-tier"]:checked');
+      var assetChecked = document.querySelector('input[name="asset-class"]:checked');
+      var selectedTier  = tierChecked  ? tierChecked.value  : null;
+      var selectedAsset = assetChecked ? assetChecked.value : null;
+      var firstName = document.querySelector('#firstname').value.trim();
+      var lastName  = document.querySelector('#lastname').value.trim();
+      var email     = document.querySelector('#email').value.trim();
+      var password  = document.querySelector('#password').value;
+      var company   = document.querySelector('#company').value.trim();
+      var errorDiv  = document.getElementById('signup-error');
+      var submitBtn = form.querySelector('button[type="submit"]');
+      var originalText = submitBtn.textContent;
+
+      // Validation
+      if (!selectedTier) {
+        if (errorDiv) { errorDiv.textContent = 'Please choose a plan (Individual or Corporate)'; errorDiv.classList.add('visible'); }
+        return;
+      }
+      if (!selectedAsset) {
+        if (errorDiv) { errorDiv.textContent = 'Please choose your market desk — Gold or Whisky'; errorDiv.classList.add('visible'); }
+        return;
+      }
+      if (!firstName || !lastName || !email || !password) {
+        if (errorDiv) { errorDiv.textContent = 'Please fill in all fields'; errorDiv.classList.add('visible'); }
+        return;
+      }
+      if (selectedTier === 'corporate' && !company) {
+        if (errorDiv) { errorDiv.textContent = 'Please enter your company/firm name'; errorDiv.classList.add('visible'); }
+        return;
+      }
+
+      if (password.length < 6) {
+        if (errorDiv) {
+          errorDiv.textContent = 'Password must be at least 6 characters';
+          errorDiv.classList.add('visible');
+        }
+        return;
+      }
+
+      submitBtn.textContent = 'CREATING ACCOUNT...';
+      submitBtn.disabled = true;
+
+      try {
+        var domain = email.split('@')[1];
+        var firmId;
+
+        if (selectedTier === 'individual') {
+          // INDIVIDUAL TIER: firm MUST already exist, created by Stripe webhook after payment
+          const { data: existingIndFirm } = await supabase
+            .from('firms')
+            .select('id, status')
+            .eq('owner_email', email)
+            .eq('subscription_type', 'individual')
+            .maybeSingle();
+
+          if (!existingIndFirm) {
+            // No payment found — send to Stripe with email + asset pre-filled
+            const stripeBase = selectedAsset === 'whisky' ? 'https://buy.stripe.com/7sYcN5950buy4c40EJ4sE05' : 'https://buy.stripe.com/00w00j2GCeGK9wo4UZ4sE06';
+            const stripeLink = stripeBase + '?prefilled_email=' + encodeURIComponent(email);
+            submitBtn.textContent = 'REDIRECTING TO PAYMENT...';
+            // Store asset choice so it's remembered when they return
+            sessionStorage.setItem('pendingAsset', selectedAsset);
+            window.location.href = stripeLink;
+            return;
+          }
+
+          if (existingIndFirm.status !== 'active') {
+            throw new Error('Your subscription is not active. Please contact desk@thebrokersterminal.com');
+          }
+
+          // Update firm access to chosen asset
+          await supabase.from('firms').update({ access: selectedAsset }).eq('id', existingIndFirm.id);
+
+          firmId = existingIndFirm.id;
+
+        } else {
+          // CORPORATE TIER: Join existing firm
+          const { data: existingFirm, error: firmQueryError } = await supabase
+            .from('firms')
+            .select('id, status, subscription_type, max_users')
+            .eq('domain', domain)
+            .eq('subscription_type', 'corporate')
+            .single();
+
+          if (firmQueryError || !existingFirm) {
+            // No corporate firm found — send to Stripe with email pre-filled
+            const stripeBase = selectedAsset === 'whisky' ? 'https://buy.stripe.com/aFa9AT4OK7eidMEevz4sE07' : 'https://buy.stripe.com/9B6fZh5SO426gYQ5Z34sE08';
+            const stripeLink = stripeBase + '?prefilled_email=' + encodeURIComponent(email);
+            submitBtn.textContent = 'REDIRECTING TO PAYMENT...';
+            sessionStorage.setItem('pendingAsset', selectedAsset);
+            window.location.href = stripeLink;
+            return;
+          }
+
+          if (existingFirm.status !== 'active') {
+            throw new Error('Your firm subscription is not active. Please contact desk@thebrokersterminal.com');
+          }
+
+          // Set firm access to chosen asset (first sign-up sets it for the whole firm)
+          await supabase.from('firms').update({ access: selectedAsset }).eq('id', existingFirm.id);
+
+          firmId = existingFirm.id;
+
+          // Check member count limit (max 15 for corporate)
+          const { count: memberCount, error: countError } = await supabase
+            .from('users')
+            .select('*', { count: 'exact', head: true })
+            .eq('firm_id', firmId);
+
+          if (countError) throw new Error('Failed to check member count: ' + countError.message);
+
+          if (memberCount >= 15) {
+            throw new Error('Maximum 15 employees per subscription reached. Contact your firm administrator.');
+          }
+        }
+
+        // Create Supabase auth user
+        const { data: authData, error: authError } = await supabase.auth.signUp({
+          email: email,
+          password: password,
+          options: {
+            emailRedirectTo: window.location.origin + '/dashboard.html'
+          }
+        });
+
+        if (authError) throw new Error(authError.message);
+
+        // Create user record with first and last name
+        const { error: userError } = await supabase
+          .from('users')
+          .insert([{
+            email: email,
+            firm_id: firmId,
+            role: 'subscriber',
+            first_name: firstName,
+            last_name: lastName
+          }]);
+
+        if (userError) throw new Error('Failed to create user record: ' + userError.message);
+
+        // Success
+        if (errorDiv) errorDiv.classList.remove('visible');
+
+        var tierLabel = selectedTier === 'individual' ? 'individual' : 'firm';
+        setTimeout(function () {
+          alert('Account created! Please check your email to confirm your account and start your free trial.');
+          window.location.href = 'login.html';
+        }, 500);
+
+      } catch (err) {
+        if (errorDiv) {
+          errorDiv.textContent = err.message || 'Signup failed. Please try again.';
+          errorDiv.classList.add('visible');
+        }
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+      }
+    });
+  });
+</script>
+</body>
+</html>
