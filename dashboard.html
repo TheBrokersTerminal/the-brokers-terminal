@@ -117,10 +117,18 @@
     .team-copy-btn.copied { background: var(--accent); color: #000; }
     .team-roster-label { font-size: 9px; letter-spacing: 0.30em; text-transform: uppercase; color: var(--text-faint); margin-bottom: 12px; }
     .team-roster { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 8px; }
-    .team-member { background: var(--bg); border: 1px solid var(--border-dim); padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .team-member { background: var(--bg); border: 1px solid var(--border-dim); padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 56px; }
     .team-member-name { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text); }
     .team-member-email { font-size: 10px; letter-spacing: 0.08em; color: var(--text-faint); margin-top: 2px; }
     .team-member-badge { font-size: 8px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--accent); flex-shrink: 0; }
+    .team-member-remove { background: none; border: 1px solid #c0392b; color: #c0392b; font-family: var(--font); font-size: 8px; letter-spacing: 0.18em; text-transform: uppercase; padding: 5px 10px; cursor: pointer; flex-shrink: 0; transition: background 0.2s, color 0.2s; }
+    .team-member-remove:hover { background: #c0392b; color: #fff; }
+    .team-add-row { display: flex; gap: 10px; align-items: center; margin-bottom: 8px; }
+    .team-add-row input { flex: 1; background: var(--bg); border: 1px solid var(--border-dim); color: var(--text); font-family: var(--font); font-size: 11px; letter-spacing: 0.08em; padding: 9px 14px; outline: none; }
+    .team-add-row input:focus { border-color: var(--accent); }
+    .team-add-btn { background: none; border: 1px solid var(--accent); color: var(--accent); font-family: var(--font); font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; padding: 9px 18px; cursor: pointer; white-space: nowrap; transition: background 0.2s, color 0.2s; flex-shrink: 0; }
+    .team-add-btn:hover { background: var(--accent); color: #000; }
+    .team-add-result { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; min-height: 16px; margin-bottom: 20px; }
 
     .this-week-links {
       background: var(--bg-raised);
@@ -478,14 +486,25 @@
   </div>
   <div class="team-body" id="team-body">
 
-    <!-- Invite link -->
-    <div class="team-invite-wrap">
+    <!-- Invite link (admin only) -->
+    <div class="team-invite-wrap" id="team-invite-section">
       <div class="team-invite-label">▸ TEAM INVITE LINK</div>
-      <div class="team-invite-sub">Share this link with your brokers. Anyone who clicks it can sign up and join your desk instantly — no admin needed. Link stays active while your subscription is live.</div>
+      <div class="team-invite-sub">Share this link with your brokers. Anyone who clicks it can create an account and join your desk instantly. Link stays active while your subscription is live.</div>
       <div class="team-invite-row">
         <div class="team-invite-url" id="team-invite-url">Loading...</div>
         <button class="team-copy-btn" id="team-copy-btn" onclick="copyInviteLink()">█ COPY LINK</button>
       </div>
+    </div>
+
+    <!-- Add member by email (admin only) -->
+    <div id="team-add-section">
+      <div class="team-roster-label">▸ ADD / REINSTATE MEMBER BY EMAIL</div>
+      <div style="color:var(--text-faint); font-size:11px; letter-spacing:0.10em; line-height:1.7; margin-bottom:12px;">Type the email of an existing account to add them to your team, or use the invite link above for new brokers.</div>
+      <div class="team-add-row">
+        <input id="team-add-email" type="email" placeholder="broker@firm.com">
+        <button class="team-add-btn" onclick="addTeamMember()">█ ADD TO TEAM</button>
+      </div>
+      <div class="team-add-result" id="team-add-result"></div>
     </div>
 
     <!-- Team roster -->
@@ -953,10 +972,10 @@
     var firmAccess = 'both'; // safe default
     var firmRow = null;
 
-    // Step 1: get firm_id from users table
+    // Step 1: get firm_id + role from users table
     const { data: userRow } = await supabase
       .from('users')
-      .select('firm_id')
+      .select('firm_id, role, status')
       .eq('email', userEmail)
       .maybeSingle();
 
@@ -978,8 +997,8 @@
         .maybeSingle();
       firmRow = firmByDomain;
 
-      // Self-heal: write firm_id back to this user's row so they're counted in seat totals
-      if (firmRow && firmRow.id) {
+      // Self-heal: write firm_id back — but never for explicitly removed users
+      if (firmRow && firmRow.id && (!userRow || userRow.status !== 'removed')) {
         supabase.from('users')
           .upsert({ email: userEmail, firm_id: firmRow.id }, { onConflict: 'email' })
           .then(function(){}).catch(function(){});
@@ -1033,11 +1052,122 @@
       if (allPanel) allPanel.classList.add('active');
     }
 
-    // ── Your Team panel (corporate only) ────────────────────────
+    // ── Your Team panel (admin of corporate accounts only) ──────
     var maxSeats = firmRow ? (firmRow.max_users || 1) : 1;
-    // Use firmRow.id as canonical firm ID regardless of how we found the firm
     var canonicalFirmId = (firmRow && firmRow.id) ? firmRow.id : (userRow ? userRow.firm_id : null);
-    if (firmRow && maxSeats > 1 && canonicalFirmId) {
+    // Admin = user whose role is 'admin' in the users table
+    var isAdmin = userRow && userRow.role === 'admin';
+
+    // ── Team management functions — defined before use ───────────
+    window.loadTeamRoster = async function() {
+      var fid = window._canonicalFirmId;
+      var me  = window._userEmail;
+      var max = window._maxSeats || 15;
+      if (!fid) return;
+
+      const { data: teamMembers } = await supabase
+        .from('users')
+        .select('first_name, last_name, email, role, status')
+        .eq('firm_id', fid)
+        .neq('status', 'removed')
+        .order('created_at', { ascending: true });
+
+      var members = teamMembers || [];
+      var seatsEl = document.getElementById('team-seats');
+      if (seatsEl) seatsEl.textContent = members.length + ' / ' + max + ' SEATS USED';
+
+      var rosterEl = document.getElementById('team-roster');
+      if (!rosterEl) return;
+
+      if (members.length === 0) {
+        rosterEl.innerHTML = '<div style="color:var(--text-faint);font-size:11px;letter-spacing:0.12em;text-transform:uppercase;">No team members yet — share the invite link above or add by email.</div>';
+      } else {
+        rosterEl.innerHTML = members.map(function(m) {
+          var name  = ((m.first_name || '') + ' ' + (m.last_name || '')).trim() || '—';
+          var badge = m.role === 'admin' ? 'ADMIN' : 'BROKER';
+          var isSelf = (m.email || '').toLowerCase() === (me || '').toLowerCase();
+          var removeBtn = isSelf ? '' :
+            '<button class="team-member-remove" onclick="removeTeamMember(\'' + (m.email || '').replace(/'/g,"\\'") + '\')">REMOVE</button>';
+          return '<div class="team-member">' +
+            '<div style="flex:1;min-width:0;">' +
+              '<div class="team-member-name">' + name + '</div>' +
+              '<div class="team-member-email">' + (m.email || '') + '</div>' +
+            '</div>' +
+            '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;">' +
+              '<div class="team-member-badge">' + badge + '</div>' +
+              removeBtn +
+            '</div>' +
+          '</div>';
+        }).join('');
+      }
+    };
+
+    window.addTeamMember = async function() {
+      var email     = (document.getElementById('team-add-email').value || '').trim().toLowerCase();
+      var resultEl  = document.getElementById('team-add-result');
+      var fid       = window._canonicalFirmId;
+      var max       = window._maxSeats || 15;
+      if (!email) { resultEl.style.color = '#c0392b'; resultEl.textContent = 'ENTER AN EMAIL ADDRESS'; return; }
+
+      resultEl.style.color = 'var(--text-faint)';
+      resultEl.textContent = 'CHECKING CAPACITY...';
+
+      try {
+        // Check actual DB count — not DOM elements
+        const { count: dbCount } = await supabase
+          .from('users')
+          .select('id', { count: 'exact', head: true })
+          .eq('firm_id', fid)
+          .neq('status', 'removed');
+
+        if (dbCount >= max) {
+          resultEl.style.color = '#c0392b';
+          resultEl.textContent = 'DESK IS FULL — ' + max + ' / ' + max + ' SEATS USED';
+          return;
+        }
+
+        resultEl.textContent = 'ADDING...';
+
+        const { error } = await supabase.from('users').upsert({
+          email: email,
+          firm_id: fid,
+          role: 'subscriber',
+          status: 'active'
+        }, { onConflict: 'email' });
+
+        if (error) throw error;
+
+        resultEl.style.color = 'var(--accent)';
+        resultEl.textContent = '✓ ' + email + ' ADDED TO TEAM';
+        document.getElementById('team-add-email').value = '';
+        setTimeout(function() { resultEl.textContent = ''; }, 4000);
+        await loadTeamRoster();
+      } catch (err) {
+        resultEl.style.color = '#c0392b';
+        resultEl.textContent = '✗ ' + (err.message || 'FAILED — TRY AGAIN');
+      }
+    };
+
+    window.removeTeamMember = async function(email) {
+      if (!email || email.toLowerCase() === (window._userEmail || '').toLowerCase()) return;
+      if (!confirm('Remove ' + email + ' from your team?\n\nThey will lose access to the terminal immediately.')) return;
+
+      try {
+        // Mark as removed + null firm_id — blocks re-entry via domain fallback
+        const { error } = await supabase.from('users')
+          .update({ firm_id: null, status: 'removed' })
+          .eq('email', email)
+          .eq('firm_id', window._canonicalFirmId);
+
+        if (error) throw error;
+        await window.loadTeamRoster();
+      } catch (err) {
+        alert('Could not remove member: ' + (err.message || 'Unknown error'));
+      }
+    };
+
+    // Only show team panel to admins of corporate accounts
+    if (isAdmin && maxSeats > 1 && canonicalFirmId) {
       var teamPanel = document.getElementById('team-panel');
       if (teamPanel) teamPanel.style.display = 'block';
 
@@ -1047,60 +1177,12 @@
       if (urlEl) urlEl.textContent = inviteUrl;
       window._inviteUrl = inviteUrl;
 
-      // Load team members + seat count
-      const { data: teamMembers, error: teamErr } = await supabase
-        .from('users')
-        .select('id, first_name, last_name, email, role, firm_id')
-        .eq('firm_id', canonicalFirmId)
-        .order('created_at', { ascending: true });
+      // Store globals for add/remove functions
+      window._canonicalFirmId = canonicalFirmId;
+      window._userEmail = userEmail;
+      window._maxSeats = maxSeats;
 
-      // DEBUG — remove after diagnosing
-      console.log('[TEAM DEBUG] canonicalFirmId:', canonicalFirmId);
-      console.log('[TEAM DEBUG] userRow:', JSON.stringify(userRow));
-      console.log('[TEAM DEBUG] firmRow:', JSON.stringify(firmRow));
-      console.log('[TEAM DEBUG] teamMembers:', JSON.stringify(teamMembers));
-      console.log('[TEAM DEBUG] teamErr:', JSON.stringify(teamErr));
-
-      var members = teamMembers || [];
-      var seatsEl = document.getElementById('team-seats');
-      if (seatsEl) seatsEl.textContent = members.length + ' / ' + maxSeats + ' SEATS USED';
-
-      // DEBUG PANEL — visible on page, remove after diagnosing
-      var debugEl = document.getElementById('team-debug');
-      if (!debugEl) {
-        debugEl = document.createElement('div');
-        debugEl.id = 'team-debug';
-        debugEl.style.cssText = 'background:#111;border:1px solid #E97132;padding:12px 16px;margin:16px 0;font-size:10px;letter-spacing:0.08em;color:#E97132;line-height:1.8;word-break:break-all;';
-        var teamBody = document.getElementById('team-body');
-        if (teamBody) teamBody.insertBefore(debugEl, teamBody.firstChild);
-      }
-      debugEl.innerHTML =
-        '<strong>▸ DEBUG INFO (screenshot this)</strong><br>' +
-        'canonicalFirmId: ' + canonicalFirmId + '<br>' +
-        'userRow.firm_id: ' + (userRow ? userRow.firm_id : 'NO USER ROW') + '<br>' +
-        'firmRow.id: ' + (firmRow ? firmRow.id : 'NO FIRM ROW') + '<br>' +
-        'members found: ' + members.length + '<br>' +
-        'members emails: ' + members.map(function(m){return m.email;}).join(', ') + '<br>' +
-        'query error: ' + (teamErr ? JSON.stringify(teamErr) : 'none');
-
-      var rosterEl = document.getElementById('team-roster');
-      if (rosterEl) {
-        if (members.length === 0) {
-          rosterEl.innerHTML = '<div style="color:var(--text-faint); font-size:11px; letter-spacing:0.12em; text-transform:uppercase;">No team members yet — share the invite link to get started.</div>';
-        } else {
-          rosterEl.innerHTML = members.map(function(m) {
-            var name = ((m.first_name || '') + ' ' + (m.last_name || '')).trim() || '—';
-            var badge = m.role === 'admin' ? 'ADMIN' : 'BROKER';
-            return '<div class="team-member">' +
-              '<div>' +
-                '<div class="team-member-name">' + name + '</div>' +
-                '<div class="team-member-email">' + (m.email || '') + '</div>' +
-              '</div>' +
-              '<div class="team-member-badge">' + badge + '</div>' +
-            '</div>';
-          }).join('');
-        }
-      }
+      await window.loadTeamRoster();
     }
 
     // Manage Subscription
