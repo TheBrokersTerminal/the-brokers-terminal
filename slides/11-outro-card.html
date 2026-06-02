@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Brokers Terminal — Outro</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #0A0A0A;
+      font-family: "Consolas","Menlo","DejaVu Sans Mono","Courier New", monospace;
+      color: #fff;
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Scanlines */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 3px,
+        rgba(0,0,0,0.06) 3px,
+        rgba(0,0,0,0.06) 4px
+      );
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    /* Subtle grid */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(233,113,50,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(233,113,50,0.04) 1px, transparent 1px);
+      background-size: 80px 80px;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* Corner marks */
+    .corner {
+      position: fixed;
+      width: 40px;
+      height: 40px;
+      opacity: 0;
+      animation: fadeIn 0.8s ease forwards 0.1s;
+      z-index: 5;
+    }
+    .corner-tl { top: 36px; left: 36px; border-top: 1px solid #E97132; border-left: 1px solid #E97132; }
+    .corner-tr { top: 36px; right: 36px; border-top: 1px solid #E97132; border-right: 1px solid #E97132; }
+    .corner-bl { bottom: 36px; left: 36px; border-bottom: 1px solid #E97132; border-left: 1px solid #E97132; }
+    .corner-br { bottom: 36px; right: 36px; border-bottom: 1px solid #E97132; border-right: 1px solid #E97132; }
+
+    /* Top bar */
+    .top-bar {
+      position: fixed;
+      top: 44px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 10px;
+      letter-spacing: 0.32em;
+      text-transform: uppercase;
+      color: #444;
+      opacity: 0;
+      animation: fadeIn 0.8s ease forwards 0.3s;
+      z-index: 5;
+      white-space: nowrap;
+    }
+
+    /* Bottom strip */
+    .bottom-strip {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent 0%, #E97132 40%, #E97132 60%, transparent 100%);
+      opacity: 0;
+      animation: fadeIn 1s ease forwards 0.2s;
+      z-index: 5;
+    }
+
+    /* Main wrap */
+    .wrap {
+      position: relative;
+      z-index: 5;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .logo-mark {
+      font-size: 28px;
+      color: #E97132;
+      line-height: 1;
+      margin-bottom: 32px;
+      opacity: 0;
+      animation: fadeUp 0.9s ease forwards 0.2s;
+      letter-spacing: 0.1em;
+    }
+
+    .logo-name {
+      font-size: clamp(14px, 1.6vw, 20px);
+      font-weight: 700;
+      letter-spacing: 0.36em;
+      text-transform: uppercase;
+      color: #666;
+      margin-bottom: 72px;
+      opacity: 0;
+      animation: fadeUp 0.9s ease forwards 0.4s;
+    }
+
+    .cta-label {
+      font-size: 11px;
+      letter-spacing: 0.36em;
+      text-transform: uppercase;
+      color: #E97132;
+      margin-bottom: 24px;
+      opacity: 0;
+      animation: fadeUp 0.9s ease forwards 0.6s;
+    }
+
+    .cta-main {
+      font-size: clamp(28px, 4.5vw, 58px);
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #FFFFFF;
+      line-height: 1.15;
+      margin-bottom: 52px;
+      opacity: 0;
+      animation: fadeUp 0.9s ease forwards 0.8s;
+    }
+
+    .cta-main span {
+      color: #E97132;
+    }
+
+    /* URL box */
+    .url-box {
+      border: 1px solid #E97132;
+      padding: 20px 56px;
+      margin-bottom: 52px;
+      opacity: 0;
+      animation: fadeUp 0.9s ease forwards 1.1s;
+      position: relative;
+    }
+
+    .url-box::before {
+      content: '▸';
+      position: absolute;
+      left: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #E97132;
+      font-size: 14px;
+    }
+
+    .url-text {
+      font-size: clamp(16px, 2vw, 24px);
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: #FFFFFF;
+    }
+
+    .divider {
+      width: 0;
+      height: 1px;
+      background: #1e1e1e;
+      margin: 0 auto 52px;
+      opacity: 0;
+      animation: expandLine 0.8s ease forwards 1.4s;
+    }
+
+    /* Trial details */
+    .trial-row {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      margin-bottom: 56px;
+      opacity: 0;
+      animation: fadeUp 0.9s ease forwards 1.5s;
+    }
+
+    .trial-item {
+      text-align: center;
+      padding: 0 40px;
+    }
+
+    .trial-num {
+      font-size: clamp(28px, 3.5vw, 44px);
+      font-weight: 700;
+      color: #E97132;
+      letter-spacing: 0.08em;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .trial-label {
+      font-size: 9px;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: #444;
+    }
+
+    .trial-sep {
+      width: 1px;
+      height: 48px;
+      background: #1e1e1e;
+    }
+
+    /* Plans row */
+    .plans-row {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      opacity: 0;
+      animation: fadeUp 0.9s ease forwards 1.8s;
+    }
+
+    .plan-chip {
+      border: 1px solid #1e1e1e;
+      padding: 12px 28px;
+      font-size: 10px;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      color: #555;
+    }
+
+    .plan-chip strong {
+      color: #E6E6E6;
+      display: block;
+      font-size: 13px;
+      letter-spacing: 0.16em;
+      margin-bottom: 4px;
+    }
+
+    .plan-chip.featured {
+      border-color: #E97132;
+    }
+
+    .plan-chip.featured strong {
+      color: #E97132;
+    }
+
+    /* Status bar */
+    .status-bar {
+      position: fixed;
+      bottom: 44px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 48px;
+      opacity: 0;
+      animation: fadeIn 0.8s ease forwards 2.2s;
+      z-index: 5;
+      white-space: nowrap;
+    }
+
+    .status-item {
+      font-size: 10px;
+      letter-spacing: 0.26em;
+      text-transform: uppercase;
+      color: #444;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      background: #E97132;
+      border-radius: 50%;
+      animation: pulse 2s ease infinite;
+    }
+
+    /* Animations */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    @keyframes expandLine {
+      from { opacity: 1; width: 0; }
+      to   { opacity: 1; width: 200px; }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.2; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="corner corner-tl"></div>
+  <div class="corner corner-tr"></div>
+  <div class="corner corner-bl"></div>
+  <div class="corner corner-br"></div>
+  <div class="bottom-strip"></div>
+  <div class="top-bar">█ &nbsp;The Brokers Terminal &nbsp;—&nbsp; Brokers Eyes Only</div>
+
+  <div class="wrap">
+
+    <div class="logo-mark">█ █ █</div>
+    <div class="logo-name">The Brokers Terminal</div>
+
+    <div class="cta-label">▸ Start Your Free Trial Today</div>
+    <div class="cta-main">Your edge starts<br>at <span>thebrokersterminal.com</span></div>
+
+    <div class="url-box">
+      <div class="url-text">thebrokersterminal.com</div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="trial-row">
+      <div class="trial-item">
+        <div class="trial-num">7</div>
+        <div class="trial-label">Day Free Trial</div>
+      </div>
+      <div class="trial-sep"></div>
+      <div class="trial-item">
+        <div class="trial-num">£49</div>
+        <div class="trial-label">Per Month — Individual</div>
+      </div>
+      <div class="trial-sep"></div>
+      <div class="trial-item">
+        <div class="trial-num">£400</div>
+        <div class="trial-label">Per Month — Full Desk</div>
+      </div>
+      <div class="trial-sep"></div>
+      <div class="trial-item">
+        <div class="trial-num">0</div>
+        <div class="trial-label">Contracts. Cancel Anytime.</div>
+      </div>
+    </div>
+
+    <div class="plans-row">
+      <div class="plan-chip featured">
+        <strong>Individual</strong>
+        £49 / month
+      </div>
+      <div class="plan-chip">
+        <strong>Full Desk</strong>
+        £400 / month — up to 15 users
+      </div>
+    </div>
+
+  </div>
+
+  <div class="status-bar">
+    <div class="status-item"><div class="status-dot"></div>&nbsp;Live Now</div>
+    <div class="status-item">No card required during trial</div>
+    <div class="status-item">Cancel with one click</div>
+  </div>
+
+</body>
+</html>

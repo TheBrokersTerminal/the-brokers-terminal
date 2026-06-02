@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Brokers Terminal — Pitch Slides</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #0A0A0A;
+      font-family: "Consolas","Menlo","DejaVu Sans Mono","Courier New", monospace;
+      color: #fff;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg, transparent, transparent 3px,
+        rgba(0,0,0,0.06) 3px, rgba(0,0,0,0.06) 4px
+      );
+      pointer-events: none;
+      z-index: 20;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(233,113,50,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(233,113,50,0.04) 1px, transparent 1px);
+      background-size: 80px 80px;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .corner {
+      position: fixed;
+      width: 40px;
+      height: 40px;
+      z-index: 15;
+    }
+    .corner-tl { top: 36px; left: 36px; border-top: 1px solid #E97132; border-left: 1px solid #E97132; }
+    .corner-tr { top: 36px; right: 36px; border-top: 1px solid #E97132; border-right: 1px solid #E97132; }
+    .corner-bl { bottom: 36px; left: 36px; border-bottom: 1px solid #E97132; border-left: 1px solid #E97132; }
+    .corner-br { bottom: 36px; right: 36px; border-bottom: 1px solid #E97132; border-right: 1px solid #E97132; }
+
+    .bottom-strip {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent 0%, #E97132 40%, #E97132 60%, transparent 100%);
+      z-index: 15;
+    }
+
+    .top-bar {
+      position: fixed;
+      top: 44px; left: 50%;
+      transform: translateX(-50%);
+      font-size: 10px;
+      letter-spacing: 0.32em;
+      text-transform: uppercase;
+      color: #2a2a2a;
+      z-index: 15;
+      white-space: nowrap;
+    }
+
+    .slide-counter {
+      position: fixed;
+      bottom: 44px; right: 72px;
+      font-size: 10px;
+      letter-spacing: 0.24em;
+      color: #2a2a2a;
+      z-index: 15;
+    }
+
+    .nav-hint {
+      position: fixed;
+      bottom: 44px; left: 50%;
+      transform: translateX(-50%);
+      font-size: 10px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: #1e1e1e;
+      z-index: 15;
+      white-space: nowrap;
+    }
+
+    .slides {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      z-index: 5;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 100px 140px;
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.55s ease, transform 0.55s ease;
+      pointer-events: none;
+    }
+
+    .slide.active {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: all;
+    }
+
+    .slide-tag {
+      font-size: 10px;
+      letter-spacing: 0.42em;
+      text-transform: uppercase;
+      color: #E97132;
+      margin-bottom: 48px;
+    }
+
+    .heading {
+      font-size: clamp(26px, 4.2vw, 56px);
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #FFFFFF;
+      line-height: 1.25;
+      margin-bottom: 0;
+    }
+
+    .heading .accent { color: #E97132; }
+    .heading .dim    { color: #2a2a2a; }
+
+    .divider {
+      width: 56px;
+      height: 1px;
+      background: #E97132;
+      margin: 44px auto;
+    }
+
+    .body {
+      font-size: clamp(12px, 1.35vw, 16px);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #555;
+      line-height: 2.1;
+      max-width: 780px;
+    }
+
+    .body strong { color: #E6E6E6; }
+    .body em     { color: #E97132; font-style: normal; }
+
+    /* Slide 8 — large quote treatment */
+    .big-quote {
+      font-size: clamp(22px, 3.5vw, 46px);
+      font-weight: 700;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+      color: #FFFFFF;
+      line-height: 1.45;
+      max-width: 900px;
+    }
+    .big-quote .accent { color: #E97132; }
+    .big-quote .dim    { color: #333; }
+
+    /* Slide 10 — stat row */
+    .stat-row {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      margin-bottom: 52px;
+    }
+    .stat { text-align: center; padding: 0 52px; }
+    .stat-num {
+      font-size: clamp(30px, 4vw, 52px);
+      font-weight: 700;
+      color: #E97132;
+      letter-spacing: 0.06em;
+      line-height: 1;
+      margin-bottom: 10px;
+    }
+    .stat-label {
+      font-size: 9px;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: #333;
+    }
+    .stat-sep { width: 1px; height: 52px; background: #1a1a1a; }
+
+    .url-box {
+      border: 1px solid #E97132;
+      padding: 18px 52px;
+      position: relative;
+    }
+    .url-box::before {
+      content: '▸';
+      position: absolute;
+      left: 18px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #E97132;
+    }
+    .url-text {
+      font-size: clamp(14px, 1.8vw, 22px);
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      color: #FFFFFF;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="corner corner-tl"></div>
+  <div class="corner corner-tr"></div>
+  <div class="corner corner-bl"></div>
+  <div class="corner corner-br"></div>
+  <div class="bottom-strip"></div>
+  <div class="top-bar">█ &nbsp;The Brokers Terminal &nbsp;—&nbsp; Brokers Eyes Only</div>
+  <div class="slide-counter" id="counter">1 / 10</div>
+  <div class="nav-hint">← → Arrow Keys &nbsp;·&nbsp; Click to Advance</div>
+
+  <div class="slides">
+
+    <!-- SLIDE 1 -->
+    <div class="slide active" id="slide-1">
+      <div class="slide-tag">▸ The Difference</div>
+      <div class="heading">
+        The ones clients remember<br>
+        don't know more.<br>
+        <span class="accent">They know different.</span>
+      </div>
+      <div class="divider"></div>
+      <div class="body">
+        Any broker can quote a price. Read a brochure. Describe a product.<br>
+        The brokers clients refer, protect, and believe —<br>
+        <strong>they place the asset inside the world.</strong><br>
+        And suddenly the world makes it feel inevitable.
+      </div>
+    </div>
+
+    <!-- SLIDE 2 -->
+    <div class="slide" id="slide-2">
+      <div class="slide-tag">▸ The Navigator</div>
+      <div class="heading">
+        Magellan didn't know<br>
+        the ship.<br>
+        <span class="accent">He read the ocean.</span>
+      </div>
+      <div class="divider"></div>
+      <div class="body">
+        You already know the boat. The cargo. The route.<br>
+        What you need is the ability to read the water beneath it —<br>
+        <strong>the currents of central bank policy,<br>
+        the undertow of inflation,<br>
+        the silences before geopolitical storms break.</strong><br><br>
+        Clients don't pay for captains who know the ship.<br>
+        <em>They pay for the ones who know the sea.</em>
+      </div>
+    </div>
+
+    <!-- SLIDE 3 -->
+    <div class="slide" id="slide-3">
+      <div class="slide-tag">▸ What They're Really Buying</div>
+      <div class="heading">
+        Clients don't buy gold.<br>
+        <span class="accent">They buy certainty.</span>
+      </div>
+      <div class="divider"></div>
+      <div class="body">
+        Every client who picks up the phone is carrying a question<br>
+        they won't say out loud:<br><br>
+        <strong>Can I trust this person with what I have?</strong><br><br>
+        They're not evaluating your product.<br>
+        They're evaluating your judgment.<br>
+        <em>Give them that — and the asset almost sells itself.</em>
+      </div>
+    </div>
+
+    <!-- SLIDE 4 -->
+    <div class="slide" id="slide-4">
+      <div class="slide-tag">▸ The Question That Ends Deals</div>
+      <div class="heading">
+        <span class="accent">"Why now?"</span><br>
+        The broker who hesitates<br>
+        loses the room.
+      </div>
+      <div class="divider"></div>
+      <div class="body">
+        The broker who answers it — with precision,<br>
+        with live data, with a story rooted in<br>
+        <strong>this week's macro reality</strong> — closes.<br><br>
+        The answer to "why now" is not a script.<br>
+        <em>It's intelligence. Weekly. Specific. Yours.</em>
+      </div>
+    </div>
+
+    <!-- SLIDE 5 -->
+    <div class="slide" id="slide-5">
+      <div class="slide-tag">▸ The Intelligence</div>
+      <div class="heading">
+        Every week the world shifts.<br>
+        <span class="accent">You'll know<br>before your clients do.</span>
+      </div>
+      <div class="divider"></div>
+      <div class="body">
+        Central bank decisions. Inflation prints. Geopolitical fault lines.<br>
+        Auction results from the rooms that matter.<br>
+        Historic data placed against today's context.<br><br>
+        <strong>Not noise — signal.</strong><br><br>
+        When a client says "what do you think about what's happening out there" —<br>
+        <em>you were already waiting for the question.</em>
+      </div>
+    </div>
+
+    <!-- SLIDE 6 -->
+    <div class="slide" id="slide-6">
+      <div class="slide-tag">▸ The Pitch Pack & Objection File</div>
+      <div class="heading">
+        Your words.<br>
+        <span class="accent">Forged from<br>this week's reality.</span>
+      </div>
+      <div class="divider"></div>
+      <div class="body">
+        Not scripts written in a vacuum.<br>
+        <strong>Pitch language built from live intelligence</strong> —<br>
+        shaped around the objections clients are raising<br>
+        right now, in this news cycle, in this market.<br><br>
+        <em>"I'll wait. I need to think. Not right now."</em><br>
+        Answered with context that makes waiting<br>
+        feel like the greater risk.
+      </div>
+    </div>
+
+    <!-- SLIDE 7 -->
+    <div class="slide" id="slide-7">
+      <div class="slide-tag">▸ Training & Psychology</div>
+      <div class="heading">
+        The world's best<br>sales minds.<br>
+        <span class="accent">Applied to the desk<br>you sit at.</span>
+      </div>
+      <div class="divider"></div>
+      <div class="body">
+        NLP. Future pacing. The loop. Reframing resistance into momentum.<br>
+        <strong>Think and Grow Rich. Way of the Wolf.<br>
+        Pitch Anything. Never Split the Difference.</strong><br><br>
+        Not abstract theory.<br>
+        Applied to the exact moment when a client pauses —<br>
+        <em>and everything depends on what you say next.</em>
+      </div>
+    </div>
+
+    <!-- SLIDE 8 -->
+    <div class="slide" id="slide-8">
+      <div class="slide-tag">▸ The Transformation</div>
+      <div class="big-quote">
+        You were selling.<br>
+        <span class="dim">Now you're advising.</span><br><br>
+        <span class="accent">There is only one broker<br>
+        clients never leave.</span><br><br>
+        <span class="dim" style="font-size: 0.7em; letter-spacing: 0.1em;">
+          The one who understands their world<br>
+          better than anyone else in the room.
+        </span>
+      </div>
+    </div>
+
+    <!-- SLIDE 9 -->
+    <div class="slide" id="slide-9">
+      <div class="slide-tag">▸ The Result</div>
+      <div class="heading">
+        A different kind of desk.<br>
+        <span class="accent">A different kind of name.</span>
+      </div>
+      <div class="divider"></div>
+      <div class="body">
+        Fewer cold calls. More callbacks.<br>
+        Clients who return before you reach out.<br>
+        <strong>Referrals given not because they were asked for —<br>
+        because your name came up naturally.</strong><br><br>
+        The broker others on the floor watch.<br>
+        <em>This is what happens when context replaces pitch.</em>
+      </div>
+    </div>
+
+    <!-- SLIDE 10 -->
+    <div class="slide" id="slide-10">
+      <div class="slide-tag">▸ The Invitation</div>
+      <div class="heading">
+        Seven days.<br>
+        No charge.<br>
+        <span class="accent">See what it does<br>to a conversation.</span>
+      </div>
+      <div class="divider"></div>
+      <div class="stat-row">
+        <div class="stat">
+          <div class="stat-num">7</div>
+          <div class="stat-label">Day Free Trial</div>
+        </div>
+        <div class="stat-sep"></div>
+        <div class="stat">
+          <div class="stat-num">£49</div>
+          <div class="stat-label">Individual / Month</div>
+        </div>
+        <div class="stat-sep"></div>
+        <div class="stat">
+          <div class="stat-num">£400</div>
+          <div class="stat-label">Full Desk / Month</div>
+        </div>
+        <div class="stat-sep"></div>
+        <div class="stat">
+          <div class="stat-num">0</div>
+          <div class="stat-label">Contracts. Cancel Anytime.</div>
+        </div>
+      </div>
+      <div class="url-box">
+        <div class="url-text">thebrokersterminal.com</div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    var current = 1, total = 10;
+    function goTo(n) {
+      document.getElementById('slide-' + current).classList.remove('active');
+      current = Math.max(1, Math.min(total, n));
+      document.getElementById('slide-' + current).classList.add('active');
+      document.getElementById('counter').textContent = current + ' / ' + total;
+    }
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') goTo(current + 1);
+      if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   goTo(current - 1);
+    });
+    document.addEventListener('click', function() { goTo(current + 1); });
+  </script>
+
+</body>
+</html>

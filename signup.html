@@ -129,6 +129,85 @@
   const SUPABASE_KEY = 'sb_publishable_hJjmJ5MYAj8aCpXL6vCMTQ_zJlxUehl';
   const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+  /* ══ INVITE MODE — broker clicking a team invite link ════════ */
+  var _inviteFirmId   = null;
+  var _inviteFirmData = null;
+
+  (async function checkInvite() {
+    var params   = new URLSearchParams(window.location.search);
+    var inviteId = params.get('invite');
+    if (!inviteId) return;
+
+    // Fetch firm
+    const { data: firm } = await supabase
+      .from('firms')
+      .select('id, company_name, status, access, max_users, subscription_type')
+      .eq('id', inviteId)
+      .maybeSingle();
+
+    if (!firm || firm.status !== 'active') {
+      var err = document.getElementById('signup-error');
+      if (err) { err.textContent = 'This invite link is no longer valid. Please contact your desk manager.'; err.classList.add('visible'); }
+      return;
+    }
+
+    // Check capacity
+    const { count } = await supabase
+      .from('users')
+      .select('id', { count: 'exact', head: true })
+      .eq('firm_id', firm.id);
+
+    var maxSeats = firm.max_users || 15;
+    if (count >= maxSeats) {
+      var err2 = document.getElementById('signup-error');
+      if (err2) { err2.textContent = 'This desk has reached its maximum number of users (' + maxSeats + '). Contact your desk manager.'; err2.classList.add('visible'); }
+      return;
+    }
+
+    // Store for use on submit
+    _inviteFirmId   = firm.id;
+    _inviteFirmData = firm;
+
+    // Switch the UI to invite mode
+    var formTitle    = document.querySelector('.form-title');
+    var formSubtitle = document.querySelector('.form-subtitle');
+    var formIntro    = document.querySelector('.form-intro');
+    var firmName     = firm.company_name || 'Your Firm';
+    var seatsLeft    = maxSeats - count;
+
+    if (formTitle)    formTitle.textContent    = '█ JOIN ' + firmName.toUpperCase();
+    if (formSubtitle) formSubtitle.textContent = 'YOU\'VE BEEN INVITED TO THE BROKERS TERMINAL';
+    if (formIntro)    formIntro.innerHTML      = 'Your desk manager has set up a team subscription for <strong style="color:var(--accent);">' + firmName + '</strong>. Create your account below — <strong style="color:var(--accent);">no payment required</strong>, your firm\'s subscription covers your access. <strong>' + seatsLeft + ' seat' + (seatsLeft !== 1 ? 's' : '') + ' remaining.</strong>';
+
+    // Hide plan, asset, and company fields — not needed for invite flow
+    var planStep  = document.querySelector('.form-group:has(input[name="subscription-tier"])');
+    var assetStep = document.querySelector('.form-group:has(input[name="asset-class"])');
+    var stepLabels = document.querySelectorAll('[style*="border-top"]');
+
+    // Hide everything before STEP 3 — YOUR DETAILS
+    document.querySelectorAll('form > *').forEach(function(el) {
+      var text = el.textContent || '';
+      if (text.includes('STEP 1') || text.includes('STEP 2') || text.includes('CHOOSE YOUR PLAN') || text.includes('CHOOSE YOUR MARKET')) {
+        el.style.display = 'none';
+      }
+    });
+    // More robust: hide by content
+    document.querySelectorAll('.form-group').forEach(function(g) {
+      if (g.querySelector('input[name="subscription-tier"]') || g.querySelector('input[name="asset-class"]')) {
+        g.style.display = 'none';
+      }
+    });
+    // Hide step labels (STEP 1 / STEP 2)
+    document.querySelectorAll('div[style*="border-top"]').forEach(function(d) {
+      var t = d.textContent || '';
+      if (t.includes('STEP 1') || t.includes('STEP 2')) d.style.display = 'none';
+    });
+
+    var submitBtn = document.querySelector('button[type="submit"]');
+    if (submitBtn) submitBtn.textContent = '█ JOIN MY DESK — CREATE ACCOUNT';
+
+  })();
+
   document.addEventListener('DOMContentLoaded', function () {
     var form = document.querySelector('form');
     if (!form) return;
@@ -213,6 +292,70 @@
       var errorDiv  = document.getElementById('signup-error');
       var submitBtn = form.querySelector('button[type="submit"]');
       var originalText = submitBtn.textContent;
+
+      // ── INVITE MODE — skip all plan/asset validation ──────────
+      if (_inviteFirmId) {
+        if (!firstName || !lastName || !email || !password) {
+          if (errorDiv) { errorDiv.textContent = 'Please fill in all fields'; errorDiv.classList.add('visible'); }
+          return;
+        }
+        if (password.length < 6) {
+          if (errorDiv) { errorDiv.textContent = 'Password must be at least 6 characters'; errorDiv.classList.add('visible'); }
+          return;
+        }
+        submitBtn.textContent = 'CREATING ACCOUNT...';
+        submitBtn.disabled = true;
+        try {
+          // Check capacity again (race condition protection)
+          const { count: currentCount } = await supabase
+            .from('users').select('id', { count: 'exact', head: true }).eq('firm_id', _inviteFirmId);
+          var maxSeats = (_inviteFirmData && _inviteFirmData.max_users) || 15;
+          if (currentCount >= maxSeats) {
+            throw new Error('This desk has reached its maximum number of users. Contact your desk manager.');
+          }
+          // Create Supabase auth user
+          const { data: authData, error: authError } = await supabase.auth.signUp({
+            email: email, password: password,
+            options: { data: { first_name: firstName, last_name: lastName } }
+          });
+          if (authError) throw authError;
+          var newUserId = authData.user ? authData.user.id : null;
+          if (!newUserId) throw new Error('Account creation failed. Please try again.');
+          // Insert into users table linked to the firm
+          const { error: insertError } = await supabase.from('users').insert({
+            id: newUserId,
+            email: email,
+            firm_id: _inviteFirmId,
+            first_name: firstName,
+            last_name: lastName,
+            role: 'subscriber'
+          });
+          // If insert failed (e.g. row already exists), upsert to ensure firm_id is set
+          if (insertError) {
+            await supabase.from('users').upsert({
+              email: email,
+              firm_id: _inviteFirmId,
+              first_name: firstName,
+              last_name: lastName,
+              role: 'subscriber'
+            }, { onConflict: 'email' });
+          }
+          if (errorDiv) {
+            errorDiv.textContent = '✓ Account created! Check your email to confirm, then log in.';
+            errorDiv.classList.add('visible');
+            errorDiv.style.color = 'var(--accent)';
+            errorDiv.style.borderColor = 'var(--accent)';
+          }
+          submitBtn.textContent = '✓ ACCOUNT CREATED';
+          setTimeout(function() { window.location.href = 'login.html'; }, 2500);
+        } catch (err) {
+          if (errorDiv) { errorDiv.textContent = err.message || 'Something went wrong. Please try again.'; errorDiv.classList.add('visible'); }
+          submitBtn.textContent = '█ JOIN MY DESK — CREATE ACCOUNT';
+          submitBtn.disabled = false;
+        }
+        return;
+      }
+      // ── END INVITE MODE ────────────────────────────────────────
 
       // Validation
       if (!selectedTier) {

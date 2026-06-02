@@ -899,16 +899,19 @@
         ? '<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#4CAF50;box-shadow:0 0 6px #4CAF50;" title="Online now"></span>'
         : '<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#555;" title="Offline"></span>';
 
-      return `<tr data-status="${firmStatus}" data-search="${fullName.toLowerCase()} ${u.email.toLowerCase()}">
+      return `<tr data-status="${firmStatus}" data-search="${fullName.toLowerCase()} ${u.email.toLowerCase()}" id="user-row-${u.id}">
         <td style="text-align:center;">${dot}</td>
-        <td>${fullName}</td>
+        <td id="user-name-cell-${u.id}">${fullName}</td>
         <td style="color:var(--text-muted)">${u.email}</td>
         <td style="color:var(--text-muted)">${firmName}</td>
         <td><span class="badge-type">${plan}</span></td>
         <td>${statusHtml}</td>
         <td style="color:var(--text-muted);font-size:10px;">${lastSeenText}</td>
         <td style="color:var(--text-muted)">${joined}</td>
-        <td style="text-align:right;"><button class="btn btn-sm btn-danger" onclick="deleteUser('${u.id}', '${u.email.replace(/'/g, "\\'")}', '${fullName.replace(/'/g, "\\'")}')" style="font-size:9px;">DELETE</button></td>
+        <td style="text-align:right; display:flex; gap:6px; justify-content:flex-end;">
+          <button class="btn btn-sm" onclick="editUserName('${u.id}', '${(u.first_name||'').replace(/'/g,"\\'")}', '${(u.last_name||'').replace(/'/g,"\\'")}', '${u.email.replace(/'/g,"\\'")}')" style="font-size:9px;">EDIT</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteUser('${u.id}', '${u.email.replace(/'/g, "\\'")}', '${fullName.replace(/'/g, "\\'")}')" style="font-size:9px;">DELETE</button>
+        </td>
       </tr>`;
     }).join('');
   }
@@ -1048,6 +1051,68 @@
 
       alert('User ' + fullName + ' permanently deleted.');
       loadSubscribers();
+    } catch (err) {
+      alert('Error: ' + err.message);
+    }
+  }
+
+  function editUserName(userId, firstName, lastName, email) {
+    var cell = document.getElementById('user-name-cell-' + userId);
+    if (!cell) return;
+
+    // Replace the name cell with inline inputs
+    cell.innerHTML = `
+      <div style="display:flex; gap:6px; align-items:center;">
+        <input id="edit-first-${userId}" type="text" value="${firstName}" placeholder="First" style="background:var(--bg-deep); border:1px solid var(--accent); color:var(--text); font-family:var(--font); font-size:10px; letter-spacing:0.08em; padding:4px 8px; width:90px; text-transform:uppercase;">
+        <input id="edit-last-${userId}" type="text" value="${lastName}" placeholder="Last" style="background:var(--bg-deep); border:1px solid var(--accent); color:var(--text); font-family:var(--font); font-size:10px; letter-spacing:0.08em; padding:4px 8px; width:90px; text-transform:uppercase;">
+        <button class="btn btn-sm" onclick="saveUserName('${userId}', '${email.replace(/'/g,"\\'")}')" style="font-size:9px; background:var(--accent); color:#fff;">SAVE</button>
+        <button class="btn btn-sm" onclick="loadSubscribers()" style="font-size:9px;">✕</button>
+      </div>`;
+
+    // Focus first input
+    var firstInput = document.getElementById('edit-first-' + userId);
+    if (firstInput) { firstInput.focus(); firstInput.select(); }
+  }
+
+  async function saveUserName(userId, email) {
+    var firstInput = document.getElementById('edit-first-' + userId);
+    var lastInput  = document.getElementById('edit-last-'  + userId);
+    if (!firstInput || !lastInput) return;
+
+    var newFirst = firstInput.value.trim();
+    var newLast  = lastInput.value.trim();
+
+    if (!newFirst || !newLast) {
+      alert('Please enter both first and last name.');
+      return;
+    }
+
+    try {
+      // Update public users table
+      var { error: dbErr } = await supabaseAdmin
+        .from('users')
+        .update({ first_name: newFirst, last_name: newLast })
+        .eq('id', userId);
+      if (dbErr) throw new Error('Failed to update name: ' + dbErr.message);
+
+      // Update Supabase Auth user metadata so it stays in sync
+      var { error: authErr } = await supabaseAdmin.auth.admin.updateUserById(userId, {
+        user_metadata: { first_name: newFirst, last_name: newLast }
+      });
+      if (authErr) console.warn('Auth metadata update failed:', authErr.message);
+
+      // Update the cell immediately without full reload
+      var cell = document.getElementById('user-name-cell-' + userId);
+      if (cell) cell.textContent = (newFirst + ' ' + newLast).toUpperCase();
+
+      // Also update the row's search attribute
+      var row = document.getElementById('user-row-' + userId);
+      if (row) {
+        var currentSearch = row.getAttribute('data-search') || '';
+        var emailPart = email.toLowerCase();
+        row.setAttribute('data-search', (newFirst + ' ' + newLast).toLowerCase() + ' ' + emailPart);
+      }
+
     } catch (err) {
       alert('Error: ' + err.message);
     }
