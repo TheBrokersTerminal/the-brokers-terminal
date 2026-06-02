@@ -286,7 +286,7 @@
       var selectedAsset = assetChecked ? assetChecked.value : null;
       var firstName = document.querySelector('#firstname').value.trim();
       var lastName  = document.querySelector('#lastname').value.trim();
-      var email     = document.querySelector('#email').value.trim();
+      var email     = document.querySelector('#email').value.trim().toLowerCase();
       var password  = document.querySelector('#password').value;
       var company   = document.querySelector('#company').value.trim();
       var errorDiv  = document.getElementById('signup-error');

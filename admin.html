@@ -977,8 +977,11 @@
         <option value="gold"  ${access==='gold'  ?'selected':''}>GOLD ONLY</option>
         <option value="whisky"${access==='whisky'?'selected':''}>WHISKY ONLY</option>
       </select>`;
+      var membersBtn = f.subscription_type === 'corporate'
+        ? `<button class="btn btn-sm" onclick="toggleFirmMembers('${f.id}', this)" style="font-size:9px;margin-left:6px;">▾ MEMBERS</button>`
+        : '';
       return `<tr data-status="${f.status}" data-plan="${f.subscription_type || ''}">
-        <td>${f.company_name || '—'}</td>
+        <td>${f.company_name || '—'}${membersBtn}</td>
         <td style="color:var(--text-muted)">${f.domain || '—'}</td>
         <td><span class="badge-type">${plan}</span></td>
         <td style="color:var(--text-muted)">${userCount} / ${maxUsers}</td>
@@ -987,8 +990,129 @@
         <td>${stripeId}</td>
         <td style="color:var(--text-muted)">${created}</td>
         <td><button class="btn btn-sm btn-danger" onclick="deleteFirm('${f.id}', '${(f.company_name||'').replace(/'/g,"\\'")}', '${f.domain||''}')">DELETE</button></td>
+      </tr>
+      <tr id="firm-members-row-${f.id}" style="display:none;">
+        <td colspan="9" style="padding:0; background:var(--bg-deep);">
+          <div id="firm-members-${f.id}" style="padding:16px 20px; border-top:1px solid var(--border-dim);">
+            <div style="color:var(--text-faint);font-size:10px;letter-spacing:0.18em;">LOADING MEMBERS...</div>
+          </div>
+        </td>
       </tr>`;
     }).join('');
+  }
+
+  // ══ TOGGLE FIRM MEMBERS ═════════════════════════════════════
+  async function toggleFirmMembers(firmId, btn) {
+    var row = document.getElementById('firm-members-row-' + firmId);
+    if (!row) return;
+
+    var isOpen = row.style.display !== 'none';
+    if (isOpen) {
+      row.style.display = 'none';
+      btn.textContent = '▾ MEMBERS';
+      return;
+    }
+
+    row.style.display = '';
+    btn.textContent = '▴ HIDE';
+    await renderFirmMembers(firmId);
+  }
+
+  async function renderFirmMembers(firmId) {
+    var container = document.getElementById('firm-members-' + firmId);
+    if (!container) return;
+
+    container.innerHTML = '<div style="color:var(--text-faint);font-size:10px;letter-spacing:0.18em;">LOADING...</div>';
+
+    const { data: members, error } = await supabaseAdmin
+      .from('users')
+      .select('first_name, last_name, email, role, status, created_at')
+      .eq('firm_id', firmId)
+      .order('created_at', { ascending: true });
+
+    var activeMembers = (members || []).filter(function(m) { return m.status !== 'removed'; });
+
+    var addForm =
+      '<div style="margin-bottom:16px;">' +
+        '<div style="font-size:9px;letter-spacing:0.26em;text-transform:uppercase;color:var(--accent);margin-bottom:8px;">▸ ADD MEMBER BY EMAIL</div>' +
+        '<div style="display:flex;gap:8px;align-items:center;">' +
+          '<input id="admin-add-email-' + firmId + '" type="email" placeholder="broker@firm.com" style="flex:1;background:var(--bg);border:1px solid var(--border-dim);color:var(--text);font-family:var(--font);font-size:11px;padding:7px 12px;outline:none;letter-spacing:0.06em;">' +
+          '<button onclick="adminAddMember(\'' + firmId + '\')" style="background:none;border:1px solid var(--accent);color:var(--accent);font-family:var(--font);font-size:9px;letter-spacing:0.20em;text-transform:uppercase;padding:7px 16px;cursor:pointer;white-space:nowrap;">█ ADD</button>' +
+        '</div>' +
+        '<div id="admin-add-result-' + firmId + '" style="font-size:10px;letter-spacing:0.12em;text-transform:uppercase;margin-top:6px;min-height:14px;"></div>' +
+      '</div>';
+
+    var rosterHeader =
+      '<div style="font-size:9px;letter-spacing:0.26em;text-transform:uppercase;color:var(--text-faint);margin-bottom:8px;">' +
+        '▸ CURRENT MEMBERS — ' + activeMembers.length + ' ACCOUNT' + (activeMembers.length !== 1 ? 'S' : '') +
+      '</div>';
+
+    var roster = activeMembers.length === 0
+      ? '<div style="color:var(--text-faint);font-size:10px;letter-spacing:0.14em;text-transform:uppercase;">No active members.</div>'
+      : '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:6px;">' +
+          activeMembers.map(function(m) {
+            var name   = ((m.first_name || '') + ' ' + (m.last_name || '')).trim() || '—';
+            var joined = m.created_at ? new Date(m.created_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}).toUpperCase() : '—';
+            var badge  = m.role === 'admin' ? 'ADMIN' : 'BROKER';
+            var safeEmail = (m.email || '').replace(/'/g, "\\'");
+            return '<div style="background:var(--bg);border:1px solid var(--border-dim);padding:8px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;">' +
+              '<div>' +
+                '<div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--text);">' + name + '</div>' +
+                '<div style="font-size:10px;letter-spacing:0.06em;color:var(--text-faint);margin-top:2px;">' + (m.email || '—') + '</div>' +
+                '<div style="font-size:9px;letter-spacing:0.14em;color:var(--text-faint);margin-top:2px;">JOINED ' + joined + '</div>' +
+              '</div>' +
+              '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">' +
+                '<span style="font-size:8px;letter-spacing:0.22em;text-transform:uppercase;color:var(--accent);">' + badge + '</span>' +
+                (m.role !== 'admin' ? '<button onclick="adminRemoveMember(\'' + firmId + '\',\'' + safeEmail + '\')" style="background:none;border:1px solid #555;color:#777;font-family:var(--font);font-size:8px;letter-spacing:0.16em;text-transform:uppercase;padding:3px 8px;cursor:pointer;" onmouseover="this.style.borderColor=\'#c0392b\';this.style.color=\'#c0392b\'" onmouseout="this.style.borderColor=\'#555\';this.style.color=\'#777\'">REMOVE</button>' : '') +
+              '</div>' +
+            '</div>';
+          }).join('') +
+        '</div>';
+
+    container.innerHTML = addForm + rosterHeader + roster;
+  }
+
+  async function adminAddMember(firmId) {
+    var input     = document.getElementById('admin-add-email-' + firmId);
+    var resultEl  = document.getElementById('admin-add-result-' + firmId);
+    var email     = (input ? input.value : '').trim().toLowerCase();
+    if (!email) { resultEl.style.color = '#c0392b'; resultEl.textContent = 'ENTER AN EMAIL ADDRESS'; return; }
+
+    resultEl.style.color = 'var(--text-faint)';
+    resultEl.textContent = 'ADDING...';
+
+    const { error } = await supabaseAdmin.from('users').upsert({
+      email: email,
+      firm_id: firmId,
+      role: 'subscriber',
+      status: 'active'
+    }, { onConflict: 'email' });
+
+    if (error) {
+      resultEl.style.color = '#c0392b';
+      resultEl.textContent = '✗ ' + (error.message || 'FAILED');
+    } else {
+      resultEl.style.color = 'var(--accent)';
+      resultEl.textContent = '✓ ' + email + ' ADDED';
+      if (input) input.value = '';
+      setTimeout(function() { resultEl.textContent = ''; }, 3000);
+      await renderFirmMembers(firmId);
+    }
+  }
+
+  async function adminRemoveMember(firmId, email) {
+    if (!confirm('Remove ' + email + ' from this firm?\n\nThey will be blocked from logging in immediately.')) return;
+
+    const { error } = await supabaseAdmin.from('users')
+      .update({ firm_id: null, status: 'removed' })
+      .eq('email', email)
+      .eq('firm_id', firmId);
+
+    if (error) {
+      alert('Failed to remove: ' + (error.message || 'Unknown error'));
+    } else {
+      await renderFirmMembers(firmId);
+    }
   }
 
   // ══ DELETE FIRM ═════════════════════════════════════════════

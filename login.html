@@ -141,16 +141,22 @@
         }
 
         // Check if user's firm is active
-        const userEmail = data.user.email;
+        const userEmail = data.user.email.toLowerCase();
         const domain = userEmail.split('@')[1];
 
         // Step 1: look up firm via users table (works for invite users with any email domain)
         var firmData = null;
         const { data: userRow } = await supabase
           .from('users')
-          .select('firm_id')
+          .select('firm_id, status')
           .eq('email', userEmail)
           .maybeSingle();
+
+        // Block removed users immediately — before any firm lookup
+        if (userRow && userRow.status === 'removed') {
+          await supabase.auth.signOut();
+          throw new Error('Your access has been removed by your firm administrator. Please contact your desk manager.');
+        }
 
         if (userRow && userRow.firm_id) {
           const { data: firmById } = await supabase
