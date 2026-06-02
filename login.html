@@ -142,25 +142,44 @@
 
         // Check if user's firm is active
         const userEmail = data.user.email;
-        const domain = userEmail.split('@')[1]; // extract domain from email
+        const domain = userEmail.split('@')[1];
 
-        const { data: firmData, error: firmError } = await supabase
-          .from('firms')
-          .select('id, status, access')
-          .eq('domain', domain)
-          .single();
+        // Step 1: look up firm via users table (works for invite users with any email domain)
+        var firmData = null;
+        const { data: userRow } = await supabase
+          .from('users')
+          .select('firm_id')
+          .eq('email', userEmail)
+          .maybeSingle();
 
-        if (firmError || !firmData || firmData.status !== 'active') {
-          // Firm not found or inactive — sign out and show error
+        if (userRow && userRow.firm_id) {
+          const { data: firmById } = await supabase
+            .from('firms')
+            .select('id, status, access')
+            .eq('id', userRow.firm_id)
+            .maybeSingle();
+          firmData = firmById;
+        }
+
+        // Step 2: fall back to domain match (original corporate flow)
+        if (!firmData) {
+          const { data: firmByDomain } = await supabase
+            .from('firms')
+            .select('id, status, access')
+            .eq('domain', domain)
+            .maybeSingle();
+          firmData = firmByDomain;
+        }
+
+        if (!firmData || firmData.status !== 'active') {
           await supabase.auth.signOut();
-          throw new Error('Your firm subscription is not active. Contact support.');
+          throw new Error('Your firm subscription is not active. Please contact desk@thebrokersterminal.com');
         }
 
         // Firm is active — login successful
         if (errorDiv) errorDiv.classList.remove('visible');
 
         // Generate unique session ID — overwrites any existing session in DB
-        // This kicks out anyone else already logged in on this account
         var sessionId = (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36));
         localStorage.setItem('sessionId', sessionId);
         localStorage.setItem('firmId', firmData.id);

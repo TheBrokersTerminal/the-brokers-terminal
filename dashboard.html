@@ -98,6 +98,30 @@
     .this-week-stat-label{ color: var(--text-faint); font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; margin-top: 3px; }
 
     /* ── THIS WEEK LINKS STRIP ────────────────────────────────── */
+    /* ── TEAM PANEL ───────────────────────────────────────────── */
+    .team-panel { background: var(--bg-raised); border-bottom: 1px solid var(--border-dim); }
+    .team-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 40px; }
+    .team-title { font-size: 10px; letter-spacing: 0.28em; text-transform: uppercase; color: var(--accent); margin-bottom: 4px; }
+    .team-seats { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-faint); }
+    .team-toggle { background: none; border: 1px solid var(--border-dim); color: var(--text-faint); font-family: var(--font); font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; padding: 6px 14px; cursor: pointer; transition: border-color 0.2s, color 0.2s; }
+    .team-toggle:hover { border-color: var(--accent); color: var(--accent); }
+    .team-body { display: none; padding: 0 40px 28px; border-top: 1px solid var(--border-dim); }
+    .team-body.open { display: block; }
+    .team-invite-wrap { margin: 24px 0 28px; }
+    .team-invite-label { font-size: 9px; letter-spacing: 0.30em; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
+    .team-invite-sub { font-size: 11px; letter-spacing: 0.10em; text-transform: uppercase; color: var(--text-faint); line-height: 1.7; margin-bottom: 14px; max-width: 680px; }
+    .team-invite-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .team-invite-url { font-size: 12px; letter-spacing: 0.12em; color: var(--text); background: var(--bg); border: 1px solid var(--border-dim); padding: 10px 16px; flex: 1; min-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .team-copy-btn { background: none; border: 1px solid var(--accent); color: var(--accent); font-family: var(--font); font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; padding: 10px 20px; cursor: pointer; white-space: nowrap; transition: background 0.2s, color 0.2s; flex-shrink: 0; }
+    .team-copy-btn:hover { background: var(--accent); color: #000; }
+    .team-copy-btn.copied { background: var(--accent); color: #000; }
+    .team-roster-label { font-size: 9px; letter-spacing: 0.30em; text-transform: uppercase; color: var(--text-faint); margin-bottom: 12px; }
+    .team-roster { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 8px; }
+    .team-member { background: var(--bg); border: 1px solid var(--border-dim); padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .team-member-name { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text); }
+    .team-member-email { font-size: 10px; letter-spacing: 0.08em; color: var(--text-faint); margin-top: 2px; }
+    .team-member-badge { font-size: 8px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--accent); flex-shrink: 0; }
+
     .this-week-links {
       background: var(--bg-raised);
       border-bottom: 1px solid var(--border-dim);
@@ -179,11 +203,13 @@
     .featured-card-note  { color: var(--text-faint); font-size: 10px; letter-spacing: 0.10em; line-height: 1.5; }
 
     /* ── FILTER TABS ──────────────────────────────────────────── */
-    .filter-tabs { display: flex; border-bottom: 1px solid var(--border-dim); margin-bottom: 24px; overflow-x: auto; scrollbar-width: none; }
+    .filter-tabs { display: flex; border-bottom: 1px solid var(--border-dim); margin-bottom: 0; overflow-x: auto; scrollbar-width: none; }
     .filter-tabs::-webkit-scrollbar { display: none; }
     .filter-tab { font-family: var(--font); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-faint); background: transparent; border: none; border-bottom: 2px solid transparent; padding: 10px 16px; cursor: pointer; white-space: nowrap; transition: color 150ms ease, border-color 150ms ease; margin-bottom: -1px; }
     .filter-tab:hover { color: var(--text); }
     .filter-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .tab-desc { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-faint); padding: 8px 4px 20px; min-height: 36px; opacity: 0.7; transition: opacity 0.2s; }
+    .tab-desc span { color: var(--accent); margin-right: 8px; }
 
     /* ── DOC GRID ─────────────────────────────────────────────── */
     .doc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 40px; }
@@ -441,6 +467,36 @@
   <!-- populated by JS -->
 </div>
 
+<!-- ══ YOUR TEAM ═════════════════════════════════════════════════ -->
+<div class="team-panel" id="team-panel" style="display:none;">
+  <div class="team-header">
+    <div class="team-header-left">
+      <div class="team-title">▸ YOUR TEAM</div>
+      <div class="team-seats" id="team-seats">— / — SEATS USED</div>
+    </div>
+    <button class="team-toggle" id="team-toggle" onclick="document.getElementById('team-body').classList.toggle('open'); this.textContent = document.getElementById('team-body').classList.contains('open') ? '▴ HIDE' : '▾ MANAGE TEAM'">▾ MANAGE TEAM</button>
+  </div>
+  <div class="team-body" id="team-body">
+
+    <!-- Invite link -->
+    <div class="team-invite-wrap">
+      <div class="team-invite-label">▸ TEAM INVITE LINK</div>
+      <div class="team-invite-sub">Share this link with your brokers. Anyone who clicks it can sign up and join your desk instantly — no admin needed. Link stays active while your subscription is live.</div>
+      <div class="team-invite-row">
+        <div class="team-invite-url" id="team-invite-url">Loading...</div>
+        <button class="team-copy-btn" id="team-copy-btn" onclick="copyInviteLink()">█ COPY LINK</button>
+      </div>
+    </div>
+
+    <!-- Team roster -->
+    <div class="team-roster-label">▸ CURRENT TEAM MEMBERS</div>
+    <div class="team-roster" id="team-roster">
+      <div style="color:var(--text-faint); font-size:11px; letter-spacing:0.12em;">Loading team...</div>
+    </div>
+
+  </div>
+</div>
+
 <!-- ══ ASSET TABS ════════════════════════════════════════════════ -->
 <div class="asset-tabs">
   <button class="asset-tab active" data-panel="all">
@@ -501,6 +557,7 @@
       <button class="filter-tab" data-filter="training">TRAINING</button>
       <button class="filter-tab" data-filter="hit_list">HIT LIST</button>
     </div>
+    <div class="tab-desc" id="tab-desc-all"><span>▸ ALL REPORTS</span>Every report across both desks — weekly, monthly, and quarterly</div>
     <div class="doc-grid" id="doc-grid">
       <!-- Reports loaded dynamically -->
     </div>
@@ -533,6 +590,7 @@
       <button class="filter-tab" data-filter-gold="training">TRAINING</button>
       <button class="filter-tab" data-filter-gold="hit_list">HIT LIST</button>
     </div>
+    <div class="tab-desc" id="tab-desc-gold"><span>▸ ALL REPORTS</span>Every Gold Desk report — weekly, monthly, and quarterly</div>
     <div class="doc-grid" id="doc-grid-gold"></div>
     <div id="empty-state-gold" class="empty-state" style="display:none;">
       <div class="empty-state-icon">░</div>
@@ -563,6 +621,7 @@
       <button class="filter-tab" data-filter-whisky="training">TRAINING</button>
       <button class="filter-tab" data-filter-whisky="hit_list">HIT LIST</button>
     </div>
+    <div class="tab-desc" id="tab-desc-whisky"><span>▸ ALL REPORTS</span>Every Whisky Desk report — weekly, monthly, and quarterly</div>
     <div class="doc-grid" id="doc-grid-whisky"></div>
     <div id="empty-state-whisky" class="empty-state" style="display:none;">
       <div class="empty-state-icon">░</div>
@@ -905,7 +964,7 @@
       // Step 2: fetch firm directly by ID — always correct regardless of domain
       const { data: firmById } = await supabase
         .from('firms')
-        .select('access, stripe_customer_id, subscription_type')
+        .select('id, company_name, access, stripe_customer_id, subscription_type, max_users')
         .eq('id', userRow.firm_id)
         .single();
       firmRow = firmById;
@@ -913,11 +972,18 @@
       // Fallback: look up by domain (corporate accounts)
       const { data: firmByDomain } = await supabase
         .from('firms')
-        .select('access, stripe_customer_id, subscription_type')
+        .select('id, company_name, access, stripe_customer_id, subscription_type, max_users')
         .eq('domain', domain)
         .eq('subscription_type', 'corporate')
         .maybeSingle();
       firmRow = firmByDomain;
+
+      // Self-heal: write firm_id back to this user's row so they're counted in seat totals
+      if (firmRow && firmRow.id) {
+        supabase.from('users')
+          .upsert({ email: userEmail, firm_id: firmRow.id }, { onConflict: 'email' })
+          .then(function(){}).catch(function(){});
+      }
     }
 
     if (firmRow && firmRow.access) firmAccess = firmRow.access;
@@ -965,6 +1031,76 @@
       var allPanel = document.getElementById('panel-all');
       if (allTab) allTab.classList.add('active');
       if (allPanel) allPanel.classList.add('active');
+    }
+
+    // ── Your Team panel (corporate only) ────────────────────────
+    var maxSeats = firmRow ? (firmRow.max_users || 1) : 1;
+    // Use firmRow.id as canonical firm ID regardless of how we found the firm
+    var canonicalFirmId = (firmRow && firmRow.id) ? firmRow.id : (userRow ? userRow.firm_id : null);
+    if (firmRow && maxSeats > 1 && canonicalFirmId) {
+      var teamPanel = document.getElementById('team-panel');
+      if (teamPanel) teamPanel.style.display = 'block';
+
+      // Invite link
+      var inviteUrl = window.location.origin + '/signup.html?invite=' + canonicalFirmId;
+      var urlEl = document.getElementById('team-invite-url');
+      if (urlEl) urlEl.textContent = inviteUrl;
+      window._inviteUrl = inviteUrl;
+
+      // Load team members + seat count
+      const { data: teamMembers, error: teamErr } = await supabase
+        .from('users')
+        .select('id, first_name, last_name, email, role, firm_id')
+        .eq('firm_id', canonicalFirmId)
+        .order('created_at', { ascending: true });
+
+      // DEBUG — remove after diagnosing
+      console.log('[TEAM DEBUG] canonicalFirmId:', canonicalFirmId);
+      console.log('[TEAM DEBUG] userRow:', JSON.stringify(userRow));
+      console.log('[TEAM DEBUG] firmRow:', JSON.stringify(firmRow));
+      console.log('[TEAM DEBUG] teamMembers:', JSON.stringify(teamMembers));
+      console.log('[TEAM DEBUG] teamErr:', JSON.stringify(teamErr));
+
+      var members = teamMembers || [];
+      var seatsEl = document.getElementById('team-seats');
+      if (seatsEl) seatsEl.textContent = members.length + ' / ' + maxSeats + ' SEATS USED';
+
+      // DEBUG PANEL — visible on page, remove after diagnosing
+      var debugEl = document.getElementById('team-debug');
+      if (!debugEl) {
+        debugEl = document.createElement('div');
+        debugEl.id = 'team-debug';
+        debugEl.style.cssText = 'background:#111;border:1px solid #E97132;padding:12px 16px;margin:16px 0;font-size:10px;letter-spacing:0.08em;color:#E97132;line-height:1.8;word-break:break-all;';
+        var teamBody = document.getElementById('team-body');
+        if (teamBody) teamBody.insertBefore(debugEl, teamBody.firstChild);
+      }
+      debugEl.innerHTML =
+        '<strong>▸ DEBUG INFO (screenshot this)</strong><br>' +
+        'canonicalFirmId: ' + canonicalFirmId + '<br>' +
+        'userRow.firm_id: ' + (userRow ? userRow.firm_id : 'NO USER ROW') + '<br>' +
+        'firmRow.id: ' + (firmRow ? firmRow.id : 'NO FIRM ROW') + '<br>' +
+        'members found: ' + members.length + '<br>' +
+        'members emails: ' + members.map(function(m){return m.email;}).join(', ') + '<br>' +
+        'query error: ' + (teamErr ? JSON.stringify(teamErr) : 'none');
+
+      var rosterEl = document.getElementById('team-roster');
+      if (rosterEl) {
+        if (members.length === 0) {
+          rosterEl.innerHTML = '<div style="color:var(--text-faint); font-size:11px; letter-spacing:0.12em; text-transform:uppercase;">No team members yet — share the invite link to get started.</div>';
+        } else {
+          rosterEl.innerHTML = members.map(function(m) {
+            var name = ((m.first_name || '') + ' ' + (m.last_name || '')).trim() || '—';
+            var badge = m.role === 'admin' ? 'ADMIN' : 'BROKER';
+            return '<div class="team-member">' +
+              '<div>' +
+                '<div class="team-member-name">' + name + '</div>' +
+                '<div class="team-member-email">' + (m.email || '') + '</div>' +
+              '</div>' +
+              '<div class="team-member-badge">' + badge + '</div>' +
+            '</div>';
+          }).join('');
+        }
+      }
     }
 
     // Manage Subscription
@@ -1162,7 +1298,7 @@
 
       // Populate stats
       document.getElementById('stat-new').textContent   = newCount;
-      document.getElementById('stat-vault').textContent = reports.length;
+      document.getElementById('stat-vault').textContent = filteredReports.length;
       document.getElementById('stat-flash').textContent = trainingCount;
 
       // Week tag
@@ -1299,6 +1435,27 @@
   }
 
   /* ══ FILTER TABS — All panel ══════════════════════════════════ */
+  /* ── Tab descriptions by filter key ───────────────────────── */
+  var TAB_DESC = {
+    'all':           { tag: 'ALL REPORTS',    text: 'Every report across both desks — weekly, monthly, and quarterly' },
+    'gold':          { tag: 'GOLD DESK',      text: 'All Gold Desk reports — weekly, monthly, and quarterly' },
+    'whisky':        { tag: 'WHISKY DESK',    text: 'All Whisky Desk reports — weekly, monthly, and quarterly' },
+    'weekly':        { tag: 'WEEKLY',         text: 'Released every Sunday — macro analysis, live price context, call scripts & objection handles for the week ahead' },
+    'pitch_pack':    { tag: 'PITCH PACK',     text: 'Released last Sunday of each month — distilled call scripts, closes & objection handles built from that month\'s macro themes' },
+    'objection_file':{ tag: 'OBJECTION FILE', text: 'Released end of each quarter — compiled AVR objection-handling scripts, updated quarterly as new objections surface' },
+    'monthly':       { tag: 'MONTHLY',        text: 'Released last Sunday of each month — deep-dive macro, COT data, positioning data, full broker training section' },
+    'quarterly':     { tag: 'QUARTERLY',      text: 'Released end of each quarter — strategic macro overview, positioning review, sector themes & outlook for the quarter ahead' },
+    'training':      { tag: 'TRAINING',       text: 'Released last Sunday of each month — one focused sales skill with practical drills & roleplay scripts tied to live market stories' },
+    'hit_list':      { tag: 'HIT LIST',       text: 'Released end of each quarter — prospect targeting brief: who to call, why now, and what angle to lead with' }
+  };
+
+  function setTabDesc(descElId, filterKey) {
+    var el = document.getElementById(descElId);
+    if (!el) return;
+    var d = TAB_DESC[filterKey] || TAB_DESC['all'];
+    el.innerHTML = '<span>▸ ' + d.tag + '</span>' + d.text;
+  }
+
   function setupFilterTabs() {
     var filterTabs = document.querySelectorAll('#filter-tabs-all .filter-tab');
     var docCards   = document.querySelectorAll('#doc-grid .doc-card');
@@ -1309,6 +1466,7 @@
         var filter = this.getAttribute('data-filter');
         filterTabs.forEach(t => t.classList.remove('active'));
         this.classList.add('active');
+        setTabDesc('tab-desc-all', filter);
 
         var visible = 0;
         docCards.forEach(function (card) {
@@ -1329,31 +1487,64 @@
 
   /* ══ VAULT SEARCH ════════════════════════════════════════════ */
   function setupVaultSearch() {
-    var searchInput   = document.getElementById('vault-search');
-    var resultsCount  = document.getElementById('search-results-count');
-    var docGrid       = document.getElementById('doc-grid');
-    var filterTabsAll = document.getElementById('filter-tabs-all');
-    var emptyState    = document.getElementById('empty-state');
+    var searchInput  = document.getElementById('vault-search');
+    var resultsCount = document.getElementById('search-results-count');
     if (!searchInput) return;
 
     var searchTimeout = null;
 
+    // Panel config: id of panel → { grid, filterTabs, emptyState, resetTab }
+    var panelConfig = {
+      'panel-all': {
+        gridId:      'doc-grid',
+        filterTabsId:'filter-tabs-all',
+        emptyStateId:'empty-state',
+        resetFilter: 'all',
+        filterAttr:  'data-filter'
+      },
+      'panel-gold': {
+        gridId:      'doc-grid-gold',
+        filterTabsId:'filter-tabs-gold',
+        emptyStateId:'empty-state-gold',
+        resetFilter: 'all',
+        filterAttr:  'data-filter-gold'
+      },
+      'panel-whisky': {
+        gridId:      'doc-grid-whisky',
+        filterTabsId:'filter-tabs-whisky',
+        emptyStateId:'empty-state-whisky',
+        resetFilter: 'all',
+        filterAttr:  'data-filter-whisky'
+      }
+    };
+
+    function getActivePanel() {
+      var active = document.querySelector('.asset-panel.active');
+      return active ? active.id : 'panel-all';
+    }
+
     function clearSearch() {
       resultsCount.style.display = 'none';
-      filterTabsAll.style.display = '';
-      document.querySelectorAll('#doc-grid .doc-card').forEach(function(c) { c.style.display = ''; });
-      emptyState.style.display = 'none';
-      var allTab = document.querySelector('#filter-tabs-all [data-filter="all"]');
-      if (allTab) allTab.click();
+      // Restore all panels to normal
+      Object.values(panelConfig).forEach(function(cfg) {
+        var filterTabs = document.getElementById(cfg.filterTabsId);
+        var emptyState = document.getElementById(cfg.emptyStateId);
+        if (filterTabs) filterTabs.style.display = '';
+        // Show all cards
+        document.querySelectorAll('#' + cfg.gridId + ' .doc-card').forEach(function(c) {
+          c.style.display = '';
+        });
+        if (emptyState) emptyState.style.display = 'none';
+        // Reset the active filter tab to "ALL"
+        var allTab = document.querySelector('#' + cfg.filterTabsId + ' [' + cfg.filterAttr + '="all"]');
+        if (allTab) allTab.click();
+      });
     }
 
     async function runSearch(rawQuery) {
       var query = rawQuery.trim().toLowerCase();
       if (!query) { clearSearch(); return; }
 
-      // Hide filter tabs while searching
-      filterTabsAll.style.display = 'none';
-      document.querySelectorAll('#filter-tabs-all .filter-tab').forEach(function(t) { t.classList.remove('active'); });
       resultsCount.style.display = 'block';
       resultsCount.textContent = 'SEARCHING...';
 
@@ -1370,18 +1561,35 @@
 
         var matchedIds = new Set((matched || []).map(function(r) { return r.id; }));
 
-        // Apply access filter
-        var cards = document.querySelectorAll('#doc-grid .doc-card');
-        var visible = 0;
-        cards.forEach(function(card) {
-          var id = card.getAttribute('data-id');
-          var show = matchedIds.has(id);
-          card.style.display = show ? '' : 'none';
-          if (show) visible++;
+        // Apply to ALL panels (so switching tabs mid-search still shows correct results)
+        Object.entries(panelConfig).forEach(function(entry) {
+          var panelId = entry[0];
+          var cfg     = entry[1];
+          var filterTabs = document.getElementById(cfg.filterTabsId);
+          var emptyState = document.getElementById(cfg.emptyStateId);
+
+          // Hide filter tabs while searching
+          if (filterTabs) filterTabs.style.display = 'none';
+
+          var cards = document.querySelectorAll('#' + cfg.gridId + ' .doc-card');
+          var visible = 0;
+          cards.forEach(function(card) {
+            var id   = card.getAttribute('data-id');
+            var show = matchedIds.has(id);
+            card.style.display = show ? '' : 'none';
+            if (show) visible++;
+          });
+
+          if (emptyState) emptyState.style.display = visible === 0 ? 'block' : 'none';
         });
 
-        resultsCount.textContent = visible + ' result' + (visible !== 1 ? 's' : '') + ' for "' + rawQuery.trim() + '"';
-        emptyState.style.display = visible === 0 ? 'block' : 'none';
+        // Count results in the ACTIVE panel for the status line
+        var activePanelId = getActivePanel();
+        var activeCfg = panelConfig[activePanelId] || panelConfig['panel-all'];
+        var activeCards = document.querySelectorAll('#' + activeCfg.gridId + ' .doc-card:not([style*="display: none"])');
+        var activeCount = activeCards.length;
+
+        resultsCount.textContent = activeCount + ' result' + (activeCount !== 1 ? 's' : '') + ' for "' + rawQuery.trim() + '"';
 
       } catch(err) {
         resultsCount.textContent = 'Search error — please try again';
@@ -1402,12 +1610,15 @@
     var tabs   = document.querySelectorAll('#' + tabsId + ' .filter-tab');
     var cards  = document.querySelectorAll('#' + gridId + ' .doc-card');
     var empty  = document.getElementById(emptyId);
+    /* derive desc element id: filter-tabs-gold → tab-desc-gold */
+    var descId = tabsId.replace('filter-tabs-', 'tab-desc-');
 
     tabs.forEach(function (tab) {
       tab.addEventListener('click', function () {
         var filter = this.getAttribute(attr);
         tabs.forEach(t => t.classList.remove('active'));
         this.classList.add('active');
+        setTabDesc(descId, filter);
 
         var visible = 0;
         cards.forEach(function (card) {
@@ -1430,6 +1641,23 @@
       document.getElementById('panel-' + this.getAttribute('data-panel')).classList.add('active');
     });
   });
+
+  /* ── Copy invite link ─────────────────────────────────────── */
+  function copyInviteLink() {
+    var url = window._inviteUrl;
+    if (!url) return;
+    navigator.clipboard.writeText(url).then(function() {
+      var btn = document.getElementById('team-copy-btn');
+      if (btn) {
+        btn.textContent = '✓ COPIED';
+        btn.classList.add('copied');
+        setTimeout(function() {
+          btn.textContent = '█ COPY LINK';
+          btn.classList.remove('copied');
+        }, 2500);
+      }
+    });
+  }
 
 </script>
 </body>

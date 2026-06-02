@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Brokers Terminal — Intro</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #0A0A0A;
+      font-family: "Consolas","Menlo","DejaVu Sans Mono","Courier New", monospace;
+      color: #fff;
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Scanlines */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 3px,
+        rgba(0,0,0,0.06) 3px,
+        rgba(0,0,0,0.06) 4px
+      );
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    /* Subtle grid */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(233,113,50,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(233,113,50,0.04) 1px, transparent 1px);
+      background-size: 80px 80px;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* Corner marks — bigger */
+    .corner {
+      position: fixed;
+      width: 40px;
+      height: 40px;
+      opacity: 0;
+      animation: fadeIn 0.8s ease forwards 2s;
+      z-index: 5;
+    }
+    .corner-tl { top: 36px; left: 36px; border-top: 1px solid #E97132; border-left: 1px solid #E97132; }
+    .corner-tr { top: 36px; right: 36px; border-top: 1px solid #E97132; border-right: 1px solid #E97132; }
+    .corner-bl { bottom: 36px; left: 36px; border-bottom: 1px solid #E97132; border-left: 1px solid #E97132; }
+    .corner-br { bottom: 36px; right: 36px; border-bottom: 1px solid #E97132; border-right: 1px solid #E97132; }
+
+    /* Top bar */
+    .top-bar {
+      position: fixed;
+      top: 44px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 10px;
+      letter-spacing: 0.32em;
+      text-transform: uppercase;
+      color: #444;
+      opacity: 0;
+      animation: fadeIn 0.8s ease forwards 2.2s;
+      z-index: 5;
+      white-space: nowrap;
+    }
+
+    /* Bottom strip */
+    .bottom-strip {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent 0%, #E97132 40%, #E97132 60%, transparent 100%);
+      opacity: 0;
+      animation: fadeIn 1.2s ease forwards 2.4s;
+      z-index: 5;
+    }
+
+    /* Status bar */
+    .status-bar {
+      position: fixed;
+      bottom: 44px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 48px;
+      opacity: 0;
+      animation: fadeIn 0.8s ease forwards 2.4s;
+      z-index: 5;
+      white-space: nowrap;
+    }
+
+    .status-item {
+      font-size: 10px;
+      letter-spacing: 0.26em;
+      text-transform: uppercase;
+      color: #444;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      background: #E97132;
+      border-radius: 50%;
+      animation: pulse 2s ease infinite;
+    }
+
+    /* ── MAIN CONTENT ── */
+    .wrap {
+      position: relative;
+      z-index: 5;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .established {
+      font-size: 11px;
+      letter-spacing: 0.42em;
+      color: #E97132;
+      text-transform: uppercase;
+      margin-bottom: 56px;
+      opacity: 0;
+      animation: fadeUp 0.9s ease forwards 0.2s;
+    }
+
+    .logo-mark {
+      font-size: 28px;
+      color: #E97132;
+      line-height: 1;
+      margin-bottom: 28px;
+      opacity: 0;
+      animation: fadeUp 0.9s ease forwards 0.5s;
+      letter-spacing: 0.1em;
+    }
+
+    .main-title {
+      font-size: clamp(48px, 7vw, 96px);
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #FFFFFF;
+      line-height: 1;
+      margin-bottom: 16px;
+      opacity: 0;
+      animation: fadeUp 0.9s ease forwards 0.7s;
+    }
+
+    .main-title-line2 {
+      font-size: clamp(48px, 7vw, 96px);
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #E97132;
+      line-height: 1;
+      margin-bottom: 0;
+      opacity: 0;
+      animation: fadeUp 0.9s ease forwards 0.95s;
+    }
+
+    .divider {
+      width: 0;
+      height: 1px;
+      background: #E97132;
+      margin: 52px auto;
+      opacity: 0;
+      animation: expandLine 1s ease forwards 1.3s;
+    }
+
+    .tagline-main {
+      font-size: clamp(12px, 1.2vw, 15px);
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: #E6E6E6;
+      margin-bottom: 36px;
+      opacity: 0;
+      animation: fadeUp 0.9s ease forwards 1.6s;
+    }
+
+    .features {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      opacity: 0;
+      animation: fadeUp 0.9s ease forwards 1.9s;
+    }
+
+    .feature {
+      font-size: 10px;
+      letter-spacing: 0.26em;
+      text-transform: uppercase;
+      color: #555;
+      padding: 0 32px;
+    }
+
+    .feature-sep {
+      width: 1px;
+      height: 14px;
+      background: #2a2a2a;
+    }
+
+    /* Animations */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    @keyframes expandLine {
+      from { opacity: 1; width: 0; }
+      to   { opacity: 1; width: 280px; }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.2; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="corner corner-tl"></div>
+  <div class="corner corner-tr"></div>
+  <div class="corner corner-bl"></div>
+  <div class="corner corner-br"></div>
+  <div class="bottom-strip"></div>
+  <div class="top-bar">Intelligence Platform &nbsp;—&nbsp; Specialist Brokers &nbsp;—&nbsp; United Kingdom</div>
+
+  <div class="wrap">
+
+    <div class="established">Established 2026 &nbsp;&nbsp;·&nbsp;&nbsp; London</div>
+
+    <div class="logo-mark">█ █ █</div>
+
+    <div class="main-title">THE BROKERS</div>
+    <div class="main-title-line2">TERMINAL</div>
+
+    <div class="divider"></div>
+
+    <div class="tagline-main">Weekly intelligence. Built for brokers who refuse to be underprepared.</div>
+
+    <div class="features">
+      <div class="feature">Macro Economics</div>
+      <div class="feature-sep"></div>
+      <div class="feature">Sales Psychology</div>
+      <div class="feature-sep"></div>
+      <div class="feature">NLP Techniques</div>
+      <div class="feature-sep"></div>
+      <div class="feature">Live Auction Data</div>
+      <div class="feature-sep"></div>
+      <div class="feature">Pitch Frameworks</div>
+    </div>
+
+  </div>
+
+  <div class="status-bar">
+    <div class="status-item"><div class="status-dot"></div>&nbsp;Live</div>
+    <div class="status-item">thebrokersterminal.com</div>
+    <div class="status-item">7-Day Free Trial — No Commitment</div>
+  </div>
+
+</body>
+</html>

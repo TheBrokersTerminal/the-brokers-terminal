@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Brokers Terminal — ▸ The Transformation</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0A0A0A;
+      font-family: "Consolas","Menlo","DejaVu Sans Mono","Courier New", monospace;
+      color: #fff;
+      height: 100vh; width: 100vw;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center;
+      overflow: hidden; position: relative;
+      padding: 100px 140px;
+    }
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.06) 3px, rgba(0,0,0,0.06) 4px);
+      pointer-events: none; z-index: 20;
+    }
+    body::after {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: linear-gradient(rgba(233,113,50,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(233,113,50,0.04) 1px, transparent 1px);
+      background-size: 80px 80px;
+      pointer-events: none; z-index: 1;
+    }
+    .corner { position: fixed; width: 40px; height: 40px; z-index: 15; }
+    .corner-tl { top: 36px; left: 36px; border-top: 1px solid #E97132; border-left: 1px solid #E97132; }
+    .corner-tr { top: 36px; right: 36px; border-top: 1px solid #E97132; border-right: 1px solid #E97132; }
+    .corner-bl { bottom: 36px; left: 36px; border-bottom: 1px solid #E97132; border-left: 1px solid #E97132; }
+    .corner-br { bottom: 36px; right: 36px; border-bottom: 1px solid #E97132; border-right: 1px solid #E97132; }
+    .bottom-strip { position: fixed; bottom: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent 0%, #E97132 40%, #E97132 60%, transparent 100%); z-index: 15; }
+    .top-bar { position: fixed; top: 44px; left: 50%; transform: translateX(-50%); font-size: 10px; letter-spacing: 0.32em; text-transform: uppercase; color: #2a2a2a; z-index: 15; white-space: nowrap; }
+    .wrap { position: relative; z-index: 5; display: flex; flex-direction: column; align-items: center; text-align: center; }
+    .slide-tag { font-size: 10px; letter-spacing: 0.42em; text-transform: uppercase; color: #E97132; margin-bottom: 48px; }
+    .heading { font-size: clamp(26px, 4.2vw, 56px); font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #FFFFFF; line-height: 1.25; }
+    .heading .accent { color: #E97132; }
+    .heading .dim { color: #2a2a2a; }
+    .divider { width: 56px; height: 1px; background: #E97132; margin: 44px auto; }
+    .body { font-size: clamp(12px, 1.35vw, 16px); letter-spacing: 0.18em; text-transform: uppercase; color: #555; line-height: 2.1; max-width: 780px; }
+    .body strong { color: #E6E6E6; }
+    .body em { color: #E97132; font-style: normal; }
+    .big-quote { font-size: clamp(22px, 3.5vw, 46px); font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase; color: #FFFFFF; line-height: 1.45; max-width: 900px; }
+    .big-quote .accent { color: #E97132; }
+    .big-quote .dim { color: #333; }
+    .stat-row { display: flex; align-items: center; gap: 0; margin-bottom: 52px; }
+    .stat { text-align: center; padding: 0 52px; }
+    .stat-num { font-size: clamp(30px, 4vw, 52px); font-weight: 700; color: #E97132; letter-spacing: 0.06em; line-height: 1; margin-bottom: 10px; }
+    .stat-label { font-size: 9px; letter-spacing: 0.28em; text-transform: uppercase; color: #333; }
+    .stat-sep { width: 1px; height: 52px; background: #1a1a1a; }
+    .url-box { border: 1px solid #E97132; padding: 18px 52px; position: relative; }
+    .url-box::before { content: '▸'; position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: #E97132; }
+    .url-text { font-size: clamp(14px, 1.8vw, 22px); letter-spacing: 0.24em; text-transform: uppercase; color: #FFFFFF; }
+</style>
+</head>
+<body>
+
+  <div class="corner corner-tl"></div>
+  <div class="corner corner-tr"></div>
+  <div class="corner corner-bl"></div>
+  <div class="corner corner-br"></div>
+  <div class="bottom-strip"></div>
+  <div class="top-bar">█ &nbsp;The Brokers Terminal &nbsp;—&nbsp; Brokers Eyes Only</div>
+
+
+      <div class="wrap">
+        <div class="slide-tag">▸ The Transformation</div>
+        <div class="big-quote">
+          You were selling.<br>
+          <span class="dim">Now you're advising.</span><br><br>
+          <span class="accent">There is only one broker<br>
+          clients never leave.</span><br><br>
+          <span class="dim" style="font-size:0.7em;letter-spacing:0.1em;">
+            The one who understands their world<br>
+            better than anyone else in the room.
+          </span>
+        </div>
+      </div>
+    
+</body>
+</html>
