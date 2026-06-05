@@ -242,74 +242,55 @@
           var tier      = pending.tier      || 'individual';
           var domain    = email.split('@')[1];
 
-          // Poll for the firm the webhook should have created (up to ~15s)
+          document.querySelector('.form-intro').textContent = 'Creating your account...';
+
+          // Create auth account FIRST — before waiting for webhook
+          var userId = null;
+          var { data: signUpData } = await supabase.auth.signUp({ email: email, password: password });
+          if (signUpData && signUpData.user) {
+            userId = signUpData.user.id;
+          }
+          if (!userId) {
+            var { data: signInData } = await supabase.auth.signInWithPassword({ email: email, password: password });
+            if (signInData && signInData.user) userId = signInData.user.id;
+          }
+
+          if (!userId) {
+            document.querySelector('.form-intro').innerHTML = 'Could not create your account. <a href="signup.html" style="color:var(--accent);">Please try again</a> or email desk@thebrokersterminal.com';
+            return;
+          }
+
+          // Now poll for the firm the Stripe webhook creates (up to 20s)
+          document.querySelector('.form-intro').textContent = 'Account created — confirming your subscription...';
           var firm = null;
-          for (var attempt = 0; attempt < 10; attempt++) {
-            var query = supabase.from('firms').select('id, status').eq('domain', domain).eq('subscription_type', tier).order('created_at', { ascending: false }).limit(1);
-            var { data: firms } = await query;
+          for (var attempt = 0; attempt < 13; attempt++) {
+            var { data: firms } = await supabase.from('firms').select('id, status').eq('domain', domain).eq('subscription_type', tier).order('created_at', { ascending: false }).limit(1);
             firm = firms && firms.length > 0 ? firms[0] : null;
             if (firm && firm.status === 'active') break;
-            document.querySelector('.form-intro').textContent = 'Confirming payment with Stripe (' + (attempt + 1) + '/10)...';
             await new Promise(function(r) { setTimeout(r, 1500); });
           }
 
-          if (!firm) {
-            document.querySelector('.form-intro').innerHTML = 'Payment confirmed but account setup took too long. <a href="login.html" style="color:var(--accent);">Try logging in</a> — if that fails, contact desk@thebrokersterminal.com';
-            localStorage.removeItem('pendingSignup');
-            return;
+          // Write user record — with firm if found, without if webhook is slow
+          var upsertData = { id: userId, email: email, role: 'subscriber', status: 'active', first_name: firstName, last_name: lastName };
+          if (firm) {
+            upsertData.firm_id = firm.id;
+            await supabase.from('firms').update({ access: asset }).eq('id', firm.id);
           }
+          await supabase.from('users').upsert(upsertData, { onConflict: 'email' });
 
-          document.querySelector('.form-intro').textContent = 'Payment verified — creating your login...';
-
-          // Update desk access
-          await supabase.from('firms').update({ access: asset }).eq('id', firm.id);
-
-          // Create auth account OR sign in if already exists
-          var session = null;
-          var userId  = null;
-
-          var { data: signUpData } = await supabase.auth.signUp({ email: email, password: password });
-          if (signUpData && signUpData.user) {
-            userId  = signUpData.user.id;
-            session = signUpData.session;
-          }
-
-          if (!userId) {
-            // Account already existed — sign in with stored password
-            var { data: signInData } = await supabase.auth.signInWithPassword({ email: email, password: password });
-            if (signInData && signInData.user) {
-              userId  = signInData.user.id;
-              session = signInData.session;
-            }
-          }
-
-          if (!userId) {
-            document.querySelector('.form-intro').innerHTML = 'Account created but could not sign in automatically. <a href="login.html" style="color:var(--accent);">Click here to log in</a> with the email and password you entered.';
-            localStorage.removeItem('pendingSignup');
-            return;
-          }
-
-          // Write user record
-          await supabase.from('users').upsert({
-            id: userId, email: email, firm_id: firm.id,
-            role: 'subscriber', status: 'active',
-            first_name: firstName, last_name: lastName
-          }, { onConflict: 'email' });
-
-          // Set session in localStorage so dashboard auth check passes
+          // Set session
           var sessionId = (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36));
           localStorage.setItem('sessionId', sessionId);
-          localStorage.setItem('firmId', firm.id);
+          localStorage.setItem('firmId', firm ? firm.id : '');
           localStorage.setItem('userEmail', email);
-          await supabase.from('users').update({ current_session_id: sessionId }).eq('email', email);
+          if (firm) await supabase.from('users').update({ current_session_id: sessionId }).eq('email', email);
 
           localStorage.removeItem('pendingSignup');
 
           document.querySelector('.form-title').textContent = '█ YOU\'RE IN';
           document.querySelector('.form-subtitle').textContent = 'WELCOME TO THE BROKERS TERMINAL';
           document.querySelector('.form-intro').textContent = 'Taking you to your desk now...';
-
-          setTimeout(function() { window.location.href = 'dashboard.html'; }, 1000);
+          setTimeout(function() { window.location.href = 'dashboard.html'; }, 800);
         })();
         return; // Don't run the rest of DOMContentLoaded form setup
       }
