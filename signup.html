@@ -215,17 +215,86 @@
     var form = document.querySelector('form');
     if (!form) return;
 
-    // If returning from Stripe payment, auto-select individual and show message
+    // If returning from Stripe — auto-complete account, never show form again
     var urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('paid') === '1') {
-      var indRadio = document.querySelector('input[name="subscription-tier"][value="individual"]');
-      if (indRadio) indRadio.checked = true;
-      var errorDiv = document.getElementById('signup-error');
-      if (errorDiv) {
-        errorDiv.textContent = '✓ Payment confirmed! Now create your account below to get access.';
-        errorDiv.classList.add('visible');
-        errorDiv.style.color = 'var(--accent)';
-        errorDiv.style.borderColor = 'var(--accent)';
+      var raw = localStorage.getItem('pendingSignup');
+      if (raw) {
+        // Hide the entire form and show a status message
+        form.style.display = 'none';
+        document.querySelector('.form-title').textContent = '█ SETTING UP YOUR ACCOUNT';
+        document.querySelector('.form-subtitle').textContent = 'PAYMENT CONFIRMED — ACTIVATING ACCESS...';
+        document.querySelector('.form-intro').textContent = 'Please wait — creating your account now.';
+
+        (async function completePaidSignup() {
+          var pending;
+          try { pending = JSON.parse(raw); } catch(e) { pending = null; }
+          if (!pending || !pending.email) {
+            document.querySelector('.form-intro').innerHTML = 'Something went wrong. <a href="signup.html" style="color:var(--accent);">Please start again.</a>';
+            return;
+          }
+
+          var email     = pending.email;
+          var password  = pending.password;
+          var firstName = pending.firstName || '';
+          var lastName  = pending.lastName  || '';
+          var asset     = pending.asset     || 'gold';
+          var tier      = pending.tier      || 'individual';
+          var domain    = email.split('@')[1];
+
+          // Poll for the firm the webhook should have created (up to ~15s)
+          var firm = null;
+          for (var attempt = 0; attempt < 10; attempt++) {
+            var query = supabase.from('firms').select('id, status').eq('domain', domain).eq('subscription_type', tier).order('created_at', { ascending: false }).limit(1);
+            var { data: firms } = await query;
+            firm = firms && firms.length > 0 ? firms[0] : null;
+            if (firm && firm.status === 'active') break;
+            document.querySelector('.form-intro').textContent = 'Confirming payment with Stripe (' + (attempt + 1) + '/10)...';
+            await new Promise(function(r) { setTimeout(r, 1500); });
+          }
+
+          if (!firm) {
+            document.querySelector('.form-intro').innerHTML = 'Payment confirmed but account setup took too long. <a href="login.html" style="color:var(--accent);">Try logging in</a> — if that fails, contact desk@thebrokersterminal.com';
+            localStorage.removeItem('pendingSignup');
+            return;
+          }
+
+          document.querySelector('.form-intro').textContent = 'Payment verified — creating your login...';
+
+          // Update desk access
+          await supabase.from('firms').update({ access: asset }).eq('id', firm.id);
+
+          // Create auth account
+          var { data: authData, error: authError } = await supabase.auth.signUp({ email: email, password: password });
+
+          var userId = authData && authData.user ? authData.user.id : null;
+          if (!userId) {
+            // Account already exists — sign in to get id then sign out
+            var { data: si } = await supabase.auth.signInWithPassword({ email: email, password: password });
+            if (si && si.user) userId = si.user.id;
+            await supabase.auth.signOut();
+          }
+
+          if (userId) {
+            await supabase.from('users').upsert({
+              id: userId, email: email, firm_id: firm.id,
+              role: 'subscriber', status: 'active',
+              first_name: firstName, last_name: lastName
+            }, { onConflict: 'email' });
+          }
+
+          localStorage.removeItem('pendingSignup');
+
+          document.querySelector('.form-title').textContent = '█ YOU\'RE IN';
+          document.querySelector('.form-subtitle').textContent = 'ACCOUNT CREATED — WELCOME TO THE TERMINAL';
+          document.querySelector('.form-intro').textContent = 'Log in below with the email and password you just set up.';
+
+          var ctaDiv = document.createElement('div');
+          ctaDiv.style.marginTop = '24px';
+          ctaDiv.innerHTML = '<a class="btn btn-full btn-solid" href="login.html">█ LOG IN TO THE TERMINAL</a>';
+          document.querySelector('.form-panel').appendChild(ctaDiv);
+        })();
+        return; // Don't run the rest of DOMContentLoaded form setup
       }
     }
 
@@ -407,11 +476,13 @@
           const existingIndFirm = indFirms && indFirms.length > 0 ? indFirms[0] : null;
 
           if (!existingIndFirm) {
-            // No payment found — send to Stripe with email + asset pre-filled
+            // No payment found — save details then send to Stripe
+            localStorage.setItem('pendingSignup', JSON.stringify({
+              email, password, firstName, lastName, asset: selectedAsset, tier: 'individual'
+            }));
             const stripeBase = selectedAsset === 'whisky' ? 'https://buy.stripe.com/7sYcN5950buy4c40EJ4sE05' : 'https://buy.stripe.com/00w00j2GCeGK9wo4UZ4sE06';
             const stripeLink = stripeBase + '?prefilled_email=' + encodeURIComponent(email);
             submitBtn.textContent = 'REDIRECTING TO PAYMENT...';
-            sessionStorage.setItem('pendingAsset', selectedAsset);
             window.location.href = stripeLink;
             return;
           }
@@ -435,11 +506,13 @@
             .single();
 
           if (firmQueryError || !existingFirm) {
-            // No corporate firm found — send to Stripe with email pre-filled
+            // No corporate firm found — save details then send to Stripe
+            localStorage.setItem('pendingSignup', JSON.stringify({
+              email, password, firstName, lastName, asset: selectedAsset, tier: 'corporate'
+            }));
             const stripeBase = selectedAsset === 'whisky' ? 'https://buy.stripe.com/aFa9AT4OK7eidMEevz4sE07' : 'https://buy.stripe.com/9B6fZh5SO426gYQ5Z34sE08';
             const stripeLink = stripeBase + '?prefilled_email=' + encodeURIComponent(email);
             submitBtn.textContent = 'REDIRECTING TO PAYMENT...';
-            sessionStorage.setItem('pendingAsset', selectedAsset);
             window.location.href = stripeLink;
             return;
           }
@@ -477,10 +550,23 @@
 
         if (authError) throw new Error(authError.message);
 
-        // Create or reactivate user record (handles previously-removed users paying again)
+        // If signUp returns null user the email is already registered — redirect to login
+        if (!authData.user) {
+          if (errorDiv) {
+            errorDiv.textContent = '✓ Account already exists for this email. Please log in below.';
+            errorDiv.classList.add('visible');
+            errorDiv.style.color = 'var(--accent)';
+            errorDiv.style.borderColor = 'var(--accent)';
+          }
+          setTimeout(function () { window.location.href = 'login.html'; }, 2000);
+          return;
+        }
+
+        // Write user record — must include id so RLS policy (id = auth.uid()) passes
         const { error: userError } = await supabase
           .from('users')
           .upsert({
+            id: authData.user.id,
             email: email,
             firm_id: firmId,
             role: 'subscriber',
@@ -491,14 +577,18 @@
 
         if (userError) throw new Error('Failed to create user record: ' + userError.message);
 
-        // Success
+        // Success — log them in immediately and go to dashboard
         if (errorDiv) errorDiv.classList.remove('visible');
 
-        var tierLabel = selectedTier === 'individual' ? 'individual' : 'firm';
-        setTimeout(function () {
-          alert('Account created! Please check your email to confirm your account and start your free trial.');
-          window.location.href = 'login.html';
-        }, 500);
+        var sessionId = (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36));
+        localStorage.setItem('sessionId', sessionId);
+        localStorage.setItem('firmId', firmId);
+        localStorage.setItem('userEmail', email);
+
+        await supabase.from('users').update({ current_session_id: sessionId }).eq('email', email);
+
+        submitBtn.textContent = '✓ ACCESS GRANTED — ENTERING THE DESK...';
+        setTimeout(function () { window.location.href = 'dashboard.html'; }, 800);
 
       } catch (err) {
         if (errorDiv) {

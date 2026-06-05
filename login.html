@@ -136,13 +136,6 @@
           throw new Error(error.message);
         }
 
-        // Check if email is confirmed
-        if (!data.user.email_confirmed_at) {
-          // Email not confirmed — sign out and show error
-          await supabase.auth.signOut();
-          throw new Error('Please confirm your email before logging in. Check your inbox for a confirmation email.');
-        }
-
         // Check if user's firm is active
         const userEmail = data.user.email.toLowerCase();
         const domain = userEmail.split('@')[1];
