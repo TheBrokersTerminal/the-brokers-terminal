@@ -159,6 +159,16 @@ serve(async (req) => {
       }
     }
 
+    // ─── CHECKOUT COMPLETED — set correct desk from client_reference_id ─
+    if (event.type === "checkout.session.completed") {
+      const session = event.data.object;
+      const desk = session.client_reference_id; // 'gold' or 'whisky'
+      const customerId = session.customer;
+      if (customerId && (desk === "gold" || desk === "whisky")) {
+        await supabase.from("firms").update({ access: desk }).eq("stripe_customer_id", customerId);
+      }
+    }
+
     // ─── SUBSCRIPTION CANCELLED / EXPIRED ────────────────────────
     if (event.type === "customer.subscription.deleted") {
       const subscription = event.data.object;
