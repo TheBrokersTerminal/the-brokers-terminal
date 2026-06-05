@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>THE BROKERS TERMINAL — Subscription Confirmed</title>
   <link rel="stylesheet" href="site.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.0"></script>
 </head>
 <body>
 
@@ -12,22 +13,25 @@
   <a class="nav-brand" href="index.html">█ THE BROKERS TERMINAL</a>
   <ul class="nav-links">
     <li><a href="index.html">HOME</a></li>
-    <li><a href="dashboard.html">MY DESK</a></li>
-    <li><a href="login.html">LOG OUT</a></li>
+    <li><a href="login.html">LOGIN</a></li>
   </ul>
 </nav>
 
 <div class="success-wrap">
   <div class="success-box">
     <div class="success-icon">█</div>
-    <div class="success-title">SUBSCRIPTION CONFIRMED</div>
-    <p class="success-body">
-      Your firm's subscription to The Brokers Terminal is now active. Your first issue will be delivered this Monday morning — along with the Pitch Pack, Objection File, Training Module, Morning Line, and Week Ahead Calendar.<br><br>
-      Check your inbox for a confirmation email from Stripe with your receipt and subscription details. You can manage your subscription — including billing and cancellation — from the link in that email.
+    <div class="success-title" id="status-title">PAYMENT CONFIRMED</div>
+    <p class="success-body" id="status-body">
+      Setting up your account — this takes a few seconds...
     </p>
-    <a class="btn btn-full" href="dashboard.html">█ ACCESS YOUR DESK</a>
-    <div style="margin-top: 20px; text-align: center;">
-      <a href="index.html" style="color: var(--text-faint); font-size: 11px; letter-spacing: 0.10em;">Return to home</a>
+    <div id="cta-area" style="display:none;">
+      <a class="btn btn-full" href="login.html" id="cta-btn">█ LOG IN TO THE TERMINAL</a>
+      <div style="margin-top: 20px; text-align: center;">
+        <a href="index.html" style="color: var(--text-faint); font-size: 11px; letter-spacing: 0.10em;">Return to home</a>
+      </div>
+    </div>
+    <div id="manual-area" style="display:none; margin-top:16px;">
+      <a class="btn btn-full" href="signup.html?paid=1">█ COMPLETE YOUR ACCOUNT SETUP</a>
     </div>
   </div>
 </div>
@@ -42,5 +46,119 @@
 </footer>
 
 <script src="site.js"></script>
+<script>
+  const SUPABASE_URL = 'https://oqpodikelxhwcnjdwojw.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_hJjmJ5MYAj8aCpXL6vCMTQ_zJlxUehl';
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  var statusTitle = document.getElementById('status-title');
+  var statusBody  = document.getElementById('status-body');
+  var ctaArea     = document.getElementById('cta-area');
+  var manualArea  = document.getElementById('manual-area');
+
+  function setStatus(title, body) {
+    if (statusTitle) statusTitle.textContent = title;
+    if (statusBody)  statusBody.innerHTML    = body;
+  }
+
+  // Poll Supabase until the firm created by the Stripe webhook appears (up to ~15s)
+  async function waitForFirm(email, maxAttempts) {
+    var domain = email.split('@')[1];
+    for (var i = 0; i < maxAttempts; i++) {
+      var { data: firms } = await supabase
+        .from('firms')
+        .select('id, status')
+        .eq('domain', domain)
+        .eq('subscription_type', 'individual')
+        .order('created_at', { ascending: false })
+        .limit(1);
+      var firm = firms && firms.length > 0 ? firms[0] : null;
+      if (firm && firm.status === 'active') return firm;
+      await new Promise(function(r) { setTimeout(r, 1500); });
+    }
+    return null;
+  }
+
+  (async function () {
+    var raw = localStorage.getItem('pendingSignup');
+
+    // No pending signup saved — user came here directly (e.g. pricing page link)
+    if (!raw) {
+      setStatus('PAYMENT CONFIRMED', 'Your subscription is live. Log in below using the account you created, or <a href="signup.html?paid=1" style="color:var(--accent);">complete your account setup</a> if you haven\'t done so yet.');
+      ctaArea.style.display = 'block';
+      return;
+    }
+
+    var pending;
+    try { pending = JSON.parse(raw); } catch(e) { pending = null; }
+
+    if (!pending || !pending.email || !pending.password) {
+      setStatus('PAYMENT CONFIRMED', 'Your payment went through. <a href="signup.html?paid=1" style="color:var(--accent);">Click here to complete your account setup.</a>');
+      manualArea.style.display = 'block';
+      return;
+    }
+
+    var email     = pending.email;
+    var password  = pending.password;
+    var firstName = pending.firstName || '';
+    var lastName  = pending.lastName  || '';
+    var asset     = pending.asset     || 'gold';
+
+    setStatus('PAYMENT CONFIRMED', 'Setting up your account — hold tight...');
+
+    // Wait for Stripe webhook to create the firm (up to ~15 seconds)
+    var firm = await waitForFirm(email, 10);
+
+    if (!firm) {
+      setStatus('ALMOST THERE', 'Your payment is confirmed but the account link is taking a moment. <a href="signup.html?paid=1" style="color:var(--accent);">Click here to finish setup.</a>');
+      localStorage.setItem('pendingSignup', raw); // keep it for signup.html
+      manualArea.style.display = 'block';
+      return;
+    }
+
+    // Update firm access to the chosen desk
+    await supabase.from('firms').update({ access: asset }).eq('id', firm.id);
+
+    // Create the auth account
+    var { data: authData, error: authError } = await supabase.auth.signUp({
+      email: email,
+      password: password
+    });
+
+    if (authError && authError.message !== 'User already registered') {
+      setStatus('SETUP ERROR', 'Something went wrong creating your account. <a href="signup.html?paid=1" style="color:var(--accent);">Click here to try again.</a>');
+      manualArea.style.display = 'block';
+      return;
+    }
+
+    var userId = authData && authData.user ? authData.user.id : null;
+
+    // If user already existed, fetch their id
+    if (!userId) {
+      var { data: { user: existingUser } } = await supabase.auth.signInWithPassword({ email, password });
+      if (existingUser) userId = existingUser.id;
+      await supabase.auth.signOut();
+    }
+
+    // Write the users row
+    if (userId) {
+      await supabase.from('users').upsert({
+        id: userId,
+        email: email,
+        firm_id: firm.id,
+        role: 'subscriber',
+        status: 'active',
+        first_name: firstName,
+        last_name: lastName
+      }, { onConflict: 'email' });
+    }
+
+    // Clear saved details
+    localStorage.removeItem('pendingSignup');
+
+    setStatus('YOU\'RE IN', 'Account created. Log in below with the email and password you just set up.');
+    ctaArea.style.display = 'block';
+  })();
+</script>
 </body>
 </html>
