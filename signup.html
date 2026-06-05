@@ -467,7 +467,7 @@
             localStorage.setItem('pendingAsset', selectedAsset);
             const stripeBase = selectedAsset === 'whisky' ? 'https://buy.stripe.com/7sYcN5950buy4c40EJ4sE05' : 'https://buy.stripe.com/00w00j2GCeGK9wo4UZ4sE06';
             submitBtn.textContent = 'REDIRECTING TO PAYMENT...';
-            window.location.href = stripeBase + '?prefilled_email=' + encodeURIComponent(email);
+            window.location.href = stripeBase + '?prefilled_email=' + encodeURIComponent(email) + '&client_reference_id=' + selectedAsset;
             return;
           }
 
@@ -501,7 +501,7 @@
             localStorage.setItem('pendingAsset', selectedAsset);
             const stripeBase = selectedAsset === 'whisky' ? 'https://buy.stripe.com/aFa9AT4OK7eidMEevz4sE07' : 'https://buy.stripe.com/9B6fZh5SO426gYQ5Z34sE08';
             submitBtn.textContent = 'REDIRECTING TO PAYMENT...';
-            window.location.href = stripeBase + '?prefilled_email=' + encodeURIComponent(email);
+            window.location.href = stripeBase + '?prefilled_email=' + encodeURIComponent(email) + '&client_reference_id=' + selectedAsset;
             return;
           }
 
