@@ -427,8 +427,10 @@
   <span class="dashboard-masthead-center">SUBSCRIBER DESK</span>
   <div class="dashboard-masthead-right">
     <span>Welcome, <strong style="color: var(--text);" id="user-name">loading...</strong></span>
-    <a href="#" id="manage-subscription-btn" style="color:var(--text-muted); font-size:11px; letter-spacing:0.08em; margin-right:4px;">MANAGE SUBSCRIPTION</a>
+    <a href="#" id="manage-subscription-btn" style="color:var(--text-muted); font-size:11px; letter-spacing:0.08em;">MANAGE SUBSCRIPTION</a>
     <span style="color:var(--text-faint);">|</span>
+    <a href="#" id="manage-team-btn" style="display:none; color:var(--text-muted); font-size:11px; letter-spacing:0.08em;">MANAGE TEAM</a>
+    <span id="manage-team-sep" style="display:none; color:var(--text-faint);">|</span>
     <a href="#" id="logout-btn">LOG OUT</a>
   </div>
 </div>
@@ -475,16 +477,17 @@
   <!-- populated by JS -->
 </div>
 
-<!-- ══ YOUR TEAM ═════════════════════════════════════════════════ -->
-<div class="team-panel" id="team-panel" style="display:none;">
-  <div class="team-header">
-    <div class="team-header-left">
-      <div class="team-title">▸ YOUR TEAM</div>
-      <div class="team-seats" id="team-seats">— / — SEATS USED</div>
+<!-- ══ YOUR TEAM MODAL ════════════════════════════════════════════ -->
+<div id="team-panel" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:9000; align-items:flex-start; justify-content:center; padding-top:60px;">
+  <div style="background:var(--bg-raised); border:1px solid var(--border-dim); width:100%; max-width:860px; max-height:80vh; overflow-y:auto; padding:32px 40px; position:relative;">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:24px;">
+      <div>
+        <div class="team-title" style="font-size:11px; letter-spacing:0.28em; color:var(--accent);">▸ YOUR TEAM</div>
+        <div class="team-seats" id="team-seats" style="font-size:10px; letter-spacing:0.18em; color:var(--text-faint); margin-top:4px;">— / — SEATS USED</div>
+      </div>
+      <button onclick="document.getElementById('team-panel').style.display='none';" style="background:none; border:1px solid var(--border-dim); color:var(--text-faint); font-family:var(--font); font-size:9px; letter-spacing:0.22em; padding:6px 14px; cursor:pointer;">✕ CLOSE</button>
     </div>
-    <button class="team-toggle" id="team-toggle" onclick="document.getElementById('team-body').classList.toggle('open'); this.textContent = document.getElementById('team-body').classList.contains('open') ? '▴ HIDE' : '▾ MANAGE TEAM'">▾ MANAGE TEAM</button>
-  </div>
-  <div class="team-body" id="team-body">
+  <div class="team-body open" id="team-body">
 
     <!-- Invite link (admin only) -->
     <div class="team-invite-wrap" id="team-invite-section">
@@ -513,6 +516,7 @@
       <div style="color:var(--text-faint); font-size:11px; letter-spacing:0.12em;">Loading team...</div>
     </div>
 
+  </div>
   </div>
 </div>
 
@@ -1166,10 +1170,13 @@
       }
     };
 
-    // Only show team panel to admins of corporate accounts
+    // Only show team management to admins of corporate accounts
     if (isAdmin && maxSeats > 1 && canonicalFirmId) {
-      var teamPanel = document.getElementById('team-panel');
-      if (teamPanel) teamPanel.style.display = 'block';
+      // Show "MANAGE TEAM" link in header
+      var manageTeamBtn = document.getElementById('manage-team-btn');
+      var manageTeamSep = document.getElementById('manage-team-sep');
+      if (manageTeamBtn) manageTeamBtn.style.display = 'inline';
+      if (manageTeamSep) manageTeamSep.style.display = 'inline';
 
       // Invite link
       var inviteUrl = window.location.origin + '/signup.html?invite=' + canonicalFirmId;
@@ -1183,6 +1190,14 @@
       window._maxSeats = maxSeats;
 
       await window.loadTeamRoster();
+
+      // Open modal on click
+      if (manageTeamBtn) {
+        manageTeamBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          document.getElementById('team-panel').style.display = 'flex';
+        });
+      }
     }
 
     // Manage Subscription
