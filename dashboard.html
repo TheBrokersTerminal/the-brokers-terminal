@@ -988,14 +988,25 @@
         .single();
       firmRow = firmById;
     } else {
-      // Fallback: look up by domain (corporate accounts)
-      const { data: firmByDomain } = await supabase
+      // Fallback 1: corporate firm by domain
+      const { data: corpFirm } = await supabase
         .from('firms')
         .select('id, company_name, access, stripe_customer_id, subscription_type, max_users')
         .eq('domain', domain)
         .eq('subscription_type', 'corporate')
         .maybeSingle();
-      firmRow = firmByDomain;
+      firmRow = corpFirm;
+
+      // Fallback 2: individual firm by owner_email (handles gmail.com etc.)
+      if (!firmRow) {
+        const { data: indFirm } = await supabase
+          .from('firms')
+          .select('id, company_name, access, stripe_customer_id, subscription_type, max_users')
+          .eq('owner_email', userEmail)
+          .eq('subscription_type', 'individual')
+          .maybeSingle();
+        firmRow = indFirm;
+      }
 
       // Self-heal: write firm_id back — but never for explicitly removed users
       if (firmRow && firmRow.id && (!userRow || userRow.status !== 'removed')) {

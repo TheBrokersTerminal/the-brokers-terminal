@@ -95,9 +95,17 @@ serve(async (req) => {
       const isActive = ["active", "trialing"].includes(subStatus);
       const firmStatus = isActive ? "active" : "inactive";
 
+      // Look up desk choice from the most recent checkout session
+      const sessRes = await fetch(`https://api.stripe.com/v1/checkout/sessions?customer=${customerId}&limit=1`, {
+        headers: { Authorization: `Bearer ${STRIPE_SECRET_KEY}` },
+      });
+      const sessData = await sessRes.json();
+      const latestSession = sessData?.data?.[0];
+      const desk = (latestSession?.client_reference_id === "gold" || latestSession?.client_reference_id === "whisky")
+        ? latestSession.client_reference_id
+        : "both";
+
       if (tier === "individual") {
-        // ── INDIVIDUAL: firm per Stripe customer ─────────────────────
-        // Look up by stripe_customer_id first (most reliable)
         const { data: existing } = await supabase
           .from("firms")
           .select("id")
@@ -105,28 +113,26 @@ serve(async (req) => {
           .maybeSingle();
 
         if (existing) {
-          await supabase
-            .from("firms")
-            .update({
-              status: firmStatus,
-              stripe_subscription_id: subscriptionId,
-            })
-            .eq("id", existing.id);
+          await supabase.from("firms").update({
+            status: firmStatus,
+            stripe_subscription_id: subscriptionId,
+            access: desk,
+          }).eq("id", existing.id);
         } else {
           await supabase.from("firms").insert([{
             company_name: email.split("@")[0],
             domain: domain,
+            owner_email: email,
             subscription_type: "individual",
             max_users: 1,
             status: firmStatus,
             stripe_customer_id: customerId,
             stripe_subscription_id: subscriptionId,
-            access: "both",
+            access: desk,
           }]);
         }
 
       } else {
-        // ── CORPORATE: firm per domain ───────────────────────────────
         const { data: existing } = await supabase
           .from("firms")
           .select("id")
@@ -135,15 +141,13 @@ serve(async (req) => {
           .maybeSingle();
 
         if (existing) {
-          await supabase
-            .from("firms")
-            .update({
-              status: firmStatus,
-              stripe_customer_id: customerId,
-              stripe_subscription_id: subscriptionId,
-              updated_at: new Date().toISOString(),
-            })
-            .eq("id", existing.id);
+          await supabase.from("firms").update({
+            status: firmStatus,
+            stripe_customer_id: customerId,
+            stripe_subscription_id: subscriptionId,
+            access: desk,
+            updated_at: new Date().toISOString(),
+          }).eq("id", existing.id);
         } else {
           await supabase.from("firms").insert([{
             company_name: domain,
@@ -153,7 +157,7 @@ serve(async (req) => {
             status: firmStatus,
             stripe_customer_id: customerId,
             stripe_subscription_id: subscriptionId,
-            access: "both",
+            access: desk,
           }]);
         }
       }
