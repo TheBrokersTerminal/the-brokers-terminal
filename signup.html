@@ -251,7 +251,14 @@
 
           if (firm) {
             await supabase.from('firms').update({ access: asset }).eq('id', firm.id);
-            await supabase.from('users').update({ firm_id: firm.id }).eq('email', userEmail);
+
+            // First user on a corporate firm becomes admin, everyone else stays subscriber
+            var { data: firmFull } = await supabase.from('firms').select('max_users').eq('id', firm.id).maybeSingle();
+            var isCorporate = firmFull && firmFull.max_users > 1;
+            var { count: existingUsers } = await supabase.from('users').select('id', { count: 'exact', head: true }).eq('firm_id', firm.id);
+            var assignedRole = (isCorporate && existingUsers === 0) ? 'admin' : 'subscriber';
+
+            await supabase.from('users').update({ firm_id: firm.id, role: assignedRole }).eq('email', userEmail);
 
             var sessionId = (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36));
             localStorage.setItem('sessionId', sessionId);
