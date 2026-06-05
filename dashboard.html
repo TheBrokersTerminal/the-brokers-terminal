@@ -1199,7 +1199,7 @@
           });
           const data = await response.json();
           if (data.url) {
-            window.location.href = data.url;
+            window.open(data.url, '_blank');
           } else if (data.error === 'NO_STRIPE_CUSTOMER') {
             alert('Your account was created manually. To cancel or manage your subscription, please contact us at desk@thebrokersterminal.com');
           } else {
