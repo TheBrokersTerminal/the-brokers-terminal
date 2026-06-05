@@ -395,19 +395,22 @@
 
         if (selectedTier === 'individual') {
           // INDIVIDUAL TIER: firm MUST already exist, created by Stripe webhook after payment
-          const { data: existingIndFirm } = await supabase
+          // Look up by domain + individual subscription type (webhook creates it this way)
+          const { data: indFirms } = await supabase
             .from('firms')
-            .select('id, status')
-            .eq('owner_email', email)
+            .select('id, status, created_at')
+            .eq('domain', domain)
             .eq('subscription_type', 'individual')
-            .maybeSingle();
+            .order('created_at', { ascending: false })
+            .limit(1);
+
+          const existingIndFirm = indFirms && indFirms.length > 0 ? indFirms[0] : null;
 
           if (!existingIndFirm) {
             // No payment found — send to Stripe with email + asset pre-filled
             const stripeBase = selectedAsset === 'whisky' ? 'https://buy.stripe.com/7sYcN5950buy4c40EJ4sE05' : 'https://buy.stripe.com/00w00j2GCeGK9wo4UZ4sE06';
             const stripeLink = stripeBase + '?prefilled_email=' + encodeURIComponent(email);
             submitBtn.textContent = 'REDIRECTING TO PAYMENT...';
-            // Store asset choice so it's remembered when they return
             sessionStorage.setItem('pendingAsset', selectedAsset);
             window.location.href = stripeLink;
             return;
@@ -474,16 +477,17 @@
 
         if (authError) throw new Error(authError.message);
 
-        // Create user record with first and last name
+        // Create or reactivate user record (handles previously-removed users paying again)
         const { error: userError } = await supabase
           .from('users')
-          .insert([{
+          .upsert({
             email: email,
             firm_id: firmId,
             role: 'subscriber',
+            status: 'active',
             first_name: firstName,
             last_name: lastName
-          }]);
+          }, { onConflict: 'email' });
 
         if (userError) throw new Error('Failed to create user record: ' + userError.message);
 
