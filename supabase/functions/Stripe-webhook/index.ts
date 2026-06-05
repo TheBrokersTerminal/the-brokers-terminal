@@ -96,12 +96,12 @@ serve(async (req) => {
       const firmStatus = isActive ? "active" : "inactive";
 
       if (tier === "individual") {
-        // ── INDIVIDUAL: firm per email address ──────────────────────
+        // ── INDIVIDUAL: firm per Stripe customer ─────────────────────
+        // Look up by stripe_customer_id first (most reliable)
         const { data: existing } = await supabase
           .from("firms")
           .select("id")
-          .eq("owner_email", email)
-          .eq("subscription_type", "individual")
+          .eq("stripe_customer_id", customerId)
           .maybeSingle();
 
         if (existing) {
@@ -109,16 +109,13 @@ serve(async (req) => {
             .from("firms")
             .update({
               status: firmStatus,
-              stripe_customer_id: customerId,
               stripe_subscription_id: subscriptionId,
-              updated_at: new Date().toISOString(),
             })
             .eq("id", existing.id);
         } else {
           await supabase.from("firms").insert([{
             company_name: email.split("@")[0],
             domain: domain,
-            owner_email: email,
             subscription_type: "individual",
             max_users: 1,
             status: firmStatus,
