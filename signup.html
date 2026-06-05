@@ -264,35 +264,52 @@
           // Update desk access
           await supabase.from('firms').update({ access: asset }).eq('id', firm.id);
 
-          // Create auth account
-          var { data: authData, error: authError } = await supabase.auth.signUp({ email: email, password: password });
+          // Create auth account OR sign in if already exists
+          var session = null;
+          var userId  = null;
 
-          var userId = authData && authData.user ? authData.user.id : null;
+          var { data: signUpData } = await supabase.auth.signUp({ email: email, password: password });
+          if (signUpData && signUpData.user) {
+            userId  = signUpData.user.id;
+            session = signUpData.session;
+          }
+
           if (!userId) {
-            // Account already exists — sign in to get id then sign out
-            var { data: si } = await supabase.auth.signInWithPassword({ email: email, password: password });
-            if (si && si.user) userId = si.user.id;
-            await supabase.auth.signOut();
+            // Account already existed — sign in with stored password
+            var { data: signInData } = await supabase.auth.signInWithPassword({ email: email, password: password });
+            if (signInData && signInData.user) {
+              userId  = signInData.user.id;
+              session = signInData.session;
+            }
           }
 
-          if (userId) {
-            await supabase.from('users').upsert({
-              id: userId, email: email, firm_id: firm.id,
-              role: 'subscriber', status: 'active',
-              first_name: firstName, last_name: lastName
-            }, { onConflict: 'email' });
+          if (!userId) {
+            document.querySelector('.form-intro').innerHTML = 'Account created but could not sign in automatically. <a href="login.html" style="color:var(--accent);">Click here to log in</a> with the email and password you entered.';
+            localStorage.removeItem('pendingSignup');
+            return;
           }
+
+          // Write user record
+          await supabase.from('users').upsert({
+            id: userId, email: email, firm_id: firm.id,
+            role: 'subscriber', status: 'active',
+            first_name: firstName, last_name: lastName
+          }, { onConflict: 'email' });
+
+          // Set session in localStorage so dashboard auth check passes
+          var sessionId = (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36));
+          localStorage.setItem('sessionId', sessionId);
+          localStorage.setItem('firmId', firm.id);
+          localStorage.setItem('userEmail', email);
+          await supabase.from('users').update({ current_session_id: sessionId }).eq('email', email);
 
           localStorage.removeItem('pendingSignup');
 
           document.querySelector('.form-title').textContent = '█ YOU\'RE IN';
-          document.querySelector('.form-subtitle').textContent = 'ACCOUNT CREATED — WELCOME TO THE TERMINAL';
-          document.querySelector('.form-intro').textContent = 'Log in below with the email and password you just set up.';
+          document.querySelector('.form-subtitle').textContent = 'WELCOME TO THE BROKERS TERMINAL';
+          document.querySelector('.form-intro').textContent = 'Taking you to your desk now...';
 
-          var ctaDiv = document.createElement('div');
-          ctaDiv.style.marginTop = '24px';
-          ctaDiv.innerHTML = '<a class="btn btn-full btn-solid" href="login.html">█ LOG IN TO THE TERMINAL</a>';
-          document.querySelector('.form-panel').appendChild(ctaDiv);
+          setTimeout(function() { window.location.href = 'dashboard.html'; }, 1000);
         })();
         return; // Don't run the rest of DOMContentLoaded form setup
       }
