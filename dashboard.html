@@ -36,13 +36,9 @@
       display: flex;
       gap: 0;
       white-space: nowrap;
-      animation: ticker-scroll 40s linear infinite;
+      will-change: transform;
     }
     .ticker-track:hover { animation-play-state: paused; }
-    @keyframes ticker-scroll {
-      0%   { transform: translateX(0); }
-      100% { transform: translateX(-50%); }
-    }
     .ticker-item {
       display: inline-flex;
       align-items: center;
@@ -1482,13 +1478,35 @@
       items.forEach(function(item) { setHtml += buildItemHtml(item); });
     }
 
-    // Duplicate the full set for seamless loop (translateX -50%)
-    track.innerHTML = setHtml + setHtml;
+    // Build one set, measure it, then duplicate for seamless loop
+    track.innerHTML = setHtml;
     ticker.style.display = 'flex';
 
-    // Speed: scale with total item count so it feels consistent
-    var duration = Math.max(20, reps * items.length * 6);
-    track.style.animationDuration = duration + 's';
+    // Wait for layout then start JS-driven scroll
+    requestAnimationFrame(function() {
+      var singleWidth = track.scrollWidth;
+      track.innerHTML = setHtml + setHtml;
+
+      var speed = 60; // pixels per second
+      var pos = 0;
+      var paused = false;
+      track.closest('.ticker-track-wrap').addEventListener('mouseenter', function() { paused = true; });
+      track.closest('.ticker-track-wrap').addEventListener('mouseleave', function() { paused = false; });
+
+      var last = null;
+      function step(ts) {
+        if (!last) last = ts;
+        var delta = ts - last;
+        last = ts;
+        if (!paused) {
+          pos += speed * (delta / 1000);
+          if (pos >= singleWidth) pos -= singleWidth;
+          track.style.transform = 'translateX(-' + pos + 'px)';
+        }
+        requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    });
   }
 
   /* ── Build featured card for Gold / Whisky panel ───────────── */
