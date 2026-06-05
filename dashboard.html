@@ -1016,6 +1016,16 @@
       }
     }
 
+    // No active firm = no access — sign out immediately
+    if (!firmRow || firmRow.status !== 'active') {
+      await supabase.auth.signOut();
+      localStorage.removeItem('sessionId');
+      localStorage.removeItem('firmId');
+      localStorage.removeItem('userEmail');
+      window.location.href = 'login.html?reason=inactive';
+      return;
+    }
+
     if (firmRow && firmRow.access) firmAccess = firmRow.access;
 
     // Hide "Manage Subscription" button if no Stripe customer linked (e.g. admin/manual accounts)
