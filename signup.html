@@ -215,85 +215,60 @@
     var form = document.querySelector('form');
     if (!form) return;
 
-    // If returning from Stripe — auto-complete account, never show form again
+    // If returning from Stripe — use active session to link firm, go to dashboard
     var urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('paid') === '1') {
-      var raw = localStorage.getItem('pendingSignup');
-      if (raw) {
-        // Hide the entire form and show a status message
-        form.style.display = 'none';
-        document.querySelector('.form-title').textContent = '█ SETTING UP YOUR ACCOUNT';
-        document.querySelector('.form-subtitle').textContent = 'PAYMENT CONFIRMED — ACTIVATING ACCESS...';
-        document.querySelector('.form-intro').textContent = 'Please wait — creating your account now.';
+      form.style.display = 'none';
+      document.querySelector('.form-title').textContent = '█ ACTIVATING YOUR ACCESS';
+      document.querySelector('.form-subtitle').textContent = 'PAYMENT CONFIRMED — SETTING UP YOUR DESK...';
+      document.querySelector('.form-intro').textContent = 'Please wait a moment.';
 
-        (async function completePaidSignup() {
-          var pending;
-          try { pending = JSON.parse(raw); } catch(e) { pending = null; }
-          if (!pending || !pending.email) {
-            document.querySelector('.form-intro').innerHTML = 'Something went wrong. <a href="signup.html" style="color:var(--accent);">Please start again.</a>';
+      (async function activateAfterPayment() {
+        try {
+          var { data: { session } } = await supabase.auth.getSession();
+          if (!session) {
+            document.querySelector('.form-intro').innerHTML = 'Session expired — <a href="login.html" style="color:var(--accent);">click here to log in</a> with the credentials you created.';
             return;
           }
 
-          var email     = pending.email;
-          var password  = pending.password;
-          var firstName = pending.firstName || '';
-          var lastName  = pending.lastName  || '';
-          var asset     = pending.asset     || 'gold';
-          var tier      = pending.tier      || 'individual';
-          var domain    = email.split('@')[1];
+          var userEmail = session.user.email.toLowerCase();
+          var domain    = userEmail.split('@')[1];
+          var asset     = sessionStorage.getItem('pendingAsset') || 'gold';
+          sessionStorage.removeItem('pendingAsset');
 
-          document.querySelector('.form-intro').textContent = 'Creating your account...';
+          document.querySelector('.form-intro').textContent = 'Confirming subscription with Stripe...';
 
-          // Create auth account FIRST — before waiting for webhook
-          var userId = null;
-          var { data: signUpData } = await supabase.auth.signUp({ email: email, password: password });
-          if (signUpData && signUpData.user) {
-            userId = signUpData.user.id;
-          }
-          if (!userId) {
-            var { data: signInData } = await supabase.auth.signInWithPassword({ email: email, password: password });
-            if (signInData && signInData.user) userId = signInData.user.id;
-          }
-
-          if (!userId) {
-            document.querySelector('.form-intro').innerHTML = 'Could not create your account. <a href="signup.html" style="color:var(--accent);">Please try again</a> or email desk@thebrokersterminal.com';
-            return;
-          }
-
-          // Now poll for the firm the Stripe webhook creates (up to 20s)
-          document.querySelector('.form-intro').textContent = 'Account created — confirming your subscription...';
+          // Poll for firm (webhook fires within a few seconds)
           var firm = null;
-          for (var attempt = 0; attempt < 13; attempt++) {
-            var { data: firms } = await supabase.from('firms').select('id, status').eq('domain', domain).eq('subscription_type', tier).order('created_at', { ascending: false }).limit(1);
+          for (var i = 0; i < 13; i++) {
+            var { data: firms } = await supabase.from('firms').select('id, status')
+              .eq('domain', domain).eq('status', 'active')
+              .order('created_at', { ascending: false }).limit(1);
             firm = firms && firms.length > 0 ? firms[0] : null;
-            if (firm && firm.status === 'active') break;
+            if (firm) break;
             await new Promise(function(r) { setTimeout(r, 1500); });
           }
 
-          // Write user record — with firm if found, without if webhook is slow
-          var upsertData = { id: userId, email: email, role: 'subscriber', status: 'active', first_name: firstName, last_name: lastName };
           if (firm) {
-            upsertData.firm_id = firm.id;
             await supabase.from('firms').update({ access: asset }).eq('id', firm.id);
+            await supabase.from('users').update({ firm_id: firm.id }).eq('email', userEmail);
+
+            var sessionId = (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36));
+            localStorage.setItem('sessionId', sessionId);
+            localStorage.setItem('firmId', firm.id);
+            localStorage.setItem('userEmail', userEmail);
+            await supabase.from('users').update({ current_session_id: sessionId }).eq('email', userEmail);
           }
-          await supabase.from('users').upsert(upsertData, { onConflict: 'email' });
-
-          // Set session
-          var sessionId = (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36));
-          localStorage.setItem('sessionId', sessionId);
-          localStorage.setItem('firmId', firm ? firm.id : '');
-          localStorage.setItem('userEmail', email);
-          if (firm) await supabase.from('users').update({ current_session_id: sessionId }).eq('email', email);
-
-          localStorage.removeItem('pendingSignup');
 
           document.querySelector('.form-title').textContent = '█ YOU\'RE IN';
-          document.querySelector('.form-subtitle').textContent = 'WELCOME TO THE BROKERS TERMINAL';
           document.querySelector('.form-intro').textContent = 'Taking you to your desk now...';
           setTimeout(function() { window.location.href = 'dashboard.html'; }, 800);
-        })();
-        return; // Don't run the rest of DOMContentLoaded form setup
-      }
+
+        } catch(err) {
+          document.querySelector('.form-intro').innerHTML = 'Something went wrong. <a href="login.html" style="color:var(--accent);">Try logging in</a> or contact desk@thebrokersterminal.com';
+        }
+      })();
+      return;
     }
 
     // Highlight selected plan card
@@ -474,14 +449,18 @@
           const existingIndFirm = indFirms && indFirms.length > 0 ? indFirms[0] : null;
 
           if (!existingIndFirm) {
-            // No payment found — save details then send to Stripe
-            localStorage.setItem('pendingSignup', JSON.stringify({
-              email, password, firstName, lastName, asset: selectedAsset, tier: 'individual'
-            }));
+            // No payment yet — create auth account first, then send to Stripe
+            submitBtn.textContent = 'SETTING UP ACCOUNT...';
+            var { data: preAuth } = await supabase.auth.signUp({ email: email, password: password });
+            if (!preAuth.user) {
+              await supabase.auth.signInWithPassword({ email: email, password: password });
+            } else {
+              await supabase.from('users').upsert({ id: preAuth.user.id, email: email, first_name: firstName, last_name: lastName, role: 'subscriber', status: 'active' }, { onConflict: 'email' });
+            }
+            sessionStorage.setItem('pendingAsset', selectedAsset);
             const stripeBase = selectedAsset === 'whisky' ? 'https://buy.stripe.com/7sYcN5950buy4c40EJ4sE05' : 'https://buy.stripe.com/00w00j2GCeGK9wo4UZ4sE06';
-            const stripeLink = stripeBase + '?prefilled_email=' + encodeURIComponent(email);
             submitBtn.textContent = 'REDIRECTING TO PAYMENT...';
-            window.location.href = stripeLink;
+            window.location.href = stripeBase + '?prefilled_email=' + encodeURIComponent(email);
             return;
           }
 
@@ -504,14 +483,18 @@
             .single();
 
           if (firmQueryError || !existingFirm) {
-            // No corporate firm found — save details then send to Stripe
-            localStorage.setItem('pendingSignup', JSON.stringify({
-              email, password, firstName, lastName, asset: selectedAsset, tier: 'corporate'
-            }));
+            // No payment yet — create auth account first, then send to Stripe
+            submitBtn.textContent = 'SETTING UP ACCOUNT...';
+            var { data: preAuth } = await supabase.auth.signUp({ email: email, password: password });
+            if (!preAuth.user) {
+              await supabase.auth.signInWithPassword({ email: email, password: password });
+            } else {
+              await supabase.from('users').upsert({ id: preAuth.user.id, email: email, first_name: firstName, last_name: lastName, role: 'subscriber', status: 'active' }, { onConflict: 'email' });
+            }
+            sessionStorage.setItem('pendingAsset', selectedAsset);
             const stripeBase = selectedAsset === 'whisky' ? 'https://buy.stripe.com/aFa9AT4OK7eidMEevz4sE07' : 'https://buy.stripe.com/9B6fZh5SO426gYQ5Z34sE08';
-            const stripeLink = stripeBase + '?prefilled_email=' + encodeURIComponent(email);
             submitBtn.textContent = 'REDIRECTING TO PAYMENT...';
-            window.location.href = stripeLink;
+            window.location.href = stripeBase + '?prefilled_email=' + encodeURIComponent(email);
             return;
           }
 
