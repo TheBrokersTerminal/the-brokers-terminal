@@ -97,7 +97,10 @@
       </div>
       <div class="form-group">
         <label class="form-label" for="password">CREATE A PASSWORD</label>
-        <input class="form-input" id="password" type="password" placeholder="••••••••••••" autocomplete="new-password" required>
+        <div style="position:relative;">
+          <input class="form-input" id="password" type="password" placeholder="••••••••••••" autocomplete="new-password" required style="padding-right:70px;">
+          <button type="button" onclick="var p=document.getElementById('password');var b=this;if(p.type==='password'){p.type='text';b.textContent='HIDE';}else{p.type='password';b.textContent='SHOW';}" style="position:absolute;right:0;top:0;height:100%;background:none;border:none;border-left:1px solid var(--border-dim);color:var(--text-faint);font-family:var(--font);font-size:9px;letter-spacing:0.22em;padding:0 14px;cursor:pointer;">SHOW</button>
+        </div>
       </div>
       <div class="form-group" id="company-group" style="display: none;">
         <label class="form-label" for="company">COMPANY / FIRM NAME</label>

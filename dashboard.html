@@ -1153,9 +1153,9 @@
       if (!confirm('Remove ' + email + ' from your team?\n\nThey will lose access to the terminal immediately.')) return;
 
       try {
-        // Mark as removed + null firm_id — blocks re-entry via domain fallback
+        // Mark as removed — keep firm_id so they stay grouped under their firm in admin
         const { error } = await supabase.from('users')
-          .update({ firm_id: null, status: 'removed' })
+          .update({ status: 'removed' })
           .eq('email', email)
           .eq('firm_id', window._canonicalFirmId);
 

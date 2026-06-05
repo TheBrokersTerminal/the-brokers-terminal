@@ -183,7 +183,10 @@
     <form id="gate-form">
       <div class="form-group">
         <label class="form-label" for="admin-pw">ADMIN PASSWORD</label>
-        <input class="form-input" id="admin-pw" type="password" placeholder="Enter admin password" autocomplete="off">
+        <div style="position:relative;">
+          <input class="form-input" id="admin-pw" type="password" placeholder="Enter admin password" autocomplete="off" style="padding-right:70px;">
+          <button type="button" onclick="var p=document.getElementById('admin-pw');var b=this;if(p.type==='password'){p.type='text';b.textContent='HIDE';}else{p.type='password';b.textContent='SHOW';}" style="position:absolute;right:0;top:0;height:100%;background:none;border:none;border-left:1px solid var(--border-dim);color:var(--text-faint);font-family:var(--font);font-size:9px;letter-spacing:0.22em;padding:0 14px;cursor:pointer;">SHOW</button>
+        </div>
       </div>
       <div class="form-err" id="gate-error"></div>
       <button class="btn btn-full btn-solid" type="submit">█ ENTER ADMIN PANEL</button>
@@ -434,11 +437,17 @@
     <div class="admin-section" id="tab-subscribers">
 
       <div class="filter-bar">
-        <input type="text" id="sub-search" placeholder="Search name or email..." oninput="filterSubscribers()" style="min-width: 240px;">
+        <input type="text" id="sub-search" placeholder="Search firm, name or email..." oninput="filterSubscribers()" style="min-width: 240px;">
         <select id="sub-filter-status" onchange="filterSubscribers()">
           <option value="all">ALL STATUS</option>
           <option value="active">Active</option>
           <option value="inactive">Inactive</option>
+          <option value="removed">Removed</option>
+        </select>
+        <select id="sub-filter-plan" onchange="filterSubscribers()">
+          <option value="all">ALL PLANS</option>
+          <option value="corporate">Corporate</option>
+          <option value="individual">Individual</option>
         </select>
         <span style="color: var(--text-faint); font-size: 10px; letter-spacing: 0.14em; margin-left: 8px;" id="subs-count"></span>
       </div>
@@ -447,18 +456,17 @@
         <table class="admin-table">
           <thead>
             <tr>
-              <th>ONLINE</th>
-              <th>NAME</th>
-              <th>EMAIL</th>
-              <th>FIRM</th>
+              <th>FIRM / NAME</th>
+              <th>DOMAIN / EMAIL</th>
               <th>PLAN</th>
+              <th>USERS</th>
+              <th>ONLINE</th>
               <th>STATUS</th>
-              <th>LAST SEEN</th>
-              <th>JOINED</th>
+              <th>ACTIONS</th>
             </tr>
           </thead>
           <tbody id="subscribers-tbody">
-            <tr class="loading-row"><td colspan="6">LOADING SUBSCRIBERS...</td></tr>
+            <tr class="loading-row"><td colspan="7">LOADING SUBSCRIBERS...</td></tr>
           </tbody>
         </table>
       </div>
@@ -861,71 +869,222 @@
 
   function renderSubscribersTable(subs) {
     var tbody = document.getElementById('subscribers-tbody');
-    document.getElementById('subs-count').textContent = subs.length + ' SUBSCRIBERS';
+    var now   = new Date();
+
+    var activeCount  = subs.filter(function(u) { return u.status !== 'removed'; }).length;
+    var removedCount = subs.length - activeCount;
+    document.getElementById('subs-count').textContent =
+      activeCount + ' SUBSCRIBER' + (activeCount !== 1 ? 'S' : '') +
+      (removedCount > 0 ? ' · ' + removedCount + ' REMOVED' : '');
 
     if (!subs.length) {
-      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:var(--text-faint); padding:32px; font-size:10px; letter-spacing:0.18em; text-transform:uppercase;">NO SUBSCRIBERS YET</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-faint);padding:32px;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;">NO SUBSCRIBERS YET</td></tr>';
       return;
     }
 
-    var now = new Date();
-    tbody.innerHTML = subs.map(function (u) {
-      var firmName   = u.firms ? u.firms.company_name : '—';
-      var plan       = u.firms ? (u.firms.subscription_type || 'individual').toUpperCase() : '—';
-      var firmStatus = u.firms ? u.firms.status : 'inactive';
-      var statusHtml = firmStatus === 'active'
-        ? '<span class="status-active">ACTIVE</span>'
-        : firmStatus === 'past_due'
-          ? '<span class="status-past-due">PAST DUE</span>'
-          : '<span class="status-inactive">INACTIVE</span>';
-      var joined = u.created_at
-        ? new Date(u.created_at).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' }).toUpperCase()
-        : '—';
-      var fullName = ((u.first_name || '') + ' ' + (u.last_name || '')).trim() || u.email;
+    // Group corporate users by firm_id; everything else is individual
+    var firmMap    = {};
+    var individuals = [];
+    subs.forEach(function(u) {
+      if (u.firm_id && u.firms && u.firms.subscription_type === 'corporate') {
+        if (!firmMap[u.firm_id]) firmMap[u.firm_id] = { firmId: u.firm_id, firm: u.firms, members: [] };
+        firmMap[u.firm_id].members.push(u);
+      } else {
+        individuals.push(u);
+      }
+    });
 
-      // Presence dot — online if last_seen within 2 minutes
-      var isOnline = false;
+    var html = '';
+    var corpGroups = Object.values(firmMap);
+
+    // ── CORPORATE FIRMS ────────────────────────────────────────
+    if (corpGroups.length) {
+      html += '<tr><td colspan="7" style="background:rgba(233,113,50,0.06);padding:7px 16px;border-bottom:1px solid var(--border-dim);">' +
+        '<span style="color:var(--accent);font-size:9px;letter-spacing:0.26em;text-transform:uppercase;font-weight:700;">▸ CORPORATE FIRMS — ' + corpGroups.length + '</span>' +
+        '</td></tr>';
+
+      corpGroups.forEach(function(group) {
+        var f = group.firm;
+        var activeMembers = group.members.filter(function(m) { return m.status !== 'removed'; });
+        var onlineNow = activeMembers.filter(function(m) {
+          return m.last_seen && (now - new Date(m.last_seen)) < 2 * 60 * 1000;
+        }).length;
+        var statusHtml = f.status === 'active'
+          ? '<span class="status-active">ACTIVE</span>'
+          : f.status === 'past_due' ? '<span class="status-past-due">PAST DUE</span>'
+          : '<span class="status-inactive">INACTIVE</span>';
+        var onlineHtml = onlineNow > 0
+          ? '<span style="color:#4CAF50;font-size:10px;letter-spacing:0.10em;font-weight:700;">● ' + onlineNow + ' ONLINE</span>'
+          : '<span style="color:var(--text-faint);font-size:10px;">—</span>';
+
+        html +=
+          '<tr>' +
+            '<td style="font-weight:700;color:var(--text);">' +
+              '<button id="sub-toggle-btn-' + group.firmId + '" onclick="toggleSubFirm(\'' + group.firmId + '\')" ' +
+                'style="background:none;border:1px solid var(--border-dim);color:var(--accent);font-family:var(--font);font-size:8px;letter-spacing:0.18em;text-transform:uppercase;padding:3px 10px;cursor:pointer;margin-right:8px;white-space:nowrap;">▾ MEMBERS</button>' +
+              (f.company_name || '—') +
+            '</td>' +
+            '<td style="color:var(--text-muted);">' + (f.domain || '—') + '</td>' +
+            '<td><span class="badge-type">CORPORATE · £400</span></td>' +
+            '<td style="color:var(--text-muted);">' + activeMembers.length + ' / 15</td>' +
+            '<td>' + onlineHtml + '</td>' +
+            '<td>' + statusHtml + '</td>' +
+            '<td></td>' +
+          '</tr>' +
+          '<tr id="sub-firm-row-' + group.firmId + '" style="display:none;">' +
+            '<td colspan="7" style="padding:0;background:var(--bg-deep);">' +
+              '<div style="padding:16px 20px;border-top:1px solid var(--border-dim);">' +
+                buildSubMemberTable(group.members, now) +
+              '</div>' +
+            '</td>' +
+          '</tr>';
+      });
+    }
+
+    // ── INDIVIDUAL SUBSCRIBERS ─────────────────────────────────
+    if (individuals.length) {
+      var indActive = individuals.filter(function(u) { return u.status !== 'removed'; }).length;
+      html +=
+        '<tr><td colspan="7" style="background:rgba(255,255,255,0.02);padding:7px 16px;border-bottom:1px solid var(--border-dim);' +
+        (corpGroups.length ? 'border-top:2px solid var(--border-dim);' : '') + '">' +
+          '<span style="color:var(--text-faint);font-size:9px;letter-spacing:0.26em;text-transform:uppercase;font-weight:700;">▸ INDIVIDUAL — ' + indActive + ' ACTIVE</span>' +
+        '</td></tr>';
+
+      individuals.forEach(function(u) {
+        var fullName  = ((u.first_name || '') + ' ' + (u.last_name || '')).trim() || u.email;
+        var isRemoved = u.status === 'removed';
+        var isOnline  = u.last_seen && (now - new Date(u.last_seen)) < 2 * 60 * 1000;
+        var dot = isOnline
+          ? '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#4CAF50;box-shadow:0 0 5px #4CAF50;margin-right:8px;"></span>'
+          : '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#444;margin-right:8px;"></span>';
+        var lastSeenText = 'Never';
+        if (u.last_seen) {
+          var diff = now - new Date(u.last_seen);
+          lastSeenText = diff < 60000 ? 'Just now'
+            : diff < 3600000 ? Math.floor(diff/60000) + 'm ago'
+            : diff < 86400000 ? Math.floor(diff/3600000) + 'h ago'
+            : new Date(u.last_seen).toLocaleDateString('en-GB', {day:'2-digit',month:'short'}).toUpperCase();
+        }
+        var firmStatus = u.firms ? u.firms.status : 'inactive';
+        var statusHtml = isRemoved
+          ? '<span style="color:#c0392b;font-size:9px;letter-spacing:0.16em;text-transform:uppercase;font-weight:700;">REMOVED</span>'
+          : firmStatus === 'active' ? '<span class="status-active">ACTIVE</span>'
+          : '<span class="status-inactive">INACTIVE</span>';
+        var plan = u.firms ? (u.firms.subscription_type || 'individual').toUpperCase() : 'INDIVIDUAL';
+        var safeFirst = (u.first_name||'').replace(/'/g,"\\'");
+        var safeLast  = (u.last_name||'').replace(/'/g,"\\'");
+        var safeEmail = u.email.replace(/'/g,"\\'");
+        var safeName  = fullName.replace(/'/g,"\\'");
+
+        html +=
+          '<tr id="user-row-' + u.id + '"' + (isRemoved ? ' style="opacity:0.45;"' : '') + '>' +
+            '<td>' + dot + '<span style="font-weight:600;color:var(--text);" id="user-name-cell-' + u.id + '">' + fullName + '</span></td>' +
+            '<td style="color:var(--text-muted);">' + u.email + '</td>' +
+            '<td><span class="badge-type">' + plan + '</span></td>' +
+            '<td style="color:var(--text-faint);">—</td>' +
+            '<td style="color:var(--text-muted);font-size:10px;">' + lastSeenText + '</td>' +
+            '<td>' + statusHtml + '</td>' +
+            '<td><div style="display:flex;gap:6px;">' +
+              '<button class="btn btn-sm" onclick="editUserName(\'' + u.id + '\',\'' + safeFirst + '\',\'' + safeLast + '\',\'' + safeEmail + '\')" style="font-size:9px;">EDIT</button>' +
+              '<button class="btn btn-sm btn-danger" onclick="deleteUser(\'' + u.id + '\',\'' + safeEmail + '\',\'' + safeName + '\')" style="font-size:9px;">DELETE</button>' +
+            '</div></td>' +
+          '</tr>';
+      });
+    }
+
+    tbody.innerHTML = html;
+  }
+
+  function buildSubMemberTable(members, now) {
+    var active  = members.filter(function(m) { return m.status !== 'removed'; });
+    var removed = members.filter(function(m) { return m.status === 'removed'; });
+    if (!active.length && !removed.length) return '<div style="color:var(--text-faint);font-size:10px;letter-spacing:0.14em;text-transform:uppercase;">No members yet.</div>';
+
+    var th = 'style="background:var(--bg);color:var(--text-faint);font-size:8px;letter-spacing:0.20em;text-transform:uppercase;padding:7px 12px;text-align:left;border-bottom:1px solid var(--border-dim);white-space:nowrap;"';
+    var td = 'style="padding:10px 12px;border-bottom:1px solid var(--border-dim);vertical-align:middle;"';
+
+    var html = '<table style="width:100%;border-collapse:collapse;font-size:11px;">' +
+      '<thead><tr>' +
+        '<th ' + th + ' style="width:28px;">●</th>' +
+        '<th ' + th + '>NAME</th>' +
+        '<th ' + th + '>EMAIL</th>' +
+        '<th ' + th + '>ROLE</th>' +
+        '<th ' + th + '>LAST SEEN</th>' +
+        '<th ' + th + '>JOINED</th>' +
+        '<th ' + th + '>ACTIONS</th>' +
+      '</tr></thead><tbody>';
+
+    active.forEach(function(u) {
+      var isOnline = u.last_seen && (now - new Date(u.last_seen)) < 2 * 60 * 1000;
+      var dot = isOnline
+        ? '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#4CAF50;box-shadow:0 0 5px #4CAF50;" title="Online"></span>'
+        : '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#444;" title="Offline"></span>';
       var lastSeenText = 'Never';
       if (u.last_seen) {
-        var lastSeen = new Date(u.last_seen);
-        var diffMs = now - lastSeen;
-        isOnline = diffMs < 2 * 60 * 1000; // 2 minutes
-        if (diffMs < 60000)           lastSeenText = 'Just now';
-        else if (diffMs < 3600000)    lastSeenText = Math.floor(diffMs/60000) + 'm ago';
-        else if (diffMs < 86400000)   lastSeenText = Math.floor(diffMs/3600000) + 'h ago';
-        else                          lastSeenText = lastSeen.toLocaleDateString('en-GB', { day:'2-digit', month:'short' }).toUpperCase();
+        var diff = now - new Date(u.last_seen);
+        lastSeenText = diff < 60000 ? 'Just now'
+          : diff < 3600000 ? Math.floor(diff/60000) + 'm ago'
+          : diff < 86400000 ? Math.floor(diff/3600000) + 'h ago'
+          : new Date(u.last_seen).toLocaleDateString('en-GB', {day:'2-digit',month:'short'}).toUpperCase();
       }
-      var dot = isOnline
-        ? '<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#4CAF50;box-shadow:0 0 6px #4CAF50;" title="Online now"></span>'
-        : '<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#555;" title="Offline"></span>';
+      var fullName = ((u.first_name || '') + ' ' + (u.last_name || '')).trim() || u.email;
+      var joined   = u.created_at ? new Date(u.created_at).toLocaleDateString('en-GB', {day:'2-digit',month:'short',year:'numeric'}).toUpperCase() : '—';
+      var badge    = u.role === 'admin'
+        ? '<span style="color:var(--accent);font-size:8px;letter-spacing:0.18em;text-transform:uppercase;font-weight:700;">ADMIN</span>'
+        : '<span style="color:var(--text-faint);font-size:8px;letter-spacing:0.18em;text-transform:uppercase;">BROKER</span>';
+      var safeFirst = (u.first_name||'').replace(/'/g,"\\'");
+      var safeLast  = (u.last_name||'').replace(/'/g,"\\'");
+      var safeEmail = u.email.replace(/'/g,"\\'");
+      var safeName  = fullName.replace(/'/g,"\\'");
 
-      return `<tr data-status="${firmStatus}" data-search="${fullName.toLowerCase()} ${u.email.toLowerCase()}" id="user-row-${u.id}">
-        <td style="text-align:center;">${dot}</td>
-        <td id="user-name-cell-${u.id}">${fullName}</td>
-        <td style="color:var(--text-muted)">${u.email}</td>
-        <td style="color:var(--text-muted)">${firmName}</td>
-        <td><span class="badge-type">${plan}</span></td>
-        <td>${statusHtml}</td>
-        <td style="color:var(--text-muted);font-size:10px;">${lastSeenText}</td>
-        <td style="color:var(--text-muted)">${joined}</td>
-        <td style="text-align:right; display:flex; gap:6px; justify-content:flex-end;">
-          <button class="btn btn-sm" onclick="editUserName('${u.id}', '${(u.first_name||'').replace(/'/g,"\\'")}', '${(u.last_name||'').replace(/'/g,"\\'")}', '${u.email.replace(/'/g,"\\'")}')" style="font-size:9px;">EDIT</button>
-          <button class="btn btn-sm btn-danger" onclick="deleteUser('${u.id}', '${u.email.replace(/'/g, "\\'")}', '${fullName.replace(/'/g, "\\'")}')" style="font-size:9px;">DELETE</button>
-        </td>
-      </tr>`;
-    }).join('');
+      html +=
+        '<tr>' +
+          '<td ' + td + ' style="text-align:center;padding:10px 6px;">' + dot + '</td>' +
+          '<td ' + td + ' style="font-weight:600;color:var(--text);" id="user-name-cell-' + u.id + '">' + fullName + '</td>' +
+          '<td ' + td + ' style="color:var(--text-muted);">' + u.email + '</td>' +
+          '<td ' + td + '>' + badge + '</td>' +
+          '<td ' + td + ' style="color:var(--text-muted);font-size:10px;">' + lastSeenText + '</td>' +
+          '<td ' + td + ' style="color:var(--text-faint);font-size:10px;">' + joined + '</td>' +
+          '<td ' + td + '><div style="display:flex;gap:6px;white-space:nowrap;">' +
+            '<button class="btn btn-sm" onclick="editUserName(\'' + u.id + '\',\'' + safeFirst + '\',\'' + safeLast + '\',\'' + safeEmail + '\')" style="font-size:9px;">EDIT</button>' +
+            (u.role !== 'admin' ? '<button class="btn btn-sm btn-danger" onclick="deleteUser(\'' + u.id + '\',\'' + safeEmail + '\',\'' + safeName + '\')" style="font-size:9px;">DELETE</button>' : '') +
+          '</div></td>' +
+        '</tr>';
+    });
+
+    html += '</tbody></table>';
+
+    if (removed.length) {
+      html += '<div style="margin-top:8px;padding:6px 12px;background:rgba(192,57,43,0.08);border-left:2px solid #c0392b;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:#c0392b;">' +
+        removed.length + ' REMOVED: ' + removed.map(function(m) { return m.email; }).join(', ') +
+      '</div>';
+    }
+    return html;
+  }
+
+  function toggleSubFirm(firmId) {
+    var row = document.getElementById('sub-firm-row-' + firmId);
+    var btn = document.getElementById('sub-toggle-btn-' + firmId);
+    if (!row) return;
+    var isOpen = row.style.display !== 'none';
+    row.style.display = isOpen ? 'none' : '';
+    if (btn) btn.textContent = isOpen ? '▾ MEMBERS' : '▴ HIDE';
   }
 
   function filterSubscribers() {
-    var search    = document.getElementById('sub-search').value.toLowerCase();
-    var statusF   = document.getElementById('sub-filter-status').value;
-    var filtered  = allSubscribers.filter(function (u) {
-      var fullName = ((u.first_name || '') + ' ' + (u.last_name || '')).trim().toLowerCase();
-      var email    = u.email.toLowerCase();
-      var status   = u.firms ? u.firms.status : 'inactive';
-      var matchSearch = !search || fullName.includes(search) || email.includes(search);
-      var matchStatus = statusF === 'all' || status === statusF;
-      return matchSearch && matchStatus;
+    var search  = document.getElementById('sub-search').value.toLowerCase();
+    var statusF = document.getElementById('sub-filter-status').value;
+    var planF   = document.getElementById('sub-filter-plan').value;
+    var filtered = allSubscribers.filter(function(u) {
+      var fullName   = ((u.first_name || '') + ' ' + (u.last_name || '')).trim().toLowerCase();
+      var email      = u.email.toLowerCase();
+      var firmName   = u.firms ? (u.firms.company_name || '').toLowerCase() : '';
+      var userStatus = u.status === 'removed' ? 'removed' : (u.firms ? u.firms.status : 'inactive');
+      var userPlan   = u.firms ? (u.firms.subscription_type || 'individual') : 'individual';
+      var matchSearch = !search || fullName.includes(search) || email.includes(search) || firmName.includes(search);
+      var matchStatus = statusF === 'all' || userStatus === statusF;
+      var matchPlan   = planF === 'all' || userPlan === planF;
+      return matchSearch && matchStatus && matchPlan;
     });
     renderSubscribersTable(filtered);
   }
@@ -933,9 +1092,9 @@
   // ══ FIRMS ════════════════════════════════════════════════════
   async function loadFirms() {
     try {
-      var { data, error } = await supabase
+      var { data, error } = await supabaseAdmin
         .from('firms')
-        .select('*, users(count)')
+        .select('*, users(id, status)')
         .order('created_at', { ascending: false });
       if (error) throw error;
 
@@ -963,7 +1122,7 @@
       var plan = f.subscription_type
         ? (f.subscription_type === 'corporate' ? 'CORPORATE · £400' : 'INDIVIDUAL · £49')
         : '—';
-      var userCount = f.users ? f.users.length : '—';
+      var userCount = f.users ? f.users.filter(function(u) { return u.status !== 'removed'; }).length : '—';
       var maxUsers  = f.max_users || '—';
       var created   = f.created_at
         ? new Date(f.created_at).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' }).toUpperCase()
@@ -1104,7 +1263,7 @@
     if (!confirm('Remove ' + email + ' from this firm?\n\nThey will be blocked from logging in immediately.')) return;
 
     const { error } = await supabaseAdmin.from('users')
-      .update({ firm_id: null, status: 'removed' })
+      .update({ status: 'removed' })
       .eq('email', email)
       .eq('firm_id', firmId);
 
@@ -1428,36 +1587,32 @@
         firmId = newFirm.id;
       }
 
-      // 2. Create the Supabase auth user (email pre-confirmed)
-      // If auth user already exists (from deleted account), just reuse it
+      // 2. Pre-clear any stale users table record BEFORE creating the auth user
+      // (prevents duplicate key errors when re-adding a previously deleted account)
+      await supabaseAdmin.from('users').delete().eq('email', email);
+
+      // 3. Invite the user — sends the "Invite" email template (not "Reset Password")
       var authUser;
-      var { data: newAuth, error: authErr } = await supabaseAdmin.auth.admin.createUser({
-        email: email,
-        email_confirm: true,
-        user_metadata: { first_name: firstName, last_name: lastName }
+      var { data: inviteData, error: inviteErr } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
+        redirectTo: 'https://thebrokersterminal.com/reset-password.html',
+        data: { first_name: firstName, last_name: lastName }
       });
 
-      if (authErr) {
-        // Email already registered - look it up
-        if (authErr.message && (authErr.message.includes('already registered') || authErr.message.includes('already exists'))) {
-          // Try to get the existing user by email
-          try {
-            var { data: { users }, error: listErr } = await supabaseAdmin.auth.admin.listUsers();
-            authUser = users ? users.find(u => u.email === email) : null;
-            if (!authUser) {
-              throw new Error('Could not find existing auth user with email ' + email);
-            }
-          } catch (e) {
-            throw new Error('Email already registered. Please log in with this email or use a different email.');
-          }
+      if (inviteErr) {
+        // User already exists in Auth — look them up
+        if (inviteErr.message && (inviteErr.message.includes('already registered') || inviteErr.message.includes('already been registered') || inviteErr.message.includes('already exists'))) {
+          var { data: { users: existingUsers } } = await supabaseAdmin.auth.admin.listUsers();
+          authUser = existingUsers ? existingUsers.find(function(u) { return u.email === email; }) : null;
+          if (!authUser) throw new Error('Could not locate existing auth user for ' + email);
         } else {
-          throw new Error('Could not create auth account: ' + authErr.message);
+          throw new Error('Could not create account: ' + inviteErr.message);
         }
       } else {
-        authUser = newAuth.user;
+        authUser = inviteData.user;
       }
 
-      // 3. Add to public users table
+      // 4. Insert into users table — also post-clear in case a DB trigger fired during invite
+      await supabaseAdmin.from('users').delete().eq('email', email);
       var { error: userErr } = await supabaseAdmin
         .from('users')
         .insert({
@@ -1466,14 +1621,10 @@
           firm_id: firmId,
           first_name: firstName,
           last_name: lastName,
-          role: 'subscriber'
+          role: 'subscriber',
+          status: 'active'
         });
       if (userErr) throw new Error('Could not add user record: ' + userErr.message);
-
-      // 4. Send password setup email
-      await supabaseAdmin.auth.resetPasswordForEmail(email, {
-        redirectTo: 'https://thebrokersterminal.com/reset-password.html'
-      });
 
       // Success
       successDiv.style.display = 'block';
@@ -1596,6 +1747,18 @@
       setTimeout(() => { successDiv.style.display = 'none'; }, 3000);
       await loadReports();
       await loadStats();
+
+      // Notify active subscribers
+      try {
+        const { data: notifyResult } = await supabaseAdmin.functions.invoke('notify-new-report', {
+          body: { title, reportType, assetClass, publishedDate }
+        });
+        if (notifyResult && notifyResult.sent > 0) {
+          console.log('Subscriber notifications sent:', notifyResult.sent);
+        }
+      } catch (notifyErr) {
+        console.warn('Notification send failed (upload still succeeded):', notifyErr);
+      }
 
     } catch (err) {
       errorDiv.textContent   = err.message;
