@@ -233,8 +233,8 @@
 
           var userEmail = session.user.email.toLowerCase();
           var domain    = userEmail.split('@')[1];
-          var asset     = sessionStorage.getItem('pendingAsset') || 'gold';
-          sessionStorage.removeItem('pendingAsset');
+          var asset     = localStorage.getItem('pendingAsset') || 'gold';
+          localStorage.removeItem('pendingAsset');
 
           document.querySelector('.form-intro').textContent = 'Confirming subscription with Stripe...';
 
@@ -297,11 +297,11 @@
     }
 
     // Pre-select asset from URL param OR sessionStorage (restored after Stripe redirect)
-    var urlAsset = new URLSearchParams(window.location.search).get('asset') || sessionStorage.getItem('pendingAsset');
+    var urlAsset = new URLSearchParams(window.location.search).get('asset') || localStorage.getItem('pendingAsset');
     if (urlAsset === 'gold' || urlAsset === 'whisky') {
       var preAsset = document.querySelector('input[name="asset-class"][value="' + urlAsset + '"]');
       if (preAsset) { preAsset.checked = true; updateAssetCards(); }
-      sessionStorage.removeItem('pendingAsset');
+      localStorage.removeItem('pendingAsset');
     }
 
     tierRadios.forEach(function (radio) {
@@ -457,7 +457,7 @@
             } else {
               await supabase.from('users').upsert({ id: preAuth.user.id, email: email, first_name: firstName, last_name: lastName, role: 'subscriber', status: 'active' }, { onConflict: 'email' });
             }
-            sessionStorage.setItem('pendingAsset', selectedAsset);
+            localStorage.setItem('pendingAsset', selectedAsset);
             const stripeBase = selectedAsset === 'whisky' ? 'https://buy.stripe.com/7sYcN5950buy4c40EJ4sE05' : 'https://buy.stripe.com/00w00j2GCeGK9wo4UZ4sE06';
             submitBtn.textContent = 'REDIRECTING TO PAYMENT...';
             window.location.href = stripeBase + '?prefilled_email=' + encodeURIComponent(email);
@@ -491,7 +491,7 @@
             } else {
               await supabase.from('users').upsert({ id: preAuth.user.id, email: email, first_name: firstName, last_name: lastName, role: 'subscriber', status: 'active' }, { onConflict: 'email' });
             }
-            sessionStorage.setItem('pendingAsset', selectedAsset);
+            localStorage.setItem('pendingAsset', selectedAsset);
             const stripeBase = selectedAsset === 'whisky' ? 'https://buy.stripe.com/aFa9AT4OK7eidMEevz4sE07' : 'https://buy.stripe.com/9B6fZh5SO426gYQ5Z34sE08';
             submitBtn.textContent = 'REDIRECTING TO PAYMENT...';
             window.location.href = stripeBase + '?prefilled_email=' + encodeURIComponent(email);
