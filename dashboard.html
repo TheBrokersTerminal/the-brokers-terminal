@@ -1398,9 +1398,9 @@
         if (!latestObjFile    && report.report_type === 'objection_file')               latestObjFile    = report;
         if (!latestPitchPack  && report.report_type === 'pitch_pack')                   latestPitchPack  = report;
 
-        // Ticker items
-        if (isFlash)     tickerItems.push({ label: 'FLASH ALERT', title: report.title, flash: true });
-        else if (isNew)  tickerItems.push({ label: 'NEW',         title: report.title, flash: false });
+        // Ticker items — both flash and new expire after 7 days
+        if (isFlash && isNew)  tickerItems.push({ label: 'FLASH ALERT', title: report.title, flash: true });
+        else if (isNew)        tickerItems.push({ label: 'NEW',         title: report.title, flash: false });
 
         // Add to All panel
         docGrid.appendChild(buildCard(report, pubDateStr, isNew, isFlash, reportUrl));
