@@ -983,7 +983,7 @@
       // Step 2: fetch firm directly by ID — always correct regardless of domain
       const { data: firmById } = await supabase
         .from('firms')
-        .select('id, company_name, access, stripe_customer_id, subscription_type, max_users')
+        .select('id, status, company_name, access, stripe_customer_id, subscription_type, max_users')
         .eq('id', userRow.firm_id)
         .single();
       firmRow = firmById;
@@ -991,7 +991,7 @@
       // Fallback 1: corporate firm by domain
       const { data: corpFirm } = await supabase
         .from('firms')
-        .select('id, company_name, access, stripe_customer_id, subscription_type, max_users')
+        .select('id, status, company_name, access, stripe_customer_id, subscription_type, max_users')
         .eq('domain', domain)
         .eq('subscription_type', 'corporate')
         .maybeSingle();
@@ -1001,7 +1001,7 @@
       if (!firmRow) {
         const { data: indFirm } = await supabase
           .from('firms')
-          .select('id, company_name, access, stripe_customer_id, subscription_type, max_users')
+          .select('id, status, company_name, access, stripe_customer_id, subscription_type, max_users')
           .eq('owner_email', userEmail)
           .eq('subscription_type', 'individual')
           .maybeSingle();
