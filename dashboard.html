@@ -830,7 +830,7 @@
     window.open(currentReport.url, '_blank');
 
     // Log as a tracked open
-    var logEmail  = localStorage.getItem('userEmail') || '';
+    var logEmail  = window._userEmail || localStorage.getItem('userEmail') || '';
     var logFirmId = localStorage.getItem('firmId') || null;
     if (logEmail) {
       supabase.from('activity_log').insert({
@@ -854,7 +854,7 @@
     document.getElementById('modal-report-name').textContent = '— ' + (reportTitle || 'REPORT').toUpperCase();
 
     // Log report view to activity log
-    var logEmail = localStorage.getItem('userEmail') || '';
+    var logEmail = window._userEmail || localStorage.getItem('userEmail') || '';
     var logFirmId = localStorage.getItem('firmId') || null;
     if (logEmail) {
       supabase.from('activity_log').insert({
