@@ -19,12 +19,46 @@ serve(async (req) => {
 
     const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_KEY!);
 
-    const domain = user_email.split('@')[1];
-    const { data: firm } = await supabase
-      .from('firms')
-      .select('stripe_customer_id')
-      .eq('domain', domain)
-      .single();
+    let firm = null;
+
+    // Step 1: look up firm_id from users table
+    const { data: userRow } = await supabase
+      .from('users')
+      .select('firm_id')
+      .eq('email', user_email)
+      .maybeSingle();
+
+    if (userRow?.firm_id) {
+      const { data: firmById } = await supabase
+        .from('firms')
+        .select('stripe_customer_id')
+        .eq('id', userRow.firm_id)
+        .maybeSingle();
+      firm = firmById;
+    }
+
+    // Step 2: fallback — corporate firm by domain
+    if (!firm) {
+      const domain = user_email.split('@')[1];
+      const { data: corpFirm } = await supabase
+        .from('firms')
+        .select('stripe_customer_id')
+        .eq('domain', domain)
+        .eq('subscription_type', 'corporate')
+        .maybeSingle();
+      firm = corpFirm;
+    }
+
+    // Step 3: fallback — individual firm by owner_email
+    if (!firm) {
+      const { data: indFirm } = await supabase
+        .from('firms')
+        .select('stripe_customer_id')
+        .eq('owner_email', user_email)
+        .eq('subscription_type', 'individual')
+        .maybeSingle();
+      firm = indFirm;
+    }
 
     if (!firm?.stripe_customer_id) {
       return new Response(JSON.stringify({ error: 'NO_STRIPE_CUSTOMER' }), {
