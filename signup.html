@@ -303,6 +303,20 @@
       }
     }
 
+    // Pre-select tier from URL param
+    var urlTier = new URLSearchParams(window.location.search).get('tier');
+    if (urlTier === 'individual' || urlTier === 'corporate') {
+      var preTier = document.querySelector('input[name="subscription-tier"][value="' + urlTier + '"]');
+      if (preTier) {
+        preTier.checked = true;
+        updatePlanCards();
+        if (urlTier === 'corporate') {
+          companyGroup.style.display = 'block';
+          companyInput.setAttribute('required', 'required');
+        }
+      }
+    }
+
     // Pre-select asset from URL param OR sessionStorage (restored after Stripe redirect)
     var urlAsset = new URLSearchParams(window.location.search).get('asset') || localStorage.getItem('pendingAsset');
     if (urlAsset === 'gold' || urlAsset === 'whisky') {
