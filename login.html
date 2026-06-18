@@ -218,12 +218,18 @@
   /* ── Forgot Password Modal ──────────────────────────────── */
   function openForgotPasswordModal(e) {
     e.preventDefault();
+    document.getElementById('forgot-password-form').style.display = '';
+    document.getElementById('reset-success').style.display = 'none';
+    document.getElementById('reset-email').value = '';
+    document.getElementById('reset-error').textContent = '';
+    document.getElementById('reset-error').classList.remove('visible');
     document.getElementById('forgot-password-modal').style.display = 'flex';
     document.getElementById('reset-email').focus();
   }
 
   function closeForgotPasswordModal() {
     document.getElementById('forgot-password-modal').style.display = 'none';
+    document.getElementById('forgot-password-form').style.display = '';
     document.getElementById('reset-email').value = '';
     document.getElementById('reset-error').textContent = '';
     document.getElementById('reset-error').classList.remove('visible');

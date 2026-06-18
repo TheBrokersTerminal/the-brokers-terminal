@@ -533,34 +533,47 @@
           }
         }
 
-        // Create Supabase auth user
-        const { data: authData, error: authError } = await supabase.auth.signUp({
+        // Try signing in first — account may already exist from the pre-Stripe step
+        var userId;
+        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
           email: email,
-          password: password,
-          options: {
-            emailRedirectTo: window.location.origin + '/dashboard.html'
-          }
+          password: password
         });
 
-        if (authError) throw new Error(authError.message);
+        if (!signInError && signInData.user) {
+          // Account exists and password matches — use the existing session
+          userId = signInData.user.id;
+        } else {
+          // Account doesn't exist yet — create it now
+          const { data: authData, error: authError } = await supabase.auth.signUp({
+            email: email,
+            password: password,
+            options: {
+              emailRedirectTo: window.location.origin + '/dashboard.html'
+            }
+          });
 
-        // If signUp returns null user the email is already registered — redirect to login
-        if (!authData.user) {
-          if (errorDiv) {
-            errorDiv.textContent = '✓ Account already exists for this email. Please log in below.';
-            errorDiv.classList.add('visible');
-            errorDiv.style.color = 'var(--accent)';
-            errorDiv.style.borderColor = 'var(--accent)';
+          if (authError) throw new Error(authError.message);
+
+          if (!authData.user) {
+            // Account exists but password is wrong
+            if (errorDiv) {
+              errorDiv.textContent = 'An account already exists for this email. Please log in or use forgot password.';
+              errorDiv.classList.add('visible');
+            }
+            submitBtn.textContent = originalText;
+            submitBtn.disabled = false;
+            return;
           }
-          setTimeout(function () { window.location.href = 'login.html'; }, 2000);
-          return;
+
+          userId = authData.user.id;
         }
 
         // Write user record — must include id so RLS policy (id = auth.uid()) passes
         const { error: userError } = await supabase
           .from('users')
           .upsert({
-            id: authData.user.id,
+            id: userId,
             email: email,
             firm_id: firmId,
             role: 'subscriber',
