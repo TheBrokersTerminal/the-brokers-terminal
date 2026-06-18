@@ -1695,7 +1695,7 @@
 
         if (error) throw error;
 
-        var matchedIds = new Set((matched || []).map(function(r) { return r.id; }));
+        var matchedIds = new Set((matched || []).map(function(r) { return String(r.id); }));
 
         // Apply to ALL panels (so switching tabs mid-search still shows correct results)
         Object.entries(panelConfig).forEach(function(entry) {
