@@ -284,23 +284,30 @@
     var companyGroup = document.getElementById('company-group');
     var companyInput = document.getElementById('company');
 
-    function updatePlanCards() {
-      document.getElementById('plan-individual').style.borderColor = '';
-      document.getElementById('plan-corporate').style.borderColor = '';
-      var checked = document.querySelector('input[name="subscription-tier"]:checked');
-      if (checked) {
-        var cardId = checked.value === 'individual' ? 'plan-individual' : 'plan-corporate';
-        document.getElementById(cardId).style.borderColor = 'var(--accent)';
+    function setCardSelected(el, selected) {
+      if (selected) {
+        el.style.borderColor = '#ffffff';
+        el.style.borderWidth = '2px';
+        el.style.background  = 'rgba(255,255,255,0.07)';
+        el.style.boxShadow   = '0 0 0 1px rgba(255,255,255,0.15)';
+      } else {
+        el.style.borderColor = '';
+        el.style.borderWidth = '1px';
+        el.style.background  = '';
+        el.style.boxShadow   = '';
       }
     }
 
+    function updatePlanCards() {
+      var checked = document.querySelector('input[name="subscription-tier"]:checked');
+      setCardSelected(document.getElementById('plan-individual'), checked && checked.value === 'individual');
+      setCardSelected(document.getElementById('plan-corporate'),  checked && checked.value === 'corporate');
+    }
+
     function updateAssetCards() {
-      document.getElementById('plan-gold').style.borderColor = '';
-      document.getElementById('plan-whisky').style.borderColor = '';
       var checked = document.querySelector('input[name="asset-class"]:checked');
-      if (checked) {
-        document.getElementById('plan-' + checked.value).style.borderColor = 'var(--accent)';
-      }
+      setCardSelected(document.getElementById('plan-gold'),   checked && checked.value === 'gold');
+      setCardSelected(document.getElementById('plan-whisky'), checked && checked.value === 'whisky');
     }
 
     // Pre-select tier from URL param
