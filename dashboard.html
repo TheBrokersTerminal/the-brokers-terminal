@@ -1028,15 +1028,6 @@
 
     if (firmRow && firmRow.access) firmAccess = firmRow.access;
 
-    // Save referral code to firm if captured from affiliate link and not yet recorded
-    if (firmRow && !firmRow.referral_code) {
-      var pendingRef = localStorage.getItem('referralCode');
-      if (pendingRef) {
-        await supabase.from('firms').update({ referral_code: pendingRef }).eq('id', firmRow.id);
-        localStorage.removeItem('referralCode');
-      }
-    }
-
     // Hide "Manage Subscription" button if no Stripe customer linked (e.g. admin/manual accounts)
     var manageSubBtn = document.getElementById('manage-subscription-btn');
     var manageSep = manageSubBtn ? manageSubBtn.nextElementSibling : null;
