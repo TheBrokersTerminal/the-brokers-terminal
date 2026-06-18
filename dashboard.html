@@ -983,7 +983,7 @@
       // Step 2: fetch firm directly by ID — always correct regardless of domain
       const { data: firmById } = await supabase
         .from('firms')
-        .select('id, status, company_name, access, stripe_customer_id, subscription_type, max_users')
+        .select('id, status, company_name, access, stripe_customer_id, subscription_type, max_users, referral_code')
         .eq('id', userRow.firm_id)
         .single();
       firmRow = firmById;
@@ -991,7 +991,7 @@
       // Fallback 1: corporate firm by domain
       const { data: corpFirm } = await supabase
         .from('firms')
-        .select('id, status, company_name, access, stripe_customer_id, subscription_type, max_users')
+        .select('id, status, company_name, access, stripe_customer_id, subscription_type, max_users, referral_code')
         .eq('domain', domain)
         .eq('subscription_type', 'corporate')
         .maybeSingle();
@@ -1001,7 +1001,7 @@
       if (!firmRow) {
         const { data: indFirm } = await supabase
           .from('firms')
-          .select('id, status, company_name, access, stripe_customer_id, subscription_type, max_users')
+          .select('id, status, company_name, access, stripe_customer_id, subscription_type, max_users, referral_code')
           .eq('owner_email', userEmail)
           .eq('subscription_type', 'individual')
           .maybeSingle();
@@ -1027,6 +1027,15 @@
     }
 
     if (firmRow && firmRow.access) firmAccess = firmRow.access;
+
+    // Save referral code to firm if captured from affiliate link and not yet recorded
+    if (firmRow && !firmRow.referral_code) {
+      var pendingRef = localStorage.getItem('referralCode');
+      if (pendingRef) {
+        await supabase.from('firms').update({ referral_code: pendingRef }).eq('id', firmRow.id);
+        localStorage.removeItem('referralCode');
+      }
+    }
 
     // Hide "Manage Subscription" button if no Stripe customer linked (e.g. admin/manual accounts)
     var manageSubBtn = document.getElementById('manage-subscription-btn');
