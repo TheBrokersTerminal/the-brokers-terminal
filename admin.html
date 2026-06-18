@@ -1754,10 +1754,13 @@
           body: { title, reportType, assetClass, publishedDate }
         });
         if (notifyResult && notifyResult.sent > 0) {
-          console.log('Subscriber notifications sent:', notifyResult.sent);
+          successDiv.textContent = '✓ UPLOADED — ' + notifyResult.sent + ' subscriber' + (notifyResult.sent !== 1 ? 's' : '') + ' notified by email.';
+        } else if (notifyResult && notifyResult.failed > 0) {
+          successDiv.textContent = '✓ UPLOADED — notification failed for ' + notifyResult.failed + ' subscriber(s). Check Resend.';
         }
       } catch (notifyErr) {
-        console.warn('Notification send failed (upload still succeeded):', notifyErr);
+        successDiv.textContent = '✓ UPLOADED — but email notification failed to send. Check Supabase logs.';
+        console.warn('Notification send failed:', notifyErr);
       }
 
     } catch (err) {

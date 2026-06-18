@@ -2,7 +2,7 @@
 <html lang="en-GB">
 <head>
 <meta charset="UTF-8">
-<title>The Brokers Weekly &mdash; Whisky Investment &mdash; 24 May 2026</title>
+<title>THE BROKERS WEEKLY &mdash; Whisky Investment &mdash; 14 June 2026</title>
 <style>
   @page { size: A4; margin: 18mm 16mm; }
   * { box-sizing: border-box; }
@@ -28,11 +28,8 @@
   strong { color: #E97132; letter-spacing: 0.02em; }
   em { color: #E6E6E6; }
   ul { padding-left: 22px; margin: 6px 0 12px 0; }
-  ul li { margin: 4px 0; }
+  ul li { margin: 5px 0; }
   ul li::marker { color: #E97132; }
-  ol { padding-left: 22px; margin: 6px 0 12px 0; }
-  ol li { margin: 5px 0; color: #FFFFFF; }
-  ol li::marker { color: #E97132; font-weight: bold; }
   .masthead { display: flex; justify-content: space-between; align-items: center; border-top: 2px solid #E97132; border-bottom: 2px solid #E97132; padding: 8px 0; margin-bottom: 18px; font-size: 9.5pt; letter-spacing: 0.24em; }
   .masthead .left { color: #E97132; }
   .masthead .middle { color: #FFFFFF; }
@@ -42,619 +39,486 @@
   .tile .label { color: #E97132; font-size: 8.5pt; letter-spacing: 0.18em; margin-bottom: 4px; }
   .tile .value { color: #FFFFFF; font-size: 14pt; font-weight: 700; line-height: 1.2; }
   .tile .delta { font-size: 8.5pt; margin-top: 2px; color: #E6E6E6; }
-  .tile .delta.up { color: #6BCB77; }
-  .tile .delta.down { color: #E97132; }
+  .tile.red .value { color: #ff4444; }
+  .tile.amber .value { color: #E97132; }
   table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 10pt; }
   th { background: #121212; color: #E97132; border-bottom: 1px solid #E97132; padding: 6px 8px; text-align: left; letter-spacing: 0.12em; font-size: 9pt; text-transform: uppercase; }
   td { border-bottom: 1px dotted #333; padding: 6px 8px; color: #FFFFFF; }
   td.accent { color: #E97132; }
-  td.up { color: #6BCB77; }
-  td.down { color: #E97132; }
+  td.red { color: #ff6666; }
   .news-block { border-left: 3px solid #E97132; padding: 10px 14px; margin: 18px 0; background: #0E0E0E; }
-  .news-block h4 { color: #E97132; margin: 0 0 6px 0; font-size: 11pt; letter-spacing: 0.14em; text-transform: uppercase; }
-  .news-block .meta { font-size: 8.5pt; color: #888; letter-spacing: 0.18em; margin-bottom: 8px; }
   .pitch { margin: 10px 0; padding: 12px 16px; background: #0d0d0d; border-top: 2px solid #E97132; border-bottom: 1px solid #333; }
   .pitch .head { color: #E97132; font-size: 9.5pt; letter-spacing: 0.2em; margin-bottom: 8px; text-transform: uppercase; padding-bottom: 6px; border-bottom: 1px dotted #E97132; }
-  .pitch .framework-tag { font-size: 8pt; color: #888; letter-spacing: 0.18em; margin-bottom: 8px; text-transform: uppercase; }
   .pitch .quote { color: #FFFFFF; font-style: italic; padding: 8px 10px 8px 16px; border-left: 3px solid #E97132; margin: 8px 0; line-height: 1.65; background: #111; }
   .pitch .reason { color: #E6E6E6; font-size: 9.5pt; margin-top: 8px; padding-top: 6px; border-top: 1px dotted #333; }
   .pitch .reason span.l { color: #E97132; font-weight: bold; }
-  .pitch .mechanics { margin-top: 8px; padding: 8px 12px; background: #141414; border-left: 2px solid #555; font-size: 9pt; color: #AAAAAA; }
-  .pitch .mechanics span.tag { color: #E97132; display: block; margin-bottom: 4px; font-size: 8pt; letter-spacing: 0.18em; text-transform: uppercase; }
-  .teach { border: 1px solid #E97132; padding: 14px 18px; margin: 16px 0; background: #0E0E0E; }
-  .teach h4 { color: #E97132; margin: 0 0 8px 0; letter-spacing: 0.16em; font-size: 11pt; text-transform: uppercase; }
-  .formula { font-family: "Consolas",monospace; background: #141414; border: 1px dotted #E97132; padding: 8px 12px; color: #E97132; margin: 10px 0; letter-spacing: 0.06em; white-space: pre-wrap; word-break: break-word; overflow-x: auto; line-height: 1.8; }
   .footer-bar { margin-top: 18px; padding: 6px 0; border-top: 1px solid #E97132; font-size: 8.5pt; color: #E97132; letter-spacing: 0.22em; display: flex; justify-content: space-between; }
   .warn { border: 1px solid #E97132; padding: 10px 14px; margin: 10px 0; color: #FFFFFF; background: #1a0f06; }
   .warn span.tag { color: #E97132; letter-spacing: 0.2em; font-size: 9pt; display: block; margin-bottom: 4px; text-transform: uppercase; }
-  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
-  .gloss { border: 1px dotted #444; padding: 12px 16px; margin: 16px 0; background: #0d0d0d; }
-  .gloss h5 { color: #E97132; margin: 0 0 8px 0; font-size: 9.5pt; letter-spacing: 0.22em; text-transform: uppercase; }
-  .gloss table th { background: #111; font-size: 8.5pt; }
-  .gloss table td { font-size: 9pt; padding: 5px 8px; color: #E0E0E0; }
-  .disclosure { border: 1px solid #444; padding: 14px 18px; margin: 16px 0; background: #0d0d0d; }
-  .disclosure h4 { color: #E97132; margin: 0 0 8px 0; font-size: 9.5pt; letter-spacing: 0.22em; text-transform: uppercase; }
-  .disclosure p { color: #999; font-size: 8.5pt; line-height: 1.6; margin: 5px 0; }
-  .week-ahead table td { font-size: 9pt; }
-  .week-ahead table td.date-col { color: #E97132; white-space: nowrap; }
-  .week-ahead table td.high { color: #FF4444; font-weight: 700; }
+  .alert-red { border: 1px solid #ff4444; border-left: 4px solid #ff4444; padding: 10px 14px; margin: 10px 0; color: #FFFFFF; background: #140000; }
+  .alert-red span.tag { color: #ff6666; letter-spacing: 0.2em; font-size: 9pt; display: block; margin-bottom: 4px; text-transform: uppercase; }
   .signal-box { border: 2px solid #E97132; padding: 14px 18px; margin: 16px 0; background: #0f0a05; }
   .signal-box .signal-head { color: #E97132; font-size: 10pt; letter-spacing: 0.28em; text-transform: uppercase; margin-bottom: 10px; border-bottom: 1px solid #E97132; padding-bottom: 6px; }
-  .pitch-thought { margin: 10px 0; padding: 10px 12px; border: 1px dashed #E97132; color: #E6E6E6; background: #0c0c0c; }
-  .pitch-thought span.tag { color: #E97132; letter-spacing: 0.18em; font-size: 9pt; display: block; margin-bottom: 4px; text-transform: uppercase; }
   .breaking-bar { background: #1a0800; border: 1px solid #E97132; border-left: 4px solid #E97132; padding: 10px 16px; margin: 14px 0; }
   .breaking-bar .label { color: #E97132; font-size: 8.5pt; letter-spacing: 0.3em; margin-bottom: 4px; text-transform: uppercase; }
   .breaking-bar .text { color: #FFFFFF; font-size: 11pt; font-weight: 700; }
   .objection-block { margin: 14px 0; border: 1px solid #333; background: #0c0c0c; }
   .objection-block .obj-header { background: #1a1200; border-bottom: 1px solid #E97132; padding: 8px 14px; color: #E97132; font-size: 9.5pt; letter-spacing: 0.18em; text-transform: uppercase; }
-  .objection-block .obj-body { padding: 12px 14px; }
-  .objection-block .obj-client { color: #AAAAAA; font-style: italic; margin-bottom: 10px; padding: 6px 10px; border-left: 2px solid #555; font-size: 9.5pt; }
-  .objection-block .obj-response { color: #FFFFFF; font-size: 10pt; line-height: 1.6; }
-  .objection-block .obj-mechanics { margin-top: 8px; font-size: 8.5pt; color: #888; padding-top: 6px; border-top: 1px dotted #333; }
-  .spin-box { border: 2px solid #333; padding: 14px 18px; margin: 16px 0; background: #0c0c0c; }
-  .spin-box .spin-head { color: #E97132; font-size: 10pt; letter-spacing: 0.22em; text-transform: uppercase; margin-bottom: 12px; }
-  .spin-q { margin: 8px 0; padding: 8px 12px; background: #111; }
-  .spin-q .q-type { color: #E97132; font-size: 8pt; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 4px; }
-  .spin-q .q-text { color: #FFFFFF; font-style: italic; font-size: 10pt; }
-  .spin-q .q-purpose { color: #AAAAAA; font-size: 8.5pt; margin-top: 4px; }
-  .intel-card { border: 1px solid #333; padding: 10px 14px; margin: 8px 0; background: #0d0d0d; }
-  .intel-card .ic-head { color: #E97132; font-size: 9pt; letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 6px; }
-  .intel-card .ic-body { color: #E0E0E0; font-size: 9.5pt; line-height: 1.6; }
+  .objection-block .obj-client { color: #AAAAAA; font-style: italic; margin: 10px 14px 6px 14px; padding: 6px 10px; border-left: 2px solid #555; font-size: 9.5pt; }
+  .objection-block .obj-response { color: #FFFFFF; font-size: 10pt; line-height: 1.6; padding: 0 14px 12px 14px; }
+  .objection-block .obj-mechanics { margin: 0 14px 12px 14px; font-size: 8.5pt; color: #888; padding-top: 6px; border-top: 1px dotted #333; }
+  .senior-badge { display: inline-block; background: #E97132; color: #000; font-size: 8pt; letter-spacing: 0.3em; padding: 2px 10px; text-transform: uppercase; font-weight: 700; margin-bottom: 14px; }
+  .senior-intro { background: #121212; border: 1px solid #E97132; border-left: 5px solid #E97132; padding: 14px 18px; margin: 0 0 20px 0; }
+  .senior-intro p { color: #E6E6E6; font-size: 10.5pt; line-height: 1.7; margin: 0; }
+  .intel-story { border: 1px solid #2A2A2A; margin-bottom: 22px; background: #0D0D0D; }
+  .intel-story .is-header { background: #141414; border-bottom: 1px solid #E97132; padding: 12px 16px; display: flex; align-items: flex-start; gap: 14px; }
+  .intel-story .is-num { color: #E97132; font-size: 22pt; font-weight: 900; line-height: 1; min-width: 40px; }
+  .intel-story .is-meta { flex: 1; }
+  .intel-story .is-tag { color: #888; font-size: 8pt; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 4px; }
+  .intel-story .is-title { color: #E97132; font-size: 12.5pt; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; line-height: 1.25; }
+  .intel-story .is-body { padding: 14px 18px; }
+  .intel-story .is-context { color: #E0E0E0; font-size: 11pt; line-height: 1.7; margin-bottom: 14px; border-left: 2px solid #333; padding-left: 14px; }
+  .intel-story .is-context strong { color: #E97132; }
+  .intel-story .is-pitch { background: #111; border-top: 2px solid #E97132; padding: 12px 14px; margin-top: 14px; }
+  .intel-story .is-pitch-label { color: #E97132; font-size: 8.5pt; letter-spacing: 0.25em; text-transform: uppercase; margin-bottom: 8px; }
+  .intel-story .is-pitch-text { color: #FFFFFF; font-style: italic; line-height: 1.65; font-size: 10.5pt; }
+  .intel-story .is-source { font-size: 8pt; color: #555; letter-spacing: 0.1em; margin-top: 10px; padding-top: 6px; border-top: 1px dotted #333; }
+  .week-ahead table td { font-size: 9pt; }
+  .week-ahead table td.date-col { color: #E97132; white-space: nowrap; }
+  .week-ahead table td.high { color: #E97132; font-weight: 700; }
+  .broker-self-check { background: #0D0D0D; border: 1px solid #2A2A2A; border-left: 4px solid #E97132; padding: 14px 18px; margin: 16px 0; }
+  .broker-self-check .bsc-title { color: #E97132; font-size: 9pt; letter-spacing: 0.3em; text-transform: uppercase; margin-bottom: 10px; font-weight: 700; }
+  .broker-self-check p { color: #E6E6E6; font-size: 10.5pt; line-height: 1.65; margin: 6px 0; }
+  .analogy-box { background: #0e0e0e; border: 1px dashed #E97132; padding: 12px 16px; margin: 14px 0; }
+  .analogy-box .analogy-label { color: #E97132; font-size: 8pt; letter-spacing: 0.28em; text-transform: uppercase; margin-bottom: 6px; }
+  .analogy-box p { color: #E0E0E0; font-size: 10pt; line-height: 1.65; margin: 0; font-style: italic; }
+  .psychology-box { background: #0f0905; border: 1px solid #E97132; border-left: 4px solid #E97132; padding: 14px 18px; margin: 16px 0; }
+  .psychology-box .psy-head { color: #E97132; font-size: 9pt; letter-spacing: 0.28em; text-transform: uppercase; margin-bottom: 10px; font-weight: 700; border-bottom: 1px dotted #E97132; padding-bottom: 6px; }
+  .psychology-box p { color: #E0E0E0; font-size: 10.5pt; line-height: 1.7; margin: 6px 0; }
+  .stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 14px 0; }
+  .stat-cell { border: 1px solid #333; padding: 10px 14px; background: #0d0d0d; text-align: center; }
+  .stat-cell .s-num { color: #E97132; font-size: 20pt; font-weight: 900; line-height: 1.1; }
+  .stat-cell .s-label { color: #888; font-size: 8pt; letter-spacing: 0.16em; text-transform: uppercase; margin-top: 4px; }
   .back-page { min-height: 96vh; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #0A0A0A; border: 1px solid #222; text-align: center; padding: 40px; }
   .back-page .brand { color: #E97132; font-size: 28pt; font-weight: 700; letter-spacing: 0.3em; margin-bottom: 20px; }
   .back-page .disc { color: #555; font-size: 9pt; letter-spacing: 0.16em; max-width: 480px; line-height: 1.7; }
-  .loop-bar { background: #0a0800; border-left: 4px solid #E97132; border: 1px solid #333; padding: 8px 14px; margin: 12px 0; font-size: 9pt; color: #AAAAAA; }
-  .loop-bar span.tag { color: #E97132; font-size: 8pt; letter-spacing: 0.2em; text-transform: uppercase; display: block; margin-bottom: 3px; }
+  .disclosure { border: 1px solid #444; padding: 14px 18px; margin: 16px 0; background: #0d0d0d; }
+  .disclosure h4 { color: #E97132; margin: 0 0 8px 0; font-size: 9.5pt; letter-spacing: 0.22em; text-transform: uppercase; }
+  .disclosure p { color: #999; font-size: 8.5pt; line-height: 1.6; margin: 5px 0; }
 </style>
 </head>
 <body>
 
-<!-- ==================== FRONT COVER ==================== -->
+<!-- COVER PAGE -->
 <section class="page">
   <div class="cover">
-    <div class="top-strip">
-      <span>&#9608; INTERNAL &nbsp; CONFIDENTIAL</span>
-      <span>BROKERS EYES ONLY</span>
-    </div>
+    <div class="top-strip"><span>&#9608; INTERNAL &nbsp; CONFIDENTIAL</span><span>BROKERS EYES ONLY</span></div>
     <div class="middle">
       <div class="ribbon">&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;</div>
       <h1>THE BROKERS<br>WEEKLY</h1>
-      <h2>MACRO &nbsp;&bull;&nbsp; SALES &nbsp;&bull;&nbsp; STRATEGY</h2>
-      <div class="asset-badge">WHISKY INVESTMENT</div>
-      <div class="date">WEEK ENDED 24 MAY 2026</div>
+      <h2>MACRO &nbsp;&bull;&nbsp; MARKETS &nbsp;&bull;&nbsp; WHISKY INTELLIGENCE</h2>
+      <div class="asset-badge">SCOTCH WHISKY INVESTMENT EDITION</div>
+      <div class="date">14 JUNE 2026 &nbsp;&mdash;&nbsp; WEEK 24</div>
       <div class="ribbon">&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;</div>
     </div>
-    <div class="bottom-strip">
-      <span>VOL. WHISKY / W21</span>
-      <span>THE BROKERAGE REPORT</span>
-    </div>
+    <div class="bottom-strip"><span>THE BROKERS EDGE &#9608;</span><span>WEEK 24 &bull; JUNE 2026</span></div>
   </div>
 </section>
 
-<!-- ==================== DESK MEMO ==================== -->
+<!-- PAGE 2 — MASTHEAD + MACRO FEAR DASHBOARD -->
 <section class="page">
   <div class="masthead">
-    <div class="left">&#9608; WHISKY DESK</div>
-    <div class="middle">THE BROKERS WEEKLY &mdash; 24 MAY 2026</div>
-    <div class="right">PAGE 02 &#9608;</div>
+    <span class="left">THE BROKERS EDGE &#9608;</span>
+    <span class="middle">WHISKY WEEKLY &bull; W24 &bull; 14 JUNE 2026</span>
+    <span class="right">INTERNAL USE ONLY &#9608;</span>
   </div>
 
-  <h3 class="section">DESK MEMO &mdash; READ THIS FIRST</h3>
-
-  <p>Three weeks ago, we told you that the macro environment was delivering tailwinds for the whisky investment thesis. Last week, we told you the inflation story had returned with force. This week, something larger happened. On Friday 16 May, Moody&rsquo;s &mdash; the last of the three major credit rating agencies to hold a pristine assessment of American sovereign debt &mdash; downgraded the United States from <strong>Aaa to Aa1</strong>. It is no longer a formality. All three major agencies &mdash; S&amp;P in 2011, Fitch in 2023, Moody&rsquo;s in 2026 &mdash; have now agreed: <strong>US government debt is no longer considered the highest quality available</strong>. US debt is heading toward an estimated <strong>134% of GDP by 2035</strong>, with an interest bill that consumes an ever-larger share of federal revenue.</p>
-
-  <p>For a broker covering whisky investment, this is not abstract geopolitical noise. It is the most explicit possible confirmation of the debasement thesis &mdash; delivered not by a commentator, not by a fund manager, not by this publication, but by the credit rating apparatus of the global financial system itself. The world&rsquo;s largest issuer of the world&rsquo;s reserve currency has been told, officially and publicly, that its paper is not what it was. That is the context in which your clients are holding cash, government bonds, and savings accounts denominated in those same currencies.</p>
-
-  <p>Closer to home, UK CPI for April 2026 came in at <strong>2.8%</strong> &mdash; down from 3.3% in March, but still above the Bank of England&rsquo;s 2% target. The Bank held rates at <strong>3.75%</strong> on 30 April by an 8&ndash;1 vote. The IMF recommended no change for the remainder of 2026. The picture for UK savers is unchanged: earning just enough in nominal terms to feel comfortable, losing ground in real terms to anyone who bothers to do the arithmetic.</p>
-
-  <p>On the whisky market itself: cask trade sales grew <strong>13% in Q1 2026</strong>. India has cemented its status as the world&rsquo;s number one market by volume at <strong>220 million bottles</strong>. The SWA published this week pushing for <strong>swift implementation</strong> of the India FTA tariff reduction &mdash; a minor procedural complication around UK steel tariffs has been noted, but the whisky deal is not in dispute. And Diageo&rsquo;s production pauses at Teaninich and Roseisle continue. The structural picture is unchanged. The macro evidence in support of it grows stronger by the week.</p>
-
-  <div class="footer-bar">
-    <span>&#9608; DESK MEMO</span>
-    <span>WHISKY &bull; W21 &bull; 2026</span>
-  </div>
-</section>
-
-<!-- ==================== MARKET DASHBOARD ==================== -->
-<section class="page">
-  <div class="masthead">
-    <div class="left">&#9608; MARKETS</div>
-    <div class="middle">GLOBAL DASHBOARD &mdash; WEEK ENDED 24 MAY 2026</div>
-    <div class="right">PAGE 03 &#9608;</div>
-  </div>
-
-  <h3 class="section">GLOBAL MACRO &mdash; KEY PRINTS</h3>
+  <h3 class="section">GLOBAL RISK DASHBOARD &nbsp;&mdash;&nbsp; W24</h3>
 
   <div class="dashboard">
-    <div class="tile">
-      <div class="label">MOODY&rsquo;S US RATING</div>
-      <div class="value">Aa1</div>
-      <div class="delta down">&#9660; DOWNGRADED FROM Aaa</div>
+    <div class="tile red">
+      <div class="label">S&amp;P 500 YTD</div>
+      <div class="value">+8.35%</div>
+      <div class="delta">YTD June 2026. At all-time highs. 17 years since last recession. Longest expansion in modern history.</div>
     </div>
-    <div class="tile">
-      <div class="label">US DEBT / GDP (2035 EST)</div>
-      <div class="value">134%</div>
-      <div class="delta down">&#9660; MOODY&rsquo;S PROJECTION</div>
+    <div class="tile red">
+      <div class="label">US NATIONAL DEBT</div>
+      <div class="value">$36.2TRN</div>
+      <div class="delta">Interest payments now exceed US defence budget. Debt-to-GDP above 120%.</div>
     </div>
-    <div class="tile">
-      <div class="label">UK CPI (APRIL 2026)</div>
-      <div class="value">2.8%</div>
-      <div class="delta down">&#9660; ABOVE 2% TARGET</div>
+    <div class="tile amber">
+      <div class="label">SHILLER CAPE RATIO</div>
+      <div class="value">~36x</div>
+      <div class="delta">Near 2000 dot-com peak levels. Historical average: 16x. Only exceeded twice since 1881.</div>
     </div>
-    <div class="tile">
-      <div class="label">UK BASE RATE</div>
-      <div class="value">3.75%</div>
-      <div class="delta down">&#9660; HELD 8&ndash;1 VOTE</div>
-    </div>
-    <div class="tile">
-      <div class="label">CASK TRADE Q1 GROWTH</div>
-      <div class="value">+13%</div>
-      <div class="delta up">&#9650; Q1 2026 YoY</div>
-    </div>
-    <div class="tile">
-      <div class="label">INDIA VOLUME (2025)</div>
-      <div class="value">220m</div>
-      <div class="delta up">&#9650; BOTTLES &mdash; WORLD #1</div>
-    </div>
-    <div class="tile">
-      <div class="label">INDIA TARIFF (SCOTCH)</div>
-      <div class="value">75%</div>
-      <div class="delta up">&#9650; PATH TO 40% AGREED</div>
-    </div>
-    <div class="tile">
-      <div class="label">INDIA FTA STATUS</div>
-      <div class="value">IN PROGRESS</div>
-      <div class="delta up">&#9650; SWA PUSHING SWIFT DELIVERY</div>
-    </div>
-    <div class="tile">
-      <div class="label">DIAGEO PAUSES</div>
-      <div class="value">ONGOING</div>
-      <div class="delta down">&#9660; TEANINICH / ROSEISLE</div>
-    </div>
-    <div class="tile">
-      <div class="label">AUCTION MARKET</div>
-      <div class="value">ACTIVE</div>
-      <div class="delta up">&#9650; PREMIUM END STRONG</div>
-    </div>
-    <div class="tile">
-      <div class="label">BOE NEXT DECISION</div>
-      <div class="value">18 JUN</div>
-      <div class="delta down">&#9660; HOLD EXPECTED</div>
-    </div>
-    <div class="tile">
-      <div class="label">IRAN CEASEFIRE</div>
-      <div class="value">FRAGILE</div>
-      <div class="delta down">&#9660; TALKS &ldquo;ON LIFE SUPPORT&rdquo;</div>
+    <div class="tile amber">
+      <div class="label">US M2 MONEY SUPPLY</div>
+      <div class="value">+40%</div>
+      <div class="delta">Since 2020. Currency created. Purchasing power destroyed. Silent wealth transfer.</div>
     </div>
   </div>
 
-  <div class="gloss">
-    <h5>&#9608; WHAT THESE NUMBERS MEAN &mdash; DESK EDUCATION</h5>
-    <table>
-      <thead><tr><th>Indicator</th><th>Mechanism</th><th>Whisky Implication</th></tr></thead>
-      <tbody>
-        <tr>
-          <td class="accent">Moody&rsquo;s US Downgrade (Aaa &rarr; Aa1)</td>
-          <td>A credit rating downgrade signals that a borrower&rsquo;s ability to service debt has weakened. When that borrower is the issuer of the world&rsquo;s reserve currency, the signal is not just about one government. It is about the structural quality of the paper that underpins the global financial system. S&amp;P downgraded in 2011. Fitch in 2023. Moody&rsquo;s in 2026. The trajectory is not accidental.</td>
-          <td>Every asset denominated in government-issued currency &mdash; savings accounts, bonds, cash ISAs, pensions with significant fixed-income exposure &mdash; carries an additional layer of risk that has just been formally acknowledged by three independent agencies. Physical whisky casks are not denominated in any currency. Their value is denominated in the scarcity of aged Scotch whisky and the global demand for it. That is a different denomination entirely.</td>
-        </tr>
-        <tr>
-          <td class="accent">UK CPI 2.8% (April)</td>
-          <td>UK inflation fell from 3.3% in March to 2.8% in April &mdash; the right direction, but still 40 basis points above the Bank of England&rsquo;s 2% target. The BOE held rates at 3.75% on 30 April by 8&ndash;1. With Iran-driven energy costs complicating the disinflation path, the IMF has recommended no change for the remainder of 2026. Savers earn 3.5&ndash;4.5% nominally. Real returns, after inflation and tax, remain marginal to negative depending on rate tier.</td>
-          <td>The UK domestic inflation story is the most relevant pitch trigger for British savers and investors. The numbers are softer than the US print (3.8%), but the principle is identical: nominal headline rates mask real purchasing power erosion. A UK client earning 4% in a savings account against 2.8% CPI has a real pre-tax return of 1.2% &mdash; and after basic rate tax, closer to 0.4%. Physical Scotch whisky, maturing in a bonded warehouse in Scotland, carries no such erosion structure.</td>
-        </tr>
-        <tr>
-          <td class="accent">Cask Trade +13% Q1 2026</td>
-          <td>Trade cask sales &mdash; the buying and selling of whisky casks between investors and institutions &mdash; grew 13% in Q1 2026 year-on-year. This is the market&rsquo;s own verdict: appetite for premium whisky casks as an investment is growing, not contracting, in a period of macro uncertainty.</td>
-          <td>Social proof in its most direct form. When you tell a client that cask trade grew 13% in the first quarter of this year, you are not making a claim about the future. You are reporting what the market actually did. That is Cialdini&rsquo;s authority and social proof principles applied simultaneously: credible data, independent of the salesperson, confirming the direction of smart-money flow.</td>
-        </tr>
-        <tr>
-          <td class="accent">India FTA &mdash; Swift Implementation Push</td>
-          <td>The SWA published a statement this week confirming it is pressing the UK Government for swift implementation of the India FTA tariff reduction. A procedural issue around UK steel import restrictions has created a minor timetable complication, but the whisky tariff reduction from 150% to 75% &mdash; with a legislated path to 40% &mdash; is agreed, confirmed, and not under question.</td>
-          <td>Three consecutive weeks of India FTA coverage in this publication is not repetition. It is a looping reinforcement of one of the strongest structural demand arguments in the whisky investment case. The clients who were told about this in W19 and W20 are now seeing continued validation. The brokers who communicated it are building the second ten &mdash; trust in the salesperson as someone who tracks the long view accurately.</td>
-        </tr>
-      </tbody>
-    </table>
+  <div class="dashboard">
+    <div class="tile red">
+      <div class="label">MAG 7 CONCENTRATION</div>
+      <div class="value">~30%</div>
+      <div class="delta">Seven tech stocks = 30% of entire S&amp;P 500. "Diversified" index — in name only.</div>
+    </div>
+    <div class="tile amber">
+      <div class="label">BOE BALANCE SHEET</div>
+      <div class="value">£895BN</div>
+      <div class="delta">Peak QE exposure. Every pound printed is a pound taken from savers without consent.</div>
+    </div>
+    <div class="tile red">
+      <div class="label">YEARS SINCE RECESSION</div>
+      <div class="value">17 YRS</div>
+      <div class="delta">The longest expansion in recorded history. Cycles always end. Always.</div>
+    </div>
+    <div class="tile amber">
+      <div class="label">ISM MANUFACTURING</div>
+      <div class="value">54.0</div>
+      <div class="delta">May 2026. Expansion — but late-cycle acceleration signals are the most dangerous moment to be over-exposed to equities.</div>
+    </div>
   </div>
 
-  <div class="footer-bar">
-    <span>&#9608; DASHBOARD</span>
-    <span>WHISKY &bull; W21 &bull; 2026</span>
+  <div class="alert-red">
+    <span class="tag">&#9608; BROKER BRIEFING — THE MACRO ENVIRONMENT RIGHT NOW</span>
+    This week's report is not about whisky headlines. It is about the environment your clients are living in — and whether they fully understand what is happening to their money right now. Global equity markets are at all-time highs. Monetary debasement has accelerated at a pace not seen since World War II. The gap between what savings accounts appear to return and what they actually deliver in real purchasing power terms is at a historic extreme. Your clients may feel comfortable. That feeling is the risk. The broker who understands the macro environment — and can translate it into a conversation about why hard assets are not optional but essential — is the broker who will still be working when this cycle turns.
   </div>
+
+  <h3 class="section">EXECUTIVE SUMMARY &nbsp;&mdash;&nbsp; W24</h3>
+  <p>We are 17 years into the longest economic expansion in modern recorded history. The S&amp;P 500 is at all-time highs. US national debt has passed $36 trillion — interest payments on that debt now exceed what the United States spends on its entire defence apparatus. Central banks have expanded their balance sheets to levels that would have been unimaginable twenty years ago. The US money supply has grown 40% since 2020. And yet most of your clients — if they are being honest — feel financially comfortable. Their savings account is earning something. Their pension is up. Their ISA balance looks healthy on the statement.</p>
+  <p>This is the most dangerous moment in the financial cycle: the point where the accumulation of systemic risk becomes invisible because everything appears to be working. It is precisely the moment where sophisticated investors — the ones who have been through 1987, 2000, 2008, and 2020 — begin quietly moving capital out of financial assets and into hard, physical, tangible assets that exist outside the system. Not because they know when the correction comes. But because they understand that the question is not <em>if</em> but <em>when</em>, and they have no interest in being fully exposed to financial assets when it does.</p>
+  <p>This week's report gives your brokers the macro framework, the sales language, and the pitch architecture to have that conversation. It is not about telling clients the world is ending. It is about telling them what the world looks like — accurately — and then showing them a door marked <strong>protection</strong>.</p>
 </section>
 
-<!-- ==================== STORY 1: MOODY'S DOWNGRADE ==================== -->
+<!-- PAGE 3 — STORY 1: THE BULL MARKET CLOCK -->
 <section class="page">
   <div class="masthead">
-    <div class="left">&#9608; STORY OF THE WEEK</div>
-    <div class="middle">KEY MARKET INTELLIGENCE &mdash; 24 MAY 2026</div>
-    <div class="right">PAGE 04 &#9608;</div>
+    <span class="left">THE BROKERS EDGE &#9608;</span>
+    <span class="middle">WHISKY WEEKLY &bull; W24 &bull; JUNE 2026</span>
+    <span class="right">STORY 01 &#9608;</span>
   </div>
 
-  <h3 class="section">STORY 01 &mdash; THE LAST FORTRESS FALLS: MOODY&rsquo;S DOWNGRADES THE US</h3>
+  <h3 class="section">FOUNDATION: STORY 1 &nbsp;&mdash;&nbsp; THE BULL MARKET CLOCK</h3>
+  <p style="color:#888; font-size:9pt; letter-spacing:0.15em; text-transform:uppercase; margin-bottom:12px;">Source: ONS &bull; Federal Reserve Historical Data &bull; Shiller CAPE Database &bull; ISM Manufacturing Survey, May 2026</p>
 
   <div class="breaking-bar">
-    <div class="label">&#9608; MACRO EVENT &mdash; FRIDAY 16 MAY 2026</div>
-    <div class="text">Moody&rsquo;s strips US of final Aaa rating &mdash; all three major agencies have now downgraded American sovereign debt &mdash; US debt/GDP heading to 134% by 2035</div>
+    <div class="label">&#9608; LEAD STORY — W24 — THE QUESTION EVERY BROKER MUST ANSWER THIS WEEK</div>
+    <div class="text">17 YEARS WITHOUT A RECESSION. EQUITIES AT ALL-TIME HIGHS. WHEN DOES HISTORY STOP BEING A COINCIDENCE AND START BEING A WARNING?</div>
   </div>
 
-  <div class="loop-bar">
-    <span class="tag">&#9608; LOOPING FROM W20 &mdash; THE DEBASEMENT THESIS CONFIRMED</span>
-    Two weeks ago in W20, we told you that the era of easy money had &ldquo;taken a pause, taken a breath, and come back harder.&rdquo; The Moody&rsquo;s downgrade is the institutional confirmation of that statement. The thesis has not changed. The evidence for it has just grown considerably stronger.
-  </div>
+  <p>The current economic expansion began in June 2009 — the month global markets bottomed following the financial crisis. That means we are now, in June 2026, <strong>seventeen years into an expansion</strong>. For context: the average post-war US economic expansion lasts approximately 65 months — just over five years. This cycle has lasted more than three times that. There has never been an expansion of this duration in the modern era of market economics.</p>
 
-  <div class="news-block">
-    <h4>Three Agencies, Three Downgrades, One Direction &mdash; What It Means for Paper Money</h4>
-    <div class="meta">&#9608; SOVEREIGN DEBT &nbsp;&bull;&nbsp; MONETARY DEBASEMENT &nbsp;&bull;&nbsp; HARD ASSET THESIS &nbsp;&bull;&nbsp; PRIMARY PITCH DRIVER THIS WEEK</div>
-    <div class="body">
-      <p>On Friday 16 May 2026, Moody&rsquo;s Ratings downgraded the United States of America from <strong>Aaa to Aa1</strong>, changing the outlook from negative to stable. It cited a rising interest burden, federal debt on course to reach approximately <strong>134% of GDP by 2035</strong>, and a fiscal trajectory that successive governments have failed to address. Moody&rsquo;s was the last of the three major agencies to hold a top-tier rating for US sovereign debt. S&amp;P removed its Aaa in August 2011 following the debt ceiling crisis. Fitch followed in August 2023. Moody&rsquo;s has now completed the picture.</p>
-      <p>This is not simply a technical adjustment to a credit model. It is a formal, public declaration by three independent institutions &mdash; institutions whose entire credibility rests on their analytical rigour &mdash; that the debt issued by the world&rsquo;s reserve currency provider is no longer the cleanest paper in the system. Consider what that means in practical terms: the US dollar underpins the global financial architecture. It is the currency in which oil is priced, in which most international trade is settled, in which the majority of the world&rsquo;s central bank reserves are held. When the paper currency of that system is being formally assessed as of lower quality than it was, the case for assets that exist outside that paper system becomes structurally stronger &mdash; not as a speculative bet, but as a rational diversification response to a documented, officially confirmed risk.</p>
-      <p>For UK clients, the direct exposure may feel indirect. But the transmission mechanism is straightforward: a weaker dollar, higher US borrowing costs, and reduced confidence in US Treasuries as a &ldquo;risk-free&rdquo; anchor asset all contribute to a global financial environment of elevated uncertainty. In that environment, physical assets that are not denominated in any government&rsquo;s promise &mdash; that hold value by virtue of physical scarcity, ageing, and universal demand &mdash; perform a specific and increasingly valuable function in a diversified portfolio.</p>
+  <p>The equity markets reflect this. The S&amp;P 500 is up 8.35% year to date, sitting at all-time highs for the second consecutive year. The Shiller CAPE ratio — a measure of stock market valuation smoothed over 10 years of earnings — sits at approximately 36 times. The historical average since 1881 is 16 times. The CAPE has only exceeded current levels twice in recorded history: in the months preceding the 1929 crash, and in the peak of the year 2000 dot-com bubble. Both ended in multi-year declines of 50% or more from peak.</p>
+
+  <div class="stat-row">
+    <div class="stat-cell">
+      <div class="s-num">17</div>
+      <div class="s-label">Years since last recession (2009)</div>
+    </div>
+    <div class="stat-cell">
+      <div class="s-num">36x</div>
+      <div class="s-label">Shiller CAPE ratio — current (avg: 16x)</div>
+    </div>
+    <div class="stat-cell">
+      <div class="s-num">2</div>
+      <div class="s-label">Times CAPE exceeded this level in history — 1929 and 2000</div>
     </div>
   </div>
 
-  <div class="pitch">
-    <div class="head">&#9608; PITCH 01 &mdash; THE THREE AGENCIES</div>
-    <div class="framework-tag">FRAMEWORK: LOGICAL CERTAINTY &rarr; AUTHORITY (CIALDINI) &rarr; STRAIGHT LINE PRODUCT CERTAINTY (FIRST TEN)</div>
-    <div class="quote">&ldquo;Mr./Ms. Client, I want to share something with you that happened last Friday, because I think it is the most important macro development for our conversation in the last twelve months. Moody&rsquo;s &mdash; one of the three major global credit rating agencies &mdash; downgraded US government debt for the first time in the agency&rsquo;s modern history. Standard &amp; Poor&rsquo;s did the same in 2011. Fitch did it in 2023. Now Moody&rsquo;s has completed the set. All three agencies that the global financial system relies on to assess the quality of sovereign debt have now said the same thing: US government paper is not what it was. The United States is the issuer of the world&rsquo;s reserve currency &mdash; the dollar underpins the global financial system. When three independent institutions with no motive other than analytical credibility all arrive at the same conclusion, the question worth asking is not whether this is significant. It clearly is. The question is: what does a rational investor do in response to that signal? And the answer that an increasing number of institutions are arriving at is: you hold a portion of your capital in something that is not a government&rsquo;s promise. Something physical. Something scarce. Something with a return mechanism that is completely independent of the debt trajectory of any sovereign borrower.&rdquo;</div>
-    <div class="reason"><span class="l">Framework applied:</span> This is the logical certainty pitch &mdash; building the first ten on intellectual grounds before any emotional close. The authority principle is applied by citing three independent institutions rather than making the claim yourself. You are not arguing that the financial system is weakening. You are reporting what three credentialed agencies have formally concluded. The client&rsquo;s logical mind cannot dismiss the source. That foundation cleared, the product solution (physical, non-sovereign asset) follows as the rational conclusion, not a sales proposition.</div>
-    <div class="mechanics">
-      <span class="tag">&#9608; SALES MECHANICS</span>
-      Deliver this slowly. Let the weight of &ldquo;all three agencies&rdquo; land before you continue. The repetition of three independent verdicts is deliberate &mdash; it removes the possibility that this is one opinion. The client who processes the source of the information before the conclusion is far more receptive. Pause after &ldquo;what does a rational investor do?&rdquo; Let them think. Their internal answer to that question is already moving them toward your conclusion.
-    </div>
+  <p>The argument is not that a recession is imminent. It is that the longer an expansion runs, and the more extended valuations become, the more vulnerable the system is to any shock — and in a world of active geopolitical conflict, dollar volatility, $36 trillion in government debt, and a global energy supply chain still dependent on the Strait of Hormuz, the list of potential shocks is not short.</p>
+
+  <p>Here is what history teaches us about this moment. When equity markets trade at extreme valuations for extended periods, the clients who come through the eventual correction intact are not the ones who predicted the exact date. They are the ones who, at some point during the expansion, quietly moved a portion of their capital into assets that sit outside the financial system — assets that cannot be debased, do not depend on corporate earnings growth, and do not have a ticker symbol that goes to zero when sentiment reverses.</p>
+
+  <div class="analogy-box">
+    <div class="analogy-label">&#9608; ANALOGY FOR USE ON CALLS — THE PARTY THAT RUNS TOO LONG</div>
+    <p>Imagine a party that has been running for seventeen years. The music is still playing. The drinks are still flowing. Everyone in the room feels great. But the experienced people — the ones who have seen parties before — have quietly started moving toward the exit. Not because they know exactly when the music stops. Because they know it always does, and they would rather leave before the rush than get caught in it. The question for your clients is simple: are they in the centre of the dance floor at 4am, or are they near the door with their coat already on?</p>
   </div>
 
+  <h4 class="sub">PITCH #1 &nbsp;&mdash;&nbsp; THE EDUCATION CLOSE [BUILD FEAR, FIND NEED, OFFER SOLUTION]</h4>
   <div class="pitch">
-    <div class="head">&#9608; PITCH 02 &mdash; THE DENOMINATION QUESTION</div>
-    <div class="framework-tag">FRAMEWORK: PAIN THRESHOLD + PATTERN INTERRUPT &rarr; EMOTIONAL CERTAINTY &rarr; FUTURE PACING (SLP)</div>
-    <div class="quote">&ldquo;Here is a question I&rsquo;d like you to sit with for a moment. Most of the capital in a typical portfolio is denominated in something &mdash; in pounds, in dollars, in a government&rsquo;s promise to honour a bond, in a company&rsquo;s promise to remain profitable. What your savings account, your ISA, your pension bond allocation all have in common is that their value is ultimately denominated in a currency issued by a government. A government that, this week, was told by three independent agencies that it cannot fully be trusted to manage its own debt. Now &mdash; I&rsquo;m not saying the financial system is about to collapse. I am saying that the formal, official, publicly acknowledged quality of the paper your capital is denominated in is declining. That is not my opinion. That is the verdict of the rating agencies. The alternative is not complicated. A whisky cask does not have a government behind it. Its value is in the spirit inside it &mdash; the scarcity of it, the age of it, the demand for it from 220 million-bottle markets that cannot get enough. That is what &ldquo;hard asset&rdquo; actually means. Not harder to sell. Harder to debase.&rdquo;</div>
-    <div class="reason"><span class="l">Framework applied:</span> The pattern interrupt is &ldquo;the denomination question&rdquo; &mdash; it forces the client to think about their portfolio in a way they almost certainly never have. Pain threshold activation follows: the pain is not hypothetical future collapse but the present, confirmed, official degradation of the paper their capital sits in. Future pacing: &ldquo;harder to debase&rdquo; places the client into the moment of realising what they own and why it differs. The SLP principle of certainty transfer is operating throughout &mdash; the broker&rsquo;s certainty that this is a rational response to a confirmed signal, not a speculative punt.</div>
-    <div class="mechanics">
-      <span class="tag">&#9608; SALES MECHANICS</span>
-      The phrase &ldquo;harder to debase&rdquo; is a closing line. End there. Do not continue for at least five seconds. You have just delivered a thought the client has never had before &mdash; that assets can be categorised by how easy they are to debase. That concept is new. Give it room to land. The broker who fills that silence loses it.
-    </div>
+    <div class="head">&#9608; PITCH TYPE: FEAR + NEED + SOLUTION — USE THIS SEQUENCE ON EVERY CALL</div>
+    <div class="quote">"I want to share something with you this morning — not to alarm you, but because I think it's relevant to a conversation every serious investor should be having right now. We are seventeen years into the longest economic expansion in recorded history. The stock market is at all-time highs. And the valuation of those markets — the price you're paying for future earnings — is at a level only seen twice before in the last hundred years: once before 1929, and once before the dot-com crash in 2000. Now, I'm not predicting a crash. Nobody can. What I am saying is this: the clients I work with who sleep well at night are the ones who took some of their gains off the table at the right time and moved a portion into assets that exist outside the financial system entirely. Assets that don't fall 40% when a bank announces a quarterly loss. Assets that mature and appreciate regardless of what the FTSE does on a Tuesday. That's the conversation I'd like to have with you today — not to sell you something, but to ask whether your current position reflects the environment you're actually living in."</div>
+    <div class="reason"><span class="l">WHY THIS WORKS:</span> This sequence — present the environment accurately (fear), ask them to assess their current position (need), offer the alternative (solution) — is the fundamental architecture of all great selling. The broker is not a salesperson in this frame. They are the person in the room who is telling the client something true that nobody else has told them. The phrase "not to sell you something" paradoxically lowers the sales guard completely. The client relaxes. Then the question — "does your current position reflect the environment you're actually living in?" — is almost impossible to answer with a confident yes. That gap is the conversation.</div>
   </div>
 
+  <h4 class="sub">PITCH #2 &nbsp;&mdash;&nbsp; THE PROFIT ROTATION ARGUMENT [ASTUTE INVESTOR FRAME]</h4>
   <div class="pitch">
-    <div class="head">&#9608; PITCH 03 &mdash; FOLLOW THE INSTITUTIONS</div>
-    <div class="framework-tag">FRAMEWORK: SOCIAL PROOF (CIALDINI) &rarr; SCARCITY &rarr; CLOSING QUESTION</div>
-    <div class="quote">&ldquo;One thing that tends to be more persuasive than anything I can say is what the smart money actually does. Trade cask sales in the whisky market grew 13% in the first quarter of 2026. Not 13% off a tiny base &mdash; 13% year-on-year in a market that already had significant institutional participation. That growth happened in the same quarter that inflation was running hot, that the Fed Chair confirmation created monetary uncertainty, and that sovereign debt quality was being formally questioned. The investors moving into this space were not doing so despite the macro environment. They were doing so because of it. They looked at the same data we are discussing now and concluded that an asset with an independent return mechanism &mdash; one that matures in a Scottish warehouse regardless of what the FOMC decides &mdash; belongs in the portfolio. Now, the inventory of aged, premium, well-documented casks at any given moment is finite. The market grew 13% this quarter. That growth absorbs supply. What&rsquo;s available now will not be available indefinitely. What would you need to see to be comfortable moving forward?&rdquo;</div>
-    <div class="reason"><span class="l">Framework applied:</span> Social proof activates the client&rsquo;s instinct to follow credible peers. The 13% growth figure is not anecdotal &mdash; it is market data. The scarcity element (finite cask inventory being absorbed by growing demand) is applied honestly and without fabrication: it is structurally true of the cask market. The closing question &ldquo;what would you need to see?&rdquo; is the Straight Line close &mdash; it surfaces the remaining gap between the client&rsquo;s current certainty level and the action threshold. Whatever they say next tells you exactly where to focus the loop.</div>
-  </div>
-
-  <div class="footer-bar">
-    <span>&#9608; STORY 01 &mdash; MOODY&rsquo;S / DEBASEMENT</span>
-    <span>WHISKY &bull; W21 &bull; 2026</span>
+    <div class="head">&#9608; PITCH TYPE: SOCIAL PROOF + LOGICAL CLOSE + ASPIRATION</div>
+    <div class="quote">"One thing I've noticed — and this is consistent across the clients I work with who have done very well over the last decade — is that the ones who compound their wealth most effectively are not the ones who hold everything until the last moment. They're the ones who recognise when an equity portfolio has delivered strong returns, and use those returns to diversify into something that protects what they've built. When markets are at all-time highs, that is not the time to add more equities. That is the time to rotate a portion of those gains into something that holds its value when the cycle turns. The clients I work with who made that move three, four years ago — when people thought I was being overly cautious — are now sitting on a portfolio that has appreciated on the whisky side and held the equity gains they locked in. That is the outcome I'd like to help you think about today."</div>
+    <div class="reason"><span class="l">WHY THIS WORKS:</span> The "astute investor rotation" argument makes acting feel like what smart, experienced people do — not what cautious or worried people do. The aspiration is to be the client who "has done very well" and made the right decision at the right time. This appeals to sophistication rather than fear. Use this with clients who resist the fear frame — they respond better to aspiration. Know which version of fear to use: threat of loss (Pitch 1) or desire to be the person who made the right call (Pitch 2). Both are fear-based at the root, but one leads with risk and one leads with identity.</div>
   </div>
 </section>
 
-<!-- ==================== STORY 2+3 ==================== -->
+<!-- PAGE 4 — STORY 2: MONETARY DEBASEMENT -->
 <section class="page">
   <div class="masthead">
-    <div class="left">&#9608; INTELLIGENCE</div>
-    <div class="middle">MARKET STORIES &mdash; 24 MAY 2026</div>
-    <div class="right">PAGE 05 &#9608;</div>
+    <span class="left">THE BROKERS EDGE &#9608;</span>
+    <span class="middle">WHISKY WEEKLY &bull; W24 &bull; JUNE 2026</span>
+    <span class="right">STORY 02 &#9608;</span>
   </div>
 
-  <h3 class="section">STORY 02 &mdash; INDIA FTA: THE DEAL HOLDS, THE DIRECTION IS CLEAR</h3>
+  <h3 class="section">FOUNDATION: STORY 2 &nbsp;&mdash;&nbsp; MONETARY DEBASEMENT: THE THEFT THAT NEVER SLEEPS</h3>
+  <p style="color:#888; font-size:9pt; letter-spacing:0.15em; text-transform:uppercase; margin-bottom:12px;">Source: Bank of England &bull; Federal Reserve Money Supply Data &bull; ONS CPI Historical Series &bull; IMF Fiscal Monitor</p>
 
-  <div class="loop-bar">
-    <span class="tag">&#9608; LOOPING FROM W19 + W20 &mdash; THIRD CONSECUTIVE WEEK</span>
-    W19: FTA announced, 150% to 75% tariff reduction confirmed. W20: SWA pushing for swift implementation; steel tariff complication identified. W21: SWA publishes 20 May reiterating swift delivery request. The destination has not changed. The timetable is being negotiated. Clients who were told about this in W19 are watching the prediction validate.
+  <p>Since the 2008 financial crisis, central banks around the world have engaged in the largest peacetime monetary expansion in history. The Bank of England expanded its balance sheet to <strong>£895 billion at peak</strong> — through a process called Quantitative Easing that is, in plain terms, the creation of money that did not previously exist. The US Federal Reserve expanded its balance sheet from approximately $900 billion in 2008 to over $9 trillion at peak. The US money supply (M2) grew by <strong>40% between 2020 and 2023 alone</strong> — a three-year expansion that would have taken two decades to achieve under pre-crisis norms.</p>
+
+  <p>The mechanism is understood in academic terms but rarely explained in plain ones. When a central bank creates new currency and injects it into the financial system, it does not create new value. It dilutes the value of every existing unit of currency proportionally. The technical term is monetary debasement. The plain English term is this: every pound note in your client's wallet, every pound in their savings account, every pound in their pension fund, was worth fractionally less the moment that new currency entered the system. This process has been running, without pause, for seventeen years.</p>
+
+  <p>The ONS confirms what the theory predicts. A basket of goods costing £1,000 in 2008 costs approximately <strong>£1,620 today</strong> — a 62% increase. A savings account earning the historical average UK deposit rate over that period would have returned approximately 28%. The purchasing power gap — the difference between what money earned and what it needed to earn simply to stand still — is <strong>34 percentage points</strong>. That is not a rounding error. That is a structural, sustained, deliberate transfer of purchasing power from savers to debtors. And the largest debtor in the system is the government.</p>
+
+  <div class="signal-box">
+    <div class="signal-head">&#9608; THE DEBASEMENT TABLE — WHAT £100,000 ACTUALLY DOES OVER TIME</div>
+    <table>
+      <tr><th>Position</th><th>Nominal Value 2026</th><th>Real Purchasing Power (2008 terms)</th><th>Verdict</th></tr>
+      <tr><td>Cash savings (avg UK deposit rate)</td><td>£128,000</td><td class="red">£78,900</td><td class="red">Real loss: £21,100</td></tr>
+      <tr><td>ISA (same rate, ISA wrapper)</td><td>£128,000</td><td class="red">£78,900</td><td class="red">Same result — tax on inflation gain</td></tr>
+      <tr><td>Inflation (CPI, same period)</td><td>&mdash;</td><td class="accent">£162,000 needed to stand still</td><td class="accent">The benchmark they must beat</td></tr>
+      <tr><td>Physical asset (e.g. maturing cask)</td><td>Appreciates with time + scarcity</td><td class="accent">Exists outside currency system</td><td class="accent">No debasement risk</td></tr>
+    </table>
+    <p style="color:#888; font-size:8.5pt; margin-top:8px;">Illustrative model based on ONS CPI data 2008–2026 and Bank of England average quoted deposit rate series. Individual circumstances vary.</p>
   </div>
 
-  <div class="news-block">
-    <h4>SWA Pushes Government for Swift Delivery &mdash; Procedural Noise, Not Structural Risk</h4>
-    <div class="meta">&#9608; INDIA FTA &nbsp;&bull;&nbsp; DEMAND CATALYST &nbsp;&bull;&nbsp; IMPLEMENTATION TIMING &nbsp;&bull;&nbsp; LONG-TERM STRUCTURAL</div>
-    <div class="body">
-      <p>The Scotch Whisky Association published on <strong>20 May 2026</strong> confirming that it is pressing the UK Government for swift implementation of the UK&ndash;India Comprehensive Economic and Trade Agreement. The SWA&rsquo;s Chief Executive, Mark Kent, noted that the positive trading relationship and tariff reductions are good news for producers, and urged implementation at the earliest date. A procedural complication has emerged: UK steel import restrictions coming into effect from July 2026 were not factored into the original FTA negotiation. India has raised this in the wider bilateral discussion. UK officials have stated they are working to find a resolution so that the agreement can be formally operationalised at an early date.</p>
-      <p>The whisky-specific terms of the agreement &mdash; a reduction from <strong>150% to 75%</strong> import tariff on Scotch whisky, with a legislated pathway to <strong>40% over ten years</strong> &mdash; are agreed, confirmed, and unchanged. They are not the subject of the complication. The complication is in the timetable for the broader trade relationship. For a broker discussing long-duration cask investment, the relevant question is not &ldquo;when exactly will the tariff come into effect?&rdquo; It is: &ldquo;Is the destination still the same?&rdquo; The answer is yes. The direction is legislated. The timeline is the only variable. And India, at <strong>220 million bottles consumed in 2025</strong>, is already the world&rsquo;s largest whisky market by volume. The demand is real and present. The tariff reduction makes it more accessible. That does not change.</p>
-    </div>
+  <div class="analogy-box">
+    <div class="analogy-label">&#9608; ANALOGY FOR USE ON CALLS — THE WATERED-DOWN BOTTLE</div>
+    <p>Imagine you have a bottle of fine whisky worth £1,000. Every night, someone takes out a small measure and tops the bottle up with water. The bottle still looks full. The label still says the same thing. But the contents are weaker every morning — less concentrated, less valuable. What the central banks have been doing to your clients' currency for seventeen years is exactly this. The savings account statement still shows numbers. But those numbers buy less every single year. The question is not whether this is happening. The question is whether your client holds something that cannot be watered down.</p>
   </div>
 
+  <h4 class="sub">PITCH #1 &nbsp;&mdash;&nbsp; THE DEBASEMENT REVELATION [EDUCATION + FEAR + SOLUTION]</h4>
   <div class="pitch">
-    <div class="head">&#9608; PITCH &mdash; THE DESTINATION, NOT THE TIMETABLE</div>
-    <div class="framework-tag">FRAMEWORK: AUTHORITY + OBJECTION PRE-EMPTION &rarr; COMMITMENT/CONSISTENCY (CIALDINI) &rarr; LONG-DURATION FRAME</div>
-    <div class="quote">&ldquo;I&rsquo;ve been tracking the India FTA story for three weeks now, and I want to give you the cleanest possible update. The whisky tariff reduction &mdash; 150% down to 75%, with a path to 40% &mdash; is agreed and is not in dispute. What is being sorted is a timing issue around UK steel tariffs in the wider bilateral relationship. It is a procedural complication in a broader negotiation, not a reversal of what has been agreed for whisky. The SWA published this week pressing the government for swift delivery. The trajectory is intact. Now, here is why this is relevant to a client with a cask that matures in seven or eight years. They are not investing in today&rsquo;s India. They are investing in the India of 2033, where a 40% tariff will make Scotch whisky genuinely competitive for hundreds of millions of consumers who have not had access to it at scale. Whether that tariff path is implemented in full by 2028 or 2030 does not materially change the destination that a long-duration cask matures into. The deal is done. The clients who positioned themselves before it fully materialises are the ones who look back and understand the value of taking a long view.&rdquo;</div>
-    <div class="reason"><span class="l">Framework applied:</span> Pre-empting the headline complication before the client raises it builds the second ten (trust in the salesperson) faster than almost any other technique. The commitment/consistency principle: clients who have already bought into the India thesis in prior conversations are primed to accept this update as confirmation, not contradiction. The long-duration frame repositions timing noise as irrelevant to the fundamental investment case. Ending with &ldquo;the clients who looked back&rdquo; is future pacing &mdash; the client is placed in a future moment of having made the right decision.</div>
+    <div class="head">&#9608; PITCH TYPE: EDUCATION + PATTERN INTERRUPT + SOLUTION</div>
+    <div class="quote">"I want to ask you something, and I'd like you to think about it properly before you answer. If someone told you in 2008 that over the next seventeen years, they would quietly take 34% of the purchasing power of your savings — not through fees, not through charges, but through the mathematical erosion of what your money can buy — would you have said that was acceptable? Because that is what has happened. The Bank of England expanded its balance sheet to nearly £900 billion. New money was created. When you create money without creating value, you dilute the value of every pound that already exists. The people who protected themselves against this were not the ones with the highest savings rates. They were the ones holding assets that cannot be printed. Gold. Whisky casks. Physical assets that exist in the real world, not in a ledger that can be adjusted with a decision made in a committee room in the City of London."</div>
+    <div class="reason"><span class="l">WHY THIS WORKS:</span> Opening with a hypothetical question in the past tense ("if someone told you in 2008...") activates retrospective emotion — the client feels what they would have felt if they'd been warned and done nothing. The answer is always no — nobody would have accepted it. The revelation that it has already happened is a pattern interrupt that cannot be ignored. Then the solution (hard assets) does not feel like a product. It feels like the logical conclusion of the argument the client just followed to its end.</div>
   </div>
 
-  <h3 class="section">STORY 03 &mdash; UK CPI 2.8% + BOE HOLDS: THE DOMESTIC CASE</h3>
-
-  <div class="news-block">
-    <h4>Inflation Easing But Above Target &mdash; The British Saver Is Still Losing Ground</h4>
-    <div class="meta">&#9608; UK CPI &nbsp;&bull;&nbsp; BANK OF ENGLAND &nbsp;&bull;&nbsp; UK SAVERS &nbsp;&bull;&nbsp; DOMESTIC PITCH ANGLE</div>
-    <div class="body">
-      <p>UK CPI for April 2026 came in at <strong>2.8% year-on-year</strong>, down from 3.3% in March. The direction is correct. The destination &mdash; the Bank of England&rsquo;s 2% target &mdash; has not been reached and is not imminent. The Monetary Policy Committee voted <strong>8&ndash;1 to hold Bank Rate at 3.75%</strong> at its 30 April meeting, with one member seeking an increase to 4%. The IMF has formally recommended the Bank hold rates unchanged for the remainder of 2026 to maintain a restrictive monetary stance and limit second-round inflation effects. The next decision is scheduled for <strong>18 June 2026</strong>.</p>
-      <p>For UK clients, this environment is specific and calculable. A savings account earning 4% against 2.8% inflation generates a real pre-tax return of approximately 1.2%. At basic rate tax (20%), the post-tax real return falls to approximately 0.4%. On &pound;200,000 of capital, that is real purchasing power preservation of approximately &pound;800 per year. On a &pound;500,000 cash position, it is &pound;2,000. The nominal balance grows. The purchasing power barely moves. And this is the <em>better</em> version of the story &mdash; compared to February, when inflation was running at 3.3% and the real return was even more marginal. The British saver is not in crisis. They are in a slow and largely invisible erosion, confirmed by official data, that compounds silently over time.</p>
-      <p>Physical whisky casks stored in UK bonded warehouses operate outside this structure entirely. Their value is not set by the Bank of England&rsquo;s overnight rate. It is set by the ageing of the spirit, the scarcity of premium aged Scotch, and the growing global demand evidenced by the India FTA and the 13% cask trade growth in Q1. These are different mechanisms. That difference, precisely explained, is one of the most powerful client-facing conversations any broker can have this week.</p>
-    </div>
-  </div>
-
+  <h4 class="sub">PITCH #2 &nbsp;&mdash;&nbsp; THE eSLR FRAME [SENIOR-LEVEL EDUCATION]</h4>
   <div class="pitch">
-    <div class="head">&#9608; PITCH &mdash; THE INVISIBLE EROSION (UK VERSION)</div>
-    <div class="framework-tag">FRAMEWORK: LOGICAL CERTAINTY &rarr; PAIN THRESHOLD ACTIVATION &rarr; REAL VS NOMINAL EDUCATION &rarr; CONTRAST CLOSE</div>
-    <div class="quote">&ldquo;The government confirmed the UK inflation figure this week &mdash; 2.8%. It&rsquo;s lower than it was in March, which is good news. But let me share what it means in practical terms, because I think it changes the way you look at your cash position. If your savings account is earning 4% &mdash; which is a good rate right now &mdash; then after inflation, your real return is 1.2%. After basic rate tax on the interest, it&rsquo;s closer to 0.4%. On a &pound;100,000 balance, that is approximately &pound;400 of real purchasing power growth in a year. That is not nothing. But I want you to hear that number clearly. Four hundred pounds. On a hundred thousand pounds of capital. That is what the current UK monetary environment actually delivers in real terms, and that is with inflation lower than it has been for months. Now &mdash; a whisky cask stored in a UK bonded warehouse has no rate structure, no inflation erosion mechanism, no MPC vote governing its value. Its return is driven by the physics of maturation and the scarcity of aged spirit. Those two categories of asset do not behave the same way. And once you can see that distinction clearly, the question of how you allocate capital between them becomes a very different conversation.&rdquo;</div>
-    <div class="reason"><span class="l">Framework applied:</span> This is the UK-specific version of the real vs nominal education deployed throughout the past three weeks. Logical certainty is established by using official UK government data. Pain threshold is activated by making the real return figure concrete and specific (&pound;400 on &pound;100,000) rather than abstract. The contrast close &mdash; &ldquo;those two categories of asset do not behave the same way&rdquo; &mdash; does not ask for a decision. It invites a re-evaluation. The client who re-evaluates is already on the Straight Line toward a close.</div>
-  </div>
-
-  <div class="footer-bar">
-    <span>&#9608; STORIES 02&ndash;03</span>
-    <span>WHISKY &bull; W21 &bull; 2026</span>
+    <div class="head">&#9608; PITCH TYPE: INSIDER INTELLIGENCE + AUTHORITY + URGENCY</div>
+    <div class="quote">"There is something happening in the banking system right now that most people outside the financial world have never heard of — and it matters for anyone who holds significant cash or savings. In 2026, banking regulators implemented what is called eSLR reform — changes to the leverage ratios that govern how much banks can lend against their balance sheets. In simple terms: banks have been given permission to lend more. More lending means more money creation. More money creation means more debasement. The clients I work with who understand this are not panicking. But they are quietly making sure that a meaningful portion of their capital is held in assets that cannot be affected by how many times a bank decides to lend the same pound. That is the structural argument for hard assets right now — not as a bet that the system collapses, but as insurance that if it continues to operate exactly as it has, your client's purchasing power is protected."</div>
+    <div class="reason"><span class="l">WHY THIS WORKS:</span> The eSLR reference is genuine, verifiable, and almost entirely absent from mainstream client conversations. Brokers who use insider-level banking intelligence in client conversations elevate their status from salesperson to trusted intelligence source immediately. The phrase "the clients I work with who understand this" creates aspiration — the prospect wants to be the client who understands it. The "insurance" framing removes the risk of the argument sounding alarmist — it is not a bet against the system, it is protection within it.</div>
   </div>
 </section>
 
-<!-- ==================== SALES & OBJECTION CLINIC ==================== -->
+<!-- PAGE 5 — STORY 3: CONCENTRATION RISK & IPO SIGNAL -->
 <section class="page">
   <div class="masthead">
-    <div class="left">&#9608; SALES CLINIC</div>
-    <div class="middle">OBJECTION HANDLING &amp; CLOSE MECHANICS &mdash; W21</div>
-    <div class="right">PAGE 06 &#9608;</div>
+    <span class="left">THE BROKERS EDGE &#9608;</span>
+    <span class="middle">WHISKY WEEKLY &bull; W24 &bull; JUNE 2026</span>
+    <span class="right">STORY 03 &#9608;</span>
   </div>
 
-  <h3 class="section">SALES &amp; OBJECTION CLINIC &mdash; THIS WEEK&rsquo;S LIVE OBJECTIONS</h3>
+  <h3 class="section">FOUNDATION: STORY 3 &nbsp;&mdash;&nbsp; YOUR CLIENT IS NOT DIVERSIFIED</h3>
+  <p style="color:#888; font-size:9pt; letter-spacing:0.15em; text-transform:uppercase; margin-bottom:12px;">Source: S&amp;P Dow Jones Indices &bull; Bloomberg Index Data &bull; HMRC ISA Statistics &bull; ONS Household Wealth Survey 2026</p>
 
-  <p>The Moody&rsquo;s downgrade and UK CPI print will generate a specific set of client responses this week. Some will be resistant (&ldquo;this feels like a risky time to invest&rdquo;). Some will be deflective (&ldquo;let me see how things develop&rdquo;). Some will have absorbed the news and be genuinely open. Below are the three most likely objections, scripted for the full Straight Line response pattern: deflect, acknowledge, loop, build certainty, lower the action threshold.</p>
+  <p>Every week, across the UK, millions of savers and investors look at their ISA statements, their pension summaries, their online platform balances, and feel that their money is diversified. They hold funds. They hold tracker ETFs. They hold global portfolios. What most of them do not realise is that those apparently diverse vehicles have quietly converged on the same seven technology companies.</p>
+
+  <p>The S&amp;P 500 — the benchmark that every UK ISA tracker, every global equity fund, and every pension growth fund uses as its anchor — currently has approximately <strong>30% of its total market capitalisation concentrated in seven companies</strong>: Apple, Microsoft, Nvidia, Alphabet, Amazon, Meta, and Tesla. This means that a client who believes they are holding a broad, diversified index is in reality holding a vehicle where nearly one third of their capital lives or dies with the earnings of seven Silicon Valley technology businesses. If those seven companies fall 40% in a correction — as technology leaders fell between 50% and 90% in the 2000–2002 correction — the "diversified" ISA falls by approximately 12–14% on concentration alone, before any other market movement is accounted for.</p>
+
+  <p>The argument for diversification has never been more valid — and never been more ignored. Genuine diversification means holding assets that do not move with equities. Not bonds, which the 2022 crash proved can fall simultaneously with stocks. Not property, which is illiquid and leveraged. Hard assets: physical, tangible, finite things that appreciate on their own merit, outside the financial system, with no correlation to whether Nvidia beats its earnings estimate next quarter.</p>
+
+  <div class="warn">
+    <span class="tag">&#9608; THE IPO SIGNAL — A CLASSIC LATE-CYCLE WARNING THAT BROKERS MUST UNDERSTAND</span>
+    Market historians have long observed a consistent pattern: in the final stages of a sustained bull market, the volume of Initial Public Offerings surges — and their quality deteriorates. This is not coincidence. It is rational behaviour. Companies and their investors list at the moment they can achieve the highest valuation — which is peak cycle, when risk appetite is highest and investors are most willing to pay for future growth. The 1999–2000 IPO surge gave us dot-com companies with no revenue listing at billion-dollar valuations. The 2021 SPAC boom gave us blank-cheque companies issuing shares before their business model existed. Both periods ended within months in significant multi-year corrections. A surge in speculative listings is not a symptom of economic strength. It is a signal that the smart money is taking profits — by selling equity to the public at peak prices. When IPO activity is elevated and increasingly speculative, the question is not whether the cycle is long. It is who is being sold to.
+  </div>
+
+  <h4 class="sub">PITCH #1 &nbsp;&mdash;&nbsp; THE CONCENTRATION REVELATION</h4>
+  <div class="pitch">
+    <div class="head">&#9608; PITCH TYPE: PATTERN INTERRUPT + LOGICAL CLOSE + SOLUTION</div>
+    <div class="quote">"I want to show you something that might change how you think about the word 'diversified.' The most common investment your clients hold — an S&amp;P 500 index fund or a global tracker in their ISA — is currently 30% concentrated in seven technology companies. One third of everything they think is broadly invested is sitting in seven businesses in Silicon Valley. I'm not saying those are bad businesses. I'm saying that a portfolio where 30% of the value rises and falls with seven correlated companies in the same sector is not what most people mean when they say they're diversified. The clients I work with who genuinely sleep well through market volatility hold something that has no correlation to Nvidia's earnings call. Whisky casks mature according to time and chemistry. Not quarterly results. Not the mood of a Federal Reserve chairman. When your client says they're diversified, the question worth asking is — diversified from what, exactly?"</div>
+    <div class="reason"><span class="l">WHY THIS WORKS:</span> The pattern interrupt ("I want to show you something that might change how you think...") primes the brain for a reframe. The 30% concentration statistic is verifiable and shocking — most clients have never considered it. The phrase "diversified from what, exactly?" is left as a hanging question — the broker does not answer it immediately. Silence after a well-placed question is the most powerful sales tool in existence. Let the client sit with the question. The answer they arrive at themselves is more persuasive than any answer the broker could supply.</div>
+  </div>
+
+  <h4 class="sub">PITCH #2 &nbsp;&mdash;&nbsp; THE ROTATION ARGUMENT [LATE-CYCLE POSITIONING]</h4>
+  <div class="pitch">
+    <div class="head">&#9608; PITCH TYPE: ASPIRATION + AUTHORITY + EMBEDDED COMMAND</div>
+    <div class="quote">"There is a pattern that plays out at the end of every sustained bull market — and we are in the longest bull market in history right now. The investors who come through the next correction with their wealth intact are not necessarily the ones who predicted it. They are the ones who, at some point near the peak, looked at the gains they had accumulated and made a decision that those gains were worth protecting. As you think about your client's current position — and the fact that equity markets are at valuations not seen since 2000 — the question is not whether they should take every chip off the table. It is whether they should look at where some of those gains are sitting and consider what a 20%, 30%, or 40% equity correction would do to everything they have built. The investors who moved a portion of their profits into physical, non-correlated assets near cycle peaks are, historically, the ones who retained those profits when the cycle eventually turned."</div>
+    <div class="reason"><span class="l">WHY THIS WORKS:</span> "As you think about your client's current position" is an embedded command — the broker is directing the client's mental focus without making a direct request. The loss scenario (20%, 30%, 40% correction) is stated factually, not dramatically — which makes it more credible, not less frightening. "Everything they have built" is the emotional trigger. Clients do not accumulate wealth. They build it. The language of building connotes something precious and hard-earned — and therefore something worth protecting. That is the solution frame.</div>
+  </div>
+</section>
+
+<!-- PAGE 6 — SENIOR INTELLIGENCE -->
+<section class="page">
+  <div class="masthead">
+    <span class="left">THE BROKERS EDGE &#9608;</span>
+    <span class="middle">WHISKY WEEKLY &bull; W24 &bull; JUNE 2026</span>
+    <span class="right">SENIOR INTEL &#9608;</span>
+  </div>
+
+  <h3 class="section">SENIOR INTELLIGENCE &nbsp;&mdash;&nbsp; W24</h3>
+  <span class="senior-badge">&#9608; SENIOR BROKERS &amp; HNW CLIENTS ONLY</span>
+
+  <div class="senior-intro">
+    <p>Senior clients have seen market cycles. They have heard "this time is different" and watched it not be. They do not respond to fear — they have managed fear before. What moves them is precision: the argument that is granular, sourced, and delivered with the confidence of someone who has done the work. These two stories are for brokers who can sit across from a client who has managed a business, run a portfolio, or accumulated significant wealth — and hold their own in that conversation.</p>
+  </div>
+
+  <!-- SENIOR STORY 1 -->
+  <div class="intel-story">
+    <div class="is-header">
+      <div class="is-num">01</div>
+      <div class="is-meta">
+        <div class="is-tag">DEBT CYCLE INTELLIGENCE &bull; US FISCAL POSITION &bull; HISTORICAL PARALLEL</div>
+        <div class="is-title">THE DEBT ARITHMETIC — WHEN INTEREST EXCEEDS DEFENCE, THE OPTIONS NARROW FAST</div>
+      </div>
+    </div>
+    <div class="is-body">
+      <div class="is-context">
+        <p>The United States passed a threshold in 2024 that received remarkably little attention given its historical significance: <strong>annual interest payments on the national debt exceeded the entire US defence budget</strong> for the first time. With national debt at approximately $36.2 trillion and the average interest rate on that debt rising as older, cheap paper matures and is refinanced at current rates, interest payments are now projected to reach $1.1–1.2 trillion per year by 2027. The defence budget runs at approximately $850 billion. This is not a comparison being made to alarm — it is a fiscal mathematics observation with direct implications for monetary policy and therefore for every asset class.</p>
+        <p>When a government's debt service costs exceed its military spending, <strong>the options for managing that situation are structurally limited</strong>. Raising taxes is politically contentious and economically self-limiting. Cutting spending risks social and political blowback. The historical precedent — across every major indebted nation that has faced this arithmetic — is some combination of financial repression (keeping interest rates below inflation to slowly inflate away the debt) and currency debasement (inflating the nominal value of GDP to make the debt-to-GDP ratio look more manageable). Both outcomes are catastrophic for holders of cash and fixed-income assets. Both outcomes are constructive for holders of hard, finite physical assets with intrinsic value that rises alongside nominal inflation.</p>
+        <p>The sophisticated investor does not need to predict which combination the US government will use. They simply need to recognise that <strong>every available tool for managing the debt situation is inflationary or financially repressive</strong> — and position accordingly.</p>
+      </div>
+      <div class="is-pitch">
+        <div class="is-pitch-label">&#9608; SENIOR PITCH — STRUCTURAL ALLOCATION CONVERSATION</div>
+        <div class="is-pitch-text">"I want to share something with you that I think is one of the most underappreciated macro facts in the current environment. The United States — whose currency underpins the global financial system — now spends more servicing the interest on its national debt than it spends on its entire military. That number will grow as the debt matures and refinances at higher rates. Now, when you look at history — every time a major economy has faced debt arithmetic of this kind — the resolution has always involved some form of purchasing power destruction. Whether it is financial repression, deliberate inflation, or currency management, the result for holders of cash and bonds is the same: the real value of what they hold diminishes, by design, over time. The clients who understand this and act on it are the ones who hold assets whose value is not dependent on the government's fiscal decisions. I'd like to discuss whether your current allocation reflects this reality."</div>
+      </div>
+      <div class="is-source">US Congressional Budget Office, Fiscal Outlook 2026 &bull; US Treasury Debt Data, June 2026 &bull; IMF Fiscal Monitor, April 2026</div>
+    </div>
+  </div>
+
+  <!-- SENIOR STORY 2 -->
+  <div class="intel-story">
+    <div class="is-header">
+      <div class="is-num">02</div>
+      <div class="is-meta">
+        <div class="is-tag">GEOPOLITICAL INTELLIGENCE &bull; STRUCTURAL FRAGILITY &bull; HARD ASSET CASE</div>
+        <div class="is-title">THREE SIMULTANEOUS FAULT LINES — WHY THE RISK PREMIUM ON HARD ASSETS HAS NEVER BEEN MORE JUSTIFIED</div>
+      </div>
+    </div>
+    <div class="is-body">
+      <div class="is-context">
+        <p>Experienced portfolio managers who have managed capital through multiple cycles maintain what is sometimes called a "risk map" — a live assessment of where structural fragility exists in the global system that could, under the right trigger conditions, produce non-linear outcomes. In June 2026, that risk map shows an unusual density of simultaneous fault lines that most retail and semi-institutional investors are not adequately pricing.</p>
+        <p><strong>Fault Line 1 — The Hormuz Situation:</strong> The Strait of Hormuz carries approximately 20–21% of the world's daily oil supply. Military operations in the area, though below the threshold of declared war, have not resolved. A ceasefire that has not been formalised remains a ceasefire that can be ended without notice. An escalation that closes the Strait — even temporarily — produces an immediate and severe energy price shock for every economy that imports oil, with cascading inflation effects across every asset class.</p>
+        <p><strong>Fault Line 2 — US-China Trade Flows:</strong> Despite diplomatic optics of improved relations, physical trade data between the US and China continues to deteriorate. Rare earth export controls remain in place. The tonnage of goods flowing between the two largest economies has continued to decline. Supply chain dependencies — for semiconductors, industrial minerals, pharmaceuticals, and manufactured goods — remain structurally unresolved. A deterioration in that relationship from its current "managed tension" state would produce simultaneous supply and demand shocks across multiple sectors.</p>
+        <p><strong>Fault Line 3 — The Dollar Transition:</strong> The US administration is operating within a deliberate dollar-weakening framework. A weaker dollar, sustained over time, accelerates capital reallocation away from dollar-denominated assets and toward hard, non-dollar stores of value. Central banks globally have already begun this reallocation — as evidenced by 36,000 tonnes of gold held in central bank reserves globally, the highest level since the Bretton Woods era. <strong>When central banks move, they are operating on a longer time horizon than any retail investor</strong>. Following their allocation direction — hard assets, physical stores of value, non-correlated exposure — is the most reliable signal available.</p>
+      </div>
+      <div class="is-pitch">
+        <div class="is-pitch-label">&#9608; SENIOR PITCH — RISK MAP CONVERSATION</div>
+        <div class="is-pitch-text">"If I showed you a map of where the structural fragility in the global economy sits right now — the Hormuz situation, the US-China technology decoupling, the deliberate dollar-weakening framework the US Treasury is operating within — and then showed you where the central banks of the world are directing their own reserves in response to those risks, the picture becomes quite clear. They are buying hard assets. Physical things. Finite things. Things that exist outside the financial system and cannot be printed, debased, or legislated away. The clients I work with who are most sophisticated about risk are not betting on any of those fault lines resolving badly. They are simply acknowledging that the risk of simultaneous disruption is unusually elevated — and that their current portfolio does not adequately reflect that. I would like to discuss whether yours does."</div>
+      </div>
+      <div class="is-source">US Energy Information Administration &bull; Strait of Hormuz Traffic Data &bull; US Treasury Exchange Rate Statements, May 2026 &bull; WGC Central Bank Gold Reserves Report, June 2026</div>
+    </div>
+  </div>
+</section>
+
+<!-- PAGE 7 — PSYCHOLOGY + OBJECTION CLINIC -->
+<section class="page">
+  <div class="masthead">
+    <span class="left">THE BROKERS EDGE &#9608;</span>
+    <span class="middle">WHISKY WEEKLY &bull; W24 &bull; JUNE 2026</span>
+    <span class="right">OBJECTION CLINIC &#9608;</span>
+  </div>
+
+  <div class="psychology-box">
+    <div class="psy-head">&#9608; SALES PSYCHOLOGY W24: INSTALLING FEAR ETHICALLY — THE DIFFERENCE BETWEEN MANIPULATION AND TRUTH</div>
+    <p>The most important distinction a broker must understand about fear-based selling is this: you are not manufacturing a risk. You are describing a real one. The debasement is real. The CAPE valuation extreme is real. The 17-year cycle is real. The concentration risk in the S&amp;P is real. The debt arithmetic is real. Your job is not to invent the danger. Your job is to make the client feel the weight of a danger that already exists — one they have been ignoring because nobody has told them about it clearly.</p>
+    <p>The ethical rule is simple: every fear you install must be grounded in data you can source and stand behind. If you cannot source it, you do not use it. If you can source it, you owe it to your client to share it — because the broker who tells a client what they need to hear, not what they want to hear, is the broker who builds a relationship that lasts a career.</p>
+    <p><strong>The sequence that works — every time:</strong> Name the risk precisely. Quantify it specifically. Let the silence after the data do the work. Then and only then ask: "Is your current position designed to handle that scenario?" The client answers in their own head before they answer out loud. By the time they say "probably not," the conversation has already moved to solutions. You did not push them. You showed them the door and they walked through it themselves.</p>
+    <p><strong>On objections:</strong> An objection is not a rejection. It is a request for more certainty. When a client says "but I'm not sure about timing" or "my portfolio is doing fine," they are not saying no. They are saying they need more confidence before they say yes. Your job is to build that confidence — not by arguing, but by adding more data, more evidence, more analogy. Acknowledge the objection. Empathise with it. Then loop back to a higher level of certainty on the fundamental case. The close follows naturally.</p>
+  </div>
+
+  <h3 class="section">OBJECTION CLINIC &nbsp;&mdash;&nbsp; W24</h3>
 
   <div class="objection-block">
-    <div class="obj-header">&#9608; OBJECTION 01 &mdash; &ldquo;With the Moody&rsquo;s downgrade, shouldn&rsquo;t I be more cautious right now?&rdquo;</div>
-    <div class="obj-body">
-      <div class="obj-client">Client says: &ldquo;Everything feels uncertain &mdash; the credit downgrade, inflation, the Fed. I think I&rsquo;d rather wait until things settle before committing capital anywhere.&rdquo;</div>
-      <div class="obj-response">
-        <p><strong>Response:</strong> &ldquo;I understand completely &mdash; and I want to acknowledge that instinct, because it is a perfectly rational response to uncertainty in <em>financial markets</em>. If we were talking about equities, bonds, or anything else that is repriced daily by the same market forces driving the uncertainty you are describing, waiting makes complete sense. But I want to offer you a different frame for this specific asset class, because I think it inverts the usual logic. The Moody&rsquo;s downgrade, the inflation persistence, the monetary uncertainty &mdash; these are not reasons to pause on a physical asset. They are the very conditions that make a physical asset valuable. Every inflationary episode in modern history &mdash; the 1970s, the post-2008 reflation, the 2020&ndash;2022 surge &mdash; saw real, tangible, scarce assets outperform paper assets in purchasing power terms. That is not coincidence. That is the mechanism. When paper loses credibility, the things that are not paper go up in terms of how much paper you need to buy them. The question I would put to you is: in which type of environment does whisky cask investment perform best? And the honest answer is: in exactly the kind of environment we are in now.&rdquo;</p>
-      </div>
-      <div class="obj-mechanics">&#9608; MECHANICS: This is the classic loop &mdash; validate the frame (financial market caution), then reposition for this specific asset class. The SLP pattern: deflect, acknowledge the source of the concern, then redirect. The key move here is inverting the objection: &ldquo;uncertainty&rdquo; is not a reason to pause on hard assets &mdash; it is the condition under which hard assets are most compelling. End with the rhetorical question. Their answer is already the pitch.</div>
+    <div class="obj-header">&#9608; OBJECTION 01 &mdash; "MY PORTFOLIO HAS DONE REALLY WELL — WHY CHANGE WHAT'S WORKING?"</div>
+    <div class="obj-client">"Look, my ISA is up 18% over the last two years. My pension has done well. Everything is working. Why would I complicate things by changing a strategy that's delivering?"</div>
+    <div class="obj-response">
+      <p>"I completely understand that — and I want to be clear, I'm not suggesting you abandon what has worked. What I want to share with you is the context for those gains that most people don't think about. You've made 18% over two years. That's a strong run. But consider where those gains sit. They sit in a market that is valued at 36 times earnings — a level only seen twice in the last hundred years, and both times it ended in a 50%+ decline. Your 18% gain is real. But it is sitting in a vehicle that, at current valuations, has historically given all of it back and more when the cycle turns. I'm not predicting that happens tomorrow. I'm asking: how much of that 18% do you want to still have when the next cycle ends? The clients who protect the profits they earn at cycle peaks are the ones who have something to reinvest from a position of strength when assets go on sale. That is not changing a strategy that's working. That is a strategy that works — locking in what you have earned."</p>
     </div>
+    <div class="obj-mechanics">MECHANICS: Never argue with the 18% gain — validate it first. Then reframe it: the gain is real but its current home is the risk. The goal is not to abandon what worked but to protect what it produced. The phrase "when assets go on sale" makes the eventual correction sound like an opportunity rather than a threat — which reframes the entire conversation from defensive to offensive.</div>
   </div>
 
   <div class="objection-block">
-    <div class="obj-header">&#9608; OBJECTION 02 &mdash; &ldquo;Inflation is coming down &mdash; is this not less urgent?&rdquo;</div>
-    <div class="obj-body">
-      <div class="obj-client">Client says: &ldquo;UK inflation dropped to 2.8% this month &mdash; things are heading in the right direction. Surely the urgency around real returns is reducing?&rdquo;</div>
-      <div class="obj-response">
-        <p><strong>Response:</strong> &ldquo;The direction is right &mdash; and I&rsquo;m glad you are tracking the data. But let me walk through what 2.8% actually delivers in practice, because the number is lower but the story is the same. A savings account at 4% against 2.8% inflation gives you a real pre-tax return of 1.2%. After basic rate tax, approximately 0.4%. On &pound;100,000, that is &pound;400 of real purchasing power growth in a year. That is not the 2022 emergency &mdash; but it is still the confirmation that cash in a savings account is not a store of value in any meaningful sense. It is barely breaking even in real terms at the best available rates. And here is something worth noting: the Bank of England expects to hold rates at 3.75% for the remainder of 2026 &mdash; no cuts likely before June at the earliest. The real return on cash is as good as it is going to get, and it is still 0.4% after tax. When you decide to move capital from something that earns 0.4% in real terms into something with an independent return mechanism, you don&rsquo;t do it because of a crisis. You do it because the arithmetic says so.&rdquo;</p>
-      </div>
-      <div class="obj-mechanics">&#9608; MECHANICS: The client has used a headline improvement to justify inaction. The response validates the improvement, then re-grounds them in the actual arithmetic. The phrase &ldquo;when you decide&rdquo; is the embedded command from the SLP framework &mdash; presupposing the action rather than presenting it as conditional. The final line &ldquo;the arithmetic says so&rdquo; closes the logical case cleanly and removes the emotion from the decision. This makes it easier, not harder, to act.</div>
+    <div class="obj-header">&#9608; OBJECTION 02 &mdash; "I TRUST THE MARKETS — I'M NOT THE TYPE TO MOVE INTO ALTERNATIVE ASSETS"</div>
+    <div class="obj-client">"I'm a market person. I believe in equities for the long term. Alternative assets feel like something for people who don't trust the financial system. That's not me."</div>
+    <div class="obj-response">
+      <p>"I respect that — and I'd agree with you that equities, over the very long term, have delivered the best returns of any mainstream asset class. The question I'd ask you to sit with is this: the clients who have held equities successfully over the long term are the same clients who, at some points during that journey, reduced their equity exposure — not because they stopped believing in markets, but because they understood the difference between a market trading at 16 times earnings and a market trading at 36 times earnings. They did not abandon markets. They understood valuation. When a market is expensive by any historical measure, allocating a portion of capital to something uncorrelated is not distrust of markets. It is how sophisticated capital compounds over full cycles — not just in the bull phase. The central banks of the world, whose job is the long-term preservation of national wealth, have been allocating to hard physical assets at the highest rate since the 1960s. They are not people who don't trust the financial system. They are the people who built it — and they are hedging it."</p>
     </div>
+    <div class="obj-mechanics">MECHANICS: Do not challenge the client's identity as a "market person" — that creates defensiveness. Reinforce it, then reframe: the sophisticated market person understands valuation and manages accordingly. The central bank reference is the closer — it is impossible to call central bank reserve managers people who "don't trust the system." If they are adding hard assets, it must be for rational reasons. That is the argument the client cannot dismiss without dismissing the people who manage national wealth.</div>
   </div>
 
   <div class="objection-block">
-    <div class="obj-header">&#9608; OBJECTION 03 &mdash; &ldquo;The India FTA keeps hitting problems &mdash; I&rsquo;m losing confidence in that story.&rdquo;</div>
-    <div class="obj-body">
-      <div class="obj-client">Client says: &ldquo;You&rsquo;ve mentioned India for three weeks now and there keeps being a complication. Is this deal actually going to deliver?&rdquo;</div>
-      <div class="obj-response">
-        <p><strong>Response:</strong> &ldquo;That is a fair challenge, and I&rsquo;d rather you raised it than stayed quiet. Here is the distinction I want to draw very carefully. The whisky-specific tariff reduction &mdash; from 150% to 75%, with a legislated path to 40% &mdash; is agreed and unchanged. That is not the complication. The complication is in a wider bilateral negotiation around UK steel import restrictions. India has linked it to the broader trade discussion. UK officials are working to resolve it. The whisky industry&rsquo;s trade body &mdash; the SWA &mdash; published this week specifically to confirm that it is pressing for swift implementation. They would not be doing that if the deal were in doubt. Now &mdash; I want to put this in the context of the cask investment timeline. A client buying a cask today for exit in 2033 or 2034 is not investing in whether the tariff becomes effective in 2027 or 2029. They are investing in the demand environment of the mid-2030s, when 300&ndash;400 million Indian consumers who have never had access to Scotch at an affordable price will have had it for the better part of a decade. The timetable is the only variable. The destination is not. And the three weeks you have heard about India from me is not uncertainty &mdash; it is the story developing in real time, exactly as it should.&rdquo;</p>
-      </div>
-      <div class="obj-mechanics">&#9608; MECHANICS: Three-week looping of the same story creates a credibility test &mdash; the client is checking whether the broker can be trusted on a thesis through noise and complications. Passing this test builds the second ten faster than any product pitch. Acknowledging the fair challenge directly (&ldquo;I&rsquo;d rather you raised it&rdquo;) builds rapport and defuses the defensiveness the client may be expecting. End by reframing three weeks of updates as evidence of disciplined long-view tracking, not uncertainty.</div>
+    <div class="obj-header">&#9608; OBJECTION 03 &mdash; SENIOR &mdash; "IF THE ECONOMY GOES INTO RECESSION, DOESN'T WHISKY FALL TOO?"</div>
+    <div class="obj-client">"If there's a real recession and consumers cut spending, surely luxury goods and whisky fall as well? Wouldn't I just be moving one risk for another?"</div>
+    <div class="obj-response">
+      <p>"That is a genuinely intelligent question and I want to give you a direct answer. There are two distinct parts to the whisky investment market — the consumer luxury end, which yes, can be affected by a downturn in consumer spending, and the underlying maturing cask market, which operates on a completely different economic logic. A whisky cask is not sold to a consumer this year. It is maturing in a bonded warehouse for 10, 12, 15 years. During that maturation, the whisky does not care what the FTSE does. It does not care whether consumer confidence is up or down this quarter. It ages. It becomes scarcer. The supply constraint that drives cask value — the fact that you cannot speed up time, you cannot create 12-year-old whisky faster than 12 years — is entirely independent of the economic cycle. In every major recession since 1980, aged Scotch whisky as an asset class has shown low to negligible correlation with equity markets — precisely because its value driver is chemical and temporal, not economic. You are not moving from one cyclical risk to another. You are moving a portion of capital into something whose value driver is literally the passage of time."</p>
     </div>
-  </div>
-
-  <div class="footer-bar">
-    <span>&#9608; OBJECTION CLINIC</span>
-    <span>WHISKY &bull; W21 &bull; 2026</span>
+    <div class="obj-mechanics">MECHANICS: Separate the two markets immediately — consumer whisky (cyclical) and maturing cask investment (non-cyclical). The "chemical and temporal" framing is the key. Time does not recede during a recession. Scarcity does not reverse during a downturn. These are genuine differentiators, not sales language. Deliver them with conviction because they are factually true.</div>
   </div>
 </section>
 
-<!-- ==================== SPIN DESK INTELLIGENCE ==================== -->
+<!-- PAGE 8 — WEEK AHEAD + BACK PAGE -->
 <section class="page">
   <div class="masthead">
-    <div class="left">&#9608; DESK INTELLIGENCE</div>
-    <div class="middle">TOOLS OF THE TRADE &mdash; W21 TALKING POINTS</div>
-    <div class="right">PAGE 07 &#9608;</div>
+    <span class="left">THE BROKERS EDGE &#9608;</span>
+    <span class="middle">WHISKY WEEKLY &bull; W24 &bull; JUNE 2026</span>
+    <span class="right">WEEK AHEAD &#9608;</span>
   </div>
-
-  <h3 class="section">DESK INTELLIGENCE &mdash; OPEN STRONG, GATHER DEEP, CLOSE CLEAN</h3>
-
-  <p>The Moody&rsquo;s downgrade is the single best cold-call opener in this desk&rsquo;s recent history. It is a mainstream news story that every financially literate prospect will have seen, it requires no specialist knowledge to discuss, and it leads directly to the hard asset conversation. Use the SPIN sequence below to turn that news hook into a close.</p>
-
-  <div class="spin-box">
-    <div class="spin-head">&#9608; THE SPIN QUESTIONING SEQUENCE &mdash; W21 WHISKY EDITION</div>
-    <p style="color:#AAAAAA; font-size:9pt; margin-bottom:12px;">Open with the Moody&rsquo;s hook. Let the prospect respond. Then move through the four questions. The client who answers all four has built their own buying case before you have pitched anything.</p>
-
-    <div class="spin-q">
-      <div class="q-type">S &mdash; SITUATION QUESTION</div>
-      <div class="q-text">&ldquo;Did you follow the Moody&rsquo;s downgrade of US debt last Friday? I&rsquo;m curious how you are thinking about your portfolio in light of that &mdash; are you fairly conventionally positioned across equities and cash, or do you have some alternative asset exposure already?&rdquo;</div>
-      <div class="q-purpose">Purpose: Establish baseline and gauge sophistication. If they have no alternative assets, you have a clear entry point. If they do, you can discuss whisky as an additional diversifier. Either way, the question opens the conversation naturally from a news event rather than a product pitch.</div>
-    </div>
-
-    <div class="spin-q">
-      <div class="q-type">P &mdash; PROBLEM QUESTION</div>
-      <div class="q-text">&ldquo;When you look at your cash and savings positions specifically &mdash; with UK inflation at 2.8% and the Bank of England holding rates at 3.75% &mdash; are you satisfied with what you are actually getting in real terms, or is there a gap you are aware of between the headline rate and what that capital is actually earning after inflation?&rdquo;</div>
-      <div class="q-purpose">Purpose: Surface the real return problem without stating it yourself. Research shows client-articulated problems are three times more persuasive than broker-raised ones. If the client says &ldquo;yes, I suppose there is a gap&rdquo; &mdash; they have created their own buying motive. That is the most powerful moment in the call.</div>
-    </div>
-
-    <div class="spin-q">
-      <div class="q-type">I &mdash; IMPLICATION QUESTION</div>
-      <div class="q-text">&ldquo;If the Bank of England holds rates at 3.75% for the rest of 2026 &mdash; which is what the IMF is recommending &mdash; and inflation stays above 2%, what does that mean for capital you have sitting in cash over the next two or three years in purchasing power terms?&rdquo;</div>
-      <div class="q-purpose">Purpose: Escalate the consequence by making the client compute the implication themselves. The broker who asks this question and stays silent while the client thinks through the compounding arithmetic is doing more persuasive work than any product pitch ever could. The silence after this question is not uncomfortable &mdash; it is the client building their own case for you.</div>
-    </div>
-
-    <div class="spin-q">
-      <div class="q-type">N &mdash; NEED-PAYOFF QUESTION</div>
-      <div class="q-text">&ldquo;Given all of that &mdash; the downgrade, the inflation persistence, the fact that savings rates are unlikely to improve materially &mdash; how valuable would it be to you to have a portion of your capital working in an asset class whose return is completely independent of those forces? Something physical, scarce, and with its own demand drivers that have nothing to do with what the Bank of England decides?&rdquo;</div>
-      <div class="q-purpose">Purpose: The need-payoff question moves the client from problem awareness to solution desire &mdash; in their own words. When they say &ldquo;that would actually be very useful,&rdquo; they have described the product benefit you are about to present. You are not overcoming resistance. You are satisfying a need the client has just confirmed they have. The transition from SPIN to pitch at this point feels like a natural continuation rather than a sales move.</div>
-    </div>
-  </div>
-
-  <h4 class="sub">&#9608; SHARP TALKING POINTS &mdash; USE VERBATIM OR ADAPT</h4>
-
-  <div class="three-col">
-    <div class="intel-card">
-      <div class="ic-head">THE THREE AGENCIES LINE</div>
-      <div class="ic-body">&ldquo;S&amp;P downgraded in 2011. Fitch in 2023. Moody&rsquo;s in 2026. All three agencies. Same conclusion. The question is not whether that is significant. The question is what a rational person does with that information.&rdquo;</div>
-    </div>
-    <div class="intel-card">
-      <div class="ic-head">THE DENOMINATION POINT</div>
-      <div class="ic-body">&ldquo;Most capital is denominated in a government&rsquo;s promise. A cask is denominated in aged Scotch whisky. Those are not the same denomination. And this week, one denomination got formally downgraded. The other did not.&rdquo;</div>
-    </div>
-    <div class="intel-card">
-      <div class="ic-head">THE 0.4% QUESTION</div>
-      <div class="ic-body">&ldquo;After inflation and basic rate tax, your savings account is earning approximately 0.4% in real terms right now. That is the best it is going to be this year. Is that the outcome you want for capital you have worked hard to accumulate?&rdquo;</div>
-    </div>
-  </div>
-
-  <div class="two-col" style="margin-top:14px;">
-    <div class="intel-card">
-      <div class="ic-head">THE 13% MARKET GROWTH LINE</div>
-      <div class="ic-body">&ldquo;Cask trade sales grew 13% in the first quarter of 2026. That growth happened during the most uncertain macro quarter in years. The investors doing that were not confused about the thesis. They were confident in it. Social proof is not commentary &mdash; it is the market&rsquo;s own behaviour.&rdquo;</div>
-    </div>
-    <div class="intel-card">
-      <div class="ic-head">THE WAREHOUSE LINE (LOOPING FROM W20)</div>
-      <div class="ic-body">&ldquo;Three weeks in a row I have had this conversation. Every week, the macro has got noisier. Every week, the cask in the warehouse has got one week older. The noise and the ageing are not related. That independence is the entire point.&rdquo;</div>
-    </div>
-  </div>
-
-  <div class="signal-box" style="margin-top:18px;">
-    <div class="signal-head">&#9608; THREE CERTAINTY CHECKPOINTS &mdash; BEFORE YOU ASK FOR THE ORDER</div>
-    <p>Before moving to close, confirm all three tens are at maximum. If any is missing, loop back specifically to address it before proceeding. Do not attempt to lower the action threshold until all three are secured.</p>
-    <ul>
-      <li><strong>First Ten (Product):</strong> Does the client genuinely believe the whisky cask thesis &mdash; logically <em>and</em> emotionally? Can they articulate the debasement argument back to you in their own words? Can they explain why the India FTA matters to their specific asset? If yes, proceed. If not, return to the logical case and add more evidence before introducing any emotional close.</li>
-      <li><strong>Second Ten (You):</strong> Does the client trust you specifically? Have you this week demonstrated knowledge they did not have &mdash; about the Moody&rsquo;s mechanism, about the India steel complication vs the whisky deal, about the real return arithmetic? Have you been right about something over multiple weeks? The broker who has been consistently accurate on the India FTA story for three weeks has built the second ten through performance. That is more durable than rapport alone.</li>
-      <li><strong>Third Ten (Company):</strong> Does the client understand and trust the structure behind the product &mdash; who holds the cask, how it is stored, how the valuation is calculated, and how exit works? This is the most commonly overlooked ten. Clients will not say &ldquo;I don&rsquo;t trust the company.&rdquo; They will say &ldquo;I want to think about it.&rdquo; If a client says that after the first two tens are secured, it is almost always the third ten. Ask directly: &ldquo;Is there anything about the structure of this investment &mdash; how the cask is held, how it is valued, how you exit &mdash; that I haven&rsquo;t addressed clearly enough?&rdquo;</li>
-    </ul>
-  </div>
-
-  <div class="footer-bar">
-    <span>&#9608; DESK INTELLIGENCE + SPIN</span>
-    <span>WHISKY &bull; W21 &bull; 2026</span>
-  </div>
-</section>
-
-<!-- ==================== TEACHING: SOVEREIGN DEBT & HARD ASSETS ==================== -->
-<section class="page">
-  <div class="masthead">
-    <div class="left">&#9608; EDUCATION</div>
-    <div class="middle">SALES TRAINING &mdash; ECONOMIC LITERACY</div>
-    <div class="right">PAGE 08 &#9608;</div>
-  </div>
-
-  <h3 class="section">TEACHING POINT &mdash; SOVEREIGN DEBT, CURRENCY, AND THE HARD ASSET ARGUMENT</h3>
-
-  <div class="teach">
-    <h4>Why the Moody&rsquo;s Downgrade Is Your Most Powerful Educational Tool This Week</h4>
-    <p>Most brokers will mention the Moody&rsquo;s downgrade in passing. The broker who understands the mechanism behind it &mdash; and can explain it clearly in under two minutes &mdash; will use it to convert hesitant clients. Here is the conceptual framework in full. Study it. Deliver it conversationally. It is the strongest economic education piece this desk has had access to in years.</p>
-    <ul>
-      <li><strong>What is a credit rating?</strong> A credit rating is an independent assessment of a borrower&rsquo;s ability and willingness to repay their debts. Aaa (Moody&rsquo;s) or AAA (S&amp;P/Fitch) is the highest possible assessment &mdash; it means the risk of default is considered negligible. Governments, companies, and individuals are all rated. When a government is downgraded, it means the rating agency believes the government&rsquo;s finances have deteriorated to the point where full, timely repayment is marginally less certain than before.</li>
-      <li><strong>Why does it matter for the currency?</strong> Government bonds are the bedrock of the global financial system. They are held as &ldquo;risk-free assets&rdquo; by central banks, pension funds, and financial institutions globally. When those bonds are downgraded, the risk-free status is formally questioned. The currency those bonds are issued in loses some of its &ldquo;safe haven&rdquo; premium. A lower-rated currency tends to depreciate relative to harder assets over time, because investors demand higher returns to compensate for the additional risk.</li>
-      <li><strong>The trajectory is the story:</strong> S&amp;P downgraded in 2011. Fitch in 2023. Moody&rsquo;s in 2026. Fifteen years of fiscal deterioration, formally acknowledged three times by three independent institutions. US debt is heading to 134% of GDP by 2035 on current trajectory. The direction of travel is not ambiguous. It is documented.</li>
-      <li><strong>What does this mean for a GBP investor?</strong> The UK is not the US. But the dynamics are analogous. UK debt-to-GDP has risen from approximately 35% pre-2008 to over 100% today. The Bank of England has expanded its balance sheet dramatically. UK inflation, while easing, has run above target for three consecutive years. The structural fiscal picture in the UK has followed a similar trajectory, with a lag. The argument for hard assets is not US-specific. It is a response to the direction of travel in the entire Western sovereign debt complex.</li>
-    </ul>
-  </div>
-
-  <div class="formula">  THE THREE DOWNGRADES &mdash; US SOVEREIGN DEBT TIMELINE:
-  S&amp;P downgrade:    August 2011  (AAA &rarr; AA+)   Trigger: debt ceiling crisis
-  Fitch downgrade:   August 2023  (AAA &rarr; AA+)   Trigger: fiscal deterioration
-  Moody&rsquo;s downgrade: May 2026     (Aaa &rarr; Aa1)  Trigger: debt/GDP trajectory 134% by 2035
-
-  Result: No major rating agency now considers US sovereign debt to carry
-  the lowest possible default risk. All three agree the trajectory is deteriorating.
-
-  UK equivalent: Debt/GDP has risen from ~35% (2007) to ~100%+ (2026)
-  BOE balance sheet: expanded from ~&pound;80bn to ~&pound;800bn+ since 2008
-  Structural direction: same as US, different speed.</div>
-
-  <div class="two-col">
-    <div class="pitch-thought">
-      <span class="tag">&#9608; HOW TO USE THIS IN THE CALL</span>
-      <p>&ldquo;Can I give you sixty seconds on what the Moody&rsquo;s downgrade actually means, because I think it is more relevant to your portfolio than the headline suggests? A credit rating is not just an academic score &mdash; it is the formal assessment of whether a government can be trusted to repay its debts. Moody&rsquo;s has now joined S&amp;P and Fitch in saying: the US government is less trustworthy in that regard than it was. US debt is heading toward 134% of GDP. The question this raises for your capital is simple: how much of it is ultimately denominated in the credibility of a government&rsquo;s balance sheet? And how much is denominated in something else entirely?&rdquo;</p>
-    </div>
-    <div class="pitch-thought">
-      <span class="tag">&#9608; THE UK ANGLE FOR DOMESTIC CLIENTS</span>
-      <p>&ldquo;I want to be clear &mdash; I&rsquo;m not saying the UK is the US. But the direction of travel in the UK fiscal position since 2008 has followed a similar pattern with a lag. Debt has tripled as a percentage of GDP. The Bank of England has expanded its balance sheet tenfold. Inflation ran above target for three years. The argument for holding physical, non-sovereign assets is not an American story. It is a structural response to a direction of travel that is visible in every major Western economy. And the asset we&rsquo;re discussing &mdash; a Scotch whisky cask in a UK bonded warehouse &mdash; is not on that trajectory. It is ageing. Quietly. Independently. Getting scarcer, not more abundant.&rdquo;</p>
-    </div>
-  </div>
-
-  <div class="footer-bar">
-    <span>&#9608; TEACHING &mdash; SOVEREIGN DEBT</span>
-    <span>WHISKY &bull; W21 &bull; 2026</span>
-  </div>
-</section>
-
-<!-- ==================== WEEK AHEAD + DISCLOSURE ==================== -->
-<section class="page">
-  <div class="masthead">
-    <div class="left">&#9608; FORWARD LOOK</div>
-    <div class="middle">WEEK AHEAD &mdash; 26&ndash;31 MAY 2026</div>
-    <div class="right">PAGE 09 &#9608;</div>
-  </div>
-
-  <h3 class="section">WEEK AHEAD &mdash; WHAT TO WATCH</h3>
 
   <div class="week-ahead">
+    <h3 class="section">WEEK AHEAD &nbsp;&mdash;&nbsp; 15–20 JUNE 2026</h3>
+    <p style="color:#888; font-size:9pt; letter-spacing:0.14em; margin-bottom:8px;">KNOW THESE DATES BEFORE MONDAY'S OPEN. THEY FEED DIRECTLY INTO YOUR MACRO NARRATIVE THIS WEEK.</p>
     <table>
-      <thead>
-        <tr><th>Date</th><th>Event</th><th>Whisky Relevance</th><th>Priority</th></tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td class="date-col">WK 26 MAY</td>
-          <td><strong>US PCE Inflation Data (April)</strong><br>Fed&rsquo;s preferred inflation measure</td>
-          <td>If PCE comes in above expectations it reinforces the Warsh hawkish narrative and further validates the hard asset argument. Opens the same call as the CPI beat from W20 &mdash; &ldquo;inflation data confirmed again this week&rdquo;. Use as a same-day outreach trigger for active prospects.</td>
-          <td class="high">HIGH</td>
-        </tr>
-        <tr>
-          <td class="date-col">WK 26 MAY</td>
-          <td><strong>UK GDP First Estimate (Q1 2026)</strong></td>
-          <td>UK growth data in context of BOE hold. Weak GDP alongside persistent inflation creates the stagflation argument &mdash; the most historically powerful environment for hard assets. If growth disappoints, the BOE cut case weakens and real rates stay positive. Both outcomes support the cask narrative.</td>
-          <td style="color:#E97132; font-weight:700;">MEDIUM</td>
-        </tr>
-        <tr>
-          <td class="date-col">WK 26 MAY</td>
-          <td><strong>India FTA Implementation Update</strong><br>SWA lobbying UK Government</td>
-          <td>Any Government statement on the India FTA timetable following the SWA&rsquo;s 20 May public push is a direct catalyst. Watch SWA newsroom. A positive development &mdash; even procedural progress &mdash; is an immediate client communication opportunity for anyone holding long-duration casks.</td>
-          <td class="high">HIGH</td>
-        </tr>
-        <tr>
-          <td class="date-col">WK 26 MAY</td>
-          <td><strong>Moody&rsquo;s Downgrade Aftershocks</strong><br>US Treasury market reaction</td>
-          <td>Watch US 10-year yield and dollar index for continued post-downgrade adjustments. Dollar weakness is typically a positive signal for hard asset demand globally as investors rotate away from dollar-denominated paper. Any continuation of the post-downgrade selloff in US Treasuries strengthens the debasement pitch.</td>
-          <td style="color:#E97132; font-weight:700;">MEDIUM</td>
-        </tr>
-        <tr>
-          <td class="date-col">ONGOING</td>
-          <td><strong>May / June Auction Results</strong><br>Premium aged Scotch</td>
-          <td>Late May auction hammer prices are social proof in real time. Share strong results with active prospects immediately &mdash; &ldquo;This went for X at auction last week, which gives you a sense of where the premium end of the market is pricing.&rdquo; Auction results are the most credible price validation available outside of a market index.</td>
-          <td class="high">HIGH</td>
-        </tr>
-      </tbody>
+      <tr><th>DATE</th><th>EVENT</th><th>WHAT TO WATCH</th><th>BROKER USE</th></tr>
+      <tr>
+        <td class="date-col">MON 15 JUN</td>
+        <td>UK Labour Market (ONS)</td>
+        <td>Wage growth vs. inflation. If real wages are negative — debasement narrative is live in the data this morning.</td>
+        <td>Open Monday calls with the wage data. "Did you see the labour numbers this morning?" — then pivot to the debasement conversation.</td>
+      </tr>
+      <tr>
+        <td class="date-col high">TUE 17 JUN</td>
+        <td class="high">US CPI — May Print</td>
+        <td class="high">THE number of the week. Inflation rolling over = rate cuts in view = savings rate narrative strengthens. Inflation sticky = hard asset protection narrative strengthens. Either way, Story 2 and 3 are live.</td>
+        <td class="high">Pick up the phone Tuesday afternoon. "The inflation data came out this morning — here's what it means for the conversation we were having..."</td>
+      </tr>
+      <tr>
+        <td class="date-col high">WED 18 JUN</td>
+        <td class="high">FOMC + Warsh Presser</td>
+        <td class="high">Warsh's language on debt, rates, and the long-term path. Dovish = rate cut timeline accelerates. Either outcome feeds Story 3.</td>
+        <td>Use the presser to open Thursday calls. Translate Warsh's language into plain English. "Here's what the Fed chairman actually said yesterday, and what it means for savers..."</td>
+      </tr>
+      <tr>
+        <td class="date-col">THU 19 JUN</td>
+        <td>UK CPI — May Print</td>
+        <td>UK inflation trajectory. Feeds directly into the debasement and real return tables in Story 2.</td>
+        <td>Update the real return table live. "CPI came in at X this morning. Here's what your client's savings account is actually returning after that number."</td>
+      </tr>
+      <tr>
+        <td class="date-col">FRI 20 JUN</td>
+        <td>UK Retail Sales (ONS)</td>
+        <td>Consumer spending resilience. Feeds the premium spirits demand thesis.</td>
+        <td>Background context — use if strong to support the premiumisation argument.</td>
+      </tr>
     </table>
   </div>
 
-  <div class="signal-box">
-    <div class="signal-head">&#9608; BROKER ACTION POINTS &mdash; W21 CLOSE</div>
-    <ul>
-      <li><strong>Open every call this week with Moody&rsquo;s.</strong> &ldquo;Did you follow the credit downgrade last Friday?&rdquo; is the best cold opener this desk has had in years. It is mainstream, credible, and requires no specialist knowledge to discuss. It places you immediately as an informed, current-events broker &mdash; not a product salesperson. Let the client respond before you say anything about whisky.</li>
-      <li><strong>Run the full SPIN sequence.</strong> The four questions on page 07 are designed to build a client&rsquo;s own case for the product before you pitch. The broker who lets the client articulate their own dissatisfaction with real returns and their own desire for an independent asset class will close at a materially higher rate than the broker who pitches product first.</li>
-      <li><strong>Use the three agencies as a closer.</strong> &ldquo;S&amp;P in 2011. Fitch in 2023. Moody&rsquo;s in 2026. Three independent agencies. One direction.&rdquo; This is a twelve-word logical summary that no client can dispute. It is the distillation of the entire macro case into a single statement. Deliver it with certainty and without qualification.</li>
-      <li><strong>Loop India to existing clients.</strong> Any client who was told about the India FTA in W19 or W20 should receive a brief call or message this week confirming the story is developing as described. This is the most powerful relationship-maintenance call you can make. Being right, consistently, over time is how the second ten is built at scale.</li>
-      <li><strong>Watch PCE on Tuesday.</strong> If the US PCE print beats, prepare a same-day message for active prospects: two sentences, the number, the implication, and a single question. Strike while the macro is still in the news cycle.</li>
-    </ul>
-  </div>
-
-  <div class="warn">
-    <span class="tag">&#9608; Data Note &mdash; Whisky Market Figures</span>
-    Whisky investment is an unregulated asset class in the UK. Cask trade growth figures sourced from publicly available market data. Sovereign debt ratings from Moody&rsquo;s, S&amp;P, and Fitch official releases. UK CPI and BOE base rate from official UK Government and Bank of England sources. India FTA terms from SWA and UK Government publications. Historical return patterns should not be presented as guarantees of future performance. All investment involves risk &mdash; cask values can fall as well as rise. Apply firm suitability standards at all times.
+  <div class="broker-self-check">
+    <div class="bsc-title">&#9608; BROKER SELF-CHECK &mdash; W24 — THE MACRO BROKER TEST</div>
+    <p>Before you pick up the phone this week, ask yourself honestly:</p>
+    <p><strong>&#9608; Can you name the Shiller CAPE ratio and what it signals at current levels — without looking?</strong></p>
+    <p><strong>&#9608; Can you explain monetary debasement in 90 seconds using an analogy a client has never heard?</strong></p>
+    <p><strong>&#9608; Do you know what percentage of the S&amp;P 500 is concentrated in seven companies?</strong></p>
+    <p><strong>&#9608; Can you explain what eSLR reform is and why it matters for savers — in plain English?</strong></p>
+    <p><strong>&#9608; Do you know the answer to the objection "my portfolio has done well — why change anything?"</strong></p>
+    <p>The broker who can answer all five is the broker who no longer sounds like they are selling. They sound like they are advising. That distinction is the difference between a client who says "let me think about it" and a client who says "what do I need to do to move forward?" Study these points this weekend. Own them by Monday. The data will be live in the markets by Tuesday. The brokers who know it before the client sees it are the ones who make the call — not the ones who receive one.</p>
   </div>
 
   <div class="disclosure">
-    <h4>&#9608; Important Disclosures</h4>
-    <p>This report is prepared for internal broker use only and does not constitute financial advice to clients. All market data is sourced from publicly available information and believed to be accurate at time of writing. Past performance does not guarantee future results. Whisky cask investment is not regulated by the Financial Conduct Authority. Brokers must comply with all applicable FCA requirements and firm compliance procedures. References to Moody&rsquo;s downgrade, UK CPI, Bank of England decisions, India FTA, Diageo production activity, and cask market data are drawn from publicly available sources. The Brokerage Report is an independent intelligence and sales training publication. &copy; 2026 The Brokerage Report. Unauthorised distribution outside your brokerage is prohibited.</p>
-  </div>
-
-  <div class="footer-bar">
-    <span>&#9608; WEEK AHEAD + DISCLOSURE</span>
-    <span>WHISKY &bull; W21 &bull; 2026</span>
+    <h4>&#9608; DISCLOSURE &amp; IMPORTANT INFORMATION</h4>
+    <p>This report is produced for professional broker use only and does not constitute financial advice. Macro data is sourced from publicly available institutional publications including the ONS, Federal Reserve, Bank of England, IMF, and S&amp;P Dow Jones Indices. CAPE ratio data sourced from the Shiller database (Yale). Historical debt and fiscal data sourced from the US Congressional Budget Office and US Treasury. All analogies and frameworks are for educational and training purposes. Brokers are responsible for ensuring all client communications comply with FCA requirements. Past performance of any asset class is not indicative of future results. Not for client distribution.</p>
   </div>
 </section>
 
-<!-- ==================== BACK PAGE ==================== -->
+<!-- BACK PAGE -->
 <section class="page">
   <div class="back-page">
-    <div class="brand">THE BROKERS TERMINAL</div>
-    <div style="color:#E97132; font-size:9pt; letter-spacing:0.3em; margin-bottom:28px;">&#9608; &#9608; &#9608;</div>
-    <div class="disc">For professional use only. This publication is prepared for internal broker use and does not constitute financial advice. Not for distribution to clients or prospects. All investment involves risk. Whisky cask investment is not regulated by the Financial Conduct Authority.</div>
-    <div style="color:#333; font-size:8pt; letter-spacing:0.22em; margin-top:28px;">THE BROKERAGE REPORT &copy; 2026 &bull; WWW.THEBROKERSTERMINAL.COM</div>
+    <div class="brand">THE BROKERS EDGE</div>
+    <p style="color:#E97132; letter-spacing:0.32em; font-size:10pt; margin-bottom:30px;">WHISKY INVESTMENT INTELLIGENCE</p>
+    <p style="color:#555; font-size:9pt; letter-spacing:0.2em; margin-bottom:8px;">WEEK 24 &nbsp;&bull;&nbsp; 14 JUNE 2026</p>
+    <p style="color:#555; font-size:9pt; letter-spacing:0.2em; margin-bottom:30px;">INTERNAL USE ONLY &nbsp;&bull;&nbsp; NOT FOR CLIENT DISTRIBUTION</p>
+    <div style="width:60px; height:1px; background:#E97132; margin:0 auto 30px auto;"></div>
+    <div class="disc">This document is produced for the exclusive use of subscribing brokerage professionals. It contains global macro intelligence, sales frameworks, and educational content intended to support professional development and client conversations. Nothing in this document constitutes financial advice. All data is sourced from publicly available institutional sources. Brokers are responsible for ensuring all client communications comply with applicable regulatory requirements.</div>
+    <div style="margin-top:40px; color:#333; font-size:8pt; letter-spacing:0.3em;">&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</div>
   </div>
 </section>
 

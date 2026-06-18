@@ -74,7 +74,7 @@ serve(async (req) => {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
       body: new URLSearchParams({
-        customer: firm.stripe_customer_id,
+        customer: firm.stripe_customer_id.trim(),
         return_url: 'https://www.thebrokersterminal.com/dashboard.html',
       }),
     });

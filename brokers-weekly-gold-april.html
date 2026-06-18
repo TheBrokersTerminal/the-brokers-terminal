@@ -2,7 +2,7 @@
 <html lang="en-GB">
 <head>
 <meta charset="UTF-8">
-<title>The Brokers Weekly &mdash; Gold Bullion &mdash; 24 May 2026</title>
+<title>THE BROKERS WEEKLY &mdash; Gold Bullion &mdash; 14 June 2026</title>
 <style>
   @page { size: A4; margin: 18mm 16mm; }
   * { box-sizing: border-box; }
@@ -28,11 +28,8 @@
   strong { color: #E97132; letter-spacing: 0.02em; }
   em { color: #E6E6E6; }
   ul { padding-left: 22px; margin: 6px 0 12px 0; }
-  ul li { margin: 4px 0; }
+  ul li { margin: 5px 0; }
   ul li::marker { color: #E97132; }
-  ol { padding-left: 22px; margin: 6px 0 12px 0; }
-  ol li { margin: 5px 0; color: #FFFFFF; }
-  ol li::marker { color: #E97132; font-weight: bold; }
   .masthead { display: flex; justify-content: space-between; align-items: center; border-top: 2px solid #E97132; border-bottom: 2px solid #E97132; padding: 8px 0; margin-bottom: 18px; font-size: 9.5pt; letter-spacing: 0.24em; }
   .masthead .left { color: #E97132; }
   .masthead .middle { color: #FFFFFF; }
@@ -42,636 +39,492 @@
   .tile .label { color: #E97132; font-size: 8.5pt; letter-spacing: 0.18em; margin-bottom: 4px; }
   .tile .value { color: #FFFFFF; font-size: 14pt; font-weight: 700; line-height: 1.2; }
   .tile .delta { font-size: 8.5pt; margin-top: 2px; color: #E6E6E6; }
-  .tile .delta.up { color: #6BCB77; }
-  .tile .delta.down { color: #E97132; }
+  .tile.green .value { color: #44cc88; }
+  .tile.red .value { color: #ff5555; }
+  .tile.amber .value { color: #E97132; }
   table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 10pt; }
   th { background: #121212; color: #E97132; border-bottom: 1px solid #E97132; padding: 6px 8px; text-align: left; letter-spacing: 0.12em; font-size: 9pt; text-transform: uppercase; }
   td { border-bottom: 1px dotted #333; padding: 6px 8px; color: #FFFFFF; }
   td.accent { color: #E97132; }
-  td.up { color: #6BCB77; }
-  td.down { color: #E97132; }
-  .news-block { border-left: 3px solid #E97132; padding: 10px 14px; margin: 18px 0; background: #0E0E0E; }
-  .news-block h4 { color: #E97132; margin: 0 0 6px 0; font-size: 11pt; letter-spacing: 0.14em; text-transform: uppercase; }
-  .news-block .meta { font-size: 8.5pt; color: #888; letter-spacing: 0.18em; margin-bottom: 8px; }
+  td.green { color: #44cc88; }
+  td.red { color: #ff6666; }
   .pitch { margin: 10px 0; padding: 12px 16px; background: #0d0d0d; border-top: 2px solid #E97132; border-bottom: 1px solid #333; }
   .pitch .head { color: #E97132; font-size: 9.5pt; letter-spacing: 0.2em; margin-bottom: 8px; text-transform: uppercase; padding-bottom: 6px; border-bottom: 1px dotted #E97132; }
-  .pitch .framework-tag { font-size: 8pt; color: #888; letter-spacing: 0.18em; margin-bottom: 8px; text-transform: uppercase; }
   .pitch .quote { color: #FFFFFF; font-style: italic; padding: 8px 10px 8px 16px; border-left: 3px solid #E97132; margin: 8px 0; line-height: 1.65; background: #111; }
   .pitch .reason { color: #E6E6E6; font-size: 9.5pt; margin-top: 8px; padding-top: 6px; border-top: 1px dotted #333; }
   .pitch .reason span.l { color: #E97132; font-weight: bold; }
-  .pitch .mechanics { margin-top: 8px; padding: 8px 12px; background: #141414; border-left: 2px solid #555; font-size: 9pt; color: #AAAAAA; }
-  .pitch .mechanics span.tag { color: #E97132; display: block; margin-bottom: 4px; font-size: 8pt; letter-spacing: 0.18em; text-transform: uppercase; }
-  .teach { border: 1px solid #E97132; padding: 14px 18px; margin: 16px 0; background: #0E0E0E; }
-  .teach h4 { color: #E97132; margin: 0 0 8px 0; letter-spacing: 0.16em; font-size: 11pt; text-transform: uppercase; }
-  .formula { font-family: "Consolas",monospace; background: #141414; border: 1px dotted #E97132; padding: 8px 12px; color: #E97132; margin: 10px 0; letter-spacing: 0.06em; white-space: pre-wrap; word-break: break-word; overflow-x: auto; line-height: 1.8; }
-  .footer-bar { margin-top: 18px; padding: 6px 0; border-top: 1px solid #E97132; font-size: 8.5pt; color: #E97132; letter-spacing: 0.22em; display: flex; justify-content: space-between; }
   .warn { border: 1px solid #E97132; padding: 10px 14px; margin: 10px 0; color: #FFFFFF; background: #1a0f06; }
   .warn span.tag { color: #E97132; letter-spacing: 0.2em; font-size: 9pt; display: block; margin-bottom: 4px; text-transform: uppercase; }
-  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
-  .gloss { border: 1px dotted #444; padding: 12px 16px; margin: 16px 0; background: #0d0d0d; }
-  .gloss h5 { color: #E97132; margin: 0 0 8px 0; font-size: 9.5pt; letter-spacing: 0.22em; text-transform: uppercase; }
-  .gloss table th { background: #111; font-size: 8.5pt; }
-  .gloss table td { font-size: 9pt; padding: 5px 8px; color: #E0E0E0; }
-  .disclosure { border: 1px solid #444; padding: 14px 18px; margin: 16px 0; background: #0d0d0d; }
-  .disclosure h4 { color: #E97132; margin: 0 0 8px 0; font-size: 9.5pt; letter-spacing: 0.22em; text-transform: uppercase; }
-  .disclosure p { color: #999; font-size: 8.5pt; line-height: 1.6; margin: 5px 0; }
-  .week-ahead table td { font-size: 9pt; }
-  .week-ahead table td.date-col { color: #E97132; white-space: nowrap; }
-  .week-ahead table td.high { color: #FF4444; font-weight: 700; }
-  .signal-box { border: 2px solid #E97132; padding: 14px 18px; margin: 16px 0; background: #0f0a05; }
-  .signal-box .signal-head { color: #E97132; font-size: 10pt; letter-spacing: 0.28em; text-transform: uppercase; margin-bottom: 10px; border-bottom: 1px solid #E97132; padding-bottom: 6px; }
-  .pitch-thought { margin: 10px 0; padding: 10px 12px; border: 1px dashed #E97132; color: #E6E6E6; background: #0c0c0c; }
-  .pitch-thought span.tag { color: #E97132; letter-spacing: 0.18em; font-size: 9pt; display: block; margin-bottom: 4px; text-transform: uppercase; }
+  .alert-green { border: 1px solid #44cc88; border-left: 4px solid #44cc88; padding: 10px 16px; margin: 14px 0; background: #001a0a; }
+  .alert-green .label { color: #44cc88; font-size: 8.5pt; letter-spacing: 0.3em; margin-bottom: 4px; text-transform: uppercase; }
+  .alert-green .text { color: #FFFFFF; font-size: 11pt; font-weight: 700; }
   .breaking-bar { background: #1a0800; border: 1px solid #E97132; border-left: 4px solid #E97132; padding: 10px 16px; margin: 14px 0; }
   .breaking-bar .label { color: #E97132; font-size: 8.5pt; letter-spacing: 0.3em; margin-bottom: 4px; text-transform: uppercase; }
   .breaking-bar .text { color: #FFFFFF; font-size: 11pt; font-weight: 700; }
-  .price-bar { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 14px 0; }
-  .price-bar .stat { border: 1px solid #333; padding: 8px 10px; background: #111; text-align: center; }
-  .price-bar .stat .lbl { color: #E97132; font-size: 8pt; letter-spacing: 0.2em; display: block; margin-bottom: 4px; text-transform: uppercase; }
-  .price-bar .stat .val { color: #FFFFFF; font-size: 12pt; font-weight: 700; }
-  .price-bar .stat .chg { font-size: 8.5pt; margin-top: 2px; }
-  .ascii { background: #101010; border: 1px dotted #E97132; padding: 10px 12px; color: #E97132; white-space: pre-wrap; word-break: break-word; overflow-x: auto; font-size: 8.5pt; margin: 12px 0; line-height: 1.4; }
+  .signal-box { border: 2px solid #E97132; padding: 14px 18px; margin: 16px 0; background: #0f0a05; }
+  .signal-box .signal-head { color: #E97132; font-size: 10pt; letter-spacing: 0.28em; text-transform: uppercase; margin-bottom: 10px; border-bottom: 1px solid #E97132; padding-bottom: 6px; }
   .objection-block { margin: 14px 0; border: 1px solid #333; background: #0c0c0c; }
   .objection-block .obj-header { background: #1a1200; border-bottom: 1px solid #E97132; padding: 8px 14px; color: #E97132; font-size: 9.5pt; letter-spacing: 0.18em; text-transform: uppercase; }
-  .objection-block .obj-body { padding: 12px 14px; }
-  .objection-block .obj-client { color: #AAAAAA; font-style: italic; margin-bottom: 10px; padding: 6px 10px; border-left: 2px solid #555; font-size: 9.5pt; }
-  .objection-block .obj-response { color: #FFFFFF; font-size: 10pt; line-height: 1.6; }
-  .objection-block .obj-mechanics { margin-top: 8px; font-size: 8.5pt; color: #888; padding-top: 6px; border-top: 1px dotted #333; }
-  .spin-box { border: 2px solid #333; padding: 14px 18px; margin: 16px 0; background: #0c0c0c; }
-  .spin-box .spin-head { color: #E97132; font-size: 10pt; letter-spacing: 0.22em; text-transform: uppercase; margin-bottom: 12px; }
-  .spin-q { margin: 8px 0; padding: 8px 12px; background: #111; }
-  .spin-q .q-type { color: #E97132; font-size: 8pt; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 4px; }
-  .spin-q .q-text { color: #FFFFFF; font-style: italic; font-size: 10pt; }
-  .spin-q .q-purpose { color: #AAAAAA; font-size: 8.5pt; margin-top: 4px; }
-  .intel-card { border: 1px solid #333; padding: 10px 14px; margin: 8px 0; background: #0d0d0d; }
-  .intel-card .ic-head { color: #E97132; font-size: 9pt; letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 6px; }
-  .intel-card .ic-body { color: #E0E0E0; font-size: 9.5pt; line-height: 1.6; }
+  .objection-block .obj-client { color: #AAAAAA; font-style: italic; margin: 10px 14px 6px 14px; padding: 6px 10px; border-left: 2px solid #555; font-size: 9.5pt; }
+  .objection-block .obj-response { color: #FFFFFF; font-size: 10pt; line-height: 1.6; padding: 0 14px 12px 14px; }
+  .objection-block .obj-mechanics { margin: 0 14px 12px 14px; font-size: 8.5pt; color: #888; padding-top: 6px; border-top: 1px dotted #333; }
+  .senior-badge { display: inline-block; background: #E97132; color: #000; font-size: 8pt; letter-spacing: 0.3em; padding: 2px 10px; text-transform: uppercase; font-weight: 700; margin-bottom: 14px; }
+  .senior-intro { background: #121212; border: 1px solid #E97132; border-left: 5px solid #E97132; padding: 14px 18px; margin: 0 0 20px 0; }
+  .senior-intro p { color: #E6E6E6; font-size: 10.5pt; line-height: 1.7; margin: 0; }
+  .intel-story { border: 1px solid #2A2A2A; margin-bottom: 22px; background: #0D0D0D; }
+  .intel-story .is-header { background: #141414; border-bottom: 1px solid #E97132; padding: 12px 16px; display: flex; align-items: flex-start; gap: 14px; }
+  .intel-story .is-num { color: #E97132; font-size: 22pt; font-weight: 900; line-height: 1; min-width: 40px; }
+  .intel-story .is-meta { flex: 1; }
+  .intel-story .is-tag { color: #888; font-size: 8pt; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 4px; }
+  .intel-story .is-title { color: #E97132; font-size: 12.5pt; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; line-height: 1.25; }
+  .intel-story .is-body { padding: 14px 18px; }
+  .intel-story .is-context { color: #E0E0E0; font-size: 11pt; line-height: 1.7; margin-bottom: 14px; border-left: 2px solid #333; padding-left: 14px; }
+  .intel-story .is-context strong { color: #E97132; }
+  .intel-story .is-pitch { background: #111; border-top: 2px solid #E97132; padding: 12px 14px; margin-top: 14px; }
+  .intel-story .is-pitch-label { color: #E97132; font-size: 8.5pt; letter-spacing: 0.25em; text-transform: uppercase; margin-bottom: 8px; }
+  .intel-story .is-pitch-text { color: #FFFFFF; font-style: italic; line-height: 1.65; font-size: 10.5pt; }
+  .intel-story .is-source { font-size: 8pt; color: #555; letter-spacing: 0.1em; margin-top: 10px; padding-top: 6px; border-top: 1px dotted #333; }
+  .week-ahead table td { font-size: 9pt; }
+  .week-ahead table td.date-col { color: #E97132; white-space: nowrap; }
+  .week-ahead table td.high { color: #E97132; font-weight: 700; }
+  .broker-self-check { background: #0D0D0D; border: 1px solid #2A2A2A; border-left: 4px solid #E97132; padding: 14px 18px; margin: 16px 0; }
+  .broker-self-check .bsc-title { color: #E97132; font-size: 9pt; letter-spacing: 0.3em; text-transform: uppercase; margin-bottom: 10px; font-weight: 700; }
+  .broker-self-check p { color: #E6E6E6; font-size: 10.5pt; line-height: 1.65; margin: 6px 0; }
+  .analogy-box { background: #0e0e0e; border: 1px dashed #E97132; padding: 12px 16px; margin: 14px 0; }
+  .analogy-box .analogy-label { color: #E97132; font-size: 8pt; letter-spacing: 0.28em; text-transform: uppercase; margin-bottom: 6px; }
+  .analogy-box p { color: #E0E0E0; font-size: 10pt; line-height: 1.65; margin: 0; font-style: italic; }
+  .psychology-box { background: #0f0905; border: 1px solid #E97132; border-left: 4px solid #E97132; padding: 14px 18px; margin: 16px 0; }
+  .psychology-box .psy-head { color: #E97132; font-size: 9pt; letter-spacing: 0.28em; text-transform: uppercase; margin-bottom: 10px; font-weight: 700; border-bottom: 1px dotted #E97132; padding-bottom: 6px; }
+  .psychology-box p { color: #E0E0E0; font-size: 10.5pt; line-height: 1.7; margin: 6px 0; }
+  .stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 14px 0; }
+  .stat-cell { border: 1px solid #333; padding: 10px 14px; background: #0d0d0d; text-align: center; }
+  .stat-cell .s-num { color: #E97132; font-size: 20pt; font-weight: 900; line-height: 1.1; }
+  .stat-cell .s-label { color: #888; font-size: 8pt; letter-spacing: 0.16em; text-transform: uppercase; margin-top: 4px; }
+  .loop-bar { background: #0a0800; border-left: 4px solid #E97132; border: 1px solid #333; padding: 8px 14px; margin: 12px 0; font-size: 9pt; color: #AAAAAA; }
+  .loop-bar span.tag { color: #E97132; font-size: 8pt; letter-spacing: 0.2em; text-transform: uppercase; display: block; margin-bottom: 3px; }
+  .disclosure { border: 1px solid #444; padding: 14px 18px; margin: 16px 0; background: #0d0d0d; }
+  .disclosure h4 { color: #E97132; margin: 0 0 8px 0; font-size: 9.5pt; letter-spacing: 0.22em; text-transform: uppercase; }
+  .disclosure p { color: #999; font-size: 8.5pt; line-height: 1.6; margin: 5px 0; }
   .back-page { min-height: 96vh; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #0A0A0A; border: 1px solid #222; text-align: center; padding: 40px; }
   .back-page .brand { color: #E97132; font-size: 28pt; font-weight: 700; letter-spacing: 0.3em; margin-bottom: 20px; }
   .back-page .disc { color: #555; font-size: 9pt; letter-spacing: 0.16em; max-width: 480px; line-height: 1.7; }
-  .loop-bar { background: #0a0800; border-left: 4px solid #E97132; border: 1px solid #333; padding: 8px 14px; margin: 12px 0; font-size: 9pt; color: #AAAAAA; }
-  .loop-bar span.tag { color: #E97132; font-size: 8pt; letter-spacing: 0.2em; text-transform: uppercase; display: block; margin-bottom: 3px; }
-  .accusation-box { border: 1px dashed #555; padding: 10px 14px; margin: 12px 0; background: #0c0c0c; }
-  .accusation-box span.tag { color: #E97132; font-size: 8pt; letter-spacing: 0.2em; text-transform: uppercase; display: block; margin-bottom: 6px; }
 </style>
 </head>
 <body>
 
-<!-- ==================== FRONT COVER ==================== -->
+<!-- COVER PAGE -->
 <section class="page">
   <div class="cover">
-    <div class="top-strip">
-      <span>&#9608; INTERNAL &nbsp; CONFIDENTIAL</span>
-      <span>BROKERS EYES ONLY</span>
-    </div>
+    <div class="top-strip"><span>&#9608; INTERNAL &nbsp; CONFIDENTIAL</span><span>BROKERS EYES ONLY</span></div>
     <div class="middle">
       <div class="ribbon">&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;</div>
       <h1>THE BROKERS<br>WEEKLY</h1>
-      <h2>MACRO &nbsp;&bull;&nbsp; SALES &nbsp;&bull;&nbsp; STRATEGY</h2>
-      <div class="asset-badge">GOLD BULLION</div>
-      <div class="date">WEEK ENDED 24 MAY 2026</div>
+      <h2>MACRO &nbsp;&bull;&nbsp; MARKETS &nbsp;&bull;&nbsp; GOLD INTELLIGENCE</h2>
+      <div class="asset-badge">GOLD BULLION INVESTMENT EDITION</div>
+      <div class="date">14 JUNE 2026 &nbsp;&mdash;&nbsp; WEEK 24</div>
       <div class="ribbon">&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;&#9644;</div>
     </div>
-    <div class="bottom-strip">
-      <span>VOL. GOLD / W21</span>
-      <span>THE BROKERAGE REPORT</span>
-    </div>
+    <div class="bottom-strip"><span>THE BROKERS EDGE &#9608;</span><span>WEEK 24 &bull; JUNE 2026</span></div>
   </div>
 </section>
 
-<!-- ==================== DESK MEMO ==================== -->
+<!-- PAGE 2 — MASTHEAD + DASHBOARD -->
 <section class="page">
   <div class="masthead">
-    <div class="left">&#9608; GOLD DESK</div>
-    <div class="middle">THE BROKERS WEEKLY &mdash; 24 MAY 2026</div>
-    <div class="right">PAGE 02 &#9608;</div>
+    <span class="left">THE BROKERS EDGE &#9608;</span>
+    <span class="middle">GOLD WEEKLY &bull; W24 &bull; 14 JUNE 2026</span>
+    <span class="right">INTERNAL USE ONLY &#9608;</span>
   </div>
 
-  <h3 class="section">DESK MEMO &mdash; READ THIS FIRST</h3>
-
-  <p>Last week, gold fell 4.6% on a hot inflation print and hawkish Fed repricing. This week, gold found its floor. The metal opened Monday at approximately <strong>$4,500</strong>, rallied to <strong>$4,543</strong> as the market processed the Moody&rsquo;s downgrade, then gave back some ground as Iran deal optimism grew mid-week, closing the week near <strong>$4,450</strong>. Net result: roughly flat, consolidating above the W20 lows, with two competing forces creating the week&rsquo;s tension.</p>
-
-  <p>Force one: the Moody&rsquo;s downgrade. On Friday 16 May, Moody&rsquo;s stripped the United States of its final Aaa rating. The dollar weakened. Yields steepened. Safe-haven demand returned immediately. Gold responded as it should &mdash; up. This is the debasement thesis in real time: when the paper is formally questioned, the metal rises relative to it. Gold is now up approximately <strong>40% year-on-year</strong> despite a volatile recent few weeks.</p>
-
-  <p>Force two: Iran deal hopes. By mid-week, reports emerged of active negotiations toward a formal agreement, with a one-page memo in circulation. Optimism around a deal reduces the immediate geopolitical risk premium embedded in the gold price. The market began unwinding some safe-haven positioning, which capped the Moody&rsquo;s rally.</p>
-
-  <p>The result is a gold price that is being pulled in two directions simultaneously &mdash; a debasement driver pushing up, a geopolitical resolution driver pushing down. This is not a contradiction. It is the market pricing two separate and independent arguments for gold ownership at the same time. Brokers need to understand both forces and be able to explain why <em>neither</em> resolution weakens the long-term case. And this week, Warsh confirmed he is moving to shrink the Fed&rsquo;s <strong>$6.7 trillion balance sheet</strong>. That is the third structural macro driver &mdash; and it creates a case for gold ownership regardless of which of the other two forces prevails.</p>
-
-  <div class="footer-bar">
-    <span>&#9608; DESK MEMO</span>
-    <span>GOLD &bull; W21 &bull; 2026</span>
-  </div>
-</section>
-
-<!-- ==================== MARKET DASHBOARD ==================== -->
-<section class="page">
-  <div class="masthead">
-    <div class="left">&#9608; MARKETS</div>
-    <div class="middle">GLOBAL DASHBOARD &mdash; WEEK ENDED 24 MAY 2026</div>
-    <div class="right">PAGE 03 &#9608;</div>
-  </div>
-
-  <h3 class="section">GOLD PRICE ACTION &mdash; W21</h3>
-
-  <div class="price-bar">
-    <div class="stat">
-      <span class="lbl">W21 OPEN</span>
-      <div class="val">$4,500</div>
-      <div class="chg" style="color:#AAAAAA;">W20 CLOSE</div>
-    </div>
-    <div class="stat">
-      <span class="lbl">WEEK HIGH</span>
-      <div class="val">$4,543</div>
-      <div class="chg" style="color:#6BCB77;">&#9650; MOODY&rsquo;S BID</div>
-    </div>
-    <div class="stat">
-      <span class="lbl">WEEK LOW</span>
-      <div class="val">~$4,400</div>
-      <div class="chg" style="color:#E97132;">&#9660; IRAN OPTIMISM</div>
-    </div>
-    <div class="stat">
-      <span class="lbl">W21 CLOSE</span>
-      <div class="val">~$4,450</div>
-      <div class="chg" style="color:#E97132;">&#9660; ~-1% W/W</div>
-    </div>
-    <div class="stat">
-      <span class="lbl">YoY PERFORMANCE</span>
-      <div class="val">+40%</div>
-      <div class="chg" style="color:#6BCB77;">&#9650; 12-MONTH RETURN</div>
-    </div>
-  </div>
-
-  <div class="ascii">  W21 PRICE NARRATIVE:
-  MON 19: $4,500 open &rarr; rallied to $4,543 on Moody's safe-haven bid, dollar weakness
-  TUE 20: Held gains. Dollar index continued lower. Warsh balance sheet comments noted.
-  WED 21: Iran deal memo reports emerged. Safe-haven premium began unwinding. Pullback.
-  THU 22: $4,543 area. Competing forces in equilibrium. Market watching Iran closely.
-  FRI 23: Iran optimism dominated. Gold closed near $4,450. Geopolitical premium reduced.
-  NET:    Consolidation. Debasement bid vs geopolitical resolution. Floor holding ~$4,400.</div>
-
-  <h3 class="section">GLOBAL MACRO &mdash; KEY PRINTS</h3>
+  <h3 class="section">GOLD MARKET DASHBOARD &nbsp;&mdash;&nbsp; W24</h3>
 
   <div class="dashboard">
-    <div class="tile">
-      <div class="label">MOODY&rsquo;S US RATING</div>
-      <div class="value">Aa1</div>
-      <div class="delta down">&#9660; FROM Aaa &mdash; FINAL AGENCY</div>
+    <div class="tile amber">
+      <div class="label">GOLD SPOT (USD)</div>
+      <div class="value">$4,216</div>
+      <div class="delta">June 12 close. Down 24.6% from Jan 28 ATH of $5,589. Structural buyers have not changed their mandate.</div>
     </div>
     <div class="tile">
-      <div class="label">GOLD YoY RETURN</div>
-      <div class="value">+40%</div>
-      <div class="delta up">&#9650; 12-MONTH PERFORMANCE</div>
+      <div class="label">GOLD SPOT (GBP)</div>
+      <div class="value">~£3,340</div>
+      <div class="delta">Approx. GBP equivalent at current rates. Still well above 2024 levels of ~£1,900.</div>
+    </div>
+    <div class="tile red">
+      <div class="label">ALL-TIME HIGH</div>
+      <div class="value">$5,589</div>
+      <div class="delta">January 28, 2026. 24.6% pullback to current. Every major bank sits 23–42% above today's price.</div>
     </div>
     <div class="tile">
-      <div class="label">FED BALANCE SHEET</div>
-      <div class="value">$6.7T</div>
-      <div class="delta down">&#9660; WARSH TARGETING REDUCTION</div>
-    </div>
-    <div class="tile">
-      <div class="label">IRAN CEASEFIRE</div>
-      <div class="value">TALKS LIVE</div>
-      <div class="delta up">&#9650; 1-PAGE MEMO IN PLAY</div>
-    </div>
-    <div class="tile">
-      <div class="label">US 10Y YIELD</div>
-      <div class="value">~4.6%</div>
-      <div class="delta down">&#9660; ELEVATED / POST-DOWNGRADE</div>
-    </div>
-    <div class="tile">
-      <div class="label">REAL YIELD (APPROX)</div>
-      <div class="value">~0.8%</div>
-      <div class="delta down">&#9660; STILL POSITIVE HEADWIND</div>
-    </div>
-    <div class="tile">
-      <div class="label">US DEBT / GDP (2035)</div>
-      <div class="value">134%</div>
-      <div class="delta down">&#9660; MOODY&rsquo;S PROJECTION</div>
-    </div>
-    <div class="tile">
-      <div class="label">UK CPI (APRIL)</div>
-      <div class="value">2.8%</div>
-      <div class="delta down">&#9660; ABOVE 2% TARGET</div>
+      <div class="label">DXY (DOLLAR INDEX)</div>
+      <div class="value">~99.81</div>
+      <div class="delta">June 12. Weakening trajectory continues. Target 92–95. Dollar weakness = gold's primary mechanical driver.</div>
     </div>
   </div>
 
-  <div class="gloss">
-    <h5>&#9608; THE TWO FORCES &mdash; WHAT IS DRIVING GOLD THIS WEEK</h5>
-    <table>
-      <thead><tr><th>Force</th><th>Direction</th><th>Mechanism</th><th>Duration</th></tr></thead>
-      <tbody>
-        <tr>
-          <td class="accent">Moody&rsquo;s Downgrade</td>
-          <td class="up">&#9650; POSITIVE FOR GOLD</td>
-          <td>Dollar weakens, Treasury safe-haven status questioned, investors rotate into non-sovereign stores of value. Gold is the primary beneficiary of reserve currency credibility loss.</td>
-          <td>Long-term structural. Cannot be reversed by any single policy decision.</td>
-        </tr>
-        <tr>
-          <td class="accent">Iran Deal Optimism</td>
-          <td class="down">&#9660; SHORT-TERM NEGATIVE</td>
-          <td>A deal reduces geopolitical risk premium embedded in oil and gold. Lower oil = less inflation fear = less hawkish Fed pressure = some easing of real yields. Market unwinds safe-haven positioning.</td>
-          <td>Short-term. If deal fails, premium returns immediately. If deal succeeds, monetary debasement thesis remains fully intact.</td>
-        </tr>
-        <tr>
-          <td class="accent">Warsh Balance Sheet Reduction</td>
-          <td class="down">&#9660; SHORT-TERM HEADWIND</td>
-          <td>Shrinking the Fed balance sheet reduces money supply, tightens liquidity. Short-term: higher real yields = gold headwind. Long-term: confirms QE era is over, raising bar for any future easing cycle reversal.</td>
-          <td>Both &mdash; short-term pressure, long-term removes the &lsquo;easy rescue&rsquo; expectation from financial markets.</td>
-        </tr>
-      </tbody>
-    </table>
+  <div class="dashboard">
+    <div class="tile red">
+      <div class="label">US CPI (MAY 2026)</div>
+      <div class="value">4.2%</div>
+      <div class="delta">YoY. Released June 10. Above Fed target. Energy +23.5% YoY. Real yield = NEGATIVE.</div>
+    </div>
+    <div class="tile">
+      <div class="label">FED FUNDS RATE</div>
+      <div class="value">3.625%</div>
+      <div class="delta">Midpoint of 3.50–3.75% target. Real yield: 3.625% − 4.2% = −0.575%. Gold's mechanical trigger is live.</div>
+    </div>
+    <div class="tile green">
+      <div class="label">CB BUYING Q1 2026</div>
+      <div class="value">244t</div>
+      <div class="delta">Central bank net purchases Q1 2026. Exceeds 5-year quarterly average. Structural bid unchanged.</div>
+    </div>
+    <div class="tile">
+      <div class="label">COT NET LONGS</div>
+      <div class="value">176,000</div>
+      <div class="delta">CFTC, June 5. Up from 154,300 previous week. Speculative positioning building — not yet extreme.</div>
+    </div>
   </div>
 
-  <div class="footer-bar">
-    <span>&#9608; DASHBOARD</span>
-    <span>GOLD &bull; W21 &bull; 2026</span>
-  </div>
-</section>
-
-<!-- ==================== STORY 1: MOODYS ==================== -->
-<section class="page">
-  <div class="masthead">
-    <div class="left">&#9608; STORY OF THE WEEK</div>
-    <div class="middle">KEY MARKET INTELLIGENCE &mdash; 24 MAY 2026</div>
-    <div class="right">PAGE 04 &#9608;</div>
-  </div>
-
-  <h3 class="section">STORY 01 &mdash; NOBODY&rsquo;S LIABILITY: GOLD IN THE AGE OF DOWNGRADED PAPER</h3>
-
-  <div class="breaking-bar">
-    <div class="label">&#9608; MACRO EVENT &mdash; 16 MAY 2026 &mdash; LOOPING FROM W20</div>
-    <div class="text">Moody&rsquo;s completes the set &mdash; all three major agencies have now downgraded US sovereign debt &mdash; gold up 40% year-on-year &mdash; dollar weakens &mdash; safe-haven bid returns Monday</div>
+  <div class="alert-green">
+    <div class="label">&#9608; INSTITUTIONAL CONSENSUS — ALL FIVE MAJOR BANKS ABOVE CURRENT PRICE</div>
+    <div class="text">Goldman Sachs: $5,400 &nbsp;|&nbsp; JPMorgan: ~$6,000 &nbsp;|&nbsp; Morgan Stanley: $5,200 &nbsp;|&nbsp; UBS: $5,500 &nbsp;|&nbsp; Bank of America: $6,000</div>
   </div>
 
   <div class="loop-bar">
-    <span class="tag">&#9608; LOOPING FROM W20 &mdash; THE REAL YIELD MECHANISM REVISITED</span>
-    In W20 we explained why gold fell on hot inflation: rising real yields pressure the metal short-term. The Moody&rsquo;s downgrade this week demonstrates the equal and opposite dynamic: when the credibility of the paper backing those yields is questioned, the metal that carries no such credibility risk is bid immediately. Both reactions confirm the same underlying truth &mdash; gold is priced against the quality of paper money, not just its quantity.
+    <span class="tag">&#9608; LOOP-BACK — W23</span>
+    Last week we established that gold now accounts for 27% of global central bank reserves vs 22% for US Treasuries — the first time gold has led since 1996. This week we go deeper: with CPI printing 4.2% and real yields turning negative, the same structural case gains a new mechanical driver. The central bank story is the long game. Negative real yields are the near-term catalyst. Understand both. Use both on calls.
   </div>
 
-  <div class="news-block">
-    <h4>The Metal That Is Nobody&rsquo;s Liability &mdash; What the Downgrade Actually Means</h4>
-    <div class="meta">&#9608; SOVEREIGN DEBT &nbsp;&bull;&nbsp; MONETARY CREDIBILITY &nbsp;&bull;&nbsp; NON-SOVEREIGN STORE OF VALUE &nbsp;&bull;&nbsp; PRIMARY PITCH DRIVER</div>
-    <div class="body">
-      <p>There is a phrase used by institutional gold investors that rarely makes it into retail conversations: <strong>gold is nobody&rsquo;s liability</strong>. Every other financial asset in a portfolio &mdash; cash, bonds, equities, derivatives &mdash; is somebody&rsquo;s liability. A bond is a liability of the issuing government. A savings account is a liability of the bank. A currency is a liability of the central bank that issues it. If any of those issuers defaults, fails, or loses credibility, the asset tied to them is affected. Physical gold has no issuer. It has no counterparty. It owes nothing to no one. It simply is.</p>
-      <p>The Moody&rsquo;s downgrade is significant not because it means the US is about to default &mdash; it is not &mdash; but because it is the formal, public acknowledgement by a third independent institution that the quality of the world&rsquo;s most important liability-based asset (US Treasury bonds) has deteriorated. S&amp;P said it in 2011. Fitch said it in 2023. Moody&rsquo;s has now completed the consensus. US debt is heading toward <strong>134% of GDP by 2035</strong>. The interest bill on that debt is consuming an ever-larger share of federal revenue. The trajectory is formally documented.</p>
-      <p>Gold&rsquo;s 40% year-on-year gain is the market&rsquo;s verdict on that trajectory. It is not speculation. It is the reallocation of rational capital away from assets whose quality is declining and toward an asset whose quality cannot decline &mdash; because it has no issuer, no government, no balance sheet. It simply exists, in finite quantity, in a planet that is not making more of it.</p>
-    </div>
-  </div>
-
-  <div class="accusation-box">
-    <span class="tag">&#9608; ACCUSATION AUDIT &mdash; SAY THIS BEFORE THE CLIENT DOES</span>
-    <p style="color:#E6E6E6; font-size:9.5pt;">Before you pitch, name the objection out loud first. &ldquo;I know what you might be thinking &mdash; gold fell last week despite hot inflation, and this week it barely rallied despite a credit downgrade. If I were in your position I&rsquo;d be wondering whether the story is running out of steam.&rdquo; Pause. Then: &ldquo;Let me show you exactly why those two reactions are actually evidence for the thesis, not against it &mdash; and why 40% in twelve months is the only number that matters.&rdquo; Naming the objection before the client does disarms it completely and builds enormous trust.</p>
-  </div>
-
-  <div class="pitch">
-    <div class="head">&#9608; PITCH 01 &mdash; NOBODY&rsquo;S LIABILITY</div>
-    <div class="framework-tag">FRAMEWORK: REFRAME / CHALLENGER TEACH &rarr; LOGICAL CERTAINTY (SLP FIRST TEN) &rarr; AUTHORITY (CIALDINI)</div>
-    <div class="quote">&ldquo;I want to give you a concept that I think changes the way you look at your entire portfolio &mdash; not just gold. Every asset you own is somebody&rsquo;s liability. Your savings account is a liability of your bank. Your government bonds are a liability of the government. Your pension&rsquo;s fixed income holdings are liabilities of whoever issued those bonds. If any of those issuers faces serious stress, your asset faces the same stress. That is the structure of the entire financial system. Now &mdash; physical gold is the single mainstream asset that is not a liability of anyone. No government issued it. No bank stands behind it. No central bank can print more of it. It simply exists, in the ground and in vaults, in finite quantity. This week, Moody&rsquo;s became the third major agency to formally acknowledge that the world&rsquo;s most important liability-based asset &mdash; US government debt &mdash; has deteriorated in quality. The market&rsquo;s response was immediate: the dollar weakened, and gold rose. That is not a coincidence. That is the mechanism. And it is why gold is up 40% over the last twelve months whilst conventional assets have repriced through one of the most volatile macro environments in a generation.&rdquo;</div>
-    <div class="reason"><span class="l">Framework applied:</span> The Challenger teaching approach &mdash; leading with a concept the client has likely never considered (nobody&rsquo;s liability) rather than a product feature. This reframes gold not as an investment to be evaluated against other investments, but as a categorically different type of asset. Once a client accepts that framing, the logical case follows automatically. Authority is applied through the three agency consensus &mdash; not the broker&rsquo;s opinion, but three independent institutions&rsquo; formal verdicts.</div>
-    <div class="mechanics">
-      <span class="tag">&#9608; SALES MECHANICS</span>
-      The phrase &ldquo;every asset you own is somebody&rsquo;s liability&rdquo; should be delivered slowly. It is a thought the client has never had. Let them follow it through their own portfolio mentally &mdash; they will arrive at the conclusion themselves before you complete the pitch. Self-generated insight is far more durable than salesperson-provided insight. That is the Challenger principle in practice.
-    </div>
-  </div>
-
-  <div class="pitch">
-    <div class="head">&#9608; PITCH 02 &mdash; THE 40% QUESTION</div>
-    <div class="framework-tag">FRAMEWORK: CALIBRATED QUESTION (TACTICAL EMPATHY) &rarr; SOCIAL PROOF &rarr; FUTURE PACING (SLP)</div>
-    <div class="quote">&ldquo;I want to ask you something, and I&rsquo;d like you to take a moment before you answer. Gold is up 40% over the last twelve months. Not 4%. Not 14%. Forty. During a period that included the most hawkish Fed environment in a generation, a major sovereign conflict, a credit downgrade of the world&rsquo;s reserve currency, and ongoing inflation above target in both the US and the UK. Which of your conventional investments &mdash; your equities, your bonds, your savings account &mdash; has returned 40% in the last twelve months? And what does it tell you that the asset most people describe as &lsquo;old-fashioned&rsquo; or &lsquo;a relic of the gold standard&rsquo; has outperformed almost everything in the modern financial toolkit during the most complex macro environment of the last decade? I ask not to pressure you &mdash; I ask because the answer to that question is usually the beginning of a very different conversation about how capital should be positioned.&rdquo;</div>
-    <div class="reason"><span class="l">Framework applied:</span> The calibrated question is borrowed from elite negotiation technique &mdash; asking a question that has no simple yes or no answer, forcing genuine reflection. The social proof is the 40% return &mdash; not the broker&rsquo;s projection but the market&rsquo;s own documented performance. Future pacing is embedded in &ldquo;the beginning of a very different conversation&rdquo; &mdash; the client is placed at the start of a journey rather than the end of a pitch. This dramatically lowers the action threshold because there is no pressure to decide &mdash; only to begin a conversation.</div>
-    <div class="mechanics">
-      <span class="tag">&#9608; SALES MECHANICS</span>
-      &ldquo;I ask not to pressure you&rdquo; is a strategic disarmament. Clients who feel no pressure lower their defences. The paradox of sales is that reducing apparent urgency often accelerates the decision. The client who feels they have time to think clearly is far more likely to act than one who feels cornered. Use this phrasing consistently when introducing the performance data &mdash; it signals confidence, not desperation.
-    </div>
-  </div>
-
-  <div class="footer-bar">
-    <span>&#9608; STORY 01 &mdash; MOODY&rsquo;S / NOBODY&rsquo;S LIABILITY</span>
-    <span>GOLD &bull; W21 &bull; 2026</span>
-  </div>
+  <h3 class="section">EXECUTIVE SUMMARY &nbsp;&mdash;&nbsp; W24</h3>
+  <p>Three data points came together this week that, taken individually, are each significant. Taken together, they form one of the clearest cases for gold ownership this publication has presented in its history.</p>
+  <p>First: <strong>US CPI for May came in at 4.2% annualised</strong>, driven heavily by a 23.5% surge in energy costs. The Federal Reserve's target rate sits at 3.50–3.75%. That means the real yield on US dollar cash — the true return after inflation — is negative. Minus 0.575% and falling. Every time in history that real yields have turned persistently negative, gold has produced sustained, multi-year outperformance. This is not a prediction. It is a pattern that has replicated across the 1970s stagflation, the 2008–2012 QE cycle, and the 2020–2022 pandemic response. That pattern is active again, right now.</p>
+  <p>Second: <strong>Gold has pulled back 24.6% from its January all-time high of $5,589</strong> to trade at approximately $4,216. The structural case — central bank accumulation, reserve diversification, dollar debasement — has not changed. The price has. Every major financial institution, from Goldman Sachs to JPMorgan to Bank of America, maintains year-end price targets between $5,200 and $6,000. The current price sits 23–42% below those institutional targets. The buyer who enters at $4,216 with the institutional consensus pointing to $5,200–$6,000 is not making a speculative call. They are following where the most informed capital in the world is pointing.</p>
+  <p>Third: <strong>Kevin Warsh chairs his first FOMC meeting on June 16–17</strong>. The market has priced in hawkishness — partly why gold pulled from $5,589 to $4,216. If Warsh's actual tone is less hawkish than priced, gold re-rates sharply upward. If he holds the hawkish line, the negative real yield environment is unchanged. Either outcome leaves the structural gold case intact. The asymmetry at this price level, with this macro backdrop, favours the buyer.</p>
 </section>
 
-<!-- ==================== STORY 2+3 ==================== -->
+<!-- PAGE 3 — STORY 1: THE DIP AND THE INSTITUTIONAL CONSENSUS -->
 <section class="page">
   <div class="masthead">
-    <div class="left">&#9608; INTELLIGENCE</div>
-    <div class="middle">MARKET STORIES &mdash; 24 MAY 2026</div>
-    <div class="right">PAGE 05 &#9608;</div>
+    <span class="left">THE BROKERS EDGE &#9608;</span>
+    <span class="middle">GOLD WEEKLY &bull; W24 &bull; JUNE 2026</span>
+    <span class="right">STORY 01 &#9608;</span>
   </div>
 
-  <h3 class="section">STORY 02 &mdash; IRAN: IF A DEAL HAPPENS, GOLD STILL WINS</h3>
+  <h3 class="section">FOUNDATION: STORY 1 &nbsp;&mdash;&nbsp; A 25% DISCOUNT ON THE INSTITUTIONAL CONSENSUS</h3>
+  <p style="color:#888; font-size:9pt; letter-spacing:0.15em; text-transform:uppercase; margin-bottom:12px;">Source: Goldman Sachs Research &bull; JPMorgan Commodities Report &bull; Morgan Stanley, UBS, Bank of America 2026 Targets &bull; WGC Q1 2026 Demand Trends</p>
 
-  <div class="news-block">
-    <h4>Ceasefire Memo in Circulation &mdash; Why a Resolution Does Not End the Gold Argument</h4>
-    <div class="meta">&#9608; IRAN NEGOTIATIONS &nbsp;&bull;&nbsp; GEOPOLITICAL RISK PREMIUM &nbsp;&bull;&nbsp; SAFE-HAVEN MECHANICS &nbsp;&bull;&nbsp; OBJECTION PRE-EMPTION</div>
-    <div class="body">
-      <p>US and Iranian officials are reportedly close to a one-page memorandum of understanding covering a ceasefire framework and initial nuclear agreement terms. By mid-week, gold had pulled back from its Moody&rsquo;s-driven highs as markets began pricing a reduced geopolitical risk premium. Iran-driven energy supply concerns &mdash; which have kept inflationary pressure elevated &mdash; would also ease on a deal, potentially reducing the near-term case for Fed hawkishness.</p>
-      <p>Brokers should expect this to become an objection this week: <em>&ldquo;If the Iran situation resolves, doesn&rsquo;t that remove one of the main arguments for gold?&rdquo;</em> The answer is no &mdash; and it requires understanding the difference between gold&rsquo;s short-term price drivers and its long-term ownership argument. The geopolitical risk premium is a <em>layer</em> on top of the structural case, not the structural case itself. An Iran deal removes a layer. It does not remove the foundations.</p>
-      <p>Consider what an Iran deal does not change: US debt at 134% of GDP by 2035. All three agencies having downgraded sovereign debt. Inflation above target in both the US and UK. Warsh determined to shrink a $6.7 trillion balance sheet and reduce the Fed&rsquo;s role in the economy. Central banks globally having purchased over 1,000 tonnes of gold in each of the last three years. None of those drivers have a ceasefire date. None of them resolve when a peace memo is signed.</p>
-      <p>Furthermore, historically, geopolitical resolution events have not caused sustained gold selloffs. After the resolution of major conflicts, the monetary conditions that drove gold higher have typically persisted &mdash; because wars are expensive, they leave larger deficits, more debt, more money printed to finance them. The world after an Iran deal is not a world with less debt. It is a world with the same debt, the same downgrade trajectory, and one less short-term news catalyst &mdash; but the structure intact.</p>
-    </div>
+  <div class="breaking-bar">
+    <div class="label">&#9608; LEAD STORY — W24 — THE PRICE EVERY MAJOR INSTITUTION IS BUYING BELOW</div>
+    <div class="text">GOLD AT $4,216 — 24.6% BELOW THE JANUARY ATH. GOLDMAN: $5,400. JPMORGAN: $6,000. MORGAN STANLEY: $5,200. THE DIP IS NOT A WARNING. IT IS AN INVITATION.</div>
   </div>
 
-  <div class="pitch">
-    <div class="head">&#9608; PITCH &mdash; THE LAYER VS THE FOUNDATION</div>
-    <div class="framework-tag">FRAMEWORK: REFRAME (CHALLENGER) &rarr; LOGICAL CERTAINTY &rarr; OBJECTION PRE-EMPTION &rarr; BOTH-OUTCOME CLOSE (SLP)</div>
-    <div class="quote">&ldquo;I want to address something before you raise it, because I think it is the most important question in the gold conversation this week. You may have seen reports that US and Iran are close to a deal. And your instinct might be: does that remove the argument for gold? I want to answer that directly. There are two types of drivers in the gold price. There are layers &mdash; short-term catalysts like geopolitical risk premiums. And there are foundations &mdash; the structural monetary and fiscal conditions that determine gold&rsquo;s long-term value. A deal removes a layer. It does not touch the foundations. The foundations are: US debt heading to 134% of GDP. All three major agencies having downgraded the paper backing that debt. Inflation structurally above target. A new Fed Chair moving to shrink a $6.7 trillion balance sheet in a way that has never been attempted at this scale before. None of those close with an Iran peace memo. And history tells us that post-conflict environments do not reduce sovereign debt &mdash; they increase it, because wars are expensive and the bills arrive after the guns go quiet. A deal is good news for the world. It is not a reason to reconsider a gold position. The two are simply not in the same conversation.&rdquo;</div>
-    <div class="reason"><span class="l">Framework applied:</span> Pre-empting the objection using the accusation audit principle &mdash; naming what the client is likely thinking before they say it, then answering it definitively. The layer vs foundation reframe is the Challenger teaching move: it gives the client a new mental model for evaluating gold drivers, making them better informed and more confident in the thesis. The both-outcome close from the SLP &mdash; &ldquo;a deal is good news for the world and not a reason to reconsider gold&rdquo; &mdash; removes the binary trap of &ldquo;deal = bad for gold.&rdquo;</div>
-  </div>
+  <p>On January 28, 2026, gold reached an all-time high of $5,589 per ounce. In the months that followed, a combination of factors — anticipation of a hawkish Federal Reserve under incoming chair Kevin Warsh, a temporary firming of the dollar, and profit-taking from the rapid move higher — produced a 24.6% pullback to current levels of approximately $4,216.</p>
 
-  <h3 class="section">STORY 03 &mdash; WARSH MOVES ON THE BALANCE SHEET: THE ERA OF FREE MONEY IS OVER</h3>
+  <p>What did not change during that pullback: the structural case. Central banks purchased <strong>244 tonnes of gold net in Q1 2026</strong> — exceeding the five-year quarterly average and extending what is now the most sustained period of sovereign gold accumulation since 1967. Gold's share of global central bank reserves now stands at 27%, surpassing US Treasuries (22%) for the first time since 1996. The buyers who move markets — the sovereign wealth funds, the central banks, the reserve managers — have not reduced their mandate. They have been given a better price at which to continue it.</p>
 
-  <div class="news-block">
-    <h4>New Chair Targets $6.7 Trillion Balance Sheet &mdash; The End of QE as a Safety Net</h4>
-    <div class="meta">&#9608; FEDERAL RESERVE &nbsp;&bull;&nbsp; BALANCE SHEET REDUCTION &nbsp;&bull;&nbsp; MONETARY TIGHTENING &nbsp;&bull;&nbsp; LONG-TERM GOLD STRUCTURAL</div>
-    <div class="body">
-      <p>Axios reported this week that Federal Reserve Chair Kevin Warsh has moved immediately to begin the process of shrinking the Fed&rsquo;s <strong>$6.7 trillion balance sheet</strong>. Warsh has long argued that the Fed&rsquo;s expanded balance sheet &mdash; a product of three rounds of quantitative easing since 2008, and an emergency expansion in 2020 &mdash; distorts financial markets, suppresses natural interest rates, and creates systemic risks by making the Fed an implicit backstop for the entire financial system. He is also reportedly adopting a Greenspan-style approach to communication: less forward guidance, more deliberate ambiguity, allowing markets to function with less central bank hand-holding.</p>
-      <p>The immediate implication for gold is a short-term headwind: reducing the balance sheet tightens liquidity, which typically supports higher real yields, which pressure gold. But the medium and long-term implications are more nuanced and ultimately constructive. A smaller Fed balance sheet means a reduced implicit guarantee that the central bank will ride to the rescue of markets in a downturn. It raises the cost of a future crisis response. It means that the next recession &mdash; and recessions are cyclical, not optional &mdash; arrives with a Fed that has less ammunition already deployed and must choose between genuine austerity or a new round of dramatic balance sheet expansion. Either choice is historically positive for gold: austerity creates recession conditions (safe-haven bid), renewed expansion restarts the debasement cycle (monetary case for gold strengthens).</p>
-    </div>
-  </div>
+  <p>The institutional research consensus is unanimous in a way that is unusual in financial markets. Goldman Sachs targets $5,400. JPMorgan targets approximately $6,000. Morgan Stanley targets $5,200. UBS targets $5,500. Bank of America targets $6,000. These are not small analysts with obscure models. These are the five largest financial institutions in the world, with access to every data point available, and every single one of them has a year-end price target that sits materially above today's price.</p>
 
-  <div class="pitch">
-    <div class="head">&#9608; PITCH &mdash; THE WARSH PARADOX: BOTH OUTCOMES SERVE THE THESIS</div>
-    <div class="framework-tag">FRAMEWORK: SCENARIO ANALYSIS &rarr; BOTH-OUTCOME CLOSE (SLP) &rarr; URGENCY &rarr; EMBEDDED COMMAND</div>
-    <div class="quote">&ldquo;The new Fed Chair confirmed this week that he is moving to shrink the Fed&rsquo;s balance sheet from $6.7 trillion. I want to walk you through what that means for gold, because the answer is more interesting than a simple positive or negative. There are two scenarios. Scenario one: Warsh succeeds. He reduces the balance sheet, tightens monetary conditions, keeps inflation toward target. In doing so, he engineers a slowdown &mdash; and historically, every Fed tightening cycle of this magnitude has ended in a recession or near-recession. In each of those environments since 1970, gold has appreciated in real terms as investors moved away from risk assets. Scenario two: Warsh does not fully succeed. The balance sheet reduction proves too difficult to execute without market stress, or inflation persists despite the tightening. In that case, the debasement thesis is not resolved &mdash; it is confirmed. The Fed tried to clean up and discovered the mess was structural. Gold&rsquo;s long-term ownership argument strengthens. I am not telling you which outcome is more likely. I am telling you that, from a gold ownership perspective, both lead to the same place. When you decide to hold a portion of your capital in something that benefits from both outcomes of the most consequential monetary experiment of our era, that is not speculation. That is sound risk management.&rdquo;</div>
-    <div class="reason"><span class="l">Framework applied:</span> The both-outcome close is the most intellectually complete pitch structure in the Straight Line toolkit. It removes the client&rsquo;s ability to construct a counter-scenario, because both scenarios have been explicitly addressed. The embedded command &ldquo;when you decide&rdquo; presupposes action. The reframe from &ldquo;speculation&rdquo; to &ldquo;sound risk management&rdquo; directly addresses the most common psychological barrier to alternative asset ownership in a professional financial context.</div>
-  </div>
-
-  <div class="footer-bar">
-    <span>&#9608; STORIES 02&ndash;03</span>
-    <span>GOLD &bull; W21 &bull; 2026</span>
-  </div>
-</section>
-
-<!-- ==================== SALES & OBJECTION CLINIC ==================== -->
-<section class="page">
-  <div class="masthead">
-    <div class="left">&#9608; SALES CLINIC</div>
-    <div class="middle">OBJECTION HANDLING &amp; CLOSE MECHANICS &mdash; W21</div>
-    <div class="right">PAGE 06 &#9608;</div>
-  </div>
-
-  <h3 class="section">SALES &amp; OBJECTION CLINIC &mdash; THIS WEEK&rsquo;S LIVE OBJECTIONS</h3>
-
-  <p>Three specific objections will dominate the floor this week. They are predictable because the macro is predictable &mdash; Moody&rsquo;s downgrade, Iran deal optimism, and Warsh balance sheet moves are all public, widely discussed, and will be in clients&rsquo; minds before you call. The broker who pre-empts all three in the opening two minutes of a call will have already cleared the main resistance before the pitch even begins. Preparation is the entire game.</p>
-
-  <div class="objection-block">
-    <div class="obj-header">&#9608; OBJECTION 01 &mdash; &ldquo;Gold barely reacted to the Moody&rsquo;s downgrade &mdash; is the thesis running out of steam?&rdquo;</div>
-    <div class="obj-body">
-      <div class="obj-client">Client says: &ldquo;I watched gold this week. The Moody&rsquo;s news was massive but gold only moved a little. If the thesis was that strong, shouldn&rsquo;t it have gone much higher?&rdquo;</div>
-      <div class="obj-response">
-        <p><strong>Response:</strong> &ldquo;That is exactly the right observation &mdash; and I want to tell you what it actually means, because the answer changes the whole picture. Gold did react to Moody&rsquo;s &mdash; it rallied from $4,500 to $4,543 on Monday. But simultaneously, a separate development was pushing it the other way: Iran deal optimism. When two opposing forces act on the same asset at the same time, the price looks flat &mdash; but flat does not mean the thesis is not working. It means two forces are in equilibrium. The debasement force is pushing up. The geopolitical resolution force is pushing down. The net result is consolidation, not collapse. And here is the most important number in this conversation: gold is up <em>40% over the last twelve months</em>. That 40% happened through CPI surprises, hawkish Fed appointments, sovereign downgrades, and geopolitical volatility. If the thesis were running out of steam, we would not be 40% higher than we were a year ago. We would be lower. The consolidation of this week is not the story. The trajectory of the last twelve months is the story.&rdquo;</p>
-      </div>
-      <div class="obj-mechanics">&#9608; MECHANICS: This objection comes from fixating on the week rather than the trend &mdash; a common short-term bias. The response does two things simultaneously: validates the observation (demonstrating you are not defensive or dismissive) and then reframes the timeframe. Moving the client&rsquo;s reference point from &ldquo;this week&rdquo; to &ldquo;the last twelve months&rdquo; is a standard anchoring shift. The 40% figure is the anchor that makes everything else look like noise by comparison.</div>
-    </div>
-  </div>
-
-  <div class="objection-block">
-    <div class="obj-header">&#9608; OBJECTION 02 &mdash; &ldquo;If Iran reaches a deal, gold will sell off &mdash; better to wait.&rdquo;</div>
-    <div class="obj-body">
-      <div class="obj-client">Client says: &ldquo;The Iran deal seems close. Won&rsquo;t that remove a major reason to own gold? I&rsquo;d rather wait to see how it plays out before committing.&rdquo;</div>
-      <div class="obj-response">
-        <p><strong>Response:</strong> &ldquo;I want to make sure I understand your thinking &mdash; so help me understand something. If a deal happens and gold dips 3%, 4%, 5% on geopolitical unwind &mdash; would that change your view of the next five years of gold ownership? Because the conditions that matter to that five-year view &mdash; US debt at 134% of GDP, three agencies having downgraded sovereign debt, a new Fed Chair trying to shrink a balance sheet that has never been this large before &mdash; none of those conditions are in the Iran ceasefire memo. A deal is good news for the world. It may cause a short-term gold dip. But the clients who waited for the perfect entry point on gold in 2019 waited through a pandemic. The ones who waited in 2022 waited through a European war. The ones waiting now may wait through whatever the next unpriced event is. There is always a reason to wait. The question is whether the reason is structural or just noise. This one is noise.&rdquo;</p>
-      </div>
-      <div class="obj-mechanics">&#9608; MECHANICS: Opening with &ldquo;help me understand something&rdquo; is a tactical empathy move &mdash; it signals genuine curiosity rather than defensiveness, and it forces the client to define their real objection precisely. The historical reference to clients who waited in 2019 and 2022 uses the social proof of prior decision-making patterns to make inaction feel like the riskier choice. The closing line &ldquo;this one is noise&rdquo; delivers authority and certainty without aggression.</div>
-    </div>
-  </div>
-
-  <div class="objection-block">
-    <div class="obj-header">&#9608; OBJECTION 03 &mdash; &ldquo;Warsh tightening means gold headwinds &mdash; shouldn&rsquo;t I wait for the rate picture to clarify?&rdquo;</div>
-    <div class="obj-body">
-      <div class="obj-client">Client says: &ldquo;With Warsh tightening and potentially shrinking the balance sheet, the real yield environment could get worse for gold before it gets better. Why not wait?&rdquo;</div>
-      <div class="obj-response">
-        <p><strong>Response:</strong> &ldquo;That is genuinely sophisticated thinking &mdash; and it is exactly right in the short term. Real yield increases are a gold headwind. Warsh tightening does create that pressure. I am not going to tell you otherwise. But I want to offer you the other side of that analysis, because I think it changes the timing question. The scenario in which Warsh successfully tightens and real yields stay elevated for an extended period requires the US economy to absorb the tightening without recession. Every major tightening cycle in the last fifty years has eventually ended in a growth slowdown that reversed those real yields. When that reversal comes &mdash; whether in twelve months or thirty &mdash; gold re-rates upward. The question is not whether that will happen. It is whether you want to own gold before or after the market prices the inflection. The clients who are positioned before a tightening cycle ends are the ones who participate in the subsequent rally in full. Those who wait for confirmation of the inflection point almost always get in after the first 15&ndash;20% of the move. What would you rather own: the uncertainty or the confirmation at a higher price?&rdquo;</p>
-      </div>
-      <div class="obj-mechanics">&#9608; MECHANICS: Validating the client&rsquo;s analysis (&ldquo;that is genuinely sophisticated thinking&rdquo;) is a pacing move &mdash; it meets them where they are before leading them somewhere else. The historical pattern (every tightening cycle ends in slowdown) is an evidence-based argument that does not require speculation. The closing question (&ldquo;the uncertainty or the confirmation at a higher price?&rdquo;) presents the choice explicitly &mdash; making inaction as much a decision as action, and attaching a concrete cost to it.</div>
-    </div>
-  </div>
-
-  <div class="footer-bar">
-    <span>&#9608; OBJECTION CLINIC</span>
-    <span>GOLD &bull; W21 &bull; 2026</span>
-  </div>
-</section>
-
-<!-- ==================== SPIN DESK INTELLIGENCE ==================== -->
-<section class="page">
-  <div class="masthead">
-    <div class="left">&#9608; DESK INTELLIGENCE</div>
-    <div class="middle">TOOLS OF THE TRADE &mdash; W21 TALKING POINTS</div>
-    <div class="right">PAGE 07 &#9608;</div>
-  </div>
-
-  <h3 class="section">DESK INTELLIGENCE &mdash; OPEN STRONG, GATHER DEEP, CLOSE CLEAN</h3>
-
-  <p>This week has three natural call openers of equal quality: the Moody&rsquo;s downgrade, the Iran deal developments, and Warsh&rsquo;s balance sheet move. Any one of them can open a cold call. Use the SPIN sequence below to turn the opener into intelligence &mdash; and turn the intelligence into a close.</p>
-
-  <div class="spin-box">
-    <div class="spin-head">&#9608; THE SPIN QUESTIONING SEQUENCE &mdash; W21 GOLD EDITION</div>
-    <p style="color:#AAAAAA; font-size:9pt; margin-bottom:12px;">Open with the news hook &mdash; choose whichever the prospect is most likely to have seen. Then use these four questions in sequence. The client who answers all four has built their own case before you pitch.</p>
-
-    <div class="spin-q">
-      <div class="q-type">S &mdash; SITUATION QUESTION</div>
-      <div class="q-text">&ldquo;How is your portfolio currently structured &mdash; are you carrying significant exposure to conventional financial assets like bonds and equities, or do you have some hard asset or alternative exposure in the mix?&rdquo;</div>
-      <div class="q-purpose">Purpose: Establish their current state. If heavily conventional, you have the &ldquo;everybody&rsquo;s liability&rdquo; frame fully loaded. If they already have some alternatives, you can position gold as the specific hard asset with the most directly relevant macro tailwinds right now.</div>
-    </div>
-
-    <div class="spin-q">
-      <div class="q-type">P &mdash; PROBLEM QUESTION</div>
-      <div class="q-text">&ldquo;With Moody&rsquo;s having completed the hat-trick of downgrades on US sovereign debt this week &mdash; all three major agencies now agree it has deteriorated &mdash; how comfortable are you with the proportion of your capital that is ultimately denominated in the credibility of government balance sheets?&rdquo;</div>
-      <div class="q-purpose">Purpose: Surface the problem by connecting it directly to this week&rsquo;s news. The client who says &ldquo;I suppose I&rsquo;m not that comfortable&rdquo; has named their own buying motive. You have said nothing about gold yet. You have simply asked them to assess their own exposure against a documented risk.</div>
-    </div>
-
-    <div class="spin-q">
-      <div class="q-type">I &mdash; IMPLICATION QUESTION</div>
-      <div class="q-text">&ldquo;If the trajectory of Western sovereign debt continues in the direction all three agencies have formally documented &mdash; and there is no credible political path to reversing it in the near term &mdash; what does that mean for the real, inflation-adjusted value of assets that are denominated in those currencies over the next five to ten years?&rdquo;</div>
-      <div class="q-purpose">Purpose: Make the client compute the consequence themselves. The answer &mdash; that currency-denominated assets lose real value as the paper backing them deteriorates &mdash; is the core of the gold thesis. When the client articulates it, it becomes three times more persuasive than when you say it.</div>
-    </div>
-
-    <div class="spin-q">
-      <div class="q-type">N &mdash; NEED-PAYOFF QUESTION</div>
-      <div class="q-text">&ldquo;How much value would there be &mdash; for your overall portfolio and your peace of mind &mdash; in having a portion of your capital in an asset that has no issuer, no government behind it, no counterparty risk, and a twelve-month return of 40%?&rdquo;</div>
-      <div class="q-purpose">Purpose: The need-payoff question moves the client from problem to solution desire in their own words. Including the 40% figure here is deliberate &mdash; it connects the abstract concept of &ldquo;non-sovereign store of value&rdquo; to a concrete, documented performance outcome. When the client says &ldquo;that sounds like exactly what I need,&rdquo; your pitch is already done.</div>
-    </div>
-  </div>
-
-  <h4 class="sub">&#9608; SHARP TALKING POINTS &mdash; USE VERBATIM OR ADAPT</h4>
-
-  <div class="three-col">
-    <div class="intel-card">
-      <div class="ic-head">THE HAT-TRICK LINE</div>
-      <div class="ic-body">&ldquo;S&amp;P 2011. Fitch 2023. Moody&rsquo;s 2026. All three. Same verdict. The world&rsquo;s most important debt is no longer considered pristine by anyone whose job it is to assess it. What do you do with that information?&rdquo;</div>
-    </div>
-    <div class="intel-card">
-      <div class="ic-head">NOBODY&rsquo;S LIABILITY</div>
-      <div class="ic-body">&ldquo;Every asset you own is somebody&rsquo;s liability. Except one. Physical gold has no issuer, no counterparty, no government behind it. It simply exists in finite quantity. This week, the quality of all those other liabilities was formally downgraded. The one that was not is up 40% year-on-year.&rdquo;</div>
-    </div>
-    <div class="intel-card">
-      <div class="ic-head">THE WARSH PARADOX</div>
-      <div class="ic-body">&ldquo;If Warsh succeeds in tightening, we get a slowdown &mdash; and gold has gained in every major slowdown since 1970. If he fails, debasement continues. Both outcomes point to the same asset. That is not a coincidence. That is a structural argument.&rdquo;</div>
-    </div>
-  </div>
-
-  <div class="two-col" style="margin-top:14px;">
-    <div class="intel-card">
-      <div class="ic-head">THE DEAL IS GOOD NEWS (LOOP FROM BOTH DESKS)</div>
-      <div class="ic-body">&ldquo;An Iran deal would be good for the world. It would also be used to argue that gold no longer has a catalyst. I want to be ready with the response: the catalyst for gold ownership is not a conflict in the Middle East. It is a credit rating on a balance sheet in Washington. That was downgraded last Friday. That does not un-downgrade when a ceasefire is signed.&rdquo;</div>
-    </div>
-    <div class="intel-card">
-      <div class="ic-head">THE 40% ANCHOR</div>
-      <div class="ic-body">&ldquo;The single most powerful number in the gold conversation right now is 40% year-on-year. Use it early. Anchor on it. Then when the client raises a short-term concern about this week&rsquo;s price, the 40% is already in their mind as the reference point &mdash; and the week&rsquo;s movement looks like rounding error by comparison.&rdquo;</div>
-    </div>
-  </div>
-
-  <div class="signal-box" style="margin-top:18px;">
-    <div class="signal-head">&#9608; THREE CERTAINTY CHECKPOINTS &mdash; BEFORE YOU ASK FOR THE ORDER</div>
-    <ul>
-      <li><strong>First Ten (Product):</strong> Does the client understand <em>why</em> gold is up 40% year-on-year in an environment where it should theoretically be under pressure? Can they articulate the nobody&rsquo;s-liability concept back to you? Do they understand the difference between the short-term geopolitical layer and the long-term structural foundation? If yes on all three, proceed.</li>
-      <li><strong>Second Ten (You):</strong> Have you demonstrated this week that you understand gold&rsquo;s mechanics better than the client? Have you pre-empted their objections before they raised them? Have you given them something they did not know before the call &mdash; the accusation audit, the layer vs foundation distinction, the Warsh paradox? The broker who teaches earns trust faster than the broker who pitches.</li>
-      <li><strong>Third Ten (Company):</strong> Physical gold investment requires clarity on custody, allocation, storage, and exit. If the client has any uncertainty about how their gold is held or how they access it, they will not commit regardless of how strong the first two tens are. Ask directly: &ldquo;Is there anything about how the gold is held and how you access it that isn&rsquo;t completely clear?&rdquo; Then address it before you ask for the order.</li>
-    </ul>
-  </div>
-
-  <div class="footer-bar">
-    <span>&#9608; DESK INTELLIGENCE + SPIN</span>
-    <span>GOLD &bull; W21 &bull; 2026</span>
-  </div>
-</section>
-
-<!-- ==================== TEACHING: NOBODY'S LIABILITY ==================== -->
-<section class="page">
-  <div class="masthead">
-    <div class="left">&#9608; EDUCATION</div>
-    <div class="middle">SALES TRAINING &mdash; ECONOMIC LITERACY</div>
-    <div class="right">PAGE 08 &#9608;</div>
-  </div>
-
-  <h3 class="section">TEACHING POINT &mdash; THE BALANCE SHEET OF THE GLOBAL FINANCIAL SYSTEM</h3>
-
-  <div class="teach">
-    <h4>Understanding What a Federal Reserve Balance Sheet Is &mdash; And Why Its Size Matters to Gold Owners</h4>
-    <p>The Federal Reserve&rsquo;s balance sheet is one of the most discussed and least understood concepts in modern finance. A broker who can explain it simply, accurately, and in terms of what it means for a client&rsquo;s capital will immediately differentiate themselves from the field. Here is the concept in full &mdash; study it, simplify it, deploy it.</p>
-    <ul>
-      <li><strong>What is the Fed balance sheet?</strong> The Federal Reserve&rsquo;s balance sheet is a record of the assets it owns and the liabilities it has issued. Its primary assets are US Treasury bonds and mortgage-backed securities &mdash; financial instruments it has purchased over time. Its primary liability is the money it has issued to purchase those assets: dollars in the financial system, and bank reserves held at the Fed. When the Fed buys assets, it creates money. When it sells or lets assets mature, it destroys money. The balance sheet is, in the simplest possible terms, a measure of how much money the Fed has put into the system.</li>
-      <li><strong>How did it get to $6.7 trillion?</strong> Before 2008, the Fed&rsquo;s balance sheet was approximately $900 billion &mdash; modest, conventional, and manageable. Then came the Global Financial Crisis. The Fed expanded to $2.3 trillion by 2010. By 2015 it was $4.5 trillion. The 2020 pandemic response pushed it to $9 trillion within months. Gradual reduction brought it to approximately $6.7 trillion today. Each expansion created money. Each dollar created dilutes the purchasing power of every existing dollar. That is the debasement mechanism.</li>
-      <li><strong>Why does Warsh want to reduce it?</strong> A larger balance sheet means more money in the financial system. More money chasing the same goods is one of the core drivers of inflation. Warsh believes the balance sheet&rsquo;s size distorts asset prices, suppresses natural interest rates, and creates the implicit assumption that the Fed will always rescue markets in a crisis. He wants to remove that assumption. The problem is that no one knows how large a balance sheet reduction the system can absorb before something breaks.</li>
-      <li><strong>The gold connection:</strong> Every phase of Fed balance sheet expansion has historically preceded a period of gold outperformance. The money created does not disappear when the Fed tries to remove it &mdash; it circulates, inflates assets, and eventually finds its way into the price level. Physical gold, which cannot be created by any central bank&rsquo;s decision, is the natural beneficiary of a system where the supply of paper is structurally expanding. Warsh&rsquo;s attempt to reverse that does not eliminate the consequence of what already happened. It simply raises the question of what comes next.</li>
-    </ul>
-  </div>
-
-  <div class="formula">  FED BALANCE SHEET EXPANSION &mdash; HISTORICAL CONTEXT:
-  Pre-GFC (2007):          ~$900 billion     (conventional, pre-crisis)
-  Post-GFC (2015):         ~$4.5 trillion    (first QE cycle &mdash; 5x expansion)
-  Post-COVID peak (2022):  ~$9.0 trillion    (emergency expansion &mdash; 10x pre-crisis)
-  Current (2026):          ~$6.7 trillion    (partial reduction &mdash; still 7x pre-crisis)
-
-  Warsh target:            Unknown, but significantly below $6.7T
-  Gold price 2007:         ~$800/oz
-  Gold price 2026:         ~$4,450/oz        (+456% over same period)
-
-  The money supply grew. The gold supply did not. The price adjusted accordingly.</div>
-
-  <div class="two-col">
-    <div class="pitch-thought">
-      <span class="tag">&#9608; HOW TO DELIVER THIS IN 60 SECONDS</span>
-      <p>&ldquo;Here is a number that puts everything in context. Before the financial crisis in 2008, the Federal Reserve had about $900 billion on its balance sheet. Today, after three rounds of emergency money creation, it sits at $6.7 trillion. That is 7 times larger. That money did not come from productivity or growth. It was created. Gold was $800 an ounce in 2007. Today it is around $4,450. The money supply grew by a factor of seven. The gold supply grew by almost nothing. The price adjusted. That arithmetic is not a forecast. It is recorded history.&rdquo;</p>
-    </div>
-    <div class="pitch-thought">
-      <span class="tag">&#9608; THE WARSH UNCERTAINTY FRAME</span>
-      <p>&ldquo;Warsh is attempting something that has never been done at this scale &mdash; shrinking a balance sheet that is 7 times larger than it was before the era of QE. There is no historical playbook for this. Financial markets are about to operate with less of a central bank safety net than they have had for eighteen years. In that environment, the question is not whether you want some exposure to an asset that has been used as a store of value for five thousand years. The question is how much.&rdquo;</p>
-    </div>
-  </div>
-
-  <div class="footer-bar">
-    <span>&#9608; TEACHING &mdash; FED BALANCE SHEET</span>
-    <span>GOLD &bull; W21 &bull; 2026</span>
-  </div>
-</section>
-
-<!-- ==================== WEEK AHEAD + DISCLOSURE ==================== -->
-<section class="page">
-  <div class="masthead">
-    <div class="left">&#9608; FORWARD LOOK</div>
-    <div class="middle">WEEK AHEAD &mdash; 26&ndash;31 MAY 2026</div>
-    <div class="right">PAGE 09 &#9608;</div>
-  </div>
-
-  <h3 class="section">WEEK AHEAD &mdash; WHAT TO WATCH</h3>
-
-  <div class="week-ahead">
+  <div class="signal-box">
+    <div class="signal-head">&#9608; THE GAP TABLE — WHERE INSTITUTIONS SEE GOLD VS. WHERE IT TRADES TODAY</div>
     <table>
-      <thead>
-        <tr><th>Date</th><th>Event</th><th>Gold Relevance</th><th>Priority</th></tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td class="date-col">WK 26 MAY</td>
-          <td><strong>US PCE Inflation Data (April)</strong><br>Fed&rsquo;s preferred inflation measure</td>
-          <td>PCE is the metric Warsh will reference when making rate decisions. A hot reading reinforces the hawkish narrative but also confirms the debasement argument. A soft reading could trigger a brief gold selloff as real yield expectations ease. Either way, use same-day as a call-opener: &ldquo;The inflation number the Fed actually watches came in this morning.&rdquo;</td>
-          <td class="high">HIGH</td>
-        </tr>
-        <tr>
-          <td class="date-col">WK 26 MAY</td>
-          <td><strong>Iran Deal Status</strong><br>One-page memo negotiations</td>
-          <td>A formal deal announcement would likely trigger a short-term gold selloff of 2&ndash;4% as geopolitical premium unwinds. Prepare clients in advance: &ldquo;If a deal is announced this week, gold will dip. That dip is the layer, not the foundation. The Moody&rsquo;s downgrade happened. The debt trajectory is unchanged. The dip is an entry point.&rdquo; Brief your clients before the event so they are not surprised by the move.</td>
-          <td class="high">HIGH</td>
-        </tr>
-        <tr>
-          <td class="date-col">WK 26 MAY</td>
-          <td><strong>Warsh Fed Communications</strong><br>First formal statements as Chair</td>
-          <td>Warsh is reportedly adopting a Greenspan-style approach to communication &mdash; less forward guidance, more deliberate ambiguity. Any public statement will be dissected for signals on the balance sheet reduction timeline and rate outlook. Prepare the response: whatever he says, the structural monetary backdrop is unchanged. Use any hawkish comments to reinforce the debasement pitch, and any softening to reinforce the safe-haven argument.</td>
-          <td style="color:#E97132; font-weight:700;">MEDIUM</td>
-        </tr>
-        <tr>
-          <td class="date-col">WK 26 MAY</td>
-          <td><strong>US Treasury Market Reaction</strong><br>Post-downgrade yield movements</td>
-          <td>Watch the 10-year Treasury yield and the dollar index. Continued dollar weakness supports gold. If yields spike further post-downgrade, real yields may rise and create a short-term gold headwind. Use either scenario to contextualise the long-term case: the short-term mechanism and the structural thesis are different animals.</td>
-          <td style="color:#E97132; font-weight:700;">MEDIUM</td>
-        </tr>
-        <tr>
-          <td class="date-col">ONGOING</td>
-          <td><strong>Central Bank Gold Purchases</strong><br>May monthly data</td>
-          <td>Central bank buying has exceeded 1,000 tonnes per year for three consecutive years. Any monthly data release confirming continued sovereign accumulation is the most credible social proof available for the gold thesis. The same institutions formally downgrading US debt are simultaneously buying gold. That alignment is the most powerful single fact in the entire sales conversation.</td>
-          <td class="high">HIGH</td>
-        </tr>
-      </tbody>
+      <tr><th>Institution</th><th>2026 Price Target</th><th>Current Price</th><th>Implied Upside</th><th>Basis</th></tr>
+      <tr><td>Goldman Sachs</td><td class="accent">$5,400</td><td>$4,216</td><td class="green">+28.1%</td><td>CB accumulation, debasement, real yield</td></tr>
+      <tr><td>JPMorgan</td><td class="accent">~$6,000</td><td>$4,216</td><td class="green">+42.3%</td><td>De-dollarisation, geopolitical premium</td></tr>
+      <tr><td>Morgan Stanley</td><td class="accent">$5,200</td><td>$4,216</td><td class="green">+23.3%</td><td>Dollar weakness, Fed path</td></tr>
+      <tr><td>UBS</td><td class="accent">$5,500</td><td>$4,216</td><td class="green">+30.4%</td><td>Structural demand shift, debasement</td></tr>
+      <tr><td>Bank of America</td><td class="accent">$6,000</td><td>$4,216</td><td class="green">+42.3%</td><td>Negative real yields, reserve reallocation</td></tr>
+    </table>
+    <p style="color:#888; font-size:8.5pt; margin-top:8px;">Note: Institutional targets as reported in research published during June 2026. Price targets are forward-looking estimates and not guarantees of future performance. Source: Goldman Sachs Research, JPMorgan Commodities, Morgan Stanley, UBS, Bank of America.</p>
+  </div>
+
+  <div class="analogy-box">
+    <div class="analogy-label">&#9608; ANALOGY FOR USE ON CALLS — THE SALE YOUR CLIENT NEVER SHOPS</div>
+    <p>Imagine the five best-informed buyers of a property — the agents who know every comparable sale, every planning permission, every flood risk — all independently valued that property at between £520,000 and £600,000. The property is currently listed at £421,000 because the previous owner took a personal financial hit and needed to sell into a nervous market. Would your client buy it at £421,000? Or would they wait until it traded at £520,000 to feel confident they were making the right decision? Gold is that property. The informed buyers have published their valuations. The price is below them. The question is timing, not direction.</p>
+  </div>
+
+  <h4 class="sub">PITCH #1 &nbsp;&mdash;&nbsp; THE INSTITUTIONAL MIRROR [ASPIRATION CLOSE]</h4>
+  <div class="pitch">
+    <div class="head">&#9608; PITCH TYPE: INSTITUTIONAL VALIDATION + ASPIRATION + LOGICAL CLOSE</div>
+    <div class="quote">"I want to share something with you that I think reframes the gold conversation completely at the moment. Five of the world's largest financial institutions — Goldman Sachs, JPMorgan, Morgan Stanley, UBS, Bank of America — all have price targets on gold between $5,200 and $6,000 for this year. Gold is currently trading at around $4,200. That means every single one of the most well-resourced research teams on the planet believes gold is 23 to 42 per cent undervalued at today's price. Now, these institutions are not sentimental about gold. They are not buying because it's shiny. They have quantitative models, macro frameworks, and teams of analysts looking at the same data we look at in this business. The question I would put to your clients is this: if the five best-informed buyers in the world all see meaningful upside from here — and the pullback from the January high has given us a 25% entry point discount — what additional information are they waiting for? Because by the time that information arrives, the entry price will have changed."</div>
+    <div class="reason"><span class="l">WHY THIS WORKS:</span> The "institutional mirror" technique removes the speculative framing from gold entirely. Your client is not following a hunch. They are following the research consensus of the world's most sophisticated capital allocators. Aspiration (being aligned with Goldman) replaces fear. The phrase "what additional information are they waiting for?" is the close — it makes inaction the irrational position without ever saying so directly.</div>
+  </div>
+
+  <h4 class="sub">PITCH #2 &nbsp;&mdash;&nbsp; THE ASYMMETRIC RISK FRAME [LOGIC + TIMING]</h4>
+  <div class="pitch">
+    <div class="head">&#9608; PITCH TYPE: ASYMMETRIC RISK + LOGICAL CERTAINTY + URGENCY</div>
+    <div class="quote">"There is a concept in investment that experienced portfolio managers think about constantly — asymmetric risk. It means: situations where the potential upside is materially larger than the potential downside. Right now, with gold at $4,216, you have Goldman Sachs saying $5,400, JPMorgan saying $6,000, and central banks around the world accumulating at the fastest rate in sixty years. The downside scenario — a rapid, unexpected return to strong real yields and a strong dollar — requires an inflation collapse and a policy reversal that the current data does not support. The upside scenario — negative real yields sustaining, dollar continuing to weaken, institutional targets being met — is supported by the current CPI print of 4.2%, by the Fed's rate position, and by sovereign demand that shows no sign of softening. In asymmetric risk situations, the decision is not whether you get it exactly right. It is whether the balance of evidence justifies action. I believe it does, and so does every major research desk with access to the same numbers."</div>
+    <div class="reason"><span class="l">WHY THIS WORKS:</span> Framing the decision as asymmetric risk analysis moves it from emotional to mathematical. Sophisticated clients respond to logic frames, not pressure. The structure — downside scenario requires multiple simultaneous reversals, upside requires only continuation of existing trends — is genuinely compelling because it is accurate. Deliver this with calm authority. Do not rush it. Let the mathematics land.</div>
+  </div>
+</section>
+
+<!-- PAGE 4 — STORY 2: NEGATIVE REAL YIELDS -->
+<section class="page">
+  <div class="masthead">
+    <span class="left">THE BROKERS EDGE &#9608;</span>
+    <span class="middle">GOLD WEEKLY &bull; W24 &bull; JUNE 2026</span>
+    <span class="right">STORY 02 &#9608;</span>
+  </div>
+
+  <h3 class="section">FOUNDATION: STORY 2 &nbsp;&mdash;&nbsp; NEGATIVE REAL YIELDS: GOLD'S MOST POWERFUL DRIVER IS ACTIVE</h3>
+  <p style="color:#888; font-size:9pt; letter-spacing:0.15em; text-transform:uppercase; margin-bottom:12px;">Source: Bureau of Labor Statistics, CPI Release June 10 2026 &bull; Federal Reserve Target Rate Data &bull; Historical Gold Performance Studies, WGC</p>
+
+  <p>On June 10, 2026, the Bureau of Labor Statistics released the US Consumer Price Index for May. The headline figure: <strong>4.2% year-on-year</strong>. Monthly gain of 0.5%. Core CPI (excluding food and energy): 2.9% year-on-year. Energy prices up 23.5% over the prior twelve months — the direct consequence of supply disruption in the Middle East and elevated production costs flowing through into consumer prices with the typical 3–6 month lag.</p>
+
+  <p>The Federal Reserve's target rate stands at 3.50–3.75%. Taking the midpoint — 3.625% — and subtracting the May CPI of 4.2% produces a <strong>real yield of negative 0.575%</strong>. This is not a technicality. This is the single most reliable mechanical driver of gold price appreciation in the historical record.</p>
+
+  <p>The logic is elegant and irrefutable. Gold pays no yield. It earns nothing sitting in a vault. Therefore — in an environment where cash and bonds offer real positive returns — gold carries an opportunity cost. Investors who hold gold instead of cash are foregoing a positive real return. That opportunity cost suppresses gold demand. But when real yields turn negative — when the "safe" alternative (cash, short-dated bonds) is guaranteed to lose purchasing power in real terms — the opportunity cost of holding gold disappears. Gold becomes the rational choice not because of sentiment, but because of mathematics. Historically, every sustained period of negative real US yields has produced sustained, multi-year gold outperformance.</p>
+
+  <div class="signal-box">
+    <div class="signal-head">&#9608; THE REAL YIELD CALCULATION — JUNE 2026</div>
+    <table>
+      <tr><th>Component</th><th>Rate</th><th>Note</th></tr>
+      <tr><td>Fed Funds Rate (midpoint)</td><td class="accent">3.625%</td><td>3.50–3.75% target range, June 2026</td></tr>
+      <tr><td>US CPI (May 2026, YoY)</td><td class="red">4.200%</td><td>BLS, released June 10 2026</td></tr>
+      <tr><td><strong>Real Yield (Cash)</strong></td><td class="red"><strong>−0.575%</strong></td><td>You lose purchasing power holding cash. Guaranteed.</td></tr>
+      <tr><td>Gold YoY Performance (2025)</td><td class="green">+27%</td><td>WGC data. Gold outperformed every G7 sovereign bond.</td></tr>
+      <tr><td>UK CPI (April 2026, YoY)</td><td class="red">~3.4%</td><td>ONS estimate. BOE rate 4.25%. UK real yield marginal and falling.</td></tr>
     </table>
   </div>
 
-  <div class="signal-box">
-    <div class="signal-head">&#9608; BROKER ACTION POINTS &mdash; W21 CLOSE</div>
-    <ul>
-      <li><strong>Lead with &ldquo;nobody&rsquo;s liability&rdquo; on every call.</strong> It is the strongest conceptual reframe this desk has had access to in months. It does not require charts, data, or specialist knowledge to land. It requires only that the broker delivers it with certainty and lets the silence after it do the work.</li>
-      <li><strong>Pre-empt the Iran objection before it is raised.</strong> Use the accusation audit: &ldquo;I know what you might be thinking &mdash; if a deal happens, gold loses a catalyst.&rdquo; Then answer it with the layer vs foundation distinction. Clients who see you pre-empt their objection trust you dramatically more than those who watch you react to it.</li>
-      <li><strong>Anchor the 40% figure early in every call.</strong> Whatever short-term concern the client raises, the 40% year-on-year return makes it look like noise. Establish the anchor first. Let everything else be measured against it.</li>
-      <li><strong>Prepare clients for a potential Iran deal dip.</strong> The broker who calls a client after a gold dip and says &ldquo;I told you this might happen, here is why it doesn&rsquo;t change anything&rdquo; builds the most durable client relationships in the business. Brief them now, before the event.</li>
-      <li><strong>Use the Fed balance sheet teaching point on sophisticated clients.</strong> The $900bn to $6.7T expansion mapped against gold&rsquo;s move from $800 to $4,450 is the most intellectually complete version of the debasement argument available. It takes sixty seconds to deliver and it is entirely verifiable. Those two qualities together are what make it persuasive to the highest-value, most analytical clients on the floor.</li>
-    </ul>
+  <div class="analogy-box">
+    <div class="analogy-label">&#9608; ANALOGY FOR USE ON CALLS — THE BROKEN ESCALATOR</div>
+    <p>Imagine two routes to the top floor of a building. Route A is an escalator — except the escalator is running backwards at 4.2%. You can walk forward on it (earn 3.625% in cash) but the mechanism is pulling you back faster than you're moving. You are guaranteed to end up lower than where you started. Route B is a staircase. It requires effort to understand. But it moves only upward and nobody is pulling you backwards. That is the real yield environment right now. The client who stays on the escalator (cash) is working harder than they realise and going nowhere. The client who takes the staircase (gold) is moving in only one structural direction.</p>
   </div>
 
-  <div class="warn">
-    <span class="tag">&#9608; Data Note</span>
-    Gold price data sourced from publicly available spot market sources. Fed balance sheet data from Federal Reserve H.4.1 statistical releases. Moody&rsquo;s, S&amp;P, and Fitch ratings from official agency publications. CPI and PCE data from BLS and BEA official releases. Historical return data from World Gold Council and publicly available sources. Past performance does not guarantee future results. All investment involves risk including loss of capital.
+  <h4 class="sub">PITCH #1 &nbsp;&mdash;&nbsp; THE REAL YIELD REVELATION</h4>
+  <div class="pitch">
+    <div class="head">&#9608; PITCH TYPE: MATHEMATICAL PROOF + PATTERN INTERRUPT + SOLUTION</div>
+    <div class="quote">"I want to do some quick arithmetic with you this morning, and I'd like you to bear with me because the conclusion is one that most people in your clients' position have never had explained to them. The Federal Reserve's interest rate sits at 3.625% — the midpoint of its current target. US inflation for May came in at 4.2%. That means the real return on holding US dollars — or anything denominated in US dollars that earns a cash rate — is negative. Minus 0.575% before we even discuss tax. Now, gold earns no yield. It pays no coupon. In an environment where cash delivers a positive real return, that is a cost of owning gold — you forego the positive real yield. But in an environment where cash delivers a negative real return, that cost disappears entirely. The moment real yields go negative, gold's primary competitive disadvantage is gone. And right now, real yields are negative. That is not an opinion. It is arithmetic. The question for your clients is whether they want their capital sitting in a currency that is mathematically guaranteed to lose purchasing power, or in an asset whose primary headwind just disappeared."</div>
+    <div class="reason"><span class="l">WHY THIS WORKS:</span> Arithmetic cannot be argued with. The real yield calculation is verifiable, live, and sourced from government data. "Mathematically guaranteed to lose purchasing power" is not emotive language — it is a literal description of negative real yields. Ending with a question rather than a statement forces the prospect to generate their own conclusion. The answer they arrive at is always more persuasive than the answer you give them.</div>
   </div>
 
-  <div class="disclosure">
-    <h4>&#9608; Important Disclosures</h4>
-    <p>This report is prepared for internal broker use only and does not constitute financial advice to clients or prospects. All market data is sourced from publicly available information and believed to be accurate at time of writing. Past performance does not guarantee future results. Physical gold investment involves risks including price volatility and storage costs. Brokers must comply with all applicable FCA requirements and firm compliance procedures. References to Federal Reserve policy, sovereign credit ratings, Iran negotiations, and macroeconomic data are drawn from publicly available sources. The Brokerage Report is an independent intelligence and sales training publication. &copy; 2026 The Brokerage Report. Unauthorised distribution outside your brokerage is prohibited.</p>
-  </div>
-
-  <div class="footer-bar">
-    <span>&#9608; WEEK AHEAD + DISCLOSURE</span>
-    <span>GOLD &bull; W21 &bull; 2026</span>
+  <h4 class="sub">PITCH #2 &nbsp;&mdash;&nbsp; THE HISTORICAL PATTERN CLOSE</h4>
+  <div class="pitch">
+    <div class="head">&#9608; PITCH TYPE: HISTORICAL PARALLEL + AUTHORITY + LOGICAL CERTAINTY</div>
+    <div class="quote">"There have been three distinct periods in modern history when real yields in the United States turned persistently negative. In the 1970s, inflation overtook rates following the oil shock. Gold rose from $35 to over $800 an ounce in the decade that followed. In the post-2008 period, the Fed held rates near zero while inflation ran above target. Gold rose from around $800 in 2008 to $1,900 by 2011. In 2020, rates hit zero while M2 money supply expanded 40%. Gold rose from $1,500 to $2,100. In every case, the mechanism was the same: negative real yields remove the opportunity cost of holding gold, and capital rotates toward the only monetary asset that governments cannot print. We are in the fourth period of negative real yields. The pattern has replicated three times with the same outcome. The question worth asking your clients is: what makes this time the exception?"</div>
+    <div class="reason"><span class="l">WHY THIS WORKS:</span> Historical patterns are powerful in sales because they shift the frame from prediction to precedent. The broker is not saying "I think gold will go up." They are saying "this pattern has produced this outcome three times, and the pattern is active again." The closing question — "what makes this time the exception?" — is nearly unanswerable. The prospect must argue against three decades of historical data. Most will not. And most who try will find themselves building the case for gold as they do.</div>
   </div>
 </section>
 
-<!-- ==================== BACK PAGE ==================== -->
+<!-- PAGE 5 — STORY 3: THE WARSH FOMC -->
+<section class="page">
+  <div class="masthead">
+    <span class="left">THE BROKERS EDGE &#9608;</span>
+    <span class="middle">GOLD WEEKLY &bull; W24 &bull; JUNE 2026</span>
+    <span class="right">STORY 03 &#9608;</span>
+  </div>
+
+  <h3 class="section">FOUNDATION: STORY 3 &nbsp;&mdash;&nbsp; THE WARSH PRESSER — GOLD WINS EITHER WAY</h3>
+  <p style="color:#888; font-size:9pt; letter-spacing:0.15em; text-transform:uppercase; margin-bottom:12px;">Source: FOMC Meeting Schedule, June 16–17 2026 &bull; Fed Funds Futures Pricing &bull; Financial Calendar Data</p>
+
+  <p>On June 16–17, Kevin Warsh chairs his first Federal Open Market Committee meeting as Federal Reserve Chair. This is one of the most-watched press conferences in years. Warsh built his reputation as a hawk — a proponent of tighter monetary policy, balance sheet reduction, and institutional credibility over short-term market comfort. The gold market partially priced this in during the pullback from $5,589 to $4,216. Markets are expecting him to hold rates at 3.50–3.75% and signal a cautious path forward.</p>
+
+  <p>Here is the setup that brokers need to understand — and that most clients will not have considered. <strong>There are two possible outcomes from the Warsh presser, and gold's structural case is intact under both of them.</strong></p>
+
+  <p><strong>Scenario A — Warsh is less hawkish than priced:</strong> This is the underappreciated scenario. Warsh is a former Fed governor who understands fiscal arithmetic. He knows that US interest payments now exceed the defence budget. He knows that at $36 trillion of debt, every 25 basis points of rate hike adds approximately $90 billion per year in debt service costs. A Chairman who understands debt dynamics may be more pragmatic on the rate path than his reputation implies. If his first presser reveals a more moderate trajectory than the market priced — even marginally — gold moves sharply upward from a 25% dip entry point. This is the high-probability surprise scenario.</p>
+
+  <p><strong>Scenario B — Warsh is exactly as hawkish as priced:</strong> Rate hold confirmed. Dot plot shows cautious easing path. Dollar firms slightly. Gold holds current levels or dips briefly. But the real yield environment — CPI at 4.2%, rate at 3.625% — is unchanged. The structural case for gold does not shift. CB accumulation does not reverse. The 23–42% gap between price and institutional targets does not close. The broker's client who enters at $4,216 in this scenario has positioned correctly for the medium-term, even if there is short-term noise around the presser.</p>
+
+  <p>The asymmetry is clear. In one scenario, gold rallies sharply. In the other, the entry price holds and the structural case continues to build. This is the definition of an asymmetric risk-reward setup — and it expires this Wednesday when the announcement is made.</p>
+
+  <div class="warn">
+    <span class="tag">&#9608; BROKER DESK ALERT — USE THIS ON CALLS THROUGH TUESDAY</span>
+    The FOMC announcement is Wednesday June 18 at 19:00 UK time. Between now and then, the client who has not yet positioned has a window to enter before the Warsh presser resolves the uncertainty. Once the announcement is made, the 'before the decision' entry point is gone permanently. You are not manufacturing urgency. The calendar is. Brief your desk: every client conversation between Sunday and Tuesday should include the Warsh window as the timing catalyst.
+  </div>
+
+  <h4 class="sub">PITCH — THE WARSH TWO-SCENARIO CLOSE</h4>
+  <div class="pitch">
+    <div class="head">&#9608; PITCH TYPE: LOGICAL CERTAINTY + TIMING URGENCY + ASYMMETRIC RISK</div>
+    <div class="quote">"I want to walk you through something that I think your client needs to understand before Wednesday this week. The new Federal Reserve chairman chairs his first interest rate meeting on Tuesday and Wednesday. The market has been pricing in a hawkish version of him — which is partly why gold pulled from its January high of $5,589 to around $4,200. That anticipated hawkishness is already in the price. Now consider the two possibilities. If he's less hawkish than the market expected — and there are good structural reasons why he might be, given the fiscal position of the US — gold corrects sharply upward from a 25% dip. If he's exactly as hawkish as priced, gold holds where it is, and the negative real yield environment that supports every institutional forecast of $5,200 to $6,000 remains completely intact. One scenario produces an upward move. The other scenario leaves the medium-term case unchanged. When one outcome is positive and the other is neutral, and the entry price gives you a 25% discount to where Goldman Sachs thinks this ends up — that is not a decision that should wait until after the announcement. The before-and-after prices will be different. I'd like to discuss what makes sense to do before Wednesday."</div>
+    <div class="reason"><span class="l">WHY THIS WORKS:</span> The two-scenario close removes the "I need to wait and see" objection by showing the client that both outcomes of the event they are waiting on support the thesis. Waiting is not a neutral act — it means potentially entering at a higher price after the dovish surprise. The calendar does the urgency work. The broker is not inventing pressure; they are accurately describing a real window that closes on a specific date and time.</div>
+  </div>
+</section>
+
+<!-- PAGE 6 — SENIOR INTELLIGENCE -->
+<section class="page">
+  <div class="masthead">
+    <span class="left">THE BROKERS EDGE &#9608;</span>
+    <span class="middle">GOLD WEEKLY &bull; W24 &bull; JUNE 2026</span>
+    <span class="right">SENIOR INTEL &#9608;</span>
+  </div>
+
+  <h3 class="section">SENIOR INTELLIGENCE &nbsp;&mdash;&nbsp; W24</h3>
+  <span class="senior-badge">&#9608; SENIOR BROKERS &amp; HNW CLIENTS ONLY</span>
+
+  <div class="senior-intro">
+    <p>Senior clients think in portfolio terms, not individual asset terms. They are not asking whether gold is a good idea. They are asking how gold fits into the context of everything else they hold — and whether the risk-adjusted case is compelling enough to warrant reallocation. These two stories are designed for that level of conversation: precise, data-led, and framed within the macro environment the client is actually navigating.</p>
+  </div>
+
+  <!-- SENIOR STORY 1 -->
+  <div class="intel-story">
+    <div class="is-header">
+      <div class="is-num">01</div>
+      <div class="is-meta">
+        <div class="is-tag">PORTFOLIO INTELLIGENCE &bull; GOLD VS EQUITIES &bull; VALUATION COMPARISON</div>
+        <div class="is-title">GOLD AT A 25% DISCOUNT. EQUITIES AT A 17-YEAR EXTREME. THE ROTATION CASE HAS NEVER BEEN CLEARER.</div>
+      </div>
+    </div>
+    <div class="is-body">
+      <div class="is-context">
+        <p>Two asset classes. Two very different valuation pictures. The S&amp;P 500 is up <strong>8.35% year to date</strong> on a Shiller CAPE ratio of approximately 36 times — a valuation extreme seen only twice in the last century, both times preceding multi-year corrections exceeding 50%. Gold is down 24.6% from its January all-time high, trading at approximately $4,216 per ounce, with every major institutional research desk sitting on a price target 23–42% above current price.</p>
+        <p>Sophisticated capital allocators do not evaluate assets in isolation. They evaluate them relative to alternatives. In the current environment, the relative case is stark. Equities are priced for perfection at historically extreme valuations, 17 years into an expansion, with concentration risk concentrated in seven technology companies representing 30% of the benchmark index. Gold is priced 25% below its institutional consensus target, with a mechanical tailwind (negative real yields) active for the first time since 2022, and with sovereign demand running at the highest rate in 60 years.</p>
+        <p>The historical case for rotating equity profits into gold at late-cycle peaks is well-documented. In 1999–2000, investors who rotated equity gains into gold ahead of the dot-com correction preserved wealth that equity-only holders lost. In 2007–2008, gold held its value through the financial crisis while the S&amp;P fell 57%. <strong>The broker's job in this conversation is not to predict when the equity cycle ends. It is to explain that a client who holds 100% of their wealth in assets that move together, at peak valuation, is taking a correlated risk that they may not be fully aware of.</strong></p>
+      </div>
+      <div class="is-pitch">
+        <div class="is-pitch-label">&#9608; SENIOR PITCH — PORTFOLIO REBALANCING CONVERSATION</div>
+        <div class="is-pitch-text">"I want to give you two numbers and ask you to sit with them for a moment. The S&P 500 is up 8.35% year to date, on a valuation multiple that has only been this high twice in the last hundred years. Gold is trading 25% below its January all-time high, with Goldman Sachs, JPMorgan, Morgan Stanley, UBS and Bank of America all sitting on targets between $5,200 and $6,000. One of these assets is priced for everything to go right and has been going up for seventeen years. The other is priced 25% below where the most informed buyers in the market think it should be, in an environment where the mechanical driver for its appreciation — negative real yields — has just switched back on. I'm not here to tell you to exit the equity market. I'm here to ask: does the balance of your current allocation reflect the balance of those two pictures? Most of the clients I work with who look at it this way find that it doesn't — and that's the conversation worth having today."</div>
+      </div>
+      <div class="is-source">S&amp;P 500 YTD data June 2026 &bull; Shiller CAPE Database (Yale) &bull; Institutional Price Targets, June 2026 &bull; Historical Gold Performance, WGC</div>
+    </div>
+  </div>
+
+  <!-- SENIOR STORY 2 -->
+  <div class="intel-story">
+    <div class="is-header">
+      <div class="is-num">02</div>
+      <div class="is-meta">
+        <div class="is-tag">MACRO INTELLIGENCE &bull; DEBT CYCLE &bull; MONETARY ARCHITECTURE</div>
+        <div class="is-title">THE $36 TRILLION FLOOR — WHY THE DEBT ARITHMETIC MAKES GOLD STRUCTURALLY INEVITABLE</div>
+      </div>
+    </div>
+    <div class="is-body">
+      <div class="is-context">
+        <p>When a government owes $36.2 trillion and the interest payments on that debt now exceed the entire defence budget, the policy choices available narrow dramatically. Raising rates to fight inflation aggressively increases debt service costs by approximately $90 billion per additional 25 basis points — at $36 trillion of outstanding debt. Cutting spending to reduce the deficit faces structural political resistance and social programme dependency that cannot be unwound quickly. Raising taxes dampens growth and therefore reduces the tax base. The fourth option — financial repression, deliberately keeping rates below inflation to gradually inflate away the real value of the debt — is the option that governments have historically exercised when the arithmetic becomes unavoidable.</p>
+        <p>Financial repression is precisely the environment that produces sustained, structural gold outperformance. By definition, financial repression requires negative real yields — the government keeps nominal rates below inflation so that the real value of its debt falls over time. Savers bear the cost. Holders of inflation-linked assets benefit. Gold, as the only globally recognised store of value that governments cannot print, is the primary beneficiary of a financially repressed monetary environment.</p>
+        <p>The important intelligence for senior clients is this: <strong>the debt arithmetic does not require any prediction about policy intent</strong>. It simply shows that the available options for managing US fiscal sustainability all lead to the same destination for gold — either negative real yields sustain (financial repression route), or a currency crisis forces a rethink of reserve asset composition (hard asset revaluation route). Both routes arrive at the same answer. This is not a political judgment. It is arithmetic.</p>
+      </div>
+      <div class="is-pitch">
+        <div class="is-pitch-label">&#9608; SENIOR PITCH — STRUCTURAL MACRO CONVERSATION</div>
+        <div class="is-pitch-text">"I want to show you a piece of arithmetic that I think is the most important context for understanding why every major institution has a gold target materially above current prices. The US government owes $36.2 trillion. Its interest payments now exceed the defence budget. Every quarter-point increase in interest rates adds roughly $90 billion per year to that debt service burden. Now ask yourself: in that environment, how aggressive can any Federal Reserve chairman realistically be about raising rates to fight inflation? The constraint is not philosophical. It is mathematical. And the escape valve — the mechanism that governments have historically used to manage unsustainable debt without explicit default — is financial repression. Keeping rates below inflation. Letting inflation gradually erode the real value of the debt. That is negative real yields by design. And negative real yields are gold's most powerful structural driver. The clients I work with who understand this are not betting that the world falls apart. They are making a straightforward observation about the available options — and positioning accordingly."</div>
+      </div>
+      <div class="is-source">US Congressional Budget Office Fiscal Data, 2026 &bull; US Treasury Debt Outstanding, June 2026 &bull; IMF Fiscal Monitor &bull; Historical Financial Repression Studies, Carmen Reinhart</div>
+    </div>
+  </div>
+</section>
+
+<!-- PAGE 7 — PSYCHOLOGY + OBJECTION CLINIC -->
+<section class="page">
+  <div class="masthead">
+    <span class="left">THE BROKERS EDGE &#9608;</span>
+    <span class="middle">GOLD WEEKLY &bull; W24 &bull; JUNE 2026</span>
+    <span class="right">OBJECTION CLINIC &#9608;</span>
+  </div>
+
+  <div class="psychology-box">
+    <div class="psy-head">&#9608; SALES PSYCHOLOGY W24: THE ASYMMETRIC RISK FRAME — WHEN MATHS DOES THE SELLING</div>
+    <p>The most powerful sales conversation in the gold market right now is not emotional. It is mathematical. Negative real yields. A 25% discount to institutional targets. Negative correlation to equities at peak valuation. Each of these is a verifiable number, not a prediction. The broker who delivers these numbers with calm authority — not as a pitch but as data — is operating at a level that most clients have never experienced from someone in this business.</p>
+    <p>The asymmetric risk frame works as follows: map out both scenarios (dovish Warsh / hawkish Warsh; rate cuts come / rate cuts delayed) and show that gold's case is supported in the majority of scenarios. When the client can see that the downside is limited (structural buyers provide a floor) and the upside is material (23–42% to institutional targets), the decision stops being about conviction and starts being about whether they can afford not to have exposure.</p>
+    <p><strong>The key shift in language:</strong> Stop asking whether they want to buy gold. Start asking what percentage of their portfolio they want to have working against them in a negative real yield environment. The client who frames it as "should I buy gold?" is making an emotional decision. The client who frames it as "how much of my wealth do I want in an asset that is mathematically guaranteed to lose purchasing power right now?" is making a mathematical one. Guide them to the second framing and the decision usually resolves itself.</p>
+    <p><strong>On hesitation:</strong> When a client says "I want to think about it," they are not saying no. They are saying they need more certainty. Your response: "Of course — and while you're thinking about it, the Warsh press conference is Wednesday. I'd rather you had the time to make a considered decision before that window closes than feel rushed after it. Would Tuesday morning work for a follow-up call?" You have acknowledged their need for space while anchoring a specific date before the catalyst event. That is not pressure. That is service.</p>
+  </div>
+
+  <h3 class="section">OBJECTION CLINIC &nbsp;&mdash;&nbsp; W24</h3>
+
+  <div class="objection-block">
+    <div class="obj-header">&#9608; OBJECTION 01 &mdash; "GOLD HAS ALREADY HAD ITS BIG RUN — I'VE MISSED IT"</div>
+    <div class="obj-client">"Gold hit $5,500 in January. It feels like I've already missed the move. I don't want to buy at the top."</div>
+    <div class="obj-response">
+      <p>"I understand that feeling completely — and I'd say this: you haven't missed the move. You've been handed a 25% discount on it. Gold is currently at $4,216. Goldman Sachs thinks it's worth $5,400. JPMorgan thinks it's worth $6,000. Every major financial institution has a target that sits materially above today's price. The January move to $5,589 was the market getting ahead of the structural case. The pullback is the market correcting that overextension. The structural drivers — central banks buying at 60-year highs, negative real yields, dollar weakening — those haven't changed. What's changed is the price. The client who bought at $5,589 in January was chasing the move. The client who buys at $4,216 today, with the institutional consensus above them, is positioning ahead of it. Those are very different decisions. Which one sounds more like a missed opportunity to you?"</p>
+    </div>
+    <div class="obj-mechanics">MECHANICS: Never agree that they've "missed it" — because they haven't. Reframe the pullback as a discount, not a warning. The closing question — "which one sounds more like a missed opportunity?" — forces the client to reconsider which scenario they're describing. The January buyer is the one who paid the higher price into momentum. The current buyer gets the institutional entry point. Let the client arrive at that conclusion themselves.</div>
+  </div>
+
+  <div class="objection-block">
+    <div class="obj-header">&#9608; OBJECTION 02 &mdash; "HIGHER RATES MEAN GOLD SHOULD FALL — ISN'T THE RATE ENVIRONMENT BAD FOR GOLD?"</div>
+    <div class="obj-client">"I've always been told that gold falls when interest rates are high. The Fed is at 3.625% — surely that's bad for gold?"</div>
+    <div class="obj-response">
+      <p>"That's one of the most important distinctions in the gold market and it's worth explaining properly. Gold's relationship is not with the nominal interest rate. It's with the real interest rate — the rate after you subtract inflation. The Federal Reserve's rate is 3.625%. US inflation for May just came in at 4.2%. That means the real yield is negative 0.575%. In other words, you're earning 3.625% in cash, but losing 4.2% of your purchasing power. The net result is a guaranteed real loss on cash. Now, gold earns zero — no yield, no coupon. In an environment where cash delivers a positive real return, that zero is a cost. But in an environment where cash delivers a negative real return, that zero is better than the alternative. The nominal rate being high is not gold's enemy. The nominal rate being lower than inflation is gold's best friend. And right now, it is. That is why every major bank has a target between $5,200 and $6,000 and central banks are buying at the fastest rate in sixty years."</p>
+    </div>
+    <div class="obj-mechanics">MECHANICS: This is a knowledge objection — the client has the right framework but is applying the wrong variable. Correct it without making them feel foolish: "That's one of the most important distinctions." Then explain the real yield mechanism clearly, sourced to live data. The moment they understand the distinction, the objection disappears permanently. This is the kind of teaching moment that turns a prospect into a long-term client — you gave them something they will carry for years.</div>
+  </div>
+
+  <div class="objection-block">
+    <div class="obj-header">&#9608; OBJECTION 03 &mdash; SENIOR &mdash; "I'M ALREADY IN EQUITIES AND THEY'RE PERFORMING — GOLD FEELS LIKE A STEP BACKWARDS"</div>
+    <div class="obj-client">"My portfolio is up this year. Equities are working. Gold feels like the trade you make when you've given up on the market. I haven't."</div>
+    <div class="obj-response">
+      <p>"I respect that — and I want to challenge one thing gently: gold is not the trade you make when you've given up on markets. Gold is the trade you make when you understand markets deeply enough to know where you are in the cycle. The investors who came through 2000–2002 and 2008–2009 with their wealth intact were not people who gave up on markets. They were people who understood valuation — who saw that at 36 times Shiller earnings, equities were priced for a perfect world, and that in every prior instance where equities traded at those levels, the correction was severe. They did not exit markets. They rebalanced. They took a portion of their equity gains and moved them into something uncorrelated. That is not a retreat from conviction. It is the highest form of it. The client who holds everything in equities at peak CAPE, 17 years into an expansion, is not displaying conviction in markets. They are displaying a failure to distinguish between an asset that has done well and an asset that is currently priced correctly. Those are different things. I'd like to discuss how that distinction applies to your portfolio today."</p>
+    </div>
+    <div class="obj-mechanics">MECHANICS: This objection is about identity — "I'm a market person, gold is for people who aren't." Reframe gold ownership as the most sophisticated, market-aware decision — not a retreat from markets but a response to valuation within them. The phrase "the highest form of conviction" is the turning point. You are not asking the client to abandon their identity. You are showing them that their identity — as an investor who understands markets — leads directly to the same conclusion you are presenting.</div>
+  </div>
+</section>
+
+<!-- PAGE 8 — WEEK AHEAD + BACK PAGE -->
+<section class="page">
+  <div class="masthead">
+    <span class="left">THE BROKERS EDGE &#9608;</span>
+    <span class="middle">GOLD WEEKLY &bull; W24 &bull; JUNE 2026</span>
+    <span class="right">WEEK AHEAD &#9608;</span>
+  </div>
+
+  <div class="week-ahead">
+    <h3 class="section">WEEK AHEAD &nbsp;&mdash;&nbsp; 15–20 JUNE 2026</h3>
+    <p style="color:#888; font-size:9pt; letter-spacing:0.14em; margin-bottom:8px;">THE MOST SIGNIFICANT WEEK FOR GOLD PRICING IN Q2 2026. BRIEF YOUR DESK BEFORE MONDAY.</p>
+    <table>
+      <tr><th>DATE</th><th>EVENT</th><th>GOLD IMPACT</th><th>BROKER ACTION</th></tr>
+      <tr>
+        <td class="date-col">MON 15 JUN</td>
+        <td>UK Labour Market Data (ONS)</td>
+        <td>Wages vs. inflation. If real wages negative: UK real yield story strengthens, GBP gold case builds.</td>
+        <td>Reference on Monday calls as supporting data for the UK client debasement argument.</td>
+      </tr>
+      <tr>
+        <td class="date-col high">TUE 17 JUN</td>
+        <td class="high">US CPI Print + FOMC Day 1</td>
+        <td class="high">CPI already printed at 4.2% but Tuesday is the build-up to Wednesday. Last client call window before the Warsh presser. Use the Warsh two-scenario pitch today.</td>
+        <td class="high">Every senior prospect call should happen today. Use the Warsh window close. This is the last clear opportunity to position before the announcement resolves the uncertainty.</td>
+      </tr>
+      <tr>
+        <td class="date-col high">WED 18 JUN</td>
+        <td class="high">&#9608; FOMC DECISION + WARSH FIRST PRESS CONFERENCE &mdash; 19:00 UK</td>
+        <td class="high">THE PIVOTAL EVENT OF THE WEEK. Rate hold expected. What matters: dot plot and Warsh's language on the rate path. Dovish surprise = sharp gold rerating. As-expected = structural case unchanged.</td>
+        <td class="high">Watch the press conference. Have your briefing note ready for Thursday morning calls. Whatever Warsh says — translate it into what it means for real yields and gold. Call your prospects Thursday with the live update.</td>
+      </tr>
+      <tr>
+        <td class="date-col">THU 19 JUN</td>
+        <td>UK CPI May Print (ONS)</td>
+        <td>UK real yield calculation. If CPI surprises higher, BOE rate cut case softens — but the negative UK real yield story for GBP savers strengthens regardless.</td>
+        <td>Use to reinforce Story 2 with UK-specific numbers for British client conversations.</td>
+      </tr>
+      <tr>
+        <td class="date-col">FRI 20 JUN</td>
+        <td>UK Retail Sales (ONS)</td>
+        <td>Consumer demand signal. Strong retail = cycle resilient = premium physical demand for gold holds up.</td>
+        <td>Background context. Monitor but not primary driver this week.</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="warn">
+    <span class="tag">&#9608; DESK INTELLIGENCE — THE WEEK IN PLAIN ENGLISH</span>
+    This is the week that sets the gold narrative for Q3. The Warsh press conference on Wednesday will produce a market reaction regardless of what he says. If you haven't had the Warsh two-scenario conversation with your key prospects by Tuesday evening, you will be calling them after the market has already moved. Before = intelligence. After = following the news. Your desk should be having gold conversations on Monday and Tuesday with urgency grounded in the calendar, not in artificial sales pressure. The clock is real. The window is specific. Use it.
+  </div>
+
+  <div class="broker-self-check">
+    <div class="bsc-title">&#9608; BROKER SELF-CHECK &mdash; W24</div>
+    <p><strong>&#9608; Do you know the current gold spot price? ($4,216 approx, June 12 close)</strong></p>
+    <p><strong>&#9608; Can you name the January ATH and the pullback percentage? ($5,589 ATH, 24.6% pullback)</strong></p>
+    <p><strong>&#9608; Do you know what all five major bank targets are? ($5,200–$6,000 range — Goldman, JPM, MS, UBS, BofA)</strong></p>
+    <p><strong>&#9608; Can you explain the real yield calculation in under 60 seconds? (3.625% rate − 4.2% CPI = −0.575% real yield)</strong></p>
+    <p><strong>&#9608; Do you know the two Warsh scenarios and which outcome favours gold? (Both do — see Story 3)</strong></p>
+    <p><strong>&#9608; Can you handle the "I've missed the move" objection without hesitation? (25% discount to institutional targets)</strong></p>
+    <p>Know all six before Monday morning. The Warsh press conference is Wednesday. Every hour between now and Tuesday afternoon is a window to position a client. After Wednesday, the window has passed and you are at the post-announcement price. That is the difference between a broker who creates value for their clients and a broker who reports events to them.</p>
+  </div>
+
+  <div class="disclosure">
+    <h4>&#9608; DISCLOSURE &amp; IMPORTANT INFORMATION</h4>
+    <p>This report is produced for professional broker use only and does not constitute financial advice. Gold price data sourced from spot market closes as of June 12, 2026. CPI data sourced from BLS June 10, 2026 release. Federal Reserve rate data from FOMC statements. Institutional price targets sourced from published research reports by Goldman Sachs, JPMorgan, Morgan Stanley, UBS, and Bank of America. Central bank demand data from World Gold Council Q1 2026 Demand Trends. Shiller CAPE from Yale CAPE database. All institutional targets are research estimates and not guarantees. Historical patterns referenced for educational purposes and are not predictive. Not for client distribution. Professional broker use only.</p>
+  </div>
+</section>
+
+<!-- BACK PAGE -->
 <section class="page">
   <div class="back-page">
-    <div class="brand">THE BROKERS TERMINAL</div>
-    <div style="color:#E97132; font-size:9pt; letter-spacing:0.3em; margin-bottom:28px;">&#9608; &#9608; &#9608;</div>
-    <div class="disc">For professional use only. This publication is prepared for internal broker use and does not constitute financial advice. Not for distribution to clients or prospects. All investment involves risk. Physical gold investment is subject to price volatility and associated costs.</div>
-    <div style="color:#333; font-size:8pt; letter-spacing:0.22em; margin-top:28px;">THE BROKERAGE REPORT &copy; 2026 &bull; WWW.THEBROKERSTERMINAL.COM</div>
+    <div class="brand">THE BROKERS EDGE</div>
+    <p style="color:#E97132; letter-spacing:0.32em; font-size:10pt; margin-bottom:30px;">GOLD BULLION INVESTMENT INTELLIGENCE</p>
+    <p style="color:#555; font-size:9pt; letter-spacing:0.2em; margin-bottom:8px;">WEEK 24 &nbsp;&bull;&nbsp; 14 JUNE 2026</p>
+    <p style="color:#555; font-size:9pt; letter-spacing:0.2em; margin-bottom:30px;">INTERNAL USE ONLY &nbsp;&bull;&nbsp; NOT FOR CLIENT DISTRIBUTION</p>
+    <div style="width:60px; height:1px; background:#E97132; margin:0 auto 30px auto;"></div>
+    <div class="disc">This document is produced for the exclusive use of subscribing brokerage professionals. It contains global macro intelligence, institutional research synthesis, and sales training frameworks to support professional client conversations. Nothing in this document constitutes financial advice. Gold price data may move between publication and use — always verify current spot price before quoting to clients. Brokers are responsible for ensuring all client communications comply with FCA regulations.</div>
+    <div style="margin-top:40px; color:#333; font-size:8pt; letter-spacing:0.3em;">&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</div>
   </div>
 </section>
 
