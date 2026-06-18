@@ -1,5 +1,11 @@
 /* THE BROKERS TERMINAL — SITE JS */
 
+// Capture affiliate referral code from ?ref= on any page and persist it
+(function () {
+  var ref = new URLSearchParams(window.location.search).get('ref');
+  if (ref) localStorage.setItem('referralCode', ref.toUpperCase().trim());
+}());
+
 (function () {
   'use strict';
 

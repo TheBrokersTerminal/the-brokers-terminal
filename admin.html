@@ -235,6 +235,7 @@
     <button class="admin-tab" data-tab="subscribers">SUBSCRIBERS</button>
     <button class="admin-tab" data-tab="firms">FIRMS</button>
     <button class="admin-tab" data-tab="activity">ACTIVITY</button>
+    <button class="admin-tab" data-tab="affiliates">AFFILIATES</button>
     <button class="admin-tab" data-tab="create-account">+ CREATE ACCOUNT</button>
   </div>
 
@@ -568,6 +569,48 @@
       </div>
     </div>
 
+    <!-- ═══════════ AFFILIATES ════════════════════════════════════ -->
+    <div class="admin-section" id="tab-affiliates">
+      <div class="admin-section-label">▸ AFFILIATE SIGNUPS <span id="affiliates-count"></span></div>
+      <p style="color:var(--text-faint);font-size:11px;letter-spacing:0.12em;margin-bottom:20px;">Each row is a subscriber who signed up via an affiliate link (<code style="color:var(--accent);">?ref=CODE</code>). Share links like: <strong style="color:var(--text);">thebrokersterminal.com/pricing.html?ref=JSMITH</strong></p>
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>CODE</th>
+              <th>FIRM / SUBSCRIBER</th>
+              <th>PLAN</th>
+              <th>ACCESS</th>
+              <th>STATUS</th>
+              <th>SIGNED UP</th>
+            </tr>
+          </thead>
+          <tbody id="affiliates-tbody">
+            <tr><td colspan="6" style="text-align:center;color:var(--text-faint);padding:32px;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;">LOADING...</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="margin-top:24px;">
+        <div class="admin-section-label">▸ SUMMARY BY CODE</div>
+        <div class="admin-table-wrap" style="margin-top:12px;">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>CODE</th>
+                <th>TOTAL SIGNUPS</th>
+                <th>INDIVIDUAL</th>
+                <th>CORPORATE</th>
+                <th>ACTIVE</th>
+              </tr>
+            </thead>
+            <tbody id="affiliates-summary-tbody">
+              <tr><td colspan="5" style="text-align:center;color:var(--text-faint);padding:32px;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;">LOADING...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
     <!-- ═══════════ CREATE ACCOUNT ═══════════════════════════════ -->
     <div class="admin-section" id="tab-create-account">
       <div class="section-header">
@@ -684,6 +727,7 @@
       var tabName = this.getAttribute('data-tab');
       document.getElementById('tab-' + tabName).classList.add('active');
       if (tabName === 'activity') loadActivity();
+      if (tabName === 'affiliates') loadAffiliates();
     });
   });
 
@@ -1398,6 +1442,76 @@
 
     } catch (err) {
       alert('Error: ' + err.message);
+    }
+  }
+
+  // ══ AFFILIATES ══════════════════════════════════════════════
+  async function loadAffiliates() {
+    try {
+      var { data: firms, error } = await supabaseAdmin
+        .from('firms')
+        .select('company_name, subscription_type, status, access, referral_code, created_at')
+        .not('referral_code', 'is', null)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      var tbody  = document.getElementById('affiliates-tbody');
+      var stbody = document.getElementById('affiliates-summary-tbody');
+
+      if (!firms || !firms.length) {
+        var empty = '<tr><td colspan="6" style="text-align:center;color:var(--text-faint);padding:32px;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;">NO AFFILIATE SIGNUPS YET</td></tr>';
+        tbody.innerHTML  = empty.replace('colspan="6"', 'colspan="6"');
+        stbody.innerHTML = empty.replace('colspan="6"', 'colspan="5"');
+        document.getElementById('affiliates-count').textContent = '';
+        return;
+      }
+
+      document.getElementById('affiliates-count').textContent = firms.length + ' SIGNUP' + (firms.length !== 1 ? 'S' : '');
+
+      tbody.innerHTML = firms.map(function (f) {
+        var date   = new Date(f.created_at).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' }).toUpperCase();
+        var plan   = (f.subscription_type || '').toUpperCase();
+        var access = (f.access || 'both').toUpperCase();
+        var status = f.status === 'active'
+          ? '<span class="status-active">ACTIVE</span>'
+          : '<span class="status-inactive">' + (f.status || 'UNKNOWN').toUpperCase() + '</span>';
+        return '<tr>'
+          + '<td style="color:var(--accent);font-weight:700;">' + f.referral_code + '</td>'
+          + '<td>' + (f.company_name || '—') + '</td>'
+          + '<td>' + plan + '</td>'
+          + '<td>' + access + '</td>'
+          + '<td>' + status + '</td>'
+          + '<td style="color:var(--text-faint)">' + date + '</td>'
+          + '</tr>';
+      }).join('');
+
+      // Summary by code
+      var byCode = {};
+      firms.forEach(function (f) {
+        var code = f.referral_code;
+        if (!byCode[code]) byCode[code] = { total: 0, individual: 0, corporate: 0, active: 0 };
+        byCode[code].total++;
+        if (f.subscription_type === 'individual') byCode[code].individual++;
+        if (f.subscription_type === 'corporate')  byCode[code].corporate++;
+        if (f.status === 'active') byCode[code].active++;
+      });
+
+      stbody.innerHTML = Object.entries(byCode).map(function (entry) {
+        var code = entry[0], s = entry[1];
+        return '<tr>'
+          + '<td style="color:var(--accent);font-weight:700;">' + code + '</td>'
+          + '<td>' + s.total + '</td>'
+          + '<td>' + s.individual + '</td>'
+          + '<td>' + s.corporate + '</td>'
+          + '<td><span class="status-active">' + s.active + ' ACTIVE</span></td>'
+          + '</tr>';
+      }).join('');
+
+    } catch (err) {
+      console.error('Affiliates error:', err);
+      document.getElementById('affiliates-tbody').innerHTML =
+        '<tr><td colspan="6" style="text-align:center;color:#f66;padding:20px;font-size:10px;">ERROR LOADING — ' + err.message + '</td></tr>';
     }
   }
 

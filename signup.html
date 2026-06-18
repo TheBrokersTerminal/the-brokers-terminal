@@ -475,8 +475,11 @@
             throw new Error('Your subscription is not active. Please contact desk@thebrokersterminal.com');
           }
 
-          // Update firm access to chosen asset
-          await supabase.from('firms').update({ access: selectedAsset }).eq('id', existingIndFirm.id);
+          // Update firm access to chosen asset (attach referral code if present)
+          var indUpdate = { access: selectedAsset };
+          var indRef = localStorage.getItem('referralCode');
+          if (indRef) indUpdate.referral_code = indRef;
+          await supabase.from('firms').update(indUpdate).eq('id', existingIndFirm.id);
 
           firmId = existingIndFirm.id;
 
@@ -509,8 +512,11 @@
             throw new Error('Your firm subscription is not active. Please contact desk@thebrokersterminal.com');
           }
 
-          // Set firm access to chosen asset (first sign-up sets it for the whole firm)
-          await supabase.from('firms').update({ access: selectedAsset }).eq('id', existingFirm.id);
+          // Set firm access to chosen asset (first sign-up sets it for the whole firm; attach referral code if present)
+          var corpUpdate = { access: selectedAsset };
+          var corpRef = localStorage.getItem('referralCode');
+          if (corpRef) corpUpdate.referral_code = corpRef;
+          await supabase.from('firms').update(corpUpdate).eq('id', existingFirm.id);
 
           firmId = existingFirm.id;
 
@@ -572,6 +578,7 @@
         localStorage.setItem('sessionId', sessionId);
         localStorage.setItem('firmId', firmId);
         localStorage.setItem('userEmail', email);
+        localStorage.removeItem('referralCode');
 
         await supabase.from('users').update({ current_session_id: sessionId }).eq('email', email);
 
