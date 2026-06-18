@@ -76,12 +76,12 @@ serve(async (req) => {
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
   try {
-    // ─── SUBSCRIPTION ACTIVATED / TRIAL STARTED ──────────────────
-    if (event.type === "customer.subscription.created" || event.type === "customer.subscription.updated") {
+    // ─── SUBSCRIPTION CREATED — new firm setup ───────────────────
+    if (event.type === "customer.subscription.created") {
       const subscription = event.data.object;
       const customerId = subscription.customer;
       const subscriptionId = subscription.id;
-      const subStatus = subscription.status; // active, trialing, past_due, canceled, etc.
+      const subStatus = subscription.status;
 
       const email = await getCustomerEmail(customerId);
       if (!email) {
@@ -113,10 +113,10 @@ serve(async (req) => {
           .maybeSingle();
 
         if (existing) {
+          // Firm already exists — only update status, never overwrite access
           await supabase.from("firms").update({
             status: firmStatus,
             stripe_subscription_id: subscriptionId,
-            access: desk,
           }).eq("id", existing.id);
         } else {
           await supabase.from("firms").insert([{
@@ -141,11 +141,11 @@ serve(async (req) => {
           .maybeSingle();
 
         if (existing) {
+          // Firm already exists — only update status, never overwrite access
           await supabase.from("firms").update({
             status: firmStatus,
             stripe_customer_id: customerId,
             stripe_subscription_id: subscriptionId,
-            access: desk,
             updated_at: new Date().toISOString(),
           }).eq("id", existing.id);
         } else {
@@ -161,6 +161,23 @@ serve(async (req) => {
           }]);
         }
       }
+    }
+
+    // ─── SUBSCRIPTION UPDATED — status changes only, never touch access ─
+    if (event.type === "customer.subscription.updated") {
+      const subscription = event.data.object;
+      const customerId = subscription.customer;
+      const subscriptionId = subscription.id;
+      const subStatus = subscription.status;
+
+      const isActive = ["active", "trialing"].includes(subStatus);
+      const firmStatus = isActive ? "active" : "inactive";
+
+      await supabase.from("firms").update({
+        status: firmStatus,
+        stripe_subscription_id: subscriptionId,
+        updated_at: new Date().toISOString(),
+      }).eq("stripe_customer_id", customerId);
     }
 
     // ─── CHECKOUT COMPLETED — set correct desk from client_reference_id ─
