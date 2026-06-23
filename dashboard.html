@@ -883,8 +883,7 @@
           injected = MOBILE_REPORT_CSS + html;
         }
         if (!injected.includes('name="viewport"')) {
-          injected = injected.replace('<head>
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg">', '<head><meta name="viewport" content="width=device-width, initial-scale=1.0">');
+          injected = injected.replace('<head>', '<head><meta name="viewport" content="width=device-width, initial-scale=1.0">');
         }
         var iframe = document.getElementById('report-iframe');
         iframe.srcdoc = injected;
