@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en-GB">
 <head>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>THE BROKERS TERMINAL — Request Access</title>
@@ -264,7 +265,8 @@
             localStorage.setItem('sessionId', sessionId);
             localStorage.setItem('firmId', firm.id);
             localStorage.setItem('userEmail', userEmail);
-            await supabase.from('users').update({ current_session_id: sessionId }).eq('email', userEmail);
+            await supabase.from('users').update({ current_session_id: sessionId, last_login_at: new Date().toISOString() }).eq('email', userEmail);
+            supabase.from('activity_log').insert({ user_email: userEmail, firm_id: firm.id, action: 'login' }).then(function(){}).catch(function(){});
           }
 
           document.querySelector('.form-title').textContent = '█ YOU\'RE IN';
@@ -614,7 +616,8 @@
         localStorage.setItem('userEmail', email);
         localStorage.removeItem('referralCode');
 
-        await supabase.from('users').update({ current_session_id: sessionId }).eq('email', email);
+        await supabase.from('users').update({ current_session_id: sessionId, last_login_at: new Date().toISOString() }).eq('email', email);
+        supabase.from('activity_log').insert({ user_email: email, firm_id: firmId, action: 'login' }).then(function(){}).catch(function(){});
 
         submitBtn.textContent = '✓ ACCESS GRANTED — ENTERING THE DESK...';
         setTimeout(function () { window.location.href = 'dashboard.html'; }, 800);

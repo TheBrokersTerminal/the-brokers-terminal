@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en-GB">
 <head>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>THE BROKERS TERMINAL — Admin</title>
@@ -1002,12 +1003,13 @@
           ? '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#4CAF50;box-shadow:0 0 5px #4CAF50;margin-right:8px;"></span>'
           : '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#444;margin-right:8px;"></span>';
         var lastSeenText = 'Never';
-        if (u.last_seen) {
-          var diff = now - new Date(u.last_seen);
+        var lastLoginTs = u.last_login_at || u.last_seen;
+        if (lastLoginTs) {
+          var diff = now - new Date(lastLoginTs);
           lastSeenText = diff < 60000 ? 'Just now'
             : diff < 3600000 ? Math.floor(diff/60000) + 'm ago'
             : diff < 86400000 ? Math.floor(diff/3600000) + 'h ago'
-            : new Date(u.last_seen).toLocaleDateString('en-GB', {day:'2-digit',month:'short'}).toUpperCase();
+            : new Date(lastLoginTs).toLocaleDateString('en-GB', {day:'2-digit',month:'short'}).toUpperCase();
         }
         var firmStatus = u.firms ? u.firms.status : 'inactive';
         var statusHtml = isRemoved
