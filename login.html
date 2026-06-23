@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en-GB">
 <head>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>THE BROKERS TERMINAL — Subscriber Login</title>
@@ -189,7 +190,7 @@
 
         // Write session ID to database — invalidates all other active sessions
         await supabase.from('users')
-          .update({ current_session_id: sessionId })
+          .update({ current_session_id: sessionId, last_login_at: new Date().toISOString() })
           .eq('email', userEmail);
 
         // Log login activity
