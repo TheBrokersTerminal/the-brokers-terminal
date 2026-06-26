@@ -1022,8 +1022,15 @@
         var safeEmail = u.email.replace(/'/g,"\\'");
         var safeName  = fullName.replace(/'/g,"\\'");
 
+        var isSuspended = firmStatus === 'inactive' && !isRemoved;
+        var suspendBtn = !isRemoved
+          ? (isSuspended
+              ? '<button class="btn btn-sm" onclick="toggleSuspend(\'' + u.firm_id + '\',\'reinstate\')" style="font-size:9px;color:#4CAF50;border-color:#4CAF50;">REINSTATE</button>'
+              : '<button class="btn btn-sm" onclick="toggleSuspend(\'' + u.firm_id + '\',\'suspend\')" style="font-size:9px;color:#E97132;border-color:#E97132;">SUSPEND</button>')
+          : '';
+
         html +=
-          '<tr id="user-row-' + u.id + '"' + (isRemoved ? ' style="opacity:0.45;"' : '') + '>' +
+          '<tr id="user-row-' + u.id + '"' + (isRemoved ? ' style="opacity:0.45;"' : isSuspended ? ' style="opacity:0.6;"' : '') + '>' +
             '<td>' + dot + '<span style="font-weight:600;color:var(--text);" id="user-name-cell-' + u.id + '">' + fullName + '</span></td>' +
             '<td style="color:var(--text-muted);">' + u.email + '</td>' +
             '<td><span class="badge-type">' + plan + '</span></td>' +
@@ -1032,6 +1039,7 @@
             '<td>' + statusHtml + '</td>' +
             '<td><div style="display:flex;gap:6px;">' +
               '<button class="btn btn-sm" onclick="editUserName(\'' + u.id + '\',\'' + safeFirst + '\',\'' + safeLast + '\',\'' + safeEmail + '\')" style="font-size:9px;">EDIT</button>' +
+              suspendBtn +
               '<button class="btn btn-sm btn-danger" onclick="deleteUser(\'' + u.id + '\',\'' + safeEmail + '\',\'' + safeName + '\')" style="font-size:9px;">DELETE</button>' +
             '</div></td>' +
           '</tr>';
@@ -1362,6 +1370,19 @@
     } catch (err) {
       alert('Error: ' + err.message);
     }
+  }
+
+  async function toggleSuspend(firmId, action) {
+    var label = action === 'suspend' ? 'SUSPEND' : 'REINSTATE';
+    if (!confirm(label + ' this user?\n\n' + (action === 'suspend' ? 'They will be locked out immediately but their account will be kept.' : 'They will regain access immediately.'))) return;
+    var newStatus = action === 'suspend' ? 'inactive' : 'active';
+    var { error } = await supabaseAdmin.from('firms').update({ status: newStatus }).eq('id', firmId);
+    if (error) { alert('Error: ' + error.message); return; }
+    if (action === 'suspend') {
+      // Invalidate JWT tokens server-side — kicks anyone currently logged in immediately
+      await supabaseAdmin.functions.invoke('suspend-firm', { body: { firm_id: firmId } });
+    }
+    await loadSubscribers();
   }
 
   async function deleteUser(userId, email, fullName) {

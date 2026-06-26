@@ -940,6 +940,14 @@
     btn.textContent = '↗ OPEN IN NEW TAB'; btn.disabled = false;
   }
 
+  /* ── Force sign-out listener — handles server-side JWT invalidation ── */
+  supabase.auth.onAuthStateChange(function (event) {
+    if (event === 'SIGNED_OUT') {
+      localStorage.clear();
+      window.location.href = 'login.html';
+    }
+  });
+
   /* ── Auth Check ────────────────────────────────────────────── */
   (async function () {
     const { data: { session } } = await supabase.auth.getSession();
@@ -1263,34 +1271,51 @@
 
     // ── Session guard: kick out if another device logs in ────────
     var storedSessionId = localStorage.getItem('sessionId');
-    if (storedSessionId) {
-      setInterval(async function () {
-        try {
-          var { data: sessionCheck } = await supabase
-            .from('users')
-            .select('current_session_id')
-            .eq('email', userEmail)
-            .single();
+    setInterval(async function () {
+      try {
+        var { data: sessionCheck } = await supabase
+          .from('users')
+          .select('current_session_id')
+          .eq('email', userEmail)
+          .single();
 
-          if (sessionCheck && sessionCheck.current_session_id !== storedSessionId) {
-            await supabase.auth.signOut();
-            localStorage.clear();
-            window.location.href = 'login.html?reason=session';
-          }
-        } catch (e) {}
-      }, 30000);
-    }
+        if (sessionCheck && storedSessionId && sessionCheck.current_session_id !== storedSessionId) {
+          await supabase.auth.signOut();
+          localStorage.clear();
+          window.location.href = 'login.html?reason=session';
+        }
+      } catch (e) {}
+    }, 30000);
 
-    // ── Presence ping: update last_seen every 30 seconds ─────────
+    // ── Presence ping: update last_seen + verify firm still active ──
     async function pingPresence() {
       try {
         await supabase.from('users')
           .update({ last_seen: new Date().toISOString() })
           .eq('email', userEmail);
       } catch (e) {}
+      try {
+        var { data: uRow } = await supabase
+          .from('users')
+          .select('firm_id')
+          .eq('email', userEmail)
+          .single();
+        if (uRow && uRow.firm_id) {
+          var { data: firmCheck } = await supabase
+            .from('firms')
+            .select('status')
+            .eq('id', uRow.firm_id)
+            .single();
+          if (firmCheck && firmCheck.status !== 'active') {
+            await supabase.auth.signOut();
+            localStorage.clear();
+            window.location.href = 'login.html?reason=inactive';
+          }
+        }
+      } catch (e) {}
     }
     pingPresence();
-    setInterval(pingPresence, 30000);
+    setInterval(pingPresence, 15000);
 
     await loadReportsFromDatabase();
   })();
