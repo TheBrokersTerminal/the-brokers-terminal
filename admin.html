@@ -504,10 +504,11 @@
               <th>STATUS</th>
               <th>STRIPE ID</th>
               <th>CREATED</th>
+              <th></th>
             </tr>
           </thead>
           <tbody id="firms-tbody">
-            <tr class="loading-row"><td colspan="7">LOADING FIRMS...</td></tr>
+            <tr class="loading-row"><td colspan="9">LOADING FIRMS...</td></tr>
           </tbody>
         </table>
       </div>
@@ -1202,7 +1203,10 @@
         <td>${statusHtml}</td>
         <td>${stripeId}</td>
         <td style="color:var(--text-muted)">${created}</td>
-        <td><button class="btn btn-sm btn-danger" onclick="deleteFirm('${f.id}', '${(f.company_name||'').replace(/'/g,"\\'")}', '${f.domain||''}')">DELETE</button></td>
+        <td style="white-space:nowrap;">
+        <button class="btn btn-sm" onclick="openEditFirm('${f.id}')" style="font-size:9px;margin-right:4px;">EDIT</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteFirm('${f.id}', '${(f.company_name||'').replace(/'/g,"\\'")}', '${f.domain||''}')">DELETE</button>
+      </td>
       </tr>
       <tr id="firm-members-row-${f.id}" style="display:none;">
         <td colspan="9" style="padding:0; background:var(--bg-deep);">
@@ -1909,6 +1913,139 @@
     }
   }
 
+
+  // ══ EDIT FIRM MODAL ══════════════════════════════════════════
+  var _editFirmId = null;
+
+  function openEditFirm(firmId) {
+    var firm = allFirms.find(function(f) { return f.id === firmId; });
+    if (!firm) return;
+    _editFirmId = firmId;
+
+    document.getElementById('ef-company').value      = firm.company_name || '';
+    document.getElementById('ef-domain').value       = firm.domain || '';
+    document.getElementById('ef-plan').value         = firm.subscription_type || 'demo';
+    document.getElementById('ef-max-users').value    = firm.max_users || '';
+    document.getElementById('ef-stripe-id').value    = firm.stripe_customer_id || '';
+    document.getElementById('ef-status').value       = firm.status || 'active';
+    document.getElementById('ef-access').value       = firm.access || 'both';
+    document.getElementById('ef-error').textContent  = '';
+
+    document.getElementById('edit-firm-modal').style.display = 'flex';
+  }
+
+  function closeEditFirm() {
+    document.getElementById('edit-firm-modal').style.display = 'none';
+    _editFirmId = null;
+  }
+
+  async function saveEditFirm() {
+    if (!_editFirmId) return;
+    var btn = document.getElementById('ef-save-btn');
+    btn.disabled = true;
+    btn.textContent = 'SAVING…';
+    document.getElementById('ef-error').textContent = '';
+
+    var updates = {
+      company_name:        document.getElementById('ef-company').value.trim(),
+      domain:              document.getElementById('ef-domain').value.trim().toLowerCase(),
+      subscription_type:   document.getElementById('ef-plan').value,
+      max_users:           parseInt(document.getElementById('ef-max-users').value) || null,
+      stripe_customer_id:  document.getElementById('ef-stripe-id').value.trim() || null,
+      status:              document.getElementById('ef-status').value,
+      access:              document.getElementById('ef-access').value,
+    };
+
+    var { error } = await supabaseAdmin.from('firms').update(updates).eq('id', _editFirmId);
+    if (error) {
+      document.getElementById('ef-error').textContent = 'Error: ' + error.message;
+      btn.disabled = false;
+      btn.textContent = 'SAVE CHANGES';
+      return;
+    }
+
+    // If suspending via status change, also invalidate JWTs
+    var firm = allFirms.find(function(f) { return f.id === _editFirmId; });
+    if (firm && firm.status === 'active' && updates.status !== 'active') {
+      await supabaseAdmin.functions.invoke('suspend-firm', { body: { firm_id: _editFirmId } });
+    }
+
+    closeEditFirm();
+    await loadSubscribers();
+    btn.disabled = false;
+    btn.textContent = 'SAVE CHANGES';
+  }
+
+  // Close modal on overlay click
+  document.getElementById('edit-firm-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeEditFirm();
+  });
+
 </script>
+
+<!-- ══ EDIT FIRM MODAL ═══════════════════════════════════════════ -->
+<div id="edit-firm-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:9999; align-items:center; justify-content:center;">
+  <div style="background:var(--bg-raised); border:1px solid var(--border); padding:32px; width:480px; max-width:94vw; position:relative;">
+    <div style="font-size:11px; letter-spacing:0.2em; color:var(--accent); margin-bottom:24px; text-transform:uppercase;">Edit Firm</div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px;">
+      <div>
+        <label style="display:block; font-size:9px; letter-spacing:0.18em; color:var(--text-faint); margin-bottom:6px;">COMPANY NAME</label>
+        <input id="ef-company" type="text" style="width:100%; background:var(--bg-deep); border:1px solid var(--border); color:var(--text); font-family:var(--font); font-size:11px; padding:8px 10px; box-sizing:border-box;">
+      </div>
+      <div>
+        <label style="display:block; font-size:9px; letter-spacing:0.18em; color:var(--text-faint); margin-bottom:6px;">DOMAIN</label>
+        <input id="ef-domain" type="text" placeholder="e.g. tfandr.com" style="width:100%; background:var(--bg-deep); border:1px solid var(--border); color:var(--text); font-family:var(--font); font-size:11px; padding:8px 10px; box-sizing:border-box;">
+      </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px;">
+      <div>
+        <label style="display:block; font-size:9px; letter-spacing:0.18em; color:var(--text-faint); margin-bottom:6px;">PLAN TYPE</label>
+        <select id="ef-plan" style="width:100%; background:var(--bg-deep); border:1px solid var(--border); color:var(--text); font-family:var(--font); font-size:11px; padding:8px 10px; box-sizing:border-box;">
+          <option value="demo">DEMO</option>
+          <option value="individual">INDIVIDUAL · £49/seat</option>
+          <option value="corporate">CORPORATE · £400/mo</option>
+        </select>
+      </div>
+      <div>
+        <label style="display:block; font-size:9px; letter-spacing:0.18em; color:var(--text-faint); margin-bottom:6px;">MAX USERS (SEATS)</label>
+        <input id="ef-max-users" type="number" min="1" placeholder="e.g. 3" style="width:100%; background:var(--bg-deep); border:1px solid var(--border); color:var(--text); font-family:var(--font); font-size:11px; padding:8px 10px; box-sizing:border-box;">
+      </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px;">
+      <div>
+        <label style="display:block; font-size:9px; letter-spacing:0.18em; color:var(--text-faint); margin-bottom:6px;">STATUS</label>
+        <select id="ef-status" style="width:100%; background:var(--bg-deep); border:1px solid var(--border); color:var(--text); font-family:var(--font); font-size:11px; padding:8px 10px; box-sizing:border-box;">
+          <option value="active">ACTIVE</option>
+          <option value="inactive">INACTIVE</option>
+          <option value="past_due">PAST DUE</option>
+        </select>
+      </div>
+      <div>
+        <label style="display:block; font-size:9px; letter-spacing:0.18em; color:var(--text-faint); margin-bottom:6px;">ACCESS</label>
+        <select id="ef-access" style="width:100%; background:var(--bg-deep); border:1px solid var(--border); color:var(--text); font-family:var(--font); font-size:11px; padding:8px 10px; box-sizing:border-box;">
+          <option value="both">BOTH</option>
+          <option value="gold">GOLD ONLY</option>
+          <option value="whisky">WHISKY ONLY</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="margin-bottom:20px;">
+      <label style="display:block; font-size:9px; letter-spacing:0.18em; color:var(--text-faint); margin-bottom:6px;">STRIPE CUSTOMER ID</label>
+      <input id="ef-stripe-id" type="text" placeholder="cus_…" style="width:100%; background:var(--bg-deep); border:1px solid var(--border); color:var(--text); font-family:var(--font); font-size:11px; padding:8px 10px; box-sizing:border-box;">
+    </div>
+
+    <div id="ef-error" style="color:#e05;font-size:10px;margin-bottom:12px;"></div>
+
+    <div style="display:flex; gap:10px; justify-content:flex-end;">
+      <button class="btn btn-sm" onclick="closeEditFirm()" style="font-size:10px;">CANCEL</button>
+      <button id="ef-save-btn" class="btn btn-sm" onclick="saveEditFirm()" style="font-size:10px; background:var(--accent); color:#fff; border-color:var(--accent);">SAVE CHANGES</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
