@@ -6,7 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>THE BROKERS TERMINAL — Pricing &amp; Subscription</title>
   <link rel="stylesheet" href="site.css">
-  <script async src="https://js.stripe.com/v3/pricing-table.js"></script>
 </head>
 <body>
 
@@ -21,92 +20,50 @@
   </ul>
 </nav>
 
+<!-- ══ HERO BANNER ═════════════════════════════════════════════ -->
+<div style="background:var(--accent);padding:16px 40px;text-align:center;">
+  <div style="font-size:clamp(14px,2.2vw,26px);font-weight:700;letter-spacing:.14em;line-height:1.2;color:#0a0a0a;text-transform:uppercase;">INSTITUTIONAL INTELLIGENCE. DELIVERED TO YOUR DESK EVERY WEEK.</div>
+</div>
+
 <div class="pricing-wrap">
 
   <!-- ══ INTRO ══════════════════════════════════════════════════ -->
-  <div class="pricing-intro">
-    <div class="pricing-intro-tag">█ PRICING</div>
-    <div class="pricing-intro-title">YOUR EDGE STARTS HERE</div>
-    <p class="pricing-intro-sub">Two plans. Same institutional-grade intelligence on both. The only difference is how many brokers on your desk benefit from it. Both include a full 7-day free trial — no charge, no commitment, cancel anytime.</p>
+  <div style="text-align:center;padding:40px 0 36px;">
+    <p style="color:var(--text-muted);font-size:14px;max-width:560px;margin:0 auto 14px;line-height:1.8;">Institutional-grade market research. Broker-ready scripts. Objection handles built from live data. Delivered to your terminal every week — written not as news, but as ammunition for your next conversation.</p>
+    <p style="color:var(--accent);font-size:10px;letter-spacing:.22em;text-transform:uppercase;">7-DAY FREE TRIAL &nbsp;·&nbsp; NO COMMITMENT &nbsp;·&nbsp; CANCEL ANYTIME</p>
   </div>
 
   <!-- ══ PRICING CARDS ══════════════════════════════════════════ -->
-  <div class="pricing-card-wrap">
+  <div class="pricing-card-wrap" style="gap:20px;margin-bottom:16px;">
 
     <!-- INDIVIDUAL -->
-    <div class="pricing-card">
-      <div class="pricing-card-label">THE BROKERS TERMINAL — INDIVIDUAL</div>
-      <div class="pricing-card-price"><span>£</span>49</div>
-      <div class="pricing-card-period">PER MONTH &nbsp;•&nbsp; 7-DAY FREE TRIAL</div>
-      <p style="text-align: center; color: var(--text-faint); font-size: 13px; margin-bottom: 18px; line-height: 1.65;">For solo professionals who refuse to walk into a client conversation under-prepared. Less than one client lunch. More valuable than any CRM you've ever bought.</p>
-      <ul class="pricing-features">
-        <li class="pf-cadence">▸ WEEKLY — EVERY SUNDAY</li>
-        <li>Gold Desk Weekly — macro analysis, live price context, call scripts &amp; SPIN sequences for the week ahead</li>
-        <li>Whisky Desk Weekly — same treatment for the Scotch whisky market, including auction data &amp; objection handles</li>
-        <li class="pf-cadence">▸ MONTHLY — LAST SUNDAY OF EACH MONTH</li>
-        <li>The Monthly — deep-dive macro for Gold &amp; Whisky, COT data, positioning data, full broker training section</li>
-        <li>The Pitch Pack — distilled call scripts, closes &amp; objection handles built from that month's macro themes</li>
-        <li>Training Module — one focused sales skill with practical drills &amp; roleplay scripts tied to live market stories</li>
-        <li class="pf-cadence">▸ QUARTERLY — END OF EACH QUARTER</li>
-        <li>The Objection File — every major objection scripted using the AVR method, updated quarterly</li>
-        <li>The Hit List — prospect targeting brief: who to call, why now, and what angle to lead with</li>
-        <li>The Quarterly Report — strategic macro overview, positioning review &amp; sector outlook for the quarter ahead</li>
-        <li class="pf-cadence">▸ ALWAYS-ON</li>
-        <li>Flash Alerts — same-day briefing when major macro events break mid-week</li>
-        <li>The Vault — full searchable archive of every weekly, monthly, quarterly &amp; pitch pack ever published</li>
-        <li>Secure monthly billing via Stripe — cancel anytime, no contracts, no questions</li>
-      </ul>
-
-      <!-- Payment links — LIVE MODE INDIVIDUAL -->
-      <div id="stripe-fallback-individual">
-        <a class="btn btn-full btn-solid" href="signup.html?tier=individual&asset=gold" style="margin-bottom: 8px;">█ GOLD DESK — START FREE TRIAL</a>
-        <a class="btn btn-full btn-solid" href="signup.html?tier=individual&asset=whisky">█ WHISKY DESK — START FREE TRIAL</a>
-        <p style="color: var(--text-faint); font-size: 11px; text-align: center; margin-top: 14px; letter-spacing: 0.06em; line-height: 1.65;">
-          Then £49/month. No charge during the trial. Cancel with one click at any time. Secure payment via Stripe.
-        </p>
-      </div>
+    <div class="pricing-card" style="padding:24px 28px;text-align:center;">
+      <div style="font-size:9px;letter-spacing:.24em;color:var(--text-faint);margin-bottom:14px;text-transform:uppercase;">Individual</div>
+      <div class="pricing-card-price" style="margin-bottom:2px;font-size:clamp(32px,4vw,52px);"><span>£</span>49</div>
+      <div style="font-size:9px;letter-spacing:.16em;color:var(--text-muted);text-transform:uppercase;margin-bottom:4px;">Per month</div>
+      <div style="font-size:9px;letter-spacing:.12em;color:var(--text-faint);text-transform:uppercase;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border-dim);">1 user &nbsp;·&nbsp; 7-day free trial</div>
+      <p style="color:var(--text-faint);font-size:11px;margin-bottom:20px;line-height:1.75;">The complete intelligence platform for the solo broker. Every script, every brief — built so your next conversation is the best one you've ever had.</p>
+      <a class="btn btn-full btn-solid" href="signup.html?tier=individual" style="margin-bottom:10px;font-size:10px;">█ START FREE TRIAL</a>
+      <p style="color:var(--text-faint);font-size:9px;letter-spacing:.04em;line-height:1.7;">Then £49/month. No charge during trial. Cancel anytime.</p>
     </div>
 
     <!-- CORPORATE -->
-    <div class="pricing-card">
-      <div class="pricing-card-label">THE BROKERS TERMINAL — CORPORATE</div>
-      <div class="pricing-card-price"><span>£</span>400</div>
-      <div class="pricing-card-period">PER MONTH &nbsp;•&nbsp; 7-DAY FREE TRIAL</div>
-      <p style="text-align: center; color: var(--text-faint); font-size: 13px; margin-bottom: 18px; line-height: 1.65;">For firms who want every broker on the desk operating at the same level. One subscription. Up to 15 users. The most cost-effective intelligence investment you'll ever make for your team.</p>
-      <ul class="pricing-features">
-        <li>Everything in Individual — every deliverable, every format, every script</li>
-        <li>Firm-wide access — up to 15 brokers on your desk under one subscription</li>
-        <li class="pf-cadence">▸ WEEKLY — EVERY SUNDAY</li>
-        <li>Gold Desk Weekly — macro analysis, live price context, call scripts &amp; SPIN sequences for the week ahead</li>
-        <li>Whisky Desk Weekly — same treatment for the Scotch whisky market, including auction data &amp; objection handles</li>
-        <li class="pf-cadence">▸ MONTHLY — LAST SUNDAY OF EACH MONTH</li>
-        <li>The Monthly — deep-dive macro for Gold &amp; Whisky, COT data, positioning data, full broker training section</li>
-        <li>The Pitch Pack — distilled call scripts, closes &amp; objection handles built from that month's macro themes</li>
-        <li>Training Module — one focused sales skill with practical drills &amp; roleplay scripts tied to live market stories</li>
-        <li class="pf-cadence">▸ QUARTERLY — END OF EACH QUARTER</li>
-        <li>The Objection File — every major objection scripted using the AVR method, updated quarterly</li>
-        <li>The Hit List — prospect targeting brief: who to call, why now, and what angle to lead with</li>
-        <li>The Quarterly Report — strategic macro overview, positioning review &amp; sector outlook for the quarter ahead</li>
-        <li class="pf-cadence">▸ ALWAYS-ON</li>
-        <li>Flash Alerts — same-day briefing when major macro events break mid-week</li>
-        <li>The Vault — full searchable archive of every weekly, monthly, quarterly &amp; pitch pack ever published</li>
-        <li>Secure monthly billing via Stripe — cancel anytime, no contracts, no questions</li>
-      </ul>
-
-      <!-- Payment links — LIVE MODE CORPORATE -->
-      <div id="stripe-fallback-corporate">
-        <a class="btn btn-full" href="signup.html?tier=corporate&asset=gold" style="margin-bottom: 8px;">█ GOLD DESK — START FREE TRIAL</a>
-        <a class="btn btn-full" href="signup.html?tier=corporate&asset=whisky">█ WHISKY DESK — START FREE TRIAL</a>
-        <p style="color: var(--text-faint); font-size: 11px; text-align: center; margin-top: 14px; letter-spacing: 0.06em; line-height: 1.65;">
-          Then £400/month. Up to 15 users. No charge during the trial. Cancel with one click at any time. Secure payment via Stripe.
-        </p>
-      </div>
+    <div class="pricing-card" style="padding:24px 28px;text-align:center;border-color:var(--accent);position:relative;">
+      <div style="position:absolute;top:-1px;left:50%;transform:translateX(-50%);background:var(--accent);color:#000;font-size:8px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;padding:4px 14px;white-space:nowrap;">MOST POPULAR</div>
+      <div style="font-size:9px;letter-spacing:.24em;color:var(--text-faint);margin-bottom:14px;text-transform:uppercase;margin-top:8px;">Corporate</div>
+      <div class="pricing-card-price" style="margin-bottom:2px;font-size:clamp(32px,4vw,52px);"><span>£</span>499</div>
+      <div style="font-size:9px;letter-spacing:.16em;color:var(--text-muted);text-transform:uppercase;margin-bottom:4px;">Per month</div>
+      <div style="font-size:9px;letter-spacing:.12em;color:var(--text-faint);text-transform:uppercase;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border-dim);">Up to 15 users &nbsp;·&nbsp; 7-day free trial</div>
+      <p style="color:var(--text-faint);font-size:11px;margin-bottom:20px;line-height:1.75;">One subscription. Every broker on your desk operating from the same intelligence. The firms that win move together.</p>
+      <a class="btn btn-full" href="signup.html?tier=corporate" style="margin-bottom:10px;font-size:10px;">█ START FREE TRIAL</a>
+      <p style="color:var(--text-faint);font-size:9px;letter-spacing:.04em;line-height:1.7;">Then £499/month. Up to 15 users. Cancel anytime.</p>
     </div>
+
   </div>
 
   <!-- ══ GUARANTEE ══════════════════════════════════════════════ -->
-  <div class="pricing-guarantee">
-    <p><strong style="color: var(--text);">Your card is required to start — but it will not be charged a penny during the 7-day trial.</strong> After 7 days, you'll be billed monthly (Individual: £49, Corporate: £400). Cancel anytime from your account with one click — no forms, no phone calls, no questions. All payments processed securely by <strong style="color: var(--text);">Stripe</strong>. Your card details are never stored on this site. VAT may apply.</p>
+  <div class="pricing-guarantee" style="margin-top:12px;">
+    <p>Your card is required to start — <strong style="color:var(--text);">it will not be charged during the 7-day trial.</strong> Cancel anytime from your account. No forms, no phone calls, no questions. Payments processed securely by <strong style="color:var(--text);">Stripe</strong>. VAT may apply.</p>
   </div>
 
 </div>
@@ -114,92 +71,70 @@
 <!-- ══ URGENCY STRIP ══════════════════════════════════════════════ -->
 <div class="urgency-strip">
   <div>
-    <div class="urgency-text">Not Sure Yet? Read a Full Sample Report First.</div>
-    <div class="urgency-sub">See exactly what lands in your inbox every week — before you commit to anything.</div>
+    <div class="urgency-text">Not Sure Yet? Read a Full Issue First.</div>
+    <div class="urgency-sub">A real report. The same standard that lands in every subscriber's terminal. No demo version, no highlights reel.</div>
   </div>
-  <a class="urgency-btn" href="download.html">█ VIEW SAMPLE REPORT</a>
+  <a class="urgency-btn" href="download.html">█ READ A FULL ISSUE</a>
 </div>
 
-<!-- ══ WHAT YOU RECEIVE ══════════════════════════════════════════ -->
-<div class="pricing-wrap" style="padding-top: 0;">
+<!-- ══ WHAT LANDS IN YOUR TERMINAL ══════════════════════════════ -->
+<div class="pricing-wrap" style="padding-top:0;">
 
-  <h2 class="section-header" style="margin-top: 48px;">WHAT LANDS IN YOUR TERMINAL</h2>
+  <h2 class="section-header" style="margin-top:48px;">WHAT LANDS IN YOUR TERMINAL</h2>
+  <p style="color:var(--text-faint);font-size:13px;line-height:1.8;max-width:600px;margin:0 auto 40px;text-align:center;">Everything built for one purpose — to make the next conversation better than the last. Intelligence you can use the moment it arrives.</p>
 
-  <div style="margin-bottom: 12px;">
-    <div class="freq-label">▸ WEEKLY — EVERY SUNDAY</div>
-  </div>
-  <div class="tiles-3" style="margin-bottom: 32px;">
+  <div class="tiles-3" style="margin-bottom:32px;">
+
     <div class="tile">
-      <div class="tile-cadence">▸ WEEKLY</div>
-      <div class="tile-label">GOLD DESK WEEKLY</div>
-      <p class="tile-body">Every Sunday, the Gold Desk report lands on your terminal. Macro story analysis, live price context, central bank signals — written not as news but as <strong>broker call scripts and SPIN sequences</strong> ready for Monday morning. Objection handles for the week ahead included.</p>
+      <div class="tile-label">THE WEEKLY BRIEF</div>
+      <p class="tile-body">Real market intelligence — translated into call scripts, pitch sequences, and talking points your clients haven't heard. Written not as news but as <strong>broker language, ready to use immediately.</strong></p>
     </div>
-    <div class="tile">
-      <div class="tile-cadence">▸ WEEKLY</div>
-      <div class="tile-label">WHISKY DESK WEEKLY</div>
-      <p class="tile-body">The same treatment for the Scotch whisky market. Auction results, distillery news, tariff and trade context — all translated into <strong>pitch-ready language with call scripts and objection handles</strong> built for conversations that week.</p>
-    </div>
-  </div>
 
-  <div style="margin-bottom: 12px;">
-    <div class="freq-label">▸ MONTHLY — LAST SUNDAY OF EACH MONTH</div>
-  </div>
-  <div class="tiles-3" style="margin-bottom: 32px;">
     <div class="tile">
-      <div class="tile-cadence">▸ MONTHLY</div>
       <div class="tile-label">THE MONTHLY</div>
-      <p class="tile-body">A serious deep-dive across Gold and Whisky. Full macro analysis, COT data, positioning data, sector themes, and a complete broker training section. <strong>The kind of intelligence your clients think their private bank is giving them.</strong></p>
+      <p class="tile-body">Deep macro analysis, institutional positioning data, and sector themes — the kind of research your clients assume their private bank is providing. <strong>Written for the desk, not the archive.</strong></p>
     </div>
+
     <div class="tile">
-      <div class="tile-cadence">▸ MONTHLY</div>
       <div class="tile-label">THE PITCH PACK</div>
-      <p class="tile-body">Released alongside the Monthly. Distilled call scripts, closes, and objection handles built directly from that month's macro themes — <strong>ready to use on calls the following week.</strong> Open it. Pick up the phone.</p>
+      <p class="tile-body">A complete set of call scripts, closes, and objection handles built from the month's live market themes. No interpretation needed. <strong>Open it. Pick up the phone.</strong></p>
     </div>
+
     <div class="tile">
-      <div class="tile-cadence">▸ MONTHLY</div>
       <div class="tile-label">TRAINING MODULE</div>
-      <p class="tile-body">One focused sales skill per month — action threshold, Challenger teaching, calibrated questions, anchoring, future pacing. <strong>Practical drills and roleplay scripts tied to that month's live market stories.</strong> Not abstract theory. Applied.</p>
+      <p class="tile-body">One elite sales technique per issue — action threshold, anchoring, Challenger teaching, calibrated questions — with <strong>practical drills and scripts tied to the current market environment.</strong></p>
     </div>
-  </div>
 
-  <div style="margin-bottom: 12px;">
-    <div class="freq-label">▸ QUARTERLY — END OF EACH QUARTER</div>
-  </div>
-  <div class="tiles-3" style="margin-bottom: 32px;">
     <div class="tile">
-      <div class="tile-cadence">▸ QUARTERLY</div>
       <div class="tile-label">THE OBJECTION FILE</div>
-      <p class="tile-body">Every major objection a broker will face — compiled, refined, and scripted using the AVR method: Acknowledge, Validate, Redirect. Updated each quarter as new objections surface. <strong>Every answer. Before the call begins.</strong></p>
+      <p class="tile-body">Every objection your clients will raise — scripted, answered, and refined using the AVR framework: Acknowledge, Validate, Redirect. <strong>Every answer. Before the call begins.</strong></p>
     </div>
-    <div class="tile">
-      <div class="tile-cadence">▸ QUARTERLY</div>
-      <div class="tile-label">THE HIT LIST</div>
-      <p class="tile-body">Prospect intelligence and targeting brief for the quarter ahead — <strong>who to call, why now, and what angle to lead with.</strong> The stories and triggers most likely to convert hesitation into action.</p>
-    </div>
-    <div class="tile">
-      <div class="tile-cadence">▸ QUARTERLY</div>
-      <div class="tile-label">THE QUARTERLY REPORT</div>
-      <p class="tile-body">Strategic macro overview across Gold and Whisky. Positioning review, sector themes, cycle analysis, and <strong>a forward outlook written in broker language</strong> — the kind of document you can sit across a client with.</p>
-    </div>
-  </div>
 
-  <div style="margin-bottom: 12px;">
-    <div class="freq-label">▸ ALWAYS-ON — BECAUSE MARKETS DON'T WAIT</div>
-  </div>
-  <div class="tiles-3" style="margin-bottom: 48px;">
+    <div class="tile">
+      <div class="tile-label">THE HIT LIST</div>
+      <p class="tile-body">Prospect intelligence built for action. Who to call, what they're thinking, and the precise angle most likely to convert hesitation into a decision. <strong>No guesswork. No cold calls.</strong></p>
+    </div>
+
+    <div class="tile">
+      <div class="tile-label">THE QUARTERLY REPORT</div>
+      <p class="tile-body">Strategic macro overview and positioning analysis for the quarter ahead. Backed by institutional data, <strong>written in broker language</strong> — the document you can sit across a client with.</p>
+    </div>
+
     <div class="tile">
       <div class="tile-label">FLASH ALERTS</div>
-      <p class="tile-body">When a major macro event breaks mid-week, a <strong>same-day one-pager lands on your desk.</strong> The brief. The talking points. The script. No waiting for the next issue.</p>
+      <p class="tile-body">When markets move, a same-day brief lands on your terminal before your clients call you asking what it means. <strong>The context, the talking points, the script — immediately.</strong></p>
     </div>
+
     <div class="tile">
       <div class="tile-label">THE VAULT</div>
-      <p class="tile-body">Every weekly, every monthly, every quarterly report, every pitch pack, every objection file — ever published — <strong>fully searchable, always available.</strong> The most valuable archive in the business.</p>
+      <p class="tile-body">The complete archive — every brief, every script, every analysis ever published. <strong>Fully searchable, always accessible.</strong> The most comprehensive intelligence library on any broker's desk.</p>
     </div>
+
   </div>
 
-  <div style="text-align: center; padding: 8px 0 48px;">
-    <p style="color: var(--text-faint); font-size: 12px; line-height: 1.8; max-width: 560px; margin: 0 auto;">
-      Not ready to commit? <a href="download.html" style="color: var(--accent);">Read a full sample report</a> and see the standard for yourself. Already subscribed? <a href="login.html" style="color: var(--accent);">Log in to your dashboard</a>.
+  <div style="text-align:center;padding:8px 0 48px;">
+    <p style="color:var(--text-faint);font-size:12px;line-height:1.8;max-width:560px;margin:0 auto;">
+      Already subscribed? <a href="login.html" style="color:var(--accent);">Log in to your terminal</a>.
     </p>
   </div>
 
@@ -210,10 +145,8 @@
   <div class="cta-band-heading">THE EDGE IS AVAILABLE.<br>THE QUESTION IS WHETHER YOU TAKE IT.</div>
   <p class="cta-band-sub">Every week your competitors are having client conversations. The only question is whether those conversations are better than yours. <strong>Start your free trial today.</strong> 7 days, no charge, cancel anytime.</p>
   <div class="cta-btns">
-    <a class="btn btn-solid" href="signup.html?tier=individual&asset=gold">█ GOLD · INDIVIDUAL</a>
-    <a class="btn btn-solid" href="signup.html?tier=individual&asset=whisky">█ WHISKY · INDIVIDUAL</a>
-    <a class="btn" href="signup.html?tier=corporate&asset=gold">█ GOLD · CORPORATE</a>
-    <a class="btn" href="signup.html?tier=corporate&asset=whisky">█ WHISKY · CORPORATE</a>
+    <a class="btn btn-solid" href="signup.html?tier=individual">█ INDIVIDUAL — £49/MONTH</a>
+    <a class="btn" href="signup.html?tier=corporate">█ CORPORATE — £499/MONTH</a>
   </div>
 </div>
 
@@ -227,14 +160,5 @@
 </footer>
 
 <script src="site.js"></script>
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    var table = document.querySelector('stripe-pricing-table');
-    var fallback = document.getElementById('stripe-fallback');
-    if (table && table.getAttribute('pricing-table-id') !== 'REPLACE_WITH_YOUR_PRICING_TABLE_ID') {
-      if (fallback) fallback.style.display = 'none';
-    }
-  });
-</script>
 </body>
 </html>
