@@ -6,7 +6,8 @@ const STRIPE_WEBHOOK_SECRET = Deno.env.get("STRIPE_WEBHOOK_SECRET")!;
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-const INDIVIDUAL_PRODUCTS = ["prod_UREdj4L7AbzIxf", "prod_UVbUjOgRgL6lgz"];
+const INDIVIDUAL_PRODUCTS = ["prod_UREdj4L7AbzIxf", "prod_UVbUjOgRgL6lgz", "prod_UqGSgy7bGHnsHg"];
+const CORPORATE_PRODUCTS = ["prod_UQJg5T5viAk6GC"];
 
 async function getProductFromSubscription(subscriptionId: string): Promise<{ productId: string; tier: "individual" | "corporate" }> {
   const res = await fetch(`https://api.stripe.com/v1/subscriptions/${subscriptionId}?expand[]=items.data.price.product`, {
@@ -15,7 +16,9 @@ async function getProductFromSubscription(subscriptionId: string): Promise<{ pro
   const sub = await res.json();
   const item = sub?.items?.data?.[0];
   const productId = typeof item?.price?.product === "string" ? item.price.product : item?.price?.product?.id;
-  return { productId, tier: INDIVIDUAL_PRODUCTS.includes(productId) ? "individual" : "corporate" };
+  if (CORPORATE_PRODUCTS.includes(productId)) return { productId, tier: "corporate" };
+  if (INDIVIDUAL_PRODUCTS.includes(productId)) return { productId, tier: "individual" };
+  return { productId, tier: "corporate" }; // default to corporate for unknown products
 }
 
 async function getCustomerEmail(customerId: string): Promise<string | null> {
@@ -67,10 +70,15 @@ serve(async (req) => {
       const desk = await getDeskFromCheckout(customerId);
 
       if (tier === "individual") {
-        const { data: existing } = await supabase.from("firms").select("id").eq("stripe_customer_id", customerId).maybeSingle();
+        // Check by stripe_customer_id first, then fall back to owner_email (catches pre-created fallback firms)
+        const { data: existingByCustomer } = await supabase.from("firms").select("id").eq("stripe_customer_id", customerId).maybeSingle();
+        const { data: existingByEmail } = !existingByCustomer
+          ? await supabase.from("firms").select("id").eq("owner_email", email).eq("subscription_type", "individual").maybeSingle()
+          : { data: null };
+        const existing = existingByCustomer || existingByEmail;
         if (existing) {
-          // Firm already exists — update status only, never overwrite access
-          await supabase.from("firms").update({ status: firmStatus, stripe_subscription_id: subscriptionId }).eq("id", existing.id);
+          // Firm already exists — update status and stripe IDs, never overwrite access
+          await supabase.from("firms").update({ status: firmStatus, stripe_customer_id: customerId, stripe_subscription_id: subscriptionId }).eq("id", existing.id);
         } else {
           await supabase.from("firms").insert([{
             company_name: email.split("@")[0], domain, owner_email: email,

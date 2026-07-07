@@ -728,7 +728,7 @@
       this.classList.add('active');
       var tabName = this.getAttribute('data-tab');
       document.getElementById('tab-' + tabName).classList.add('active');
-      if (tabName === 'activity') loadActivity();
+      if (tabName === 'activity') { loadActivity(); startActivityRefresh(); }
       if (tabName === 'affiliates') loadAffiliates();
     });
   });
@@ -902,7 +902,7 @@
     try {
       var { data, error } = await supabaseAdmin
         .from('users')
-        .select('*, firms(company_name, subscription_type, status)')
+        .select('*, firms(company_name, subscription_type, status, max_users)')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -972,10 +972,16 @@
             '</td>' +
             '<td style="color:var(--text-muted);">' + (f.domain || '—') + '</td>' +
             '<td><span class="badge-type">CORPORATE · £499</span></td>' +
-            '<td style="color:var(--text-muted);">' + activeMembers.length + ' / 15</td>' +
+            '<td style="color:var(--text-muted);">' + activeMembers.length + ' / ' + (f.max_users || '—') + '</td>' +
             '<td>' + onlineHtml + '</td>' +
             '<td>' + statusHtml + '</td>' +
-            '<td></td>' +
+            '<td style="white-space:nowrap;">' +
+              '<button class="btn btn-sm" onclick="openEditFirm(\'' + group.firmId + '\')" style="font-size:9px;margin-right:4px;">EDIT</button>' +
+              (f.status === 'active'
+                ? '<button class="btn btn-sm" onclick="suspendFirmFromSubs(\'' + group.firmId + '\',\'suspend\')" style="font-size:9px;color:#E97132;border-color:#E97132;margin-right:4px;">SUSPEND</button>'
+                : '<button class="btn btn-sm" onclick="suspendFirmFromSubs(\'' + group.firmId + '\',\'reinstate\')" style="font-size:9px;color:#4CAF50;border-color:#4CAF50;margin-right:4px;">REINSTATE</button>') +
+              '<button class="btn btn-sm btn-danger" onclick="deleteFirm(\'' + group.firmId + '\',\'' + (f.company_name||'').replace(/'/g,"\\'") + '\',\'' + (f.domain||'') + '\')" style="font-size:9px;">DELETE</button>' +
+            '</td>' +
           '</tr>' +
           '<tr id="sub-firm-row-' + group.firmId + '" style="display:none;">' +
             '<td colspan="7" style="padding:0;background:var(--bg-deep);">' +
@@ -1039,7 +1045,7 @@
             '<td style="color:var(--text-muted);font-size:10px;">' + lastSeenText + '</td>' +
             '<td>' + statusHtml + '</td>' +
             '<td><div style="display:flex;gap:6px;">' +
-              '<button class="btn btn-sm" onclick="editUserName(\'' + u.id + '\',\'' + safeFirst + '\',\'' + safeLast + '\',\'' + safeEmail + '\')" style="font-size:9px;">EDIT</button>' +
+              '<button class="btn btn-sm" onclick="openEditUserModal(\'' + u.id + '\',\'' + safeFirst + '\',\'' + safeLast + '\',\'' + safeEmail + '\',\'' + (u.firm_id||'') + '\',\'' + (u.role||'subscriber') + '\')" style="font-size:9px;">EDIT</button>' +
               suspendBtn +
               '<button class="btn btn-sm btn-danger" onclick="deleteUser(\'' + u.id + '\',\'' + safeEmail + '\',\'' + safeName + '\')" style="font-size:9px;">DELETE</button>' +
             '</div></td>' +
@@ -1101,7 +1107,7 @@
           '<td ' + td + ' style="color:var(--text-muted);font-size:10px;">' + lastSeenText + '</td>' +
           '<td ' + td + ' style="color:var(--text-faint);font-size:10px;">' + joined + '</td>' +
           '<td ' + td + '><div style="display:flex;gap:6px;white-space:nowrap;">' +
-            '<button class="btn btn-sm" onclick="editUserName(\'' + u.id + '\',\'' + safeFirst + '\',\'' + safeLast + '\',\'' + safeEmail + '\')" style="font-size:9px;">EDIT</button>' +
+            '<button class="btn btn-sm" onclick="openEditUserModal(\'' + u.id + '\',\'' + safeFirst + '\',\'' + safeLast + '\',\'' + safeEmail + '\',\'' + (u.firm_id||'') + '\',\'' + (u.role||'subscriber') + '\')" style="font-size:9px;">EDIT</button>' +
             (u.role !== 'admin' ? '<button class="btn btn-sm btn-danger" onclick="deleteUser(\'' + u.id + '\',\'' + safeEmail + '\',\'' + safeName + '\')" style="font-size:9px;">DELETE</button>' : '') +
           '</div></td>' +
         '</tr>';
@@ -1376,6 +1382,18 @@
     }
   }
 
+  async function suspendFirmFromSubs(firmId, action) {
+    var label = action === 'suspend' ? 'SUSPEND' : 'REINSTATE';
+    if (!confirm(label + ' this firm?\n\n' + (action === 'suspend' ? 'All members will be locked out immediately.' : 'All members will regain access immediately.'))) return;
+    var newStatus = action === 'suspend' ? 'inactive' : 'active';
+    var { error } = await supabaseAdmin.from('firms').update({ status: newStatus }).eq('id', firmId);
+    if (error) { alert('Error: ' + error.message); return; }
+    if (action === 'suspend') {
+      await supabaseAdmin.functions.invoke('suspend-firm', { body: { firm_id: firmId } });
+    }
+    await loadSubscribers();
+  }
+
   async function toggleSuspend(firmId, action) {
     var label = action === 'suspend' ? 'SUSPEND' : 'REINSTATE';
     if (!confirm(label + ' this user?\n\n' + (action === 'suspend' ? 'They will be locked out immediately but their account will be kept.' : 'They will regain access immediately.'))) return;
@@ -1410,65 +1428,71 @@
     }
   }
 
-  function editUserName(userId, firstName, lastName, email) {
-    var cell = document.getElementById('user-name-cell-' + userId);
-    if (!cell) return;
+  var _editUserId    = null;
+  var _editUserEmail = null;
 
-    // Replace the name cell with inline inputs
-    cell.innerHTML = `
-      <div style="display:flex; gap:6px; align-items:center;">
-        <input id="edit-first-${userId}" type="text" value="${firstName}" placeholder="First" style="background:var(--bg-deep); border:1px solid var(--accent); color:var(--text); font-family:var(--font); font-size:10px; letter-spacing:0.08em; padding:4px 8px; width:90px; text-transform:uppercase;">
-        <input id="edit-last-${userId}" type="text" value="${lastName}" placeholder="Last" style="background:var(--bg-deep); border:1px solid var(--accent); color:var(--text); font-family:var(--font); font-size:10px; letter-spacing:0.08em; padding:4px 8px; width:90px; text-transform:uppercase;">
-        <button class="btn btn-sm" onclick="saveUserName('${userId}', '${email.replace(/'/g,"\\'")}')" style="font-size:9px; background:var(--accent); color:#fff;">SAVE</button>
-        <button class="btn btn-sm" onclick="loadSubscribers()" style="font-size:9px;">✕</button>
-      </div>`;
+  function openEditUserModal(userId, firstName, lastName, email, firmId, role) {
+    _editUserId    = userId;
+    _editUserEmail = email;
 
-    // Focus first input
-    var firstInput = document.getElementById('edit-first-' + userId);
-    if (firstInput) { firstInput.focus(); firstInput.select(); }
+    document.getElementById('eu-first').value = firstName;
+    document.getElementById('eu-last').value  = lastName;
+    document.getElementById('eu-role').value  = role || 'subscriber';
+
+    var sel = document.getElementById('eu-firm');
+    sel.innerHTML = '<option value="">— INDIVIDUAL / NO FIRM —</option>' +
+      allFirms.map(function(f) {
+        var label = (f.company_name || f.domain || '').toUpperCase() +
+          (f.subscription_type ? ' · ' + f.subscription_type.toUpperCase() : '');
+        return '<option value="' + f.id + '"' + (f.id === firmId ? ' selected' : '') + '>' + label + '</option>';
+      }).join('');
+    if (firmId) sel.value = firmId;
+
+    document.getElementById('eu-error').textContent = '';
+    document.getElementById('edit-user-modal').style.display = 'flex';
   }
 
-  async function saveUserName(userId, email) {
-    var firstInput = document.getElementById('edit-first-' + userId);
-    var lastInput  = document.getElementById('edit-last-'  + userId);
-    if (!firstInput || !lastInput) return;
+  function closeEditUser() {
+    document.getElementById('edit-user-modal').style.display = 'none';
+    _editUserId = null;
+    _editUserEmail = null;
+  }
 
-    var newFirst = firstInput.value.trim();
-    var newLast  = lastInput.value.trim();
+  async function saveEditUser() {
+    if (!_editUserId) return;
+    var firstName = document.getElementById('eu-first').value.trim();
+    var lastName  = document.getElementById('eu-last').value.trim();
+    var firmId    = document.getElementById('eu-firm').value || null;
+    var role      = document.getElementById('eu-role').value;
 
-    if (!newFirst || !newLast) {
-      alert('Please enter both first and last name.');
+    if (!firstName || !lastName) {
+      document.getElementById('eu-error').textContent = 'First and last name are required.';
       return;
     }
 
+    var saveBtn = document.getElementById('eu-save-btn');
+    saveBtn.textContent = 'SAVING...';
+    saveBtn.disabled = true;
+    document.getElementById('eu-error').textContent = '';
+
     try {
-      // Update public users table
-      var { error: dbErr } = await supabaseAdmin
+      var { error } = await supabaseAdmin
         .from('users')
-        .update({ first_name: newFirst, last_name: newLast })
-        .eq('id', userId);
-      if (dbErr) throw new Error('Failed to update name: ' + dbErr.message);
+        .update({ first_name: firstName, last_name: lastName, firm_id: firmId, role: role })
+        .eq('id', _editUserId);
+      if (error) throw new Error(error.message);
 
-      // Update Supabase Auth user metadata so it stays in sync
-      var { error: authErr } = await supabaseAdmin.auth.admin.updateUserById(userId, {
-        user_metadata: { first_name: newFirst, last_name: newLast }
-      });
-      if (authErr) console.warn('Auth metadata update failed:', authErr.message);
+      supabaseAdmin.auth.admin.updateUserById(_editUserId, {
+        user_metadata: { first_name: firstName, last_name: lastName }
+      }).catch(function(){});
 
-      // Update the cell immediately without full reload
-      var cell = document.getElementById('user-name-cell-' + userId);
-      if (cell) cell.textContent = (newFirst + ' ' + newLast).toUpperCase();
-
-      // Also update the row's search attribute
-      var row = document.getElementById('user-row-' + userId);
-      if (row) {
-        var currentSearch = row.getAttribute('data-search') || '';
-        var emailPart = email.toLowerCase();
-        row.setAttribute('data-search', (newFirst + ' ' + newLast).toLowerCase() + ' ' + emailPart);
-      }
-
+      closeEditUser();
+      await Promise.all([loadSubscribers(), loadFirms()]);
     } catch (err) {
-      alert('Error: ' + err.message);
+      document.getElementById('eu-error').textContent = 'Error: ' + err.message;
+    } finally {
+      saveBtn.textContent = 'SAVE CHANGES';
+      saveBtn.disabled = false;
     }
   }
 
@@ -1543,6 +1567,12 @@
   }
 
   // ══ ACTIVITY ════════════════════════════════════════════════
+  var _activityRefreshTimer = null;
+  function startActivityRefresh() {
+    if (_activityRefreshTimer) return;
+    _activityRefreshTimer = setInterval(loadActivity, 30000);
+  }
+
   async function loadActivity() {
     try {
       // Recent logins
@@ -1977,6 +2007,10 @@
   }
 
   // Close modal on overlay click
+  document.getElementById('edit-user-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeEditUser();
+  });
+
   document.getElementById('edit-firm-modal').addEventListener('click', function(e) {
     if (e.target === this) closeEditFirm();
   });
@@ -1984,6 +2018,45 @@
 </script>
 
 <!-- ══ EDIT FIRM MODAL ═══════════════════════════════════════════ -->
+<div id="edit-user-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:9999; align-items:center; justify-content:center;">
+  <div style="background:var(--bg-raised); border:1px solid var(--border); padding:32px; width:480px; max-width:94vw; position:relative;">
+    <div style="font-size:11px; letter-spacing:0.2em; color:var(--accent); margin-bottom:24px; text-transform:uppercase;">Edit Subscriber</div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px;">
+      <div>
+        <label style="display:block; font-size:9px; letter-spacing:0.18em; color:var(--text-faint); margin-bottom:6px;">FIRST NAME</label>
+        <input id="eu-first" type="text" style="width:100%; background:var(--bg-deep); border:1px solid var(--border); color:var(--text); font-family:var(--font); font-size:11px; padding:8px 10px; box-sizing:border-box;">
+      </div>
+      <div>
+        <label style="display:block; font-size:9px; letter-spacing:0.18em; color:var(--text-faint); margin-bottom:6px;">LAST NAME</label>
+        <input id="eu-last" type="text" style="width:100%; background:var(--bg-deep); border:1px solid var(--border); color:var(--text); font-family:var(--font); font-size:11px; padding:8px 10px; box-sizing:border-box;">
+      </div>
+    </div>
+
+    <div style="margin-bottom:14px;">
+      <label style="display:block; font-size:9px; letter-spacing:0.18em; color:var(--text-faint); margin-bottom:6px;">FIRM</label>
+      <select id="eu-firm" style="width:100%; background:var(--bg-deep); border:1px solid var(--border); color:var(--text); font-family:var(--font); font-size:11px; padding:8px 10px; box-sizing:border-box;">
+        <option value="">— INDIVIDUAL / NO FIRM —</option>
+      </select>
+    </div>
+
+    <div style="margin-bottom:24px;">
+      <label style="display:block; font-size:9px; letter-spacing:0.18em; color:var(--text-faint); margin-bottom:6px;">ROLE</label>
+      <select id="eu-role" style="width:100%; background:var(--bg-deep); border:1px solid var(--border); color:var(--text); font-family:var(--font); font-size:11px; padding:8px 10px; box-sizing:border-box;">
+        <option value="subscriber">BROKER</option>
+        <option value="admin">ADMIN (FIRM MANAGER)</option>
+      </select>
+    </div>
+
+    <div id="eu-error" style="color:#e05; font-size:10px; letter-spacing:0.1em; margin-bottom:12px; min-height:14px;"></div>
+
+    <div style="display:flex; gap:10px; justify-content:flex-end;">
+      <button class="btn btn-sm" onclick="closeEditUser()" style="font-size:10px;">CANCEL</button>
+      <button id="eu-save-btn" class="btn btn-sm" onclick="saveEditUser()" style="font-size:10px; background:var(--accent); color:#fff; border-color:var(--accent);">SAVE CHANGES</button>
+    </div>
+  </div>
+</div>
+
 <div id="edit-firm-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:9999; align-items:center; justify-content:center;">
   <div style="background:var(--bg-raised); border:1px solid var(--border); padding:32px; width:480px; max-width:94vw; position:relative;">
     <div style="font-size:11px; letter-spacing:0.2em; color:var(--accent); margin-bottom:24px; text-transform:uppercase;">Edit Firm</div>

@@ -60,6 +60,22 @@ serve(async (req) => {
       firm = indFirm;
     }
 
+    // Step 4: look up directly in Stripe by email (catches trial accounts where webhook didn't store customer ID)
+    if (!firm?.stripe_customer_id) {
+      const searchRes = await fetch(`https://api.stripe.com/v1/customers/search?query=email%3A%27${encodeURIComponent(user_email)}%27&limit=1`, {
+        headers: { 'Authorization': `Bearer ${STRIPE_SECRET_KEY}` }
+      });
+      const searchData = await searchRes.json();
+      const stripeCustomer = searchData?.data?.[0];
+      if (stripeCustomer?.id) {
+        // Backfill the customer ID on the firm so future lookups are instant
+        if (userRow?.firm_id) {
+          await supabase.from('firms').update({ stripe_customer_id: stripeCustomer.id }).eq('id', userRow.firm_id);
+        }
+        firm = { stripe_customer_id: stripeCustomer.id };
+      }
+    }
+
     if (!firm?.stripe_customer_id) {
       return new Response(JSON.stringify({ error: 'NO_STRIPE_CUSTOMER' }), {
         status: 404,
