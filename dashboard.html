@@ -424,11 +424,50 @@
   <span class="dashboard-masthead-center">SUBSCRIBER DESK</span>
   <div class="dashboard-masthead-right">
     <span>Welcome, <strong style="color: var(--text);" id="user-name">loading...</strong></span>
-    <a href="#" id="manage-subscription-btn" style="color:var(--text-muted); font-size:11px; letter-spacing:0.08em;">MANAGE SUBSCRIPTION</a>
-    <span style="color:var(--text-faint);">|</span>
+    <a href="#" id="manage-subscription-btn" style="display:none; color:var(--text-muted); font-size:11px; letter-spacing:0.08em;">MANAGE SUBSCRIPTION</a>
+    <span id="manage-subscription-sep" style="display:none; color:var(--text-faint);">|</span>
     <a href="#" id="manage-team-btn" style="display:none; color:var(--text-muted); font-size:11px; letter-spacing:0.08em;">MANAGE TEAM</a>
     <span id="manage-team-sep" style="display:none; color:var(--text-faint);">|</span>
+    <a href="#" id="edit-profile-btn" style="color:var(--text-muted); font-size:11px; letter-spacing:0.08em;">EDIT PROFILE</a>
+    <span style="color:var(--text-faint);">|</span>
     <a href="#" id="logout-btn">LOG OUT</a>
+  </div>
+</div>
+
+<!-- ══ EDIT PROFILE MODAL ═════════════════════════════════════════ -->
+<div id="edit-profile-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:#111;border:1px solid var(--border);padding:36px 40px;min-width:360px;max-width:440px;width:100%;font-family:var(--font);">
+    <div style="font-size:11px;letter-spacing:0.26em;color:var(--accent);margin-bottom:24px;font-weight:700;">EDIT PROFILE</div>
+    <div style="display:flex;gap:12px;margin-bottom:16px;">
+      <div style="flex:1;">
+        <label style="font-size:9px;letter-spacing:0.18em;color:var(--text-faint);display:block;margin-bottom:6px;">FIRST NAME</label>
+        <input id="profile-first" type="text" style="width:100%;background:var(--bg-deep);border:1px solid var(--border-dim);color:var(--text);font-family:var(--font);font-size:11px;padding:8px 10px;letter-spacing:0.08em;box-sizing:border-box;">
+      </div>
+      <div style="flex:1;">
+        <label style="font-size:9px;letter-spacing:0.18em;color:var(--text-faint);display:block;margin-bottom:6px;">LAST NAME</label>
+        <input id="profile-last" type="text" style="width:100%;background:var(--bg-deep);border:1px solid var(--border-dim);color:var(--text);font-family:var(--font);font-size:11px;padding:8px 10px;letter-spacing:0.08em;box-sizing:border-box;">
+      </div>
+    </div>
+    <div style="margin-bottom:16px;">
+      <label style="font-size:9px;letter-spacing:0.18em;color:var(--text-faint);display:block;margin-bottom:6px;">EMAIL</label>
+      <input id="profile-email" type="text" disabled style="width:100%;background:var(--bg-deep);border:1px solid var(--border-dim);color:var(--text-faint);font-family:var(--font);font-size:11px;padding:8px 10px;letter-spacing:0.08em;box-sizing:border-box;opacity:0.5;">
+    </div>
+    <div style="border-top:1px solid var(--border-dim);margin:20px 0 16px;">
+      <div style="font-size:9px;letter-spacing:0.18em;color:var(--text-faint);margin:16px 0 12px;">CHANGE PASSWORD (leave blank to keep current)</div>
+      <div style="margin-bottom:12px;">
+        <label style="font-size:9px;letter-spacing:0.18em;color:var(--text-faint);display:block;margin-bottom:6px;">NEW PASSWORD</label>
+        <input id="profile-pw" type="password" style="width:100%;background:var(--bg-deep);border:1px solid var(--border-dim);color:var(--text);font-family:var(--font);font-size:11px;padding:8px 10px;letter-spacing:0.08em;box-sizing:border-box;">
+      </div>
+      <div>
+        <label style="font-size:9px;letter-spacing:0.18em;color:var(--text-faint);display:block;margin-bottom:6px;">CONFIRM PASSWORD</label>
+        <input id="profile-pw2" type="password" style="width:100%;background:var(--bg-deep);border:1px solid var(--border-dim);color:var(--text);font-family:var(--font);font-size:11px;padding:8px 10px;letter-spacing:0.08em;box-sizing:border-box;">
+      </div>
+    </div>
+    <div id="profile-msg" style="font-size:10px;letter-spacing:0.10em;margin-bottom:14px;min-height:16px;"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button onclick="document.getElementById('edit-profile-modal').style.display='none'" style="background:none;border:1px solid var(--border-dim);color:var(--text-muted);font-family:var(--font);font-size:9px;letter-spacing:0.18em;padding:8px 18px;cursor:pointer;">CANCEL</button>
+      <button id="profile-save-btn" onclick="saveProfile()" style="background:var(--accent);border:none;color:#000;font-family:var(--font);font-size:9px;letter-spacing:0.18em;padding:8px 18px;cursor:pointer;font-weight:700;">SAVE CHANGES</button>
+    </div>
   </div>
 </div>
 
@@ -1037,13 +1076,11 @@
 
     if (firmRow && firmRow.access) firmAccess = firmRow.access;
 
-    // Hide "Manage Subscription" button if no Stripe customer linked (e.g. admin/manual accounts)
+    // Show "Manage Subscription" for all accounts
     var manageSubBtn = document.getElementById('manage-subscription-btn');
-    var manageSep = manageSubBtn ? manageSubBtn.nextElementSibling : null;
-    if (manageSubBtn && (!firmRow || !firmRow.stripe_customer_id)) {
-      manageSubBtn.style.display = 'none';
-      if (manageSep) manageSep.style.display = 'none';
-    }
+    var manageSubSep = document.getElementById('manage-subscription-sep');
+    if (manageSubBtn) manageSubBtn.style.display = 'inline';
+    if (manageSubSep) manageSubSep.style.display = 'inline';
     window.firmAccess = firmAccess; // store globally for report loader
 
     // Update "ALL CONTENT" subtitle to reflect actual access
@@ -1197,7 +1234,7 @@
     };
 
     // Only show team management to admins of corporate accounts
-    if (isAdmin && maxSeats > 1 && canonicalFirmId) {
+    if (isAdmin && canonicalFirmId && firmRow && firmRow.subscription_type === 'corporate') {
       // Show "MANAGE TEAM" link in header
       var manageTeamBtn = document.getElementById('manage-team-btn');
       var manageTeamSep = document.getElementById('manage-team-sep');
@@ -1214,6 +1251,13 @@
       window._canonicalFirmId = canonicalFirmId;
       window._userEmail = userEmail;
       window._maxSeats = maxSeats;
+
+      // Log session start — catches returning users who bypass login.html
+      supabase.from('activity_log').insert({
+        user_email: userEmail,
+        firm_id: canonicalFirmId || null,
+        action: 'login'
+      }).then(function(){}).catch(function(){});
 
       await window.loadTeamRoster();
 
@@ -1242,16 +1286,69 @@
           if (data.url) {
             window.open(data.url, '_blank');
           } else if (data.error === 'NO_STRIPE_CUSTOMER') {
-            alert('Your account was created manually. To cancel or manage your subscription, please contact us at desk@thebrokersterminal.com');
+            alert('No subscription found for your account. If you signed up recently, please try again in a moment or contact desk@thebrokersterminal.com');
           } else {
-            alert('Could not open subscription portal. Please contact desk@thebrokersterminal.com');
+            alert('The subscription portal is not available right now. Please try again shortly or contact desk@thebrokersterminal.com');
           }
         } catch(err) {
-          alert('Could not open subscription portal. Please contact desk@thebrokersterminal.com');
+          alert('The subscription portal is not available right now. Please try again shortly or contact desk@thebrokersterminal.com');
         }
         manageBtn.textContent = 'MANAGE SUBSCRIPTION';
       });
     }
+
+    // Edit Profile
+    var editProfileBtn = document.getElementById('edit-profile-btn');
+    if (editProfileBtn) {
+      editProfileBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        document.getElementById('profile-first').value = userRow && userRow.first_name ? userRow.first_name : '';
+        document.getElementById('profile-last').value = userRow && userRow.last_name ? userRow.last_name : '';
+        document.getElementById('profile-email').value = userEmail;
+        document.getElementById('profile-pw').value = '';
+        document.getElementById('profile-pw2').value = '';
+        document.getElementById('profile-msg').textContent = '';
+        document.getElementById('edit-profile-modal').style.display = 'flex';
+      });
+    }
+
+    window.saveProfile = async function() {
+      var firstName = document.getElementById('profile-first').value.trim();
+      var lastName  = document.getElementById('profile-last').value.trim();
+      var pw        = document.getElementById('profile-pw').value;
+      var pw2       = document.getElementById('profile-pw2').value;
+      var msg       = document.getElementById('profile-msg');
+      var btn       = document.getElementById('profile-save-btn');
+
+      if (pw && pw !== pw2) { msg.style.color = '#E97132'; msg.textContent = 'Passwords do not match.'; return; }
+      if (pw && pw.length < 6) { msg.style.color = '#E97132'; msg.textContent = 'Password must be at least 6 characters.'; return; }
+
+      btn.textContent = 'SAVING...';
+      btn.disabled = true;
+      try {
+        // Update name in users table
+        await supabase.from('users').update({ first_name: firstName, last_name: lastName }).eq('email', userEmail);
+
+        // Update password in Supabase Auth if provided
+        if (pw) {
+          var { error: pwErr } = await supabase.auth.updateUser({ password: pw });
+          if (pwErr) throw new Error(pwErr.message);
+        }
+
+        // Update welcome name in header
+        var nameEl = document.getElementById('user-name');
+        if (nameEl) nameEl.textContent = (firstName + ' ' + lastName).trim() || userEmail.split('@')[0];
+
+        msg.style.color = '#4CAF50';
+        msg.textContent = 'Profile updated successfully.';
+        setTimeout(function() { document.getElementById('edit-profile-modal').style.display = 'none'; }, 1200);
+      } catch(err) {
+        msg.style.color = '#E97132';
+        msg.textContent = 'Error: ' + err.message;
+      }
+      btn.textContent = 'SAVE CHANGES';
+      btn.disabled = false;
+    };
 
     // Logout (single handler)
     var logoutBtn = document.getElementById('logout-btn');
@@ -1602,8 +1699,8 @@
     'all':           { tag: 'ALL REPORTS',    text: 'Every report across both desks — weekly, monthly, and quarterly' },
     'gold':          { tag: 'GOLD DESK',      text: 'All Gold Desk reports — weekly, monthly, and quarterly' },
     'whisky':        { tag: 'WHISKY DESK',    text: 'All Whisky Desk reports — weekly, monthly, and quarterly' },
-    'weekly':        { tag: 'WEEKLY',         text: 'Released every Sunday — macro analysis, live price context, call scripts & objection handles for the week ahead' },
-    'pitch_pack':    { tag: 'PITCH PACK',     text: 'Released last Sunday of each month — distilled call scripts, closes & objection handles built from that month\'s macro themes' },
+    'weekly':        { tag: 'WEEKLY',         text: 'Released every Sunday — macro analysis, live price context, conversation scripts & objection handles for the week ahead' },
+    'pitch_pack':    { tag: 'PITCH PACK',     text: 'Released last Sunday of each month — distilled conversation scripts, closes & objection handles built from that month\'s macro themes' },
     'objection_file':{ tag: 'OBJECTION FILE', text: 'Released end of each quarter — compiled AVR objection-handling scripts, updated quarterly as new objections surface' },
     'monthly':       { tag: 'MONTHLY',        text: 'Released last Sunday of each month — deep-dive macro, COT data, positioning data, full broker training section' },
     'quarterly':     { tag: 'QUARTERLY',      text: 'Released end of each quarter — strategic macro overview, positioning review, sector themes & outlook for the quarter ahead' },
