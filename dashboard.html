@@ -217,10 +217,10 @@
     .tab-desc span { color: var(--accent); margin-right: 8px; }
 
     /* ── DOC GRID ─────────────────────────────────────────────── */
-    .doc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 40px; }
+    .doc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 40px; align-items: stretch; }
 
     /* ── DOC CARD ─────────────────────────────────────────────── */
-    .doc-card { border: 1px solid var(--border-dim); background: var(--bg-raised); padding: 20px; transition: border-color 150ms ease; display: flex; flex-direction: column; }
+    .doc-card { border: 1px solid var(--border-dim); background: var(--bg-raised); padding: 20px; transition: border-color 150ms ease; display: flex; flex-direction: column; height: 100%; }
     .doc-card:hover { border-color: var(--border); }
     .doc-card.is-new   { border-left: 3px solid var(--accent); }
     .doc-card.is-flash { border-color: var(--accent); background: #0F0A06; }
@@ -242,6 +242,21 @@
     .btn-sm   { padding: 8px 16px; font-size: 10px; }
     .btn-solid{ background: var(--accent); color: var(--bg); font-weight: 700; border-color: var(--accent); }
     .btn-solid:hover { background: #fff; border-color: #fff; color: var(--bg); }
+
+    /* ── AUDIO PLAYER ────────────────────────────────────────── */
+    /* ── CLIENT EDITION PANEL ──────────────────────────────────── */
+    .client-edition-panel { border-top: 2px solid var(--accent); background: var(--bg-raised); }
+    .client-edition-header { padding: 18px 40px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-dim); }
+    .client-report-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 40px; border-bottom: 1px solid var(--border-dim); }
+    .client-report-row:last-child { border-bottom: none; }
+    .audio-bar { display: flex; align-items: center; gap: 8px; margin-top: 12px; padding: 10px 12px; background: var(--bg-deep); border: 1px solid var(--border-dim); }
+    .audio-bar.hidden { display: none; }
+    .audio-play-btn { background: none; border: 1px solid var(--accent); color: var(--accent); font-family: var(--font); font-size: 10px; letter-spacing: 0.14em; padding: 4px 10px; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
+    .audio-play-btn:hover { background: var(--accent); color: var(--bg); }
+    .audio-scrub { flex: 1; height: 3px; -webkit-appearance: none; appearance: none; background: var(--border-dim); outline: none; cursor: pointer; }
+    .audio-scrub::-webkit-slider-thumb { -webkit-appearance: none; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); cursor: pointer; }
+    .audio-time { color: var(--text-faint); font-size: 9px; letter-spacing: 0.10em; white-space: nowrap; flex-shrink: 0; min-width: 34px; text-align: right; }
+    .audio-speed { background: none; border: 1px solid var(--border-dim); color: var(--text-faint); font-family: var(--font); font-size: 8px; letter-spacing: 0.12em; padding: 3px 5px; cursor: pointer; flex-shrink: 0; }
 
     /* ── DASHBOARD WRAP ───────────────────────────────────────── */
     .dashboard-wrap { max-width: 1200px; margin: 0 auto; padding: 32px 40px 64px; }
@@ -513,6 +528,63 @@
   <!-- populated by JS -->
 </div>
 
+<!-- ══ CLIENT EDITION PANEL ══════════════════════════════════════ -->
+<div id="client-edition-panel" style="display:none;" class="client-edition-panel">
+  <div class="client-edition-header">
+    <div>
+      <div style="color:var(--accent); font-size:9px; letter-spacing:0.28em; font-weight:700; margin-bottom:3px;">▸ CLIENT EDITION — EXCLUSIVE</div>
+      <div style="color:var(--text); font-size:13px; letter-spacing:0.12em; text-transform:uppercase; font-weight:700;">Monthly Client Intelligence Reports</div>
+      <div style="color:var(--text-faint); font-size:10px; letter-spacing:0.08em; margin-top:4px;">Brand with your firm's identity and send to your clients via Mailchimp or as PDF</div>
+    </div>
+    <button onclick="openBrandModal()" style="background:none; border:1px solid var(--accent); color:var(--accent); font-family:var(--font); font-size:9px; letter-spacing:0.18em; padding:8px 16px; cursor:pointer; text-transform:uppercase; flex-shrink:0;">⚙ BRANDING SETTINGS</button>
+  </div>
+  <div id="client-reports-list">
+    <div style="padding:20px 40px; color:var(--text-faint); font-size:10px; letter-spacing:0.14em; text-transform:uppercase;">Loading...</div>
+  </div>
+</div>
+
+<!-- ══ BRANDING MODAL ════════════════════════════════════════════ -->
+<div id="brand-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.88); z-index:9000; align-items:flex-start; justify-content:center; padding-top:60px; overflow-y:auto;">
+  <div style="background:var(--bg-raised); border:1px solid var(--accent); width:100%; max-width:560px; padding:32px 40px; position:relative; margin:0 16px;">
+    <div style="font-size:11px; letter-spacing:0.26em; color:var(--accent); margin-bottom:4px; font-weight:700;">YOUR FIRM BRANDING</div>
+    <div style="font-size:10px; letter-spacing:0.08em; color:var(--text-faint); margin-bottom:24px; line-height:1.6;">Set once — your firm name and details are injected automatically into every client report.</div>
+    <div style="margin-bottom:12px;">
+      <label style="display:block; font-size:9px; letter-spacing:0.18em; color:var(--text-faint); margin-bottom:5px;">BROKERAGE NAME *</label>
+      <input id="brand-name" type="text" placeholder="e.g. Glencairn Capital" style="width:100%; background:var(--bg-deep); border:1px solid var(--border-dim); color:var(--text); font-family:var(--font); font-size:11px; padding:8px 10px; letter-spacing:0.06em; box-sizing:border-box;">
+    </div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+      <div>
+        <label style="display:block; font-size:9px; letter-spacing:0.18em; color:var(--text-faint); margin-bottom:5px;">CONTACT EMAIL *</label>
+        <input id="brand-email" type="text" placeholder="hello@yourbrokerage.com" style="width:100%; background:var(--bg-deep); border:1px solid var(--border-dim); color:var(--text); font-family:var(--font); font-size:11px; padding:8px 10px; letter-spacing:0.06em; box-sizing:border-box;">
+      </div>
+      <div>
+        <label style="display:block; font-size:9px; letter-spacing:0.18em; color:var(--text-faint); margin-bottom:5px;">CONTACT PHONE</label>
+        <input id="brand-phone" type="text" placeholder="+44 (0)1234 567890" style="width:100%; background:var(--bg-deep); border:1px solid var(--border-dim); color:var(--text); font-family:var(--font); font-size:11px; padding:8px 10px; letter-spacing:0.06em; box-sizing:border-box;">
+      </div>
+    </div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+      <div>
+        <label style="display:block; font-size:9px; letter-spacing:0.18em; color:var(--text-faint); margin-bottom:5px;">WEBSITE</label>
+        <input id="brand-website" type="text" placeholder="https://yourbrokerage.com" style="width:100%; background:var(--bg-deep); border:1px solid var(--border-dim); color:var(--text); font-family:var(--font); font-size:11px; padding:8px 10px; letter-spacing:0.06em; box-sizing:border-box;">
+      </div>
+      <div>
+        <label style="display:block; font-size:9px; letter-spacing:0.18em; color:var(--text-faint); margin-bottom:5px;">REGULATED STATUS</label>
+        <input id="brand-regulated" type="text" placeholder="e.g. FCA Authorised" style="width:100%; background:var(--bg-deep); border:1px solid var(--border-dim); color:var(--text); font-family:var(--font); font-size:11px; padding:8px 10px; letter-spacing:0.06em; box-sizing:border-box;">
+      </div>
+    </div>
+    <div style="margin-bottom:24px;">
+      <label style="display:block; font-size:9px; letter-spacing:0.18em; color:var(--text-faint); margin-bottom:5px;">UNSUBSCRIBE TAG</label>
+      <input id="brand-unsub" type="text" placeholder="*|UNSUB|*" style="width:100%; background:var(--bg-deep); border:1px solid var(--border-dim); color:var(--text); font-family:var(--font); font-size:11px; padding:8px 10px; letter-spacing:0.06em; box-sizing:border-box;">
+      <div style="font-size:9px; color:var(--text-faint); margin-top:4px; letter-spacing:0.06em;">Mailchimp: *|UNSUB|* &nbsp;·&nbsp; Mailerlite: {$unsubscribe} &nbsp;·&nbsp; Leave blank if not needed.</div>
+    </div>
+    <div id="brand-msg" style="font-size:10px; letter-spacing:0.10em; margin-bottom:14px; min-height:16px;"></div>
+    <div style="display:flex; gap:10px; justify-content:flex-end;">
+      <button onclick="document.getElementById('brand-modal').style.display='none'" style="background:none; border:1px solid var(--border-dim); color:var(--text-muted); font-family:var(--font); font-size:9px; letter-spacing:0.18em; padding:8px 18px; cursor:pointer;">CANCEL</button>
+      <button onclick="saveBranding()" style="background:var(--accent); border:none; color:#000; font-family:var(--font); font-size:9px; letter-spacing:0.18em; padding:8px 18px; cursor:pointer; font-weight:700;">SAVE BRANDING</button>
+    </div>
+  </div>
+</div>
+
 <!-- ══ YOUR TEAM MODAL ════════════════════════════════════════════ -->
 <div id="team-panel" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:9000; align-items:flex-start; justify-content:center; padding-top:60px;">
   <div style="background:var(--bg-raised); border:1px solid var(--border-dim); width:100%; max-width:860px; max-height:80vh; overflow-y:auto; padding:32px 40px; position:relative;">
@@ -706,7 +778,10 @@
     <div class="doc-card-desc">View the complete report.</div>
     <div class="doc-card-footer">
       <span class="doc-card-date">PUBLISHED_DATE</span>
-      <a class="btn btn-sm" href="#" onclick="openReport(event)">█ VIEW REPORT</a>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="audio-listen-btn btn btn-sm" style="display:none;border-color:var(--accent);color:var(--accent);">▶ LISTEN</button>
+        <a class="btn btn-sm" href="#" onclick="openReport(event)">█ VIEW REPORT</a>
+      </div>
     </div>
   </div>
 </template>
@@ -1233,6 +1308,13 @@
       }
     };
 
+    // Show Client Edition panel to all corporate admins
+    if (isAdmin && firmRow && firmRow.subscription_type === 'corporate') {
+      var clientPanel = document.getElementById('client-edition-panel');
+      if (clientPanel) clientPanel.style.display = 'block';
+      loadClientReports();
+    }
+
     // Only show team management to admins of corporate accounts
     if (isAdmin && canonicalFirmId && firmRow && firmRow.subscription_type === 'corporate') {
       // Show "MANAGE TEAM" link in header
@@ -1417,6 +1499,121 @@
     await loadReportsFromDatabase();
   })();
 
+  /* ── CLIENT EDITION ──────────────────────────────────────── */
+  async function loadClientReports() {
+    const { data: reports } = await supabase
+      .from('reports')
+      .select('id, title, asset_class, published_date, file_path')
+      .eq('status', 'published')
+      .eq('report_type', 'client_monthly')
+      .order('published_date', { ascending: false });
+
+    const list = document.getElementById('client-reports-list');
+    if (!reports || reports.length === 0) {
+      list.innerHTML = '<div style="padding:20px 40px; color:var(--text-faint); font-size:10px; letter-spacing:0.14em; text-transform:uppercase;">No client reports published yet — check back each month.</div>';
+      return;
+    }
+    list.innerHTML = reports.map(function(r) {
+      var date = new Date(r.published_date).toLocaleDateString('en-GB', { year:'numeric', month:'long', day:'2-digit' }).toUpperCase();
+      var asset = (r.asset_class || '').toUpperCase();
+      var safeTitle = r.title.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+      var safePath  = r.file_path.replace(/'/g, "\\'");
+      return '<div class="client-report-row">'
+        + '<div>'
+        + '<span style="font-size:8px; letter-spacing:0.18em; padding:2px 7px; border:1px solid var(--border-dim); color:var(--text-faint); margin-right:10px;">' + asset + '</span>'
+        + '<span style="color:var(--text); font-size:11px; letter-spacing:0.10em; text-transform:uppercase;">' + r.title + '</span>'
+        + '<span style="color:var(--text-faint); font-size:9px; letter-spacing:0.10em; margin-left:14px;">' + date + '</span>'
+        + '</div>'
+        + '<button onclick="downloadBranded(\'' + safePath + '\',\'' + safeTitle + '\',this)"'
+        + ' style="background:var(--accent); border:none; color:#000; font-family:var(--font); font-size:9px; letter-spacing:0.16em; padding:7px 16px; cursor:pointer; font-weight:700; text-transform:uppercase; flex-shrink:0;">'
+        + '↓ BRAND &amp; DOWNLOAD</button>'
+        + '</div>';
+    }).join('');
+  }
+
+  function openBrandModal() {
+    var saved = JSON.parse(localStorage.getItem('tbt_client_branding') || '{}');
+    document.getElementById('brand-name').value      = saved.name      || '';
+    document.getElementById('brand-email').value     = saved.email     || '';
+    document.getElementById('brand-phone').value     = saved.phone     || '';
+    document.getElementById('brand-website').value   = saved.website   || '';
+    document.getElementById('brand-regulated').value = saved.regulated || '';
+    document.getElementById('brand-unsub').value     = saved.unsub     || '*|UNSUB|*';
+    document.getElementById('brand-msg').textContent = '';
+    document.getElementById('brand-modal').style.display = 'flex';
+  }
+
+  function saveBranding() {
+    var name  = document.getElementById('brand-name').value.trim();
+    var email = document.getElementById('brand-email').value.trim();
+    var msg   = document.getElementById('brand-msg');
+    if (!name)  { msg.style.color = '#E97132'; msg.textContent = 'Brokerage name is required.'; return; }
+    if (!email) { msg.style.color = '#E97132'; msg.textContent = 'Contact email is required.'; return; }
+    var branding = {
+      name:      name,
+      email:     email,
+      phone:     document.getElementById('brand-phone').value.trim(),
+      website:   document.getElementById('brand-website').value.trim(),
+      regulated: document.getElementById('brand-regulated').value.trim(),
+      unsub:     document.getElementById('brand-unsub').value.trim() || '*|UNSUB|*',
+    };
+    localStorage.setItem('tbt_client_branding', JSON.stringify(branding));
+    msg.style.color = '#4CAF50';
+    msg.textContent = '✓ Branding saved.';
+    setTimeout(function() { document.getElementById('brand-modal').style.display = 'none'; }, 900);
+  }
+
+  async function downloadBranded(filePath, title, btn) {
+    var branding = JSON.parse(localStorage.getItem('tbt_client_branding') || '{}');
+    if (!branding.name) {
+      alert('Please set your firm branding first — click "⚙ BRANDING SETTINGS".');
+      openBrandModal();
+      return;
+    }
+    var orig = btn.textContent;
+    btn.textContent = 'LOADING...';
+    btn.disabled = true;
+    try {
+      var url = 'https://oqpodikelxhwcnjdwojw.supabase.co/storage/v1/object/public/Reports/' + filePath;
+      var res = await fetch(url);
+      if (!res.ok) throw new Error('Could not fetch report file.');
+      var html = await res.text();
+
+      // Replace text tokens
+      var tokens = {
+        '[BROKERAGE NAME]':   branding.name,
+        '[LOGO ALT TEXT]':    branding.name,
+        '[CONTACT EMAIL]':    branding.email || '',
+        '[CONTACT PHONE]':    branding.phone || '',
+        '[WEBSITE URL]':      branding.website || '',
+        '[REGULATED STATUS]': branding.regulated || '',
+        '[JURISDICTION]':     'United Kingdom',
+        '[UNSUBSCRIBE URL]':  branding.unsub || '*|UNSUB|*',
+      };
+      for (var token in tokens) {
+        html = html.split(token).join(tokens[token]);
+      }
+
+      // Replace logo placeholder span with styled firm name text (no image needed)
+      var nameTag = '<span style="font-family:Georgia,serif; font-size:14pt; color:#B8860B; letter-spacing:0.12em; text-transform:uppercase;">' + branding.name + '</span>';
+      html = html.replace(/<span class="logo-placeholder">\[ YOUR LOGO \]<\/span>/g, nameTag);
+      // Also clear any leftover [LOGO URL] tokens
+      html = html.split('[LOGO URL]').join('');
+
+      var blob = new Blob([html], { type: 'text/html' });
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = title.toLowerCase().replace(/\s+/g, '-') + '.html';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    } catch(err) {
+      alert('Download failed: ' + err.message);
+    } finally {
+      btn.textContent = orig;
+      btn.disabled = false;
+    }
+  }
+
   /* ── Report type descriptions ─────────────────────────────── */
   var REPORT_DESCRIPTIONS = {
     weekly:         'Your core weekly briefing. Covers the latest price action, macro shifts, key data releases, and the narrative you need to lead client conversations this week. Read this first every Monday.',
@@ -1459,10 +1656,43 @@
     if (isFlash)     { badgeNew.style.display = ''; badgeNew.textContent = 'FLASH'; }
     else if (isNew)  { badgeNew.style.display = ''; }
 
-    var btn = frag.querySelector('.btn');
+    var btn = frag.querySelector('a.btn');
     btn.setAttribute('data-url',   reportUrl);
     btn.setAttribute('data-title', report.title);
     btn.href = '#';
+
+    // Wire up compact listen button if this report has audio
+    var listenBtn = frag.querySelector('.audio-listen-btn');
+    if (report.audio_url && report.audio_url !== 'generating') {
+      listenBtn.style.display = '';
+      var audio = new Audio(report.audio_url);
+      var listenLogged = false;
+      listenBtn.addEventListener('click', function() {
+        if (audio.paused) {
+          audio.play();
+          listenBtn.textContent = '❚❚ PAUSE';
+          if (!listenLogged) {
+            listenLogged = true;
+            var logEmail  = window._userEmail || localStorage.getItem('userEmail') || '';
+            var logFirmId = localStorage.getItem('firmId') || null;
+            if (logEmail) {
+              supabase.from('activity_log').insert({
+                user_email:   logEmail,
+                firm_id:      logFirmId,
+                action:       'listen_report',
+                report_title: report.title || '',
+                asset_class:  (report.asset_class || '').toLowerCase(),
+                report_type:  report.report_type || ''
+              }).then(function(){}).catch(function(){});
+            }
+          }
+        } else {
+          audio.pause();
+          listenBtn.textContent = '▶ LISTEN';
+        }
+      });
+      audio.addEventListener('ended', function() { listenBtn.textContent = '▶ LISTEN'; });
+    }
 
     return frag;
   }
@@ -1481,6 +1711,7 @@
       // Filter reports to only what this firm can access (fetched live from DB — not cached)
       var firmAccess = window.firmAccess || 'both';
       var filteredReports = (reports || []).filter(function(r) {
+        if (r.report_type === 'client_monthly') return false; // shown in Client Edition panel only
         if (firmAccess === 'gold')   return r.asset_class === 'gold';
         if (firmAccess === 'whisky') return r.asset_class === 'whisky';
         return true; // 'both'
@@ -1667,6 +1898,9 @@
     label.style.display = '';
     document.getElementById(asset + '-featured-date').textContent = 'PUBLISHED ' + pubDate;
 
+    var hasAudio = report.audio_url && report.audio_url !== 'generating';
+    var audioId  = 'featured-audio-' + asset;
+
     wrap.innerHTML =
       '<div class="featured-card">' +
         '<div>' +
@@ -1678,12 +1912,55 @@
           '<div class="featured-card-title">' + report.title + '</div>' +
           '<div class="featured-card-meta">' + pubDate + '</div>' +
           '<p class="featured-card-desc">Your latest ' + assetLabel.toLowerCase() + ' intelligence report. Full analysis, market data, and <strong>complete pitch scripts</strong> ready for the phones today.</p>' +
+          (hasAudio ? '<div class="audio-bar" style="margin-top:16px;" id="' + audioId + '-bar">' +
+            '<button class="audio-play-btn" id="' + audioId + '-btn">▶ LISTEN</button>' +
+            '<input type="range" class="audio-scrub" id="' + audioId + '-scrub" value="0" min="0" max="100" step="0.1">' +
+            '<span class="audio-time" id="' + audioId + '-time">0:00</span>' +
+            '<select class="audio-speed" id="' + audioId + '-speed"><option>1×</option><option>1.25×</option><option>1.5×</option><option>2×</option></select>' +
+          '</div>' : '') +
         '</div>' +
         '<div class="featured-card-right">' +
           '<a class="btn btn-solid" href="#" data-url="' + url + '" data-title="' + report.title + '" onclick="openReport(event)">█ OPEN REPORT</a>' +
-          '<p class="featured-card-note">Opens in full-screen viewer.<br>Searchable. Printable.</p>' +
+          '<p class="featured-card-note">Opens in full-screen viewer.<br>Searchable. Printable.' + (hasAudio ? '<br><br>Or listen below ↙' : '') + '</p>' +
         '</div>' +
       '</div>';
+
+    if (hasAudio) {
+      var audio    = new Audio(report.audio_url);
+      var playBtn  = document.getElementById(audioId + '-btn');
+      var scrub    = document.getElementById(audioId + '-scrub');
+      var timeEl   = document.getElementById(audioId + '-time');
+      var speedSel = document.getElementById(audioId + '-speed');
+      function fmtTime(s) { var m=Math.floor(s/60); return m+':'+(Math.floor(s%60)+'').padStart(2,'0'); }
+      var featListenLogged = false;
+      playBtn.addEventListener('click', function() {
+        if (audio.paused) {
+          audio.play(); playBtn.textContent = '❚❚ PAUSE';
+          if (!featListenLogged) {
+            featListenLogged = true;
+            var logEmail  = window._userEmail || localStorage.getItem('userEmail') || '';
+            var logFirmId = localStorage.getItem('firmId') || null;
+            if (logEmail) {
+              supabase.from('activity_log').insert({
+                user_email:   logEmail,
+                firm_id:      logFirmId,
+                action:       'listen_report',
+                report_title: report.title || '',
+                asset_class:  (report.asset_class || asset || '').toLowerCase(),
+                report_type:  report.report_type || ''
+              }).then(function(){}).catch(function(){});
+            }
+          }
+        } else { audio.pause(); playBtn.textContent = '▶ LISTEN'; }
+      });
+      audio.addEventListener('timeupdate', function() {
+        if (audio.duration) scrub.value = (audio.currentTime / audio.duration) * 100;
+        timeEl.textContent = fmtTime(audio.currentTime);
+      });
+      audio.addEventListener('ended', function() { playBtn.textContent = '▶ LISTEN'; scrub.value = 0; });
+      scrub.addEventListener('input', function() { if (audio.duration) audio.currentTime = (scrub.value / 100) * audio.duration; });
+      speedSel.addEventListener('change', function() { audio.playbackRate = parseFloat(speedSel.value); });
+    }
   }
 
   /* ── Filter matching — 'training' tab catches psychology too ── */
