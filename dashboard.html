@@ -1584,19 +1584,33 @@
       return;
     }
     var orig = btn.textContent;
-    btn.textContent = 'OPENING...';
+    btn.textContent = 'LOADING...';
     btn.disabled = true;
     try {
       var fileUrl = 'https://oqpodikelxhwcnjdwojw.supabase.co/storage/v1/object/public/Reports/' + filePath;
-      var params = new URLSearchParams({
-        firm:      b.brokerage_name      || '',
-        email:     b.contact_email       || '',
-        phone:     b.contact_phone       || '',
-        website:   b.website             || '',
-        regulated: b.regulated_status    || '',
-        unsub:     b.unsubscribe_tag     || '',
-      });
-      window.open(fileUrl + '?' + params.toString(), '_blank');
+      var res = await fetch(fileUrl);
+      if (!res.ok) throw new Error('Could not fetch report file.');
+      var html = await res.text();
+
+      // Apply branding replacements — matching the template's own styledName logic
+      var firm = b.brokerage_name || '';
+      var words = firm.trim().toUpperCase().split(/\s+/);
+      var styledFirm = words.length === 1 ? words[0] : words[0] + '<em>' + words.slice(1).join(' ') + '</em>';
+      html = html.split('YOUR<em>BROKERAGE</em>').join(styledFirm);
+      html = html.split('YourBrokerage').join(firm);
+      if (b.website)          html = html.split('www.yourbrokerage.com').join(b.website.replace(/^https?:\/\//, ''));
+      if (b.contact_email)    html = html.split('hello@yourbrokerage.com').join(b.contact_email);
+      if (b.contact_phone)    html = html.split('+44 (0)1234 567890').join(b.contact_phone);
+      if (b.regulated_status) html = html.split('[insert regulatory status]').join(b.regulated_status);
+      if (b.unsubscribe_tag && b.unsubscribe_tag !== '*|UNSUB|*') {
+        html = html.replace(/href="#"([^>]*>To unsubscribe)/g, 'href="' + b.unsubscribe_tag + '"$1');
+      }
+
+      // Open in new tab as a rendered HTML page
+      var blob = new Blob([html], { type: 'text/html' });
+      var blobUrl = URL.createObjectURL(blob);
+      window.open(blobUrl, '_blank');
+      setTimeout(function() { URL.revokeObjectURL(blobUrl); }, 60000);
     } catch(err) {
       alert('Failed to open report: ' + err.message);
     } finally {
