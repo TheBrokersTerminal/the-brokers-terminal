@@ -1579,26 +1579,15 @@
       if (!res.ok) throw new Error('Could not fetch report file.');
       var html = await res.text();
 
-      // Replace text tokens
-      var tokens = {
-        '[BROKERAGE NAME]':   branding.name,
-        '[LOGO ALT TEXT]':    branding.name,
-        '[CONTACT EMAIL]':    branding.email || '',
-        '[CONTACT PHONE]':    branding.phone || '',
-        '[WEBSITE URL]':      branding.website || '',
-        '[REGULATED STATUS]': branding.regulated || '',
-        '[JURISDICTION]':     'United Kingdom',
-        '[UNSUBSCRIBE URL]':  branding.unsub || '*|UNSUB|*',
-      };
-      for (var token in tokens) {
-        html = html.split(token).join(tokens[token]);
+      // Replace placeholder tokens used in the client monthly template
+      html = html.split('YourBrokerage').join(branding.name);
+      if (branding.website) html = html.split('www.yourbrokerage.com').join(branding.website.replace(/^https?:\/\//, ''));
+      if (branding.email)   html = html.split('hello@yourbrokerage.com').join(branding.email);
+      if (branding.phone)   html = html.split('+44 (0)1234 567890').join(branding.phone);
+      if (branding.regulated) html = html.split('[insert regulatory status]').join(branding.regulated);
+      if (branding.unsub && branding.unsub !== '*|UNSUB|*') {
+        html = html.replace(/href="#"([^>]*>To unsubscribe)/g, 'href="' + branding.unsub + '"$1');
       }
-
-      // Replace logo placeholder span with styled firm name text (no image needed)
-      var nameTag = '<span style="font-family:Georgia,serif; font-size:14pt; color:#B8860B; letter-spacing:0.12em; text-transform:uppercase;">' + branding.name + '</span>';
-      html = html.replace(/<span class="logo-placeholder">\[ YOUR LOGO \]<\/span>/g, nameTag);
-      // Also clear any leftover [LOGO URL] tokens
-      html = html.split('[LOGO URL]').join('');
 
       var blob = new Blob([html], { type: 'text/html' });
       var a = document.createElement('a');
