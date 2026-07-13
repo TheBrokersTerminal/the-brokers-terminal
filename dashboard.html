@@ -1606,11 +1606,13 @@
         html = html.replace(/href="#"([^>]*>To unsubscribe)/g, 'href="' + b.unsubscribe_tag + '"$1');
       }
 
-      // Open in new tab as a rendered HTML page
+      // Download as a clean HTML file — opens with file:// URL, no platform branding visible
       var blob = new Blob([html], { type: 'text/html' });
-      var blobUrl = URL.createObjectURL(blob);
-      window.open(blobUrl, '_blank');
-      setTimeout(function() { URL.revokeObjectURL(blobUrl); }, 60000);
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = title.toLowerCase().replace(/\s+/g, '-') + '.html';
+      a.click();
+      setTimeout(function() { URL.revokeObjectURL(a.href); }, 10000);
     } catch(err) {
       alert('Failed to open report: ' + err.message);
     } finally {
