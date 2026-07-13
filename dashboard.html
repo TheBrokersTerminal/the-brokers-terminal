@@ -1580,10 +1580,16 @@
       var html = await res.text();
 
       // Replace placeholder tokens used in the client monthly template
+      // Styled cover/back logo: YOUR<em>BROKERAGE</em>
+      var nameWords = branding.name.trim().toUpperCase().split(/\s+/);
+      var styledFirm = nameWords.length === 1 ? nameWords[0] : nameWords[0] + '<em>' + nameWords.slice(1).join(' ') + '</em>';
+      html = html.split('YOUR<em>BROKERAGE</em>').join(styledFirm);
+      // Plain text instances
       html = html.split('YourBrokerage').join(branding.name);
-      if (branding.website) html = html.split('www.yourbrokerage.com').join(branding.website.replace(/^https?:\/\//, ''));
-      if (branding.email)   html = html.split('hello@yourbrokerage.com').join(branding.email);
-      if (branding.phone)   html = html.split('+44 (0)1234 567890').join(branding.phone);
+      var webPlain = branding.website ? branding.website.replace(/^https?:\/\//, '') : '';
+      if (webPlain)           html = html.split('www.yourbrokerage.com').join(webPlain);
+      if (branding.email)     html = html.split('hello@yourbrokerage.com').join(branding.email);
+      if (branding.phone)     html = html.split('+44 (0)1234 567890').join(branding.phone);
       if (branding.regulated) html = html.split('[insert regulatory status]').join(branding.regulated);
       if (branding.unsub && branding.unsub !== '*|UNSUB|*') {
         html = html.replace(/href="#"([^>]*>To unsubscribe)/g, 'href="' + branding.unsub + '"$1');
