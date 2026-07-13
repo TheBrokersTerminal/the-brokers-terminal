@@ -1531,78 +1531,74 @@
     }).join('');
   }
 
-  function openBrandModal() {
-    var saved = JSON.parse(localStorage.getItem('tbt_client_branding') || '{}');
-    document.getElementById('brand-name').value      = saved.name      || '';
-    document.getElementById('brand-email').value     = saved.email     || '';
-    document.getElementById('brand-phone').value     = saved.phone     || '';
-    document.getElementById('brand-website').value   = saved.website   || '';
-    document.getElementById('brand-regulated').value = saved.regulated || '';
-    document.getElementById('brand-unsub').value     = saved.unsub     || '*|UNSUB|*';
+  async function openBrandModal() {
     document.getElementById('brand-msg').textContent = '';
     document.getElementById('brand-modal').style.display = 'flex';
+    var firmId = window._canonicalFirmId;
+    if (firmId) {
+      var { data: b } = await supabase.from('firm_branding').select('*').eq('firm_id', firmId).single();
+      if (b) {
+        document.getElementById('brand-name').value      = b.brokerage_name     || '';
+        document.getElementById('brand-email').value     = b.contact_email      || '';
+        document.getElementById('brand-phone').value     = b.contact_phone      || '';
+        document.getElementById('brand-website').value   = b.website            || '';
+        document.getElementById('brand-regulated').value = b.regulated_status   || '';
+        document.getElementById('brand-unsub').value     = b.unsubscribe_tag    || '*|UNSUB|*';
+      }
+    }
   }
 
-  function saveBranding() {
+  async function saveBranding() {
     var name  = document.getElementById('brand-name').value.trim();
     var email = document.getElementById('brand-email').value.trim();
     var msg   = document.getElementById('brand-msg');
     if (!name)  { msg.style.color = '#E97132'; msg.textContent = 'Brokerage name is required.'; return; }
     if (!email) { msg.style.color = '#E97132'; msg.textContent = 'Contact email is required.'; return; }
-    var branding = {
-      name:      name,
-      email:     email,
-      phone:     document.getElementById('brand-phone').value.trim(),
-      website:   document.getElementById('brand-website').value.trim(),
-      regulated: document.getElementById('brand-regulated').value.trim(),
-      unsub:     document.getElementById('brand-unsub').value.trim() || '*|UNSUB|*',
-    };
-    localStorage.setItem('tbt_client_branding', JSON.stringify(branding));
+    var firmId = window._canonicalFirmId;
+    if (!firmId) { msg.style.color = '#E97132'; msg.textContent = 'Could not identify your firm.'; return; }
+    var { error } = await supabase.from('firm_branding').upsert({
+      firm_id:          firmId,
+      brokerage_name:   name,
+      contact_email:    email,
+      contact_phone:    document.getElementById('brand-phone').value.trim(),
+      website:          document.getElementById('brand-website').value.trim(),
+      regulated_status: document.getElementById('brand-regulated').value.trim(),
+      unsubscribe_tag:  document.getElementById('brand-unsub').value.trim() || '*|UNSUB|*',
+    }, { onConflict: 'firm_id' });
+    if (error) { msg.style.color = '#E97132'; msg.textContent = 'Save failed: ' + error.message; return; }
     msg.style.color = '#4CAF50';
     msg.textContent = '✓ Branding saved.';
     setTimeout(function() { document.getElementById('brand-modal').style.display = 'none'; }, 900);
   }
 
   async function downloadBranded(filePath, title, btn) {
-    var branding = JSON.parse(localStorage.getItem('tbt_client_branding') || '{}');
-    if (!branding.name) {
+    var firmId = window._canonicalFirmId;
+    var b = null;
+    if (firmId) {
+      var { data } = await supabase.from('firm_branding').select('*').eq('firm_id', firmId).single();
+      b = data;
+    }
+    if (!b || !b.brokerage_name) {
       alert('Please set your firm branding first — click "⚙ BRANDING SETTINGS".');
       openBrandModal();
       return;
     }
     var orig = btn.textContent;
-    btn.textContent = 'LOADING...';
+    btn.textContent = 'OPENING...';
     btn.disabled = true;
     try {
-      var url = 'https://oqpodikelxhwcnjdwojw.supabase.co/storage/v1/object/public/Reports/' + filePath;
-      var res = await fetch(url);
-      if (!res.ok) throw new Error('Could not fetch report file.');
-      var html = await res.text();
-
-      // Replace placeholder tokens used in the client monthly template
-      // Styled cover/back logo: YOUR<em>BROKERAGE</em>
-      var nameWords = branding.name.trim().toUpperCase().split(/\s+/);
-      var styledFirm = nameWords.length === 1 ? nameWords[0] : nameWords[0] + '<em>' + nameWords.slice(1).join(' ') + '</em>';
-      html = html.split('YOUR<em>BROKERAGE</em>').join(styledFirm);
-      // Plain text instances
-      html = html.split('YourBrokerage').join(branding.name);
-      var webPlain = branding.website ? branding.website.replace(/^https?:\/\//, '') : '';
-      if (webPlain)           html = html.split('www.yourbrokerage.com').join(webPlain);
-      if (branding.email)     html = html.split('hello@yourbrokerage.com').join(branding.email);
-      if (branding.phone)     html = html.split('+44 (0)1234 567890').join(branding.phone);
-      if (branding.regulated) html = html.split('[insert regulatory status]').join(branding.regulated);
-      if (branding.unsub && branding.unsub !== '*|UNSUB|*') {
-        html = html.replace(/href="#"([^>]*>To unsubscribe)/g, 'href="' + branding.unsub + '"$1');
-      }
-
-      var blob = new Blob([html], { type: 'text/html' });
-      var a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = title.toLowerCase().replace(/\s+/g, '-') + '.html';
-      a.click();
-      URL.revokeObjectURL(a.href);
+      var fileUrl = 'https://oqpodikelxhwcnjdwojw.supabase.co/storage/v1/object/public/Reports/' + filePath;
+      var params = new URLSearchParams({
+        firm:      b.brokerage_name      || '',
+        email:     b.contact_email       || '',
+        phone:     b.contact_phone       || '',
+        website:   b.website             || '',
+        regulated: b.regulated_status    || '',
+        unsub:     b.unsubscribe_tag     || '',
+      });
+      window.open(fileUrl + '?' + params.toString(), '_blank');
     } catch(err) {
-      alert('Download failed: ' + err.message);
+      alert('Failed to open report: ' + err.message);
     } finally {
       btn.textContent = orig;
       btn.disabled = false;
