@@ -2234,8 +2234,8 @@
           var { data: { users: existingUsers } } = await supabaseAdmin.auth.admin.listUsers();
           authUser = existingUsers ? existingUsers.find(function(u) { return u.email === email; }) : null;
           if (!authUser) throw new Error('Could not locate existing auth user for ' + email);
-          // Update their password to the new temporary one
-          await supabaseAdmin.auth.admin.updateUserById(authUser.id, { password: password });
+          // Update their password and confirm their email
+          await supabaseAdmin.auth.admin.updateUserById(authUser.id, { password: password, email_confirm: true });
         } else {
           throw new Error('Could not create account: ' + createErr.message);
         }
