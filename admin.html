@@ -733,26 +733,35 @@
           </div>
 
           <div class="form-group">
-            <label class="form-label">FIRM / COMPANY NAME</label>
-            <input class="form-input" id="ca-firm" type="text" placeholder="e.g. Robertson & Co" required>
+            <label class="form-label">FIRM</label>
+            <select class="form-input" id="ca-firm-select" onchange="toggleNewFirmFields()">
+              <option value="__new__">+ Create new firm</option>
+            </select>
           </div>
 
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+          <div id="ca-new-firm-fields">
             <div class="form-group">
-              <label class="form-label">CONTENT ACCESS</label>
-              <select class="form-input" id="ca-access">
-                <option value="both">Both (Gold + Whisky)</option>
-                <option value="gold">Gold Only</option>
-                <option value="whisky">Whisky Only</option>
-              </select>
+              <label class="form-label">FIRM / COMPANY NAME</label>
+              <input class="form-input" id="ca-firm" type="text" placeholder="e.g. Robertson & Co">
             </div>
-            <div class="form-group">
-              <label class="form-label">PLAN</label>
-              <select class="form-input" id="ca-plan" onchange="toggleExpiryField()">
-                <option value="corporate">Corporate (£499/mo)</option>
-                <option value="individual">Individual (£49/mo)</option>
-                <option value="complimentary">Complimentary Access</option>
-              </select>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+              <div class="form-group">
+                <label class="form-label">CONTENT ACCESS</label>
+                <select class="form-input" id="ca-access">
+                  <option value="both">Both (Gold + Whisky)</option>
+                  <option value="gold">Gold Only</option>
+                  <option value="whisky">Whisky Only</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">PLAN</label>
+                <select class="form-input" id="ca-plan" onchange="toggleExpiryField()">
+                  <option value="corporate">Corporate (£499/mo)</option>
+                  <option value="individual">Individual (£49/mo)</option>
+                  <option value="complimentary">Complimentary Access</option>
+                </select>
+              </div>
             </div>
           </div>
 
@@ -835,6 +844,7 @@
       document.getElementById('tab-' + tabName).classList.add('active');
       if (tabName === 'activity') { loadActivity(); startActivityRefresh(); }
       if (tabName === 'affiliates') loadAffiliates();
+      if (tabName === 'create-account') loadFirmDropdown();
     });
   });
 
@@ -2109,27 +2119,52 @@
     document.getElementById('ca-expiry-group').style.display = plan === 'complimentary' ? 'block' : 'none';
   }
 
+  async function loadFirmDropdown() {
+    var sel = document.getElementById('ca-firm-select');
+    var { data: firms } = await supabaseAdmin.from('firms').select('id, company_name').eq('status', 'active').order('company_name');
+    sel.innerHTML = '<option value="__new__">+ Create new firm</option>';
+    (firms || []).forEach(function(f) {
+      var opt = document.createElement('option');
+      opt.value = f.id;
+      opt.textContent = f.company_name;
+      sel.appendChild(opt);
+    });
+    toggleNewFirmFields();
+  }
+
+  function toggleNewFirmFields() {
+    var isNew = document.getElementById('ca-firm-select').value === '__new__';
+    document.getElementById('ca-new-firm-fields').style.display = isNew ? 'block' : 'none';
+  }
+
   // ══ CREATE ACCOUNT ══════════════════════════════════════════
   document.getElementById('create-account-form').addEventListener('submit', async function(e) {
     e.preventDefault();
 
-    var firstName = document.getElementById('ca-first').value.trim();
-    var lastName  = document.getElementById('ca-last').value.trim();
-    var email     = document.getElementById('ca-email').value.trim().toLowerCase();
-    var firmName  = document.getElementById('ca-firm').value.trim();
-    var access    = document.getElementById('ca-access').value;
-    var plan      = document.getElementById('ca-plan').value;
-    var password  = document.getElementById('ca-password').value.trim();
-    var errorDiv  = document.getElementById('ca-error');
-    var successDiv = document.getElementById('ca-success');
-    var submitBtn  = document.getElementById('ca-submit');
+    var firstName    = document.getElementById('ca-first').value.trim();
+    var lastName     = document.getElementById('ca-last').value.trim();
+    var email        = document.getElementById('ca-email').value.trim().toLowerCase();
+    var password     = document.getElementById('ca-password').value.trim();
+    var selectedFirm = document.getElementById('ca-firm-select').value;
+    var isNewFirm    = selectedFirm === '__new__';
+    var firmName     = isNewFirm ? document.getElementById('ca-firm').value.trim() : '';
+    var access       = isNewFirm ? document.getElementById('ca-access').value : 'both';
+    var plan         = isNewFirm ? document.getElementById('ca-plan').value : 'corporate';
+    var errorDiv     = document.getElementById('ca-error');
+    var successDiv   = document.getElementById('ca-success');
+    var submitBtn    = document.getElementById('ca-submit');
 
     errorDiv.textContent = '';
     errorDiv.classList.remove('visible');
     successDiv.style.display = 'none';
 
-    if (!firstName || !lastName || !email || !firmName || !password) {
-      errorDiv.textContent = 'Please fill in all fields including the temporary password.';
+    if (!firstName || !lastName || !email || !password) {
+      errorDiv.textContent = 'Please fill in all required fields including the temporary password.';
+      errorDiv.classList.add('visible');
+      return;
+    }
+    if (isNewFirm && !firmName) {
+      errorDiv.textContent = 'Please enter a firm name.';
       errorDiv.classList.add('visible');
       return;
     }
@@ -2144,35 +2179,26 @@
 
     try {
       var domain = email.split('@')[1];
-
-      // Access values: 'gold', 'whisky', 'both' (constraint allows these)
-      var dbAccess = access || 'both';
-
-      // Set subscription type and user limits based on plan
-      var subscriptionType = plan;
-      var maxUsers = plan === 'corporate' ? 15 : 1;
-
-      // For complimentary accounts, append expiry note to firm name
-      if (plan === 'complimentary') {
-        var expiryVal = document.getElementById('ca-expiry').value;
-        if (expiryVal) {
-          var expiryDate = new Date(expiryVal + 'T00:00:00');
-          var expiryStr  = expiryDate.toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'}).toUpperCase();
-          firmName = firmName + ' · COMP TO ' + expiryStr;
-        }
-      }
-
-      // 1. Create or find the firm
-      var { data: existingFirm } = await supabaseAdmin
-        .from('firms')
-        .select('id')
-        .eq('domain', domain)
-        .maybeSingle();
-
       var firmId;
-      if (existingFirm) {
-        firmId = existingFirm.id;
+
+      if (!isNewFirm) {
+        // Use the selected existing firm
+        firmId = selectedFirm;
       } else {
+        // Create a new firm
+        var dbAccess = access || 'both';
+        var subscriptionType = plan;
+        var maxUsers = plan === 'corporate' ? 15 : 1;
+
+        if (plan === 'complimentary') {
+          var expiryVal = document.getElementById('ca-expiry').value;
+          if (expiryVal) {
+            var expiryDate = new Date(expiryVal + 'T00:00:00');
+            var expiryStr  = expiryDate.toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'}).toUpperCase();
+            firmName = firmName + ' · COMP TO ' + expiryStr;
+          }
+        }
+
         var { data: newFirm, error: firmErr } = await supabaseAdmin
           .from('firms')
           .insert({
