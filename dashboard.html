@@ -1509,11 +1509,17 @@
       .order('published_date', { ascending: false });
 
     const list = document.getElementById('client-reports-list');
-    if (!reports || reports.length === 0) {
+    // Filter by the subscriber's asset access
+    var access = window.firmAccess || 'both';
+    var filtered = (reports || []).filter(function(r) {
+      if (access === 'both' || access === 'all') return true;
+      return (r.asset_class || '').toLowerCase() === access;
+    });
+    if (filtered.length === 0) {
       list.innerHTML = '<div style="padding:20px 40px; color:var(--text-faint); font-size:10px; letter-spacing:0.14em; text-transform:uppercase;">No client reports published yet — check back each month.</div>';
       return;
     }
-    list.innerHTML = reports.map(function(r) {
+    list.innerHTML = filtered.map(function(r) {
       var date = new Date(r.published_date).toLocaleDateString('en-GB', { year:'numeric', month:'long', day:'2-digit' }).toUpperCase();
       var asset = (r.asset_class || '').toUpperCase();
       var safeTitle = r.title.replace(/'/g, "\\'").replace(/"/g, '&quot;');
