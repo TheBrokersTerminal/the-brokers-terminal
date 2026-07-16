@@ -2150,11 +2150,15 @@
           cb.type = 'checkbox';
           cb.value = f.id;
           cb.name = 'doc-firm-cb';
+          cb.checked = false;
           cb.style.cssText = 'accent-color:var(--accent);width:14px;height:14px;cursor:pointer;';
           label.appendChild(cb);
           label.appendChild(document.createTextNode(f.company_name));
           container.appendChild(label);
         });
+      } else {
+        // Reset all checkboxes to unticked each time client_monthly is selected
+        container.querySelectorAll('input[type="checkbox"]').forEach(function(cb) { cb.checked = false; });
       }
     }
   });
