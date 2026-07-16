@@ -133,7 +133,7 @@ serve(async (req) => {
   }
 
   try {
-    const { title, reportType, assetClass, publishedDate, test_email } = await req.json()
+    const { title, reportType, assetClass, publishedDate, firmId, test_email } = await req.json()
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE)
 
@@ -146,17 +146,19 @@ serve(async (req) => {
     } else {
       const { data: users, error } = await supabase
         .from('users')
-        .select('email, first_name, role, status, firms(status, access, subscription_type)')
+        .select('email, first_name, role, status, firm_id, firms(status, access, subscription_type)')
         .eq('status', 'active')
         .not('firm_id', 'is', null)
 
       if (error) throw error
 
       if (isClientMonthly) {
-        // Client monthly — only corporate admins
+        // Client monthly — corporate admins only, restricted to specific firm if firmId set
         recipients = (users || []).filter((u: any) => {
           if (!u.firms || u.firms.status !== 'active') return false
-          return u.firms.subscription_type === 'corporate' && u.role === 'admin'
+          if (u.firms.subscription_type !== 'corporate' || u.role !== 'admin') return false
+          if (firmId) return u.firm_id === firmId
+          return true
         })
       } else {
         // Standard report — all active subscribers with matching asset access
