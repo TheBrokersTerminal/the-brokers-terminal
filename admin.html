@@ -377,6 +377,14 @@
               <input class="form-input" id="doc-date" type="date" required>
             </div>
 
+            <div class="form-group" id="doc-firm-group" style="display:none;">
+              <label class="form-label" for="doc-firm">ASSIGN TO FIRM <span style="color:var(--text-faint); font-weight:400;">(optional — leave blank for generic template visible to all)</span></label>
+              <select class="form-input form-select" id="doc-firm">
+                <option value="">Generic — visible to all qualifying firms</option>
+              </select>
+              <div style="color:var(--text-faint); font-size:10px; margin-top:6px; letter-spacing:0.10em;">Select a firm to make this report exclusive to them — e.g. a custom branded version with their logo.</div>
+            </div>
+
             <div class="form-group">
               <label class="form-label" for="doc-tags">SEARCH TAGS <span style="color:var(--text-faint); font-weight:400;">(comma separated — helps subscribers find this)</span></label>
               <input class="form-input" id="doc-tags" type="text" placeholder="e.g. inflation, interest rates, objection, gold price, recession, pitch">
@@ -2119,6 +2127,25 @@
     document.getElementById('ca-expiry-group').style.display = plan === 'complimentary' ? 'block' : 'none';
   }
 
+  // Show firm selector only for client_monthly uploads
+  document.getElementById('doc-type').addEventListener('change', async function() {
+    var isClientMonthly = this.value === 'client_monthly';
+    var group = document.getElementById('doc-firm-group');
+    group.style.display = isClientMonthly ? 'block' : 'none';
+    if (isClientMonthly) {
+      var sel = document.getElementById('doc-firm');
+      if (sel.options.length <= 1) {
+        var { data: firms } = await supabaseAdmin.from('firms').select('id, company_name').eq('status', 'active').order('company_name');
+        (firms || []).forEach(function(f) {
+          var opt = document.createElement('option');
+          opt.value = f.id;
+          opt.textContent = f.company_name;
+          sel.appendChild(opt);
+        });
+      }
+    }
+  });
+
   async function loadFirmDropdown() {
     var sel = document.getElementById('ca-firm-select');
     var { data: firms } = await supabaseAdmin.from('firms').select('id, company_name').eq('status', 'active').order('company_name');
@@ -2362,6 +2389,7 @@
         contentText = (doc.body ? doc.body.innerText || doc.body.textContent : '').replace(/\s+/g, ' ').trim().substring(0, 50000);
       } catch(e) { console.warn('Could not extract text:', e); }
 
+      var firmIdVal = reportType === 'client_monthly' ? (document.getElementById('doc-firm').value || null) : null;
       var { error: dbError } = await supabaseAdmin.from('reports').insert([{
         title:          title,
         report_type:    reportType,
@@ -2370,7 +2398,8 @@
         file_path:      folderPath + filename,
         status:         'published',
         tags:           tags || null,
-        content_text:   contentText || null
+        content_text:   contentText || null,
+        firm_id:        firmIdVal
       }]);
       if (dbError) throw new Error('Database error: ' + dbError.message);
 
