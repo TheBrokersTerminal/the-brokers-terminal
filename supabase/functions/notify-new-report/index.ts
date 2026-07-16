@@ -133,7 +133,7 @@ serve(async (req) => {
   }
 
   try {
-    const { title, reportType, assetClass, publishedDate, firmId, test_email } = await req.json()
+    const { title, reportType, assetClass, publishedDate, reportId, test_email } = await req.json()
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE)
 
@@ -152,12 +152,24 @@ serve(async (req) => {
 
       if (error) throw error
 
+      // For client monthly, look up which firms have access
+      let allowedFirmIds: string[] | null = null
+      if (isClientMonthly && reportId) {
+        const { data: accessRows } = await supabase
+          .from('report_firm_access')
+          .select('firm_id')
+          .eq('report_id', reportId)
+        if (accessRows && accessRows.length > 0) {
+          allowedFirmIds = accessRows.map((r: any) => r.firm_id)
+        }
+      }
+
       if (isClientMonthly) {
-        // Client monthly — corporate admins only, restricted to specific firm if firmId set
+        // Client monthly — corporate admins only, restricted to ticked firms if any
         recipients = (users || []).filter((u: any) => {
           if (!u.firms || u.firms.status !== 'active') return false
           if (u.firms.subscription_type !== 'corporate' || u.role !== 'admin') return false
-          if (firmId) return u.firm_id === firmId
+          if (allowedFirmIds) return allowedFirmIds.includes(u.firm_id)
           return true
         })
       } else {
