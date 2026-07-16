@@ -2412,7 +2412,7 @@
       // Notify active subscribers
       try {
         const { data: notifyResult } = await supabaseAdmin.functions.invoke('notify-new-report', {
-          body: { title, reportType, assetClass, publishedDate }
+          body: { title, reportType, assetClass, publishedDate, firmId: firmIdVal }
         });
         if (notifyResult && notifyResult.sent > 0) {
           successDiv.textContent = '✓ UPLOADED — ' + notifyResult.sent + ' subscriber' + (notifyResult.sent !== 1 ? 's' : '') + ' notified by email.';
