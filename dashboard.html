@@ -1501,12 +1501,19 @@
 
   /* ── CLIENT EDITION ──────────────────────────────────────── */
   async function loadClientReports() {
-    const { data: reports } = await supabase
+    var firmId = window._canonicalFirmId;
+    var query = supabase
       .from('reports')
-      .select('id, title, asset_class, published_date, file_path')
+      .select('id, title, asset_class, published_date, file_path, firm_id')
       .eq('status', 'published')
       .eq('report_type', 'client_monthly')
       .order('published_date', { ascending: false });
+    if (firmId) {
+      query = query.or('firm_id.is.null,firm_id.eq.' + firmId);
+    } else {
+      query = query.is('firm_id', null);
+    }
+    const { data: reports } = await query;
 
     const list = document.getElementById('client-reports-list');
     // Filter by the subscriber's asset access
