@@ -1502,7 +1502,6 @@
 
   /* ── CLIENT EDITION ──────────────────────────────────────── */
   async function loadClientReports() {
-    var firmId = window._canonicalFirmId;
     const { data: reports } = await supabase
       .from('reports')
       .select('id, title, asset_class, published_date, file_path, visible_to, report_firm_access(firm_id)')
@@ -1511,6 +1510,7 @@
       .order('published_date', { ascending: false });
 
     const list = document.getElementById('client-reports-list');
+    var firmId = window._canonicalFirmId;
     var access = window.firmAccess || 'both';
     var subType = window._firmSubscriptionType || 'individual';
     var filtered = (reports || []).filter(function(r) {
