@@ -1157,6 +1157,7 @@
     if (manageSubBtn) manageSubBtn.style.display = 'inline';
     if (manageSubSep) manageSubSep.style.display = 'inline';
     window.firmAccess = firmAccess; // store globally for report loader
+    window._firmSubscriptionType = (firmRow && firmRow.subscription_type) || 'individual';
 
     // Update "ALL CONTENT" subtitle to reflect actual access
     var allSub = document.getElementById('all-content-sub');
@@ -1504,7 +1505,7 @@
     var firmId = window._canonicalFirmId;
     var query = supabase
       .from('reports')
-      .select('id, title, asset_class, published_date, file_path, firm_id')
+      .select('id, title, asset_class, published_date, file_path, firm_id, visible_to')
       .eq('status', 'published')
       .eq('report_type', 'client_monthly')
       .order('published_date', { ascending: false });
@@ -1516,11 +1517,15 @@
     const { data: reports } = await query;
 
     const list = document.getElementById('client-reports-list');
-    // Filter by the subscriber's asset access
     var access = window.firmAccess || 'both';
+    var subType = window._firmSubscriptionType || 'individual';
     var filtered = (reports || []).filter(function(r) {
-      if (access === 'both' || access === 'all') return true;
-      return (r.asset_class || '').toLowerCase() === access;
+      // Filter by asset access
+      if (access !== 'both' && access !== 'all' && (r.asset_class || '').toLowerCase() !== access) return false;
+      // Filter by visible_to
+      var vt = r.visible_to || 'all';
+      if (vt === 'all') return true;
+      return vt === subType;
     });
     if (filtered.length === 0) {
       list.innerHTML = '<div style="padding:20px 40px; color:var(--text-faint); font-size:10px; letter-spacing:0.14em; text-transform:uppercase;">No client reports published yet — check back each month.</div>';

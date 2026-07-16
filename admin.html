@@ -385,6 +385,15 @@
               <div style="color:var(--text-faint); font-size:10px; margin-top:6px; letter-spacing:0.10em;">Select a firm to make this report exclusive to them — e.g. a custom branded version with their logo.</div>
             </div>
 
+            <div class="form-group" id="doc-visible-group" style="display:none;">
+              <label class="form-label" for="doc-visible">VISIBLE TO</label>
+              <select class="form-input form-select" id="doc-visible">
+                <option value="all">All accounts (corporate &amp; individual)</option>
+                <option value="corporate">Corporate accounts only</option>
+                <option value="individual">Individual accounts only</option>
+              </select>
+            </div>
+
             <div class="form-group">
               <label class="form-label" for="doc-tags">SEARCH TAGS <span style="color:var(--text-faint); font-weight:400;">(comma separated — helps subscribers find this)</span></label>
               <input class="form-input" id="doc-tags" type="text" placeholder="e.g. inflation, interest rates, objection, gold price, recession, pitch">
@@ -2127,11 +2136,12 @@
     document.getElementById('ca-expiry-group').style.display = plan === 'complimentary' ? 'block' : 'none';
   }
 
-  // Show firm selector only for client_monthly uploads
+  // Show firm selector and visibility options only for client_monthly uploads
   document.getElementById('doc-type').addEventListener('change', async function() {
     var isClientMonthly = this.value === 'client_monthly';
     var group = document.getElementById('doc-firm-group');
     group.style.display = isClientMonthly ? 'block' : 'none';
+    document.getElementById('doc-visible-group').style.display = isClientMonthly ? 'block' : 'none';
     if (isClientMonthly) {
       var sel = document.getElementById('doc-firm');
       if (sel.options.length <= 1) {
@@ -2389,7 +2399,8 @@
         contentText = (doc.body ? doc.body.innerText || doc.body.textContent : '').replace(/\s+/g, ' ').trim().substring(0, 50000);
       } catch(e) { console.warn('Could not extract text:', e); }
 
-      var firmIdVal = reportType === 'client_monthly' ? (document.getElementById('doc-firm').value || null) : null;
+      var firmIdVal  = reportType === 'client_monthly' ? (document.getElementById('doc-firm').value || null) : null;
+      var visibleTo  = reportType === 'client_monthly' ? (document.getElementById('doc-visible').value || 'all') : 'all';
       var { error: dbError } = await supabaseAdmin.from('reports').insert([{
         title:          title,
         report_type:    reportType,
@@ -2399,7 +2410,8 @@
         status:         'published',
         tags:           tags || null,
         content_text:   contentText || null,
-        firm_id:        firmIdVal
+        firm_id:        firmIdVal,
+        visible_to:     visibleTo
       }]);
       if (dbError) throw new Error('Database error: ' + dbError.message);
 
