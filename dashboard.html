@@ -246,8 +246,7 @@
     /* ── AUDIO PLAYER ────────────────────────────────────────── */
     /* ── CLIENT EDITION PANEL ──────────────────────────────────── */
     .client-edition-panel { border-top: 2px solid var(--accent); background: var(--bg-raised); }
-    .client-edition-header { padding: 18px 40px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(233,113,50,0.3); background: var(--accent); }
-    .client-report-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 40px; border-bottom: 1px solid var(--border-dim); }
+    .client-report-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 24px; border-bottom: 1px solid var(--border-dim); gap: 12px; }
     .client-report-row:last-child { border-bottom: none; }
     .audio-bar { display: flex; align-items: center; gap: 8px; margin-top: 12px; padding: 10px 12px; background: var(--bg-deep); border: 1px solid var(--border-dim); }
     .audio-bar.hidden { display: none; }
@@ -530,16 +529,8 @@
 
 <!-- ══ CLIENT EDITION PANEL ══════════════════════════════════════ -->
 <div id="client-edition-panel" style="display:none;" class="client-edition-panel">
-  <div class="client-edition-header">
-    <div>
-      <div style="color:#000; font-size:9px; letter-spacing:0.28em; font-weight:700; margin-bottom:3px;">▸ CLIENT EDITION — EXCLUSIVE</div>
-      <div style="color:#000; font-size:13px; letter-spacing:0.12em; text-transform:uppercase; font-weight:700;">Monthly Client Intelligence Reports</div>
-      <div style="color:rgba(0,0,0,0.6); font-size:10px; letter-spacing:0.08em; margin-top:4px;">Brand with your firm's identity and send to your clients via Mailchimp or as PDF</div>
-    </div>
-    <button onclick="openBrandModal()" style="background:none; border:1px solid #000; color:#000; font-family:var(--font); font-size:9px; letter-spacing:0.18em; padding:8px 16px; cursor:pointer; text-transform:uppercase; flex-shrink:0;">⚙ BRANDING SETTINGS</button>
-  </div>
   <div id="client-reports-list">
-    <div style="padding:20px 40px; color:var(--text-faint); font-size:10px; letter-spacing:0.14em; text-transform:uppercase;">Loading...</div>
+    <div style="padding:12px 24px; color:var(--text-faint); font-size:10px; letter-spacing:0.14em; text-transform:uppercase;">Loading...</div>
   </div>
 </div>
 
@@ -1540,17 +1531,18 @@
       var asset = (r.asset_class || '').toUpperCase();
       var safeTitle = r.title.replace(/'/g, "\\'").replace(/"/g, '&quot;');
       var safePath  = r.file_path.replace(/'/g, "\\'");
+      var viewUrl = '/ClientReport' + asset.charAt(0) + asset.slice(1).toLowerCase();
       return '<div class="client-report-row">'
-        + '<div>'
-        + '<span style="font-size:8px; letter-spacing:0.18em; padding:2px 7px; border:1px solid var(--border-dim); color:var(--text-faint); margin-right:10px;">' + asset + '</span>'
-        + '<span style="color:var(--text); font-size:11px; letter-spacing:0.10em; text-transform:uppercase;">' + r.title + '</span>'
-        + '<span style="color:var(--text-faint); font-size:9px; letter-spacing:0.10em; margin-left:14px;">' + date + '</span>'
+        + '<div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0;">'
+        + '<span style="background:var(--accent);color:#000;font-size:8px;letter-spacing:0.20em;font-weight:700;padding:3px 8px;white-space:nowrap;flex-shrink:0;">CLIENT EDITION</span>'
+        + '<span style="font-size:8px;letter-spacing:0.18em;padding:2px 6px;border:1px solid var(--border-dim);color:var(--text-faint);flex-shrink:0;">' + asset + '</span>'
+        + '<span style="color:var(--text);font-size:11px;letter-spacing:0.10em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + r.title + '</span>'
+        + '<span style="color:var(--text-faint);font-size:9px;letter-spacing:0.10em;white-space:nowrap;flex-shrink:0;">' + date + '</span>'
         + '</div>'
-        + '<div style="display:flex;gap:8px;flex-shrink:0;">'
-        + '<a href="/ClientReport' + asset.charAt(0) + asset.slice(1).toLowerCase() + '" target="_blank" style="background:none; border:1px solid var(--border-dim); color:var(--text-faint); font-family:var(--font); font-size:9px; letter-spacing:0.16em; padding:7px 14px; cursor:pointer; font-weight:700; text-transform:uppercase; text-decoration:none; display:inline-flex; align-items:center;">⤢ VIEW</a>'
-        + '<button onclick="downloadBranded(\'' + safePath + '\',\'' + safeTitle + '\',this)"'
-        + ' style="background:var(--accent); border:none; color:#000; font-family:var(--font); font-size:9px; letter-spacing:0.16em; padding:7px 16px; cursor:pointer; font-weight:700; text-transform:uppercase;">'
-        + '↓ DOWNLOAD</button>'
+        + '<div style="display:flex;gap:6px;flex-shrink:0;align-items:center;">'
+        + '<button onclick="openBrandModal()" style="background:none;border:1px solid var(--border-dim);color:var(--text-faint);font-family:var(--font);font-size:9px;letter-spacing:0.14em;padding:5px 10px;cursor:pointer;font-weight:700;text-transform:uppercase;white-space:nowrap;">⚙ BRANDING</button>'
+        + '<a href="' + viewUrl + '" target="_blank" style="background:none;border:1px solid var(--border-dim);color:var(--text-faint);font-family:var(--font);font-size:9px;letter-spacing:0.14em;padding:5px 10px;cursor:pointer;font-weight:700;text-transform:uppercase;text-decoration:none;display:inline-flex;align-items:center;">⤢ VIEW</a>'
+        + '<button onclick="downloadBranded(\'' + safePath + '\',\'' + safeTitle + '\',this)" style="background:var(--accent);border:none;color:#000;font-family:var(--font);font-size:9px;letter-spacing:0.14em;padding:5px 12px;cursor:pointer;font-weight:700;text-transform:uppercase;">↓ DOWNLOAD</button>'
         + '</div>'
         + '</div>';
     }
