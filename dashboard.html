@@ -246,7 +246,7 @@
     /* ── AUDIO PLAYER ────────────────────────────────────────── */
     /* ── CLIENT EDITION PANEL ──────────────────────────────────── */
     .client-edition-panel { border-top: 2px solid var(--accent); background: var(--bg-raised); }
-    .client-edition-header { padding: 18px 40px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-dim); }
+    .client-edition-header { padding: 18px 40px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(233,113,50,0.3); background: var(--accent); }
     .client-report-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 40px; border-bottom: 1px solid var(--border-dim); }
     .client-report-row:last-child { border-bottom: none; }
     .audio-bar { display: flex; align-items: center; gap: 8px; margin-top: 12px; padding: 10px 12px; background: var(--bg-deep); border: 1px solid var(--border-dim); }
@@ -532,11 +532,11 @@
 <div id="client-edition-panel" style="display:none;" class="client-edition-panel">
   <div class="client-edition-header">
     <div>
-      <div style="color:var(--accent); font-size:9px; letter-spacing:0.28em; font-weight:700; margin-bottom:3px;">▸ CLIENT EDITION — EXCLUSIVE</div>
-      <div style="color:var(--text); font-size:13px; letter-spacing:0.12em; text-transform:uppercase; font-weight:700;">Monthly Client Intelligence Reports</div>
-      <div style="color:var(--text-faint); font-size:10px; letter-spacing:0.08em; margin-top:4px;">Brand with your firm's identity and send to your clients via Mailchimp or as PDF</div>
+      <div style="color:#000; font-size:9px; letter-spacing:0.28em; font-weight:700; margin-bottom:3px;">▸ CLIENT EDITION — EXCLUSIVE</div>
+      <div style="color:#000; font-size:13px; letter-spacing:0.12em; text-transform:uppercase; font-weight:700;">Monthly Client Intelligence Reports</div>
+      <div style="color:rgba(0,0,0,0.6); font-size:10px; letter-spacing:0.08em; margin-top:4px;">Brand with your firm's identity and send to your clients via Mailchimp or as PDF</div>
     </div>
-    <button onclick="openBrandModal()" style="background:none; border:1px solid var(--accent); color:var(--accent); font-family:var(--font); font-size:9px; letter-spacing:0.18em; padding:8px 16px; cursor:pointer; text-transform:uppercase; flex-shrink:0;">⚙ BRANDING SETTINGS</button>
+    <button onclick="openBrandModal()" style="background:none; border:1px solid #000; color:#000; font-family:var(--font); font-size:9px; letter-spacing:0.18em; padding:8px 16px; cursor:pointer; text-transform:uppercase; flex-shrink:0;">⚙ BRANDING SETTINGS</button>
   </div>
   <div id="client-reports-list">
     <div style="padding:20px 40px; color:var(--text-faint); font-size:10px; letter-spacing:0.14em; text-transform:uppercase;">Loading...</div>
