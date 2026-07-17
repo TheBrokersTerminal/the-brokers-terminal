@@ -1043,6 +1043,7 @@
         <td style="display:flex; gap:6px; flex-wrap:wrap;">
           <button class="btn btn-sm" onclick="previewReport('${r.file_path}', '${r.title.replace(/'/g,"\\'")}')">PREVIEW</button>
           ${audioBtn}
+          ${r.report_type === 'client_monthly' ? `<button class="btn btn-sm" onclick="openAccessModal('${r.id}', '${r.title.replace(/'/g,"\\'")}')">EDIT ACCESS</button>` : ''}
           <button class="btn btn-sm btn-danger" onclick="deleteReport('${r.id}', '${r.file_path.replace(/'/g,"\\'")}')">DELETE</button>
         </td>
       </tr>`;
@@ -2636,6 +2637,92 @@
     </div>
   </div>
 </div>
+
+<div id="access-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:9999; align-items:center; justify-content:center;">
+  <div style="background:var(--bg-raised); border:1px solid var(--border); padding:32px; width:480px; max-width:94vw; position:relative; max-height:90vh; overflow-y:auto;">
+    <div style="font-size:11px; letter-spacing:0.2em; color:var(--accent); margin-bottom:6px; text-transform:uppercase;">Edit Report Access</div>
+    <div id="access-modal-title" style="font-size:10px; letter-spacing:0.12em; color:var(--text-faint); margin-bottom:20px; text-transform:uppercase;"></div>
+
+    <div style="font-size:9px; letter-spacing:0.14em; color:var(--text-faint); margin-bottom:10px; text-transform:uppercase;">Tick firms that can view this report. Leave all unticked for generic (visible to all).</div>
+    <div id="access-modal-checkboxes" style="display:flex; flex-direction:column; gap:8px; margin-bottom:20px;"></div>
+
+    <div id="access-modal-msg" style="font-size:10px; letter-spacing:0.12em; margin-bottom:12px; min-height:14px;"></div>
+
+    <div style="display:flex; gap:10px; justify-content:flex-end;">
+      <button class="btn btn-sm" onclick="document.getElementById('access-modal').style.display='none'" style="font-size:10px;">CANCEL</button>
+      <button id="access-save-btn" class="btn btn-sm" onclick="saveReportAccess()" style="font-size:10px; background:var(--accent); color:#fff; border-color:var(--accent);">SAVE ACCESS</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  var _accessReportId = null;
+
+  async function openAccessModal(reportId, title) {
+    _accessReportId = reportId;
+    document.getElementById('access-modal-title').textContent = title;
+    document.getElementById('access-modal-msg').textContent = '';
+    document.getElementById('access-modal').style.display = 'flex';
+
+    var container = document.getElementById('access-modal-checkboxes');
+    container.innerHTML = '<div style="color:var(--text-faint);font-size:10px;letter-spacing:0.12em;">Loading...</div>';
+
+    // Load all firms and current access in parallel
+    var [{ data: firms }, { data: current }] = await Promise.all([
+      supabaseAdmin.from('firms').select('id, company_name').eq('status', 'active').order('company_name'),
+      supabaseAdmin.from('report_firm_access').select('firm_id').eq('report_id', reportId)
+    ]);
+
+    var currentIds = new Set((current || []).map(function(r) { return r.firm_id; }));
+
+    container.innerHTML = '';
+    (firms || []).forEach(function(f) {
+      var label = document.createElement('label');
+      label.style.cssText = 'display:flex;align-items:center;gap:8px;font-size:11px;letter-spacing:0.10em;text-transform:uppercase;color:var(--text);cursor:pointer;';
+      var cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.value = f.id;
+      cb.name = 'access-modal-cb';
+      cb.checked = currentIds.has(f.id);
+      cb.style.cssText = 'accent-color:var(--accent);width:14px;height:14px;cursor:pointer;';
+      label.appendChild(cb);
+      label.appendChild(document.createTextNode(f.company_name));
+      container.appendChild(label);
+    });
+  }
+
+  async function saveReportAccess() {
+    var btn = document.getElementById('access-save-btn');
+    var msg = document.getElementById('access-modal-msg');
+    btn.textContent = 'SAVING...';
+    btn.disabled = true;
+    msg.textContent = '';
+
+    var selectedIds = Array.from(document.querySelectorAll('input[name="access-modal-cb"]:checked')).map(function(cb) { return cb.value; });
+
+    try {
+      // Delete all existing access rows for this report
+      await supabaseAdmin.from('report_firm_access').delete().eq('report_id', _accessReportId);
+
+      // Insert new ones if any ticked
+      if (selectedIds.length > 0) {
+        var rows = selectedIds.map(function(fid) { return { report_id: _accessReportId, firm_id: fid }; });
+        var { error } = await supabaseAdmin.from('report_firm_access').insert(rows);
+        if (error) throw error;
+      }
+
+      msg.style.color = '#4CAF50';
+      msg.textContent = '✓ Access updated.';
+      setTimeout(function() { document.getElementById('access-modal').style.display = 'none'; }, 800);
+    } catch(e) {
+      msg.style.color = '#e05';
+      msg.textContent = '✗ ' + (e.message || 'Save failed.');
+    } finally {
+      btn.textContent = 'SAVE ACCESS';
+      btn.disabled = false;
+    }
+  }
+</script>
 
 </body>
 </html>
