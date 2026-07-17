@@ -1540,7 +1540,6 @@
       var asset = (r.asset_class || '').toUpperCase();
       var safeTitle = r.title.replace(/'/g, "\\'").replace(/"/g, '&quot;');
       var safePath  = r.file_path.replace(/'/g, "\\'");
-      var viewUrl   = 'https://oqpodikelxhwcnjdwojw.supabase.co/storage/v1/object/public/Reports/' + r.file_path;
       return '<div class="client-report-row">'
         + '<div>'
         + '<span style="font-size:8px; letter-spacing:0.18em; padding:2px 7px; border:1px solid var(--border-dim); color:var(--text-faint); margin-right:10px;">' + asset + '</span>'
@@ -1548,7 +1547,7 @@
         + '<span style="color:var(--text-faint); font-size:9px; letter-spacing:0.10em; margin-left:14px;">' + date + '</span>'
         + '</div>'
         + '<div style="display:flex;gap:8px;flex-shrink:0;">'
-        + '<a href="' + viewUrl + '" target="_blank" style="background:none; border:1px solid var(--border-dim); color:var(--text-faint); font-family:var(--font); font-size:9px; letter-spacing:0.16em; padding:7px 14px; cursor:pointer; font-weight:700; text-transform:uppercase; text-decoration:none; display:inline-block;">⤢ VIEW</a>'
+        + '<button onclick="viewReport(\'' + safePath + '\',this)" style="background:none; border:1px solid var(--border-dim); color:var(--text-faint); font-family:var(--font); font-size:9px; letter-spacing:0.16em; padding:7px 14px; cursor:pointer; font-weight:700; text-transform:uppercase;">⤢ VIEW</button>'
         + '<button onclick="downloadBranded(\'' + safePath + '\',\'' + safeTitle + '\',this)"'
         + ' style="background:var(--accent); border:none; color:#000; font-family:var(--font); font-size:9px; letter-spacing:0.16em; padding:7px 16px; cursor:pointer; font-weight:700; text-transform:uppercase;">'
         + '↓ DOWNLOAD</button>'
@@ -1605,6 +1604,26 @@
     msg.style.color = '#4CAF50';
     msg.textContent = '✓ Branding saved.';
     setTimeout(function() { document.getElementById('brand-modal').style.display = 'none'; }, 900);
+  }
+
+  async function viewReport(filePath, btn) {
+    var orig = btn.textContent;
+    btn.textContent = 'LOADING...';
+    btn.disabled = true;
+    try {
+      var fileUrl = 'https://oqpodikelxhwcnjdwojw.supabase.co/storage/v1/object/public/Reports/' + filePath;
+      var res = await fetch(fileUrl);
+      if (!res.ok) throw new Error('Could not fetch report.');
+      var html = await res.text();
+      var blob = new Blob([html], { type: 'text/html' });
+      var url = URL.createObjectURL(blob);
+      window.open(url, '_blank');
+    } catch(e) {
+      alert('Could not open report: ' + e.message);
+    } finally {
+      btn.textContent = orig;
+      btn.disabled = false;
+    }
   }
 
   async function downloadBranded(filePath, title, btn) {
