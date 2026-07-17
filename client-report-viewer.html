@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>THE BROKERS TERMINAL — Client Report</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.0"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; background: #0A0A0A; font-family: 'Courier New', monospace; color: #fff; }
+    #loading {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      height: 100vh; gap: 16px;
+    }
+    #loading-text { font-size: 10px; letter-spacing: 0.24em; text-transform: uppercase; color: #E97132; }
+    #error {
+      display: none; flex-direction: column; align-items: center; justify-content: center;
+      height: 100vh; gap: 12px; text-align: center; padding: 40px;
+    }
+    #error-title { font-size: 11px; letter-spacing: 0.24em; text-transform: uppercase; color: #E97132; }
+    #error-msg { font-size: 10px; letter-spacing: 0.12em; color: #666; }
+    #viewer { display: none; width: 100%; height: 100vh; border: none; }
+  </style>
+</head>
+<body>
+  <div id="loading">
+    <div style="font-size:13px;font-weight:700;letter-spacing:0.24em;color:#E97132;">█ THE BROKERS TERMINAL</div>
+    <div id="loading-text">Loading report...</div>
+  </div>
+  <div id="error">
+    <div id="error-title">Access Denied</div>
+    <div id="error-msg">You do not have access to this report, or it has not been published yet.</div>
+    <a href="/dashboard.html" style="margin-top:16px;font-size:9px;letter-spacing:0.20em;text-transform:uppercase;color:#E97132;text-decoration:none;">← Return to Desk</a>
+  </div>
+  <iframe id="viewer" sandbox="allow-same-origin allow-scripts allow-popups"></iframe>
+
+  <script>
+    const SUPABASE_URL = 'https://oqpodikelxhwcnjdwojw.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_hJjmJ5MYAj8aCpXL6vCMTQ_zJlxUehl';
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    function showError(msg) {
+      document.getElementById('loading').style.display = 'none';
+      var el = document.getElementById('error');
+      el.style.display = 'flex';
+      if (msg) document.getElementById('error-msg').textContent = msg;
+    }
+
+    async function init() {
+      // Determine asset class from URL path
+      var path = window.location.pathname;
+      var assetClass = path.toLowerCase().includes('gold') ? 'gold' : 'whisky';
+
+      // Check auth
+      var { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        window.location.href = '/login.html';
+        return;
+      }
+
+      var userEmail = session.user.email;
+
+      // Get firm
+      var { data: userRow } = await supabase
+        .from('users')
+        .select('firm_id, status')
+        .eq('email', userEmail)
+        .maybeSingle();
+
+      if (!userRow || userRow.status === 'removed' || !userRow.firm_id) {
+        showError('No active account found.');
+        return;
+      }
+
+      var firmId = userRow.firm_id;
+
+      // Verify firm is active
+      var { data: firm } = await supabase
+        .from('firms')
+        .select('status, access')
+        .eq('id', firmId)
+        .single();
+
+      if (!firm || firm.status !== 'active') {
+        showError('Your subscription is not active.');
+        return;
+      }
+
+      // Check asset access
+      var access = firm.access || 'both';
+      if (access !== 'both' && access !== 'all' && access !== assetClass) {
+        showError('Your subscription does not include ' + assetClass + ' reports.');
+        return;
+      }
+
+      // Fetch latest client monthly report for this asset class
+      var { data: reports } = await supabase
+        .from('reports')
+        .select('id, file_path, title, report_firm_access(firm_id)')
+        .eq('status', 'published')
+        .eq('report_type', 'client_monthly')
+        .eq('asset_class', assetClass)
+        .order('published_date', { ascending: false })
+        .limit(10);
+
+      if (!reports || reports.length === 0) {
+        showError('No report published yet — check back next month.');
+        return;
+      }
+
+      // Find first report this firm can access
+      var report = null;
+      for (var i = 0; i < reports.length; i++) {
+        var r = reports[i];
+        var accessList = r.report_firm_access || [];
+        if (accessList.length === 0) { report = r; break; }
+        if (accessList.some(function(a) { return a.firm_id === firmId; })) { report = r; break; }
+      }
+
+      if (!report) {
+        showError('No report available for your account yet.');
+        return;
+      }
+
+      // Fetch and render
+      document.getElementById('loading-text').textContent = 'Loading ' + report.title + '...';
+      var fileUrl = SUPABASE_URL + '/storage/v1/object/public/Reports/' + report.file_path;
+      var res = await fetch(fileUrl);
+      if (!res.ok) { showError('Could not load report file.'); return; }
+      var html = await res.text();
+
+      var iframe = document.getElementById('viewer');
+      iframe.srcdoc = html;
+      iframe.style.display = 'block';
+      document.getElementById('loading').style.display = 'none';
+    }
+
+    init().catch(function(e) { showError(e.message || 'An error occurred.'); });
+  </script>
+</body>
+</html>
