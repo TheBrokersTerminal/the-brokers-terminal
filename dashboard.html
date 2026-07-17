@@ -1547,7 +1547,7 @@
         + '<span style="color:var(--text-faint); font-size:9px; letter-spacing:0.10em; margin-left:14px;">' + date + '</span>'
         + '</div>'
         + '<div style="display:flex;gap:8px;flex-shrink:0;">'
-        + '<button onclick="viewReport(\'' + safePath + '\',this)" style="background:none; border:1px solid var(--border-dim); color:var(--text-faint); font-family:var(--font); font-size:9px; letter-spacing:0.16em; padding:7px 14px; cursor:pointer; font-weight:700; text-transform:uppercase;">⤢ VIEW</button>'
+        + '<a href="/ClientReport' + asset.charAt(0) + asset.slice(1).toLowerCase() + '" target="_blank" style="background:none; border:1px solid var(--border-dim); color:var(--text-faint); font-family:var(--font); font-size:9px; letter-spacing:0.16em; padding:7px 14px; cursor:pointer; font-weight:700; text-transform:uppercase; text-decoration:none; display:inline-flex; align-items:center;">⤢ VIEW</a>'
         + '<button onclick="downloadBranded(\'' + safePath + '\',\'' + safeTitle + '\',this)"'
         + ' style="background:var(--accent); border:none; color:#000; font-family:var(--font); font-size:9px; letter-spacing:0.16em; padding:7px 16px; cursor:pointer; font-weight:700; text-transform:uppercase;">'
         + '↓ DOWNLOAD</button>'
