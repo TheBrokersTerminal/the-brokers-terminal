@@ -1593,8 +1593,8 @@
         + '<span style="color:var(--text-faint);font-size:9px;letter-spacing:0.10em;white-space:nowrap;flex-shrink:0;">' + date + '</span>'
         + '</div>'
         + '<div style="display:flex;gap:6px;flex-shrink:0;align-items:center;">'
-        + '<button onclick="openBrandModal()" style="background:none;border:1px solid var(--border-dim);color:var(--text-faint);font-family:var(--font);font-size:9px;letter-spacing:0.14em;padding:5px 10px;cursor:pointer;font-weight:700;text-transform:uppercase;white-space:nowrap;">⚙ BRANDING</button>'
         + '<button onclick="viewReportBlob(\'' + safePath + '\',this)" style="background:none;border:1px solid var(--border-dim);color:var(--text-faint);font-family:var(--font);font-size:9px;letter-spacing:0.14em;padding:5px 10px;cursor:pointer;font-weight:700;text-transform:uppercase;">⤢ VIEW</button>'
+        + '<button onclick="savePdfReport(\'' + safePath + '\')" style="background:none;border:1px solid var(--accent);color:var(--accent);font-family:var(--font);font-size:9px;letter-spacing:0.14em;padding:5px 10px;cursor:pointer;font-weight:700;text-transform:uppercase;white-space:nowrap;">⎙ PDF</button>'
         + (window._firmAllowDownload ? '<button onclick="downloadBranded(\'' + safePath + '\',\'' + safeTitle + '\',\'' + asset.toLowerCase() + '\',this)" style="background:var(--accent);border:none;color:#000;font-family:var(--font);font-size:9px;letter-spacing:0.14em;padding:5px 12px;cursor:pointer;font-weight:700;text-transform:uppercase;">↓ DOWNLOAD</button>' : '')
         + '</div>'
         + '</div>';
@@ -1656,6 +1656,10 @@
     window.open('/view/' + filePath, '_blank');
   }
 
+  function savePdfReport(filePath) {
+    window.open('/view/' + filePath + '?print=1', '_blank');
+  }
+
   async function viewReport(filePath, btn) {
     var orig = btn.textContent;
     btn.textContent = 'LOADING...';
@@ -1711,13 +1715,19 @@
         html = html.replace(/href="#"([^>]*>To unsubscribe)/g, 'href="' + b.unsubscribe_tag + '"$1');
       }
 
-      // Download as a clean HTML file — opens with file:// URL, no platform branding visible
       var blob = new Blob([html], { type: 'text/html' });
-      var a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = title.toLowerCase().replace(/\s+/g, '-') + '.html';
-      a.click();
-      setTimeout(function() { URL.revokeObjectURL(a.href); }, 10000);
+      var blobUrl = URL.createObjectURL(blob);
+      var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      if (isMobile) {
+        // iOS Safari ignores a.download on blobs — open in new tab so user can share/save
+        window.open(blobUrl, '_blank');
+      } else {
+        var a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = title.toLowerCase().replace(/\s+/g, '-') + '.html';
+        a.click();
+      }
+      setTimeout(function() { URL.revokeObjectURL(blobUrl); }, 10000);
 
       var logEmail = window._userEmail || '';
       var logFirmId = window._canonicalFirmId || null;
