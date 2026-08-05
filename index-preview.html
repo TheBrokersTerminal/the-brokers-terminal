@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PREVIEW — THE BROKERS TERMINAL</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+  /* ═══════════════════════════════════════════════════
+     DESIGN TOKENS
+  ═══════════════════════════════════════════════════ */
+  :root {
+    --bg:         #06080E;
+    --bg-2:       #090C14;
+    --bg-3:       #0C0F18;
+    --bg-4:       #0F121C;
+    --line:       rgba(255,255,255,0.07);
+    --line-warm:  rgba(233,113,50,0.20);
+    --text:       #EDEAE4;
+    --text-2:     #7C8896;
+    --text-3:     #343E4A;
+    --orange:     #E97132;
+    --orange-hi:  #F5824A;
+    --mono:       'DM Mono', 'Consolas', monospace;
+    --sans:       'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    -webkit-font-smoothing: antialiased;
+    padding-bottom: 60px;
+  }
+  a { color: inherit; text-decoration: none; }
+  img { display: block; }
+
+  /* ═══════════════════════════════════════════════════
+     NAV — Goldman clean
+  ═══════════════════════════════════════════════════ */
+  .nav {
+    position: sticky;
+    top: 0;
+    z-index: 200;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 56px;
+    background: rgba(6,8,14,0.94);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--line);
+  }
+  .nav-brand {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.30em;
+    text-transform: uppercase;
+    color: var(--text);
+  }
+  .nav-brand span { color: var(--orange); }
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 36px;
+    list-style: none;
+  }
+  .nav-links a {
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    color: var(--text-2);
+    transition: color 0.15s;
+  }
+  .nav-links a:hover { color: var(--text); }
+  .nav-cta {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--bg) !important;
+    background: var(--orange);
+    padding: 10px 22px;
+    transition: background 0.15s !important;
+  }
+  .nav-cta:hover { background: var(--orange-hi) !important; color: var(--bg) !important; }
+
+  /* ═══════════════════════════════════════════════════
+     HERO — Goldman scale + LSEG confidence
+  ═══════════════════════════════════════════════════ */
+  .hero {
+    min-height: calc(100vh - 64px);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    padding: 0 56px;
+    gap: 80px;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 1px solid var(--line);
+  }
+
+  /* Goldman-style subtle background gradient */
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 800px 600px at 70% 50%, rgba(233,113,50,0.055) 0%, transparent 70%),
+      radial-gradient(ellipse 400px 400px at 100% 0%, rgba(233,113,50,0.04) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .hero-left {
+    position: relative;
+    z-index: 1;
+    padding: 80px 0;
+  }
+
+  .hero-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--orange);
+    margin-bottom: 40px;
+  }
+  .hero-label-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--orange);
+    animation: blink 2.5s ease-in-out infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  .hero-h1 {
+    font-size: clamp(44px, 5.5vw, 76px);
+    font-weight: 800;
+    line-height: 1.04;
+    letter-spacing: -0.03em;
+    color: var(--text);
+    margin-bottom: 32px;
+  }
+  .hero-h1 em {
+    font-style: normal;
+    color: var(--orange);
+  }
+
+  .hero-sub {
+    font-size: 17px;
+    font-weight: 400;
+    line-height: 1.72;
+    color: var(--text-2);
+    max-width: 480px;
+    margin-bottom: 48px;
+  }
+  .hero-sub strong { color: var(--text); font-weight: 600; }
+
+  .hero-actions {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  /* Goldman-style CTA — solid + arrow text */
+  .btn-fill {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    background: var(--orange);
+    color: var(--bg);
+    padding: 15px 32px;
+    transition: background 0.15s;
+    white-space: nowrap;
+  }
+  .btn-fill:hover { background: var(--orange-hi); }
+  .btn-fill svg { transition: transform 0.15s; }
+  .btn-fill:hover svg { transform: translateX(3px); }
+
+  .btn-text {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--text-2);
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 2px;
+    transition: color 0.15s, border-color 0.15s;
+    white-space: nowrap;
+  }
+  .btn-text:hover { color: var(--text); border-color: var(--text-2); }
+  .btn-text svg { transition: transform 0.15s; }
+  .btn-text:hover svg { transform: translateX(3px); }
+
+  /* Hero right — terminal visual */
+  .hero-right {
+    position: relative;
+    z-index: 1;
+    padding: 60px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .hero-terminal {
+    background: var(--bg-3);
+    border: 1px solid var(--line);
+    overflow: hidden;
+    border-radius: 2px;
+  }
+  .terminal-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    background: var(--bg-4);
+    border-bottom: 1px solid var(--line);
+  }
+  .terminal-bar-title {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--text-3);
+  }
+  .terminal-bar-status {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--orange);
+  }
+  .terminal-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--line);
+    transition: background 0.15s;
+  }
+  .terminal-row:last-child { border-bottom: none; }
+  .terminal-row:hover { background: rgba(233,113,50,0.04); }
+  .tr-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .tr-asset {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.10em;
+    color: var(--text);
+  }
+  .tr-desc {
+    font-size: 11px;
+    color: var(--text-3);
+    letter-spacing: 0.02em;
+  }
+  .tr-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    text-align: right;
+  }
+  .tr-price {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text);
+  }
+  .tr-change { font-family: var(--mono); font-size: 11px; min-width: 56px; text-align: right; }
+  .up { color: #4ADE80; }
+  .dn { color: var(--orange); }
+
+  .hero-week-strip {
+    background: var(--bg-3);
+    border: 1px solid var(--line);
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .week-strip-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--text-3);
+  }
+  .week-strip-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-2);
+    letter-spacing: 0.02em;
+  }
+  .week-strip-cta {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--orange);
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* ═══════════════════════════════════════════════════
+     METRICS STRIP — Goldman bottom-of-hero numbers
+  ═══════════════════════════════════════════════════ */
+  .metrics {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    background: var(--bg-2);
+  }
+  .metric {
+    padding: 36px 56px;
+    border-right: 1px solid var(--line);
+  }
+  .metric:last-child { border-right: none; }
+  .metric-num {
+    font-size: 40px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--text);
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+  .metric-num span { color: var(--orange); }
+  .metric-label {
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--text-2);
+    letter-spacing: 0.02em;
+  }
+
+  /* ═══════════════════════════════════════════════════
+     SECTION PRIMITIVES
+  ═══════════════════════════════════════════════════ */
+  .section { padding: 96px 56px; }
+  .section-inner { max-width: 1120px; margin: 0 auto; }
+
+  /* Goldman-style section label — thin orange top border */
+  .sec-label {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--orange);
+    margin-bottom: 24px;
+  }
+  .sec-label::before {
+    content: '';
+    display: block;
+    width: 24px;
+    height: 2px;
+    background: var(--orange);
+    flex-shrink: 0;
+  }
+
+  .sec-h2 {
+    font-size: clamp(32px, 3.5vw, 52px);
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    line-height: 1.08;
+    color: var(--text);
+    margin-bottom: 20px;
+  }
+  .sec-h2 em { font-style: normal; color: var(--orange); }
+
+  .sec-body {
+    font-size: 16px;
+    line-height: 1.78;
+    color: var(--text-2);
+    max-width: 640px;
+  }
+  .sec-body strong { color: var(--text); font-weight: 600; }
+
+  /* ═══════════════════════════════════════════════════
+     WHAT IS — two col, Goldman editorial
+  ═══════════════════════════════════════════════════ */
+  .about-grid {
+    display: grid;
+    grid-template-columns: 5fr 7fr;
+    gap: 80px;
+    align-items: start;
+    padding-top: 56px;
+    border-top: 1px solid var(--line);
+  }
+  .about-left-h {
+    font-size: clamp(28px, 3vw, 44px);
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    line-height: 1.1;
+    color: var(--text);
+  }
+  .about-left-h em { font-style: normal; color: var(--orange); }
+  .about-specs {
+    margin-top: 40px;
+    display: flex;
+    flex-direction: column;
+  }
+  .about-spec {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--line);
+    gap: 24px;
+  }
+  .spec-k {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    color: var(--text-3);
+    white-space: nowrap;
+  }
+  .spec-v {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-2);
+    text-align: right;
+    letter-spacing: 0.02em;
+  }
+  .spec-v.hi { color: var(--orange); }
+  .about-right-body {
+    font-size: 16px;
+    line-height: 1.82;
+    color: var(--text-2);
+  }
+  .about-right-body strong { color: var(--text); font-weight: 600; }
+  .about-right-body p + p { margin-top: 20px; }
+
+  /* ═══════════════════════════════════════════════════
+     DELIVERABLES — LSEG-style card grid
+  ═══════════════════════════════════════════════════ */
+  .freq-divider {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin: 56px 0 24px;
+    padding-top: 32px;
+    border-top: 1px solid var(--line);
+  }
+  .freq-divider:first-of-type { margin-top: 0; border-top: none; padding-top: 0; }
+  .freq-tag {
+    font-family: var(--mono);
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.30em;
+    text-transform: uppercase;
+    color: var(--orange);
+    background: rgba(233,113,50,0.10);
+    padding: 5px 12px;
+    white-space: nowrap;
+  }
+  .freq-rule { flex: 1; height: 1px; background: var(--line); }
+  .freq-when {
+    font-size: 11px;
+    color: var(--text-3);
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+  }
+
+  .cards-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--line); }
+  .cards-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: var(--line); }
+  .cards-3 + .cards-3, .cards-2 + .cards-3, .cards-3 + .cards-2 { margin-top: 1px; }
+
+  .card {
+    background: var(--bg-2);
+    padding: 32px 36px 36px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    transition: background 0.2s;
+  }
+  .card:hover { background: var(--bg-3); }
+  /* Goldman orange top-line on hover */
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--orange);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.25s ease;
+  }
+  .card:hover::before { transform: scaleX(1); }
+  .card-freq {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    margin-bottom: 12px;
+  }
+  .card-title {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    color: var(--text);
+    margin-bottom: 14px;
+    line-height: 1.3;
+  }
+  .card-body {
+    font-size: 13px;
+    line-height: 1.72;
+    color: var(--text-2);
+    flex: 1;
+  }
+  .card-body strong { color: var(--text); font-weight: 600; }
+  /* LSEG arrow link at bottom */
+  .card-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--orange);
+    transition: gap 0.15s;
+  }
+  .card:hover .card-link { gap: 10px; }
+
+  /* ═══════════════════════════════════════════════════
+     PHILOSOPHY — Goldman full-width editorial quote
+  ═══════════════════════════════════════════════════ */
+  .philosophy {
+    padding: 96px 56px;
+    background: var(--bg-2);
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+  .philosophy-inner {
+    max-width: 1120px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 80px;
+    align-items: center;
+  }
+  .phil-left { }
+  .phil-left-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.30em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .phil-left-label::before { content: ''; display: block; width: 20px; height: 2px; background: var(--orange); }
+  .phil-left-hl {
+    font-size: 52px;
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    line-height: 0.9;
+    color: rgba(233,113,50,0.12);
+  }
+  .phil-quote {
+    font-size: clamp(18px, 2vw, 24px);
+    font-weight: 300;
+    line-height: 1.68;
+    color: var(--text);
+    font-style: italic;
+    border-left: 3px solid var(--orange);
+    padding-left: 36px;
+    margin-bottom: 28px;
+  }
+  .phil-credit {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    padding-left: 39px;
+  }
+
+  /* ═══════════════════════════════════════════════════
+     WHO IT'S FOR — LSEG three-panel
+  ═══════════════════════════════════════════════════ */
+  .for-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--line);
+    margin-top: 56px;
+  }
+  .for-card {
+    background: var(--bg);
+    padding: 40px 40px 44px;
+    transition: background 0.2s;
+    position: relative;
+  }
+  .for-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--orange);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.25s ease;
+  }
+  .for-card:hover::before { transform: scaleX(1); }
+  .for-card:hover { background: var(--bg-2); }
+  .for-num {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    color: var(--orange);
+    margin-bottom: 20px;
+    font-family: var(--mono);
+  }
+  .for-title {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--text);
+    margin-bottom: 16px;
+    line-height: 1.25;
+  }
+  .for-body {
+    font-size: 14px;
+    line-height: 1.78;
+    color: var(--text-2);
+  }
+  .for-body strong { color: var(--orange); font-weight: 600; }
+
+  /* ═══════════════════════════════════════════════════
+     MARKETS
+  ═══════════════════════════════════════════════════ */
+  .markets-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 32px;
+  }
+  .market-tag {
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    color: var(--text-2);
+    border: 1px solid var(--line);
+    padding: 10px 22px;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .market-tag:hover { border-color: var(--orange); color: var(--text); }
+
+  /* ═══════════════════════════════════════════════════
+     PRICING — Goldman clean two-col
+  ═══════════════════════════════════════════════════ */
+  .pricing-wrap {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--line);
+    margin-top: 56px;
+  }
+  .price-card {
+    background: var(--bg-2);
+    padding: 52px 52px 56px;
+    position: relative;
+    overflow: hidden;
+  }
+  .price-card.featured { background: var(--bg-3); }
+  .price-card-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    margin-bottom: 28px;
+  }
+  .price-card.featured .price-card-label { color: var(--orange); }
+  .price-num {
+    font-size: 72px;
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .price-num sup {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--orange);
+    vertical-align: top;
+    margin-top: 14px;
+    display: inline-block;
+  }
+  .price-period {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: var(--text-3);
+    text-transform: uppercase;
+    margin-bottom: 36px;
+    padding-bottom: 36px;
+    border-bottom: 1px solid var(--line);
+  }
+  .price-desc {
+    font-size: 14px;
+    line-height: 1.78;
+    color: var(--text-2);
+    margin-bottom: 40px;
+  }
+
+  /* ═══════════════════════════════════════════════════
+     CTA — Goldman full-width dark closer
+  ═══════════════════════════════════════════════════ */
+  .cta-section {
+    padding: 120px 56px;
+    background: var(--bg-2);
+    border-top: 1px solid var(--line);
+    position: relative;
+    overflow: hidden;
+  }
+  .cta-section::before {
+    content: '';
+    position: absolute;
+    right: -200px;
+    top: -200px;
+    width: 700px;
+    height: 700px;
+    background: radial-gradient(ellipse, rgba(233,113,50,0.07) 0%, transparent 65%);
+    pointer-events: none;
+  }
+  .cta-inner {
+    max-width: 1120px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 80px;
+    position: relative;
+    z-index: 1;
+  }
+  .cta-heading {
+    font-size: clamp(32px, 4vw, 56px);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.08;
+    color: var(--text);
+  }
+  .cta-heading em { font-style: normal; color: var(--orange); }
+  .cta-sub {
+    font-size: 16px;
+    line-height: 1.72;
+    color: var(--text-2);
+    margin-top: 20px;
+    max-width: 520px;
+  }
+  .cta-sub strong { color: var(--text); font-weight: 600; }
+  .cta-right {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+
+  /* ═══════════════════════════════════════════════════
+     FOOTER
+  ═══════════════════════════════════════════════════ */
+  .footer {
+    border-top: 1px solid var(--line);
+    background: var(--bg);
+    padding: 32px 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .footer-brand {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--text);
+  }
+  .footer-brand span { color: var(--orange); }
+  .footer-mid {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--text-3);
+  }
+  .footer-right {
+    font-size: 11px;
+    color: var(--text-3);
+    letter-spacing: 0.06em;
+  }
+  .footer-disclaimer {
+    padding: 18px 56px;
+    border-top: 1px solid var(--line);
+    font-size: 11px;
+    color: var(--text-3);
+    line-height: 1.65;
+    text-align: center;
+  }
+  .footer-disclaimer a:hover { color: var(--text-2); }
+
+  /* ═══════════════════════════════════════════════════
+     PREVIEW BAR
+  ═══════════════════════════════════════════════════ */
+  .pbar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 9999;
+    height: 60px;
+    background: rgba(6,8,14,0.97);
+    border-top: 1px solid var(--orange);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 32px;
+    gap: 20px;
+    backdrop-filter: blur(12px);
+  }
+  .pbar-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--orange);
+  }
+  .pbar-note { font-size: 12px; color: var(--text-2); }
+  .pbar-btns { display: flex; gap: 8px; }
+  .pbar-btn {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    padding: 8px 18px;
+    border: 1px solid var(--line);
+    color: var(--text-2);
+    background: transparent;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.15s;
+  }
+  .pbar-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+  .pbar-btn.go { background: var(--orange); border-color: var(--orange); color: var(--bg); }
+  .pbar-btn.go:hover { background: var(--orange-hi); border-color: var(--orange-hi); }
+
+  /* ═══════════════════════════════════════════════════
+     RESPONSIVE
+  ═══════════════════════════════════════════════════ */
+  @media (max-width: 1024px) {
+    .hero { grid-template-columns: 1fr; padding: 60px 32px 0; gap: 40px; }
+    .hero-left { padding: 60px 0 0; }
+    .hero-right { padding: 0 0 40px; }
+    .about-grid { grid-template-columns: 1fr; gap: 48px; }
+    .philosophy-inner { grid-template-columns: 1fr; gap: 40px; }
+    .cta-inner { grid-template-columns: 1fr; gap: 40px; }
+    .for-grid { grid-template-columns: 1fr; }
+    .cards-3 { grid-template-columns: 1fr 1fr; }
+    .pricing-wrap { grid-template-columns: 1fr; }
+    .metrics { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 768px) {
+    .nav { padding: 0 24px; }
+    .nav-links { display: none; }
+    .hero { padding: 40px 24px 0; }
+    .section { padding: 64px 24px; }
+    .metrics { grid-template-columns: repeat(2, 1fr); }
+    .metric { padding: 28px 24px; }
+    .philosophy { padding: 64px 24px; }
+    .cta-section { padding: 72px 24px; }
+    .footer { padding: 24px; }
+    .footer-disclaimer { padding: 16px 24px; }
+    .cards-3, .cards-2 { grid-template-columns: 1fr; }
+    .price-card { padding: 36px 28px 40px; }
+    .pbar { padding: 0 20px; }
+    .pbar-note { display: none; }
+  }
+  </style>
+</head>
+<body>
+
+<!-- PREVIEW BAR -->
+<div class="pbar">
+  <div style="display:flex;align-items:center;gap:20px;">
+    <span class="pbar-label">▸ Preview</span>
+    <span class="pbar-note">Live site unchanged — approve to apply.</span>
+  </div>
+  <div class="pbar-btns">
+    <a class="pbar-btn" href="index.html" target="_blank">Live Site</a>
+    <a class="pbar-btn go" href="#" onclick="alert('Tell Claude: \'Apply the redesign\' to go live.'); return false;">Approve &amp; Apply</a>
+  </div>
+</div>
+
+<!-- ══ NAV ═══════════════════════════════════════════════════════ -->
+<nav class="nav">
+  <div class="nav-brand"><span>■</span> &nbsp;The Brokers Terminal</div>
+  <ul class="nav-links">
+    <li><a href="pricing.html">Pricing</a></li>
+    <li><a href="download.html">Sample Report</a></li>
+    <li><a href="login.html">Login</a></li>
+    <li><a href="signup.html" class="nav-cta">Request Access</a></li>
+  </ul>
+</nav>
+
+<!-- ══ HERO ══════════════════════════════════════════════════════ -->
+<section class="hero">
+
+  <div class="hero-left">
+    <div class="hero-label">
+      <span class="hero-label-dot"></span>
+      Restricted — Professional Brokers Only
+    </div>
+
+    <h1 class="hero-h1">
+      The intelligence<br>
+      your clients will<br>
+      <em>never see.</em>
+    </h1>
+
+    <p class="hero-sub">
+      Every Sunday, a complete intelligence pack lands on your desk. The macro story. The price data. The pitch scripts. The objection handles. <strong>Everything required to walk into Monday prepared.</strong> Not informed. Prepared.
+    </p>
+
+    <div class="hero-actions">
+      <a class="btn-fill" href="pricing.html">
+        Request Access
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+      <a class="btn-text" href="download.html">
+        Preview Intelligence
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+    </div>
+  </div>
+
+  <div class="hero-right">
+    <!-- Live market data panel -->
+    <div class="hero-terminal">
+      <div class="terminal-bar">
+        <span class="terminal-bar-title">Market Intelligence — Live Feed</span>
+        <span class="terminal-bar-status">● Active</span>
+      </div>
+      <div class="terminal-row">
+        <div class="tr-left">
+          <span class="tr-asset">XAU/USD</span>
+          <span class="tr-desc">Gold Spot</span>
+        </div>
+        <div class="tr-right">
+          <span class="tr-price">3,328.40</span>
+          <span class="tr-change up">+0.43%</span>
+        </div>
+      </div>
+      <div class="terminal-row">
+        <div class="tr-left">
+          <span class="tr-asset">MACALLAN 18</span>
+          <span class="tr-desc">Single Malt</span>
+        </div>
+        <div class="tr-right">
+          <span class="tr-price">£1,240</span>
+          <span class="tr-change up">+6.2% YTD</span>
+        </div>
+      </div>
+      <div class="terminal-row">
+        <div class="tr-left">
+          <span class="tr-asset">GBP/USD</span>
+          <span class="tr-desc">Sterling</span>
+        </div>
+        <div class="tr-right">
+          <span class="tr-price">1.2734</span>
+          <span class="tr-change dn">−0.12%</span>
+        </div>
+      </div>
+      <div class="terminal-row">
+        <div class="tr-left">
+          <span class="tr-asset">GLENFARCLAS 25</span>
+          <span class="tr-desc">Single Malt</span>
+        </div>
+        <div class="tr-right">
+          <span class="tr-price">£3,100</span>
+          <span class="tr-change up">+9.1% YTD</span>
+        </div>
+      </div>
+      <div class="terminal-row">
+        <div class="tr-left">
+          <span class="tr-asset">GOLD YTD</span>
+          <span class="tr-desc">Performance</span>
+        </div>
+        <div class="tr-right">
+          <span class="tr-price">+43.5%</span>
+          <span class="tr-change up">↑ Leading</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Latest issue strip -->
+    <div class="hero-week-strip">
+      <div>
+        <div class="week-strip-label">Latest Issue</div>
+        <div class="week-strip-title">Gold Desk Weekly — Week Ended 29 Jun 2026</div>
+      </div>
+      <a href="download.html" class="week-strip-cta">
+        View
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6h8M6 2l4 4-4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+    </div>
+  </div>
+
+</section>
+
+<!-- ══ METRICS ════════════════════════════════════════════════════ -->
+<div class="metrics">
+  <div class="metric">
+    <div class="metric-num">8</div>
+    <div class="metric-label">Deliverables per subscription. Weekly, monthly, quarterly, on-demand.</div>
+  </div>
+  <div class="metric">
+    <div class="metric-num">7</div>
+    <div class="metric-label">Day free trial. Card required. No charge until day eight.</div>
+  </div>
+  <div class="metric">
+    <div class="metric-num"><span>£</span>49</div>
+    <div class="metric-label">Per month. Less than one client lunch. Cancel any time.</div>
+  </div>
+  <div class="metric">
+    <div class="metric-num">∞</div>
+    <div class="metric-label">Archive access. Every issue ever published. Fully searchable.</div>
+  </div>
+</div>
+
+<!-- ══ WHAT IS ════════════════════════════════════════════════════ -->
+<section class="section" style="background: var(--bg);">
+  <div class="section-inner">
+    <div class="sec-label">What This Is</div>
+    <div class="about-grid">
+      <div>
+        <h2 class="about-left-h">Most brokers have a view.<br>We give you the <em>language.</em></h2>
+        <div class="about-specs">
+          <div class="about-spec">
+            <span class="spec-k">Coverage</span>
+            <span class="spec-v">Weekly · Monthly · Quarterly</span>
+          </div>
+          <div class="about-spec">
+            <span class="spec-k">Markets</span>
+            <span class="spec-v">Gold · Whisky · Macro</span>
+          </div>
+          <div class="about-spec">
+            <span class="spec-k">Trial</span>
+            <span class="spec-v hi">7 Days — No Charge</span>
+          </div>
+          <div class="about-spec">
+            <span class="spec-k">Access</span>
+            <span class="spec-v">Professional Brokers Only</span>
+          </div>
+          <div class="about-spec">
+            <span class="spec-k">Archive</span>
+            <span class="spec-v">Every Issue Ever Published</span>
+          </div>
+          <div class="about-spec">
+            <span class="spec-k">Commitment</span>
+            <span class="spec-v hi">None — Cancel Anytime</span>
+          </div>
+        </div>
+      </div>
+      <div class="about-right-body">
+        <p>The broker who educates commands the conversation. The broker who pitches price chases it. Every deliverable in The Brokers Terminal is built around a single question: <strong>what do you say, to whom, and exactly how do you say it</strong> to move them from hesitation to commitment?</p>
+        <p>The research gives you the macro story. The pitch scripts give you the exact language. The objection files give you the answer before the client asks the question. The training modules give you the psychological framework that makes all of it land. <strong>Every week. Not occasionally. Every week.</strong></p>
+        <p>This is not a news service. Goldman Sachs, JPMorgan, and Morgan Stanley produce news. What they do not produce is a Monday-morning call script built around that week's specific data environment — with the objection handles already written and the closes already tested. <strong>That is what this is.</strong></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ DELIVERABLES ═══════════════════════════════════════════════ -->
+<section class="section" style="background: var(--bg-2); border-top: 1px solid var(--line);">
+  <div class="section-inner">
+    <div class="sec-label">Intelligence Stack</div>
+    <h2 class="sec-h2">Every plan includes</h2>
+
+    <div class="freq-divider" style="margin-top:48px;">
+      <span class="freq-tag">Weekly</span>
+      <span class="freq-rule"></span>
+      <span class="freq-when">Every Sunday</span>
+    </div>
+    <div class="cards-2">
+      <div class="card">
+        <div class="card-freq">Weekly</div>
+        <div class="card-title">Gold Desk Weekly</div>
+        <p class="card-body">The macro story, the price data, the central bank positioning, and the geopolitical context — written not as news but as <strong>a desk brief with call scripts attached</strong>. Issued Sunday. Usable Monday. Objection handles included.</p>
+        <span class="card-link">Read sample <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6h8M6 2l4 4-4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></span>
+      </div>
+      <div class="card">
+        <div class="card-freq">Weekly</div>
+        <div class="card-title">Whisky Desk Weekly</div>
+        <p class="card-body">Auction results, distillery news, secondary market data, tariff context — translated into <strong>pitch language with call scripts</strong> built around that week's specific story. The broker who calls on Monday with the Macallan 18 auction data already framed is leading the conversation. Not following it.</p>
+        <span class="card-link">Read sample <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6h8M6 2l4 4-4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></span>
+      </div>
+    </div>
+
+    <div class="freq-divider">
+      <span class="freq-tag">Monthly</span>
+      <span class="freq-rule"></span>
+      <span class="freq-when">Last Sunday of Each Month</span>
+    </div>
+    <div class="cards-3">
+      <div class="card">
+        <div class="card-freq">Monthly</div>
+        <div class="card-title">The Monthly</div>
+        <p class="card-body">Full macro analysis, COT positioning data, central bank demand, sector themes. <strong>The intelligence your clients believe their private bank provides.</strong> It does not. This does.</p>
+      </div>
+      <div class="card">
+        <div class="card-freq">Monthly</div>
+        <div class="card-title">The Pitch Pack</div>
+        <p class="card-body">Every call script, close, and objection handle for that month's market environment — distilled into one document. <strong>Open it. Pick up the phone.</strong> That is the entire process.</p>
+      </div>
+      <div class="card">
+        <div class="card-freq">Monthly</div>
+        <div class="card-title">Training Module</div>
+        <p class="card-body">One sales skill per month. Anchoring. The Challenger teach. Calibrated questions. AVR objection handling. <strong>Applied to that month's live market stories</strong> — not hypotheticals. Never hypotheticals.</p>
+      </div>
+    </div>
+
+    <div class="freq-divider">
+      <span class="freq-tag">Quarterly</span>
+      <span class="freq-rule"></span>
+      <span class="freq-when">End of Each Quarter</span>
+    </div>
+    <div class="cards-3">
+      <div class="card">
+        <div class="card-freq">Quarterly</div>
+        <div class="card-title">The Objection File</div>
+        <p class="card-body">Every objection scripted using AVR — Acknowledge, Validate, Redirect. <em>"I've missed the move." "It's too expensive." "I'll wait."</em> <strong>Every answer written. Before the call begins.</strong> No improvising under pressure.</p>
+      </div>
+      <div class="card">
+        <div class="card-freq">Quarterly</div>
+        <div class="card-title">The Hit List</div>
+        <p class="card-body">The specific client triggers most likely to convert hesitation to action that quarter. <strong>Who to call, why now, what angle to open with.</strong> The broker who knows this is not making cold calls. They are making calculated ones.</p>
+      </div>
+      <div class="card">
+        <div class="card-freq">Quarterly</div>
+        <div class="card-title">The Quarterly Report</div>
+        <p class="card-body">Strategic macro overview across Gold and Whisky. Cycle analysis. Forward outlook. <strong>Written in the language you use across a client desk</strong> — not in the language a fund manager uses in a note nobody reads.</p>
+      </div>
+    </div>
+
+    <div class="freq-divider">
+      <span class="freq-tag">Always-On</span>
+      <span class="freq-rule"></span>
+      <span class="freq-when">Because Markets Don't Wait</span>
+    </div>
+    <div class="cards-2">
+      <div class="card">
+        <div class="card-title">Flash Alerts</div>
+        <p class="card-body">When a major data release, Fed decision, or geopolitical event breaks mid-week, a same-day one-pager is on your desk within hours. The brief. The talking points. The exact language. <strong>The broker who calls the same day leads the conversation. The broker who calls on Sunday reports it.</strong></p>
+      </div>
+      <div class="card">
+        <div class="card-title">The Vault</div>
+        <p class="card-body">Every weekly, monthly, and quarterly report ever published — fully searchable, permanently available. When a client asks about the 2024 gold cycle, or last September's objection clinic, or the Warsh press conference brief — <strong>the answer is already written. You just have to find it.</strong></p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══ PHILOSOPHY ════════════════════════════════════════════════ -->
+<div class="philosophy">
+  <div class="philosophy-inner">
+    <div class="phil-left">
+      <div class="phil-left-label">Editorial Philosophy</div>
+      <div class="phil-left-hl">"</div>
+    </div>
+    <div>
+      <p class="phil-quote">Stop asking whether they want to buy gold. Start asking what percentage of their portfolio they want working against them in a negative real yield environment. The client who frames it as "should I buy gold?" is making an emotional decision. The client who frames it as "how much of my wealth do I want in an asset mathematically guaranteed to lose purchasing power?" is making a mathematical one. Guide them to the second framing. The decision usually resolves itself.</p>
+      <div class="phil-credit">— The Brokers Terminal, Editorial Desk</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ WHO IT'S FOR ═══════════════════════════════════════════════ -->
+<section class="section" style="background: var(--bg);">
+  <div class="section-inner">
+    <div class="sec-label">Access Levels</div>
+    <h2 class="sec-h2">Who it's for</h2>
+    <div class="for-grid">
+      <div class="for-card">
+        <div class="for-num">01</div>
+        <div class="for-title">The Solo Broker</div>
+        <p class="for-body">You do not have a research desk. You do not have a training manager. You have your intelligence, your calls, and your results. <strong>The Brokers Terminal is your research desk, your training manager, and your script library.</strong> £49 per month. Less than one client lunch.</p>
+      </div>
+      <div class="for-card">
+        <div class="for-num">02</div>
+        <div class="for-title">The Desk Leader</div>
+        <p class="for-body">Your team's output depends on the quality of their preparation. The Brokers Terminal puts the same macro brief, the same scripts, and the same objection clinic in every broker's hands on the same day. <strong>One Corporate subscription. Up to fifteen users. Same standard across the desk.</strong></p>
+      </div>
+      <div class="for-card">
+        <div class="for-num">03</div>
+        <div class="for-title">The Serious Practitioner</div>
+        <p class="for-body">You already understand the markets. The gap between knowing something and being able to articulate it — clearly, calmly, under pressure, to a client who is hesitating — is a language problem, not a knowledge problem. <strong>That is the problem this solves.</strong></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ MARKETS ════════════════════════════════════════════════════ -->
+<section class="section" style="background: var(--bg-2); border-top: 1px solid var(--line); padding-top: 64px; padding-bottom: 64px;">
+  <div class="section-inner">
+    <div class="sec-label">Coverage</div>
+    <h2 class="sec-h2" style="font-size: 32px;">Markets Covered</h2>
+    <div class="markets-list">
+      <span class="market-tag">Whisky Market</span>
+      <span class="market-tag">Gold Bullion</span>
+      <span class="market-tag">Global Macro</span>
+      <span class="market-tag">Alternative Assets</span>
+      <span class="market-tag">More Expanding</span>
+    </div>
+  </div>
+</section>
+
+<!-- ══ PRICING ════════════════════════════════════════════════════ -->
+<section class="section" style="background: var(--bg); border-top: 1px solid var(--line);">
+  <div class="section-inner">
+    <div class="sec-label">Access Pricing</div>
+    <h2 class="sec-h2">Choose your plan</h2>
+    <div class="pricing-wrap">
+      <div class="price-card">
+        <div class="price-card-label">Individual Access</div>
+        <div class="price-num"><sup>£</sup>49</div>
+        <div class="price-period">Per Month · 1 User</div>
+        <p class="price-desc">Full access from day one. Every weekly report, every pitch pack, every objection file, every training module, and the complete archive. The first seven days are free. No charge until day eight. Cancel any time.</p>
+        <a class="btn-fill" href="pricing.html" style="display:inline-flex;">Start Free Trial <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+      </div>
+      <div class="price-card featured">
+        <div class="price-card-label">Corporate Access</div>
+        <div class="price-num"><sup>£</sup>400</div>
+        <div class="price-period">Per Month · Up to 15 Users</div>
+        <p class="price-desc">One subscription. Every broker on your desk with access to the same brief, the same scripts, the same objection clinic — every week. The standard of your team's client conversations is a function of the quality of their preparation. This is the preparation.</p>
+        <a class="btn-fill" href="pricing.html" style="display:inline-flex;">Start Free Trial <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+      </div>
+    </div>
+    <p style="font-size:12px;color:var(--text-3);text-align:center;margin-top:20px;letter-spacing:0.04em;">7-day free trial on both plans. Card required, no charge during trial. Cancel anytime. Billed securely via Stripe.</p>
+  </div>
+</section>
+
+<!-- ══ CTA ════════════════════════════════════════════════════════ -->
+<div class="cta-section">
+  <div class="cta-inner">
+    <div>
+      <h2 class="cta-heading">Every week your competitors<br>are having client conversations.<br><em>The question is how well prepared they are.</em></h2>
+      <p class="cta-sub">The broker who calls on Monday with the week's macro story already framed, the scripts already written, and the objections already answered is not working harder than the broker who doesn't. They are working with <strong>better information, in better language, on better timing.</strong> Seven days. No charge. See the difference.</p>
+    </div>
+    <div class="cta-right">
+      <a class="btn-fill" href="pricing.html">
+        Request Access
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+      <a class="btn-text" href="download.html">
+        Preview Intelligence First
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- ══ FOOTER ═════════════════════════════════════════════════════ -->
+<footer>
+  <div class="footer">
+    <span class="footer-brand"><span>■</span> The Brokers Terminal</span>
+    <span class="footer-mid">Brokers Eyes Only</span>
+    <span class="footer-right">© 2026 — All Rights Reserved</span>
+  </div>
+  <div class="footer-disclaimer">
+    This publication is distributed for informational purposes only. Not financial advice. For professional use only.
+    &nbsp;·&nbsp; <a href="mailto:desk@thebrokersterminal.com">desk@thebrokersterminal.com</a>
+  </div>
+</footer>
+
+</body>
+</html>
