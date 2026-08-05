@@ -40,6 +40,13 @@
         .then(function(html) {
           reportHtml = html;
           var iframe = document.getElementById('viewer');
+          var autoPrint = new URLSearchParams(window.location.search).get('print') === '1';
+          if (autoPrint) {
+            iframe.addEventListener('load', function onLoad() {
+              iframe.removeEventListener('load', onLoad);
+              setTimeout(printReport, 800);
+            });
+          }
           iframe.srcdoc = html;
           iframe.style.display = 'block';
           document.getElementById('loading').style.display = 'none';
@@ -120,8 +127,18 @@
         ].join('\n');
         iDoc.head.appendChild(style);
 
-        iframe.contentWindow.focus();
-        iframe.contentWindow.print();
+        var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        if (isMobile) {
+          // iOS Safari can't print from a sandboxed iframe — open content in a new window
+          var printWin = window.open('', '_blank');
+          printWin.document.write(iDoc.documentElement.outerHTML);
+          printWin.document.close();
+          printWin.focus();
+          setTimeout(function() { printWin.print(); }, 600);
+        } else {
+          iframe.contentWindow.focus();
+          iframe.contentWindow.print();
+        }
       });
     }
   </script>
