@@ -54,42 +54,75 @@
       var iframe = document.getElementById('viewer');
       var iDoc = iframe.contentDocument || iframe.contentWindow.document;
 
-      if (!iDoc.getElementById('tbt-print-css')) {
+      ['tbt-print-css', 'tbt-measure-css'].forEach(function(id) {
+        var el = iDoc.getElementById(id);
+        if (el) el.parentNode.removeChild(el);
+      });
+
+      // Step 1: Apply print-equivalent layout on SCREEN so scrollHeight
+      // matches what will actually render in the PDF.
+      // Without this, vh-based cover/back heights and padding differences
+      // cause the measured height to be wrong and leave blank space at end.
+      var measureStyle = iDoc.createElement('style');
+      measureStyle.id = 'tbt-measure-css';
+      measureStyle.textContent = [
+        '.cover, .cover-wrap { min-height: 297mm !important; }',
+        '.back { min-height: 297mm !important; }',
+        '.page { padding: 6mm 17mm !important; }',
+        '.content { padding: 6mm 17mm !important; }',
+        '.metrics-row { margin: 0 !important; padding: 0 !important; }',
+        '.ticker-wrap, .sidebar, nav, .audio-bar, .audio-player, .audio-wrap { display: none !important; }'
+      ].join('\n');
+      iDoc.head.appendChild(measureStyle);
+
+      // Step 2: Wait one frame for reflow, then measure and print
+      requestAnimationFrame(function() {
+        var heightPx = iDoc.documentElement.scrollHeight;
+        var heightMm = Math.ceil(heightPx * 25.4 / 96);
+
+        // Remove measure style before print so screen view is clean
+        iDoc.head.removeChild(measureStyle);
+
+        // Step 3: Inject print CSS with the accurately measured page height
         var style = iDoc.createElement('style');
         style.id = 'tbt-print-css';
         style.textContent = [
           '@media print {',
-          '  @page { size: A4 portrait; margin: 12mm 14mm; }',
-          '  *, *::before, *::after { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }',
-          '  .page-wrap { box-shadow: none !important; width: 100% !important; max-width: 100% !important; }',
-          '  .cover { min-height: 297mm !important; page-break-after: always !important; break-after: page !important; }',
-          '  .back  { min-height: 297mm !important; page-break-before: always !important; break-before: page !important; }',
-          '  .content { padding: 20px 28px 40px !important; }',
+          '  @page { size: 210mm ' + heightMm + 'mm; margin: 0; }',
+          '  *, *::before, *::after {',
+          '    -webkit-print-color-adjust: exact !important;',
+          '    print-color-adjust: exact !important;',
+          '    color-adjust: exact !important;',
+          '    break-inside: auto !important;',
+          '    page-break-inside: auto !important;',
+          '    break-before: auto !important;',
+          '    page-break-before: auto !important;',
+          '    break-after: auto !important;',
+          '    page-break-after: auto !important;',
+          '  }',
+          '  .page-wrap, .cover-wrap { box-shadow: none !important; width: 100% !important; max-width: 100% !important; margin: 0 !important; }',
+          '  .cover, .cover-wrap, .back, .page {',
+          '    break-after: auto !important; page-break-after: auto !important;',
+          '    break-before: auto !important; page-break-before: auto !important;',
+          '  }',
+          '  .page { padding: 6mm 17mm !important; }',
+          '  .content { padding: 6mm 17mm !important; }',
           '  .metrics-row { margin: 0 !important; padding: 0 !important; flex-wrap: wrap !important; }',
           '  .metric { flex: 0 0 32% !important; padding: 10px 8px !important; }',
           '  .ticker-wrap, .sidebar, nav, .audio-bar, .audio-player, .audio-wrap { display: none !important; }',
           '  .page-layout { display: block !important; padding: 0 !important; }',
           '  .main-content { width: 100% !important; padding: 0 !important; }',
           '  table { width: 100% !important; }',
-          '  thead { display: table-header-group; }',
-          '  tr { page-break-inside: avoid !important; break-inside: avoid !important; }',
           '  img { max-width: 100% !important; height: auto !important; }',
-          '  p { orphans: 3; widows: 3; }',
-          '  /* Override report break rules that cause white gaps */',
-          '  .article, .callout, .pull-quote, .urgency-band, .fwd-item, .article-meta, .rh, .section, .sec-block, .entry, .item {',
-          '    break-inside: auto !important; page-break-inside: auto !important;',
-          '  }',
-          '  h1, h2, h3, h4, h2.sec, h3.sub {',
-          '    break-after: auto !important; page-break-after: auto !important;',
-          '    break-before: auto !important; page-break-before: auto !important;',
-          '  }',
+          '  /* Remove text/box shadows — blur-radius shadows render as solid colour boxes in PDF */',
+          '  * { text-shadow: none !important; box-shadow: none !important; }',
           '}'
         ].join('\n');
         iDoc.head.appendChild(style);
-      }
 
-      iframe.contentWindow.focus();
-      iframe.contentWindow.print();
+        iframe.contentWindow.focus();
+        iframe.contentWindow.print();
+      });
     }
   </script>
 </body>
