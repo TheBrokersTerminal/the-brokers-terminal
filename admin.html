@@ -163,6 +163,36 @@
     /* ── LOADING ──────────────────────────────────────────────── */
     .loading-row td { color: var(--text-faint); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; text-align: center; padding: 32px; }
 
+    /* ── OVERVIEW KPI TILES ──────────────────────────────────── */
+    .overview-kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--border-dim); margin-bottom: 28px; }
+    .overview-kpi-tile { background: var(--bg-raised); padding: 20px 24px; }
+    .overview-kpi-val { font-size: 32px; font-weight: 700; line-height: 1; color: var(--accent); margin-bottom: 4px; letter-spacing: -0.01em; }
+    .overview-kpi-val.green { color: #6BCB77; }
+    .overview-kpi-val.amber { color: #f0a500; }
+    .overview-kpi-label { font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--text-faint); margin-bottom: 3px; }
+    .overview-kpi-sub { font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-faint); opacity: 0.55; }
+
+    /* ── ONLINE LIST ─────────────────────────────────────────── */
+    .online-list { list-style: none; padding: 0; margin: 0; }
+    .online-list li { display: flex; align-items: center; gap: 8px; padding: 7px 0; border-bottom: 1px solid var(--border-dim); font-size: 10px; letter-spacing: 0.08em; }
+    .online-list li:last-child { border-bottom: none; }
+    .online-dot { width: 7px; height: 7px; border-radius: 50%; background: #6BCB77; flex-shrink: 0; box-shadow: 0 0 6px #6BCB7799; }
+    .online-name { color: var(--text); flex: 1; }
+    .online-time { color: var(--text-faint); font-size: 9px; }
+
+    /* ── ACTIVITY FEED ───────────────────────────────────────── */
+    .feed-list { list-style: none; padding: 0; margin: 0; }
+    .feed-list li { padding: 7px 0; border-bottom: 1px solid var(--border-dim); font-size: 10px; }
+    .feed-list li:last-child { border-bottom: none; }
+    .feed-action { font-size: 8px; letter-spacing: 0.16em; text-transform: uppercase; padding: 1px 5px; margin-right: 5px; }
+    .feed-action.login    { color: #6BCB77; border: 1px solid #6BCB7755; }
+    .feed-action.view     { color: var(--accent); border: 1px solid var(--accent-dim, #E9713255); }
+    .feed-action.download { color: #a78bfa; border: 1px solid #a78bfa55; }
+    .feed-action.listen   { color: #60a5fa; border: 1px solid #60a5fa55; }
+    .feed-user { color: var(--text-muted); }
+    .feed-detail { color: var(--text-faint); font-size: 9px; display: block; margin-top: 2px; padding-left: 2px; }
+    .feed-when { color: var(--text-faint); font-size: 9px; float: right; }
+
   </style>
 </head>
 <body>
@@ -253,6 +283,30 @@
     <!-- ═══════════ OVERVIEW ═══════════════════════════════════ -->
     <div class="admin-section active" id="tab-overview">
 
+      <!-- KPI tiles -->
+      <div class="overview-kpi-row">
+        <div class="overview-kpi-tile">
+          <div class="overview-kpi-label">EST. MONTHLY REVENUE</div>
+          <div class="overview-kpi-val" id="kpi-mrr">—</div>
+          <div class="overview-kpi-sub" id="kpi-mrr-sub">&nbsp;</div>
+        </div>
+        <div class="overview-kpi-tile">
+          <div class="overview-kpi-label">NEW THIS MONTH</div>
+          <div class="overview-kpi-val green" id="kpi-new-month">—</div>
+          <div class="overview-kpi-sub">SUBSCRIBER SIGNUPS</div>
+        </div>
+        <div class="overview-kpi-tile">
+          <div class="overview-kpi-label">ONLINE NOW</div>
+          <div class="overview-kpi-val green" id="kpi-online-now">—</div>
+          <div class="overview-kpi-sub">ACTIVE IN LAST 5 MIN</div>
+        </div>
+        <div class="overview-kpi-tile">
+          <div class="overview-kpi-label">NEVER LOGGED IN</div>
+          <div class="overview-kpi-val amber" id="kpi-at-risk">—</div>
+          <div class="overview-kpi-sub">ACTION REQUIRED</div>
+        </div>
+      </div>
+
       <!-- This week checklist -->
       <div class="admin-section-label">
         ▸ THIS WEEK — CONTENT CHECKLIST
@@ -262,8 +316,8 @@
         <!-- populated by JS -->
       </div>
 
-      <!-- Two column layout -->
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+      <!-- Three column layout -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; margin-bottom: 28px;">
 
         <!-- Recent uploads -->
         <div>
@@ -278,12 +332,26 @@
           </div>
         </div>
 
-        <!-- Flash alerts removed -->
+        <!-- Who's Online Now -->
+        <div>
+          <div class="admin-section-label">▸ ONLINE NOW <span id="online-now-count" style="color:#6BCB77;">LOADING...</span></div>
+          <ul class="online-list" id="online-now-list">
+            <li><span class="online-dot"></span><span class="online-name" style="color:var(--text-faint);">LOADING...</span></li>
+          </ul>
+        </div>
+
+        <!-- Recent Activity Feed -->
+        <div>
+          <div class="admin-section-label">▸ RECENT ACTIVITY <span>LAST 24 HRS</span></div>
+          <ul class="feed-list" id="overview-activity-feed">
+            <li style="color:var(--text-faint);font-size:10px;padding:10px 0;letter-spacing:0.14em;">LOADING...</li>
+          </ul>
+        </div>
 
       </div>
 
       <!-- Alert panels -->
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 28px;">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
 
         <!-- Never Logged In -->
         <div>
@@ -402,6 +470,14 @@
               <label class="form-label" for="doc-file">HTML FILE</label>
               <input class="form-input" id="doc-file" type="file" accept=".html" required style="padding: 10px 14px; cursor: pointer;">
               <div style="color: var(--text-faint); font-size: 10px; margin-top: 6px; letter-spacing: 0.10em;">HTML files only. Max recommended size: 5MB.</div>
+            </div>
+
+            <div style="display:flex; align-items:center; gap:10px; padding:12px 14px; border:1px solid var(--border-dim); background:var(--bg-deep); margin-bottom:14px;">
+              <input type="checkbox" id="doc-notify" checked style="width:14px;height:14px;accent-color:var(--accent);cursor:pointer;flex-shrink:0;">
+              <div>
+                <label for="doc-notify" style="font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--text);cursor:pointer;font-weight:700;">NOTIFY SUBSCRIBERS BY EMAIL</label>
+                <div style="font-size:9px;letter-spacing:0.10em;color:var(--text-faint);margin-top:3px;">Untick when re-uploading or replacing a file — prevents duplicate notifications.</div>
+              </div>
             </div>
 
             <button class="btn btn-full btn-solid" type="submit" id="upload-submit">█ UPLOAD DOCUMENT</button>
@@ -560,14 +636,13 @@
               <th>PLAN</th>
               <th>USERS</th>
               <th>ACCESS</th>
+              <th>ONLINE</th>
               <th>STATUS</th>
-              <th>STRIPE ID</th>
-              <th>CREATED</th>
-              <th></th>
+              <th>ACTIONS</th>
             </tr>
           </thead>
           <tbody id="firms-tbody">
-            <tr class="loading-row"><td colspan="9">LOADING FIRMS...</td></tr>
+            <tr class="loading-row"><td colspan="8">LOADING FIRMS...</td></tr>
           </tbody>
         </table>
       </div>
@@ -575,65 +650,55 @@
 
     <!-- ═══════════ ACTIVITY ══════════════════════════════════════ -->
     <div class="admin-section" id="tab-activity">
-      <div class="section-header">
-        <div class="section-title">ACTIVITY LOG</div>
-        <div class="section-subtitle">Real-time login history and report views across all subscribers.</div>
-      </div>
-
-      <!-- Churn Risk -->
-      <div style="border:1px solid #8B0000;background:#0D0101;padding:20px;margin-bottom:32px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-          <div>
-            <div style="color:#FF4444;font-size:10px;letter-spacing:0.22em;font-weight:700;text-transform:uppercase;">▸ CHURN RISK — SUBSCRIBERS NOT SEEN IN 14+ DAYS</div>
-            <div style="color:var(--text-faint);font-size:10px;letter-spacing:0.12em;margin-top:4px;">Active paying subscribers who may have gone cold. Reach out before they cancel.</div>
-          </div>
-          <div id="churn-count-badge" style="background:#8B0000;color:#FF4444;font-size:11px;font-weight:700;letter-spacing:0.18em;padding:6px 14px;white-space:nowrap;">— AT RISK</div>
+      <!-- KPI Stats Bar -->
+      <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:1px;background:var(--border-dim);border:1px solid var(--border-dim);margin-bottom:32px;">
+        <div style="background:var(--bg-raised);padding:16px 18px;">
+          <div style="color:var(--text-faint);font-size:8px;letter-spacing:0.22em;text-transform:uppercase;margin-bottom:6px;">LOGINS</div>
+          <div id="stat-total-logins" style="color:var(--text);font-size:22px;font-weight:700;">—</div>
+          <div style="color:var(--text-faint);font-size:8px;letter-spacing:0.12em;margin-top:4px;">ALL TIME</div>
         </div>
-        <div class="admin-table-wrap">
-          <table class="admin-table">
-            <thead><tr><th>SUBSCRIBER</th><th>FIRM</th><th>PLAN</th><th>LAST SEEN</th><th>DAYS GONE</th><th>RISK</th></tr></thead>
-            <tbody id="churn-tbody">
-              <tr><td colspan="6" style="text-align:center;color:var(--text-faint);padding:20px;font-size:10px;">LOADING...</td></tr>
-            </tbody>
-          </table>
+        <div style="background:var(--bg-raised);padding:16px 18px;">
+          <div style="color:var(--text-faint);font-size:8px;letter-spacing:0.22em;text-transform:uppercase;margin-bottom:6px;">REPORT READS</div>
+          <div id="stat-total-reads" style="color:var(--accent);font-size:22px;font-weight:700;">—</div>
+          <div style="color:var(--text-faint);font-size:8px;letter-spacing:0.12em;margin-top:4px;">ALL TIME</div>
         </div>
-      </div>
-
-      <!-- Read vs Listen summary -->
-      <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:32px;">
-        <div style="background:var(--bg-raised);border:1px solid var(--border-dim);padding:20px;">
-          <div style="color:var(--text-faint);font-size:9px;letter-spacing:0.22em;text-transform:uppercase;margin-bottom:8px;">TOTAL READS</div>
-          <div id="stat-total-reads" style="color:var(--accent);font-size:28px;font-weight:700;">—</div>
-          <div style="color:var(--text-faint);font-size:9px;letter-spacing:0.14em;margin-top:4px;">REPORT OPENS</div>
+        <div style="background:var(--bg-raised);padding:16px 18px;">
+          <div style="color:var(--text-faint);font-size:8px;letter-spacing:0.22em;text-transform:uppercase;margin-bottom:6px;">AUDIO LISTENS</div>
+          <div id="stat-total-listens" style="color:#4CAF50;font-size:22px;font-weight:700;">—</div>
+          <div style="color:var(--text-faint);font-size:8px;letter-spacing:0.12em;margin-top:4px;">ALL TIME</div>
         </div>
-        <div style="background:var(--bg-raised);border:1px solid var(--border-dim);padding:20px;">
-          <div style="color:var(--text-faint);font-size:9px;letter-spacing:0.22em;text-transform:uppercase;margin-bottom:8px;">TOTAL LISTENS</div>
-          <div id="stat-total-listens" style="color:#4CAF50;font-size:28px;font-weight:700;">—</div>
-          <div style="color:var(--text-faint);font-size:9px;letter-spacing:0.14em;margin-top:4px;">AUDIO PLAYS</div>
+        <div style="background:var(--bg-raised);padding:16px 18px;">
+          <div style="color:var(--text-faint);font-size:8px;letter-spacing:0.22em;text-transform:uppercase;margin-bottom:6px;">LISTEN RATE</div>
+          <div id="stat-listen-rate" style="color:var(--text);font-size:22px;font-weight:700;">—</div>
+          <div style="color:var(--text-faint);font-size:8px;letter-spacing:0.12em;margin-top:4px;">OF ENGAGEMENTS</div>
         </div>
-        <div style="background:var(--bg-raised);border:1px solid var(--border-dim);padding:20px;">
-          <div style="color:var(--text-faint);font-size:9px;letter-spacing:0.22em;text-transform:uppercase;margin-bottom:8px;">LISTEN RATE</div>
-          <div id="stat-listen-rate" style="color:var(--text);font-size:28px;font-weight:700;">—</div>
-          <div style="color:var(--text-faint);font-size:9px;letter-spacing:0.14em;margin-top:4px;">OF ENGAGEMENTS USE AUDIO</div>
+        <div style="background:var(--bg-raised);padding:16px 18px;">
+          <div style="color:var(--text-faint);font-size:8px;letter-spacing:0.22em;text-transform:uppercase;margin-bottom:6px;">CLIENT VIEWS</div>
+          <div id="stat-total-client-opens" style="color:var(--accent);font-size:22px;font-weight:700;">—</div>
+          <div style="color:var(--text-faint);font-size:8px;letter-spacing:0.12em;margin-top:4px;">CLIENT EDITION</div>
+        </div>
+        <div style="background:var(--bg-raised);padding:16px 18px;">
+          <div style="color:var(--text-faint);font-size:8px;letter-spacing:0.22em;text-transform:uppercase;margin-bottom:6px;">DOWNLOADS</div>
+          <div id="stat-total-downloads" style="color:var(--text);font-size:22px;font-weight:700;">—</div>
+          <div style="color:var(--text-faint);font-size:8px;letter-spacing:0.12em;margin-top:4px;">BRANDED REPORTS</div>
         </div>
       </div>
 
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-bottom:32px;">
-        <!-- Recent logins -->
+      <!-- Live Feed: 3 columns -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-bottom:32px;">
         <div>
           <div class="admin-section-label">▸ RECENT LOGINS</div>
           <div class="admin-table-wrap">
             <table class="admin-table">
-              <thead><tr><th>USER</th><th>FIRM</th><th>TIME</th></tr></thead>
+              <thead><tr><th>USER</th><th>TIME</th></tr></thead>
               <tbody id="activity-logins-tbody">
-                <tr><td colspan="3" style="text-align:center;color:var(--text-faint);padding:20px;font-size:10px;">LOADING...</td></tr>
+                <tr><td colspan="2" style="text-align:center;color:var(--text-faint);padding:20px;font-size:10px;">LOADING...</td></tr>
               </tbody>
             </table>
           </div>
         </div>
-        <!-- Recent report views -->
         <div>
-          <div class="admin-section-label">▸ RECENT REPORT VIEWS</div>
+          <div class="admin-section-label">▸ RECENT READS</div>
           <div class="admin-table-wrap">
             <table class="admin-table">
               <thead><tr><th>USER</th><th>REPORT</th><th>TIME</th></tr></thead>
@@ -643,11 +708,22 @@
             </table>
           </div>
         </div>
+        <div>
+          <div class="admin-section-label">▸ RECENT LISTENS</div>
+          <div class="admin-table-wrap">
+            <table class="admin-table">
+              <thead><tr><th>USER</th><th>REPORT</th><th>TIME</th></tr></thead>
+              <tbody id="activity-listens-tbody">
+                <tr><td colspan="3" style="text-align:center;color:var(--text-faint);padding:20px;font-size:10px;">LOADING...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
-      <!-- Most popular reports -->
-      <div class="admin-section-label">▸ MOST ENGAGED REPORTS</div>
-      <div class="admin-table-wrap">
+      <!-- Engagement by Report -->
+      <div class="admin-section-label">▸ ENGAGEMENT BY REPORT</div>
+      <div class="admin-table-wrap" style="margin-bottom:32px;">
         <table class="admin-table">
           <thead><tr><th>REPORT</th><th>ASSET</th><th>TYPE</th><th style="color:var(--accent);">READS</th><th style="color:#4CAF50;">LISTENS</th><th>TOTAL</th></tr></thead>
           <tbody id="activity-popular-tbody">
@@ -656,24 +732,38 @@
         </table>
       </div>
 
-      <!-- Recent listens -->
-      <div class="admin-section-label" style="margin-top:32px;">▸ RECENT LISTENS</div>
-      <div class="admin-table-wrap">
+      <!-- Client Edition Activity -->
+      <div class="admin-section-label">▸ CLIENT EDITION — OPENS &amp; DOWNLOADS <span id="client-activity-count" style="color:var(--text-faint);font-weight:400;letter-spacing:0.10em;"></span></div>
+      <div class="admin-table-wrap" style="margin-bottom:32px;">
+        <table class="admin-table">
+          <thead><tr><th>USER</th><th>FIRM</th><th>ASSET</th><th>ACTION</th><th>REPORT</th><th>WHEN</th></tr></thead>
+          <tbody id="activity-client-monthly-tbody">
+            <tr><td colspan="6" style="text-align:center;color:var(--text-faint);padding:20px;font-size:10px;">LOADING...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Downloads (non-client-monthly) -->
+      <div class="admin-section-label">▸ REPORT OPENS IN NEW TAB</div>
+      <div class="admin-table-wrap" style="margin-bottom:32px;">
         <table class="admin-table">
           <thead><tr><th>USER</th><th>REPORT</th><th>ASSET</th><th>WHEN</th></tr></thead>
-          <tbody id="activity-listens-tbody">
+          <tbody id="activity-downloads-tbody">
             <tr><td colspan="4" style="text-align:center;color:var(--text-faint);padding:20px;font-size:10px;">LOADING...</td></tr>
           </tbody>
         </table>
       </div>
 
-      <!-- Downloads -->
-      <div class="admin-section-label" style="margin-top:32px;">▸ OPENED IN NEW TAB</div>
+      <!-- Churn Risk -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div class="admin-section-label" style="margin:0;">▸ CHURN RISK — NOT SEEN IN 14+ DAYS</div>
+        <div id="churn-count-badge" style="background:#8B0000;color:#FF4444;font-size:9px;font-weight:700;letter-spacing:0.18em;padding:4px 12px;white-space:nowrap;">— AT RISK</div>
+      </div>
       <div class="admin-table-wrap">
         <table class="admin-table">
-          <thead><tr><th>USER</th><th>FIRM</th><th>REPORT</th><th>ASSET</th><th>WHEN</th></tr></thead>
-          <tbody id="activity-downloads-tbody">
-            <tr><td colspan="5" style="text-align:center;color:var(--text-faint);padding:20px;font-size:10px;">LOADING...</td></tr>
+          <thead><tr><th>SUBSCRIBER</th><th>FIRM</th><th>PLAN</th><th>LAST SEEN</th><th>DAYS GONE</th><th>RISK</th></tr></thead>
+          <tbody id="churn-tbody">
+            <tr><td colspan="6" style="text-align:center;color:var(--text-faint);padding:20px;font-size:10px;">LOADING...</td></tr>
           </tbody>
         </table>
       </div>
@@ -871,8 +961,11 @@
       loadSubscribers(),
       loadFirms()
     ]);
+    renderOverviewActivityFeed();
     // Refresh subscribers every 30 seconds to keep presence dots live
     setInterval(loadSubscribers, 30000);
+    // Refresh activity feed every 60 seconds
+    setInterval(renderOverviewActivityFeed, 60000);
   }
 
   // ══ STATS ═══════════════════════════════════════════════════
@@ -993,6 +1086,8 @@
       // Sync never-logged-in stat counter too
       document.getElementById('stat-never-logged-in').textContent = neverLogged.length;
 
+      renderOverviewKPIs();
+
     } catch (err) { console.error('Alert panels error:', err); }
   }
 
@@ -1073,6 +1168,94 @@
       var typeLabel = r.report_type.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
       return `<tr><td>${r.title}</td><td><span class="badge-type">${typeLabel}</span></td><td style="color:var(--text-faint)">${date}</td></tr>`;
     }).join('');
+  }
+
+  // ══ OVERVIEW KPIs + PANELS ═══════════════════════════════════
+
+  function renderOverviewKPIs() {
+    var now = new Date();
+    var fiveMinAgo   = new Date(now - 5 * 60 * 1000);
+    var thirtyDaysAgo = new Date(now); thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    var twoDaysAgo   = new Date(now); twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
+
+    // MRR from allFirms
+    var activeFirms = allFirms.filter(function(f) { return f.status === 'active'; });
+    var corpCount   = activeFirms.filter(function(f) { return f.subscription_type === 'corporate'; }).length;
+    var indiCount   = activeFirms.length - corpCount;
+    var mrr = (corpCount * 499) + (indiCount * 49);
+    var mrrEl = document.getElementById('kpi-mrr');
+    var mrrSub = document.getElementById('kpi-mrr-sub');
+    if (mrrEl) mrrEl.textContent = '£' + mrr.toLocaleString();
+    if (mrrSub) mrrSub.textContent = indiCount + ' INDIVIDUAL · ' + corpCount + ' CORPORATE';
+
+    // New this month from allSubscribers
+    var newMonth = allSubscribers.filter(function(u) {
+      return u.status !== 'removed' && new Date(u.created_at) >= thirtyDaysAgo;
+    }).length;
+    var nmEl = document.getElementById('kpi-new-month');
+    if (nmEl) nmEl.textContent = newMonth;
+
+    // Online now from allSubscribers
+    var onlineNow = allSubscribers.filter(function(u) {
+      return u.last_seen && new Date(u.last_seen) >= fiveMinAgo;
+    });
+    var onEl = document.getElementById('kpi-online-now');
+    if (onEl) onEl.textContent = onlineNow.length;
+
+    // At risk (never logged in, older than 2 days)
+    var atRisk = allSubscribers.filter(function(u) {
+      return !u.last_seen && !u.last_login_at && new Date(u.created_at) < twoDaysAgo && u.status !== 'removed';
+    }).length;
+    var arEl = document.getElementById('kpi-at-risk');
+    if (arEl) arEl.textContent = atRisk;
+
+    // Online now panel
+    var countEl = document.getElementById('online-now-count');
+    var listEl  = document.getElementById('online-now-list');
+    if (countEl) countEl.textContent = onlineNow.length ? onlineNow.length + ' ONLINE' : 'NONE';
+    if (listEl) {
+      if (!onlineNow.length) {
+        listEl.innerHTML = '<li style="color:var(--text-faint);font-size:10px;padding:10px 0;letter-spacing:0.12em;">NO SUBSCRIBERS ACTIVE RIGHT NOW</li>';
+      } else {
+        listEl.innerHTML = onlineNow.slice(0, 12).map(function(u) {
+          var name = ((u.first_name || '') + ' ' + (u.last_name || '')).trim() || u.email;
+          var seenMs = Date.now() - new Date(u.last_seen).getTime();
+          var seenLabel = seenMs < 60000 ? 'JUST NOW' : Math.floor(seenMs / 60000) + 'M AGO';
+          return '<li><span class="online-dot"></span><span class="online-name">' + name + '</span><span class="online-time">' + seenLabel + '</span></li>';
+        }).join('');
+      }
+    }
+  }
+
+  async function renderOverviewActivityFeed() {
+    var feedEl = document.getElementById('overview-activity-feed');
+    if (!feedEl) return;
+    try {
+      var since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+      var { data } = await supabaseAdmin
+        .from('activity_log')
+        .select('action, user_email, report_title, asset_class, created_at')
+        .gte('created_at', since)
+        .order('created_at', { ascending: false })
+        .limit(12);
+      var rows = data || [];
+      if (!rows.length) {
+        feedEl.innerHTML = '<li style="color:var(--text-faint);font-size:10px;padding:10px 0;letter-spacing:0.12em;">NO ACTIVITY IN LAST 24 HRS</li>';
+        return;
+      }
+      feedEl.innerHTML = rows.map(function(r) {
+        var actionMap = { login: 'LOGIN', view_report: 'VIEW', download_report: 'DOWNLOAD', listen: 'LISTEN' };
+        var actionClass = { login: 'login', view_report: 'view', download_report: 'download', listen: 'listen' };
+        var label  = actionMap[r.action] || r.action.toUpperCase();
+        var cls    = actionClass[r.action] || 'view';
+        var user   = (r.user_email || '').split('@')[0];
+        var detail = r.report_title ? r.report_title.slice(0, 38) + (r.report_title.length > 38 ? '…' : '') : '';
+        var seenMs = Date.now() - new Date(r.created_at).getTime();
+        var when   = seenMs < 60000 ? 'now' : seenMs < 3600000 ? Math.floor(seenMs/60000) + 'm ago' : Math.floor(seenMs/3600000) + 'h ago';
+        return '<li><span class="feed-when">' + when + '</span><span class="feed-action ' + cls + '">' + label + '</span><span class="feed-user">' + user + '</span>' +
+          (detail ? '<span class="feed-detail">' + detail + '</span>' : '') + '</li>';
+      }).join('');
+    } catch(e) { console.error('Activity feed error:', e); }
   }
 
   // ══ THIS WEEK CHECKLIST ══════════════════════════════════════
@@ -1460,12 +1643,13 @@
     try {
       var { data, error } = await supabaseAdmin
         .from('firms')
-        .select('*, users(id, status)')
+        .select('*, users(id, status, last_seen)')
         .order('created_at', { ascending: false });
       if (error) throw error;
 
       allFirms = data || [];
       renderFirmsTable(allFirms);
+      renderOverviewKPIs();
 
     } catch (err) { console.error('Firms error:', err); }
   }
@@ -1475,58 +1659,87 @@
     document.getElementById('firms-count').textContent = firms.length + ' FIRMS';
 
     if (!firms.length) {
-      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--text-faint); padding:32px; font-size:10px; letter-spacing:0.18em; text-transform:uppercase;">NO FIRMS YET</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text-faint);padding:32px;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;">NO FIRMS YET</td></tr>';
       return;
     }
 
-    tbody.innerHTML = firms.map(function (f) {
+    var corp = firms.filter(function(f) { return f.subscription_type === 'corporate'; });
+    var indv = firms.filter(function(f) { return f.subscription_type !== 'corporate'; });
+    var now  = new Date();
+
+    function onlineCount(f) {
+      if (!f.users) return 0;
+      return f.users.filter(function(u) {
+        if (u.status === 'removed' || !u.last_seen) return false;
+        return (now - new Date(u.last_seen)) < 5 * 60 * 1000;
+      }).length;
+    }
+
+    function firmRow(f) {
       var statusHtml = f.status === 'active'
         ? '<span class="status-active">ACTIVE</span>'
         : f.status === 'past_due'
           ? '<span class="status-past-due">PAST DUE</span>'
           : '<span class="status-inactive">INACTIVE</span>';
-      var plan = f.subscription_type
-        ? (f.subscription_type === 'corporate' ? 'CORPORATE · £499' : 'INDIVIDUAL · £49')
-        : '—';
-      var userCount = f.users ? f.users.filter(function(u) { return u.status !== 'removed'; }).length : '—';
-      var maxUsers  = f.max_users || '—';
-      var created   = f.created_at
-        ? new Date(f.created_at).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' }).toUpperCase()
-        : '—';
-      var stripeId  = f.stripe_customer_id
-        ? '<span style="font-size:10px; color:var(--text-faint); letter-spacing:0;">' + f.stripe_customer_id.substring(0, 18) + '...</span>'
+      var plan = f.subscription_type === 'corporate' ? 'CORPORATE · £499' : 'INDIVIDUAL · £49';
+      var activeUsers = f.users ? f.users.filter(function(u) { return u.status !== 'removed'; }).length : 0;
+      var maxUsers = f.max_users || 1;
+      var online = onlineCount(f);
+      var onlineHtml = online > 0
+        ? '<span style="color:#4CAF50;font-weight:700;">● ' + online + ' ONLINE</span>'
         : '<span style="color:var(--text-faint)">—</span>';
       var access = f.access || 'both';
-      var accessHtml = `<select onchange="updateFirmAccess('${f.id}', this.value)" style="background:#111;color:#E97132;border:1px solid #333;padding:3px 6px;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;border-radius:2px;">
-        <option value="both"  ${access==='both'  ?'selected':''}>BOTH</option>
-        <option value="gold"  ${access==='gold'  ?'selected':''}>GOLD ONLY</option>
-        <option value="whisky"${access==='whisky'?'selected':''}>WHISKY ONLY</option>
-      </select>`;
+      var accessHtml = '<select onchange="updateFirmAccess(\'' + f.id + '\', this.value)" style="background:#111;color:#E97132;border:1px solid #333;padding:3px 6px;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;">'
+        + '<option value="both"'   + (access==='both'   ? ' selected' : '') + '>BOTH</option>'
+        + '<option value="gold"'   + (access==='gold'   ? ' selected' : '') + '>GOLD ONLY</option>'
+        + '<option value="whisky"' + (access==='whisky' ? ' selected' : '') + '>WHISKY ONLY</option>'
+        + '</select>'
+        + '<br><button onclick="toggleFirmDownload(\'' + f.id + '\', ' + (f.allow_download ? 'false' : 'true') + ', this)" style="margin-top:4px;background:' + (f.allow_download ? '#6BCB77' : '#333') + ';border:none;color:' + (f.allow_download ? '#000' : 'var(--text-faint)') + ';font-family:var(--font);font-size:8px;letter-spacing:0.14em;padding:3px 8px;cursor:pointer;font-weight:700;text-transform:uppercase;">'
+        + (f.allow_download ? '↓ DOWNLOADS ON' : '↓ DOWNLOADS OFF')
+        + '</button>';
       var membersBtn = f.subscription_type === 'corporate'
-        ? `<button class="btn btn-sm" onclick="toggleFirmMembers('${f.id}', this)" style="font-size:9px;margin-left:6px;">▾ MEMBERS</button>`
+        ? '<button class="btn btn-sm" onclick="toggleFirmMembers(\'' + f.id + '\', this)" style="font-size:9px;padding:2px 8px;margin-top:4px;">+ MEMBERS</button>'
         : '';
-      return `<tr data-status="${f.status}" data-plan="${f.subscription_type || ''}">
-        <td>${f.company_name || '—'}${membersBtn}</td>
-        <td style="color:var(--text-muted)">${f.domain || '—'}</td>
-        <td><span class="badge-type">${plan}</span></td>
-        <td style="color:var(--text-muted)">${userCount} / ${maxUsers}</td>
-        <td>${accessHtml}</td>
-        <td>${statusHtml}</td>
-        <td>${stripeId}</td>
-        <td style="color:var(--text-muted)">${created}</td>
-        <td style="white-space:nowrap;">
-        <button class="btn btn-sm" onclick="openEditFirm('${f.id}')" style="font-size:9px;margin-right:4px;">EDIT</button>
-        <button class="btn btn-sm btn-danger" onclick="deleteFirm('${f.id}', '${(f.company_name||'').replace(/'/g,"\\'")}', '${f.domain||''}')">DELETE</button>
-      </td>
-      </tr>
-      <tr id="firm-members-row-${f.id}" style="display:none;">
-        <td colspan="9" style="padding:0; background:var(--bg-deep);">
-          <div id="firm-members-${f.id}" style="padding:16px 20px; border-top:1px solid var(--border-dim);">
-            <div style="color:var(--text-faint);font-size:10px;letter-spacing:0.18em;">LOADING MEMBERS...</div>
-          </div>
-        </td>
-      </tr>`;
-    }).join('');
+      var safeName = (f.company_name || '').replace(/'/g, "\\'");
+      return '<tr data-status="' + f.status + '" data-plan="' + (f.subscription_type || '') + '">'
+        + '<td><div style="font-weight:700;">' + (f.company_name || '—') + '</div>' + membersBtn + '</td>'
+        + '<td style="color:var(--text-muted);">' + (f.domain || '—') + '</td>'
+        + '<td><span class="badge-type">' + plan + '</span></td>'
+        + '<td style="color:var(--text-muted);">' + activeUsers + ' / ' + maxUsers + '</td>'
+        + '<td>' + accessHtml + '</td>'
+        + '<td>' + onlineHtml + '</td>'
+        + '<td>' + statusHtml + '</td>'
+        + '<td style="white-space:nowrap;">'
+          + '<button class="btn btn-sm" onclick="openEditFirm(\'' + f.id + '\')" style="margin-right:4px;">EDIT</button>'
+          + '<button class="btn btn-sm btn-danger" onclick="deleteFirm(\'' + f.id + '\', \'' + safeName + '\', \'' + (f.domain||'') + '\')">DELETE</button>'
+        + '</td>'
+        + '</tr>'
+        + '<tr id="firm-members-row-' + f.id + '" style="display:none;">'
+          + '<td colspan="8" style="padding:0;background:var(--bg-deep);">'
+            + '<div id="firm-members-' + f.id + '" style="padding:16px 20px;border-top:1px solid var(--border-dim);">'
+              + '<div style="color:var(--text-faint);font-size:10px;letter-spacing:0.18em;">LOADING MEMBERS...</div>'
+            + '</div>'
+          + '</td>'
+        + '</tr>';
+    }
+
+    var html = '';
+
+    if (corp.length) {
+      html += '<tr><td colspan="8" style="padding:12px 0 8px;border-bottom:none;">'
+        + '<span style="color:var(--accent);font-size:9px;letter-spacing:0.26em;text-transform:uppercase;font-weight:700;">▸ CORPORATE FIRMS — ' + corp.length + '</span>'
+        + '</td></tr>';
+      html += corp.map(firmRow).join('');
+    }
+
+    if (indv.length) {
+      html += '<tr><td colspan="8" style="padding:20px 0 8px;border-bottom:none;">'
+        + '<span style="color:var(--text-faint);font-size:9px;letter-spacing:0.26em;text-transform:uppercase;font-weight:700;">▸ INDIVIDUAL — ' + indv.length + ' ACTIVE</span>'
+        + '</td></tr>';
+      html += indv.map(firmRow).join('');
+    }
+
+    tbody.innerHTML = html;
   }
 
   // ══ TOGGLE FIRM MEMBERS ═════════════════════════════════════
@@ -1968,10 +2181,16 @@
         churnTbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#6BCB77;padding:20px;font-size:10px;letter-spacing:0.14em;">✓ ALL SUBSCRIBERS ACTIVE — NO CHURN RISK DETECTED</td></tr>';
       }
 
+      // Total login count
+      var { count: totalLoginCount } = await supabaseAdmin
+        .from('activity_log').select('*', { count: 'exact', head: true }).eq('action', 'login');
+      var loginCountEl = document.getElementById('stat-total-logins');
+      if (loginCountEl) loginCountEl.textContent = totalLoginCount || 0;
+
       // Recent logins
       var { data: logins } = await supabaseAdmin
         .from('activity_log')
-        .select('user_email, firm_id, created_at')
+        .select('user_email, created_at')
         .eq('action', 'login')
         .order('created_at', { ascending: false })
         .limit(20);
@@ -1985,16 +2204,13 @@
             : diff < 3600000 ? Math.floor(diff/60000) + 'm ago'
             : diff < 86400000 ? Math.floor(diff/3600000) + 'h ago'
             : new Date(l.created_at).toLocaleDateString('en-GB', { day:'2-digit', month:'short' }).toUpperCase();
-          var name = l.user_email.split('@')[0];
-          var firm = l.user_email.split('@')[1];
-          return `<tr>
-            <td>${name}</td>
-            <td style="color:var(--text-faint);font-size:10px;">@${firm}</td>
-            <td style="color:var(--text-muted);font-size:10px;">${when}</td>
-          </tr>`;
+          return '<tr>'
+            + '<td>' + l.user_email + '</td>'
+            + '<td style="color:var(--text-faint);font-size:10px;white-space:nowrap;">' + when + '</td>'
+            + '</tr>';
         }).join('');
       } else {
-        loginsTbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-faint);padding:20px;font-size:10px;">NO LOGINS YET</td></tr>';
+        loginsTbody.innerHTML = '<tr><td colspan="2" style="text-align:center;color:var(--text-faint);padding:20px;font-size:10px;">NO LOGINS YET</td></tr>';
       }
 
       // Recent report views
@@ -2083,17 +2299,16 @@
           var when = diff < 60000 ? 'Just now'
             : diff < 3600000 ? Math.floor(diff/60000) + 'm ago'
             : diff < 86400000 ? Math.floor(diff/3600000) + 'h ago'
-            : new Date(l.created_at).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' }).toUpperCase();
+            : new Date(l.created_at).toLocaleDateString('en-GB', { day:'2-digit', month:'short' }).toUpperCase();
           var name = l.user_email.split('@')[0];
-          return `<tr>
-            <td>${name}<span style="color:var(--text-faint);font-size:10px;"> @${l.user_email.split('@')[1]}</span></td>
-            <td style="color:var(--text-muted);font-size:10px;">${l.report_title || '—'}</td>
-            <td style="color:var(--text-muted);font-size:10px;">${(l.asset_class||'').toUpperCase()}</td>
-            <td style="color:var(--text-faint);font-size:10px;">${when}</td>
-          </tr>`;
+          return '<tr>'
+            + '<td>' + name + '</td>'
+            + '<td style="color:var(--text-muted);font-size:10px;">' + (l.report_title || '—') + '</td>'
+            + '<td style="color:var(--text-faint);font-size:10px;white-space:nowrap;">' + when + '</td>'
+            + '</tr>';
         }).join('');
       } else {
-        listensTbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-faint);padding:20px;font-size:10px;">NO LISTENS YET</td></tr>';
+        listensTbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-faint);padding:20px;font-size:10px;">NO LISTENS YET</td></tr>';
       }
 
       // Downloads
@@ -2112,19 +2327,82 @@
           var when = diff < 60000 ? 'Just now'
             : diff < 3600000 ? Math.floor(diff/60000) + 'm ago'
             : diff < 86400000 ? Math.floor(diff/3600000) + 'h ago'
-            : new Date(d.created_at).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' }).toUpperCase();
+            : new Date(d.created_at).toLocaleDateString('en-GB', { day:'2-digit', month:'short' }).toUpperCase();
           var name = d.user_email.split('@')[0];
-          var firm = d.user_email.split('@')[1];
-          return `<tr>
-            <td>${name}</td>
-            <td style="color:var(--text-faint);font-size:10px;">@${firm}</td>
-            <td style="color:var(--text-muted);font-size:10px;">${d.report_title || '—'}</td>
-            <td style="color:var(--text-muted);font-size:10px;">${(d.asset_class||'').toUpperCase()}</td>
-            <td style="color:var(--text-faint);font-size:10px;">${when}</td>
-          </tr>`;
+          return '<tr>'
+            + '<td>' + name + '</td>'
+            + '<td style="color:var(--text-muted);font-size:10px;">' + (d.report_title || '—') + '</td>'
+            + '<td style="color:var(--text-faint);font-size:10px;">' + (d.asset_class||'').toUpperCase() + '</td>'
+            + '<td style="color:var(--text-faint);font-size:10px;white-space:nowrap;">' + when + '</td>'
+            + '</tr>';
         }).join('');
       } else {
-        dlTbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-faint);padding:20px;font-size:10px;">NO DOWNLOADS YET</td></tr>';
+        dlTbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-faint);padding:20px;font-size:10px;">NO OPENS YET</td></tr>';
+      }
+
+      // Client Monthly opens & downloads
+      var { data: clientActivity } = await supabaseAdmin
+        .from('activity_log')
+        .select('user_email, firm_id, report_title, asset_class, action, created_at')
+        .eq('report_type', 'client_monthly')
+        .in('action', ['view_report', 'download_report'])
+        .order('created_at', { ascending: false })
+        .limit(100);
+
+      // Resolve firm names
+      var firmNameMap = {};
+      var clientFirmIds = [...new Set((clientActivity || []).map(function(a) { return a.firm_id; }).filter(Boolean))];
+      if (clientFirmIds.length) {
+        var { data: firmRows } = await supabaseAdmin.from('firms').select('id, company_name').in('id', clientFirmIds);
+        (firmRows || []).forEach(function(f) { firmNameMap[f.id] = f.company_name; });
+      }
+
+      // Resolve subscriber names (email → display name)
+      var userEmails = [...new Set((clientActivity || []).map(function(a) { return a.user_email; }).filter(Boolean))];
+      var userNameMap = {};
+      if (userEmails.length) {
+        var { data: userRows } = await supabaseAdmin.from('users').select('email, first_name, last_name').in('email', userEmails);
+        (userRows || []).forEach(function(u) {
+          var name = ((u.first_name || '') + ' ' + (u.last_name || '')).trim();
+          userNameMap[u.email] = name || u.email;
+        });
+      }
+
+      // Populate new stat tiles
+      var clientOpens    = (clientActivity || []).filter(function(a) { return a.action === 'view_report'; }).length;
+      var clientDownloads = (clientActivity || []).filter(function(a) { return a.action === 'download_report'; }).length;
+      var soEl = document.getElementById('stat-total-client-opens');
+      var sdEl = document.getElementById('stat-total-downloads');
+      if (soEl) soEl.textContent = clientOpens;
+      if (sdEl) sdEl.textContent = clientDownloads;
+
+      var cmTbody = document.getElementById('activity-client-monthly-tbody');
+      var countEl = document.getElementById('client-activity-count');
+      if (countEl) countEl.textContent = '— ' + (clientActivity ? clientActivity.length : 0) + ' EVENTS';
+      if (clientActivity && clientActivity.length) {
+        var now4 = new Date();
+        cmTbody.innerHTML = clientActivity.map(function(a) {
+          var diff = now4 - new Date(a.created_at);
+          var when = diff < 60000 ? 'Just now'
+            : diff < 3600000 ? Math.floor(diff/60000) + 'm ago'
+            : diff < 86400000 ? Math.floor(diff/3600000) + 'h ago'
+            : new Date(a.created_at).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' }).toUpperCase();
+          var user = (a.user_email && userNameMap[a.user_email]) || a.user_email || '—';
+          var firmName = (a.firm_id && firmNameMap[a.firm_id]) || '—';
+          var actionLabel = a.action === 'download_report'
+            ? '<span style="color:#E97132;font-weight:700;letter-spacing:0.10em;">↓ DOWNLOAD</span>'
+            : '<span style="color:#4CAF50;letter-spacing:0.10em;">⤢ VIEW</span>';
+          return '<tr>'
+            + '<td>' + user + '</td>'
+            + '<td style="color:var(--text-muted);">' + firmName + '</td>'
+            + '<td style="color:var(--text-faint);">' + (a.asset_class || '').toUpperCase() + '</td>'
+            + '<td>' + actionLabel + '</td>'
+            + '<td style="color:var(--text-faint);font-size:10px;">' + (a.report_title || '—') + '</td>'
+            + '<td style="color:var(--text-faint);font-size:10px;">' + when + '</td>'
+            + '</tr>';
+        }).join('');
+      } else {
+        cmTbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-faint);padding:20px;font-size:10px;">NO CLIENT MONTHLY ACTIVITY YET</td></tr>';
       }
 
     } catch (err) { console.error('Activity error:', err); }
@@ -2325,9 +2603,30 @@
     if (error) {
       alert('Failed to update access: ' + error.message);
     } else {
-      // Update local cache too
       var firm = allFirms.find(function(f) { return f.id === firmId; });
       if (firm) firm.access = newAccess;
+    }
+  }
+
+  async function toggleFirmDownload(firmId, newVal, btn) {
+    btn.textContent = 'SAVING...';
+    btn.disabled = true;
+    var { error } = await supabaseAdmin
+      .from('firms')
+      .update({ allow_download: newVal })
+      .eq('id', firmId);
+    if (error) {
+      alert('Failed to update: ' + error.message);
+      btn.disabled = false;
+      btn.textContent = newVal ? '↓ DOWNLOADS ON' : '↓ DOWNLOADS OFF';
+    } else {
+      var firm = allFirms.find(function(f) { return f.id === firmId; });
+      if (firm) firm.allow_download = newVal;
+      btn.style.background = newVal ? '#6BCB77' : '#333';
+      btn.style.color = newVal ? '#000' : 'var(--text-faint)';
+      btn.textContent = newVal ? '↓ DOWNLOADS ON' : '↓ DOWNLOADS OFF';
+      btn.onclick = function() { toggleFirmDownload(firmId, !newVal, btn); };
+      btn.disabled = false;
     }
   }
 
@@ -2393,7 +2692,7 @@
       var folderPath = assetFolder + '/' + typeFolder + '/';
 
       var { error: uploadError } = await supabaseAdmin.storage
-        .from('Reports').upload(folderPath + filename, file, { upsert: true });
+        .from('Reports').upload(folderPath + filename, file, { upsert: true, contentType: 'text/html' });
       if (uploadError) throw new Error('Upload failed: ' + uploadError.message);
 
       // Extract plain text from HTML for full-text search
@@ -2431,25 +2730,32 @@
         if (accessErr) throw new Error('Access table error: ' + accessErr.message);
       }
 
+      // Capture notify preference BEFORE form.reset() wipes it
+      var shouldNotify = (document.getElementById('doc-notify') || {}).checked !== false;
+
       successDiv.style.display = 'block';
       form.reset();
       setTimeout(() => { successDiv.style.display = 'none'; }, 3000);
       await loadReports();
       await loadStats();
 
-      // Notify active subscribers
-      try {
-        const { data: notifyResult } = await supabaseAdmin.functions.invoke('notify-new-report', {
-          body: { title, reportType, assetClass, publishedDate, reportId: inserted.id }
-        });
-        if (notifyResult && notifyResult.sent > 0) {
-          successDiv.textContent = '✓ UPLOADED — ' + notifyResult.sent + ' subscriber' + (notifyResult.sent !== 1 ? 's' : '') + ' notified by email.';
-        } else if (notifyResult && notifyResult.failed > 0) {
-          successDiv.textContent = '✓ UPLOADED — notification failed for ' + notifyResult.failed + ' subscriber(s). Check Resend.';
+      // Notify active subscribers (only if checkbox was ticked at submit time)
+      if (shouldNotify) {
+        try {
+          const { data: notifyResult } = await supabaseAdmin.functions.invoke('notify-new-report', {
+            body: { title, reportType, assetClass, publishedDate, reportId: inserted.id }
+          });
+          if (notifyResult && notifyResult.sent > 0) {
+            successDiv.textContent = '✓ UPLOADED — ' + notifyResult.sent + ' subscriber' + (notifyResult.sent !== 1 ? 's' : '') + ' notified by email.';
+          } else if (notifyResult && notifyResult.failed > 0) {
+            successDiv.textContent = '✓ UPLOADED — notification failed for ' + notifyResult.failed + ' subscriber(s). Check Resend.';
+          }
+        } catch (notifyErr) {
+          successDiv.textContent = '✓ UPLOADED — but email notification failed to send. Check Supabase logs.';
+          console.warn('Notification send failed:', notifyErr);
         }
-      } catch (notifyErr) {
-        successDiv.textContent = '✓ UPLOADED — but email notification failed to send. Check Supabase logs.';
-        console.warn('Notification send failed:', notifyErr);
+      } else {
+        successDiv.textContent = '✓ UPLOADED — no notification sent.';
       }
 
     } catch (err) {

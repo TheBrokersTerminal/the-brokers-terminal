@@ -416,6 +416,45 @@
         min-height: 100%;
         width: 100%;
       }
+
+      /* Client edition panel — stack vertically on mobile */
+      .client-report-row {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 14px 16px;
+        gap: 10px;
+      }
+      .client-report-row > div:first-child {
+        flex-wrap: wrap;
+        gap: 6px;
+        width: 100%;
+      }
+      .client-report-row > div:first-child > span:nth-child(3) {
+        white-space: normal;
+        overflow: visible;
+        text-overflow: unset;
+        font-size: 11px;
+        width: 100%;
+      }
+      .client-report-row > div:last-child {
+        width: 100%;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .client-report-row > div:last-child button,
+      .client-report-row > div:last-child a {
+        flex: 1;
+        text-align: center;
+        justify-content: center;
+        min-width: 80px;
+      }
+
+      /* Audio scrubber bar on mobile */
+      .audio-bar { flex-wrap: wrap; gap: 6px; padding: 10px; }
+      .audio-scrub { width: 100%; order: 3; }
+      .card-audio-bar { flex-wrap: wrap; }
+      .card-audio-bar .audio-scrub { width: 100%; order: 3; }
     }
 
   </style>
@@ -774,6 +813,14 @@
         <a class="btn btn-sm" href="#" onclick="openReport(event)">█ VIEW REPORT</a>
       </div>
     </div>
+    <div class="audio-bar card-audio-bar hidden">
+      <button class="card-audio-play audio-play-btn">▶</button>
+      <input type="range" class="card-audio-scrub audio-scrub" value="0" min="0" max="100" step="0.1">
+      <span class="card-audio-time audio-time">0:00</span>
+      <select class="card-audio-speed audio-speed">
+        <option>1×</option><option>1.25×</option><option>1.5×</option><option>2×</option>
+      </select>
+    </div>
   </div>
 </template>
 
@@ -1097,7 +1144,7 @@
       // Step 2: fetch firm directly by ID — always correct regardless of domain
       const { data: firmById } = await supabase
         .from('firms')
-        .select('id, status, company_name, access, stripe_customer_id, subscription_type, max_users, referral_code')
+        .select('id, status, company_name, access, stripe_customer_id, subscription_type, max_users, referral_code, allow_download')
         .eq('id', userRow.firm_id)
         .single();
       firmRow = firmById;
@@ -1105,7 +1152,7 @@
       // Fallback 1: corporate firm by domain
       const { data: corpFirm } = await supabase
         .from('firms')
-        .select('id, status, company_name, access, stripe_customer_id, subscription_type, max_users, referral_code')
+        .select('id, status, company_name, access, stripe_customer_id, subscription_type, max_users, referral_code, allow_download')
         .eq('domain', domain)
         .eq('subscription_type', 'corporate')
         .maybeSingle();
@@ -1115,7 +1162,7 @@
       if (!firmRow) {
         const { data: indFirm } = await supabase
           .from('firms')
-          .select('id, status, company_name, access, stripe_customer_id, subscription_type, max_users, referral_code')
+          .select('id, status, company_name, access, stripe_customer_id, subscription_type, max_users, referral_code, allow_download')
           .eq('owner_email', userEmail)
           .eq('subscription_type', 'individual')
           .maybeSingle();
@@ -1142,13 +1189,10 @@
 
     if (firmRow && firmRow.access) firmAccess = firmRow.access;
 
-    // Show "Manage Subscription" for all accounts
-    var manageSubBtn = document.getElementById('manage-subscription-btn');
-    var manageSubSep = document.getElementById('manage-subscription-sep');
-    if (manageSubBtn) manageSubBtn.style.display = 'inline';
-    if (manageSubSep) manageSubSep.style.display = 'inline';
-    window.firmAccess = firmAccess; // store globally for report loader
+    // Manage Subscription shown after isAdmin is determined (see below)
+    window.firmAccess = firmAccess;
     window._firmSubscriptionType = (firmRow && firmRow.subscription_type) || 'individual';
+    window._firmAllowDownload = !!(firmRow && firmRow.allow_download);
 
     // Update "ALL CONTENT" subtitle to reflect actual access
     var allSub = document.getElementById('all-content-sub');
@@ -1191,6 +1235,15 @@
     var canonicalFirmId = (firmRow && firmRow.id) ? firmRow.id : (userRow ? userRow.firm_id : null);
     // Admin = user whose role is 'admin' in the users table
     var isAdmin = userRow && userRow.role === 'admin';
+
+    // Manage Subscription — admins only for corporate accounts; all individual subscribers
+    var isCorpBroker = firmRow && firmRow.subscription_type === 'corporate' && !isAdmin;
+    if (!isCorpBroker) {
+      var manageSubBtn = document.getElementById('manage-subscription-btn');
+      var manageSubSep = document.getElementById('manage-subscription-sep');
+      if (manageSubBtn) manageSubBtn.style.display = 'inline';
+      if (manageSubSep) manageSubSep.style.display = 'inline';
+    }
 
     // ── Team management functions — defined before use ───────────
     window.loadTeamRoster = async function() {
@@ -1507,15 +1560,15 @@
     var filtered = (reports || []).filter(function(r) {
       // Filter by asset access
       if (access !== 'both' && access !== 'all' && (r.asset_class || '').toLowerCase() !== access) return false;
-      // Filter by visible_to (subscription type)
-      var vt = r.visible_to || 'all';
-      if (vt !== 'all' && vt !== subType) return false;
-      // Filter by firm access list — if entries exist, subscriber must be in the list
+      // Filter by firm access list — explicit access overrides visible_to
       var accessList = r.report_firm_access || [];
       if (accessList.length > 0) {
         if (!firmId) return false;
         return accessList.some(function(a) { return a.firm_id === firmId; });
       }
+      // No specific access list — fall back to visible_to subscription type check
+      var vt = r.visible_to || 'all';
+      if (vt !== 'all' && vt !== subType) return false;
       return true;
     });
     if (filtered.length === 0) {
@@ -1531,7 +1584,7 @@
       var asset = (r.asset_class || '').toUpperCase();
       var safeTitle = r.title.replace(/'/g, "\\'").replace(/"/g, '&quot;');
       var safePath  = r.file_path.replace(/'/g, "\\'");
-      var viewUrl = '/ClientReport' + asset.charAt(0) + asset.slice(1).toLowerCase();
+      var viewUrl = 'https://oqpodikelxhwcnjdwojw.supabase.co/storage/v1/object/public/Reports/' + r.file_path;
       return '<div class="client-report-row">'
         + '<div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0;">'
         + '<span style="background:var(--accent);color:#000;font-size:8px;letter-spacing:0.20em;font-weight:700;padding:3px 8px;white-space:nowrap;flex-shrink:0;">CLIENT EDITION</span>'
@@ -1541,8 +1594,8 @@
         + '</div>'
         + '<div style="display:flex;gap:6px;flex-shrink:0;align-items:center;">'
         + '<button onclick="openBrandModal()" style="background:none;border:1px solid var(--border-dim);color:var(--text-faint);font-family:var(--font);font-size:9px;letter-spacing:0.14em;padding:5px 10px;cursor:pointer;font-weight:700;text-transform:uppercase;white-space:nowrap;">⚙ BRANDING</button>'
-        + '<a href="' + viewUrl + '" target="_blank" style="background:none;border:1px solid var(--border-dim);color:var(--text-faint);font-family:var(--font);font-size:9px;letter-spacing:0.14em;padding:5px 10px;cursor:pointer;font-weight:700;text-transform:uppercase;text-decoration:none;display:inline-flex;align-items:center;">⤢ VIEW</a>'
-        + '<button onclick="downloadBranded(\'' + safePath + '\',\'' + safeTitle + '\',this)" style="background:var(--accent);border:none;color:#000;font-family:var(--font);font-size:9px;letter-spacing:0.14em;padding:5px 12px;cursor:pointer;font-weight:700;text-transform:uppercase;">↓ DOWNLOAD</button>'
+        + '<button onclick="viewReportBlob(\'' + safePath + '\',this)" style="background:none;border:1px solid var(--border-dim);color:var(--text-faint);font-family:var(--font);font-size:9px;letter-spacing:0.14em;padding:5px 10px;cursor:pointer;font-weight:700;text-transform:uppercase;">⤢ VIEW</button>'
+        + (window._firmAllowDownload ? '<button onclick="downloadBranded(\'' + safePath + '\',\'' + safeTitle + '\',\'' + asset.toLowerCase() + '\',this)" style="background:var(--accent);border:none;color:#000;font-family:var(--font);font-size:9px;letter-spacing:0.14em;padding:5px 12px;cursor:pointer;font-weight:700;text-transform:uppercase;">↓ DOWNLOAD</button>' : '')
         + '</div>'
         + '</div>';
     }
@@ -1599,6 +1652,10 @@
     setTimeout(function() { document.getElementById('brand-modal').style.display = 'none'; }, 900);
   }
 
+  function viewReportBlob(filePath) {
+    window.open('/view/' + filePath, '_blank');
+  }
+
   async function viewReport(filePath, btn) {
     var orig = btn.textContent;
     btn.textContent = 'LOADING...';
@@ -1619,7 +1676,7 @@
     }
   }
 
-  async function downloadBranded(filePath, title, btn) {
+  async function downloadBranded(filePath, title, assetClass, btn) {
     var firmId = window._canonicalFirmId;
     var b = null;
     if (firmId) {
@@ -1661,6 +1718,19 @@
       a.download = title.toLowerCase().replace(/\s+/g, '-') + '.html';
       a.click();
       setTimeout(function() { URL.revokeObjectURL(a.href); }, 10000);
+
+      var logEmail = window._userEmail || '';
+      var logFirmId = window._canonicalFirmId || null;
+      if (logEmail) {
+        supabase.from('activity_log').insert({
+          user_email: logEmail,
+          firm_id: logFirmId,
+          action: 'download_report',
+          report_title: title,
+          asset_class: assetClass,
+          report_type: 'client_monthly'
+        }).then(function(){}).catch(function(){});
+      }
     } catch(err) {
       alert('Failed to open report: ' + err.message);
     } finally {
@@ -1716,37 +1786,64 @@
     btn.setAttribute('data-title', report.title);
     btn.href = '#';
 
-    // Wire up compact listen button if this report has audio
+    // Wire up compact listen button + full audio bar if this report has audio
     var listenBtn = frag.querySelector('.audio-listen-btn');
     if (report.audio_url && report.audio_url !== 'generating') {
       listenBtn.style.display = '';
       var audio = new Audio(report.audio_url);
       var listenLogged = false;
+      var audioBar  = frag.querySelector('.card-audio-bar');
+      var playBtn   = frag.querySelector('.card-audio-play');
+      var scrub     = frag.querySelector('.card-audio-scrub');
+      var timeEl    = frag.querySelector('.card-audio-time');
+      var speedSel  = frag.querySelector('.card-audio-speed');
+
+      function fmtCardTime(s) {
+        var m = Math.floor(s / 60); var sec = Math.floor(s % 60);
+        return m + ':' + (sec < 10 ? '0' : '') + sec;
+      }
+      function logListen() {
+        if (listenLogged) return; listenLogged = true;
+        var logEmail = window._userEmail || '', logFirmId = window._canonicalFirmId || null;
+        if (logEmail) supabase.from('activity_log').insert({
+          user_email: logEmail, firm_id: logFirmId, action: 'listen_report',
+          report_title: report.title || '', asset_class: (report.asset_class || '').toLowerCase(),
+          report_type: report.report_type || ''
+        }).then(function(){}).catch(function(){});
+      }
+      function setPlaying(playing) {
+        var label = playing ? '❚❚' : '▶';
+        listenBtn.textContent = playing ? '❚❚ PAUSE' : '▶ LISTEN';
+        playBtn.textContent = label;
+      }
+
+      // LISTEN button toggles play and shows the bar
       listenBtn.addEventListener('click', function() {
         if (audio.paused) {
-          audio.play();
-          listenBtn.textContent = '❚❚ PAUSE';
-          if (!listenLogged) {
-            listenLogged = true;
-            var logEmail  = window._userEmail || '';
-            var logFirmId = window._canonicalFirmId || null;
-            if (logEmail) {
-              supabase.from('activity_log').insert({
-                user_email:   logEmail,
-                firm_id:      logFirmId,
-                action:       'listen_report',
-                report_title: report.title || '',
-                asset_class:  (report.asset_class || '').toLowerCase(),
-                report_type:  report.report_type || ''
-              }).then(function(res){ if (res.error) console.error('listen log error:', res.error); }).catch(function(e){ console.error('listen log catch:', e); });
-            }
-          }
+          audio.play(); setPlaying(true); logListen();
+          audioBar.classList.remove('hidden');
         } else {
-          audio.pause();
-          listenBtn.textContent = '▶ LISTEN';
+          audio.pause(); setPlaying(false);
         }
       });
-      audio.addEventListener('ended', function() { listenBtn.textContent = '▶ LISTEN'; });
+
+      // Bar play/pause button
+      playBtn.addEventListener('click', function() {
+        if (audio.paused) { audio.play(); setPlaying(true); logListen(); }
+        else              { audio.pause(); setPlaying(false); }
+      });
+
+      audio.addEventListener('timeupdate', function() {
+        if (audio.duration) scrub.value = (audio.currentTime / audio.duration) * 100;
+        timeEl.textContent = fmtCardTime(audio.currentTime);
+      });
+      audio.addEventListener('ended', function() { setPlaying(false); scrub.value = 0; timeEl.textContent = '0:00'; });
+      scrub.addEventListener('input', function() {
+        if (audio.duration) audio.currentTime = (scrub.value / 100) * audio.duration;
+      });
+      speedSel.addEventListener('change', function() {
+        audio.playbackRate = parseFloat(speedSel.value) || 1;
+      });
     }
 
     return frag;

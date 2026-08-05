@@ -206,6 +206,10 @@ function extractText(html: string): string {
   let t = html
     .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, " ")
     .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, " ")
+    // Strip TTS:SKIP blocks (ticker, dashboard grid, any manually marked section)
+    .replace(/<!--\s*TTS:SKIP\s*-->[\s\S]*?<!--\s*\/TTS:SKIP\s*-->/gi, " ")
+    // Strip navigation elements (sidebar contents nav)
+    .replace(/<nav[\s\S]*?<\/nav>/gi, " ")
     .replace(/<[^>]+>/g, " ");
 
   // Decode common HTML entities
@@ -222,8 +226,19 @@ function extractText(html: string): string {
     .replace(/&#[0-9]+;/g, " ")  // numeric entities (decorative block chars etc.)
     .replace(/&[a-z]+;/g,  " "); // remaining named entities
 
-  // Remove lines that are purely decorative (block/line-drawing characters)
-  t = t.split(/\n/).map(l => l.replace(/[─═■▬▸▹►◆•█▌▐░▒▓◘○●□■]+/g, " ").trim())
+  // Remove lines that are purely decorative or metadata
+  t = t.split(/\n/)
+       .map(l => l.trim())
+       .filter(l => {
+         // Skip lines with bullet separators — metadata like "SCOTCH • IRISH • BOURBON • JULY 2026"
+         if (/[•·]/.test(l)) return false;
+         // Skip lines containing block/border characters — decorative headers like "THE BROKERS EDGE █"
+         if (/[█▌▐░▒▓]/.test(l)) return false;
+         // Skip week-number metadata lines — e.g. "W29", "W30"
+         if (/\bW\d{1,2}\b/.test(l) && !/[a-z]/.test(l)) return false;
+         return true;
+       })
+       .map(l => l.replace(/[─═■▬▸▹►◆•█▌▐░▒▓◘○●□■]+/g, " ").trim())
        .filter(l => l.replace(/[\s\W]/g, "").length > 6)
        .join(" ");
 

@@ -81,44 +81,73 @@ function emailHtml(firstName: string, title: string, reportType: string, assetCl
 </table>`
 }
 
-function clientMonthlyEmailHtml(firstName: string, title: string, publishedDate: string): string {
+function clientMonthlyEmailHtml(firstName: string, title: string, assetClass: string, publishedDate: string): string {
   const dateStr = new Date(publishedDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' }).toUpperCase()
+  const assetLabel = (ASSET_LABELS[assetClass] || assetClass).toUpperCase()
   return `
 <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#0A0A0A" style="background-color:#0A0A0A !important;">
 <tr><td align="center" bgcolor="#0A0A0A" style="background-color:#0A0A0A !important; padding:40px 20px;">
-  <table width="600" cellpadding="0" cellspacing="0" border="0" bgcolor="#0A0A0A" style="background-color:#0A0A0A !important; border:1px solid #E97132;">
+  <table width="580" cellpadding="0" cellspacing="0" border="0" bgcolor="#0A0A0A" style="background-color:#0A0A0A !important; border:1px solid #222;">
 
-    <tr><td bgcolor="#0A0A0A" style="background-color:#0A0A0A !important; padding:22px 32px; border-bottom:2px solid #E97132;">
-      <span style="font-family:'Courier New',Courier,monospace; font-size:15px; font-weight:bold; color:#E97132; letter-spacing:0.2em; text-transform:uppercase;">&#9608; THE BROKERS TERMINAL</span>
+    <!-- Header -->
+    <tr><td bgcolor="#0A0A0A" style="background-color:#0A0A0A !important; padding:24px 32px; border-bottom:1px solid #1a1a1a;">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+        <td style="font-family:'Courier New',Courier,monospace; font-size:13px; font-weight:bold; color:#E97132; letter-spacing:0.22em;">&#9608; THE BROKERS TERMINAL</td>
+        <td align="right" style="font-family:'Courier New',Courier,monospace; font-size:9px; color:#333; letter-spacing:0.14em;">DESK@THEBROKERSTERMINAL.COM</td>
+      </tr></table>
     </td></tr>
 
+    <!-- Asset bar -->
     <tr><td bgcolor="#E97132" style="background-color:#E97132 !important; padding:10px 32px;">
-      <span style="font-family:'Courier New',Courier,monospace; font-size:10px; font-weight:bold; color:#0A0A0A; letter-spacing:0.24em; text-transform:uppercase;">CLIENT MONTHLY REPORT — READY TO BRAND &amp; SEND</span>
+      <span style="font-family:'Courier New',Courier,monospace; font-size:9px; font-weight:bold; color:#000; letter-spacing:0.26em;">CLIENT EDITION &nbsp;·&nbsp; ${assetLabel} &nbsp;·&nbsp; ${dateStr}</span>
     </td></tr>
 
-    <tr><td bgcolor="#0A0A0A" style="background-color:#0A0A0A !important; padding:36px 32px;">
-      <p style="font-family:'Courier New',Courier,monospace; font-size:11px; color:#E97132; letter-spacing:0.18em; text-transform:uppercase; margin:0 0 6px 0;">CLIENT EDITION &nbsp;·&nbsp; ${dateStr}</p>
-      <h1 style="font-family:'Courier New',Courier,monospace; font-size:22px; font-weight:bold; color:#FFFFFF; letter-spacing:0.04em; margin:0 0 24px 0; text-transform:uppercase; line-height:1.2;">${title}</h1>
-      <p style="font-family:'Courier New',Courier,monospace; font-size:12px; color:#CCCCCC; line-height:1.75; margin:0 0 12px 0;">Hi ${firstName}, a new client-facing monthly report has been uploaded to the terminal.</p>
-      <p style="font-family:'Courier New',Courier,monospace; font-size:12px; color:#CCCCCC; line-height:1.75; margin:0 0 28px 0;">Log in to the admin panel, open the <strong style="color:#FFFFFF;">Client Edition</strong> section, enter your firm's branding details, and download the branded report — ready to send straight to your clients.</p>
+    <!-- Title block -->
+    <tr><td bgcolor="#0A0A0A" style="background-color:#0A0A0A !important; padding:32px 32px 24px; border-bottom:1px solid #1a1a1a;">
+      <p style="font-family:'Courier New',Courier,monospace; font-size:9px; color:#E97132; letter-spacing:0.22em; margin:0 0 10px 0;">NEW CLIENT REPORT READY</p>
+      <h1 style="font-family:'Courier New',Courier,monospace; font-size:20px; font-weight:bold; color:#FFFFFF; letter-spacing:0.06em; margin:0 0 20px 0; text-transform:uppercase; line-height:1.25;">${title}</h1>
+
+      <!-- Ruled divider -->
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:20px;">
+        <tr>
+          <td width="40" style="border-top:2px solid #E97132; font-size:0;">&nbsp;</td>
+          <td style="border-top:1px solid #1e1e1e; font-size:0;">&nbsp;</td>
+        </tr>
+      </table>
+
+      <p style="font-family:'Courier New',Courier,monospace; font-size:11px; color:#888; line-height:1.75; margin:0 0 8px 0;">Hi ${firstName},</p>
+      <p style="font-family:'Courier New',Courier,monospace; font-size:11px; color:#888; line-height:1.75; margin:0 0 24px 0;">This month's client-facing report is ready on the terminal. Log in, open the <span style="color:#E97132;">Client Edition</span> section and download your branded copy to send to clients.</p>
 
       <table cellpadding="0" cellspacing="0" border="0"><tr>
-        <td bgcolor="#E97132" style="background-color:#E97132 !important; padding:0;">
-          <a href="https://thebrokersterminal.com/dashboard.html" style="display:inline-block; font-family:'Courier New',Courier,monospace; font-size:11px; font-weight:bold; color:#0A0A0A; letter-spacing:0.22em; text-transform:uppercase; text-decoration:none; padding:14px 28px;">&#9608; OPEN THE TERMINAL</a>
+        <td bgcolor="#E97132" style="background-color:#E97132 !important;">
+          <a href="https://thebrokersterminal.com/dashboard.html" style="display:inline-block; font-family:'Courier New',Courier,monospace; font-size:10px; font-weight:bold; color:#000; letter-spacing:0.22em; text-transform:uppercase; text-decoration:none; padding:12px 24px;">&#9608; OPEN THE TERMINAL</a>
         </td>
       </tr></table>
+    </td></tr>
 
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:28px 0 0 0;">
-        <tr><td style="border-top:1px solid #222; padding-top:20px;">
-          <p style="font-family:'Courier New',Courier,monospace; font-size:9px; color:#555555; line-height:1.65; margin:0;">You are receiving this as the account administrator for your firm on The Brokers Terminal. To unsubscribe, reply to this email.</p>
-        </td></tr>
+    <!-- Steps -->
+    <tr><td bgcolor="#0A0A0A" style="background-color:#0A0A0A !important; padding:20px 32px; border-bottom:1px solid #1a1a1a;">
+      <table cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td width="28" style="font-family:'Courier New',Courier,monospace; font-size:9px; color:#E97132; font-weight:bold; letter-spacing:0.14em; vertical-align:top; padding-top:2px;">01</td>
+          <td style="font-family:'Courier New',Courier,monospace; font-size:10px; color:#555; letter-spacing:0.10em; padding-bottom:10px;">Log in to the terminal</td>
+        </tr>
+        <tr>
+          <td width="28" style="font-family:'Courier New',Courier,monospace; font-size:9px; color:#E97132; font-weight:bold; letter-spacing:0.14em; vertical-align:top; padding-top:2px;">02</td>
+          <td style="font-family:'Courier New',Courier,monospace; font-size:10px; color:#555; letter-spacing:0.10em; padding-bottom:10px;">Open Client Edition and enter your firm branding</td>
+        </tr>
+        <tr>
+          <td width="28" style="font-family:'Courier New',Courier,monospace; font-size:9px; color:#E97132; font-weight:bold; letter-spacing:0.14em; vertical-align:top; padding-top:2px;">03</td>
+          <td style="font-family:'Courier New',Courier,monospace; font-size:10px; color:#555; letter-spacing:0.10em;">Download and send to your clients</td>
+        </tr>
       </table>
     </td></tr>
 
-    <tr><td bgcolor="#0A0A0A" style="background-color:#0A0A0A !important; padding:14px 32px; border-top:1px solid #E97132;">
+    <!-- Footer -->
+    <tr><td bgcolor="#0A0A0A" style="background-color:#0A0A0A !important; padding:14px 32px;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
-        <td style="font-family:'Courier New',Courier,monospace; font-size:8px; color:#E97132; letter-spacing:0.16em; text-transform:uppercase;">© 2026 THE BROKERS TERMINAL</td>
-        <td align="right" style="font-family:'Courier New',Courier,monospace; font-size:8px; color:#555555; letter-spacing:0.14em; text-transform:uppercase;">ADMIN NOTICE ONLY</td>
+        <td style="font-family:'Courier New',Courier,monospace; font-size:8px; color:#E97132; letter-spacing:0.16em;">© 2026 THE BROKERS TERMINAL</td>
+        <td align="right" style="font-family:'Courier New',Courier,monospace; font-size:8px; color:#333; letter-spacing:0.14em;">ADMIN NOTICE ONLY</td>
       </tr></table>
     </td></tr>
 
@@ -200,7 +229,7 @@ serve(async (req) => {
           ? `▸ Client Monthly Report Ready — Brand & Send to Your Clients`
           : `▸ New ${assetLabel} ${typeLabel} — ${title}`
         const html = isClientMonthly
-          ? clientMonthlyEmailHtml(firstName, title, publishedDate)
+          ? clientMonthlyEmailHtml(firstName, title, assetClass, publishedDate)
           : emailHtml(firstName, title, reportType, assetClass, publishedDate)
         const res = await fetch('https://api.resend.com/emails', {
           method: 'POST',

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>THE BROKERS TERMINAL — Preview</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; background: #0A0A0A; font-family: 'Courier New', monospace; color: #fff; }
+    #loading {
+      display: flex; align-items: center; justify-content: center;
+      height: 100vh; font-size: 10px; letter-spacing: 0.24em;
+      text-transform: uppercase; color: #E97132;
+    }
+    #print-btn {
+      display: none; position: fixed; bottom: 20px; right: 20px; z-index: 9999;
+      background: #E97132; color: #000; border: none; font-family: 'Courier New', monospace;
+      font-size: 9px; font-weight: 700; letter-spacing: 0.20em; text-transform: uppercase;
+      padding: 10px 18px; cursor: pointer;
+    }
+    #viewer { display: none; width: 100%; height: 100vh; border: none; }
+  </style>
+</head>
+<body>
+  <div id="loading">Loading report…</div>
+  <button id="print-btn" onclick="printReport()">⎙ SAVE AS PDF</button>
+  <iframe id="viewer" sandbox="allow-same-origin allow-scripts allow-popups allow-modals"></iframe>
+  <script>
+    var reportHtml = '';
+    var path = window.location.pathname.replace(/^\/view\//, '');
+
+    if (!path) {
+      document.getElementById('loading').textContent = 'No report path specified.';
+    } else {
+      fetch('https://oqpodikelxhwcnjdwojw.supabase.co/storage/v1/object/public/Reports/' + path)
+        .then(function(r) {
+          if (!r.ok) throw new Error('Could not load report (' + r.status + ')');
+          return r.text();
+        })
+        .then(function(html) {
+          reportHtml = html;
+          var iframe = document.getElementById('viewer');
+          iframe.srcdoc = html;
+          iframe.style.display = 'block';
+          document.getElementById('loading').style.display = 'none';
+          document.getElementById('print-btn').style.display = 'block';
+        })
+        .catch(function(e) {
+          document.getElementById('loading').textContent = 'Error: ' + e.message;
+        });
+    }
+
+    function printReport() {
+      var iframe = document.getElementById('viewer');
+      var iDoc = iframe.contentDocument || iframe.contentWindow.document;
+
+      if (!iDoc.getElementById('tbt-print-css')) {
+        var style = iDoc.createElement('style');
+        style.id = 'tbt-print-css';
+        style.textContent = [
+          '@media print {',
+          '  @page { size: A4 portrait; margin: 12mm 14mm; }',
+          '  *, *::before, *::after { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }',
+          '  .page-wrap { box-shadow: none !important; width: 100% !important; max-width: 100% !important; }',
+          '  .cover { min-height: 297mm !important; page-break-after: always !important; break-after: page !important; }',
+          '  .back  { min-height: 297mm !important; page-break-before: always !important; break-before: page !important; }',
+          '  .content { padding: 20px 28px 40px !important; }',
+          '  .metrics-row { margin: 0 !important; padding: 0 !important; flex-wrap: wrap !important; }',
+          '  .metric { flex: 0 0 32% !important; padding: 10px 8px !important; }',
+          '  .ticker-wrap, .sidebar, nav, .audio-bar, .audio-player, .audio-wrap { display: none !important; }',
+          '  .page-layout { display: block !important; padding: 0 !important; }',
+          '  .main-content { width: 100% !important; padding: 0 !important; }',
+          '  table { width: 100% !important; }',
+          '  thead { display: table-header-group; }',
+          '  tr { page-break-inside: avoid !important; break-inside: avoid !important; }',
+          '  img { max-width: 100% !important; height: auto !important; }',
+          '  p { orphans: 3; widows: 3; }',
+          '  /* Override report break rules that cause white gaps */',
+          '  .article, .callout, .pull-quote, .urgency-band, .fwd-item, .article-meta, .rh, .section, .sec-block, .entry, .item {',
+          '    break-inside: auto !important; page-break-inside: auto !important;',
+          '  }',
+          '  h1, h2, h3, h4, h2.sec, h3.sub {',
+          '    break-after: auto !important; page-break-after: auto !important;',
+          '    break-before: auto !important; page-break-before: auto !important;',
+          '  }',
+          '}'
+        ].join('\n');
+        iDoc.head.appendChild(style);
+      }
+
+      iframe.contentWindow.focus();
+      iframe.contentWindow.print();
+    }
+  </script>
+</body>
+</html>
