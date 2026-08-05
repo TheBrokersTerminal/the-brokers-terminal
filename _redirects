@@ -1,2 +1,3 @@
 /ClientReportWhisky  /client-report-viewer.html  200
 /ClientReportGold    /client-report-viewer.html  200
+/view/*              /preview.html               200

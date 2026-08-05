@@ -93,33 +93,59 @@
         return;
       }
 
-      // Fetch latest client monthly report for this asset class
-      var { data: reports } = await supabase
-        .from('reports')
-        .select('id, file_path, title, report_firm_access(firm_id)')
-        .eq('status', 'published')
-        .eq('report_type', 'client_monthly')
-        .eq('asset_class', assetClass)
-        .order('published_date', { ascending: false })
-        .limit(10);
+      // Check for a specific report ID in the URL (passed by the dashboard VIEW button)
+      var specificId = new URLSearchParams(window.location.search).get('id');
 
-      if (!reports || reports.length === 0) {
-        showError('No report published yet — check back next month.');
-        return;
-      }
-
-      // Find first report this firm can access
       var report = null;
-      for (var i = 0; i < reports.length; i++) {
-        var r = reports[i];
-        var accessList = r.report_firm_access || [];
-        if (accessList.length === 0) { report = r; break; }
-        if (accessList.some(function(a) { return a.firm_id === firmId; })) { report = r; break; }
-      }
 
-      if (!report) {
-        showError('No report available for your account yet.');
-        return;
+      if (specificId) {
+        // Load the specific report — still verify this firm has access
+        var { data: specific } = await supabase
+          .from('reports')
+          .select('id, file_path, title, report_firm_access(firm_id)')
+          .eq('id', specificId)
+          .eq('status', 'published')
+          .eq('report_type', 'client_monthly')
+          .maybeSingle();
+
+        if (specific) {
+          var accessList = specific.report_firm_access || [];
+          if (accessList.length === 0 || accessList.some(function(a) { return a.firm_id === firmId; })) {
+            report = specific;
+          }
+        }
+        if (!report) {
+          showError('This report is not available for your account.');
+          return;
+        }
+      } else {
+        // No specific ID — fall back to most recent accessible report
+        var { data: reports } = await supabase
+          .from('reports')
+          .select('id, file_path, title, report_firm_access(firm_id)')
+          .eq('status', 'published')
+          .eq('report_type', 'client_monthly')
+          .eq('asset_class', assetClass)
+          .order('published_date', { ascending: false })
+          .limit(10);
+
+        if (!reports || reports.length === 0) {
+          showError('No report published yet — check back next month.');
+          return;
+        }
+
+        for (var i = 0; i < reports.length; i++) {
+          var r = reports[i];
+          var accessList = r.report_firm_access || [];
+          if (accessList.length === 0 || accessList.some(function(a) { return a.firm_id === firmId; })) {
+            report = r; break;
+          }
+        }
+
+        if (!report) {
+          showError('No report available for your account yet.');
+          return;
+        }
       }
 
       // Fetch and render
@@ -133,6 +159,15 @@
       iframe.srcdoc = html;
       iframe.style.display = 'block';
       document.getElementById('loading').style.display = 'none';
+
+      supabase.from('activity_log').insert({
+        user_email: userEmail,
+        firm_id: firmId,
+        action: 'view_report',
+        report_title: report.title,
+        asset_class: assetClass,
+        report_type: 'client_monthly'
+      }).then(function(){}).catch(function(){});
     }
 
     init().catch(function(e) { showError(e.message || 'An error occurred.'); });
