@@ -47,6 +47,39 @@
               setTimeout(printReport, 800);
             });
           }
+          // Fix sticky sidebar: CSS position:sticky is unreliable inside srcdoc iframes.
+          // Implement it via scroll listener instead.
+          iframe.addEventListener('load', function() {
+            var iDoc = iframe.contentDocument || iframe.contentWindow.document;
+            var sidebar = iDoc.querySelector('.sidebar');
+            var layout  = iDoc.querySelector('.page-layout');
+            var main    = layout && layout.querySelector('.layout-main');
+            if (!sidebar || !layout || !main) return;
+            var sW = sidebar.offsetWidth;
+            var isFixed = false, savedPL;
+            function stickyTick() {
+              var top = layout.getBoundingClientRect().top;
+              if (top < 24 && !isFixed) {
+                var sLeft = sidebar.getBoundingClientRect().left;
+                var mLeft = main.getBoundingClientRect().left;
+                savedPL = layout.style.paddingLeft;
+                sidebar.style.position = 'fixed';
+                sidebar.style.top = '24px';
+                sidebar.style.left = sLeft + 'px';
+                sidebar.style.width = sW + 'px';
+                layout.style.paddingLeft = (mLeft - layout.getBoundingClientRect().left) + 'px';
+                isFixed = true;
+              } else if (top >= 24 && isFixed) {
+                sidebar.style.position = '';
+                sidebar.style.top = '';
+                sidebar.style.left = '';
+                sidebar.style.width = '';
+                layout.style.paddingLeft = savedPL !== undefined ? savedPL : '';
+                isFixed = false;
+              }
+            }
+            iframe.contentWindow.addEventListener('scroll', stickyTick, { passive: true });
+          });
           iframe.srcdoc = html;
           iframe.style.display = 'block';
           document.getElementById('loading').style.display = 'none';
