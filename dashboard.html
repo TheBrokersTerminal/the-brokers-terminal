@@ -1037,6 +1037,13 @@
         if (!injected.includes('name="viewport"')) {
           injected = injected.replace('<head>', '<head><meta name="viewport" content="width=device-width, initial-scale=1.0">');
         }
+        // Inject anchor-click fix: prevent srcdoc iframe from bubbling hash navigation to parent
+        var anchorFix = '<script>document.addEventListener("click",function(e){var a=e.target.closest("a[href]");if(!a)return;var h=a.getAttribute("href");if(h&&h.charAt(0)==="#"){e.preventDefault();var t=document.getElementById(h.slice(1));if(t)t.scrollIntoView({behavior:"smooth"})}});<\/script>';
+        if (injected.includes('</body>')) {
+          injected = injected.replace('</body>', anchorFix + '</body>');
+        } else {
+          injected += anchorFix;
+        }
         var iframe = document.getElementById('report-iframe');
         iframe.srcdoc = injected;
         document.getElementById('report-modal').classList.add('open');

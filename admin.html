@@ -80,6 +80,10 @@
       margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;
     }
     .admin-section-label span { color: var(--text-faint); font-size: 9px; letter-spacing: 0.14em; font-weight: 400; }
+    .vtrow { display:flex; align-items:center; justify-content:space-between; padding:11px 0; border-bottom:1px dotted #1e1e1e; }
+    .vtrow span { font-size:10px; letter-spacing:0.18em; text-transform:uppercase; color:var(--text-faint); }
+    .vt-btn { font-family:var(--font); font-size:9px; letter-spacing:0.16em; text-transform:uppercase; padding:5px 14px; border:1px solid var(--accent); background:var(--accent); color:#000; cursor:pointer; }
+    .vt-btn.vt-off { background:transparent; border-color:#333; color:var(--text-faint); }
 
     /* ── CHECKLIST ────────────────────────────────────────────── */
     .checklist { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 32px; }
@@ -276,6 +280,7 @@
     <button class="admin-tab" data-tab="activity">ACTIVITY</button>
     <button class="admin-tab" data-tab="affiliates">AFFILIATES</button>
     <button class="admin-tab" data-tab="create-account">+ CREATE ACCOUNT</button>
+    <button class="admin-tab" data-tab="settings">⚙ SETTINGS</button>
   </div>
 
   <div class="admin-content">
@@ -894,6 +899,46 @@
       </div>
     </div>
 
+    <!-- ═══════════ SETTINGS ════════════════════════════════════ -->
+    <div class="admin-section" id="tab-settings">
+      <div class="admin-section-label">▸ SUBSCRIBER VAULT — FILTER TABS <span>CONTROLS WHICH TABS SUBSCRIBERS SEE</span></div>
+      <div style="max-width:480px;margin-top:16px;">
+        <p style="font-size:10px;letter-spacing:0.12em;color:var(--text-faint);margin-bottom:20px;line-height:1.7;">Toggle which filter tabs appear in the subscriber vault. Hidden tabs won't show to any user. Settings are saved instantly.</p>
+
+        <div id="vault-tab-toggles">
+          <div data-key="weekly" style="display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px dotted #2a2a2a;">
+            <span style="font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:#999;">Weekly</span>
+            <button onclick="vtToggle('weekly')" style="font-family:inherit;font-size:9px;letter-spacing:0.16em;text-transform:uppercase;padding:5px 14px;border:1px solid #E97132;background:#E97132;color:#000;cursor:pointer;">● VISIBLE</button>
+          </div>
+          <div data-key="pitch_pack" style="display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px dotted #2a2a2a;">
+            <span style="font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:#999;">Pitch Pack</span>
+            <button onclick="vtToggle('pitch_pack')" style="font-family:inherit;font-size:9px;letter-spacing:0.16em;text-transform:uppercase;padding:5px 14px;border:1px solid #333;background:transparent;color:#666;cursor:pointer;">○ HIDDEN</button>
+          </div>
+          <div data-key="objection_file" style="display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px dotted #2a2a2a;">
+            <span style="font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:#999;">Objection File</span>
+            <button onclick="vtToggle('objection_file')" style="font-family:inherit;font-size:9px;letter-spacing:0.16em;text-transform:uppercase;padding:5px 14px;border:1px solid #333;background:transparent;color:#666;cursor:pointer;">○ HIDDEN</button>
+          </div>
+          <div data-key="monthly" style="display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px dotted #2a2a2a;">
+            <span style="font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:#999;">Monthly</span>
+            <button onclick="vtToggle('monthly')" style="font-family:inherit;font-size:9px;letter-spacing:0.16em;text-transform:uppercase;padding:5px 14px;border:1px solid #E97132;background:#E97132;color:#000;cursor:pointer;">● VISIBLE</button>
+          </div>
+          <div data-key="quarterly" style="display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px dotted #2a2a2a;">
+            <span style="font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:#999;">Quarterly</span>
+            <button onclick="vtToggle('quarterly')" style="font-family:inherit;font-size:9px;letter-spacing:0.16em;text-transform:uppercase;padding:5px 14px;border:1px solid #E97132;background:#E97132;color:#000;cursor:pointer;">● VISIBLE</button>
+          </div>
+          <div data-key="training" style="display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px dotted #2a2a2a;">
+            <span style="font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:#999;">Training</span>
+            <button onclick="vtToggle('training')" style="font-family:inherit;font-size:9px;letter-spacing:0.16em;text-transform:uppercase;padding:5px 14px;border:1px solid #E97132;background:#E97132;color:#000;cursor:pointer;">● VISIBLE</button>
+          </div>
+          <div data-key="hit_list" style="display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px dotted #2a2a2a;">
+            <span style="font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:#999;">Hit List</span>
+            <button onclick="vtToggle('hit_list')" style="font-family:inherit;font-size:9px;letter-spacing:0.16em;text-transform:uppercase;padding:5px 14px;border:1px solid #333;background:transparent;color:#666;cursor:pointer;">○ HIDDEN</button>
+          </div>
+        </div>
+        <div id="vault-tab-saved" style="display:none;margin-top:16px;font-size:9px;letter-spacing:0.2em;color:#6BCB77;">✓ SETTINGS SAVED</div>
+      </div>
+    </div>
+
   </div><!-- /admin-content -->
 
 </div><!-- /admin-panel -->
@@ -950,6 +995,7 @@
       if (tabName === 'activity') { loadActivity(); startActivityRefresh(); }
       if (tabName === 'affiliates') loadAffiliates();
       if (tabName === 'create-account') loadFirmDropdown();
+      if (tabName === 'settings') loadVaultTabSettings();
     });
   });
 
@@ -2831,13 +2877,84 @@
   }
 
   // Close modal on overlay click
-  document.getElementById('edit-user-modal').addEventListener('click', function(e) {
-    if (e.target === this) closeEditUser();
-  });
+  var _euModal = document.getElementById('edit-user-modal');
+  if (_euModal) _euModal.addEventListener('click', function(e) { if (e.target === this) closeEditUser(); });
+  var _efModal = document.getElementById('edit-firm-modal');
+  if (_efModal) _efModal.addEventListener('click', function(e) { if (e.target === this) closeEditFirm(); });
 
-  document.getElementById('edit-firm-modal').addEventListener('click', function(e) {
-    if (e.target === this) closeEditFirm();
-  });
+  // ══ VAULT FILTER TAB SETTINGS ═══════════════════════════════
+  var VT_DEFAULTS = { weekly:true, pitch_pack:false, objection_file:false, monthly:true, quarterly:true, training:true, hit_list:false };
+  var VT_CONFIG_PATH = 'config/tab_visibility.json';
+  var _vtCfg = null;
+
+  function vtSetBtn(key, on) {
+    var row = document.querySelector('#vault-tab-toggles [data-key="' + key + '"]');
+    if (!row) return;
+    var btn = row.querySelector('button');
+    if (!btn) return;
+    var BTNON  = 'font-family:inherit;font-size:9px;letter-spacing:0.16em;text-transform:uppercase;padding:5px 14px;border:1px solid #E97132;background:#E97132;color:#000;cursor:pointer;';
+    var BTNOFF = 'font-family:inherit;font-size:9px;letter-spacing:0.16em;text-transform:uppercase;padding:5px 14px;border:1px solid #333;background:transparent;color:#666;cursor:pointer;';
+    btn.style.cssText = on ? BTNON : BTNOFF;
+    btn.textContent = on ? '● VISIBLE' : '○ HIDDEN';
+  }
+
+  var VT_LABELS = { weekly:'Weekly', pitch_pack:'Pitch Pack', objection_file:'Objection File', monthly:'Monthly', quarterly:'Quarterly', training:'Training', hit_list:'Hit List' };
+  var VT_KEYS = ['weekly','pitch_pack','objection_file','monthly','quarterly','training','hit_list'];
+
+  function renderVTRows(cfg) {
+    var container = document.getElementById('vault-tab-toggles');
+    if (!container) return;
+    var ROW = 'display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px dotted #2a2a2a;';
+    var LBL = 'font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:#888;';
+    var BTNON  = 'font-family:inherit;font-size:9px;letter-spacing:0.16em;text-transform:uppercase;padding:5px 14px;border:1px solid #E97132;background:#E97132;color:#000;cursor:pointer;';
+    var BTNOFF = 'font-family:inherit;font-size:9px;letter-spacing:0.16em;text-transform:uppercase;padding:5px 14px;border:1px solid #333;background:transparent;color:#666;cursor:pointer;';
+    container.innerHTML = VT_KEYS.map(function(k) {
+      var on = !!cfg[k];
+      return '<div data-key="' + k + '" style="' + ROW + '">' +
+        '<span style="' + LBL + '">' + VT_LABELS[k] + '</span>' +
+        '<button onclick="vtToggle(\'' + k + '\')" style="' + (on ? BTNON : BTNOFF) + '">' + (on ? '● VISIBLE' : '○ HIDDEN') + '</button>' +
+        '</div>';
+    }).join('');
+  }
+
+  function loadVaultTabSettings() {
+    // Fetch saved config and sync button states (rows are already in HTML)
+    var url = SUPABASE_URL + '/storage/v1/object/public/Reports/' + VT_CONFIG_PATH + '?t=' + Date.now();
+    fetch(url)
+      .then(function(r) { return r.ok ? r.json() : null; })
+      .then(function(cfg) {
+        _vtCfg = Object.assign({}, VT_DEFAULTS, cfg || {});
+        VT_KEYS.forEach(function(k) { vtSetBtn(k, _vtCfg[k]); });
+      })
+      .catch(function() {
+        _vtCfg = Object.assign({}, VT_DEFAULTS);
+      });
+  }
+
+  function vtToggle(key) {
+    if (!_vtCfg) _vtCfg = Object.assign({}, VT_DEFAULTS);
+    _vtCfg[key] = !_vtCfg[key];
+    vtSetBtn(key, _vtCfg[key]);
+
+    var saved = document.getElementById('vault-tab-saved');
+    saved.textContent = 'SAVING...';
+    saved.style.color = 'var(--text-faint)';
+    saved.style.display = 'block';
+
+    var blob = new Blob([JSON.stringify(_vtCfg)], { type: 'application/json' });
+    supabaseAdmin.storage.from('Reports').upload(VT_CONFIG_PATH, blob, { upsert: true, contentType: 'application/json' })
+      .then(function(res) {
+        if (res.error) {
+          saved.textContent = '✗ SAVE FAILED — ' + res.error.message;
+          saved.style.color = 'var(--accent)';
+        } else {
+          saved.textContent = '✓ SAVED — ALL SUBSCRIBERS UPDATED';
+          saved.style.color = '#6BCB77';
+        }
+        clearTimeout(saved._t);
+        saved._t = setTimeout(function() { saved.style.display = 'none'; }, 3000);
+      });
+  }
 
 </script>
 

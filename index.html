@@ -6,6 +6,350 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>THE BROKERS TERMINAL — Institutional Intelligence for Professional Brokers</title>
   <link rel="stylesheet" href="site.css">
+  <style>
+
+    /* ═══ HERO ══════════════════════════════════════════════════════ */
+
+    .tbt-hero {
+      position: relative;
+      min-height: 100vh;
+      background: #060606;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      padding: 120px 48px 100px;
+      text-align: center;
+    }
+
+    /* Grid */
+    .tbt-hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(233,113,50,0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(233,113,50,0.05) 1px, transparent 1px);
+      background-size: 72px 72px;
+      pointer-events: none;
+    }
+
+    /* Scan lines */
+    .tbt-hero::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: repeating-linear-gradient(
+        0deg, transparent, transparent 3px,
+        rgba(0,0,0,0.07) 3px, rgba(0,0,0,0.07) 4px
+      );
+      pointer-events: none;
+    }
+
+    /* Radial vignette */
+    .tbt-hero-vignette {
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse 80% 70% at 50% 40%, transparent 30%, rgba(0,0,0,0.7) 100%);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* Corner brackets */
+    .tbt-corner {
+      position: absolute; width: 36px; height: 36px; z-index: 5;
+    }
+    .tbt-tl { top: 32px;    left: 32px;  border-top:    1px solid #E97132; border-left:  1px solid #E97132; }
+    .tbt-tr { top: 32px;    right: 32px; border-top:    1px solid #E97132; border-right: 1px solid #E97132; }
+    .tbt-bl { bottom: 32px; left: 32px;  border-bottom: 1px solid #E97132; border-left:  1px solid #E97132; }
+    .tbt-br { bottom: 32px; right: 32px; border-bottom: 1px solid #E97132; border-right: 1px solid #E97132; }
+
+    /* Top label */
+    .tbt-hero-eyebrow {
+      position: absolute;
+      top: 36px; left: 50%; transform: translateX(-50%);
+      font-size: 8px; letter-spacing: 0.5em; text-transform: uppercase;
+      color: rgba(255,255,255,0.12); white-space: nowrap; z-index: 5;
+      font-family: "Consolas","Menlo","Courier New", monospace;
+    }
+
+    /* Inner content */
+    .tbt-hero-inner {
+      position: relative; z-index: 3;
+      display: flex; flex-direction: column;
+      align-items: center;
+      animation: heroFadeIn 1s ease both;
+    }
+
+    @keyframes heroFadeIn {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Three bar logo */
+    .tbt-bars {
+      display: flex; gap: 8px; margin-bottom: 28px;
+      animation: heroFadeIn 0.8s ease 0.1s both;
+    }
+    .tbt-bars span {
+      display: block; width: 12px; height: 36px;
+      background: #E97132;
+    }
+
+    /* Brand name */
+    .tbt-hero-brand {
+      font-family: "Consolas","Menlo","Courier New", monospace;
+      font-size: 10px; letter-spacing: 0.55em; text-transform: uppercase;
+      color: rgba(255,255,255,0.35); margin-bottom: 36px;
+      animation: heroFadeIn 0.8s ease 0.2s both;
+    }
+
+    /* Main headline */
+    .tbt-hero-h1 {
+      font-family: "Consolas","Menlo","Courier New", monospace;
+      font-size: clamp(20px, 3.4vw, 48px);
+      font-weight: 700;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: #fff;
+      line-height: 1.22;
+      margin-bottom: 8px;
+      animation: heroFadeIn 0.8s ease 0.3s both;
+    }
+    .tbt-hero-h1 .acc { color: #E97132; }
+
+    /* Divider */
+    .tbt-hero-rule {
+      width: 56px; height: 1px; background: #E97132;
+      margin: 36px auto; animation: heroFadeIn 0.8s ease 0.4s both;
+    }
+
+    /* Sub copy */
+    .tbt-hero-copy {
+      font-family: "Consolas","Menlo","Courier New", monospace;
+      font-size: clamp(11px, 1.4vw, 15px);
+      letter-spacing: 0.16em; text-transform: uppercase;
+      color: #666; line-height: 2.1;
+      max-width: 680px;
+      margin-bottom: 48px;
+      animation: heroFadeIn 0.8s ease 0.5s both;
+    }
+    .tbt-hero-copy strong { color: #aaa; }
+
+    /* CTAs */
+    .tbt-hero-ctas {
+      display: flex; gap: 16px; justify-content: center;
+      flex-wrap: wrap; margin-bottom: 52px;
+      animation: heroFadeIn 0.8s ease 0.6s both;
+    }
+
+    /* Live badge */
+    .tbt-live {
+      display: flex; align-items: center; gap: 10px;
+      font-family: "Consolas","Menlo","Courier New", monospace;
+      font-size: 9px; letter-spacing: 0.32em; text-transform: uppercase;
+      color: rgba(255,255,255,0.2);
+      animation: heroFadeIn 0.8s ease 0.7s both;
+    }
+    .tbt-live-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: #E97132;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.4; transform: scale(0.7); }
+    }
+
+    /* Bottom fade */
+    .tbt-hero-fade {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      height: 100px;
+      background: linear-gradient(to bottom, transparent, #0A0A0A);
+      pointer-events: none; z-index: 4;
+    }
+
+    /* ═══ STAT BAR ══════════════════════════════════════════════════ */
+
+    /* ═══ STAT BAR ══════════════════════════════════════════════════ */
+
+    .stat-bar-enhanced {
+      display: flex;
+      align-items: stretch;
+      background: #E97132;
+      overflow: hidden;
+    }
+    .stat-bar-enhanced .sbi {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      padding: 14px 20px;
+      border-right: 1px solid rgba(0,0,0,0.15);
+      text-align: center;
+    }
+    .stat-bar-enhanced .sbi:last-child { border-right: none; }
+    .stat-bar-enhanced .sbi-num {
+      font-family: "Consolas","Menlo","Courier New", monospace;
+      font-size: clamp(16px, 1.8vw, 22px);
+      font-weight: 700;
+      color: #000;
+      letter-spacing: 0.04em;
+      line-height: 1;
+    }
+    .stat-bar-enhanced .sbi-label {
+      font-family: "Consolas","Menlo","Courier New", monospace;
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(0,0,0,0.65);
+      line-height: 1.5;
+      font-weight: 600;
+    }
+
+    /* ═══ SECTION IMPROVEMENTS ══════════════════════════════════════ */
+
+    .tbt-section-tag {
+      font-family: "Consolas","Menlo","Courier New", monospace;
+      font-size: 9px; letter-spacing: 0.44em; text-transform: uppercase;
+      color: #E97132; margin-bottom: 16px;
+    }
+
+    /* Tiles with icons */
+    .tile-icon {
+      font-size: 13px;
+      color: #E97132;
+      margin-bottom: 14px;
+      letter-spacing: 0;
+    }
+
+    /* Enhanced deliverable tiles */
+    .deliver-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: #111;
+      margin-top: 40px;
+    }
+    .deliver-card {
+      background: #0A0A0A;
+      padding: 36px 28px 32px;
+      position: relative;
+      transition: background 0.2s;
+      border-top: 2px solid transparent;
+    }
+    .deliver-card:hover {
+      background: #0f0f0f;
+      border-top-color: #E97132;
+    }
+    .deliver-num {
+      font-family: "Consolas","Menlo","Courier New",monospace;
+      font-size: 48px; font-weight: 700;
+      color: rgba(233,113,50,0.08);
+      line-height: 1; position: absolute;
+      top: 20px; right: 24px;
+      letter-spacing: 0;
+    }
+    .deliver-icon {
+      font-size: 18px; color: #E97132;
+      margin-bottom: 18px; display: block;
+    }
+    .deliver-name {
+      font-family: "Consolas","Menlo","Courier New",monospace;
+      font-size: 10px; letter-spacing: 0.32em;
+      text-transform: uppercase;
+      color: #E97132; margin-bottom: 14px;
+    }
+    .deliver-body {
+      font-family: "Consolas","Menlo","Courier New",monospace;
+      font-size: 11px; letter-spacing: 0.08em;
+      line-height: 1.9; color: #888;
+    }
+    .deliver-body strong { color: #bbb; }
+
+    @media (max-width: 768px) {
+      .deliver-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ═══ PHILOSOPHY ENHANCED ═══════════════════════════════════════ */
+
+    .philosophy-enhanced {
+      position: relative;
+      background: #080808;
+      border: 1px solid rgba(233,113,50,0.12);
+      padding: 64px 72px;
+      max-width: 860px;
+      margin: 0 auto;
+    }
+    .philosophy-enhanced::before,
+    .philosophy-enhanced::after {
+      content: '';
+      position: absolute;
+      width: 28px; height: 28px;
+    }
+    .philosophy-enhanced::before {
+      top: -1px; left: -1px;
+      border-top: 2px solid #E97132; border-left: 2px solid #E97132;
+    }
+    .philosophy-enhanced::after {
+      bottom: -1px; right: -1px;
+      border-bottom: 2px solid #E97132; border-right: 2px solid #E97132;
+    }
+    .philosophy-open-mark {
+      font-family: "Consolas","Menlo","Courier New", monospace;
+      font-size: 64px; color: rgba(233,113,50,0.15);
+      line-height: 1; margin-bottom: 20px; display: block;
+    }
+
+    /* ═══ MARKETS ENHANCED ══════════════════════════════════════════ */
+
+    .markets-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: #111;
+      border: 1px solid #111;
+      max-width: 720px;
+      margin: 40px auto 0;
+    }
+    .market-card {
+      background: #0A0A0A;
+      padding: 28px 20px;
+      text-align: center;
+      transition: background 0.2s;
+    }
+    .market-card:hover { background: #111; }
+    .market-card-icon { font-size: 18px; color: #E97132; margin-bottom: 12px; }
+    .market-card-name {
+      font-size: 10px; letter-spacing: 0.32em; text-transform: uppercase;
+      color: #ccc; margin-bottom: 6px;
+    }
+    .market-card-desc {
+      font-size: 8px; letter-spacing: 0.14em; text-transform: uppercase;
+      color: #3a3a3a; line-height: 1.8;
+    }
+
+    /* ═══ WHO IT'S FOR — improved ═══════════════════════════════════ */
+
+    .for-card-num {
+      font-family: "Consolas","Menlo","Courier New", monospace;
+      font-size: 40px; font-weight: 700;
+      color: rgba(233,113,50,0.12);
+      line-height: 1;
+      margin-bottom: 12px;
+    }
+
+    @media (max-width: 768px) {
+      .tbt-hero-h1 { font-size: clamp(22px, 8vw, 40px); }
+      .stat-bar-enhanced { grid-template-columns: repeat(2, 1fr); }
+      .markets-grid { grid-template-columns: repeat(2, 1fr); }
+      .philosophy-enhanced { padding: 40px 28px; }
+      .deliver-grid { grid-template-columns: 1fr !important; }
+    }
+    @media (max-width: 900px) {
+      .intel-split { grid-template-columns: 1fr !important; }
+    }
+  </style>
 </head>
 <body>
 
@@ -22,238 +366,384 @@
 </nav>
 
 <!-- ══ HERO ══════════════════════════════════════════════════════ -->
-<section class="hero">
-  <div class="hero-box">
-    <div class="hero-ribbon">▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬</div>
-    <h1 class="hero-title">THE BROKERS TERMINAL<span class="cursor-blink">_</span></h1>
-    <p class="hero-subtitle">INTELLIGENCE &nbsp;•&nbsp; TRAINING &nbsp;•&nbsp; STRATEGY</p>
-    <div class="hero-ribbon">▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬</div>
-    <p class="hero-sub-copy">Your clients are making decisions right now — with or without you. The Brokers Terminal gives you <strong style="color: var(--accent);">the research, the scripts, and the edge</strong> to make sure you're the one in the room when they do. Institutional-grade intelligence, built for professional brokers. Delivered every week. No fluff. No filler.</p>
-    <p class="hero-proof">Weekly, Monthly &amp; Quarterly intelligence &nbsp;•&nbsp; Gold Desk &amp; Whisky Desk &nbsp;•&nbsp; Scripts, training &amp; objection handling &nbsp;•&nbsp; 7-day free trial</p>
-    <div class="hero-ctas">
+<section class="tbt-hero">
+  <div class="tbt-hero-vignette"></div>
+  <div class="tbt-corner tbt-tl"></div>
+  <div class="tbt-corner tbt-tr"></div>
+  <div class="tbt-corner tbt-bl"></div>
+  <div class="tbt-corner tbt-br"></div>
+  <div class="tbt-hero-eyebrow">█ &nbsp;THE BROKERS TERMINAL &nbsp;—&nbsp; BROKERS EYES ONLY</div>
+
+  <div class="tbt-hero-inner">
+    <div class="tbt-bars">
+      <span></span><span></span><span></span>
+    </div>
+    <div class="tbt-hero-brand">THE BROKERS TERMINAL</div>
+    <h1 class="tbt-hero-h1">
+      THE RESEARCH.<br>
+      THE SCRIPTS.<br>
+      <span class="acc">THE EDGE.</span>
+    </h1>
+    <div class="tbt-hero-rule"></div>
+    <p class="tbt-hero-copy">
+      Institutional-grade intelligence, built for professional brokers.<br>
+      <strong>Delivered every week. Ready to use the moment it lands.</strong>
+    </p>
+    <div class="tbt-hero-ctas">
       <a class="btn btn-solid" href="pricing.html">█ START YOUR FREE TRIAL</a>
       <a class="btn btn-dim" href="download.html">█ VIEW SAMPLE REPORT</a>
     </div>
+    <div class="tbt-live">
+      <div class="tbt-live-dot"></div>
+      GOLD DESK &nbsp;·&nbsp; WHISKY DESK &nbsp;·&nbsp; 7-DAY FREE TRIAL &nbsp;·&nbsp; NO CONTRACTS
+    </div>
   </div>
+
+  <div class="tbt-hero-fade"></div>
 </section>
 
 <!-- ══ STAT BAR ══════════════════════════════════════════════════ -->
-<div class="stat-bar">
-  <div class="stat-item">
-    <div class="stat-num">8</div>
-    <div class="stat-label">Core Deliverables</div>
+<div class="stat-bar-enhanced">
+  <div class="sbi">
+    <div class="sbi-num">WEEKLY DELIVERABLES</div>
   </div>
-  <div class="stat-item">
-    <div class="stat-num">7</div>
-    <div class="stat-label">Day Free Trial</div>
+  <div class="sbi">
+    <div class="sbi-num" data-count="7" data-suffix="">0</div>
+    <div class="sbi-label">Day Free Trial</div>
   </div>
-  <div class="stat-item">
-    <div class="stat-num">£49</div>
-    <div class="stat-label">Per Month, Individual</div>
+  <div class="sbi">
+    <div class="sbi-num" data-count="49" data-prefix="£">£0</div>
+    <div class="sbi-label">Per Month · Individual</div>
   </div>
-  <div class="stat-item">
-    <div class="stat-num">∞</div>
-    <div class="stat-label">Archive Access — The Vault</div>
+  <div class="sbi">
+    <div class="sbi-num" style="font-size:clamp(28px,3vw,42px);line-height:1;">∞</div>
+    <div class="sbi-label">Archive · The Vault</div>
   </div>
 </div>
 
 <!-- ══ WHAT IS ════════════════════════════════════════════════════ -->
-<section class="section" style="background: var(--bg);">
-  <div class="section-inner">
-    <h2 class="section-header">WHAT IS THE BROKERS TERMINAL</h2>
-    <p style="color: var(--text-muted); font-size: 14px; line-height: 1.8; margin-bottom: 20px;">
-      Most brokers walk into client conversations with a view. The Brokers Terminal gives you a <strong style="color: var(--accent);">weapon</strong>. Every week, you receive institutional-grade research covering the macro forces, asset class dynamics, and geopolitical events that your clients are reading about — translated into pitch-ready language with specific talking points, scripted objection responses, and the psychological frameworks that turn a conversation into a commitment.
-    </p>
-    <p style="color: var(--text-muted); font-size: 14px; line-height: 1.8; margin-bottom: 20px;">
-      This isn't a news digest. It's a <strong style="color: var(--accent);">client conversation engine</strong>. Every deliverable is built around a single question: what do you say, to whom, and exactly how do you say it to move them forward? The research, training, and scripts are written by practitioners for practitioners — field-tested and ready to use.
-    </p>
-    <p style="color: var(--text-muted); font-size: 14px; line-height: 1.8;">
-      Whether you work solo or lead a desk, you get <strong style="color: var(--accent);">complete access</strong> to every weekly report, monthly deep-dive, quarterly review, flash alerts, pitch packs, objection files, and a fully searchable archive of every issue ever published. Cancel anytime. No contracts. Your first 7 days are free — and they will change how you work.
-    </p>
-  </div>
-</section>
-
-<!-- ══ SLIDESHOW ══════════════════════════════════════════════════ -->
-<section class="ss-section">
-
-  <div class="ss-header">
-    <div class="ss-header-tag">▸ SEE INSIDE THE TERMINAL</div>
-    <div class="ss-header-note">The intelligence. The scripts. The edge. — Live inside the platform.</div>
-  </div>
-
-  <div class="ss-outer">
-
-    <div class="ss-frame" id="ssFrame">
-
-      <!-- corner marks -->
-      <div class="ss-corner ss-tl"></div>
-      <div class="ss-corner ss-tr"></div>
-      <div class="ss-corner ss-bl"></div>
-      <div class="ss-corner ss-br"></div>
-
-      <!-- images -->
-      <div class="ss-slides" id="ssSlides"></div>
-
-      <!-- prev / next -->
-      <button class="ss-nav ss-prev" id="ssPrev" aria-label="Previous">&#8249;</button>
-      <button class="ss-nav ss-next" id="ssNext" aria-label="Next">&#8250;</button>
-
-      <!-- pause indicator -->
-      <div class="ss-paused" id="ssPaused">&#9646;&#9646;</div>
-
-    </div>
-
-    <!-- progress bar -->
-    <div class="ss-progress-track">
-      <div class="ss-progress-fill" id="ssProgress"></div>
-    </div>
-
-    <!-- caption + counter row -->
-    <div class="ss-meta">
-      <div class="ss-meta-left">
-        <span class="ss-meta-tag" id="ssTag">▸ THE BRAND</span>
-        <span class="ss-meta-label" id="ssLabel">The Brokers Terminal</span>
+<section style="background: var(--bg); padding: 40px 0;">
+  <div class="section-inner" style="padding-top:0; padding-bottom:0;">
+    <div class="tbt-section-tag">▸ WHAT IS THE BROKERS TERMINAL</div>
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center; margin-top: 20px;">
+      <div>
+        <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:clamp(24px,3.2vw,44px);font-weight:700;letter-spacing:0.08em;text-transform:uppercase;line-height:1.2;color:#fff;">
+          INTELLIGENCE<br>THAT<br><span style="color:#E97132;">CLOSES.</span>
+        </div>
+        <div style="width:36px;height:2px;background:#E97132;margin:20px 0 0;"></div>
       </div>
-      <div class="ss-meta-right">
-        <button class="ss-dot-btn" id="ssPauseBtn" title="Pause/Play">&#9646;&#9646;</button>
-        <span class="ss-counter" id="ssCounter">01 &nbsp;/&nbsp; 27</span>
-      </div>
-    </div>
+      <div>
+        <p style="color:#888;font-size:12px;line-height:1.8;margin-bottom:16px;font-family:'Consolas','Menlo','Courier New',monospace;letter-spacing:0.06em;">
+          Not a news digest. A <strong style="color:#ccc;">client conversation engine</strong> — institutional research translated into the exact language your brokers need on the desk, delivered every week.
+        </p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px;">
 
-    <!-- dot navigation -->
-    <div class="ss-dots" id="ssDots"></div>
+          <div style="background:#0d0d0d;border:1px solid #1a1a1a;border-left:2px solid #E97132;padding:12px 14px;">
+            <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:8px;letter-spacing:0.3em;text-transform:uppercase;color:#E97132;margin-bottom:6px;">◈ WEEKLY RESEARCH</div>
+            <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:10px;letter-spacing:0.04em;color:#777;line-height:1.7;">Live macro intelligence, market analysis, and fully scripted pitch sequences — every week, without exception.</div>
+          </div>
 
-  </div>
+          <div style="background:#0d0d0d;border:1px solid #1a1a1a;border-left:2px solid #E97132;padding:12px 14px;">
+            <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:8px;letter-spacing:0.3em;text-transform:uppercase;color:#E97132;margin-bottom:6px;">◈ SALES PSYCHOLOGY</div>
+            <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:10px;letter-spacing:0.04em;color:#777;line-height:1.7;">Cialdini, Kahneman, NLP — applied to your specific asset class and your specific client conversations.</div>
+          </div>
 
-</section>
+          <div style="background:#0d0d0d;border:1px solid #1a1a1a;border-left:2px solid #E97132;padding:12px 14px;">
+            <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:8px;letter-spacing:0.3em;text-transform:uppercase;color:#E97132;margin-bottom:6px;">◈ OBJECTION HANDLING</div>
+            <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:10px;letter-spacing:0.04em;color:#777;line-height:1.7;">Every objection your clients will raise — scripted, field-tested, and answered before the call begins.</div>
+          </div>
 
-<!-- ══ URGENCY STRIP ══════════════════════════════════════════════ -->
-<div class="urgency-strip">
-  <div>
-    <div class="urgency-text">7-Day Free Trial — No Charge. No Commitment. Just Results.</div>
-    <div class="urgency-sub">Try the full platform free. If it doesn't sharpen your edge, cancel with one click.</div>
-  </div>
-  <a class="urgency-btn" href="pricing.html">█ START FREE TRIAL NOW</a>
-</div>
+          <div style="background:#0d0d0d;border:1px solid #1a1a1a;border-left:2px solid #E97132;padding:12px 14px;">
+            <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:8px;letter-spacing:0.3em;text-transform:uppercase;color:#E97132;margin-bottom:6px;">◈ FULL ARCHIVE ACCESS</div>
+            <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:10px;letter-spacing:0.04em;color:#777;line-height:1.7;">Every issue ever published. Fully searchable. Available from day one of your subscription.</div>
+          </div>
 
-<!-- ══ WHAT YOU RECEIVE ══════════════════════════════════════════ -->
-<section class="section" style="background: var(--bg-deep); border-top: 1px solid var(--border-dim); border-bottom: 1px solid var(--border-dim);">
-  <div class="section-inner">
-    <h2 class="section-header">WHAT LANDS IN YOUR TERMINAL</h2>
-    <p style="color:var(--text-faint);font-size:13px;line-height:1.8;max-width:580px;margin:0 auto 40px;text-align:center;">Everything built for one purpose — to make the next conversation better than the last. Intelligence you can use the moment it arrives.</p>
-
-    <div class="tiles-3" style="margin-bottom: 0;">
-      <div class="tile">
-        <div class="tile-label">THE WEEKLY BRIEF</div>
-        <p class="tile-body">Real market intelligence — translated into conversation scripts, pitch sequences, and talking points your clients haven't heard. Written not as news but as <strong>broker language, ready to use immediately.</strong></p>
-      </div>
-      <div class="tile">
-        <div class="tile-label">THE MONTHLY</div>
-        <p class="tile-body">Deep macro analysis, institutional positioning data, and sector themes — the kind of research your clients assume their private bank is providing. <strong>Written for the desk, not the archive.</strong></p>
-      </div>
-      <div class="tile">
-        <div class="tile-label">THE PITCH PACK</div>
-        <p class="tile-body">A complete set of conversation scripts, closes, and objection handles built from the month's live market themes. No interpretation needed. <strong>Open it. Own the conversation.</strong></p>
-      </div>
-      <div class="tile">
-        <div class="tile-label">TRAINING MODULE</div>
-        <p class="tile-body">One elite sales technique per issue — action threshold, anchoring, Challenger teaching, calibrated questions — with <strong>practical drills tied to the current market environment.</strong></p>
-      </div>
-      <div class="tile">
-        <div class="tile-label">THE OBJECTION FILE</div>
-        <p class="tile-body">Every objection your clients will raise — scripted, answered, and refined using the AVR framework: Acknowledge, Validate, Redirect. <strong>Every answer. Before the call begins.</strong></p>
-      </div>
-      <div class="tile">
-        <div class="tile-label">THE HIT LIST</div>
-        <p class="tile-body">Prospect intelligence built for action. Who to approach, what they're thinking, and the precise angle most likely to convert hesitation into a decision. <strong>No guesswork.</strong></p>
-      </div>
-      <div class="tile">
-        <div class="tile-label">THE QUARTERLY REPORT</div>
-        <p class="tile-body">Strategic macro overview and positioning analysis for the quarter ahead. Backed by institutional data, <strong>written in broker language</strong> — the document you can sit across a client with.</p>
-      </div>
-      <div class="tile">
-        <div class="tile-label">FLASH ALERTS</div>
-        <p class="tile-body">When markets move, a same-day brief lands on your terminal before your clients call you asking what it means. <strong>The context, the talking points, the script — immediately.</strong></p>
-      </div>
-      <div class="tile">
-        <div class="tile-label">THE VAULT</div>
-        <p class="tile-body">The complete archive — every brief, every script, every analysis ever published. <strong>Fully searchable, always accessible.</strong> The most comprehensive intelligence library on any broker's desk.</p>
+        </div>
+        <a class="btn btn-solid" href="pricing.html">█ START FREE TRIAL</a>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ══ PHILOSOPHY ═════════════════════════════════════════════════ -->
-<section class="section" style="padding: 0; background: var(--bg-deep);">
-  <div class="section-inner" style="padding-top: 64px; padding-bottom: 64px;">
-    <div class="philosophy">
-      <div class="philosophy-tag">█ EDITORIAL PHILOSOPHY</div>
-      <p class="philosophy-quote">"Teach first. Pitch second. Never lead with price. Lead with the principle — whether that is owning real assets in an inflationary world, or positioning before the cycle confirms what you already see in the data. The broker who educates commands the conversation. The broker who pitches price chases it."</p>
-      <div class="philosophy-credit">— THE BROKERS TERMINAL, EDITORIAL DESK</div>
+<!-- ══ PITCH SLIDESHOW ════════════════════════════════════════════ -->
+<section style="background: var(--bg-deep); padding: 56px 0; border-top: 1px solid rgba(233,113,50,0.1); border-bottom: 1px solid rgba(233,113,50,0.1);">
+  <div style="max-width: 1300px; margin: 0 auto; padding: 0 32px;">
+    <div class="tbt-section-tag" style="text-align:center; margin-bottom: 20px;">▸ SEE INSIDE THE TERMINAL</div>
+    <div style="position:relative; border: 1px solid rgba(233,113,50,0.18); overflow:hidden;">
+      <iframe
+        id="pitchFrame"
+        src="pitch-slides.html"
+        style="display:block; width:100%; height:82vh; min-height:560px; border:none; background:#080808;"
+        allowfullscreen
+      ></iframe>
+    </div>
+    <div style="padding: 12px 0 0; text-align: center;">
+      <a href="pitch-slides.html" target="_blank"
+         style="font-family:'Consolas','Menlo','Courier New',monospace; font-size:9px; letter-spacing:0.30em; text-transform:uppercase; color:#444; text-decoration:none;">
+        ↗ OPEN FULL SCREEN
+      </a>
+    </div>
+  </div>
+</section>
+
+<script>
+/* Recapture arrow keys after user clicks inside the pitch iframe */
+window.addEventListener('blur', function() {
+  setTimeout(function() { document.body.focus(); }, 100);
+});
+</script>
+
+<!-- ══ WHAT YOU RECEIVE ════════════════════════════════════════════ -->
+<section style="position:relative; background:#060606; border-top:1px solid rgba(233,113,50,0.12); overflow:hidden;">
+  <div style="position:absolute;inset:0;pointer-events:none;z-index:0;background-image:linear-gradient(rgba(233,113,50,0.035) 1px,transparent 1px),linear-gradient(90deg,rgba(233,113,50,0.035) 1px,transparent 1px);background-size:72px 72px;"></div>
+
+  <div style="position:relative;z-index:1;text-align:center;padding:56px 40px 44px;">
+    <div class="tbt-section-tag" style="text-align:center;">▸ YOUR COMPLETE INTELLIGENCE SYSTEM</div>
+    <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:clamp(22px,3vw,40px);font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#fff;margin-bottom:16px;">WHAT LANDS IN YOUR TERMINAL</div>
+    <div style="width:40px;height:1px;background:#E97132;margin:0 auto 20px;"></div>
+    <p style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#444;max-width:500px;margin:0 auto;line-height:1.9;">Nine deliverables. One purpose. Every conversation better than the last.</p>
+  </div>
+
+  <div style="position:relative;z-index:1;display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(233,113,50,0.08);">
+
+    <div style="background:#080808;padding:36px 32px;border-top:1px solid rgba(233,113,50,0.15);transition:background 0.2s;" onmouseover="this.style.background='rgba(233,113,50,0.08)'" onmouseout="this.style.background='#080808'">
+      <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:9px;letter-spacing:0.4em;text-transform:uppercase;color:#E97132;margin-bottom:16px;">◈ &nbsp;THE WEEKLY BRIEF</div>
+      <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#fff;margin-bottom:14px;line-height:1.4;">Market Intelligence,<br>Ready to Deploy</div>
+      <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:11px;letter-spacing:0.06em;color:#aaa;line-height:1.9;">Institutional-grade research translated into pitch sequences, talking points, and conversation frameworks. Distributed every week. Used the same day.</div>
+    </div>
+
+    <div style="background:#080808;padding:36px 32px;border-top:1px solid rgba(233,113,50,0.15);transition:background 0.2s;" onmouseover="this.style.background='rgba(233,113,50,0.08)'" onmouseout="this.style.background='#080808'">
+      <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:9px;letter-spacing:0.4em;text-transform:uppercase;color:#E97132;margin-bottom:16px;">◈ &nbsp;THE MONTHLY</div>
+      <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#fff;margin-bottom:14px;line-height:1.4;">Deep Macro Analysis.<br>Institutional Depth.</div>
+      <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:11px;letter-spacing:0.06em;color:#aaa;line-height:1.9;">Extended analysis covering central bank positioning, sector dynamics, and forward macro themes. The research your clients assume their private bank provides.</div>
+    </div>
+
+    <div style="background:#080808;padding:36px 32px;border-top:1px solid rgba(233,113,50,0.15);transition:background 0.2s;" onmouseover="this.style.background='rgba(233,113,50,0.08)'" onmouseout="this.style.background='#080808'">
+      <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:9px;letter-spacing:0.4em;text-transform:uppercase;color:#E97132;margin-bottom:16px;">◈ &nbsp;THE PITCH PACK</div>
+      <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#fff;margin-bottom:14px;line-height:1.4;">Scripts Built From<br>This Week's Reality.</div>
+      <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:11px;letter-spacing:0.06em;color:#aaa;line-height:1.9;">Word-for-word conversation scripts, logical and emotional angles, closes, and objection handles — built from live market themes. Open it. Own the room.</div>
+    </div>
+
+    <div style="background:#080808;padding:36px 32px;border-top:1px solid rgba(233,113,50,0.08);transition:background 0.2s;" onmouseover="this.style.background='rgba(233,113,50,0.08)'" onmouseout="this.style.background='#080808'">
+      <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:9px;letter-spacing:0.4em;text-transform:uppercase;color:#E97132;margin-bottom:16px;">◈ &nbsp;TRAINING MODULE</div>
+      <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#fff;margin-bottom:14px;line-height:1.4;">One Elite Technique.<br>Applied This Week.</div>
+      <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:11px;letter-spacing:0.06em;color:#aaa;line-height:1.9;">Anchoring, Challenger, action-threshold selling, calibrated questions — one framework per issue with live drills tied to current market conditions.</div>
+    </div>
+
+    <div style="background:#080808;padding:36px 32px;border-top:1px solid rgba(233,113,50,0.08);transition:background 0.2s;" onmouseover="this.style.background='rgba(233,113,50,0.08)'" onmouseout="this.style.background='#080808'">
+      <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:9px;letter-spacing:0.4em;text-transform:uppercase;color:#E97132;margin-bottom:16px;">◈ &nbsp;THE OBJECTION FILE</div>
+      <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#fff;margin-bottom:14px;line-height:1.4;">Every Objection Answered<br>Before the Call Begins.</div>
+      <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:11px;letter-spacing:0.06em;color:#aaa;line-height:1.9;">25+ scripted objection responses using the AVR framework — Acknowledge, Validate, Redirect — with live market context embedded in every answer.</div>
+    </div>
+
+    <div style="background:#080808;padding:36px 32px;border-top:1px solid rgba(233,113,50,0.08);transition:background 0.2s;" onmouseover="this.style.background='rgba(233,113,50,0.08)'" onmouseout="this.style.background='#080808'">
+      <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:9px;letter-spacing:0.4em;text-transform:uppercase;color:#E97132;margin-bottom:16px;">◈ &nbsp;THE HIT LIST</div>
+      <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#fff;margin-bottom:14px;line-height:1.4;">Prospect Intelligence.<br>No Guesswork.</div>
+      <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:11px;letter-spacing:0.06em;color:#aaa;line-height:1.9;">Ranked targets, timing triggers, and the precise entry angle most likely to convert hesitation into a commitment. Who, when, and exactly how.</div>
+    </div>
+
+    <div style="background:#080808;padding:36px 32px;transition:background 0.2s;" onmouseover="this.style.background='rgba(233,113,50,0.08)'" onmouseout="this.style.background='#080808'">
+      <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:9px;letter-spacing:0.4em;text-transform:uppercase;color:#E97132;margin-bottom:16px;">◈ &nbsp;THE QUARTERLY</div>
+      <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#fff;margin-bottom:14px;line-height:1.4;">Strategic Outlook.<br>Institutional Authority.</div>
+      <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:11px;letter-spacing:0.06em;color:#aaa;line-height:1.9;">Macro cycle positioning, sector analysis, and forward themes — written in broker language. The document you sit across a client with and let do the work.</div>
+    </div>
+
+    <div style="background:#080808;padding:36px 32px;transition:background 0.2s;" onmouseover="this.style.background='rgba(233,113,50,0.08)'" onmouseout="this.style.background='#080808'">
+      <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:9px;letter-spacing:0.4em;text-transform:uppercase;color:#E97132;margin-bottom:16px;">◈ &nbsp;FLASH ALERTS</div>
+      <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#fff;margin-bottom:14px;line-height:1.4;">When Markets Move,<br>You Move First.</div>
+      <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:11px;letter-spacing:0.06em;color:#aaa;line-height:1.9;">Same-day briefings when material events break. The context, the implication, and the exact talking points — distributed before your clients start asking questions.</div>
+    </div>
+
+    <div style="background:#080808;padding:36px 32px;transition:background 0.2s;" onmouseover="this.style.background='rgba(233,113,50,0.08)'" onmouseout="this.style.background='#080808'">
+      <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:9px;letter-spacing:0.4em;text-transform:uppercase;color:#E97132;margin-bottom:16px;">◈ &nbsp;THE VAULT</div>
+      <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#fff;margin-bottom:14px;line-height:1.4;">The Complete Archive.<br>Always Accessible.</div>
+      <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:11px;letter-spacing:0.06em;color:#aaa;line-height:1.9;">Every brief, every script, every analysis ever published — fully searchable, available from day one. The most comprehensive intelligence library on any broker's desk.</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══ PHILOSOPHY — full bleed ════════════════════════════════════ -->
+<section style="
+  position: relative; background: #060606;
+  border-top: 1px solid rgba(233,113,50,0.12);
+  border-bottom: 1px solid rgba(233,113,50,0.12);
+  padding: 72px 40px;
+  overflow: hidden;
+">
+  <div style="
+    position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(ellipse 70% 80% at 50% 50%, rgba(233,113,50,0.04) 0%, transparent 70%);
+  "></div>
+  <div style="position:relative; z-index:1; max-width:900px; margin:0 auto; text-align:center;">
+    <div class="tbt-section-tag" style="text-align:center; margin-bottom:32px;">▸ EDITORIAL PHILOSOPHY</div>
+    <div style="
+      font-family:'Consolas','Menlo','Courier New',monospace;
+      font-size: clamp(14px, 1.6vw, 20px);
+      letter-spacing: 0.06em; line-height: 1.9;
+      color: #888; font-style: italic; margin-bottom: 28px;
+    ">
+      "Teach first. Pitch second. Never lead with price.<br>
+      The broker who educates commands the conversation.<br>
+      <span style="color:#E97132;">The broker who pitches price chases it.</span>"
+    </div>
+    <div style="font-family:'Consolas','Menlo','Courier New',monospace; font-size:9px; letter-spacing:0.4em; text-transform:uppercase; color:#3a3a3a;">
+      — THE BROKERS TERMINAL, EDITORIAL DESK
     </div>
   </div>
 </section>
 
 <!-- ══ WHO IT'S FOR ════════════════════════════════════════════════ -->
-<section class="section" style="background: var(--bg);">
-  <div class="section-inner">
-    <h2 class="section-header">WHO IT'S FOR</h2>
-    <div class="for-grid">
-      <div class="for-card">
-        <div class="for-card-title">█ THE SOLO BROKER</div>
-        <div class="for-card-body">You work independently and every client conversation counts. The Brokers Terminal is your research desk, your training coach, and your script library — all in one. <strong>£49/month. Less than one client lunch.</strong></div>
-      </div>
-      <div class="for-card">
-        <div class="for-card-title">█ THE DESK LEADER</div>
-        <div class="for-card-body">You're responsible for the output of a team. The Brokers Terminal puts the same intelligence, scripts, and training in the hands of every broker on your desk. <strong>One Corporate subscription covers up to 15 users.</strong></div>
-      </div>
-      <div class="for-card">
-        <div class="for-card-title">█ THE SERIOUS PRACTITIONER</div>
-        <div class="for-card-body">You already know the markets. What you need are better conversations. The Brokers Terminal turns your market knowledge into <strong>language that closes</strong> — with the psychology, scripts, and frameworks to back it up.</div>
+<section style="position:relative;background:#080808;overflow:hidden;border-top:1px solid rgba(233,113,50,0.08);">
+  <div style="position:absolute;inset:0;pointer-events:none;z-index:0;background-image:linear-gradient(rgba(233,113,50,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(233,113,50,0.03) 1px,transparent 1px);background-size:72px 72px;"></div>
+
+  <div style="position:relative;z-index:1;text-align:center;padding:56px 40px 44px;">
+    <div class="tbt-section-tag" style="text-align:center;">▸ BUILT FOR</div>
+    <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:clamp(22px,3vw,40px);font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#fff;margin-bottom:16px;">WHO IT'S FOR</div>
+    <div style="width:40px;height:1px;background:#E97132;margin:0 auto 20px;"></div>
+    <p style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#444;max-width:480px;margin:0 auto;line-height:1.9;">Three types of broker. One intelligence edge.</p>
+  </div>
+
+  <div style="position:relative;z-index:1;display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(233,113,50,0.08);padding-bottom:1px;">
+
+    <div style="background:#090909;padding:48px 36px;border-top:2px solid #E97132;transition:background 0.2s;" onmouseover="this.style.background='rgba(233,113,50,0.08)'" onmouseout="this.style.background='#090909'">
+      <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:9px;letter-spacing:0.5em;text-transform:uppercase;color:#E97132;margin-bottom:20px;">◈ &nbsp;THE SOLO BROKER</div>
+      <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:13px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#fff;margin-bottom:20px;line-height:1.5;">The Research Desk<br>You Never Had.</div>
+      <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:11px;letter-spacing:0.06em;color:#aaa;line-height:1.9;margin-bottom:24px;">Every week, institutional-grade analysis and word-for-word scripts land in your inbox. No research team. No in-house training. Just the intelligence you need to walk into every conversation already prepared.</div>
+      <div style="border-top:1px solid #151515;padding-top:20px;">
+        <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:9px;letter-spacing:0.3em;text-transform:uppercase;color:#333;">INDIVIDUAL PLAN</div>
+        <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:22px;font-weight:700;color:#E97132;margin-top:6px;">£49<span style="font-size:10px;color:#333;letter-spacing:0.2em;">/month</span></div>
       </div>
     </div>
+
+    <div style="background:#090909;padding:48px 36px;border-top:2px solid #E97132;transition:background 0.2s;" onmouseover="this.style.background='rgba(233,113,50,0.08)'" onmouseout="this.style.background='#090909'">
+      <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:9px;letter-spacing:0.5em;text-transform:uppercase;color:#E97132;margin-bottom:20px;">◈ &nbsp;THE DESK LEADER</div>
+      <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:13px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#fff;margin-bottom:20px;line-height:1.5;">Standardise Excellence<br>Across the Floor.</div>
+      <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:11px;letter-spacing:0.06em;color:#aaa;line-height:1.9;margin-bottom:24px;">One subscription gives every broker on your desk the same intelligence, the same scripts, and the same objection frameworks. Conversations improve collectively. Results follow. Up to 15 users included at no extra cost.</div>
+      <div style="border-top:1px solid #151515;padding-top:20px;">
+        <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:9px;letter-spacing:0.3em;text-transform:uppercase;color:#333;">CORPORATE PLAN</div>
+        <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:22px;font-weight:700;color:#E97132;margin-top:6px;">£499<span style="font-size:10px;color:#333;letter-spacing:0.2em;">/month</span></div>
+      </div>
+    </div>
+
+    <div style="background:#090909;padding:48px 36px;border-top:2px solid #E97132;transition:background 0.2s;" onmouseover="this.style.background='rgba(233,113,50,0.08)'" onmouseout="this.style.background='#090909'">
+      <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:9px;letter-spacing:0.5em;text-transform:uppercase;color:#E97132;margin-bottom:20px;">◈ &nbsp;THE PRACTITIONER</div>
+      <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:13px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#fff;margin-bottom:20px;line-height:1.5;">You Know the Markets.<br>Now Make Them Close.</div>
+      <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:11px;letter-spacing:0.06em;color:#aaa;line-height:1.9;margin-bottom:24px;">You already understand gold, commodities, and macro. What The Brokers Terminal gives you is the language to translate that expertise into client decisions — every framework, script, and closing technique refined for the alternative asset conversation specifically.</div>
+      <div style="border-top:1px solid #151515;padding-top:20px;">
+        <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:9px;letter-spacing:0.3em;text-transform:uppercase;color:#333;">EITHER PLAN</div>
+        <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:22px;font-weight:700;color:#E97132;margin-top:6px;">7-DAY<span style="font-size:10px;color:#333;letter-spacing:0.2em;">&nbsp;FREE TRIAL</span></div>
+      </div>
+    </div>
+
   </div>
 </section>
 
-<!-- ══ MARKETS ════════════════════════════════════════════════════ -->
-<section class="section" style="background: var(--bg-deep); border-top: 1px solid var(--border-dim);">
-  <div class="section-inner">
-    <h2 class="section-header">MARKETS COVERED</h2>
-    <div class="badges" style="justify-content:center;width:100%;">
-      <span class="badge">WHISKY MARKET</span>
-      <span class="badge">GOLD BULLION</span>
-      <span class="badge">MACRO GLOBAL</span>
-      <span class="badge">ALTERNATIVE ASSETS</span>
-      <span class="badge">MORE EXPANDING</span>
-    </div>
-  </div>
-</section>
+<!-- ══ MARKETS + PRICING ═══════════════════════════════════════════ -->
+<section style="position:relative;background:#060606;overflow:hidden;border-top:1px solid rgba(233,113,50,0.12);">
+  <div style="position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(rgba(233,113,50,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(233,113,50,0.03) 1px,transparent 1px);background-size:72px 72px;"></div>
 
-<!-- ══ PRICING SNAPSHOT ══════════════════════════════════════════ -->
-<section class="section" style="background: var(--bg-deep); border-top: 1px solid var(--border-dim);">
-  <div class="section-inner">
-    <h2 class="section-header">CHOOSE YOUR PLAN</h2>
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
-      <div class="tile" style="text-align: center; padding: 32px;">
-        <div class="tile-label" style="margin-bottom: 12px;">INDIVIDUAL</div>
-        <div style="color: var(--text); font-size: 48px; font-weight: 700; letter-spacing: 0.04em; line-height: 1; margin-bottom: 4px;">
-          <span style="font-size: 20px; color: var(--accent); vertical-align: top; margin-top: 8px; display: inline-block;">£</span>49
+  <!-- Section header -->
+  <div style="position:relative;z-index:1;text-align:center;padding:56px 40px 44px;">
+    <div class="tbt-section-tag" style="text-align:center;">▸ COVERAGE &amp; ACCESS</div>
+    <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:clamp(22px,3vw,40px);font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#fff;margin-bottom:16px;">MARKETS &amp; PLANS</div>
+    <div style="width:40px;height:1px;background:#E97132;margin:0 auto 20px;"></div>
+    <p style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#444;max-width:500px;margin:0 auto;line-height:1.9;">Every market. Every format. One subscription. Start free.</p>
+  </div>
+
+  <div style="position:relative;z-index:1;max-width:1300px;margin:0 auto;padding:0 40px 72px;display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:start;">
+
+    <!-- Markets -->
+    <div>
+      <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:9px;letter-spacing:0.4em;text-transform:uppercase;color:#E97132;margin-bottom:24px;border-bottom:1px solid #151515;padding-bottom:16px;">▸ ASSET COVERAGE</div>
+      <div style="display:flex;flex-direction:column;gap:1px;background:rgba(233,113,50,0.06);">
+
+        <div style="background:#090909;display:grid;grid-template-columns:48px 1fr auto;gap:0;align-items:center;padding:20px 24px;">
+          <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:18px;color:#E97132;opacity:0.6;">◈</div>
+          <div>
+            <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:10px;letter-spacing:0.24em;text-transform:uppercase;color:#ccc;margin-bottom:3px;">Gold Bullion</div>
+            <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:8px;letter-spacing:0.1em;text-transform:uppercase;color:#666;">Weekly · Monthly · Quarterly · Pitch Pack</div>
+          </div>
+          <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:8px;letter-spacing:0.2em;text-transform:uppercase;color:#E97132;text-align:right;">LIVE</div>
         </div>
-        <div style="color: var(--text-faint); font-size: 11px; letter-spacing: 0.20em; text-transform: uppercase; margin-bottom: 16px;">PER MONTH • 1 USER</div>
-        <p style="color: var(--text-muted); font-size: 13px; line-height: 1.65; margin-bottom: 20px;">For solo professionals who refuse to walk into a client conversation under-prepared. Full access to every report, script, and training module — from day one.</p>
-        <a class="btn btn-full btn-solid" href="pricing.html">█ START FREE TRIAL</a>
+
+        <div style="background:#090909;display:grid;grid-template-columns:48px 1fr auto;gap:0;align-items:center;padding:20px 24px;">
+          <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:18px;color:#E97132;opacity:0.6;">◈</div>
+          <div>
+            <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:10px;letter-spacing:0.24em;text-transform:uppercase;color:#ccc;margin-bottom:3px;">Whisky Market</div>
+            <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:8px;letter-spacing:0.1em;text-transform:uppercase;color:#666;">Weekly · Monthly · Quarterly · Pitch Pack</div>
+          </div>
+          <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:8px;letter-spacing:0.2em;text-transform:uppercase;color:#E97132;text-align:right;">LIVE</div>
+        </div>
+
+        <div style="background:#090909;display:grid;grid-template-columns:48px 1fr auto;gap:0;align-items:center;padding:20px 24px;">
+          <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:18px;color:#E97132;opacity:0.6;">◈</div>
+          <div>
+            <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:10px;letter-spacing:0.24em;text-transform:uppercase;color:#ccc;margin-bottom:3px;">Global Macro</div>
+            <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:8px;letter-spacing:0.1em;text-transform:uppercase;color:#666;">All desks · Every issue · Central banks · Inflation</div>
+          </div>
+          <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:8px;letter-spacing:0.2em;text-transform:uppercase;color:#E97132;text-align:right;">LIVE</div>
+        </div>
+
+        <div style="background:#090909;display:grid;grid-template-columns:48px 1fr auto;gap:0;align-items:center;padding:20px 24px;">
+          <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:18px;color:#E97132;opacity:0.6;">◈</div>
+          <div>
+            <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:10px;letter-spacing:0.24em;text-transform:uppercase;color:#ccc;margin-bottom:3px;">Sales Psychology</div>
+            <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:8px;letter-spacing:0.1em;text-transform:uppercase;color:#666;">Objection handling · Closing frameworks · NLP</div>
+          </div>
+          <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:8px;letter-spacing:0.2em;text-transform:uppercase;color:#E97132;text-align:right;">LIVE</div>
+        </div>
+
+        <div style="background:#090909;display:grid;grid-template-columns:48px 1fr auto;gap:0;align-items:center;padding:20px 24px;">
+          <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:18px;color:#E97132;opacity:0.3;">◈</div>
+          <div>
+            <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:10px;letter-spacing:0.24em;text-transform:uppercase;color:#ccc;margin-bottom:3px;">Other Markets &amp; Sectors</div>
+            <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:8px;letter-spacing:0.1em;text-transform:uppercase;color:#666;">Insurance · Pensions · Property · More coming</div>
+          </div>
+          <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:8px;letter-spacing:0.2em;text-transform:uppercase;color:#E97132;text-align:right;">SOON</div>
+        </div>
+
       </div>
-      <div class="tile" style="text-align: center; padding: 32px; border-color: var(--accent);">
-        <div class="tile-label" style="margin-bottom: 12px;">CORPORATE</div>
-        <div style="color: var(--text); font-size: 48px; font-weight: 700; letter-spacing: 0.04em; line-height: 1; margin-bottom: 4px;">
-          <span style="font-size: 20px; color: var(--accent); vertical-align: top; margin-top: 8px; display: inline-block;">£</span>499
-        </div>
-        <div style="color: var(--text-faint); font-size: 11px; letter-spacing: 0.20em; text-transform: uppercase; margin-bottom: 16px;">PER MONTH • UP TO 15 USERS</div>
-        <p style="color: var(--text-muted); font-size: 13px; line-height: 1.65; margin-bottom: 20px;">For firms who want every broker on the desk operating at the same level. One subscription. Up to 15 users. The same intelligence across your entire team.</p>
-        <a class="btn btn-full" href="pricing.html">█ START FREE TRIAL</a>
+
+      <div style="margin-top:24px;padding:16px 20px;border:1px solid #141414;background:#0a0a0a;">
+        <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:#666;line-height:1.9;">All markets included in every plan · No desk add-ons · No tiered access · Full coverage from day one</div>
       </div>
     </div>
-    <p style="color: var(--text-faint); font-size: 12px; text-align: center; line-height: 1.6;">7-day free trial on both plans. Requires card, but no charge during trial. Cancel anytime from your account. Billed securely via Stripe.</p>
+
+    <!-- Pricing -->
+    <div>
+      <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:9px;letter-spacing:0.4em;text-transform:uppercase;color:#E97132;margin-bottom:24px;border-bottom:1px solid #151515;padding-bottom:16px;">▸ SIMPLE PRICING</div>
+
+      <!-- Individual -->
+      <div style="background:#0a0a0a;border:1px solid rgba(233,113,50,0.15);border-top:2px solid #E97132;padding:32px;margin-bottom:12px;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;">
+          <div>
+            <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:9px;letter-spacing:0.4em;text-transform:uppercase;color:#888;margin-bottom:10px;">INDIVIDUAL</div>
+            <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:38px;font-weight:700;color:#fff;line-height:1;"><span style="font-size:16px;color:#E97132;vertical-align:top;margin-top:7px;display:inline-block;">£</span>49<span style="font-size:10px;color:#555;letter-spacing:0.2em;">/MO</span></div>
+          </div>
+          <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:8px;letter-spacing:0.3em;text-transform:uppercase;color:#666;text-align:right;padding-top:6px;line-height:1.8;">1 USER<br>BILLED MONTHLY</div>
+        </div>
+        <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:11px;letter-spacing:0.06em;color:#aaa;line-height:1.9;margin-bottom:24px;">Full platform access from day one. Every report, script, training module, and archive. No feature limits.</div>
+        <a href="pricing.html" style="display:block;text-align:center;font-family:'Consolas','Menlo','Courier New',monospace;font-size:9px;letter-spacing:0.3em;text-transform:uppercase;color:#000;background:#E97132;border:1px solid #E97132;padding:13px 20px;text-decoration:none;font-weight:700;transition:background 0.2s;" onmouseover="this.style.background='#f08040'" onmouseout="this.style.background='#E97132'">START 7-DAY FREE TRIAL →</a>
+      </div>
+
+      <!-- Corporate -->
+      <div style="background:#0a0a0a;border:1px solid rgba(233,113,50,0.2);border-top:2px solid #E97132;padding:32px;margin-bottom:16px;position:relative;">
+        <div style="position:absolute;top:0;right:24px;transform:translateY(-50%);background:#E97132;font-family:'Consolas','Menlo','Courier New',monospace;font-size:7px;letter-spacing:0.3em;text-transform:uppercase;color:#000;padding:4px 12px;font-weight:700;">MOST POPULAR</div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;">
+          <div>
+            <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:9px;letter-spacing:0.4em;text-transform:uppercase;color:#E97132;margin-bottom:10px;">CORPORATE</div>
+            <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:38px;font-weight:700;color:#fff;line-height:1;"><span style="font-size:16px;color:#E97132;vertical-align:top;margin-top:7px;display:inline-block;">£</span>499<span style="font-size:10px;color:#333;letter-spacing:0.2em;">/MO</span></div>
+          </div>
+          <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:8px;letter-spacing:0.3em;text-transform:uppercase;color:#E97132;text-align:right;padding-top:6px;line-height:1.8;opacity:0.6;">UP TO 15<br>USERS</div>
+        </div>
+        <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:11px;letter-spacing:0.06em;color:#aaa;line-height:1.9;margin-bottom:24px;">The whole desk, one subscription. Same intelligence, scripts, and frameworks for every broker on the floor — at £33/user/month.</div>
+        <a href="pricing.html" style="display:block;text-align:center;font-family:'Consolas','Menlo','Courier New',monospace;font-size:9px;letter-spacing:0.3em;text-transform:uppercase;color:#000;background:#E97132;border:1px solid #E97132;padding:13px 20px;text-decoration:none;font-weight:700;transition:background 0.2s;" onmouseover="this.style.background='#f08040'" onmouseout="this.style.background='#E97132'">START 7-DAY FREE TRIAL →</a>
+      </div>
+
+      <p style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:8px;letter-spacing:0.18em;text-transform:uppercase;color:#555;line-height:2;text-align:center;">No charge during trial · Cancel anytime · Stripe-secured · Instant access</p>
+    </div>
+
   </div>
 </section>
 
@@ -279,204 +769,42 @@
 
 <script src="site.js"></script>
 
+<!-- ══ STAT COUNTER (scroll-triggered) ══════════════════════════ -->
 <script>
-(function(){
+(function() {
+  var animated = false;
+  var statBar = document.querySelector('.stat-bar-enhanced');
+  if (!statBar) return;
 
-  /* ── Slide data — interleaved: quote → terminal → quote → terminal ── */
-  var SLIDES = [
-    { f:'slide-01.png', tag:'▸ THE BRAND',           label:'The Brokers Terminal — Established 2026, London' },
-    { f:'slide-12.png', tag:'▸ THE SUBSCRIBER DESK', label:'Your intelligence command centre — everything in one place' },
-    { f:'slide-02.png', tag:'▸ THE DIFFERENCE',      label:'The ones clients remember don\'t know more — they know different' },
-    { f:'slide-13.png', tag:'▸ THE GOLD DESK',       label:'Your latest issue — ready to open, read, and use today' },
-    { f:'slide-03.png', tag:'▸ THE NAVIGATOR',       label:'Magellan didn\'t know the ship. He read the ocean.' },
-    { f:'slide-14.png', tag:'▸ THE WEEKLY',          label:'The Brokers Weekly — Gold Bullion — Week Ended 16 May 2026' },
-    { f:'slide-04.png', tag:'▸ WHAT THEY BUY',       label:'Clients don\'t buy gold. They buy certainty.' },
-    { f:'slide-15.png', tag:'▸ GLOBAL MACRO',        label:'Key prints, central bank signals, geopolitical fault lines' },
-    { f:'slide-05.png', tag:'▸ THE QUESTION',        label:'"Why now?" — The broker who hesitates loses the room.' },
-    { f:'slide-16.png', tag:'▸ PITCH SCRIPTS',       label:'Open strong. Gather deep. Close clean. — Full scripted sequences' },
-    { f:'slide-06.png', tag:'▸ THE INTELLIGENCE',    label:'Every week the world shifts. You\'ll know before your clients do.' },
-    { f:'slide-17.png', tag:'▸ THE HIT LIST',        label:'Whisky Hit List — 10 stories ranked by client persuasion potential' },
-    { f:'slide-07.png', tag:'▸ THE PITCH PACK',      label:'Your words. Forged from this week\'s reality.' },
-    { f:'slide-18.png', tag:'▸ HIT LIST STORY',      label:'Trump removes US tariffs on Scotch Whisky — ready-to-use narrative' },
-    { f:'slide-08.png', tag:'▸ SALES PSYCHOLOGY',    label:'The world\'s best sales minds. Applied to the desk you sit at.' },
-    { f:'slide-19.png', tag:'▸ THE VAULT',           label:'Every issue ever published — fully searchable, always available' },
-    { f:'slide-09.png', tag:'▸ THE TRANSFORMATION',  label:'You were selling. Now you\'re advising.' },
-    { f:'slide-20.png', tag:'▸ GOLD HIT LIST',       label:'Gold +43.5% YTD — every major asset class left behind in 2026' },
-    { f:'slide-10.png', tag:'▸ THE RESULT',          label:'A different kind of desk. A different kind of name.' },
-    { f:'slide-21.png', tag:'▸ THE PSYCHOLOGY DESK', label:'Anchoring — the bias that controls every number in a conversation' },
-    { f:'slide-11.png', tag:'▸ THE INVITATION',      label:'7 days free. No contracts. Cancel anytime.' },
-    { f:'slide-22.png', tag:'▸ OBJECTION HANDLING',  label:'The Hesitant Re-Entrant — scripted, field-tested responses' },
-    { f:'slide-23.png', tag:'▸ THE SCIENCE',         label:'Cialdini. Kahneman. Tversky. Applied to your next call.' },
-    { f:'slide-24.png', tag:'▸ THE FRAMEWORK',       label:'5-Step Scarcity-Loss Framework — built to convert resistance into action' },
-    { f:'slide-25.png', tag:'▸ THE AVR METHOD',      label:'Acknowledge. Validate. Redirect. — Handle any objection, every time.' },
-    { f:'slide-26.png', tag:'▸ 25 OBJECTIONS',       label:'Every objection your clients will ever raise — answered before the call' },
-    { f:'slide-27.png', tag:'▸ START TODAY',         label:'Your edge starts at thebrokersterminal.com' }
-  ];
-
-  /* no act breaks — interleaved flow */
-  var ACT_BREAKS = [];
-
-  var INTERVAL  = 5000;  /* ms per slide */
-  var BASE_DIR  = 'screenshots/';
-
-  var current   = 0;
-  var paused    = false;
-  var timer     = null;
-  var progTimer = null;
-
-  var frame     = document.getElementById('ssFrame');
-  var slidesEl  = document.getElementById('ssSlides');
-  var tagEl     = document.getElementById('ssTag');
-  var labelEl   = document.getElementById('ssLabel');
-  var counterEl = document.getElementById('ssCounter');
-  var progressEl= document.getElementById('ssProgress');
-  var dotsEl    = document.getElementById('ssDots');
-  var pausedEl  = document.getElementById('ssPaused');
-  var pauseBtn  = document.getElementById('ssPauseBtn');
-  var prevBtn   = document.getElementById('ssPrev');
-  var nextBtn   = document.getElementById('ssNext');
-
-  if (!frame) return;
-
-  /* ── Build image elements ── */
-  var imgs = [];
-  SLIDES.forEach(function(s, i){
-    var img = document.createElement('img');
-    img.className = 'ss-img' + (i === 0 ? ' active' : '');
-    img.src = BASE_DIR + s.f;
-    img.loading = i < 3 ? 'eager' : 'lazy';
-    img.alt = s.label;
-    slidesEl.appendChild(img);
-    imgs.push(img);
-  });
-
-  /* ── Build dot navigation ── */
-  var dots = [];
-  SLIDES.forEach(function(s, i){
-    if (ACT_BREAKS.indexOf(i) !== -1) {
-      var sep = document.createElement('div');
-      sep.className = 'ss-dot-sep';
-      dotsEl.appendChild(sep);
+  function countUp(el, target, prefix) {
+    if (!target) return;
+    var start = null;
+    var duration = Math.min(1400, 600 + target * 8);
+    function step(ts) {
+      if (!start) start = ts;
+      var pct = Math.min(1, (ts - start) / duration);
+      var ease = 1 - Math.pow(1 - pct, 3);
+      el.textContent = (prefix || '') + Math.round(target * ease);
+      if (pct < 1) requestAnimationFrame(step);
+      else el.textContent = (prefix || '') + target;
     }
-    var dot = document.createElement('div');
-    dot.className = 'ss-dot' + (i === 0 ? ' active' : '');
-    dot.title = s.label;
-    dot.setAttribute('data-i', i);
-    dot.addEventListener('click', function(){ goTo(+this.getAttribute('data-i'), true); });
-    dotsEl.appendChild(dot);
-    dots.push(dot);
-  });
-
-  /* ── Go to slide ── */
-  function goTo(n, userTriggered) {
-    imgs[current].classList.remove('active');
-    dots[current].classList.remove('active');
-
-    current = ((n % SLIDES.length) + SLIDES.length) % SLIDES.length;
-
-    imgs[current].classList.add('active');
-    dots[current].classList.add('active');
-
-    tagEl.textContent   = SLIDES[current].tag;
-    labelEl.textContent = SLIDES[current].label;
-    counterEl.textContent = String(current + 1).padStart(2,'0') + '  /  ' + String(SLIDES.length).padStart(2,'0');
-
-    /* restart progress bar */
-    resetProgress();
-
-    if (userTriggered && !paused) {
-      clearInterval(timer);
-      timer = setInterval(advance, INTERVAL);
-    }
+    requestAnimationFrame(step);
   }
 
-  function advance() {
-    goTo(current + 1, false);
-  }
+  var observer = new IntersectionObserver(function(entries) {
+    if (animated || !entries[0].isIntersecting) return;
+    animated = true;
+    document.querySelectorAll('[data-count]').forEach(function(el) {
+      var target = parseInt(el.dataset.count);
+      var prefix = el.dataset.prefix || '';
+      countUp(el, target, prefix);
+    });
+  }, { threshold: 0.4 });
 
-  /* ── Progress bar ── */
-  function resetProgress(){
-    progressEl.style.transition = 'none';
-    progressEl.style.width = '0%';
-    /* force reflow */
-    void progressEl.offsetWidth;
-    if (!paused) {
-      progressEl.style.transition = 'width ' + INTERVAL + 'ms linear';
-      progressEl.style.width = '100%';
-    }
-  }
-
-  /* ── Pause / play ── */
-  function setPaused(val) {
-    paused = val;
-    if (paused) {
-      clearInterval(timer);
-      timer = null;
-      pausedEl.classList.add('visible');
-      pauseBtn.classList.add('paused');
-      pauseBtn.innerHTML = '&#9654;';
-      pauseBtn.title = 'Play';
-      /* freeze progress bar */
-      var computed = window.getComputedStyle(progressEl).width;
-      var pct = (parseFloat(computed) / progressEl.parentElement.offsetWidth * 100);
-      progressEl.style.transition = 'none';
-      progressEl.style.width = pct + '%';
-    } else {
-      pausedEl.classList.remove('visible');
-      pauseBtn.classList.remove('paused');
-      pauseBtn.innerHTML = '&#9646;&#9646;';
-      pauseBtn.title = 'Pause';
-      resetProgress();
-      timer = setInterval(advance, INTERVAL);
-    }
-  }
-
-  /* ── Event listeners ── */
-  prevBtn.addEventListener('click', function(e){
-    e.stopPropagation();
-    goTo(current - 1, true);
-  });
-
-  nextBtn.addEventListener('click', function(e){
-    e.stopPropagation();
-    goTo(current + 1, true);
-  });
-
-  frame.addEventListener('click', function(){
-    goTo(current + 1, true);
-  });
-
-  /* hover to pause */
-  var manualPause = false;
-  frame.addEventListener('mouseenter', function(){ if (!paused && !manualPause) setPaused(true); });
-  frame.addEventListener('mouseleave', function(){ if (paused && !manualPause) setPaused(false); });
-
-  pauseBtn.addEventListener('click', function(e){
-    e.stopPropagation();
-    manualPause = !manualPause;
-    setPaused(manualPause);
-  });
-
-  /* keyboard */
-  document.addEventListener('keydown', function(e){
-    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') goTo(current + 1, true);
-    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   goTo(current - 1, true);
-  });
-
-  /* touch swipe */
-  var touchStartX = 0;
-  frame.addEventListener('touchstart', function(e){ touchStartX = e.touches[0].clientX; }, {passive:true});
-  frame.addEventListener('touchend', function(e){
-    var dx = e.changedTouches[0].clientX - touchStartX;
-    if (Math.abs(dx) > 40) goTo(dx < 0 ? current + 1 : current - 1, true);
-  }, {passive:true});
-
-  /* ── Start ── */
-  goTo(0, false);
-  timer = setInterval(advance, INTERVAL);
-
+  observer.observe(statBar);
 })();
 </script>
+
 
 </body>
 </html>

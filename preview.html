@@ -79,6 +79,17 @@
               }
             }
             iframe.contentWindow.addEventListener('scroll', stickyTick, { passive: true });
+
+            // Intercept all sidebar link clicks — scroll to target, never navigate
+            iDoc.querySelectorAll('.sidebar a').forEach(function(a) {
+              a.addEventListener('click', function(e) {
+                e.preventDefault();
+                var href = a.getAttribute('href') || '';
+                var id = href.charAt(0) === '#' ? href.slice(1) : href.replace(/^.*#/, '');
+                var target = id ? (iDoc.getElementById(id) || iDoc.querySelector('[name="' + id + '"]')) : null;
+                if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              });
+            });
           });
           iframe.srcdoc = html;
           iframe.style.display = 'block';
@@ -115,7 +126,22 @@
       ].join('\n');
       iDoc.head.appendChild(measureStyle);
 
-      // Step 2: Wait one frame for reflow, then measure and print
+      // Step 2: Convert Chart.js canvases to static images so they survive print layout
+      var canvasSnapshots = [];
+      iDoc.querySelectorAll('canvas').forEach(function(canvas) {
+        try {
+          var dataUrl = canvas.toDataURL('image/png');
+          var img = iDoc.createElement('img');
+          img.src = dataUrl;
+          img.style.cssText = 'width:' + canvas.offsetWidth + 'px;max-width:100%;height:auto;display:block;';
+          img.className = 'tbt-canvas-snapshot';
+          canvas.parentNode.insertBefore(img, canvas.nextSibling);
+          canvas.style.display = 'none';
+          canvasSnapshots.push({ canvas: canvas, img: img });
+        } catch(e) {}
+      });
+
+      // Step 3: Wait one frame for reflow, then measure and print
       requestAnimationFrame(function() {
         var heightPx = iDoc.documentElement.scrollHeight;
         var heightMm = Math.ceil(heightPx * 25.4 / 96);
@@ -162,7 +188,6 @@
 
         var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
         if (isMobile) {
-          // iOS Safari can't print from a sandboxed iframe — open content in a new window
           var printWin = window.open('', '_blank');
           printWin.document.write(iDoc.documentElement.outerHTML);
           printWin.document.close();
@@ -172,6 +197,14 @@
           iframe.contentWindow.focus();
           iframe.contentWindow.print();
         }
+
+        // Restore canvases after print dialog closes
+        setTimeout(function() {
+          canvasSnapshots.forEach(function(pair) {
+            pair.canvas.style.display = '';
+            if (pair.img.parentNode) pair.img.parentNode.removeChild(pair.img);
+          });
+        }, 2000);
       });
     }
   </script>
