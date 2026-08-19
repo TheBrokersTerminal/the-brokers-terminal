@@ -160,5 +160,17 @@
 </footer>
 
 <script src="site.js"></script>
+<script>
+  (function() {
+    var ref = new URLSearchParams(window.location.search).get('ref');
+    if (!ref) return;
+    localStorage.setItem('referralCode', ref.toUpperCase());
+    document.querySelectorAll('a[href*="signup.html"]').forEach(function(a) {
+      var url = new URL(a.href, location.href);
+      url.searchParams.set('ref', ref);
+      a.href = url.toString();
+    });
+  })();
+</script>
 </body>
 </html>

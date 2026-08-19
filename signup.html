@@ -646,11 +646,12 @@
       (async function activateAfterPayment() {
         try {
           var { data: { session } } = await supabase.auth.getSession();
-          if (!session) {
-            document.querySelector('.form-intro').innerHTML = 'Session expired — <a href="login.html" style="color:var(--accent);">click here to log in</a> with the credentials you created.';
+          var userEmail = session ? session.user.email.toLowerCase() : (localStorage.getItem('pendingEmail') || '').toLowerCase();
+          if (!userEmail) {
+            document.querySelector('.form-intro').innerHTML = 'Session expired — <a href="login.html" style="color:var(--accent);">click here to log in</a> with the credentials you just created.';
             return;
           }
-          var userEmail = session.user.email.toLowerCase();
+          localStorage.removeItem('pendingEmail');
           var domain    = userEmail.split('@')[1];
           var asset     = localStorage.getItem('pendingAsset') || 'gold';
           localStorage.removeItem('pendingAsset');
@@ -701,13 +702,16 @@
                 }
                 firm = existing;
               } else {
+                var newFirmBody = {
+                  company_name: userEmail.split('@')[0], domain: domain, owner_email: userEmail,
+                  subscription_type: 'individual', max_users: 1, status: 'active', access: asset
+                };
+                var refCode2 = localStorage.getItem('referralCode');
+                if (refCode2) { newFirmBody.referral_code = refCode2; localStorage.removeItem('referralCode'); }
                 var crtRes = await fetch(sbUrl + '/rest/v1/firms', {
                   method: 'POST',
                   headers: Object.assign({}, srH, { 'Prefer': 'return=representation' }),
-                  body: JSON.stringify({
-                    company_name: userEmail.split('@')[0], domain: domain, owner_email: userEmail,
-                    subscription_type: 'individual', max_users: 1, status: 'active', access: asset
-                  })
+                  body: JSON.stringify(newFirmBody)
                 });
                 var crtData = await crtRes.json();
                 firm = Array.isArray(crtData) ? crtData[0] : null;
@@ -717,9 +721,12 @@
 
           if (firm) {
             var sessionId = (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36));
+            var firmPatch = { access: asset };
+            var refCode = localStorage.getItem('referralCode');
+            if (refCode) { firmPatch.referral_code = refCode; localStorage.removeItem('referralCode'); }
             await fetch(sbUrl + '/rest/v1/firms?id=eq.' + firm.id, {
               method: 'PATCH', headers: srH,
-              body: JSON.stringify({ access: asset })
+              body: JSON.stringify(firmPatch)
             });
             await fetch(sbUrl + '/rest/v1/users?email=eq.' + encodeURIComponent(userEmail), {
               method: 'PATCH', headers: srH,
@@ -750,6 +757,10 @@
     var assetRadios = document.querySelectorAll('input[name="asset-class"]');
     var companyGroup = document.getElementById('company-group');
     var companyInput = document.getElementById('company');
+
+    // Capture referral code from URL param
+    var urlRef = new URLSearchParams(window.location.search).get('ref');
+    if (urlRef) localStorage.setItem('referralCode', urlRef.toUpperCase());
 
     // Pre-select tier from URL param
     var urlTier = new URLSearchParams(window.location.search).get('tier');
@@ -900,6 +911,7 @@
             }
             localStorage.setItem('pendingAsset', selectedAsset);
             localStorage.setItem('pendingPlan', 'individual');
+            localStorage.setItem('pendingEmail', email);
             const stripeBase = 'https://buy.stripe.com/eVqfZhdlg2Y223W9bf4sE0c';
             submitBtn.textContent = 'REDIRECTING TO PAYMENT...';
             window.location.href = stripeBase + '?prefilled_email=' + encodeURIComponent(email) + '&client_reference_id=' + selectedAsset;
@@ -927,6 +939,7 @@
             }
             localStorage.setItem('pendingAsset', selectedAsset);
             localStorage.setItem('pendingPlan', 'corporate');
+            localStorage.setItem('pendingEmail', email);
             const stripeBase = 'https://buy.stripe.com/14AdR94OK2Y2eQIafj4sE0b';
             submitBtn.textContent = 'REDIRECTING TO PAYMENT...';
             window.location.href = stripeBase + '?prefilled_email=' + encodeURIComponent(email) + '&client_reference_id=' + selectedAsset;
