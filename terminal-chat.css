@@ -1,0 +1,760 @@
+/* ── TERMINAL CHAT WIDGET ──────────────────────────────────────── */
+.tchat-wrap {
+  display: flex;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Sidebar */
+.tchat-sidebar {
+  width: 120px;
+  flex-shrink: 0;
+  border-right: 1px solid #111;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.tchat-sidebar-hdr {
+  font-size: 7px;
+  letter-spacing: .22em;
+  color: #444;
+  text-transform: uppercase;
+  padding: 8px 10px 6px;
+  border-bottom: 1px solid #111;
+  flex-shrink: 0;
+}
+.tchat-contact {
+  display: flex;
+  flex-direction: column;
+  padding: 8px 10px;
+  cursor: pointer;
+  border-bottom: 1px solid #0e0e0e;
+  transition: background .1s;
+  position: relative;
+  gap: 2px;
+}
+.tchat-contact:hover { background: #0f0f0f; }
+.tchat-contact.active { background: #111; border-left: 2px solid #E97132; }
+.tchat-contact-name {
+  font-size: 9px;
+  color: #bbb;
+  letter-spacing: .06em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tchat-contact.active .tchat-contact-name { color: #fff; }
+.tchat-contact-sub {
+  font-size: 7px;
+  color: #444;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.tchat-contact-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: #E97132;
+  color: #000;
+  font-size: 7px;
+  font-weight: 700;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.tchat-broadcast {
+  background: rgba(233,113,50,.05);
+}
+.tchat-broadcast .tchat-contact-name { color: #E97132; }
+
+/* Main panel */
+.tchat-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+.tchat-thread-hdr {
+  padding: 7px 10px;
+  border-bottom: 1px solid #111;
+  font-size: 8px;
+  letter-spacing: .18em;
+  color: #E97132;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+.tchat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 0;
+  scrollbar-width: thin;
+  scrollbar-color: #1e1e1e transparent;
+}
+.tchat-messages::-webkit-scrollbar { width: 3px; }
+.tchat-messages::-webkit-scrollbar-thumb { background: #1e1e1e; }
+.tchat-msg {
+  padding: 4px 10px 6px;
+  transition: background .1s;
+}
+.tchat-msg:hover { background: #0a0a0a; }
+.tchat-msg-meta {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 2px;
+}
+.tchat-msg-name {
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  color: #E97132;
+  text-transform: uppercase;
+}
+.tchat-msg-name.mine { color: #44cc88; }
+.tchat-msg-time {
+  font-size: 7px;
+  color: #333;
+  letter-spacing: .08em;
+}
+.tchat-msg-del {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: #2a2a2a;
+  font-size: 9px;
+  cursor: pointer;
+  padding: 0 2px;
+  line-height: 1;
+  font-family: 'Consolas','Menlo',monospace;
+  opacity: 0;
+  transition: color .1s, opacity .1s;
+}
+.tchat-msg:hover .tchat-msg-del { opacity: 1; }
+.tchat-msg-del:hover { color: #e05050; }
+.tchat-msg-del:disabled { opacity: .3; cursor: not-allowed; }
+.tchat-msg-body {
+  font-size: 10px;
+  color: #c0c0c0;
+  line-height: 1.55;
+  letter-spacing: .02em;
+  word-break: break-word;
+}
+.tchat-empty {
+  padding: 24px 12px;
+  text-align: center;
+  font-size: 8px;
+  letter-spacing: .18em;
+  color: #2a2a2a;
+  text-transform: uppercase;
+}
+.tchat-date-divider {
+  text-align: center;
+  font-size: 7px;
+  letter-spacing: .18em;
+  color: #2a2a2a;
+  text-transform: uppercase;
+  padding: 6px 0;
+  margin: 4px 10px;
+  border-top: 1px solid #111;
+}
+
+/* Input */
+.tchat-input-wrap {
+  display: flex;
+  align-items: flex-end;
+  gap: 0;
+  border-top: 1px solid #111;
+  flex-shrink: 0;
+}
+.tchat-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #e0e0e0;
+  font-family: 'Consolas','Menlo',monospace;
+  font-size: 10px;
+  letter-spacing: .04em;
+  padding: 9px 10px;
+  resize: none;
+  line-height: 1.4;
+  max-height: 80px;
+  scrollbar-width: none;
+}
+.tchat-input::placeholder { color: #2a2a2a; }
+.tchat-send {
+  background: none;
+  border: none;
+  border-left: 1px solid #111;
+  color: #444;
+  font-family: 'Consolas','Menlo',monospace;
+  font-size: 11px;
+  padding: 9px 12px;
+  cursor: pointer;
+  transition: color .1s, background .1s;
+  flex-shrink: 0;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+}
+.tchat-send:hover { color: #E97132; background: #0f0f0f; }
+
+/* ── CALENDAR WIDGET ──────────────────────────────────────────── */
+.tcal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-bottom: 1px solid #111;
+  flex-shrink: 0;
+}
+.tcal-month {
+  font-size: 9px;
+  letter-spacing: .18em;
+  color: #fff;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+.tcal-nav {
+  background: none;
+  border: 1px solid #1e1e1e;
+  color: #555;
+  font-family: 'Consolas','Menlo',monospace;
+  font-size: 10px;
+  padding: 2px 8px;
+  cursor: pointer;
+  transition: color .1s, border-color .1s;
+}
+.tcal-nav:hover { color: #E97132; border-color: #E97132; }
+.tcal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
+  background: #111;
+  padding: 1px;
+  flex: 1;
+}
+.tcal-dow {
+  background: #080808;
+  text-align: center;
+  font-size: 7px;
+  letter-spacing: .14em;
+  color: #333;
+  text-transform: uppercase;
+  padding: 5px 0;
+}
+.tcal-day {
+  background: #080808;
+  text-align: center;
+  padding: 5px 2px 3px;
+  cursor: pointer;
+  transition: background .1s;
+  min-height: 42px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.tcal-day:hover { background: #111; }
+.tcal-day.other-month .tcal-day-num { color: #222; }
+.tcal-day.today .tcal-day-num {
+  background: #E97132;
+  color: #000;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.tcal-day.has-event { background: #0a0a0a; }
+.tcal-day-num {
+  font-size: 9px;
+  color: #888;
+  letter-spacing: .06em;
+  line-height: 18px;
+}
+.tcal-dots {
+  display: flex;
+  gap: 2px;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 28px;
+}
+.tcal-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+}
+.tcal-event-panel {
+  border-top: 1px solid #111;
+  padding: 8px 12px;
+  flex-shrink: 0;
+  max-height: 100px;
+  overflow-y: auto;
+}
+.tcal-event-lbl {
+  font-size: 7px;
+  letter-spacing: .2em;
+  color: #E97132;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+.tcal-event-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 0;
+  font-size: 9px;
+  color: #aaa;
+  border-bottom: 1px solid #0e0e0e;
+}
+.tcal-event-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.tcal-add-btn {
+  background: none;
+  border: 1px solid #1e1e1e;
+  color: #444;
+  font-family: 'Consolas','Menlo',monospace;
+  font-size: 7px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  cursor: pointer;
+  margin-top: 5px;
+  transition: color .1s, border-color .1s;
+  width: 100%;
+}
+.tcal-add-btn:hover { color: #E97132; border-color: #E97132; }
+.tcal-add-form {
+  display: flex;
+  gap: 4px;
+  margin-top: 6px;
+}
+.tcal-add-input {
+  flex: 1;
+  background: #0a0a0a;
+  border: 1px solid #1e1e1e;
+  color: #e0e0e0;
+  font-family: 'Consolas','Menlo',monospace;
+  font-size: 9px;
+  padding: 4px 8px;
+  outline: none;
+  letter-spacing: .04em;
+}
+.tcal-add-input:focus { border-color: #E97132; }
+.tcal-add-save {
+  background: #E97132;
+  border: none;
+  color: #000;
+  font-family: 'Consolas','Menlo',monospace;
+  font-size: 8px;
+  font-weight: 700;
+  padding: 4px 10px;
+  cursor: pointer;
+  letter-spacing: .1em;
+}
+
+/* ── NOTE MODAL ────────────────────────────────────────────────── */
+#tnote-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.78);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99000;
+}
+.tnote-modal {
+  background: #0d0d0d;
+  border: 1px solid #2a2a2a;
+  border-top: 2px solid #E97132;
+  width: 500px;
+  max-width: 92vw;
+  font-family: 'Consolas','Menlo',monospace;
+  box-shadow: 0 24px 80px rgba(0,0,0,.95);
+  display: flex;
+  flex-direction: column;
+}
+.tnote-modal-hdr {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 16px;
+  border-bottom: 1px solid #1a1a1a;
+}
+.tnote-modal-icon { font-size: 13px; color: #E97132; }
+.tnote-modal-type {
+  flex: 1;
+  font-size: 9px;
+  letter-spacing: .22em;
+  color: #888;
+  text-transform: uppercase;
+}
+.tnote-modal-close {
+  background: none;
+  border: none;
+  color: #444;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 0 4px;
+  transition: color .1s;
+  font-family: inherit;
+}
+.tnote-modal-close:hover { color: #e05050; }
+.tnote-modal-subject {
+  padding: 10px 16px;
+  font-size: 11px;
+  color: #ccc;
+  border-bottom: 1px solid #111;
+  letter-spacing: .03em;
+  line-height: 1.5;
+}
+.tnote-modal-ta {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #c0c0c0;
+  font-family: 'Consolas','Menlo',monospace;
+  font-size: 11px;
+  letter-spacing: .03em;
+  line-height: 1.65;
+  padding: 14px 16px;
+  resize: none;
+  min-height: 120px;
+  width: 100%;
+  box-sizing: border-box;
+}
+.tnote-modal-ta::placeholder { color: #2a2a2a; }
+.tnote-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  border-top: 1px solid #1a1a1a;
+}
+.tnote-modal-info {
+  font-size: 8px;
+  letter-spacing: .14em;
+  color: #555;
+  text-transform: uppercase;
+}
+.tnote-modal-save {
+  background: #E97132;
+  border: none;
+  color: #000;
+  font-family: 'Consolas','Menlo',monospace;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  padding: 8px 18px;
+  cursor: pointer;
+  transition: opacity .1s;
+}
+.tnote-modal-save:hover { opacity: .85; }
+.tnote-modal-save:disabled { opacity: .5; cursor: not-allowed; }
+
+/* Privacy toggle */
+.tnote-privacy-row {
+  display: flex;
+  border-top: 1px solid #111;
+  border-bottom: 1px solid #111;
+  flex-shrink: 0;
+}
+.tnote-priv-btn {
+  flex: 1;
+  background: none;
+  border: none;
+  border-right: 1px solid #111;
+  color: #444;
+  font-family: 'Consolas','Menlo',monospace;
+  font-size: 9px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  padding: 9px 12px;
+  cursor: pointer;
+  transition: color .1s, background .1s;
+}
+.tnote-priv-btn:last-child { border-right: none; }
+.tnote-priv-btn:hover { color: #aaa; }
+.tnote-priv-btn.active { color: #E97132; background: #0d0d0d; }
+
+/* Private badge */
+.tnote-priv-badge {
+  font-size: 7px;
+  letter-spacing: .14em;
+  color: #888;
+  text-transform: uppercase;
+}
+
+/* Filter tabs in inbox widget */
+.tnote-filter-tabs {
+  display: flex;
+  border-bottom: 1px solid #111;
+  flex-shrink: 0;
+}
+.tnote-filter-tab {
+  flex: 1;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #444;
+  font-family: 'Consolas','Menlo',monospace;
+  font-size: 7px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  padding: 8px 6px;
+  cursor: pointer;
+  margin-bottom: -1px;
+  transition: color .1s, border-color .1s;
+}
+.tnote-filter-tab:hover { color: #aaa; }
+.tnote-filter-tab.active { color: #E97132; border-bottom-color: #E97132; }
+
+/* Card footer with delete */
+.tnote-inbox-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 2px;
+}
+.tnote-delete-btn {
+  background: none;
+  border: none;
+  color: #2a2a2a;
+  font-family: 'Consolas','Menlo',monospace;
+  font-size: 8px;
+  letter-spacing: .12em;
+  cursor: pointer;
+  padding: 0;
+  transition: color .1s;
+}
+.tnote-inbox-card:hover .tnote-delete-btn { color: #555; }
+.tnote-delete-btn:hover { color: #e05050 !important; }
+
+/* ── NOTES INBOX WIDGET ── */
+.tnote-inbox-empty {
+  padding: 30px 16px;
+  text-align: center;
+  font-size: 8px;
+  letter-spacing: .2em;
+  color: #2a2a2a;
+  text-transform: uppercase;
+  line-height: 2;
+}
+.tnote-inbox-list {
+  height: 100%;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #1e1e1e transparent;
+}
+.tnote-inbox-list::-webkit-scrollbar { width: 4px; }
+.tnote-inbox-list::-webkit-scrollbar-thumb { background: #1e1e1e; }
+.tnote-inbox-card {
+  padding: 10px 12px;
+  border-bottom: 1px solid #0e0e0e;
+  cursor: pointer;
+  transition: background .1s;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.tnote-inbox-card:hover { background: #0f0f0f; }
+.tnote-inbox-card-hdr { display: flex; align-items: center; justify-content: space-between; }
+.tnote-inbox-type {
+  font-size: 7px;
+  letter-spacing: .2em;
+  color: #E97132;
+  text-transform: uppercase;
+}
+.tnote-inbox-from {
+  font-size: 7px;
+  letter-spacing: .1em;
+  color: #444;
+  text-transform: uppercase;
+}
+.tnote-inbox-from.mine { color: #44cc88; }
+.tnote-inbox-subject {
+  font-size: 10px;
+  color: #ccc;
+  letter-spacing: .02em;
+  line-height: 1.4;
+}
+.tnote-inbox-preview {
+  font-size: 9px;
+  color: #555;
+  letter-spacing: .03em;
+  font-style: italic;
+  line-height: 1.45;
+}
+.tnote-inbox-replies {
+  font-size: 7px;
+  letter-spacing: .14em;
+  color: #E97132;
+  text-transform: uppercase;
+}
+
+/* Thread view */
+.tnote-thread-back {
+  padding: 8px 12px;
+  font-size: 8px;
+  letter-spacing: .18em;
+  color: #555;
+  border-bottom: 1px solid #111;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: color .1s;
+  flex-shrink: 0;
+}
+.tnote-thread-back:hover { color: #E97132; }
+.tnote-thread-subject {
+  padding: 8px 12px;
+  font-size: 10px;
+  color: #bbb;
+  border-bottom: 1px solid #111;
+  letter-spacing: .03em;
+  line-height: 1.5;
+  flex-shrink: 0;
+}
+.tnote-thread-link { color: #E97132; text-decoration: none; font-size: 9px; }
+.tnote-thread-msgs {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px 0;
+  scrollbar-width: thin;
+  scrollbar-color: #1e1e1e transparent;
+}
+.tnote-thread-msgs::-webkit-scrollbar { width: 4px; }
+.tnote-thread-msgs::-webkit-scrollbar-thumb { background: #1e1e1e; }
+.tnote-thread-msg { padding: 8px 12px; border-bottom: 1px solid #0a0a0a; }
+.tnote-thread-msg-meta { display: flex; gap: 8px; align-items: baseline; margin-bottom: 3px; }
+.tnote-thread-msg-name {
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  color: #E97132;
+  text-transform: uppercase;
+}
+.tnote-thread-msg-name.mine { color: #44cc88; }
+.tnote-thread-msg-time { font-size: 7px; color: #333; letter-spacing: .08em; }
+.tnote-thread-msg-body {
+  font-size: 10px;
+  color: #c0c0c0;
+  line-height: 1.55;
+  letter-spacing: .02em;
+  word-break: break-word;
+}
+.tnote-thread-input-wrap {
+  display: flex;
+  border-top: 1px solid #111;
+  flex-shrink: 0;
+  align-items: flex-end;
+}
+.tnote-thread-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #e0e0e0;
+  font-family: 'Consolas','Menlo',monospace;
+  font-size: 10px;
+  letter-spacing: .04em;
+  padding: 9px 10px;
+  resize: none;
+  line-height: 1.4;
+  max-height: 80px;
+  scrollbar-width: none;
+}
+.tnote-thread-input::placeholder { color: #2a2a2a; }
+.tnote-thread-send {
+  background: none;
+  border: none;
+  border-left: 1px solid #111;
+  color: #444;
+  font-family: 'Consolas','Menlo',monospace;
+  font-size: 14px;
+  padding: 9px 12px;
+  cursor: pointer;
+  transition: color .1s;
+  flex-shrink: 0;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+}
+.tnote-thread-send:hover { color: #E97132; }
+
+/* ── Send-to-colleague row (modal + thread) ── */
+.tnote-send-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-top: 1px solid #111;
+  background: #060606;
+  flex-shrink: 0;
+}
+.tnote-thread-send-chat {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border-bottom: 1px solid #111;
+  background: #060606;
+  flex-shrink: 0;
+}
+.tnote-send-lbl {
+  font-size: 7px;
+  letter-spacing: .18em;
+  color: #444;
+  text-transform: uppercase;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.tnote-send-select {
+  flex: 1;
+  background: #0a0a0a;
+  border: 1px solid #222;
+  color: #aaa;
+  font-family: 'Consolas','Menlo',monospace;
+  font-size: 9px;
+  letter-spacing: .08em;
+  padding: 4px 6px;
+  outline: none;
+  cursor: pointer;
+}
+.tnote-thread-send-btn {
+  background: none;
+  border: 1px solid #2a2a2a;
+  color: #555;
+  font-family: 'Consolas','Menlo',monospace;
+  font-size: 8px;
+  letter-spacing: .14em;
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: color .1s, border-color .1s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.tnote-thread-send-btn:hover { color: #E97132; border-color: #E97132; }
+
+/* Note button used in intel popouts */
+.sp-note-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: 'Consolas','Menlo',monospace;
+  font-size: 8px;
+  letter-spacing: .18em;
+  color: #555;
+  background: none;
+  border: 1px solid #1e1e1e;
+  padding: 5px 12px;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: color .12s, border-color .12s;
+}
+.sp-note-btn:hover { color: #E97132; border-color: #E97132; }
