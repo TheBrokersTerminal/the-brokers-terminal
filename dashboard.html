@@ -6,6 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>THE BROKERS TERMINAL — Subscriber Desk</title>
   <link rel="stylesheet" href="site.css">
+  <link rel="stylesheet" href="intel-search.css">
+  <link rel="stylesheet" href="terminal-canvas.css">
+  <link rel="stylesheet" href="terminal-chat.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.0"></script>
   <style>
 
@@ -267,15 +270,16 @@
     .empty-state-sub   { color: var(--text-faint); font-size: 12px; opacity: 0.6; }
 
     /* ── MODAL ────────────────────────────────────────────────── */
-    .report-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.92); z-index: 9999; flex-direction: column; }
+    .report-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.82); z-index: 9999; align-items: center; justify-content: center; }
     .report-modal.open { display: flex; }
-    .modal-header { background: var(--bg-raised); border-bottom: 2px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; height: 48px; flex-shrink: 0; }
+    .report-modal-inner { width: 92vw; max-width: 1400px; height: 88vh; display: flex; flex-direction: column; border: 1px solid #2a2a2a; border-top: 2px solid var(--accent); box-shadow: 0 32px 100px rgba(0,0,0,0.95); }
+    .modal-header { background: var(--bg-raised); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; height: 44px; flex-shrink: 0; }
     .modal-header-left { display: flex; align-items: center; gap: 0; }
     .modal-brand  { color: var(--accent); font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; font-weight: 700; }
     .modal-report-name { color: var(--text-muted); font-size: 11px; letter-spacing: 0.10em; margin-left: 20px; }
-    .modal-close  { background: transparent; border: 1px solid var(--border); color: var(--accent); font-family: var(--font); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; padding: 8px 20px; cursor: pointer; }
+    .modal-close  { background: transparent; border: 1px solid var(--border); color: var(--accent); font-family: var(--font); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; padding: 7px 18px; cursor: pointer; }
     .modal-close:hover { background: var(--accent); color: var(--bg); }
-    .modal-iframe-wrap { flex: 1; background: white; }
+    .modal-iframe-wrap { flex: 1; background: white; overflow: hidden; }
     .modal-iframe-wrap iframe { width: 100%; height: 100%; border: none; display: block; }
 
     /* ── OFFLINE BANNER ───────────────────────────────────────── */
@@ -467,14 +471,14 @@
   <ul class="nav-links">
     <li><a href="index.html">HOME</a></li>
     <li><a href="dashboard.html">MY DESK</a></li>
+    <li><a href="news.html">NEWS FEED</a></li>
     <li><a href="#" id="nav-logout-btn">LOG OUT</a></li>
   </ul>
 </nav>
 
 <!-- ══ MASTHEAD ══════════════════════════════════════════════════ -->
 <div class="dashboard-masthead">
-  <span class="dashboard-masthead-left">█ THE BROKERS TERMINAL</span>
-  <span class="dashboard-masthead-center">SUBSCRIBER DESK</span>
+  <div id="intel-search-container" style="flex:1;display:flex;justify-content:flex-start;"></div>
   <div class="dashboard-masthead-right">
     <span>Welcome, <strong style="color: var(--text);" id="user-name">loading...</strong></span>
     <a href="#" id="manage-subscription-btn" style="display:none; color:var(--text-muted); font-size:11px; letter-spacing:0.08em;">MANAGE SUBSCRIPTION</a>
@@ -482,6 +486,8 @@
     <a href="#" id="manage-team-btn" style="display:none; color:var(--text-muted); font-size:11px; letter-spacing:0.08em;">MANAGE TEAM</a>
     <span id="manage-team-sep" style="display:none; color:var(--text-faint);">|</span>
     <a href="#" id="edit-profile-btn" style="color:var(--text-muted); font-size:11px; letter-spacing:0.08em;">EDIT PROFILE</a>
+    <span style="color:var(--text-faint);">|</span>
+    <a href="news.html" target="_blank" style="color:var(--text-muted);font-size:11px;letter-spacing:0.08em;">NEWS FEED ↗</a>
     <span style="color:var(--text-faint);">|</span>
     <a href="#" id="logout-btn">LOG OUT</a>
   </div>
@@ -529,7 +535,7 @@
 
 <!-- ══ CONTENT TICKER ════════════════════════════════════════════ -->
 <div class="content-ticker" id="content-ticker" style="display:none;">
-  <div class="ticker-label">▸ UPDATES</div>
+  <div class="ticker-label">▸ NEWS</div>
   <div class="ticker-track-wrap">
     <div class="ticker-track" id="ticker-track">
       <!-- populated by JS after reports load -->
@@ -537,34 +543,24 @@
   </div>
 </div>
 
-<!-- ══ THIS WEEK BANNER ══════════════════════════════════════════ -->
-<div class="this-week-banner">
-  <div>
-    <div class="this-week-tag" id="week-tag">▸ LOADING...</div>
-    <div class="this-week-heading">Your intelligence is ready. Your desk is loaded.</div>
-    <div class="this-week-sub" id="week-sub">Loading latest issues...</div>
-  </div>
-  <div class="this-week-right">
-    <div class="this-week-stat">
-      <div class="this-week-stat-num" id="stat-new">—</div>
-      <div class="this-week-stat-label">New This Week</div>
-    </div>
-    <div class="this-week-stat">
-      <div class="this-week-stat-num" id="stat-vault">—</div>
-      <div class="this-week-stat-label">In Your Vault</div>
-    </div>
-    <div class="this-week-stat">
-      <div class="this-week-stat-num" id="stat-flash">—</div>
-      <div class="this-week-stat-label">Psychology &amp; Training</div>
-    </div>
-  </div>
+<!-- ══ TERMINAL TAB BAR ══════════════════════════════════════════ -->
+<div class="tbc-tabs" id="tbc-tab-bar"></div>
+
+<!-- ══ TERMINAL CANVAS ═══════════════════════════════════════════ -->
+<div id="tbc-canvas-wrap">
+  <div id="tbc-canvas" class="tbc-canvas"></div>
 </div>
 
-<!-- ══ THIS WEEK LINKS ═══════════════════════════════════════════ -->
-<div class="this-week-links" id="this-week-links">
-  <div class="this-week-links-label">THIS WEEK</div>
-  <!-- populated by JS -->
-</div>
+<!-- hidden stats still populated by JS for internal use -->
+<span id="week-tag" style="display:none;"></span>
+<span id="week-sub" style="display:none;"></span>
+<span id="stat-new" style="display:none;"></span>
+<span id="stat-vault" style="display:none;"></span>
+<span id="stat-flash" style="display:none;"></span>
+<div id="this-week-links" style="display:none;"></div>
+
+<!-- ══ VAULT SECTION (hidden when not on VAULT tab) ══════════════ -->
+<div id="vault-section" style="display:none;">
 
 <!-- ══ CLIENT EDITION PANEL ══════════════════════════════════════ -->
 <div id="client-edition-panel" style="display:none;" class="client-edition-panel">
@@ -658,7 +654,7 @@
   </div>
 </div>
 
-<!-- ══ ASSET TABS ════════════════════════════════════════════════ -->
+<!-- ══ ASSET TABS (VAULT) ════════════════════════════════════════ -->
 <div class="asset-tabs">
   <button class="asset-tab active" data-panel="all">
     ALL CONTENT
@@ -674,8 +670,8 @@
   </button>
 </div>
 
-<!-- ══ DASHBOARD CONTENT ═════════════════════════════════════════ -->
-<div class="dashboard-wrap">
+<!-- ══ DASHBOARD CONTENT (VAULT TAB) ══════════════════════════════ -->
+<div class="dashboard-wrap" id="dashboard-wrap">
 
   <!-- ════════════════ VAULT SEARCH ═══════════════════════════ -->
   <div style="margin-bottom: 28px;">
@@ -793,6 +789,8 @@
 
 </div><!-- /dashboard-wrap -->
 
+</div><!-- /vault-section -->
+
 <!-- ══ TEMPLATE (hidden) ══════════════════════════════════════════ -->
 <template id="doc-card-template">
   <div class="doc-card" data-type="REPORT_TYPE" data-asset="ASSET_CLASS" data-title="REPORT_TITLE" data-tags="REPORT_TAGS">
@@ -825,16 +823,18 @@
 </template>
 
 <!-- ══ REPORT MODAL ═══════════════════════════════════════════════ -->
-<div id="report-modal" class="report-modal">
-  <div class="modal-header">
-    <div class="modal-header-left">
-      <span class="modal-brand">█ THE BROKERS TERMINAL</span>
-      <span class="modal-report-name" id="modal-report-name">— REPORT VIEWER</span>
+<div id="report-modal" class="report-modal" onclick="if(event.target===this)closeReport()">
+  <div class="report-modal-inner">
+    <div class="modal-header">
+      <div class="modal-header-left">
+        <span class="modal-brand">█ THE BROKERS TERMINAL</span>
+        <span class="modal-report-name" id="modal-report-name">— REPORT VIEWER</span>
+      </div>
+      <button class="modal-close" onclick="closeReport()">× CLOSE</button>
     </div>
-    <button class="modal-close" onclick="closeReport()">× CLOSE REPORT</button>
-  </div>
-  <div class="modal-iframe-wrap">
-    <iframe id="report-iframe" style="width:100%;height:100%;border:none;display:block;"></iframe>
+    <div class="modal-iframe-wrap">
+      <iframe id="report-iframe" style="width:100%;height:100%;border:none;display:block;"></iframe>
+    </div>
   </div>
 </div>
 
@@ -849,12 +849,42 @@
 </footer>
 
 <script src="site.js"></script>
+<script src="intel-search.js"></script>
+<script src="terminal-canvas.js"></script>
+<script src="terminal-chat.js"></script>
+<script src="terminal-notes.js"></script>
+<script>document.addEventListener('DOMContentLoaded',function(){intelSearchInit('intel-search-container');});</script>
 
 <!-- ══ SUPABASE + DASHBOARD JS ════════════════════════════════════ -->
 <script>
   const SUPABASE_URL = 'https://oqpodikelxhwcnjdwojw.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_hJjmJ5MYAj8aCpXL6vCMTQ_zJlxUehl';
   const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  /* ── Apply vault filter-tab visibility from admin config ────── */
+  (function applyVaultTabVisibility() {
+    var url = SUPABASE_URL + '/storage/v1/object/public/Reports/config/tab_visibility.json?t=' + Date.now();
+    fetch(url)
+      .then(function(r) { return r.ok ? r.json() : null; })
+      .then(function(cfg) {
+        if (!cfg) return;
+        // Hide filter tabs whose key is set to false in config
+        var attrMaps = [
+          { attr: 'data-filter',       container: '#filter-tabs-all' },
+          { attr: 'data-filter-gold',  container: '#filter-tabs-gold' },
+          { attr: 'data-filter-whisky',container: '#filter-tabs-whisky' }
+        ];
+        Object.keys(cfg).forEach(function(key) {
+          if (cfg[key] === false) {
+            attrMaps.forEach(function(m) {
+              var btn = document.querySelector(m.container + ' [' + m.attr + '="' + key + '"]');
+              if (btn) btn.style.display = 'none';
+            });
+          }
+        });
+      })
+      .catch(function() { /* config missing — show all tabs */ });
+  })();
 
   /* ── Mobile CSS injected into every report ─────────────────── */
   var MOBILE_REPORT_CSS = `<style id="mobile-inject">
@@ -1135,6 +1165,8 @@
     var userNameEl = document.getElementById('user-name');
     if (userNameEl) userNameEl.textContent = userName;
 
+    // ── Terminal canvas init deferred until firmId resolves (see below) ──
+
     // ── Fetch access level via firm_id from users table (most reliable) ──
     var domain = userEmail.split('@')[1];
     var firmAccess = 'both'; // safe default
@@ -1208,6 +1240,25 @@
       else if (firmAccess === 'whisky') allSub.textContent = 'WHISKY INTELLIGENCE';
       // 'both' — leave blank, no subtitle needed
     }
+
+    // Set globals for all users — required for activity logging regardless of role
+    window._userEmail = userEmail;
+    window._canonicalFirmId = (firmRow && firmRow.id) ? firmRow.id : (userRow ? userRow.firm_id : null);
+
+    // ── Expose globals for notes modal (terminal-notes.js) ──
+    window._sbClient = supabase;
+    window._uid      = session.user.id;
+    window._userName = userName;
+
+    // ── Init terminal canvas (firmId now resolved) ──
+    if (window.terminalCanvasInit) terminalCanvasInit(supabase, session.user.id, window._canonicalFirmId, userName);
+
+    // Log session start for every subscriber
+    supabase.from('activity_log').insert({
+      user_email: userEmail,
+      firm_id: window._canonicalFirmId || null,
+      action: 'login'
+    }).then(function(){}).catch(function(){});
 
     if (firmAccess === 'gold') {
       // Hide Whisky Desk tab and panel entirely
@@ -1381,17 +1432,8 @@
       if (urlEl) urlEl.textContent = inviteUrl;
       window._inviteUrl = inviteUrl;
 
-      // Store globals for add/remove functions
-      window._canonicalFirmId = canonicalFirmId;
-      window._userEmail = userEmail;
+      // Store globals for team management functions
       window._maxSeats = maxSeats;
-
-      // Log session start — catches returning users who bypass login.html
-      supabase.from('activity_log').insert({
-        user_email: userEmail,
-        firm_id: canonicalFirmId || null,
-        action: 'login'
-      }).then(function(){}).catch(function(){});
 
       await window.loadTeamRoster();
 
@@ -1887,6 +1929,7 @@
       });
 
       allReports = filteredReports;
+      window._dashReports = filteredReports; /* expose for canvas reports widget */
 
       var docGrid    = document.getElementById('doc-grid');
       var goldGrid   = document.getElementById('doc-grid-gold');
@@ -1953,7 +1996,7 @@
       buildThisWeekLinks(latestGold, latestWhisky, latestObjFile, latestPitchPack);
 
       // Build ticker
-      buildTicker(tickerItems);
+      buildTicker();
 
       // Setup filters
       setupFilterTabs();
@@ -2003,28 +2046,39 @@
     strip.innerHTML = html;
   }
 
-  /* ── Build ticker ──────────────────────────────────────────── */
-  function buildTicker(items) {
-    if (!items.length) return;
+  /* ── Build ticker (news headlines) ─────────────────────────── */
+  function buildTicker() {
     var track  = document.getElementById('ticker-track');
     var ticker = document.getElementById('content-ticker');
+    if (!track || !ticker) return;
 
-    function buildItemHtml(item) {
-      var cls = item.flash ? 'ticker-item is-flash' : 'ticker-item is-new';
-      var dot = item.flash ? '<span class="ticker-dot-flash">⚡</span>' : '<span class="ticker-dot-new">▸</span>';
-      return '<span class="' + cls + '">' + dot + ' ' + item.label + ': ' + item.title + '</span>';
-    }
+    function startWithStories(stories) {
+      if (!stories || !stories.length) return;
+      window._rssCache = stories; /* share with canvas news widget */
 
-    // Repeat items enough times so one set always fills the screen, even with 1 item
-    var reps = Math.max(1, Math.ceil(8 / items.length));
-    var setHtml = '';
-    for (var r = 0; r < reps; r++) {
-      items.forEach(function(item) { setHtml += buildItemHtml(item); });
-    }
+      var items = stories.slice(0, 30);
 
-    // Build one set, measure it, then duplicate for seamless loop
-    track.innerHTML = setHtml;
-    ticker.style.display = 'flex';
+      /* Decode HTML entities (&#x2019; etc.) then safely re-escape < > only */
+      var _decodeEl = document.createElement('textarea');
+      function decodeEntities(str) {
+        _decodeEl.innerHTML = String(str || '');
+        return _decodeEl.value;
+      }
+      function safeText(str) {
+        return decodeEntities(str).replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      }
+
+      function buildItemHtml(s) {
+        var hl  = s.title || s.headline || '';
+        var src = s.source || '';
+        return '<span class="ticker-item is-new"><span class="ticker-dot-new">' + safeText(src) + '</span>  ' + safeText(hl) + '</span>';
+      }
+
+      var setHtml = items.map(buildItemHtml).join('');
+
+      // Build one set, measure it, then duplicate for seamless loop
+      track.innerHTML = setHtml;
+      ticker.style.display = 'flex';
 
     // Wait for layout then start JS-driven scroll
     requestAnimationFrame(function() {
@@ -2051,6 +2105,17 @@
       }
       requestAnimationFrame(step);
     });
+    } /* end startWithStories */
+
+    /* Use cached data if the news widget already fetched; otherwise fetch now */
+    if (window._rssCache) {
+      startWithStories(window._rssCache);
+    } else {
+      fetch('/.netlify/functions/rss')
+        .then(function(r) { return r.ok ? r.json() : null; })
+        .then(function(stories) { startWithStories(stories); })
+        .catch(function() {});
+    }
   }
 
   /* ── Build featured card for Gold / Whisky panel ───────────── */

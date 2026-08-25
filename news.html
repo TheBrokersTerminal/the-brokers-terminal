@@ -1,0 +1,1261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>THE BROKERS TERMINAL — Market Intelligence Feed</title>
+<link rel="stylesheet" href="site.css">
+<link rel="stylesheet" href="intel-search.css">
+<style>
+html, body { height: 100%; overflow: hidden; }
+
+.terminal-wrap {
+  display: flex; flex-direction: column;
+  height: calc(100vh - 56px);
+  background: #080808; overflow: hidden;
+}
+
+/* ── TOOLBAR ─────────────────────────────────────────────────── */
+.tb {
+  display: flex; align-items: stretch;
+  height: 36px; background: #0a0a0a;
+  border-bottom: 1px solid #1a1a1a; flex-shrink: 0;
+}
+.tb-seg {
+  display: flex; align-items: center; gap: 6px;
+  padding: 0 14px; border-right: 1px solid #1a1a1a;
+  font-family: var(--font); font-size: 9px; letter-spacing: .20em;
+  text-transform: uppercase; color: #fff; white-space: nowrap; user-select: none;
+  cursor: pointer; transition: color .1s;
+}
+.tb-seg:hover { color: #ccc; }
+.tb-seg.active { color: var(--accent,#E97132); }
+.tb-search-seg {
+  display: flex; align-items: center; gap: 8px;
+  padding: 0 14px; border-right: 1px solid #1a1a1a; flex: 1; max-width: 460px;
+  border-bottom: 1px solid transparent; transition: border-color .15s;
+}
+.tb-search-seg:focus-within { border-bottom-color: var(--accent,#E97132); }
+.tb-search-icon { color: var(--accent,#E97132); font-size: 15px; opacity: .7; }
+#news-search {
+  background: transparent; border: none; outline: none;
+  color: #fff; font-family: var(--font); font-size: 10px; letter-spacing: .06em; width: 100%;
+}
+#news-search::placeholder { color: #888; }
+.tb-right {
+  display: flex; align-items: center; gap: 14px;
+  padding: 0 18px; margin-left: auto;
+  font-family: var(--font); font-size: 8px; letter-spacing: .20em; text-transform: uppercase; color: #444;
+}
+.tb-live-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent,#E97132); animation: ldp 2s ease-in-out infinite;
+}
+@keyframes ldp { 0%,100%{opacity:1} 50%{opacity:.3} }
+.tb-live-lbl { color: var(--accent,#E97132); }
+
+/* ── PANELS ──────────────────────────────────────────────────── */
+.panels { display: flex; flex: 1; overflow: hidden; min-height: 0; }
+
+/* ═══ LEFT PANEL ════════════════════════════════════════════════ */
+.feed-panel {
+  width: 42%; min-width: 340px; max-width: 560px;
+  display: flex; flex-direction: column;
+  border-right: 1px solid var(--accent,#E97132); border-left: 2px solid var(--accent,#E97132);
+  background: #080808; flex-shrink: 0;
+}
+.cat-bar-wrap {
+  display: flex; align-items: stretch; height: 38px; background: #0a0a0a;
+  border-bottom: 1px solid #1e1e1e; flex-shrink: 0; position: relative;
+}
+.cat-scroll-btn {
+  background: #0a0a0a; border: none; border-right: 1px solid #1e1e1e;
+  color: #555; font-size: 10px; padding: 0 8px; cursor: pointer; flex-shrink: 0;
+  transition: color .1s; z-index: 1;
+}
+.cat-scroll-btn:last-child { border-right: none; border-left: 1px solid #1e1e1e; }
+.cat-scroll-btn:hover { color: var(--accent,#E97132); }
+.cat-bar {
+  display: flex; align-items: center; gap: 4px; padding: 0 6px;
+  overflow-x: auto; scrollbar-width: none; flex: 1;
+}
+.cat-bar::-webkit-scrollbar { display: none; }
+.cat-tab {
+  background: none; border: none; border-bottom: 2px solid transparent;
+  color: #fff; font-family: var(--font); font-size: 10px; letter-spacing: .14em;
+  text-transform: uppercase; padding: 0 14px; cursor: pointer; white-space: nowrap;
+  transition: color .1s, border-color .1s; flex-shrink: 0; height: 100%;
+}
+.cat-tab:hover { color: #fff; }
+.cat-tab.active { color: var(--accent,#E97132); border-bottom-color: var(--accent,#E97132); }
+
+.feed-hdr {
+  display: grid; grid-template-columns: 56px 68px 1fr 20px;
+  padding: 5px 0 4px 10px; background: #090909; border-bottom: 1px solid #1e1e1e;
+  font-family: var(--font); font-size: 6.5px; letter-spacing: .30em;
+  text-transform: uppercase; color: #666; flex-shrink: 0;
+}
+.feed-list {
+  flex: 1; overflow-y: auto; overflow-x: hidden;
+  scrollbar-width: thin; scrollbar-color: #1a1a1a transparent;
+}
+.feed-list::-webkit-scrollbar { width: 3px; }
+.feed-list::-webkit-scrollbar-thumb { background: #1a1a1a; border-radius: 2px; }
+
+/* ── ROWS ────────────────────────────────────────────────────── */
+.nrow {
+  display: grid; grid-template-columns: 56px 68px 1fr 20px;
+  border-bottom: 1px solid #111; cursor: pointer; background: #080808;
+  transition: background .07s; min-height: 54px; align-items: start;
+}
+.nrow:nth-child(even) { background: #0a0a0a; }
+.nrow:hover { background: #111; }
+.nrow.active { background: #141414; border-left: 2px solid var(--accent,#E97132); border-bottom-color: #1c1c1c; }
+.nrow.nflash { animation: nf 1.4s ease-out; }
+@keyframes nf { 0%{background:rgba(233,113,50,.12)} 100%{background:#080808} }
+
+.r-time {
+  padding: 10px 4px 10px 10px; font-family: var(--font); font-size: 9.5px;
+  color: #fff; font-variant-numeric: tabular-nums; letter-spacing: .04em; line-height: 1.2;
+}
+.r-time-date { display: block; font-size: 7.5px; color: #fff; margin-top: 3px; letter-spacing: .08em; }
+
+.r-src { padding: 9px 4px; display: flex; flex-direction: column; gap: 5px; align-items: flex-start; }
+.r-src-lbl { font-family: var(--font); font-size: 8.5px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+.rs-rtrs { color: var(--accent,#E97132); }
+.rs-ft   { color: #c8891a; }
+.rs-bbg  { color: #5a8fc0; }
+.rs-wsj  { color: #fff; }
+.rs-cnbc { color: #c04040; }
+.rs-default { color: #fff; }
+.r-tickers {
+  font-family: var(--font); font-size: 7.5px; color: #fff; letter-spacing: .08em;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 64px;
+}
+.nrow.active .r-tickers { color: rgba(233,113,50,.45); }
+
+.r-main { padding: 8px 6px 8px 4px; display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.r-hl {
+  font-family: var(--font); font-size: 11.5px; color: #fff; line-height: 1.40;
+  letter-spacing: .008em; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.nrow:hover .r-hl { color: #fff; }
+.nrow.active .r-hl { color: #fff; }
+.r-tags { display: flex; gap: 5px; align-items: center; flex-wrap: wrap; }
+.rtag { font-family: var(--font); font-size: 7px; letter-spacing: .20em; font-weight: 700; text-transform: uppercase; padding: 1px 6px; border: 1px solid; }
+.rt-gold      { color: var(--accent,#E97132); border-color: rgba(233,113,50,.35); }
+.rt-macro     { color: #888; border-color: #2a2a2a; }
+.rt-forex     { color: #5a9fc8; border-color: rgba(90,159,200,.3); }
+.rt-commodity { color: #7ab87a; border-color: rgba(122,184,122,.3); }
+.rt-markets   { color: #9878c8; border-color: rgba(152,120,200,.3); }
+.rt-geo       { color: #c85050; border-color: rgba(200,80,80,.3); }
+.rt-crypto    { color: #f0c040; border-color: rgba(240,192,64,.3); }
+.rtag-new { font-family: var(--font); font-size: 7px; letter-spacing: .20em; font-weight: 700; color: #000; background: var(--accent,#E97132); border: 1px solid var(--accent,#E97132); padding: 1px 6px; }
+
+.r-ind { display: flex; align-items: flex-start; justify-content: center; padding-top: 12px; font-size: 11px; color: #222; }
+.nrow.active .r-ind { color: var(--accent,#E97132); }
+
+/* ═══ RIGHT: ARTICLE + QUOTES ════════════════════════════════ */
+.article-panel { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: #0a0a0a; min-width: 0; }
+.art-panel-body { display: flex; flex: 1; overflow: hidden; min-height: 0; }
+
+.art-scroll { flex: 1; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #1a1a1a transparent; min-width: 0; }
+.art-scroll::-webkit-scrollbar { width: 3px; }
+.art-scroll::-webkit-scrollbar-thumb { background: #1a1a1a; }
+
+/* Empty state */
+.art-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; min-height: 300px; gap: 10px; }
+.art-empty-icon { font-size: 20px; color: var(--accent,#E97132); opacity: .3; }
+.art-empty-lbl { font-family: var(--font); font-size: 8px; letter-spacing: .38em; text-transform: uppercase; color: #fff; }
+.art-empty-sub { font-family: var(--font); font-size: 7px; letter-spacing: .22em; color: #fff; }
+
+/* ── Article typography ──────────────────────────────────────── */
+.art-inner { padding: 24px 28px 40px; }
+
+.art-pill {
+  display: inline-block; font-family: var(--font); font-size: 7.5px; letter-spacing: .24em;
+  text-transform: uppercase; font-weight: 700; padding: 2px 10px; margin-bottom: 14px; border: 1px solid;
+}
+.ap-gold      { color: var(--accent,#E97132); border-color: rgba(233,113,50,.4); }
+.ap-macro     { color: #888; border-color: #2a2a2a; }
+.ap-forex     { color: #5a9fc8; border-color: rgba(90,159,200,.35); }
+.ap-commodity { color: #7ab87a; border-color: rgba(122,184,122,.35); }
+.ap-markets   { color: #9878c8; border-color: rgba(152,120,200,.35); }
+.ap-geo       { color: #c85050; border-color: rgba(200,80,80,.35); }
+.ap-crypto    { color: #f0c040; border-color: rgba(240,192,64,.35); }
+
+.art-hl { font-family: var(--font); font-size: 19px; font-weight: 700; color: #fff; line-height: 1.28; letter-spacing: .02em; margin-bottom: 12px; text-transform: uppercase; }
+
+.art-byline { display: flex; align-items: center; gap: 10px; font-family: var(--font); font-size: 8.5px; letter-spacing: .15em; text-transform: uppercase; color: #fff; margin-bottom: 18px; flex-wrap: wrap; }
+.art-byline-src { color: var(--accent,#E97132); }
+.art-byline-dot { color: #fff; }
+
+.art-hr { border: none; border-top: 1px solid #181818; margin: 0 0 18px; }
+
+/* Key takeaways */
+.art-bullets {
+  list-style: none; padding: 0 0 0 14px; margin: 0 0 20px;
+  border-left: 2px solid var(--accent,#E97132);
+}
+.art-bullets li {
+  font-family: var(--font); font-size: 11.5px; color: #fff;
+  line-height: 1.55; letter-spacing: .010em; margin-bottom: 7px; padding-left: 2px;
+}
+.art-bullets li::before { content: '▪ '; color: var(--accent,#E97132); font-size: 9px; }
+
+/* Body text */
+.art-body { font-family: var(--font); font-size: 12px; color: #fff; line-height: 1.88; letter-spacing: .012em; margin-bottom: 8px; }
+.art-body p { margin: 0 0 1em; }
+
+/* Section header */
+.art-sec-hdr {
+  font-family: var(--font); font-size: 7.5px; letter-spacing: .30em; text-transform: uppercase;
+  color: #fff; border-bottom: 1px solid #1a1a1a; padding-bottom: 8px; margin: 28px 0 14px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.art-sec-hdr-price { font-size: 10px; letter-spacing: .08em; color: #fff; font-variant-numeric: tabular-nums; }
+
+/* Market snapshot card */
+.mkt-snap { padding: 14px 16px 12px; background: #090909; border: 1px solid #1a1a1a; margin-bottom: 8px; }
+.mkt-loading { font-family: var(--font); font-size: 7px; letter-spacing: .28em; text-transform: uppercase; color: #fff; text-align: center; padding: 20px 16px; background: #090909; border: 1px solid #1a1a1a; }
+.mkt-main { display: flex; align-items: baseline; gap: 14px; margin-bottom: 12px; flex-wrap: wrap; }
+.mkt-price { font-family: var(--font); font-size: 28px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1; color: #fff; }
+.mkt-chg { font-family: var(--font); font-size: 11.5px; letter-spacing: .06em; font-variant-numeric: tabular-nums; }
+.mkt-range-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.mkt-rlbl { font-family: var(--font); font-size: 8.5px; letter-spacing: .08em; color: #fff; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.mkt-bar { flex: 1; height: 3px; background: #1c1c1c; position: relative; border-radius: 2px; }
+.mkt-bar-fill { position: absolute; top: 0; height: 100%; border-radius: 2px; opacity: .75; }
+.mkt-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; padding-top: 10px; border-top: 1px solid #141414; }
+.mkt-stat { display: flex; flex-direction: column; gap: 4px; }
+.mkt-stat-l { font-family: var(--font); font-size: 6.5px; letter-spacing: .24em; text-transform: uppercase; color: #fff; }
+.mkt-stat-v { font-family: var(--font); font-size: 12px; color: #fff; font-variant-numeric: tabular-nums; }
+.mkt-spark { margin-top: 14px; border-top: 1px solid #141414; padding-top: 12px; }
+.mkt-spark-lbl { font-family: var(--font); font-size: 6.5px; letter-spacing: .22em; text-transform: uppercase; color: #fff; margin-bottom: 8px; }
+.chart-axis { display: flex; justify-content: space-between; padding: 4px 10px 0; font-family: var(--font); font-size: 7px; letter-spacing: .10em; color: #fff; }
+
+/* Related stories */
+.art-related-row {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 10px 0; border-bottom: 1px solid #111;
+  cursor: pointer; transition: background .08s; margin: 0 -28px; padding-left: 28px; padding-right: 28px;
+}
+.art-related-row:hover { background: #0f0f0f; }
+.art-related-time { font-family: var(--font); font-size: 8px; letter-spacing: .12em; color: #fff; white-space: nowrap; flex-shrink: 0; padding-top: 2px; width: 52px; }
+.art-related-src  { font-family: var(--font); font-size: 8px; font-weight: 700; letter-spacing: .12em; white-space: nowrap; flex-shrink: 0; padding-top: 2px; width: 38px; }
+.art-related-hl { font-family: var(--font); font-size: 11px; color: #fff; line-height: 1.4; transition: color .1s; }
+.art-related-row:hover .art-related-hl { color: #fff; }
+
+/* Attribution */
+.art-attribution { font-family: var(--font); font-size: 7px; letter-spacing: .20em; text-transform: uppercase; color: #fff; padding-top: 20px; margin-top: 10px; border-top: 1px solid #141414; }
+
+/* Extended content */
+.art-extended { font-family: var(--font); font-size: 12px; color: #fff; line-height: 1.88; letter-spacing: .012em; border-top: 1px solid #141414; padding-top: 16px; margin-top: 4px; }
+.art-extended p { margin: 0 0 1em; }
+
+/* ── QUOTES SIDEBAR ──────────────────────────────────────────── */
+.quotes-panel { width: 182px; border-left: 1px solid #1a1a1a; background: #090909; display: flex; flex-direction: column; flex-shrink: 0; overflow: hidden; }
+.qp-hdr { padding: 10px 12px 8px; font-family: var(--font); font-size: 7px; letter-spacing: .30em; text-transform: uppercase; color: #fff; border-bottom: 1px solid #141414; flex-shrink: 0; }
+.qp-list { flex: 1; overflow-y: auto; scrollbar-width: none; }
+.qp-list::-webkit-scrollbar { display: none; }
+.q-row { padding: 11px 12px; border-bottom: 1px solid #111; cursor: default; transition: background .1s; }
+.q-row:hover { background: #111; }
+.q-lbl   { font-family: var(--font); font-size: 8.5px; letter-spacing: .12em; color: #fff; margin-bottom: 4px; text-transform: uppercase; }
+.q-price { font-family: var(--font); font-size: 15px; font-weight: 700; color: #fff; font-variant-numeric: tabular-nums; line-height: 1; margin-bottom: 4px; }
+.q-chg   { font-family: var(--font); font-size: 8.5px; font-variant-numeric: tabular-nums; letter-spacing: .06em; }
+.q-up    { color: #4caf50; }
+.q-dn    { color: #e05050; }
+.q-flat  { color: #fff; }
+.qp-ftr  { padding: 7px 12px; font-family: var(--font); font-size: 6px; letter-spacing: .18em; color: #fff; border-top: 1px solid #141414; flex-shrink: 0; }
+
+.art-read-link { margin-left: auto; font-family: var(--font); font-size: 7.5px; letter-spacing: .18em; text-transform: uppercase; color: var(--accent,#E97132); text-decoration: none; border: 1px solid rgba(233,113,50,.35); padding: 3px 8px; white-space: nowrap; transition: background .1s; }
+.art-read-link:hover { background: rgba(233,113,50,.1); }
+
+/* ── STATUS BAR ──────────────────────────────────────────────── */
+.feed-status { height: 26px; background: #060606; border-top: 1px solid #141414; display: flex; align-items: center; justify-content: space-between; padding: 0 14px; font-family: var(--font); font-size: 6.5px; letter-spacing: .18em; text-transform: uppercase; color: #252525; flex-shrink: 0; }
+.feed-status strong { color: #444; }
+
+/* ── UTILITY ─────────────────────────────────────────────────── */
+.state-msg { display: flex; align-items: center; justify-content: center; padding: 30px 14px; font-family: var(--font); font-size: 8px; letter-spacing: .28em; text-transform: uppercase; color: #fff; }
+.ld::after { content:'...'; animation:lda 1.2s steps(3,end) infinite; }
+@keyframes lda { 0%,33%{content:'.'} 66%{content:'..'} 100%{content:'...'} }
+
+/* ── ARTICLE TAB BAR ─────────────────────────────────────────── */
+.art-tab-bar {
+  display: flex; align-items: stretch; height: 38px; background: #090909;
+  border-bottom: 1px solid #1e1e1e; overflow-x: auto; scrollbar-width: none; flex-shrink: 0;
+}
+.art-tab-bar::-webkit-scrollbar { display: none; }
+.art-tab {
+  display: flex; align-items: center; gap: 8px; padding: 0 14px;
+  border-right: 1px solid #151515; cursor: pointer; white-space: nowrap;
+  font-family: var(--font); font-size: 9px; letter-spacing: .16em; text-transform: uppercase;
+  color: #555; background: #090909; transition: color .1s, background .1s;
+  max-width: 240px; min-width: 100px; flex-shrink: 0;
+}
+.art-tab:hover { background: #101010; }
+.art-tab:hover .art-tab-cat { color: #fff; }
+.art-tab.active { background: #0e0e0e; border-bottom: 2px solid var(--accent,#E97132); }
+.art-tab-cat {
+  font-family: var(--font); font-size: 10px; font-weight: 700;
+  letter-spacing: .18em; text-transform: uppercase; flex-shrink: 0;
+  color: #777; transition: color .1s;
+}
+.art-tab.active .art-tab-cat { color: var(--accent,#E97132); }
+.art-tab-lbl { display: none; }
+.art-tab-close {
+  flex-shrink: 0; font-size: 10px; color: #333; background: none; border: none;
+  padding: 0; cursor: pointer; line-height: 1; transition: color .1s; margin-left: auto;
+}
+.art-tab-close:hover { color: #e05050; }
+.art-tab-popout {
+  flex-shrink: 0; font-size: 11px; color: #888; background: none; border: none;
+  padding: 0 1px; cursor: pointer; line-height: 1; transition: color .1s;
+}
+.art-tab-popout:hover { color: var(--accent,#E97132); }
+
+/* ── BROKERS INTELLIGENCE PANEL ──────────────────────────────── */
+.intel-panel { margin: 22px 0 8px; border: 1px solid #1e1e1e; border-left: 3px solid var(--accent,#E97132); background: #0c0c0c; }
+.intel-hdr { display: flex; align-items: center; gap: 10px; padding: 9px 14px; border-bottom: 1px solid #1a1a1a; }
+.intel-hdr-lbl { font-size: 7px; letter-spacing: .35em; text-transform: uppercase; color: var(--accent,#E97132); font-weight: 700; }
+.intel-hdr-sub { font-size: 7px; letter-spacing: .12em; text-transform: uppercase; color: #555; }
+.intel-loading { padding: 16px 14px; font-size: 9px; letter-spacing: .2em; color: #444; text-transform: uppercase; }
+.intel-loading .ld::after { content: '...'; animation: ldots 1.2s steps(3,end) infinite; }
+@keyframes ldots { 0%{content:'.'} 33%{content:'..'} 66%{content:'...'} }
+.intel-body { padding: 14px; }
+.intel-section { margin-bottom: 14px; }
+.intel-section:last-child { margin-bottom: 0; }
+.intel-sec-lbl { font-size: 7px; letter-spacing: .3em; text-transform: uppercase; color: var(--accent,#E97132); margin-bottom: 6px; }
+.intel-text { font-size: 11px; color: #d8d8d8; line-height: 1.85; letter-spacing: .01em; }
+.intel-analogy { background: #111; border-left: 2px solid #333; padding: 8px 12px; margin: 8px 0 0; font-size: 11px; color: #bbb; line-height: 1.8; font-style: italic; }
+.intel-pitch { background: #0f0f0f; border: 1px solid #222; border-left: 2px solid var(--accent,#E97132); padding: 10px 12px; font-size: 11px; color: #e8e8e8; line-height: 1.85; font-style: italic; }
+.intel-risk { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px 3px 6px; font-size: 7px; letter-spacing: .2em; text-transform: uppercase; font-weight: 700; margin-bottom: 6px; }
+.intel-risk.on  { background: rgba(68,204,136,.08); border: 1px solid rgba(68,204,136,.3); color: #44cc88; }
+.intel-risk.off { background: rgba(255,85,85,.08);  border: 1px solid rgba(255,85,85,.3);  color: #ff5555; }
+.intel-risk.neu { background: rgba(233,113,50,.08); border: 1px solid rgba(233,113,50,.3); color: var(--accent,#E97132); }
+.intel-risk-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+.intel-risk.on  .intel-risk-dot { background: #44cc88; }
+.intel-risk.off .intel-risk-dot { background: #ff5555; }
+.intel-risk.neu .intel-risk-dot { background: var(--accent,#E97132); }
+.intel-risk-reason { font-size: 10px; color: #999; line-height: 1.6; }
+
+/* ── CHART + RELATED SIDE-BY-SIDE ────────────────────────────── */
+.art-market-row {
+  display: flex; gap: 20px; align-items: flex-start; margin-top: 4px;
+}
+.art-market-row .art-related-col {
+  flex: 1; min-width: 0;
+}
+.art-market-row .art-chart-col {
+  width: 48%; flex-shrink: 0;
+}
+
+/* ── DRAG GHOST ──────────────────────────────────────────────── */
+.drag-ghost {
+  position: fixed; pointer-events: none; z-index: 9999;
+  background: #111; border: 1px solid var(--accent,#E97132);
+  font-family: var(--font); font-size: 8px; letter-spacing: .12em;
+  text-transform: uppercase; color: #fff; padding: 6px 12px;
+  white-space: nowrap; opacity: .85;
+}
+.nrow.dragging { opacity: .4; }
+
+/* ── PANEL RESIZE HANDLE ─────────────────────────────────────── */
+.panel-resize-handle {
+  width: 5px; flex-shrink: 0; background: transparent; cursor: col-resize;
+  position: relative; z-index: 10; transition: background .15s;
+}
+.panel-resize-handle:hover, .panel-resize-handle.dragging { background: var(--accent,#E97132); }
+
+/* ── POP-OUT WINDOWS ─────────────────────────────────────────── */
+.popwin {
+  position: fixed; z-index: 1000;
+  width: 560px; min-width: 320px; max-width: 90vw;
+  background: #0d0d0d; border: 1px solid var(--accent,#E97132);
+  border-left: 3px solid var(--accent,#E97132);
+  display: flex; flex-direction: column;
+  box-shadow: 0 8px 40px rgba(0,0,0,.7);
+  resize: both; overflow: hidden;
+  min-height: 200px; max-height: 90vh;
+}
+.popwin-bar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 0 10px; height: 30px; background: #111;
+  border-bottom: 1px solid #1e1e1e; cursor: move; flex-shrink: 0; user-select: none;
+}
+.popwin-pill { font-family: var(--font); font-size: 7px; letter-spacing: .22em; font-weight: 700; text-transform: uppercase; padding: 1px 7px; border: 1px solid; flex-shrink: 0; }
+.popwin-title { font-family: var(--font); font-size: 8.5px; letter-spacing: .06em; color: #fff; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase; }
+.popwin-btns { display: flex; gap: 4px; flex-shrink: 0; }
+.popwin-btn {
+  background: none; border: 1px solid #2a2a2a; color: #555;
+  font-family: var(--font); font-size: 9px; padding: 1px 7px; cursor: pointer;
+  transition: color .1s, border-color .1s; line-height: 1.4;
+}
+.popwin-btn:hover { color: #fff; border-color: #555; }
+.popwin-btn.close:hover { color: #e05050; border-color: rgba(224,80,80,.5); }
+.popwin-body { flex: 1; overflow-y: auto; overflow-x: hidden; scrollbar-width: thin; scrollbar-color: #1a1a1a transparent; }
+.popwin-body::-webkit-scrollbar { width: 3px; }
+.popwin-body::-webkit-scrollbar-thumb { background: #1a1a1a; }
+.popwin-body .art-inner { padding: 18px 20px 32px; }
+.popwin-body .quotes-panel { border-top: 1px solid #1a1a1a; background: #0a0a0a; }
+.popwin-body .qp-hdr { padding: 8px 12px; }
+.popwin-body .qp-list { max-height: 180px; overflow-y: auto; }
+
+@media (max-width:860px) {
+  html, body { overflow: auto; }
+  .terminal-wrap { height: auto; overflow: visible; }
+  .panels { flex-direction: column; }
+  .feed-panel { width: 100%; max-width: 100%; min-width: 0; }
+  .article-panel { display: none; }
+  .feed-list { height: 65vh; }
+}
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+  <a class="nav-brand" href="index.html">█ THE BROKERS TERMINAL</a>
+  <ul class="nav-links">
+    <li><a href="index.html">HOME</a></li>
+    <li><a href="dashboard.html">MY DESK</a></li>
+    <li><a href="news.html" class="active">NEWS FEED</a></li>
+    <li><a href="#" id="nav-logout-btn">LOG OUT</a></li>
+  </ul>
+</nav>
+
+<div class="terminal-wrap">
+  <div class="tb">
+    <div class="tb-seg active" id="tb-sort-new" data-sort="new">▼ MOST RECENT</div>
+    <div class="tb-seg" id="tb-sort-old" data-sort="old">ALL TIME</div>
+    <div class="tb-search-seg">
+      <span class="tb-search-icon">⌕</span>
+      <input type="text" id="news-search" placeholder="Search by keyword, topic, source…" autocomplete="off">
+    </div>
+    <div id="intel-search-container"></div>
+    <div class="tb-right">
+      <div class="tb-live-dot"></div>
+      <span class="tb-live-lbl">LIVE</span>
+      <span>· <strong id="story-count" style="color:#888;">—</strong> STORIES</span>
+      <span>· NEXT <strong id="next-refresh" style="color:#888;">90S</strong></span>
+    </div>
+  </div>
+
+  <div class="panels">
+    <!-- LEFT: FEED -->
+    <div class="feed-panel" id="feed-panel">
+      <div class="cat-bar-wrap">
+        <button class="cat-scroll-btn" id="cat-scroll-l">◀</button>
+        <div class="cat-bar" id="cat-tabs">
+          <button class="cat-tab active" data-cat="all">ALL</button>
+          <button class="cat-tab" data-cat="whisky">WHISKY</button>
+          <button class="cat-tab" data-cat="gold">█ GOLD &amp; PRECIOUS</button>
+          <button class="cat-tab" data-cat="macro">MACRO &amp; RATES</button>
+          <button class="cat-tab" data-cat="forex">FX &amp; CURRENCY</button>
+          <button class="cat-tab" data-cat="commodity">COMMODITIES</button>
+          <button class="cat-tab" data-cat="markets">MARKETS</button>
+          <button class="cat-tab" data-cat="geo">GEOPOLITICAL</button>
+        </div>
+        <button class="cat-scroll-btn" id="cat-scroll-r">▶</button>
+      </div>
+      <div class="feed-hdr">
+        <div>TIME</div><div>SOURCE</div><div>HEADLINE</div><div></div>
+      </div>
+      <div class="feed-list" id="feed-list">
+        <div class="state-msg">█ LOADING <span class="ld"></span></div>
+      </div>
+    </div>
+
+    <!-- RESIZE HANDLE -->
+    <div class="panel-resize-handle" id="panel-resize"></div>
+
+    <!-- RIGHT: ARTICLE + QUOTES -->
+    <div class="article-panel" id="article-panel">
+      <div class="art-tab-bar" id="art-tab-bar"></div>
+      <div class="art-panel-body">
+        <div class="art-scroll" id="art-scroll">
+          <div class="art-empty">
+            <div class="art-empty-icon">█</div>
+            <div class="art-empty-lbl">Select a story</div>
+            <div class="art-empty-sub">Click any headline to read</div>
+          </div>
+        </div>
+        <div class="quotes-panel">
+          <div class="qp-hdr">RELATED QUOTES</div>
+          <div class="qp-list" id="quotes-list">
+            <div class="state-msg" style="padding:16px 10px;font-size:7px;">—</div>
+          </div>
+          <div class="qp-ftr">INDICATIVE</div>
+        </div>
+      </div>
+      <div class="feed-status">
+        <div>REUTERS · FT · BLOOMBERG · CNBC · MARKETWATCH · YAHOO FINANCE</div>
+        <div>UPDATED <strong id="last-updated">—</strong></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="site.js"></script>
+<script src="intel-search.js"></script>
+<script>document.addEventListener('DOMContentLoaded',function(){intelSearchInit('intel-search-container');});</script>
+<script>
+var FINNHUB_KEY  = 'da6p77hr01qqqkkgl7b0da6p77hr01qqqkkgl7bg';
+var REFRESH_SECS = 90;
+
+var CATS = {
+  whisky:    ['whisky','whiskey','scotch','bourbon','distillery','distilleries','single malt','blended malt','cask whisky','rare whisky','whisky auction','whisky investment','diageo','brown-forman','pernod ricard','spirits market','rare spirits','whisky fund','whisky index','apex 1000','macallan','glenfiddich','glenlivet','highland park','laphroaig','oban','dalmore','balvenie','springbank','ardbeg','bruichladdich','talisker','aberlour','craigellachie','bunnahabhain'],
+  gold:      ['gold','silver','platinum','palladium','bullion','precious metal','xau','xag','troy ounce','lbma','comex','spot gold','gold price','gold fix'],
+  macro:     ['interest rate','federal reserve','fed rate','fed fund','bank of england','boe rate','ecb rate','inflation','cpi','gdp','monetary policy','yield curve','central bank','rate cut','rate hike','treasury','rate decision','base rate','rate hold','jackson hole'],
+  forex:     ['dollar index','dxy','gbp/usd','eur/usd','sterling','pound','usd/jpy','forex','currency','fx market','greenback','dollar fell','dollar rose','dollar weakens','dollar strength','exchange rate'],
+  commodity: ['crude oil','brent','wti','copper','commodity','iron ore','natural gas','energy prices','oil price','mining','metals','platinum group'],
+  markets:   ['ftse','s&p 500','dow jones','nasdaq','equity','equities','stock market','wall street','market rally','market selloff','global stocks','shares fall','shares rise'],
+  geo:       ['sanction','geopolit','war','conflict','military','nato','crisis','iran','russia','ukraine','middle east','trade war','tariff']
+};
+var CAT_TICKERS = { whisky:['DEO','BF.B','MGPI'], gold:['XAU=','USD=','XAG=','XPT='], macro:['US10YT=RR','GB10YT=RR','USD='], forex:['GBP=D3','EUR=','USD=','JPY='], commodity:['LCOc1','CLc1','XAU='], markets:['.SPX','.FTSE','USD='], geo:['XAU=','USD=','LCOc1'] };
+var CAT_TAG     = { whisky:'WHISKY', gold:'PRECIOUS', macro:'MACRO', forex:'FOREX', commodity:'COMMODITY', markets:'MARKETS', geo:'GEO' };
+/* All US ETF/stock symbols — confirmed working on Finnhub free tier */
+var CAT_CHART = {
+  whisky:    {lbl:'DIAGEO PLC  ·  DEO NYSE  ·  SPIRITS BELLWETHER', sym:'DEO', mult:1},
+  gold:      {lbl:'GOLD  ·  GLD ETF × 10  ≈  USD/OZ',               sym:'GLD', mult:10},
+  macro:     {lbl:'US 20YR TREASURIES  ·  TLT ETF  ·  USD',          sym:'TLT', mult:1},
+  forex:     {lbl:'US DOLLAR INDEX  ·  UUP ETF  ·  USD',             sym:'UUP', mult:1},
+  commodity: {lbl:'BRENT CRUDE  ·  BNO ETF  ·  USD',                 sym:'BNO', mult:1},
+  markets:   {lbl:'S&P 500 INDEX  ·  SPY ETF  ·  USD',               sym:'SPY', mult:1},
+  geo:       {lbl:'GOLD  ·  GLD ETF × 10  ≈  USD/OZ',               sym:'GLD', mult:10}
+};
+var QUOTE_SYMS = {
+  whisky:    [{sym:'DEO', mult:1,l:'DIAGEO (DEO)'},{sym:'BF.B',mult:1,l:'BROWN-FORMAN'},{sym:'MGPI',mult:1,l:'MGP INGREDIENTS'},{sym:'GLD',mult:10,l:'GOLD/OZ'}],
+  gold:      [{sym:'GLD',mult:10,l:'GOLD/OZ'},{sym:'SLV',mult:1,l:'SILVER'},{sym:'UUP',mult:1,l:'USD INDEX'},{sym:'TLT',mult:1,l:'US 20YR BOND'}],
+  macro:     [{sym:'TLT',mult:1,l:'US 20YR BOND'},{sym:'IEF',mult:1,l:'US 10YR BOND'},{sym:'SHY',mult:1,l:'US 2YR BOND'},{sym:'UUP',mult:1,l:'USD INDEX'}],
+  forex:     [{sym:'UUP',mult:1,l:'USD INDEX'},{sym:'FXE',mult:1,l:'EUR/USD'},{sym:'FXB',mult:1,l:'GBP/USD'},{sym:'FXY',mult:1,l:'JPY'}],
+  commodity: [{sym:'BNO',mult:1,l:'BRENT CRUDE'},{sym:'USO',mult:1,l:'WTI CRUDE'},{sym:'UNG',mult:1,l:'NATURAL GAS'},{sym:'GLD',mult:10,l:'GOLD/OZ'}],
+  markets:   [{sym:'SPY',mult:1,l:'S&P 500'},{sym:'QQQ',mult:1,l:'NASDAQ 100'},{sym:'VXX',mult:1,l:'VIX FUTURES'},{sym:'TLT',mult:1,l:'US 20YR BOND'}],
+  geo:       [{sym:'GLD',mult:10,l:'GOLD/OZ'},{sym:'BNO',mult:1,l:'BRENT CRUDE'},{sym:'VXX',mult:1,l:'VIX FUTURES'},{sym:'TLT',mult:1,l:'US 20YR BOND'}]
+};
+
+function categorise(s) {
+  var t=((s.headline||'')+' '+(s.summary||'')).toLowerCase();
+  for(var c in CATS) for(var i=0;i<CATS[c].length;i++) if(t.includes(CATS[c][i])) return c;
+  return null;
+}
+function srcInfo(src) {
+  var s=(src||'').toLowerCase();
+  if(s.includes('reuters'))                          return {cls:'rs-rtrs',lbl:'RTRS'};
+  if(s.includes('financial times')||s==='ft')        return {cls:'rs-ft',  lbl:'FT'};
+  if(s.includes('bloomberg'))                       return {cls:'rs-bbg', lbl:'BBG'};
+  if(s.includes('wsj')||s.includes('wall street')) return {cls:'rs-wsj', lbl:'WSJ'};
+  if(s.includes('cnbc'))                            return {cls:'rs-cnbc',lbl:'CNBC'};
+  return {cls:'rs-default',lbl:(src||'WIRE').substring(0,5).toUpperCase()};
+}
+function hms(ts)  { return new Date(ts*1000).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'}); }
+function hm(ts)   { return new Date(ts*1000).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}); }
+function dmon(ts) { return new Date(ts*1000).toLocaleDateString('en-GB',{day:'2-digit',month:'short'}); }
+function ago(ts)  { var d=Math.floor(Date.now()/1000-ts); if(d<60)return d+'S AGO'; if(d<3600)return Math.floor(d/60)+'M AGO'; if(d<86400)return Math.floor(d/3600)+'H AGO'; return Math.floor(d/86400)+'D AGO'; }
+function fmtPrice(c) { return c>=100?c.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}):c.toFixed(5); }
+
+var allStories=[], activeCat='all', searchQuery='', activeStory=null, seenIds=new Set(), refreshSecs=REFRESH_SECS, quotesLock=false, _sid=null;
+
+/* ── FETCH FEED ────────────────────────────────────────────── */
+async function fetchFeed() {
+  try {
+    /* RSS proxy function — fetches Reuters, CNBC, MarketWatch, FT, Yahoo Finance, Bloomberg, Investing.com */
+    var res=await fetch('/.netlify/functions/rss');
+    var items=res.ok?await res.json():[];
+    /* Normalise RSS items to match Finnhub shape */
+    var merged=items.map(function(s,i){
+      return {
+        id: s.url||String(s.datetime)+i,
+        headline: s.title,
+        summary: s.description||'',
+        source: s.source,
+        url: s.url,
+        datetime: s.datetime
+      };
+    });
+    /* Deduplicate by URL */
+    var seen=new Set(), dd=merged.filter(function(s){
+      var k=s.url||s.headline.slice(0,50);
+      if(seen.has(k))return false; seen.add(k); return true;
+    });
+    var rel=dd.filter(function(s){return categorise(s)!==null;});
+    rel.sort(function(a,b){return b.datetime-a.datetime;});
+    rel.forEach(function(s){s._cat=categorise(s);s._isNew=!seenIds.has(s.id);seenIds.add(s.id);});
+    allStories=rel; render();
+    document.getElementById('last-updated').textContent=new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  } catch(e) {
+    document.getElementById('feed-list').innerHTML='<div class="state-msg">FEED ERROR — RETRYING</div>';
+  }
+}
+
+/* ── RENDER LIST ───────────────────────────────────────────── */
+function render() {
+  var q=searchQuery.toLowerCase();
+  var filtered=allStories.filter(function(s){
+    return (activeCat==='all'||s._cat===activeCat)&&(!q||(s.headline||'').toLowerCase().includes(q)||(s.summary||'').toLowerCase().includes(q)||(s.source||'').toLowerCase().includes(q));
+  });
+  if(sortOrder==='old') filtered=filtered.slice().reverse();
+  document.getElementById('story-count').textContent=filtered.length;
+  var list=document.getElementById('feed-list');
+  if(!filtered.length){list.innerHTML='<div class="state-msg">NO STORIES MATCH</div>';return;}
+  list.innerHTML='';
+  filtered.forEach(function(story){
+    var cat=story._cat||'markets', si=srcInfo(story.source), tks=(CAT_TICKERS[cat]||[]).join(' ');
+    var row=document.createElement('div');
+    row.className='nrow'+(story._isNew?' nflash':'')+(activeStory&&story.id===activeStory.id?' active':'');
+    row.dataset.id=story.id;
+    row.innerHTML=
+      '<div class="r-time">'+hm(story.datetime)+'<span class="r-time-date">'+dmon(story.datetime)+'</span></div>'+
+      '<div class="r-src"><span class="r-src-lbl '+si.cls+'">'+si.lbl+'</span><span class="r-tickers">'+tks+'</span></div>'+
+      '<div class="r-main"><div class="r-hl">'+(story.headline||'')+'</div><div class="r-tags">'+(story._isNew?'<span class="rtag rtag-new">NEW</span>':'')+'<span class="rtag rt-'+cat+'">'+(CAT_TAG[cat]||cat.toUpperCase())+'</span></div></div>'+
+      '<div class="r-ind">○</div>';
+    row.setAttribute('draggable','true');
+    row.addEventListener('dragstart',function(e){
+      e.dataTransfer.setData('storyId', String(story.id));
+      e.dataTransfer.effectAllowed='move';
+      row.classList.add('dragging');
+    });
+    row.addEventListener('dragend',function(e){
+      row.classList.remove('dragging');
+      spawnPopout(story, e.clientX, e.clientY);
+    });
+    row.addEventListener('click',function(){
+      document.querySelectorAll('.nrow.active').forEach(function(r){r.classList.remove('active');});
+      activeStory=story; row.classList.add('active');
+      openStoryTab(story);
+    });
+    list.appendChild(row);
+  });
+}
+
+/* ── RENDER ARTICLE ────────────────────────────────────────── */
+function renderArticle(story) {
+  var cat=story._cat||'markets', src=story.source||'WIRE', si=srcInfo(story.source);
+  _sid=story.id;
+
+  /* Parse summary — strip dateline, split into bullets + body */
+  var raw=(story.summary||'').replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
+  raw=raw.replace(/^[A-Z][A-Z\s\/,\-]+,\s+\w+\.?\s+\d{1,2}\s+\([^)]+\)\s*[-–]\s*/,'');
+  var sentences=(raw.match(/[^.!?]+[.!?]+[\s]*/g)||[raw]).map(function(s){return s.trim();}).filter(function(s){return s.length>20;});
+  var bullets=sentences.slice(0,Math.min(3,sentences.length));
+  var bodyText=sentences.slice(bullets.length).join(' ');
+
+  /* Related stories — same category, different story */
+  var related=allStories.filter(function(s){return s.id!==story.id&&s._cat===cat;}).slice(0,4);
+
+  /* Chart info */
+  var chartCfg=CAT_CHART[cat];
+
+  /* Build HTML */
+  var bulletHTML=bullets.map(function(b){return '<li>'+b+'</li>';}).join('');
+  var bodyHTML=bodyText.trim()
+    ? '<div class="art-body" id="art-body-'+story.id+'"><p>'+bodyText.trim()+'</p></div>'
+    : '<div class="art-body" id="art-body-'+story.id+'"></div>';
+
+  var relInner=related.length
+    ? related.map(function(s){
+        var rsi=srcInfo(s.source);
+        return '<div class="art-related-row" data-sid="'+s.id+'">'+
+          '<span class="art-related-time">'+ago(s.datetime)+'</span>'+
+          '<span class="art-related-src '+rsi.cls+'">'+rsi.lbl+'</span>'+
+          '<span class="art-related-hl">'+(s.headline||'')+'</span>'+
+        '</div>';
+      }).join('')
+    : '';
+
+  /* Side-by-side: related stories LEFT, chart RIGHT */
+  var marketRow=chartCfg
+    ? '<div class="art-market-row">'+
+        '<div class="art-related-col">'+
+          (relInner?'<div class="art-sec-hdr">RELATED STORIES</div>'+relInner:'')+'</div>'+
+        '<div class="art-chart-col">'+
+          '<div class="art-sec-hdr">'+chartCfg.lbl+'<span class="art-sec-hdr-price" id="cpr-'+story.id+'"></span></div>'+
+          '<div id="cwrap-'+story.id+'"><div class="mkt-loading">LOADING<span class="ld"></span></div></div>'+
+        '</div>'+
+      '</div>'
+    : (relInner?'<div class="art-sec-hdr">RELATED STORIES</div>'+relInner:'');
+
+  document.getElementById('art-scroll').innerHTML=
+    '<div class="art-inner">'+
+      '<span class="art-pill ap-'+cat+'">'+(CAT_TAG[cat]||cat.toUpperCase())+'</span>'+
+      '<div class="art-hl">'+(story.headline||'')+'</div>'+
+      '<div class="art-byline">'+
+        '<span class="art-byline-src">'+src+'</span>'+
+        '<span class="art-byline-dot">·</span>'+
+        '<span>'+dmon(story.datetime)+'&nbsp;'+hms(story.datetime)+' GMT</span>'+
+        '<span class="art-byline-dot">·</span>'+
+        '<span>'+ago(story.datetime)+'</span>'+
+        (story.url?'<a class="art-read-link" href="'+story.url+'" target="_blank" rel="noopener">READ FULL ARTICLE ↗</a>':'')+
+      '</div>'+
+      '<hr class="art-hr">'+
+      '<ul class="art-bullets">'+bulletHTML+'</ul>'+
+      bodyHTML+
+      '<div id="art-ext-'+story.id+'"></div>'+
+      '<div id="art-intel-'+story.id+'" class="intel-panel">'+
+        '<div class="intel-hdr">'+
+          '<span class="intel-hdr-lbl">▌ BROKERS INTELLIGENCE</span>'+
+          '<span class="intel-hdr-sub">AI-GENERATED · FOR BROKER USE</span>'+
+        '</div>'+
+        '<div class="intel-loading">ANALYSING<span class="ld"></span></div>'+
+      '</div>'+
+      marketRow+
+      '<div class="art-attribution">SOURCE: '+src.toUpperCase()+'</div>'+
+    '</div>';
+
+  /* Click related stories → open as new tab */
+  document.getElementById('art-scroll').addEventListener('click',function(e){
+    var rr=e.target.closest('.art-related-row'); if(!rr)return;
+    var sid=parseInt(rr.dataset.sid);
+    var s2=allStories.find(function(s){return s.id===sid;});
+    if(s2) openStoryTab(s2);
+  });
+
+  fetchQuotes(cat);
+  if(chartCfg) drawChart(story.id, chartCfg);
+  if(story.url) extendArticle(story);
+  fetchIntelligence(story);
+}
+
+/* ── BROKERS INTELLIGENCE — AI EXPLANATION ─────────────────── */
+async function fetchIntelligence(story) {
+  var el=document.getElementById('art-intel-'+story.id);
+  if(!el) return;
+  try {
+    var res=await fetch('/.netlify/functions/explain',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        headline: story.headline,
+        summary:  story.summary,
+        category: story._cat||'markets'
+      })
+    });
+    var d=res.ok?await res.json():null;
+    if(!d||d.error) { el.querySelector('.intel-loading').textContent='Intelligence unavailable.'; return; }
+
+    var riskCls=d.risk==='RISK ON'?'on':d.risk==='RISK OFF'?'off':'neu';
+    var riskLbl=d.risk||'NEUTRAL';
+
+    el.innerHTML=
+      '<div class="intel-hdr">'+
+        '<span class="intel-hdr-lbl">▌ BROKERS INTELLIGENCE</span>'+
+        '<span class="intel-hdr-sub">AI-GENERATED · FOR BROKER USE</span>'+
+      '</div>'+
+      '<div class="intel-body">'+
+
+        '<div class="intel-section">'+
+          '<div class="intel-sec-lbl">WHAT IT MEANS</div>'+
+          '<div class="intel-text">'+(d.what||'')+'</div>'+
+          (d.analogy?'<div class="intel-analogy">"'+(d.analogy)+'"</div>':'')+
+        '</div>'+
+
+        '<div class="intel-section">'+
+          '<div class="intel-sec-lbl">RISK SIGNAL</div>'+
+          '<div class="intel-risk '+riskCls+'"><span class="intel-risk-dot"></span>'+riskLbl+'</div>'+
+          '<div class="intel-risk-reason">'+(d.riskReason||'')+'</div>'+
+        '</div>'+
+
+        '<div class="intel-section">'+
+          '<div class="intel-sec-lbl">HOW TO PITCH IT — SAY THIS TO YOUR CLIENT</div>'+
+          '<div class="intel-pitch">'+(d.pitch||'')+'</div>'+
+        '</div>'+
+
+      '</div>';
+  } catch(e) {
+    var lo=el.querySelector('.intel-loading');
+    if(lo) lo.textContent='Intelligence unavailable.';
+  }
+}
+
+/* ── DATA HELPERS ──────────────────────────────────────────── */
+async function finnhubQ(sym){ return fetch('https://finnhub.io/api/v1/quote?symbol='+sym+'&token='+FINNHUB_KEY).then(function(r){return r.json();}); }
+
+/* open.er-api.com: free, no key, CORS-enabled. rates[GBP]=0.786 means 1 USD = 0.786 GBP */
+var _erRates=null, _erAge=0;
+async function loadFxRates(){
+  if(_erRates&&Date.now()-_erAge<120000) return _erRates;
+  var r=await fetch('https://open.er-api.com/v6/latest/USD');
+  var d=await r.json();
+  if(d.result==='success'&&d.rates){ _erRates=d.rates; _erAge=Date.now(); return _erRates; }
+  throw new Error('er-api failed');
+}
+function erRate(rates,pair,inv){ return inv ? rates[pair] : (rates[pair]?1/rates[pair]:null); }
+
+/* ── OHLC SPARKLINE from single quote response ─────────────── */
+function ohlcSVG(storyId, o, h, l, c, pc, col){
+  /* 6 data points using only real OHLC values — no historical API needed */
+  var isUp = c >= o;
+  var pts5 = isUp ? [pc, o, l, h, c] : [pc, o, h, l, c];
+  var n=pts5.length;
+  var minV=Math.min.apply(null,pts5), maxV=Math.max.apply(null,pts5);
+  var pad=(maxV-minV)*0.14; minV-=pad; maxV+=pad;
+  var W=520, H=110, YL=58;
+  var TW=YL+W;
+  var pts=pts5.map(function(v,i){ return (YL+(i/(n-1))*W).toFixed(1)+','+(H-((v-minV)/(maxV-minV))*H).toFixed(1); }).join(' ');
+  var lastY=H-((c-minV)/(maxV-minV))*H;
+  function lbl(v){ return v>=100?v.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}):v.toFixed(5); }
+  var yH=H-((h-minV)/(maxV-minV))*H, yL=H-((l-minV)/(maxV-minV))*H, yO=H-((o-minV)/(maxV-minV))*H;
+  return '<svg viewBox="0 0 '+(TW+60)+' '+H+'" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:'+H+'px;display:block;">'+
+    '<defs><linearGradient id="og'+storyId+'" x1="0" y1="0" x2="0" y2="1">'+
+      '<stop offset="0%" stop-color="'+col+'" stop-opacity="0.20"/>'+
+      '<stop offset="100%" stop-color="'+col+'" stop-opacity="0"/>'+
+    '</linearGradient></defs>'+
+    /* grid */
+    '<line x1="'+YL+'" y1="'+yH.toFixed(1)+'" x2="'+TW+'" y2="'+yH.toFixed(1)+'" stroke="#1e1e1e" stroke-width="1" stroke-dasharray="3,4"/>'+
+    '<line x1="'+YL+'" y1="'+yL.toFixed(1)+'" x2="'+TW+'" y2="'+yL.toFixed(1)+'" stroke="#1e1e1e" stroke-width="1" stroke-dasharray="3,4"/>'+
+    /* y-axis price labels */
+    '<text x="'+(YL-4)+'" y="'+(yH+3).toFixed()+'" text-anchor="end" font-family="Consolas,monospace" font-size="8.5" fill="#3a3a3a">'+lbl(h)+'</text>'+
+    '<text x="'+(YL-4)+'" y="'+(yO+3).toFixed()+'" text-anchor="end" font-family="Consolas,monospace" font-size="8.5" fill="#3a3a3a">'+lbl(o)+'</text>'+
+    '<text x="'+(YL-4)+'" y="'+(yL+3).toFixed()+'" text-anchor="end" font-family="Consolas,monospace" font-size="8.5" fill="#3a3a3a">'+lbl(l)+'</text>'+
+    /* x-axis labels */
+    '<text x="'+YL+'" y="'+(H-2)+'" text-anchor="middle" font-family="Consolas,monospace" font-size="7" fill="#2a2a2a">PREV</text>'+
+    '<text x="'+(YL+W*0.25)+'" y="'+(H-2)+'" text-anchor="middle" font-family="Consolas,monospace" font-size="7" fill="#2a2a2a">OPEN</text>'+
+    '<text x="'+(YL+W*0.75)+'" y="'+(H-2)+'" text-anchor="middle" font-family="Consolas,monospace" font-size="7" fill="#2a2a2a">'+(isUp?'HIGH':'LOW')+'</text>'+
+    '<text x="'+TW+'" y="'+(H-2)+'" text-anchor="middle" font-family="Consolas,monospace" font-size="7" fill="#2a2a2a">NOW</text>'+
+    /* area + line */
+    '<polygon points="'+YL+','+(H-14)+' '+pts+' '+TW+','+(H-14)+'" fill="url(#og'+storyId+')" opacity="0.8"/>'+
+    '<polyline points="'+pts+'" fill="none" stroke="'+col+'" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>'+
+    /* current price line + dot */
+    '<line x1="'+YL+'" y1="'+lastY.toFixed(1)+'" x2="'+TW+'" y2="'+lastY.toFixed(1)+'" stroke="'+col+'" stroke-width="0.5" stroke-dasharray="4,3" opacity="0.6"/>'+
+    '<circle cx="'+TW+'" cy="'+lastY.toFixed(1)+'" r="4" fill="'+col+'"/>'+
+    '<text x="'+(TW+7)+'" y="'+(lastY+3.5).toFixed()+'" font-family="Consolas,monospace" font-size="9" fill="'+col+'" font-weight="700">'+lbl(c)+'</text>'+
+  '</svg>';
+}
+
+/* ── MARKET SNAPSHOT + TICK CHART ──────────────────────────── */
+function buildSnapHTML(storyId,c,pc,h,l,o,col,dir,chg,pct){
+  var rangePct=(h>l)?Math.max(0,Math.min(100,(c-l)/(h-l)*100)).toFixed(1):50;
+  var svg=ohlcSVG(storyId,o,h,l,c,pc,col);
+  return '<div class="mkt-snap">'+
+    '<div class="mkt-main">'+
+      '<span class="mkt-price" style="color:'+col+'">'+fmtPrice(c)+'</span>'+
+      '<span class="mkt-chg" style="color:'+col+'">'+dir+'&nbsp;'+(chg>=0?'+':'')+fmtPrice(Math.abs(chg))+'&nbsp;('+(pct>=0?'+':'')+pct.toFixed(2)+'%)</span>'+
+    '</div>'+
+    '<div class="mkt-range-row">'+
+      '<span class="mkt-rlbl">L&nbsp;'+fmtPrice(l)+'</span>'+
+      '<div class="mkt-bar"><div class="mkt-bar-fill" style="width:'+rangePct+'%;background:'+col+'"></div></div>'+
+      '<span class="mkt-rlbl">H&nbsp;'+fmtPrice(h)+'</span>'+
+    '</div>'+
+    '<div class="mkt-stats">'+
+      '<div class="mkt-stat"><span class="mkt-stat-l">OPEN</span><span class="mkt-stat-v">'+fmtPrice(o)+'</span></div>'+
+      '<div class="mkt-stat"><span class="mkt-stat-l">PREV CLOSE</span><span class="mkt-stat-v">'+fmtPrice(pc)+'</span></div>'+
+      '<div class="mkt-stat"><span class="mkt-stat-l">NET CHANGE</span><span class="mkt-stat-v" style="color:'+col+'">'+(chg>=0?'+':'')+fmtPrice(chg)+'</span></div>'+
+    '</div>'+
+    '<div class="mkt-spark">'+
+      '<div class="mkt-spark-lbl">TODAY\'S PRICE ACTION · PREV CLOSE → OPEN → RANGE → CURRENT</div>'+
+      svg+
+    '</div>'+
+  '</div>';
+}
+function buildSparkSVG(storyId, vals, col){
+  var n=vals.length;
+  var minV=Math.min.apply(null,vals), maxV=Math.max.apply(null,vals);
+  var pad=(maxV-minV)*0.10; minV-=pad; maxV+=pad;
+  var W=520, H=110, YL=56; /* YL = y-axis label column width */
+  var pts=vals.map(function(v,i){return (YL+(i/(n-1))*W).toFixed(1)+','+(H-((v-minV)/(maxV-minV))*H).toFixed(1);}).join(' ');
+  var lastX=YL+W, lastY=H-((vals[n-1]-minV)/(maxV-minV))*H;
+  var midV=(maxV+minV)/2;
+  var y25=H-((midV+(maxV-midV)*0.5-minV)/(maxV-minV))*H;
+  var y50=H-((midV-minV)/(maxV-minV))*H;
+  var y75=H-((midV-(midV-minV)*0.5-minV)/(maxV-minV))*H;
+  function lbl(v){return v>=100?v.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}):v.toFixed(4);}
+  var priceTop=minV+(maxV-minV)*0.875, priceMid=midV, priceBot=minV+(maxV-minV)*0.125;
+  var TW=YL+W;
+  return '<svg viewBox="0 0 '+(TW+4)+' '+H+'" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:'+H+'px;display:block;">'+
+    '<defs><linearGradient id="sg'+storyId+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="'+col+'" stop-opacity="0.22"/><stop offset="100%" stop-color="'+col+'" stop-opacity="0"/></linearGradient></defs>'+
+    /* grid */
+    '<line x1="'+YL+'" y1="'+y25.toFixed(1)+'" x2="'+TW+'" y2="'+y25.toFixed(1)+'" stroke="#171717" stroke-width="1"/>'+
+    '<line x1="'+YL+'" y1="'+y50.toFixed(1)+'" x2="'+TW+'" y2="'+y50.toFixed(1)+'" stroke="#171717" stroke-width="1"/>'+
+    '<line x1="'+YL+'" y1="'+y75.toFixed(1)+'" x2="'+TW+'" y2="'+y75.toFixed(1)+'" stroke="#171717" stroke-width="1"/>'+
+    /* y-axis labels */
+    '<text x="'+(YL-4)+'" y="'+( y25+3 ).toFixed()+'" text-anchor="end" font-family="Consolas,monospace" font-size="8" fill="#333">'+lbl(priceTop)+'</text>'+
+    '<text x="'+(YL-4)+'" y="'+( y50+3 ).toFixed()+'" text-anchor="end" font-family="Consolas,monospace" font-size="8" fill="#333">'+lbl(priceMid)+'</text>'+
+    '<text x="'+(YL-4)+'" y="'+( y75+3 ).toFixed()+'" text-anchor="end" font-family="Consolas,monospace" font-size="8" fill="#333">'+lbl(priceBot)+'</text>'+
+    /* area + line */
+    '<polygon points="'+YL+','+H+' '+pts+' '+TW+','+H+'" fill="url(#sg'+storyId+')"/>'+
+    '<polyline points="'+pts+'" fill="none" stroke="'+col+'" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>'+
+    /* last price marker */
+    '<line x1="'+YL+'" y1="'+lastY.toFixed(1)+'" x2="'+TW+'" y2="'+lastY.toFixed(1)+'" stroke="'+col+'" stroke-width="0.5" stroke-dasharray="3,3" opacity="0.5"/>'+
+    '<circle cx="'+lastX.toFixed(1)+'" cy="'+lastY.toFixed(1)+'" r="3.5" fill="'+col+'"/>'+
+    '<text x="'+(TW+3)+'" y="'+(lastY+3).toFixed()+'" font-family="Consolas,monospace" font-size="8" fill="'+col+'">'+lbl(vals[n-1])+'</text>'+
+  '</svg>';
+}
+async function drawChart(storyId, cfg) {
+  if(_sid!==storyId) return;
+  var wrap=document.getElementById('cwrap-'+storyId);
+  var prEl=document.getElementById('cpr-'+storyId);
+  if(!wrap) return;
+  var unavail='<div class="mkt-snap" style="padding:24px;text-align:center;font-family:var(--font);font-size:7px;letter-spacing:.22em;color:#2a2a2a;">MARKET DATA UNAVAILABLE</div>';
+  try {
+    var q=await finnhubQ(cfg.sym);
+    if(_sid!==storyId) return;
+    if(!q||(q.c==null&&q.pc==null)){wrap.innerHTML=unavail;return;}
+    var mult=cfg.mult||1;
+    /* When market is closed, c=0 — fall back to previous close for display */
+    var rawC=q.c||q.pc||0;
+    var c=rawC*mult, pc=(q.pc||rawC)*mult, h=(q.h||rawC)*mult, l=(q.l||rawC)*mult, o=(q.o||q.pc||rawC)*mult;
+    var chg=c-pc, pct=pc?(chg/pc*100):0;
+    var col=pct>=0?'#4caf50':'#e05050', dir=pct>=0?'▲':'▼';
+    if(prEl) prEl.innerHTML='<span style="color:#aaa;">'+fmtPrice(c)+'</span>&nbsp;<span style="color:'+col+'">'+dir+'&nbsp;'+(pct>=0?'+':'')+pct.toFixed(2)+'%</span>';
+    wrap.innerHTML=buildSnapHTML(storyId,c,pc,h,l,o,col,dir,chg,pct);
+  } catch(e){ if(wrap) wrap.innerHTML=unavail; }
+}
+
+/* ── FETCH QUOTES (Finnhub ETFs + open.er-api.com forex) ───── */
+async function fetchQuotes(cat) {
+  if(quotesLock)return; quotesLock=true;
+  var syms=QUOTE_SYMS[cat]||QUOTE_SYMS.gold;
+  var ql=document.getElementById('quotes-list');
+  ql.innerHTML='<div class="state-msg" style="padding:14px 10px;font-size:7px;">LOADING<span class="ld"></span></div>';
+  var erRates=null; try{erRates=await loadFxRates();}catch(e){}
+  var res=await Promise.allSettled(syms.map(function(s){
+    if(s.kind==='fx'){
+      if(!erRates||!erRates[s.p]) return Promise.resolve(null);
+      var c=erRate(erRates,s.p,s.inv);
+      return Promise.resolve({l:s.l,c:c,pc:c,noChg:true});
+    }
+    if(s.sym) return finnhubQ(s.sym).then(function(q){var m=s.mult||1;var raw=q&&(q.c||q.pc);return raw?{l:s.l,c:(q.c||q.pc)*m,pc:(q.pc||q.c||raw)*m}:null;});
+    return Promise.resolve(null);
+  }));
+  ql.innerHTML='';
+  res.forEach(function(r){
+    if(r.status!=='fulfilled'||!r.value)return;
+    var v=r.value, chg=v.c-v.pc, pct=v.pc&&!v.noChg?(chg/v.pc*100):0;
+    var dir=pct>0.005?'up':pct<-0.005?'dn':'flat';
+    var chgStr=v.noChg?'—':(pct>=0?'+':'')+pct.toFixed(2)+'%'+(chg>=0?' ▲':' ▼');
+    var qrow=document.createElement('div'); qrow.className='q-row';
+    qrow.innerHTML='<div class="q-lbl">'+v.l+'</div><div class="q-price">'+fmtPrice(v.c)+'</div><div class="q-chg q-'+dir+'">'+chgStr+'</div>';
+    ql.appendChild(qrow);
+  });
+  if(!ql.children.length)ql.innerHTML='<div class="state-msg" style="padding:14px 10px;font-size:7px;">—</div>';
+  quotesLock=false;
+}
+
+/* ── EXTENDED FETCH (best effort) ──────────────────────────── */
+async function extendArticle(story) {
+  var storyId=story.id;
+  try {
+    var ctrl=new AbortController(); setTimeout(function(){ctrl.abort();},9000);
+    var res=await fetch('https://api.allorigins.win/raw?url='+encodeURIComponent(story.url),{signal:ctrl.signal});
+    if(!res.ok||_sid!==storyId)return;
+    var html=await res.text(); if(_sid!==storyId)return;
+    var doc=new DOMParser().parseFromString(html,'text/html');
+    doc.querySelectorAll('script,style,nav,header,footer,aside,iframe,noscript,[class*="ad"],[class*="promo"],[class*="related"],[class*="newsletter"],[class*="share"]').forEach(function(el){el.remove();});
+    var sels=['[itemprop="articleBody"]','[class*="ArticleBody"]','[class*="article-body"]','[class*="story-body"]','[class*="body__content"]','[class*="article__body"]','[class*="post-body"]','[class*="entry-content"]','article','main'];
+    var best='';
+    for(var i=0;i<sels.length;i++){var el=doc.querySelector(sels[i]);if(!el)continue;var t=(el.innerText||el.textContent||'').replace(/\s+/g,' ').trim();if(t.length>best.length)best=t;if(best.length>800)break;}
+    var bodyEl=document.getElementById('art-body-'+storyId);
+    var existing=bodyEl?(bodyEl.textContent||'').trim():'';
+    if(!best||best.length<existing.length+150)return;
+    var paras=best.split(/\n\s*\n|\.\s{2,}/).filter(function(p){return p.trim().length>50;});
+    if(paras.length<2)return;
+    var extEl=document.getElementById('art-ext-'+storyId); if(!extEl||_sid!==storyId)return;
+    extEl.innerHTML='<div class="art-extended">'+paras.map(function(p){return '<p>'+p.trim()+'</p>';}).join('')+'</div>';
+  }catch(e){}
+}
+
+/* ── ARTICLE TAB SYSTEM ────────────────────────────────────── */
+var _tabs=[], _activeTabId=null;
+
+function openStoryTab(story) {
+  /* If tab already exists, just activate it */
+  var existing=_tabs.find(function(t){return t.id===story.id;});
+  if(existing){ activateTab(story.id); return; }
+  /* Add new tab */
+  _tabs.push(story);
+  renderTabBar();
+  activateTab(story.id);
+}
+
+function renderTabBar() {
+  var bar=document.getElementById('art-tab-bar');
+  bar.innerHTML='';
+  _tabs.forEach(function(story){
+    var cat=story._cat||'markets';
+    var tab=document.createElement('div');
+    tab.className='art-tab'+(story.id===_activeTabId?' active':'');
+    tab.dataset.id=story.id;
+    tab.innerHTML=
+      '<span class="art-tab-cat ap-'+cat+'">'+(CAT_TAG[cat]||cat.toUpperCase())+'</span>'+
+      '<span class="art-tab-lbl">'+(story.headline||'').substring(0,40)+'</span>'+
+      '<button class="art-tab-popout" title="Pop out">↗</button>'+
+      '<button class="art-tab-close" title="Close">✕</button>';
+    tab.setAttribute('draggable','true');
+    tab.addEventListener('dragstart',function(e){
+      e.dataTransfer.setData('storyId', String(story.id));
+      e.dataTransfer.effectAllowed='move';
+      tab.style.opacity='.4';
+    });
+    tab.addEventListener('dragend',function(e){
+      tab.style.opacity='';
+      /* Only pop out if dragged outside the tab bar */
+      var bar=document.getElementById('art-tab-bar');
+      var r=bar.getBoundingClientRect();
+      if(e.clientY>r.bottom+20||e.clientX<r.left-40||e.clientX>r.right+40){
+        spawnPopout(story, e.clientX, e.clientY);
+      }
+    });
+    tab.addEventListener('click',function(e){
+      if(e.target.classList.contains('art-tab-close')){ closeTab(story.id); return; }
+      if(e.target.classList.contains('art-tab-popout')){ spawnPopout(story); return; }
+      activateTab(story.id);
+    });
+    bar.appendChild(tab);
+  });
+}
+
+function activateTab(id) {
+  _activeTabId=id;
+  var story=_tabs.find(function(t){return t.id===id;});
+  if(!story)return;
+  renderTabBar();
+  renderArticle(story);
+  /* Sync feed list highlight */
+  document.querySelectorAll('.nrow.active').forEach(function(r){r.classList.remove('active');});
+  var rowEl=document.querySelector('.nrow[data-id="'+id+'"]');
+  if(rowEl)rowEl.classList.add('active');
+}
+
+function closeTab(id) {
+  var idx=_tabs.findIndex(function(t){return t.id===id;});
+  _tabs.splice(idx,1);
+  if(_activeTabId===id){
+    if(_tabs.length){ activateTab(_tabs[Math.max(0,idx-1)].id); }
+    else{ _activeTabId=null; renderTabBar(); document.getElementById('art-scroll').innerHTML='<div class="art-empty"><div class="art-empty-icon">█</div><div class="art-empty-lbl">Select a story</div><div class="art-empty-sub">Click any headline to read</div></div>'; }
+  } else { renderTabBar(); }
+}
+
+/* ── POP-OUT WINDOW SYSTEM ─────────────────────────────────── */
+var _popZ=1010, _popOffset=0, _openPopouts={};
+
+function buildArticleHTML(story, pfx) {
+  var cat=story._cat||'markets', src=story.source||'WIRE', si=srcInfo(story.source);
+  var raw=(story.summary||'').replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
+  raw=raw.replace(/^[A-Z][A-Z\s\/,\-]+,\s+\w+\.?\s+\d{1,2}\s+\([^)]+\)\s*[-–]\s*/,'');
+  var sentences=(raw.match(/[^.!?]+[.!?]+[\s]*/g)||[raw]).map(function(s){return s.trim();}).filter(function(s){return s.length>20;});
+  var bullets=sentences.slice(0,Math.min(3,sentences.length));
+  var bodyText=sentences.slice(bullets.length).join(' ');
+  var related=allStories.filter(function(s){return s.id!==story.id&&s._cat===cat;}).slice(0,3);
+  var chartCfg=CAT_CHART[cat];
+  var id=pfx+story.id;
+  var bulletHTML=bullets.map(function(b){return '<li>'+b+'</li>';}).join('');
+  var bodyHTML=bodyText.trim()?'<div class="art-body" id="art-body-'+id+'"><p>'+bodyText.trim()+'</p></div>':'<div class="art-body" id="art-body-'+id+'"></div>';
+  var chartHTML=chartCfg
+    ?'<div class="art-sec-hdr">'+chartCfg.lbl+'<span class="art-sec-hdr-price" id="cpr-'+id+'"></span></div>'+
+      '<div id="cwrap-'+id+'"><div class="mkt-loading">LOADING<span class="ld"></span></div></div>'
+    :'';
+  var relHTML=related.length
+    ?'<div class="art-sec-hdr">RELATED STORIES</div>'+
+      related.map(function(s){var rsi=srcInfo(s.source);return '<div class="art-related-row" data-sid="'+s.id+'"><span class="art-related-time">'+ago(s.datetime)+'</span><span class="art-related-src '+rsi.cls+'">'+rsi.lbl+'</span><span class="art-related-hl">'+(s.headline||'')+'</span></div>';}).join('')
+    :'';
+  return {
+    html:'<div class="art-inner">'+
+      '<span class="art-pill ap-'+cat+'">'+(CAT_TAG[cat]||cat.toUpperCase())+'</span>'+
+      '<div class="art-hl">'+(story.headline||'')+'</div>'+
+      '<div class="art-byline">'+
+        '<span class="art-byline-src">'+src+'</span>'+
+        '<span class="art-byline-dot">·</span>'+
+        '<span>'+dmon(story.datetime)+'&nbsp;'+hms(story.datetime)+' GMT</span>'+
+        '<span class="art-byline-dot">·</span><span>'+ago(story.datetime)+'</span>'+
+        (story.url?'<a class="art-read-link" href="'+story.url+'" target="_blank" rel="noopener">READ FULL ARTICLE ↗</a>':'')+
+      '</div><hr class="art-hr">'+
+      '<ul class="art-bullets">'+bulletHTML+'</ul>'+
+      bodyHTML+'<div id="art-ext-'+id+'"></div>'+chartHTML+relHTML+
+      '<div class="art-attribution">SOURCE: '+src.toUpperCase()+'</div>'+
+    '</div>',
+    cat:cat, chartCfg:chartCfg, id:id
+  };
+}
+
+function spawnPopout(story, dropX, dropY) {
+  /* If already open, just bring it to front */
+  if(_openPopouts[story.id]){
+    var ex=_openPopouts[story.id];
+    ex.style.zIndex=++_popZ;
+    ex.style.boxShadow='0 8px 40px rgba(233,113,50,.18)';
+    setTimeout(function(){ex.style.boxShadow='0 8px 40px rgba(0,0,0,.7)';},600);
+    return;
+  }
+  var pfx='pop'+story.id+'_';
+  var art=buildArticleHTML(story,pfx);
+  var cat=art.cat, chartCfg=art.chartCfg;
+
+  /* Position: use drop coordinates if dragged, otherwise cascade */
+  var left, top;
+  if(dropX!=null && dropY!=null){
+    left=Math.max(0,Math.min(dropX-20, window.innerWidth-580));
+    top=Math.max(0,Math.min(dropY-15, window.innerHeight-500));
+  } else {
+    var off=(_popOffset%8)*28;
+    left=Math.min(60+off, window.innerWidth-600);
+    top=Math.min(70+off, window.innerHeight-500);
+    _popOffset++;
+  }
+
+  var win=document.createElement('div');
+  win.className='popwin';
+  win.style.cssText='left:'+left+'px;top:'+top+'px;height:600px;z-index:'+(++_popZ)+';';
+  win.innerHTML=
+    '<div class="popwin-bar">'+
+      '<span class="popwin-pill ap-'+cat+'">'+(CAT_TAG[cat]||cat.toUpperCase())+'</span>'+
+      '<span class="popwin-title">'+(story.headline||'')+'</span>'+
+      '<div class="popwin-btns">'+
+        '<button class="popwin-btn close" title="Close">✕</button>'+
+      '</div>'+
+    '</div>'+
+    '<div class="popwin-body">'+art.html+'</div>';
+
+  document.body.appendChild(win);
+  _openPopouts[story.id]=win;
+
+  /* Bring to front on any click inside */
+  win.addEventListener('mousedown',function(){win.style.zIndex=++_popZ;},true);
+
+  /* Close */
+  win.querySelector('.popwin-btn.close').addEventListener('click',function(){
+    win.remove(); delete _openPopouts[story.id];
+  });
+
+  /* Related story clicks inside popout */
+  win.addEventListener('click',function(e){
+    var rr=e.target.closest('.art-related-row'); if(!rr)return;
+    var sid=parseInt(rr.dataset.sid);
+    var s2=allStories.find(function(s){return s.id===sid;});
+    if(s2) spawnPopout(s2);
+  });
+
+  /* Drag */
+  var bar=win.querySelector('.popwin-bar');
+  var dx=0,dy=0,dragging=false;
+  bar.addEventListener('mousedown',function(e){
+    if(e.target.closest('.popwin-btn'))return;
+    dragging=true; dx=e.clientX-win.offsetLeft; dy=e.clientY-win.offsetTop;
+    win.style.zIndex=++_popZ;
+    document.body.style.userSelect='none';
+  });
+  document.addEventListener('mousemove',function(e){
+    if(!dragging)return;
+    var nx=e.clientX-dx, ny=e.clientY-dy;
+    nx=Math.max(0,Math.min(nx,window.innerWidth-100));
+    ny=Math.max(0,Math.min(ny,window.innerHeight-40));
+    win.style.left=nx+'px'; win.style.top=ny+'px';
+  });
+  document.addEventListener('mouseup',function(){dragging=false;document.body.style.userSelect='';});
+
+  /* Load data */
+  if(chartCfg) drawChart(art.id,chartCfg);
+  fetchQuotesInto(cat, win.querySelector('.popwin-body'));
+  if(story.url) extendArticleInto(story, art.id);
+}
+
+/* fetchQuotes into a specific container (for popouts) */
+async function fetchQuotesInto(cat, container) {
+  var syms=QUOTE_SYMS[cat]||QUOTE_SYMS.gold;
+  var qlWrap=document.createElement('div');
+  qlWrap.className='quotes-panel';
+  qlWrap.innerHTML='<div class="qp-hdr">RELATED QUOTES</div><div class="qp-list" style="max-height:200px;overflow-y:auto;"></div><div class="qp-ftr">INDICATIVE</div>';
+  container.appendChild(qlWrap);
+  var ql=qlWrap.querySelector('.qp-list');
+  ql.innerHTML='<div class="state-msg" style="padding:10px;font-size:7px;">LOADING<span class="ld"></span></div>';
+  var res=await Promise.allSettled(syms.map(function(s){
+    if(s.sym) return finnhubQ(s.sym).then(function(q){var m=s.mult||1;var raw=q&&(q.c||q.pc);return raw?{l:s.l,c:(q.c||q.pc)*m,pc:(q.pc||q.c||raw)*m}:null;});
+    return Promise.resolve(null);
+  }));
+  ql.innerHTML='';
+  res.forEach(function(r){
+    if(r.status!=='fulfilled'||!r.value)return;
+    var v=r.value, chg=v.c-v.pc, pct=v.pc?(chg/v.pc*100):0;
+    var dir=pct>0.005?'up':pct<-0.005?'dn':'flat';
+    var chgStr=(pct>=0?'+':'')+pct.toFixed(2)+'%'+(chg>=0?' ▲':' ▼');
+    var qrow=document.createElement('div'); qrow.className='q-row';
+    qrow.innerHTML='<div class="q-lbl">'+v.l+'</div><div class="q-price">'+fmtPrice(v.c)+'</div><div class="q-chg q-'+dir+'">'+chgStr+'</div>';
+    ql.appendChild(qrow);
+  });
+  if(!ql.children.length)ql.innerHTML='<div class="state-msg" style="padding:10px;font-size:7px;">—</div>';
+}
+
+/* extendArticle for popout-specific IDs */
+async function extendArticleInto(story, artId) {
+  try {
+    var ctrl=new AbortController(); setTimeout(function(){ctrl.abort();},9000);
+    var res=await fetch('https://api.allorigins.win/raw?url='+encodeURIComponent(story.url),{signal:ctrl.signal});
+    if(!res.ok)return;
+    var html=await res.text();
+    var doc=new DOMParser().parseFromString(html,'text/html');
+    doc.querySelectorAll('script,style,nav,header,footer,aside,iframe,noscript,[class*="ad"],[class*="promo"],[class*="related"],[class*="newsletter"],[class*="share"]').forEach(function(el){el.remove();});
+    var sels=['[itemprop="articleBody"]','[class*="ArticleBody"]','[class*="article-body"]','[class*="story-body"]','[class*="body__content"]','[class*="article__body"]','[class*="post-body"]','[class*="entry-content"]','article','main'];
+    var best='';
+    for(var i=0;i<sels.length;i++){var el=doc.querySelector(sels[i]);if(!el)continue;var t=(el.innerText||el.textContent||'').replace(/\s+/g,' ').trim();if(t.length>best.length)best=t;if(best.length>800)break;}
+    if(!best)return;
+    var paras=best.split(/\n\s*\n|\.\s{2,}/).filter(function(p){return p.trim().length>50;});
+    if(paras.length<2)return;
+    var extEl=document.getElementById('art-ext-'+artId); if(!extEl)return;
+    extEl.innerHTML='<div class="art-extended">'+paras.map(function(p){return '<p>'+p.trim()+'</p>';}).join('')+'</div>';
+  }catch(e){}
+}
+
+/* ── CONTROLS ──────────────────────────────────────────────── */
+var sortOrder='new';
+document.getElementById('cat-tabs').addEventListener('click',function(e){
+  var btn=e.target.closest('.cat-tab'); if(!btn)return;
+  document.querySelectorAll('.cat-tab').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active'); activeCat=btn.dataset.cat; render();
+});
+document.getElementById('news-search').addEventListener('input',function(){searchQuery=this.value;render();});
+document.getElementById('tb-sort-new').addEventListener('click',function(){
+  sortOrder='new';
+  document.getElementById('tb-sort-new').classList.add('active');
+  document.getElementById('tb-sort-old').classList.remove('active');
+  render();
+});
+document.getElementById('tb-sort-old').addEventListener('click',function(){
+  sortOrder='old';
+  document.getElementById('tb-sort-old').classList.add('active');
+  document.getElementById('tb-sort-new').classList.remove('active');
+  render();
+});
+
+/* ── CATEGORY TAB SCROLL ARROWS ────────────────────────────── */
+document.getElementById('cat-scroll-l').addEventListener('click',function(){
+  document.getElementById('cat-tabs').scrollBy({left:-120,behavior:'smooth'});
+});
+document.getElementById('cat-scroll-r').addEventListener('click',function(){
+  document.getElementById('cat-tabs').scrollBy({left:120,behavior:'smooth'});
+});
+
+/* ── PANEL RESIZE ──────────────────────────────────────────── */
+(function(){
+  var handle=document.getElementById('panel-resize');
+  var feedPanel=document.getElementById('feed-panel');
+  var panels=document.querySelector('.panels');
+  var resizing=false, startX=0, startW=0;
+  handle.addEventListener('mousedown',function(e){
+    resizing=true; startX=e.clientX; startW=feedPanel.offsetWidth;
+    handle.classList.add('dragging');
+    document.body.style.cursor='col-resize'; document.body.style.userSelect='none';
+  });
+  document.addEventListener('mousemove',function(e){
+    if(!resizing)return;
+    var dx=e.clientX-startX, nw=Math.max(260,Math.min(startW+dx,panels.offsetWidth-260));
+    feedPanel.style.width=nw+'px'; feedPanel.style.maxWidth=nw+'px';
+  });
+  document.addEventListener('mouseup',function(){
+    if(!resizing)return; resizing=false;
+    handle.classList.remove('dragging');
+    document.body.style.cursor=''; document.body.style.userSelect='';
+  });
+})();
+setInterval(function(){refreshSecs--;if(refreshSecs<=0){refreshSecs=REFRESH_SECS;fetchFeed();}document.getElementById('next-refresh').textContent=refreshSecs+'S';},1000);
+
+/* ── AUTH ──────────────────────────────────────────────────── */
+var SUPABASE_URL='https://oqpodikelxhwcnjdwojw.supabase.co';
+var SUPABASE_KEY='sb_publishable_hJjmJ5MYAj8aCpXL6vCMTQ_zJlxUehl';
+var supabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+(async function(){
+  var sess=await supabase.auth.getSession();
+  if(!sess.data.session){window.location.href='login.html';return;}
+  document.getElementById('nav-logout-btn').addEventListener('click',function(e){e.preventDefault();supabase.auth.signOut().then(function(){window.location.href='login.html';});});
+  fetchFeed();
+})();
+</script>
+</body>
+</html>
