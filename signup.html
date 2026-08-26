@@ -846,7 +846,7 @@
           });
           if (insertError) {
             await supabase.from('users').upsert({
-              email: email, firm_id: _inviteFirmId,
+              id: newUserId, email: email, firm_id: _inviteFirmId,
               first_name: firstName, last_name: lastName, role: 'subscriber'
             }, { onConflict: 'email' });
           }

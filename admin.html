@@ -1898,10 +1898,32 @@
       resultEl.style.color = '#c0392b';
       resultEl.textContent = '✗ ' + (error.message || 'FAILED');
     } else {
+      resultEl.style.color = 'var(--text-faint)';
+      resultEl.textContent = 'SENDING INVITE...';
+
+      /* Look up firm name for the email */
+      var firmName = '';
+      try {
+        var { data: firmRow } = await supabaseAdmin.from('firms').select('company_name').eq('id', firmId).single();
+        firmName = (firmRow && firmRow.company_name) || '';
+      } catch(e) {}
+
+      var emailOk = false;
+      try {
+        var inviteUrl = 'https://thebrokersterminal.com/signup.html?invite=' + firmId;
+        var emailRes = await fetch('/.netlify/functions/send-invite', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email, firmName: firmName, inviteUrl: inviteUrl, adminName: 'The Brokers Terminal' }),
+        });
+        emailOk = emailRes.ok;
+        if (!emailRes.ok) console.error('send-invite failed:', await emailRes.text());
+      } catch(e) { console.error('send-invite error:', e); }
+
       resultEl.style.color = 'var(--accent)';
-      resultEl.textContent = '✓ ' + email + ' ADDED';
+      resultEl.textContent = emailOk ? '✓ INVITE SENT TO ' + email : '✓ ' + email + ' ADDED (EMAIL FAILED)';
       if (input) input.value = '';
-      setTimeout(function() { resultEl.textContent = ''; }, 3000);
+      setTimeout(function() { resultEl.textContent = ''; }, 4000);
       await renderFirmMembers(firmId);
     }
   }

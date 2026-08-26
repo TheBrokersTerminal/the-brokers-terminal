@@ -16,6 +16,8 @@
     body.style.padding = '0';
     body.style.overflow = 'hidden';
     body.style.display = 'flex';
+    body.style.flexDirection = 'column';
+    body.style.minHeight = '0';
     body.innerHTML = '<div class="tchat-wrap" id="' + widgetId + '-chat">' +
       '<div class="tchat-sidebar">' +
         '<div class="tchat-sidebar-hdr">CHANNELS</div>' +
@@ -46,32 +48,75 @@
       renderContacts(widgetId, contacts, state, sb, user);
     });
 
-    /* ── Subscribe to realtime ── */
-    state.realtimeSub = sb.channel('firm-messages-' + user.firmId)
-      .on('postgres_changes', {
-        event: 'INSERT', schema: 'public', table: 'messages',
-        filter: 'firm_id=eq.' + user.firmId,
-      }, function (payload) {
-        var msg = payload.new;
-        var isForActive = (
-          (state.activeRecipient === null && msg.recipient_id === null) ||
-          (state.activeRecipient === msg.sender_id && msg.recipient_id === user.id) ||
-          (state.activeRecipient === msg.recipient_id && msg.sender_id === user.id)
-        );
-        if (isForActive) {
-          appendMessage(widgetId, msg, user.id, sb);
-          scrollBottom(widgetId);
-        } else if (msg.sender_id !== user.id) {
-          /* unread badge */
-          var key = msg.recipient_id ? msg.sender_id : 'broadcast';
+    /* ── Request notification permission silently on load ── */
+    if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+
+    /* ── Shared handler for incoming messages ── */
+    var _seenIds = {};
+    function handleIncoming(msg) {
+      if (!msg || !msg.id) return;
+      if (_seenIds[msg.id]) return;
+      _seenIds[msg.id] = true;
+      if (msg.firm_id !== user.firmId) return;
+      var isForMe = msg.recipient_id === null || msg.recipient_id === user.id || msg.sender_id === user.id;
+      if (!isForMe) return;
+      var isForActive = (
+        (state.activeRecipient === null && msg.recipient_id === null) ||
+        (state.activeRecipient === msg.sender_id && msg.recipient_id === user.id) ||
+        (state.activeRecipient === msg.recipient_id && msg.sender_id === user.id)
+      );
+      if (isForActive) {
+        appendMessage(widgetId, msg, user.id, sb);
+        scrollBottom(widgetId);
+      }
+      if (msg.sender_id !== user.id) {
+        var key = msg.recipient_id ? msg.sender_id : 'broadcast';
+        if (!isForActive) {
           state.unread[key] = (state.unread[key] || 0) + 1;
           updateBadges(widgetId, state);
-          /* widget title badge */
-          var titleEl = document.getElementById(widgetId + '-title');
-          if (titleEl && !titleEl.textContent.includes('●')) titleEl.textContent = '● FIRM CHAT';
         }
+        var contactEl = document.getElementById(widgetId + '-c-' + key);
+        if (contactEl) {
+          contactEl.classList.remove('tchat-flash');
+          void contactEl.offsetWidth;
+          contactEl.classList.add('tchat-flash');
+        }
+        var titleEl = document.getElementById(widgetId + '-title');
+        if (titleEl && !titleEl.textContent.includes('●')) titleEl.textContent = '● FIRM CHAT';
+        if (typeof Notification !== 'undefined' && Notification.permission === 'granted' && !document.hasFocus()) {
+          var senderName = msg.sender_name || 'Someone';
+          new Notification(msg.recipient_id ? senderName + ' sent you a message' : senderName + ' (broadcast)', {
+            body: (msg.content || '').slice(0, 100),
+            icon: '/favicon.ico',
+            tag: 'tbt-chat-' + (msg.recipient_id || 'broadcast'),
+          });
+        }
+      }
+    }
+
+    /* ── Realtime subscription ── */
+    state.realtimeSub = sb.channel('firm-messages-' + user.firmId)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, function (payload) {
+        handleIncoming(payload.new);
       })
       .subscribe();
+
+    /* ── Polling fallback — catches messages if realtime misses them ── */
+    var _pollSince = new Date().toISOString();
+    var _pollTimer = setInterval(function () {
+      if (!document.getElementById(widgetId + '-messages')) { clearInterval(_pollTimer); return; }
+      sb.from('messages').select('*')
+        .eq('firm_id', user.firmId)
+        .gt('created_at', _pollSince)
+        .order('created_at', { ascending: true })
+        .then(function (res) {
+          if (!res.data || !res.data.length) return;
+          _pollSince = res.data[res.data.length - 1].created_at;
+          res.data.forEach(handleIncoming);
+        });
+    }, 4000);
 
     /* ── Send ── */
     var inputEl = document.getElementById(widgetId + '-input');
@@ -88,10 +133,10 @@
         sender_name: user.name,
         recipient_id: state.activeRecipient,
         content: text,
-      }).then(function (res) {
+      }).select().then(function (res) {
         if (res.error) return;
-        /* optimistic render */
-        var msg = {sender_id: user.id, sender_name: user.name, content: text, created_at: new Date().toISOString(), recipient_id: state.activeRecipient};
+        var msg = (res.data && res.data[0]) || {sender_id: user.id, sender_name: user.name, content: text, created_at: new Date().toISOString(), recipient_id: state.activeRecipient};
+        if (msg.id) _seenIds[msg.id] = true; /* prevent polling from duplicating */
         appendMessage(widgetId, msg, user.id, sb);
         scrollBottom(widgetId);
       });
@@ -112,6 +157,9 @@
       state.activeName = name;
       var key = recipientId || 'broadcast';
       delete state.unread[key];
+      /* explicitly hide the badge for this contact */
+      var b = document.getElementById(widgetId + '-badge-' + key);
+      if (b) b.style.display = 'none';
       updateBadges(widgetId, state);
       /* clear widget title badge */
       var total = Object.values(state.unread).reduce(function(a,b){return a+b;}, 0);

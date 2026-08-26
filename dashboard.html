@@ -1244,6 +1244,7 @@
     // Set globals for all users — required for activity logging regardless of role
     window._userEmail = userEmail;
     window._canonicalFirmId = (firmRow && firmRow.id) ? firmRow.id : (userRow ? userRow.firm_id : null);
+    window._firmName = (firmRow && firmRow.name) ? firmRow.name : '';
 
     // ── Expose globals for notes modal (terminal-notes.js) ──
     window._sbClient = supabase;
@@ -1382,8 +1383,29 @@
 
         if (error) throw error;
 
+        resultEl.style.color = 'var(--text-faint)';
+        resultEl.textContent = 'SENDING INVITE...';
+
+        /* Send invite email via Resend */
+        var emailOk = false;
+        try {
+          var inviteUrl = window._inviteUrl || (window.location.origin + '/signup.html?invite=' + fid);
+          var emailRes = await fetch('/.netlify/functions/send-invite', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              email: email,
+              firmName: window._firmName || '',
+              inviteUrl: inviteUrl,
+              adminName: window._userName || '',
+            }),
+          });
+          emailOk = emailRes.ok;
+          if (!emailRes.ok) console.error('send-invite failed:', await emailRes.text());
+        } catch (e) { console.error('send-invite error:', e); }
+
         resultEl.style.color = 'var(--accent)';
-        resultEl.textContent = '✓ ' + email + ' ADDED TO TEAM';
+        resultEl.textContent = emailOk ? '✓ INVITE SENT TO ' + email : '✓ ' + email + ' ADDED (EMAIL FAILED — CHECK CONSOLE)';
         document.getElementById('team-add-email').value = '';
         setTimeout(function() { resultEl.textContent = ''; }, 4000);
         await loadTeamRoster();
@@ -1923,9 +1945,10 @@
       var firmAccess = window.firmAccess || 'both';
       var filteredReports = (reports || []).filter(function(r) {
         if (r.report_type === 'client_monthly') return false; // shown in Client Edition panel only
-        if (firmAccess === 'gold')   return r.asset_class === 'gold';
-        if (firmAccess === 'whisky') return r.asset_class === 'whisky';
-        return true; // 'both'
+        var ac = (r.asset_class || '').toLowerCase();
+        if (firmAccess === 'gold')   return ac !== 'whisky'; // show gold + shared; exclude whisky-only
+        if (firmAccess === 'whisky') return ac !== 'gold';   // show whisky + shared; exclude gold-only
+        return true; // 'both' — see everything
       });
 
       allReports = filteredReports;
