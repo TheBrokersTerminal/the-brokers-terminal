@@ -502,3 +502,225 @@
   color: #333;
   text-transform: uppercase;
 }
+
+/* ── MACRO PRICES WIDGET ──────────────────────────── */
+.mp-wrap { padding: 6px 0; }
+.mp-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 12px;
+  border-bottom: 1px solid #0f0f0f;
+}
+.mp-row:last-child { border-bottom: none; }
+.mp-left { flex: 1; }
+.mp-lbl {
+  font-size: 9px;
+  letter-spacing: .14em;
+  color: #ccc;
+  font-family: Consolas, Menlo, monospace;
+}
+.mp-sub {
+  font-size: 7px;
+  letter-spacing: .1em;
+  color: #444;
+  margin-top: 1px;
+}
+.mp-right { text-align: right; }
+.mp-val {
+  font-size: 13px;
+  font-family: Consolas, Menlo, monospace;
+  color: #fff;
+  letter-spacing: .04em;
+}
+.mp-alt {
+  font-size: 8px;
+  color: #555;
+  font-family: Consolas, Menlo, monospace;
+  margin-top: 1px;
+}
+.mp-chg {
+  font-size: 8px;
+  font-family: Consolas, Menlo, monospace;
+  letter-spacing: .06em;
+  display: block;
+  margin-top: 1px;
+}
+.mp-up { color: #4caf7d; }
+.mp-dn { color: #e05050; }
+.mp-ts {
+  font-size: 6.5px;
+  letter-spacing: .12em;
+  color: #333;
+  text-align: center;
+  padding: 6px 12px 8px;
+  border-top: 1px solid #0f0f0f;
+}
+
+/* ── ASSET COMPARISON CHART ───────────────────────── */
+.mc-inner { display: flex; flex-direction: column; height: 100%; padding: 8px; box-sizing: border-box; }
+.mc-periods {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+.mc-period {
+  background: none;
+  border: 1px solid #222;
+  color: #555;
+  font-family: Consolas, Menlo, monospace;
+  font-size: 8px;
+  letter-spacing: .1em;
+  padding: 3px 8px;
+  cursor: pointer;
+  transition: all .15s;
+}
+.mc-period:hover { border-color: #E97132; color: #E97132; }
+.mc-period.active { border-color: #E97132; color: #E97132; background: rgba(233,113,50,.08); }
+.mc-svg-wrap { flex: 1; min-height: 0; overflow: hidden; }
+.mc-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 6px 0 2px;
+}
+.mc-leg-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 7.5px;
+  font-family: Consolas, Menlo, monospace;
+  color: #666;
+  letter-spacing: .06em;
+}
+.mc-leg-dot {
+  width: 8px;
+  height: 3px;
+  border-radius: 1px;
+  flex-shrink: 0;
+}
+.mc-leg-val {
+  font-size: 8px;
+  margin-left: 2px;
+}
+
+/* ── MACRO INTELLIGENCE WIDGET ──────────────────────────────── */
+.mi-wrap {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.mi-tabs {
+  display: flex;
+  gap: 3px;
+  padding: 7px 10px 0;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+.mi-tab {
+  font-family: Consolas, Menlo, monospace;
+  font-size: 7.5px;
+  letter-spacing: .1em;
+  font-weight: 600;
+  padding: 4px 8px;
+  border: 1px solid #2a2a2a;
+  background: transparent;
+  color: #555;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: border-color .15s, color .15s;
+}
+.mi-tab:hover {
+  color: #aaa;
+  border-color: #444;
+}
+
+.mi-panel {
+  overflow-y: auto;
+  flex: 1;
+  padding: 4px 12px 12px;
+}
+
+.mi-metric {
+  padding: 10px 0 8px;
+  border-bottom: 1px solid #1a1a1a;
+  margin-bottom: 10px;
+}
+.mi-metric-val {
+  font-size: 26px;
+  font-weight: 700;
+  font-family: Consolas, Menlo, monospace;
+  letter-spacing: -.02em;
+  display: block;
+}
+.mi-metric-sub {
+  font-size: 8px;
+  color: #444;
+  letter-spacing: .12em;
+  margin-top: 3px;
+  display: block;
+}
+.mi-metric-na {
+  color: #383838;
+  font-size: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid #1a1a1a;
+  margin-bottom: 10px;
+}
+
+.mi-section {
+  margin-bottom: 11px;
+}
+.mi-sec-hdr {
+  font-size: 7.5px;
+  font-weight: 700;
+  letter-spacing: .15em;
+  color: #444;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+.mi-sec-body {
+  font-size: 10.5px;
+  color: #bbb;
+  line-height: 1.7;
+}
+
+.mi-pitch-wrap {
+  background: #090909;
+  padding: 10px 12px;
+  border-left: 2px solid #E97132;
+}
+.mi-pitch-body {
+  color: #ddd;
+  font-size: 10.5px;
+  line-height: 1.75;
+}
+.mi-pitch-type {
+  font-size: 7px;
+  color: #444;
+  font-style: italic;
+  letter-spacing: .05em;
+  margin-left: 4px;
+}
+
+.mi-copy-btn {
+  margin-top: 10px;
+  padding: 5px 12px;
+  font-family: Consolas, Menlo, monospace;
+  font-size: 8.5px;
+  font-weight: 600;
+  letter-spacing: .1em;
+  background: transparent;
+  border: 1px solid #E97132;
+  color: #E97132;
+  cursor: pointer;
+  transition: background .15s, color .15s;
+  display: inline-block;
+}
+.mi-copy-btn:hover {
+  background: #E97132;
+  color: #000;
+}

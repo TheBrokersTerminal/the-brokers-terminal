@@ -53,7 +53,13 @@
     document.body.appendChild(overlay);
     document.getElementById('tnote-modal-x').addEventListener('click', function () { overlay.remove(); });
     overlay.addEventListener('click', function (e) { if (e.target === overlay) overlay.remove(); });
-    document.getElementById('tnote-ta').focus();
+
+    /* Pre-fill textarea with highlighted quote if provided */
+    var ta = document.getElementById('tnote-ta');
+    if (opts.subjectHighlight && ta) {
+      ta.value = '"' + opts.subjectHighlight + '"\n\n';
+    }
+    ta.focus();
 
     /* Privacy toggle logic */
     var privBtn  = document.getElementById('tnote-priv-private');
@@ -104,32 +110,60 @@
 
       if (!sb || !uid || !firmId) { saveBtn.textContent = 'NOT CONNECTED'; return; }
 
-      var thread = [{user_id: uid, user_name: userName, text: text, ts: new Date().toISOString()}];
-      sb.from('shared_notes').insert({
-        firm_id:        firmId,
-        creator_id:     uid,
-        creator_name:   userName,
-        subject_type:   opts.subjectType  || 'intel',
-        subject_title:  opts.subjectTitle || '',
-        subject_url:    opts.subjectUrl   || null,
-        subject_ticker: opts.subjectTicker || null,
-        is_private:     isPrivate,
-        thread:         thread,
-      }).then(function (res) {
-        if (res.error) { saveBtn.textContent = 'ERROR — RETRY'; saveBtn.disabled = false; return; }
+      console.log('[Notes] save — uid:', uid, 'firmId:', firmId, 'isPrivate:', isPrivate, 'sendToId:', sendToId);
+      var thread = [{
+        user_id:       uid,
+        user_name:     userName,
+        text:          text,
+        ts:            new Date().toISOString(),
+        story_content: opts.subjectContent || null,
+        highlight:     opts.subjectHighlight || null,
+      }];
+      var _saveTimeout = setTimeout(function () {
+        saveBtn.textContent = 'TIMED OUT — RETRY';
+        saveBtn.disabled = false;
+      }, 10000);
+
+      Promise.resolve(
+        sb.from('shared_notes').insert({
+          firm_id:        firmId,
+          creator_id:     uid,
+          creator_name:   userName,
+          subject_type:   opts.subjectType  || 'intel',
+          subject_title:  opts.subjectTitle || '',
+          subject_url:    opts.subjectUrl   || null,
+          subject_ticker: opts.subjectTicker || null,
+          is_private:     isPrivate,
+          thread:         thread,
+        })
+      ).then(function (res) {
+        clearTimeout(_saveTimeout);
+        if (res && res.error) {
+          console.error('Note save error:', res.error);
+          saveBtn.textContent = 'ERR: ' + (res.error.code || res.error.message || 'unknown');
+          saveBtn.disabled = false;
+          return;
+        }
 
         /* Optional DM */
         if (sendToId) {
           var chatMsg = '✎ NOTE — ' + (opts.subjectTitle || '') + '\n\n' + text;
-          sb.from('messages').insert({
-            firm_id: firmId, sender_id: uid, sender_name: userName,
-            recipient_id: sendToId, content: chatMsg,
-          }).catch(function () {});
+          Promise.resolve(
+            sb.from('messages').insert({
+              firm_id: firmId, sender_id: uid, sender_name: userName,
+              recipient_id: sendToId, content: chatMsg,
+            })
+          ).then(function () {}).catch(function () {});
         }
 
         overlay.remove();
         if (window._notesInboxRefreshAll) window._notesInboxRefreshAll();
         showNoteToast(opts.subjectTitle || 'Note', isPrivate);
+      }).catch(function (err) {
+        clearTimeout(_saveTimeout);
+        console.error('Note save error (catch):', err);
+        saveBtn.textContent = 'ERR: ' + (err && err.message ? err.message.slice(0, 40) : 'network');
+        saveBtn.disabled = false;
       });
     });
   };
@@ -196,6 +230,13 @@
     }
     body._notesLoad = loadNotes;
 
+    /* Auto-refresh list every 5 s while widget is alive */
+    var _refreshTimer = setInterval(function () {
+      if (!document.body.contains(body)) { clearInterval(_refreshTimer); return; }
+      if (body._inThreadView) return; /* don't clobber open thread */
+      loadNotes();
+    }, 5000);
+
     function renderList() {
       var filtered = notes.filter(function (n) {
         if (activeFilter === 'mine') return n.creator_id === uid;
@@ -249,7 +290,7 @@
         card.addEventListener('click', function (e) {
           if (e.target.classList.contains('tnote-delete-btn')) return;
           var note = notes.find(function (n) { return String(n.id) === String(card.dataset.nid); });
-          if (note) openThread(note);
+          if (note) openNotePopout(note);
         });
       });
 
@@ -269,7 +310,139 @@
       });
     }
 
+    function openNotePopout(note) {
+      if (!window.createGenericPopout) {
+        /* Fallback: open inline if popout unavailable */
+        openThread(note);
+        return;
+      }
+      var noteTitle = (note.subject_title || 'NOTE').slice(0, 40).toUpperCase();
+      window.createGenericPopout(noteTitle, '✎', function (popBody) {
+        /* Render the note thread inside the popout body */
+        var subBody = document.createElement('div');
+        subBody.style.cssText = 'display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden;height:100%;';
+        popBody.appendChild(subBody);
+        renderNoteThreadInEl(note, subBody);
+      }, {w: 400, h: 500});
+    }
+
+    /* Render a note thread inside any container element (used by popout + inline) */
+    function renderNoteThreadInEl(note, container) {
+      var firstEntry = note.thread && note.thread[0] ? note.thread[0] : {};
+      var storyContent = firstEntry.story_content || null;
+      var highlight    = firstEntry.highlight    || null;
+
+      container.innerHTML =
+        '<div class="tnote-thread-subject" style="margin:0;border-radius:0;">' +
+          (note.is_private ? '<span class="tnote-priv-badge">🔒 PRIVATE</span>  ' : '') +
+          '<span class="tnote-inbox-type">' + escH((note.subject_type||'').toUpperCase()) + '</span>  ' +
+          escH(note.subject_title||'') +
+          (note.subject_url ? '  <a class="tnote-thread-link" href="' + escH(note.subject_url) + '" target="_blank" rel="noopener">↗</a>' : '') +
+        '</div>' +
+
+        (storyContent
+          ? '<details class="tnote-story-panel">' +
+              '<summary class="tnote-story-toggle">▸ VIEW FULL INTEL</summary>' +
+              '<div class="tnote-story-body">' +
+                (highlight ? '<div class="tnote-story-highlight">"' + escH(highlight) + '"</div>' : '') +
+                '<div class="tnote-story-text">' + escH(storyContent) + '</div>' +
+              '</div>' +
+            '</details>'
+          : '') +
+
+        (!note.is_private || note.creator_id === uid
+          ? '<div class="tnote-thread-send-chat" id="tpop-chat-send-' + note.id + '">' +
+              '<span class="tnote-send-lbl">SEND TO:</span>' +
+              '<select class="tnote-send-select" id="tpop-chat-contact-' + note.id + '"><option value="">Pick colleague…</option></select>' +
+              '<button class="tnote-thread-send-btn" id="tpop-chat-btn-' + note.id + '">SEND VIA CHAT ↗</button>' +
+            '</div>'
+          : '') +
+
+        '<div class="tnote-thread-msgs" id="tpop-thread-' + note.id + '" style="flex:1;min-height:0;overflow-y:auto;"></div>' +
+        '<div class="tnote-thread-input-wrap">' +
+          '<textarea class="tnote-thread-input" id="tpop-reply-' + note.id + '" placeholder="Add to this note…"></textarea>' +
+          '<button class="tnote-thread-send" id="tpop-send-' + note.id + '">↵</button>' +
+        '</div>';
+
+      /* Load contacts */
+      var chatContactSel = document.getElementById('tpop-chat-contact-' + note.id);
+      if (sb && firmId && chatContactSel) {
+        sb.from('users').select('id, full_name, first_name, last_name').eq('firm_id', firmId).neq('id', uid)
+          .then(function (res) {
+            (res.data || []).forEach(function (u) {
+              var name = u.full_name || (u.first_name + ' ' + u.last_name).trim() || u.id;
+              var opt = document.createElement('option');
+              opt.value = u.id; opt.textContent = name;
+              if (chatContactSel) chatContactSel.appendChild(opt);
+            });
+          });
+      }
+
+      /* SEND VIA CHAT */
+      var chatBtn = document.getElementById('tpop-chat-btn-' + note.id);
+      if (chatBtn) {
+        chatBtn.addEventListener('click', function () {
+          var sel = document.getElementById('tpop-chat-contact-' + note.id);
+          var recipientId = sel ? sel.value : '';
+          if (!recipientId) { if (sel) sel.style.outline = '1px solid #e05050'; return; }
+          var firstText = note.thread && note.thread[0] ? note.thread[0].text : '';
+          var msg = '✎ NOTE — ' + (note.subject_title || '') + '\n\n' + firstText;
+          Promise.resolve(sb.from('messages').insert({
+            firm_id: firmId, sender_id: uid, sender_name: userName,
+            recipient_id: recipientId, content: msg,
+          })).then(function (res) {
+            if (res && !res.error) {
+              chatBtn.textContent = '✓ SENT';
+              chatBtn.style.color = '#44cc88';
+              setTimeout(function () { chatBtn.textContent = 'SEND VIA CHAT ↗'; chatBtn.style.color = ''; }, 2000);
+            }
+          }).catch(function(){});
+        });
+      }
+
+      renderThread(note.thread || [], 'tpop-thread-' + note.id, uid);
+
+      function sendReplyPop() {
+        var ta = document.getElementById('tpop-reply-' + note.id);
+        var text = ta ? ta.value.trim() : '';
+        if (!text) return;
+        var entry = {user_id: uid, user_name: userName, text: text, ts: new Date().toISOString()};
+        var newThread = (note.thread || []).concat([entry]);
+        if (ta) ta.value = '';
+        Promise.resolve(
+          sb.from('shared_notes').update({thread: newThread, updated_at: new Date().toISOString()}).eq('id', note.id)
+        ).then(function (res) {
+          if (res && !res.error) {
+            note.thread = newThread;
+            renderThread(newThread, 'tpop-thread-' + note.id, uid);
+            /* Notify participants */
+            var seen = {};
+            newThread.forEach(function (e) { if (e.user_id && e.user_id !== uid) seen[e.user_id] = true; });
+            if (note.creator_id && note.creator_id !== uid) seen[note.creator_id] = true;
+            var notifyMsg = '↩ REPLY — ' + (note.subject_title || 'Note') + '\n\n' + text;
+            Object.keys(seen).forEach(function (rid) {
+              Promise.resolve(sb.from('messages').insert({
+                firm_id: firmId, sender_id: uid, sender_name: userName,
+                recipient_id: rid, content: notifyMsg,
+              })).then(function(){}).catch(function(){});
+            });
+          }
+        }).catch(function(){});
+      }
+
+      var sendBtn = document.getElementById('tpop-send-' + note.id);
+      var replyTa = document.getElementById('tpop-reply-' + note.id);
+      if (sendBtn) sendBtn.addEventListener('click', sendReplyPop);
+      if (replyTa) replyTa.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendReplyPop(); }
+      });
+    }
+
     function openThread(note) {
+      var firstEntry = note.thread && note.thread[0] ? note.thread[0] : {};
+      var storyContent = firstEntry.story_content || null;
+      var highlight    = firstEntry.highlight    || null;
+
       body.innerHTML =
         '<div class="tnote-thread-back" id="' + widgetId + '-back">← ALL NOTES</div>' +
         '<div class="tnote-thread-subject">' +
@@ -278,6 +451,18 @@
           escH(note.subject_title||'') +
           (note.subject_url ? '  <a class="tnote-thread-link" href="' + escH(note.subject_url) + '" target="_blank" rel="noopener">↗</a>' : '') +
         '</div>' +
+
+        /* Story content panel */
+        (storyContent
+          ? '<details class="tnote-story-panel">' +
+              '<summary class="tnote-story-toggle">▸ VIEW FULL INTEL</summary>' +
+              '<div class="tnote-story-body">' +
+                (highlight ? '<div class="tnote-story-highlight">"' + escH(highlight) + '"</div>' : '') +
+                '<div class="tnote-story-text">' + escH(storyContent) + '</div>' +
+              '</div>' +
+            '</details>'
+          : '') +
+
         /* Send via chat — only if note is shared or user is creator */
         (!note.is_private || note.creator_id === uid
           ? '<div class="tnote-thread-send-chat" id="' + widgetId + '-chat-send-row">' +
@@ -317,11 +502,13 @@
           if (!recipientId) { if (sel) sel.style.outline = '1px solid #e05050'; return; }
           var firstText = note.thread && note.thread[0] ? note.thread[0].text : '';
           var msg = '✎ NOTE — ' + (note.subject_title || '') + '\n\n' + firstText;
-          sb.from('messages').insert({
-            firm_id: firmId, sender_id: uid, sender_name: userName,
-            recipient_id: recipientId, content: msg,
-          }).then(function (res) {
-            if (!res.error) {
+          Promise.resolve(
+            sb.from('messages').insert({
+              firm_id: firmId, sender_id: uid, sender_name: userName,
+              recipient_id: recipientId, content: msg,
+            })
+          ).then(function (res) {
+            if (res && !res.error) {
               chatBtn.textContent = '✓ SENT';
               chatBtn.style.color = '#44cc88';
               setTimeout(function () { chatBtn.textContent = 'SEND VIA CHAT ↗'; chatBtn.style.color = ''; }, 2000);
@@ -337,10 +524,29 @@
         var entry = {user_id: uid, user_name: userName, text: text, ts: new Date().toISOString()};
         var newThread = (note.thread || []).concat([entry]);
         ta.value = '';
-        sb.from('shared_notes').update({thread: newThread, updated_at: new Date().toISOString()})
-          .eq('id', note.id).then(function (res) {
-            if (!res.error) { note.thread = newThread; renderThread(newThread); }
-          });
+        Promise.resolve(
+          sb.from('shared_notes').update({thread: newThread, updated_at: new Date().toISOString()})
+            .eq('id', note.id)
+        ).then(function (res) {
+          if (res && !res.error) {
+            note.thread = newThread;
+            renderThread(newThread);
+
+            /* Notify all other participants via DM */
+            var seen = {};
+            (newThread || []).forEach(function (e) { if (e.user_id && e.user_id !== uid) seen[e.user_id] = true; });
+            if (note.creator_id && note.creator_id !== uid) seen[note.creator_id] = true;
+            var notifyMsg = '↩ REPLY — ' + (note.subject_title || 'Note') + '\n\n' + text;
+            Object.keys(seen).forEach(function (recipientId) {
+              Promise.resolve(
+                sb.from('messages').insert({
+                  firm_id: firmId, sender_id: uid, sender_name: userName,
+                  recipient_id: recipientId, content: notifyMsg,
+                })
+              ).then(function(){}).catch(function(){});
+            });
+          }
+        }).catch(function(){});
       }
 
       document.getElementById(widgetId + '-send').addEventListener('click', sendReply);
@@ -349,11 +555,12 @@
       });
     }
 
-    function renderThread(thread) {
-      var el = document.getElementById(widgetId + '-thread');
+    function renderThread(thread, elId, meId) {
+      var el = document.getElementById(elId || (widgetId + '-thread'));
+      var myId = meId || uid;
       if (!el) return;
       el.innerHTML = thread.map(function (entry) {
-        var isMe = entry.user_id === uid;
+        var isMe = entry.user_id === myId;
         var d = new Date(entry.ts);
         var time = d.toLocaleDateString('en-GB',{day:'2-digit',month:'short'}) + ' ' +
                    d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});

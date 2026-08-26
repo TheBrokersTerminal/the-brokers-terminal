@@ -1,7 +1,8 @@
 /* ── TERMINAL CHAT WIDGET ──────────────────────────────────────── */
 .tchat-wrap {
   display: flex;
-  height: 100%;
+  flex: 1;
+  min-height: 0;
   overflow: hidden;
 }
 
@@ -525,15 +526,15 @@
 .tnote-delete-btn {
   background: none;
   border: none;
-  color: #2a2a2a;
+  color: #888;
   font-family: 'Consolas','Menlo',monospace;
-  font-size: 8px;
-  letter-spacing: .12em;
+  font-size: 9px;
+  letter-spacing: .10em;
   cursor: pointer;
   padding: 0;
   transition: color .1s;
 }
-.tnote-inbox-card:hover .tnote-delete-btn { color: #555; }
+.tnote-inbox-card:hover .tnote-delete-btn { color: #fff; }
 .tnote-delete-btn:hover { color: #e05050 !important; }
 
 /* ── NOTES INBOX WIDGET ── */
@@ -566,33 +567,33 @@
 .tnote-inbox-card:hover { background: #0f0f0f; }
 .tnote-inbox-card-hdr { display: flex; align-items: center; justify-content: space-between; }
 .tnote-inbox-type {
-  font-size: 7px;
+  font-size: 9px;
   letter-spacing: .2em;
   color: #E97132;
   text-transform: uppercase;
 }
 .tnote-inbox-from {
-  font-size: 7px;
+  font-size: 9px;
   letter-spacing: .1em;
-  color: #444;
+  color: #aaa;
   text-transform: uppercase;
 }
 .tnote-inbox-from.mine { color: #44cc88; }
 .tnote-inbox-subject {
-  font-size: 10px;
-  color: #ccc;
+  font-size: 12px;
+  color: #ddd;
   letter-spacing: .02em;
   line-height: 1.4;
 }
 .tnote-inbox-preview {
-  font-size: 9px;
-  color: #555;
+  font-size: 10px;
+  color: #666;
   letter-spacing: .03em;
   font-style: italic;
   line-height: 1.45;
 }
 .tnote-inbox-replies {
-  font-size: 7px;
+  font-size: 9px;
   letter-spacing: .14em;
   color: #E97132;
   text-transform: uppercase;
@@ -758,3 +759,63 @@
   transition: color .12s, border-color .12s;
 }
 .sp-note-btn:hover { color: #E97132; border-color: #E97132; }
+
+/* Chat contact flash animation for new messages */
+@keyframes tchat-contact-flash {
+  0%   { background: #1a1a1a; }
+  25%  { background: #2a1800; }
+  50%  { background: #1a1a1a; }
+  75%  { background: #2a1800; }
+  100% { background: transparent; }
+}
+.tchat-flash {
+  animation: tchat-contact-flash 1.2s ease-out;
+}
+.tchat-flash .tchat-contact-name {
+  color: #E97132 !important;
+}
+
+/* ── NOTES STORY PANEL ── */
+.tnote-story-panel {
+  border: 1px solid #1a1a1a;
+  border-radius: 3px;
+  margin: 6px 10px 4px;
+  overflow: hidden;
+}
+.tnote-story-toggle {
+  display: block;
+  padding: 6px 10px;
+  font-family: 'Consolas','Menlo',monospace;
+  font-size: 8px;
+  letter-spacing: .12em;
+  color: #E97132;
+  cursor: pointer;
+  background: #0d0d0d;
+  user-select: none;
+  list-style: none;
+}
+.tnote-story-toggle::-webkit-details-marker { display: none; }
+details[open] .tnote-story-toggle { color: #aaa; }
+.tnote-story-body {
+  padding: 8px 10px;
+  background: #080808;
+  max-height: 220px;
+  overflow-y: auto;
+}
+.tnote-story-highlight {
+  border-left: 2px solid #E97132;
+  padding: 4px 8px;
+  margin-bottom: 8px;
+  font-size: 9px;
+  color: #ccc;
+  font-style: italic;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.tnote-story-text {
+  font-size: 8.5px;
+  color: #666;
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.7;
+}

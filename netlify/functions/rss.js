@@ -17,6 +17,8 @@ const FEEDS = [
   { url: 'https://www.thespiritsbusiness.com/feed/',                source: 'The Spirits Business' },
   { url: 'https://www.decanter.com/feed/',                          source: 'Decanter' },
   { url: 'https://scotchwhisky.com/feed/',                          source: 'Scotch Whisky' },
+  { url: 'https://www.whiskyadvocate.com/feed/',                    source: 'Whisky Advocate' },
+  { url: 'https://www.masterofmalt.com/blog/feed/',                 source: 'Master of Malt' },
 ];
 
 function parseXML(xml) {

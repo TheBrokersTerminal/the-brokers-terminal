@@ -10,7 +10,7 @@
   var _canvas = null; /* canvas DOM element */
   var _saveTimer = null;
   var _widgets = {};  /* id → {el, cfg} */
-  var _zTop = 100;
+  window._sharedZ = window._sharedZ || 1000;
 
   var FINNHUB_KEY = 'da6p77hr01qqqkkgl7b0da6p77hr01qqqkkgl7bg';
 
@@ -83,6 +83,11 @@
         document.getElementById('tbc-canvas-wrap').style.display = tab === 'terminal' ? 'block' : 'none';
         var vault = document.getElementById('vault-section');
         if (vault) vault.style.display = tab === 'vault' ? 'block' : 'none';
+        /* Hide intel popouts when leaving terminal; restore when returning */
+        var vis = tab === 'terminal' ? '' : 'none';
+        document.querySelectorAll('.intel-popwin, .intel-tab-group').forEach(function (el) {
+          el.style.display = vis;
+        });
         /* News feed panel */
         var newsPanel = document.getElementById('tbc-news-panel');
         if (!newsPanel && tab === 'news') {
@@ -123,6 +128,9 @@
       {type:'calendar',    icon:'◷', lbl:'CALENDAR',        sub:'Events & reminders'},
       {type:'notes_inbox',   icon:'✉', lbl:'FIRM NOTES',          sub:'Shared intel notes from your firm'},
       {type:'econ_calendar', icon:'◫', lbl:'ECONOMIC CALENDAR',   sub:'Upcoming market & macro events'},
+      {type:'macro_prices',  icon:'▲', lbl:'MACRO PRICES',         sub:'Live gold, FX, BoE rate & UK CPI'},
+      {type:'macro_chart',   icon:'◐', lbl:'ASSET COMPARISON',     sub:'Gold vs S&P 500 vs inflation chart'},
+      {type:'macro_intel',   icon:'◧', lbl:'MACRO INTELLIGENCE',   sub:'Professor + sales engine — 5 macro themes'},
     ].map(function (w) {
       return '<div class="tbc-add-item" data-type="' + w.type + '">' +
         '<span class="tbc-add-icon">' + w.icon + '</span>' +
@@ -137,8 +145,8 @@
           id: 'w-' + Date.now(),
           type: type,
           x: 40 + offset, y: 40 + offset,
-          w: type === 'notes' ? 280 : type === 'news' ? 400 : type === 'chat' ? 480 : type === 'calendar' || type === 'econ_calendar' ? 420 : 340,
-          h: type === 'news' || type === 'notes' ? 480 : type === 'chat' ? 440 : type === 'calendar' ? 380 : type === 'econ_calendar' ? 500 : 240,
+          w: type === 'notes' ? 280 : type === 'news' ? 400 : type === 'chat' ? 480 : type === 'calendar' || type === 'econ_calendar' ? 420 : type === 'macro_chart' ? 520 : type === 'macro_prices' ? 360 : type === 'macro_intel' ? 580 : 340,
+          h: type === 'news' || type === 'notes' ? 480 : type === 'chat' ? 440 : type === 'calendar' ? 380 : type === 'econ_calendar' ? 500 : type === 'macro_chart' ? 360 : type === 'macro_prices' ? 300 : type === 'macro_intel' ? 500 : 240,
           data: type === 'market' ? {cat:'gold'} : {},
         };
         spawnWidget(cfg);
@@ -162,10 +170,10 @@
     var el = document.createElement('div');
     el.className = 'tbc-widget';
     el.id = cfg.id;
-    el.style.cssText = 'left:' + cfg.x + 'px;top:' + cfg.y + 'px;width:' + cfg.w + 'px;height:' + cfg.h + 'px;z-index:' + (++_zTop) + ';';
+    el.style.cssText = 'left:' + cfg.x + 'px;top:' + cfg.y + 'px;width:' + cfg.w + 'px;height:' + cfg.h + 'px;z-index:' + (++window._sharedZ) + ';';
 
-    var icons = {news:'◈', market:'◉', reports:'▣', notes:'✎', intel:'◆', chat:'◎', calendar:'◷', notes_inbox:'✉', report_viewer:'▤', econ_calendar:'◫'};
-    var titles = {news:'LIVE HEADLINES', market:'MARKET PRICES', reports:'VAULT · LATEST', notes:'MY NOTES', intel:'BROKERS INTEL', chat:'FIRM CHAT', calendar:'CALENDAR', notes_inbox:'FIRM NOTES', report_viewer:'REPORT', econ_calendar:'ECONOMIC CALENDAR'};
+    var icons = {news:'◈', market:'◉', reports:'▣', notes:'✎', intel:'◆', chat:'◎', calendar:'◷', notes_inbox:'✉', report_viewer:'▤', econ_calendar:'◫', macro_prices:'▲', macro_chart:'◐', macro_intel:'◧'};
+    var titles = {news:'LIVE HEADLINES', market:'MARKET PRICES', reports:'VAULT · LATEST', notes:'MY NOTES', intel:'BROKERS INTEL', chat:'FIRM CHAT', calendar:'CALENDAR', notes_inbox:'FIRM NOTES', report_viewer:'REPORT', econ_calendar:'ECONOMIC CALENDAR', macro_prices:'MACRO PRICES', macro_chart:'ASSET COMPARISON', macro_intel:'MACRO INTELLIGENCE'};
 
     el.innerHTML =
       '<div class="tbc-widget-bar">' +
@@ -174,6 +182,7 @@
         '<div class="tbc-widget-actions">' +
           '<button class="tbc-widget-btn zoom-out" title="Zoom out">−</button>' +
           '<button class="tbc-widget-btn zoom-in"  title="Zoom in">+</button>' +
+          '<button class="tbc-widget-btn group-out" title="Pop out & group with other panels">⊞</button>' +
           '<button class="tbc-widget-btn refresh" title="Refresh" data-wid="' + cfg.id + '">↺</button>' +
           '<button class="tbc-widget-btn close" title="Remove" data-wid="' + cfg.id + '">✕</button>' +
         '</div>' +
@@ -184,7 +193,7 @@
     _widgets[cfg.id] = {el: el, cfg: cfg};
 
     el.addEventListener('mousedown', function () {
-      el.style.zIndex = ++_zTop;
+      el.style.zIndex = ++window._sharedZ;
     });
 
     el.querySelector('.tbc-widget-btn.close').addEventListener('click', function () {
@@ -209,6 +218,34 @@
     el.querySelector('.tbc-widget-btn.zoom-in').addEventListener('click', function () { applyZoom(_zoom + 0.1); });
     el.querySelector('.tbc-widget-btn.zoom-out').addEventListener('click', function () { applyZoom(_zoom - 0.1); });
 
+    /* Pop-out / GROUP button — lifts widget out of canvas into a floating window */
+    el.querySelector('.tbc-widget-btn.group-out').addEventListener('click', function () {
+      if (!window.createGenericPopout) return;
+      var widBody = el.querySelector('.tbc-widget-body');
+      var widTitle = (titles[cfg.type] || cfg.type).toUpperCase();
+      var widIcon  = icons[cfg.type] || '◆';
+      var rect = el.getBoundingClientRect();
+      var canvasRect = _canvas.getBoundingClientRect();
+
+      /* Detach body from widget — move it into the popout */
+      var bodyClone = widBody; /* same DOM node */
+      bodyClone.style.zoom = '1'; /* reset zoom so the popout looks right */
+
+      var popwin = window.createGenericPopout(widTitle, widIcon, function (popBody) {
+        popBody.appendChild(bodyClone);
+      }, {
+        x: rect.left,
+        y: rect.top,
+        w: rect.width,
+        h: rect.height,
+      });
+
+      /* Remove the canvas widget */
+      el.remove();
+      delete _widgets[cfg.id];
+      saveLayout();
+    });
+
     makeDraggable(el, el.querySelector('.tbc-widget-bar'));
     makeResizable(el, cfg.id);
     populateWidget(cfg.id, cfg.type, cfg.data, el);
@@ -227,10 +264,22 @@
     else if (type === 'calendar')      renderCalendarBridge(id, body);
     else if (type === 'notes_inbox')   renderNotesInboxBridge(id, body);
     else if (type === 'report_viewer') renderReportViewer(id, body, data);
-    else if (type === 'econ_calendar') renderEconCalendar(id, body);
+    else if (type === 'econ_calendar')  renderEconCalendar(id, body);
+    else if (type === 'macro_prices')   renderMacroPrices(id, body);
+    else if (type === 'macro_chart')    renderMacroChart(id, body);
+    else if (type === 'macro_intel')    renderMacroIntel(id, body);
   }
 
   /* ── NEWS ── */
+  var _NEWS_KW = {
+    whisky: ['whisky','whiskey','scotch','bourbon','distillery','single malt','spirits','diageo','pernod','macallan','glenfiddich','glenlivet','balvenie','ardbeg','dalmore','springbank','bruichladdich','laphroaig','talisker','cask'],
+    gold:   ['gold','silver','platinum','precious metal','xau','bullion','comex','spot gold','gold price','gold etf','mining','miner','gdx']
+  };
+  function _newsRelevant(s, asset) {
+    var kw = _NEWS_KW[asset]; if (!kw) return false;
+    var txt = ((s.title||'') + ' ' + (s.source||'')).toLowerCase();
+    return kw.some(function(k){ return txt.includes(k); });
+  }
   function renderNews(id, body) {
     var fetchStories = window._rssCache
       ? Promise.resolve(window._rssCache)
@@ -238,7 +287,19 @@
     fetchStories
       .then(function (stories) {
         if (!stories || !stories.length) { body.innerHTML = '<div class="tbw-loading">NO STORIES FOUND</div>'; return; }
-        var top = stories.slice(0, 10);
+        var asset = (window.firmAccess || 'both').toLowerCase();
+        var top;
+        if (asset === 'whisky' || asset === 'gold') {
+          /* Single asset — show only that asset's news */
+          top = stories.filter(function(s){ return _newsRelevant(s, asset); }).slice(0, 15);
+          if (!top.length) top = stories.slice(0, 10); /* fallback if no match */
+        } else {
+          /* Both access — show whisky + gold stories combined, sorted by date */
+          top = stories.filter(function(s){
+            return _newsRelevant(s, 'whisky') || _newsRelevant(s, 'gold');
+          }).slice(0, 15);
+          if (!top.length) top = stories.slice(0, 10);
+        }
         body.style.display = 'flex';
         body.style.flexDirection = 'column';
         body.innerHTML = top.map(function (s) {
@@ -543,15 +604,53 @@
       if (e.target.classList.contains('tbc-widget-btn')) return;
       ox = el.offsetLeft; oy = el.offsetTop;
       startX = e.clientX; startY = e.clientY;
+      var _hasMoved = false;
       function onMove(e) {
         el.style.left = Math.max(0, ox + e.clientX - startX) + 'px';
         el.style.top  = Math.max(0, oy + e.clientY - startY) + 'px';
+        var dx = e.clientX - startX, dy = e.clientY - startY;
+        if (!_hasMoved && dx*dx + dy*dy > 100) _hasMoved = true;
+        /* Drop-zone: highlight intel popouts the widget is dragged over */
+        if (_hasMoved && window.createGenericPopout) {
+          var cx = e.clientX, cy = e.clientY;
+          var newTarget = null;
+          document.querySelectorAll('.intel-popwin, .intel-tab-group').forEach(function (t) {
+            var tr = t.getBoundingClientRect();
+            if (cx > tr.left && cx < tr.right && cy > tr.top && cy < tr.bottom) newTarget = t;
+          });
+          document.querySelectorAll('.intel-drop-target').forEach(function (t) { t.classList.remove('intel-drop-target'); });
+          if (newTarget) newTarget.classList.add('intel-drop-target');
+          window._popwinDropTarget = newTarget;
+        }
       }
-      function onUp() {
-        updateCfgPos(el.id);
-        saveLayout();
+      function onUp(e) {
         document.removeEventListener('mousemove', onMove);
         document.removeEventListener('mouseup',   onUp);
+        document.querySelectorAll('.intel-drop-target').forEach(function (t) { t.classList.remove('intel-drop-target'); });
+        var dropTarget = window._popwinDropTarget;
+        window._popwinDropTarget = null;
+        if (_hasMoved && dropTarget && window.createGenericPopout && window._mergeIntoGroup) {
+          /* Pop widget out and merge it with the drop target */
+          var widBody  = el.querySelector('.tbc-widget-body');
+          var barTitle = (el.querySelector('.tbc-widget-title') || {}).textContent || el.id;
+          var rect     = dropTarget.getBoundingClientRect();
+          var popwin   = window.createGenericPopout(barTitle, '', function (popBody) {
+            if (widBody) popBody.appendChild(widBody);
+          }, { x: rect.left, y: rect.top, w: rect.width, h: rect.height });
+          var wid = el.id;
+          el.remove();
+          if (_widgets) delete _widgets[wid];
+          saveLayout();
+          if (dropTarget.classList.contains('intel-tab-group') && dropTarget._addTab) {
+            dropTarget._addTab(popwin._itTitle, popwin.querySelector('.intel-popwin-body'));
+            popwin.remove();
+          } else {
+            window._mergeIntoGroup(popwin, dropTarget);
+          }
+        } else {
+          updateCfgPos(el.id);
+          saveLayout();
+        }
       }
       document.addEventListener('mousemove', onMove);
       document.addEventListener('mouseup',   onUp);
@@ -815,7 +914,7 @@
     var existing = Object.keys(_widgets).find(function (wid) { return _widgets[wid].cfg.type === 'notes_inbox'; });
     if (existing) {
       var el = _widgets[existing].el;
-      el.style.zIndex = ++_zTop;
+      el.style.zIndex = ++window._sharedZ;
       el.style.outline = '2px solid #E97132';
       setTimeout(function () { el.style.outline = ''; }, 1400);
       /* Refresh its content */
@@ -832,6 +931,380 @@
   };
 
   /* ── EXPOSE PIN FROM SEARCH ── */
+  /* ── MACRO PRICES WIDGET ──────────────────────────────────────── */
+  function renderMacroPrices(id, body) {
+    body.innerHTML = '<div class="tbw-loading">LOADING…</div>';
+    fetch('/.netlify/functions/macro-data?type=prices')
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        function arrow(v) { return v > 0 ? '▲' : v < 0 ? '▼' : '—'; }
+        function cls(v)   { return v > 0 ? 'mp-up' : v < 0 ? 'mp-dn' : ''; }
+        function pctStr(v){ return (v > 0 ? '+' : '') + Number(v).toFixed(2) + '%'; }
+
+        var goldUSD = d.gold ? d.gold.usd : null;
+        var goldGBP = d.gold ? d.gold.gbp : null;
+        var goldChg = d.gold ? d.gold.pct : null;
+
+        var boeRate  = d.boe   ? d.boe.rate  : null;
+        var boePrev  = d.boe   ? d.boe.prev  : null;
+        var boeDiff  = (boeRate !== null && boePrev !== null) ? (boeRate - boePrev) : null;
+
+        var rows = [
+          { lbl:'GOLD / TROY OZ', sub:'LBMA · GBP',
+            val: goldGBP ? '£' + goldGBP.toLocaleString('en-GB') : (goldUSD ? '$' + Math.round(goldUSD).toLocaleString() : '—'),
+            chg: goldChg, isPct: true,
+            alt: (goldUSD && goldGBP) ? '$' + Math.round(goldUSD).toLocaleString() : null },
+          { lbl:'GBP / USD', sub:'STERLING RATE',
+            val: d.gbpusd ? d.gbpusd.price.toFixed(4) : '—',
+            chg: null },
+          { lbl:'EUR / GBP', sub:'EURO RATE',
+            val: d.eurgbp ? d.eurgbp.price.toFixed(4) : '—',
+            chg: null },
+          { lbl:'UK RATE', sub:'INTERBANK · BOE PROXY',
+            val: boeRate !== null ? boeRate.toFixed(2) + '%' : '—',
+            chg: boeDiff, isPct: false, unit: 'pp' },
+          { lbl:'UK 10-YR GILT', sub:'GOVERNMENT BOND YIELD',
+            val: (d.ukgilt && d.ukgilt.rate !== null) ? d.ukgilt.rate + '%' : '—',
+            chg: null },
+          { lbl:'UK CPI', sub:'YEAR-ON-YEAR',
+            val: (d.ukcpi && d.ukcpi.yoy !== null) ? d.ukcpi.yoy + '%' : '—',
+            chg: null },
+          { lbl:'US FED RATE', sub:'FEDERAL RESERVE',
+            val: (d.fed && d.fed.rate !== null) ? Number(d.fed.rate).toFixed(2) + '%' : '—',
+            chg: null },
+        ];
+
+        var html = '<div class="mp-wrap">';
+        rows.forEach(function (r) {
+          var chgHtml = '';
+          if (r.chg !== null && r.chg !== undefined) {
+            var cv = parseFloat(r.chg);
+            if (!isNaN(cv)) {
+              var label = r.isPct ? pctStr(cv) : ((cv > 0 ? '+' : '') + cv.toFixed(2) + (r.unit || ''));
+              chgHtml = '<span class="mp-chg ' + cls(cv) + '">' + arrow(cv) + ' ' + label + '</span>';
+            }
+          }
+          html += '<div class="mp-row">' +
+            '<div class="mp-left"><div class="mp-lbl">' + r.lbl + '</div><div class="mp-sub">' + r.sub + '</div></div>' +
+            '<div class="mp-right"><div class="mp-val">' + r.val + '</div>' +
+              (r.alt ? '<div class="mp-alt">' + r.alt + '</div>' : '') + chgHtml +
+            '</div></div>';
+        });
+        html += '</div><div class="mp-ts">UPDATED ' + new Date().toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'}) + ' · FRED + FMP</div>';
+        body.innerHTML = html;
+      })
+      .catch(function () { body.innerHTML = '<div class="tbw-loading">UNAVAILABLE</div>'; });
+  }
+
+  /* ── ASSET COMPARISON CHART WIDGET ───────────────────────────── */
+  function renderMacroChart(id, body) {
+    body.innerHTML = '<div class="tbw-loading">LOADING…</div>';
+    fetch('/.netlify/functions/macro-data?type=history&years=10')
+      .then(function (r) { return r.json(); })
+      .then(function (raw) {
+        body._mcData = raw;
+        drawMacroChart(body, raw, 10);
+
+        /* Period buttons */
+        body.querySelectorAll('.mc-period').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            body.querySelectorAll('.mc-period').forEach(function (b) { b.classList.remove('active'); });
+            btn.classList.add('active');
+            drawMacroChart(body, body._mcData, parseInt(btn.dataset.y));
+          });
+        });
+      })
+      .catch(function () { body.innerHTML = '<div class="tbw-loading">UNAVAILABLE</div>'; });
+  }
+
+  function drawMacroChart(body, raw, years) {
+    /* Slice each series to selected period */
+    var cutoff = new Date();
+    cutoff.setFullYear(cutoff.getFullYear() - years);
+    var cutTs = cutoff.getTime();
+
+    function slice(arr) {
+      return (arr || []).filter(function (p) { return new Date(p.d).getTime() >= cutTs; });
+    }
+    function rebase(arr) {
+      if (!arr.length) return [];
+      var base = arr[0].v;
+      return arr.map(function (p) { return { d: p.d, v: (p.v / base - 1) * 100 }; });
+    }
+
+    var series = [
+      { key:'gold',  lbl:'Gold (GBP)',    col:'#E97132', data: rebase(slice(raw.gold))  },
+      { key:'sp500', lbl:'S&P 500 (USD)', col:'#4a9eed', data: rebase(slice(raw.sp500)) },
+      { key:'ukcpi', lbl:'UK CPI',        col:'#4caf7d', data: rebase(slice(raw.ukcpi)) },
+    ].filter(function (s) { return s.data.length > 1; });
+
+    if (!series.length) {
+      body.innerHTML = '<div class="tbw-loading">NO DATA</div>';
+      return;
+    }
+
+    /* SVG dimensions */
+    var W = 460, H = 200, pl = 44, pr = 12, pt = 14, pb = 24;
+    var cW = W - pl - pr, cH = H - pt - pb;
+
+    /* Value range across all series */
+    var allV = [];
+    series.forEach(function (s) { s.data.forEach(function (p) { allV.push(p.v); }); });
+    var minV = Math.floor(Math.min.apply(null, allV) / 10) * 10;
+    var maxV = Math.ceil(Math.max.apply(null, allV) / 10) * 10;
+    if (minV === maxV) { minV -= 10; maxV += 10; }
+
+    /* Time range */
+    var allT = [];
+    series.forEach(function (s) { s.data.forEach(function (p) { allT.push(new Date(p.d).getTime()); }); });
+    var minT = Math.min.apply(null, allT);
+    var maxT = Math.max.apply(null, allT);
+
+    function xp(d) { return pl + (new Date(d).getTime() - minT) / (maxT - minT) * cW; }
+    function yp(v) { return pt + cH - (v - minV) / (maxV - minV) * cH; }
+
+    /* Y-axis grid lines */
+    var yTicks = [];
+    var step = Math.round((maxV - minV) / 4 / 10) * 10 || 10;
+    for (var y = Math.ceil(minV / step) * step; y <= maxV; y += step) yTicks.push(y);
+
+    /* X-axis ticks — one per year */
+    var xTicks = [];
+    var yr0 = new Date(minT).getFullYear();
+    var yr1 = new Date(maxT).getFullYear();
+    for (var y2 = yr0 + 1; y2 <= yr1; y2++) {
+      var t = new Date(y2 + '-01-01').getTime();
+      if (t >= minT && t <= maxT) xTicks.push({ t: t, lbl: String(y2).slice(2) });
+    }
+
+    /* Build SVG */
+    var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">';
+
+    /* Grid lines */
+    yTicks.forEach(function (v) {
+      var ry = yp(v).toFixed(1);
+      svg += '<line x1="' + pl + '" x2="' + (W - pr) + '" y1="' + ry + '" y2="' + ry + '" stroke="#1a1a1a" stroke-width="1"/>';
+      var lbl = (v > 0 ? '+' : '') + v + '%';
+      svg += '<text x="' + (pl - 3) + '" y="' + (parseFloat(ry) + 3.5) + '" text-anchor="end" font-size="7.5" font-family="Consolas,Menlo,monospace" fill="#555">' + lbl + '</text>';
+    });
+
+    /* Zero line */
+    var zy = yp(0).toFixed(1);
+    svg += '<line x1="' + pl + '" x2="' + (W - pr) + '" y1="' + zy + '" y2="' + zy + '" stroke="#333" stroke-width="1" stroke-dasharray="3,2"/>';
+
+    /* X ticks */
+    xTicks.forEach(function (t) {
+      var rx = xp(t.t).toFixed(1);
+      svg += '<text x="' + rx + '" y="' + (H - pb + 10) + '" text-anchor="middle" font-size="7" font-family="Consolas,Menlo,monospace" fill="#444">' + t.lbl + '</text>';
+    });
+
+    /* Series paths */
+    series.forEach(function (s) {
+      var d = s.data.map(function (p, i) {
+        return (i === 0 ? 'M' : 'L') + xp(p.d).toFixed(1) + ',' + yp(p.v).toFixed(1);
+      }).join(' ');
+      svg += '<path d="' + d + '" fill="none" stroke="' + s.col + '" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>';
+
+      /* End-point dot + value label */
+      var last = s.data[s.data.length - 1];
+      if (last) {
+        var ex = xp(last.d), ey = yp(last.v);
+        svg += '<circle cx="' + ex.toFixed(1) + '" cy="' + ey.toFixed(1) + '" r="2.5" fill="' + s.col + '"/>';
+      }
+    });
+
+    svg += '</svg>';
+
+    /* Legend */
+    var legend = '<div class="mc-legend">' + series.map(function (s) {
+      var last = s.data[s.data.length - 1];
+      var pct  = last ? (last.v > 0 ? '+' : '') + last.v.toFixed(1) + '%' : '';
+      return '<span class="mc-leg-item"><span class="mc-leg-dot" style="background:' + s.col + '"></span>' + s.lbl + '<span class="mc-leg-val" style="color:' + s.col + '">' + pct + '</span></span>';
+    }).join('') + '</div>';
+
+    /* Period buttons */
+    var periods = [1, 3, 5, 10];
+    var btnHtml = '<div class="mc-periods">' + periods.map(function (y) {
+      return '<button class="mc-period' + (y === years ? ' active' : '') + '" data-y="' + y + '">' + y + 'Y</button>';
+    }).join('') + '</div>';
+
+    /* Preserve scroll, rebuild inner content */
+    var inner = body.querySelector('.mc-inner');
+    if (!inner) {
+      body.innerHTML = '<div class="mc-inner"></div>';
+      inner = body.querySelector('.mc-inner');
+    }
+    inner.innerHTML = btnHtml + '<div class="mc-svg-wrap">' + svg + '</div>' + legend +
+      '<div class="mp-ts">GOLD (LBMA·GBP) · S&P 500 · UK CPI — SOURCE: FRED</div>';
+
+    /* Re-attach period button listeners */
+    inner.querySelectorAll('.mc-period').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        inner.querySelectorAll('.mc-period').forEach(function (b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        drawMacroChart(body, body._mcData, parseInt(btn.dataset.y));
+      });
+    });
+  }
+
+  /* ── MACRO INTELLIGENCE WIDGET ─────────────────────────────────── */
+  function renderMacroIntel(id, body) {
+    body.innerHTML = '<div class="tbw-loading">LOADING INTELLIGENCE…</div>';
+
+    fetch('/.netlify/functions/macro-data?type=intel')
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+
+        var THEMES = [
+          {
+            key: 'repression',
+            label: 'FINANCIAL REPRESSION',
+            short: 'REPRESSION',
+            accent: '#E97132',
+            headline: function () {
+              var g = d.repression.ukGilt.cur, c = d.repression.ukCpi.cur;
+              if (g === null || c === null) return null;
+              var real = (g - c).toFixed(2);
+              var sign = real >= 0 ? '+' : '';
+              return { value: sign + real + '%', sub: 'UK REAL YIELD  ·  GILT ' + g.toFixed(2) + '% − CPI ' + c.toFixed(1) + '%' };
+            },
+            what: 'Real yield is the return you earn after inflation has taken its cut. A gilt yielding 4.8% when inflation runs at 3.4% pays a real return of just 1.4%. For the entirety of 2020–2022, UK real rates were deeply negative — bondholders were losing purchasing power whilst appearing to earn a return. The structural mechanism that punishes patient capital has not been dismantled. It has merely been paused.',
+            why: 'Central banks have used financial repression — keeping real rates below zero to inflate away government debt — in every major debt cycle since World War Two. The current reading of barely positive real yields is historically fragile. If inflation re-accelerates or rates are cut to support growth, real yields turn negative again. Savers pay the cost invisibly. The pound in the account loses value without the statement ever showing a loss.',
+            pitch: 'Here is what your client needs to understand. Their gilt holding yields 4.8% on paper. After 3.4% inflation, they are keeping fewer than 15 pence of every pound earned in real purchasing power. Over a decade of deeply negative real rates, the effect compounds into serious wealth erosion — the kind that does not appear on a statement until it is too late to act. Gold holds no coupon and no maturity date. But unlike a gilt, it has no yield-to-inflation gap, no counterparty, and no government required to honour its value. Over fifty years it has broadly tracked the debasement of the currencies against which it is priced. The question worth asking your client is not whether they can afford gold. It is whether they can afford to continue holding the instrument that loses ground to inflation by design.',
+            pitchType: 'LOGICAL ARGUMENT',
+          },
+          {
+            key: 'debasement',
+            label: 'MONETARY DEBASEMENT',
+            short: 'DEBASEMENT',
+            accent: '#4a9eed',
+            headline: function () {
+              if (d.debasement.m2.cur === null) return null;
+              var t = (d.debasement.m2.cur / 1000).toFixed(1);
+              var prev = d.debasement.m2.prev;
+              var delta = prev ? (((d.debasement.m2.cur - prev) / prev) * 100).toFixed(2) : null;
+              return { value: '$' + t + 'T', sub: 'US M2 MONEY SUPPLY' + (delta ? '  ·  ' + (delta > 0 ? '+' : '') + delta + '% MOM' : '') };
+            },
+            what: 'M2 is the broadest measure of money circulating in the economy — cash, deposits, savings accounts, and money market funds. When central banks expand their balance sheets through quantitative easing, new money is created and M2 grows. More units of currency chasing the same pool of real assets means each unit purchases a smaller share of those assets. This is not abstract economics. It is arithmetic.',
+            why: 'US M2 grew by over 40% between early 2020 and early 2022 — the fastest peacetime monetary expansion in recorded American history. That flood of liquidity drove asset prices sharply higher across equities, property, and commodities, including gold. M2 growth has since slowed substantially but the expanded base remains. Every trillion added to that base represents a dilution of existing dollar purchasing power, distributed silently across every holder of dollar-denominated assets.',
+            pitch: 'Consider the economy as a finite pool of real assets — land, commodities, productive businesses, infrastructure. Now imagine multiplying the number of claims (dollars) that can be used to acquire a share of those assets without adding new assets to the pool. Each claim buys a smaller fraction. The US money supply stood at under five trillion dollars in the year 2000. It stands at over twenty-one trillion today. Gold moved from two hundred and seventy dollars per ounce to over two thousand dollars in the same period. That is not a speculative rally. That is the gold price denominated in a currency that lost most of its purchasing power. For your clients holding cash or bonds — the instruments being diluted — gold represents the exit from the mechanism itself.',
+            pitchType: 'LOGICAL ARGUMENT + PAIN AWARENESS',
+          },
+          {
+            key: 'cycle',
+            label: 'BUSINESS CYCLE',
+            short: 'CYCLE',
+            accent: '#4caf7d',
+            headline: function () {
+              if (d.cycle.curve.cur === null) return null;
+              var vc = d.cycle.curve.cur.toFixed(2);
+              var cl = d.cycle.claims.cur ? Math.round(d.cycle.claims.cur).toLocaleString() : null;
+              return { value: (vc >= 0 ? '+' : '') + vc + '%', sub: '10YR–2YR YIELD CURVE' + (cl ? '  ·  CLAIMS ' + cl + 'K' : '') };
+            },
+            what: 'The yield curve measures the gap between long-term and short-term government borrowing costs. Under normal conditions it slopes upward — lenders demand more compensation for longer commitments. When short-term rates exceed long-term rates, the curve inverts, signalling that markets expect the economy to contract and rates to be cut. The critical signal is not the inversion itself. It is what happens when it ends.',
+            why: 'The yield curve inverted sharply in 2022–23, one of the deepest readings in four decades. It is now disinverting — normalising. History since 1970 is without exception on this point: every US recession followed inversion and then disinversion. The disinversion is not the all-clear. It is the arrival of the storm the barometer already predicted. Initial jobless claims beginning to tick higher confirm the sequence is in motion.',
+            pitch: 'The yield curve is not a forecast. It is a measurement of market expectation, calibrated across trillions of dollars of institutional positioning. It has inverted before every US recession since 1970. Without exception. The sequence is inversion — disinversion — recession. We are in the disinversion phase. Initial claims are beginning to rise. Manufacturing ISM has been sub-fifty for consecutive months. These are not opinions. They are the same readings that preceded every downturn in living memory. Late cycle is precisely the moment when institutional capital — quietly, without fanfare — rotates from growth assets into real assets. Your clients do not need to wait for a headline recession to confirm what the leading indicators are already telling them. The time to position is before the crowd agrees.',
+            pitchType: 'CONTRARIAN OPPORTUNITY + FUTURE PACING',
+          },
+          {
+            key: 'ukdebt',
+            label: 'UK DEBT CRISIS',
+            short: 'UK DEBT',
+            accent: '#c87adf',
+            headline: function () {
+              if (d.ukdebt.ukGilt.cur === null) return null;
+              var g = d.ukdebt.ukGilt.cur.toFixed(2);
+              var c = d.ukdebt.ukCpi.cur !== null ? d.ukdebt.ukCpi.cur.toFixed(1) : null;
+              return { value: g + '%', sub: 'UK 10YR GILT' + (c ? '  ·  CPI ' + c + '%' : '') };
+            },
+            what: 'The UK carries over two and a half trillion pounds in public debt, much of it issued at near-zero rates during the quantitative easing era of 2009–2021. As those gilts mature and require refinancing, the Treasury is rolling over cheap legacy debt at 4–5% market yields. Simultaneously, UK corporate insolvencies have been rising for three consecutive years and consumer credit — credit cards and unsecured loans — sits at multi-decade highs. The debt burden is not a future risk. It is a present drag.',
+            why: 'Refinancing legacy low-rate debt at current yields is a scheduled, measurable drain on the UK fiscal position. Tens of billions of maturing gilts must be replaced annually at rates two to three times higher than the originals. This structural squeeze creates a difficult arithmetic: either higher taxes, reduced government spending, higher borrowing, or some combination of all three. Each option constrains domestic growth and, over time, sterling purchasing power relative to harder assets.',
+            pitch: 'Sterling assets carry sterling risk — not only price risk, but currency risk, domestic political risk, and now explicit fiscal risk. Your clients concentrated in UK equities, UK property, and gilts are implicitly long the pound and long the UK government\'s ability to manage the most complex debt refinancing in modern British economic history. Gold is priced internationally in dollars, held as a reserve asset by central banks across over one hundred and fifty countries, and has no maturity date, no refinancing requirement, and no government counterparty. For a UK-centric portfolio, it provides the one thing most clients do not realise they are missing: genuine geographic and currency diversification at the moment when the UK-specific risk premium is rising, not falling.',
+            pitchType: 'RISK/PAIN AWAKENING + PEER COMPARISON',
+          },
+          {
+            key: 'gilts',
+            label: 'THE GILT PROBLEM',
+            short: 'GILTS',
+            accent: '#e04040',
+            headline: function () {
+              if (d.gilts.ukGilt.cur === null) return null;
+              var g = d.gilts.ukGilt.cur.toFixed(2);
+              var us = d.gilts.usTsy.cur !== null ? d.gilts.usTsy.cur.toFixed(2) : null;
+              var sp = d.gilts.giltSpread.cur !== null ? (d.gilts.giltSpread.cur >= 0 ? '+' : '') + d.gilts.giltSpread.cur.toFixed(2) + '%' : null;
+              return { value: g + '%', sub: 'UK 10YR' + (us ? '  ·  US 10YR ' + us + '%' : '') + (sp ? '  ·  SPREAD ' + sp : '') };
+            },
+            what: 'UK gilts currently yield more than US Treasuries — unusual given that the United States has a larger economy, deeper capital markets, and the world\'s reserve currency. This premium reflects the market demanding compensation for UK-specific risks: persistent domestic inflation, a structural fiscal deficit, a large gilt issuance calendar, and systemic vulnerabilities in the liability-driven investment strategies used by UK pension funds.',
+            why: 'The LDI crisis of September 2022 revealed precisely how fragile the UK gilt market had become. Pension funds had built leveraged positions using gilts as collateral. When gilt prices fell sharply following the mini-budget, funds received margin calls and were forced to sell gilts to raise cash — driving prices lower still, triggering further margin calls. The Bank of England was compelled to intervene with emergency purchases. The structural conditions that caused this — large pension fund gilt exposures, ongoing government borrowing, and a market with limited liquidity buffers — remain substantially intact.',
+            pitch: 'Gilts are not the safe haven they once were. September 2022 proved this at an institutional scale: a market that required emergency Bank of England intervention to prevent a cascade failure is not a risk-free store of capital — it is a market with a loaded spring mechanism that has been temporarily reset. The pension funds that came closest to collapse were holding the instrument most widely described as safe. Physical gold held in allocated, segregated storage sits entirely outside this network of counterparty obligations. It cannot be posted as collateral. It cannot trigger a margin call. It has no issuer. For clients who hold gilts as their conservative allocation, the question worth posing is a simple one: safe from what, exactly?',
+            pitchType: 'RISK/PAIN AWAKENING + CONTRARIAN',
+          },
+        ];
+
+        var _activeIdx = 0;
+
+        function buildPanel(ai) {
+          var theme = THEMES[ai];
+          var hl = null;
+          try { hl = theme.headline(); } catch (e) {}
+
+          var tabHtml = '<div class="mi-tabs">' + THEMES.map(function (t, i) {
+            return '<button class="mi-tab' + (i === ai ? ' mi-tab-active' : '') + '" data-idx="' + i + '" data-accent="' + t.accent + '">' + t.short + '</button>';
+          }).join('') + '</div>';
+
+          var metricHtml = hl
+            ? '<div class="mi-metric"><span class="mi-metric-val" style="color:' + theme.accent + '">' + hl.value + '</span><span class="mi-metric-sub">' + hl.sub + '</span></div>'
+            : '<div class="mi-metric mi-metric-na">SERIES UNAVAILABLE — FRED MAY HAVE A LAG</div>';
+
+          var pitchSafe = theme.pitch.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+          var panelHtml =
+            '<div class="mi-panel">' +
+              metricHtml +
+              '<div class="mi-section">' +
+                '<div class="mi-sec-hdr">WHAT IT IS</div>' +
+                '<div class="mi-sec-body">' + theme.what + '</div>' +
+              '</div>' +
+              '<div class="mi-section">' +
+                '<div class="mi-sec-hdr">WHY IT MATTERS NOW</div>' +
+                '<div class="mi-sec-body">' + theme.why + '</div>' +
+              '</div>' +
+              '<div class="mi-section mi-pitch-wrap" style="border-left-color:' + theme.accent + '">' +
+                '<div class="mi-sec-hdr" style="color:' + theme.accent + '">THE PITCH  <span class="mi-pitch-type">[' + theme.pitchType + ']</span></div>' +
+                '<div class="mi-sec-body mi-pitch-body">' + pitchSafe + '</div>' +
+                '<button class="mi-copy-btn" style="border-color:' + theme.accent + ';color:' + theme.accent + '">◈ COPY PITCH</button>' +
+              '</div>' +
+            '</div>';
+
+          body.innerHTML = '<div class="mi-wrap">' + tabHtml + panelHtml + '</div>';
+
+          /* Tab clicks */
+          body.querySelectorAll('.mi-tab').forEach(function (btn) {
+            var idx = parseInt(btn.dataset.idx);
+            var ac  = btn.dataset.accent;
+            if (idx === ai) { btn.style.background = ac; btn.style.borderColor = ac; btn.style.color = '#000'; }
+            btn.addEventListener('click', function () { buildPanel(idx); });
+          });
+
+          /* Copy pitch */
+          body.querySelector('.mi-copy-btn').addEventListener('click', function () {
+            var btn = this;
+            if (navigator.clipboard) {
+              navigator.clipboard.writeText(theme.pitch).then(function () {
+                btn.textContent = '✓ COPIED TO CLIPBOARD';
+                setTimeout(function () { btn.textContent = '◈ COPY PITCH'; }, 2500);
+              });
+            }
+          });
+        }
+
+        buildPanel(0);
+      })
+      .catch(function () {
+        body.innerHTML = '<div class="tbw-loading">MACRO INTELLIGENCE UNAVAILABLE</div>';
+      });
+  }
+
   window.terminalPinSearch = function (query, type, ticker, label) {
     var cfg = {
       id: 'w-intel-' + Date.now(),

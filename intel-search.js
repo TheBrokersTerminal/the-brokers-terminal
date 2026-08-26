@@ -3,7 +3,7 @@
   'use strict';
 
   var _debounce = null;
-  var _popZ = 8000;
+  window._sharedZ = window._sharedZ || 1000;
   var _popOffset = 0;
   var _cache = {};    /* session cache: key → parsed response */
   var _registry = {}; /* pid → {query, type, ticker, x, y, w, h} */
@@ -353,7 +353,7 @@
   /* ── CREATE DRAGGABLE POP-OUT ── */
   function createPopout(query, type) {
     _popOffset = (_popOffset + 24) % 120;
-    _popZ++;
+    window._sharedZ++;
 
     var pid = 'pop-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6);
     var x   = 200 + _popOffset;
@@ -363,13 +363,15 @@
     win.className  = 'intel-popwin';
     win._itTitle   = query.toUpperCase();
     win._popId     = pid;
-    win.style.cssText = 'top:' + y + 'px;left:' + x + 'px;z-index:' + _popZ + ';';
+    win.style.cssText = 'top:' + y + 'px;left:' + x + 'px;z-index:' + window._sharedZ + ';';
 
     win.innerHTML =
       '<div class="intel-popwin-titlebar">' +
         '<span class="intel-popwin-icon">▌ INTEL</span>' +
         '<span class="intel-popwin-title">' + escH(query.toUpperCase()) + '</span>' +
-        '<div style="display:flex;gap:4px;margin-left:auto;">' +
+        '<div style="display:flex;gap:4px;margin-left:auto;align-items:center;">' +
+          '<button class="intel-popwin-btn intel-popwin-zoom-out" title="Zoom out">−</button>' +
+          '<button class="intel-popwin-btn intel-popwin-zoom-in"  title="Zoom in">+</button>' +
           '<button class="intel-popwin-btn intel-popwin-group" title="Click to merge with another open panel">⊞ GROUP</button>' +
           '<button class="intel-popwin-close">✕</button>' +
         '</div>' +
@@ -385,7 +387,15 @@
     makeDraggable(win, win.querySelector('.intel-popwin-titlebar'));
     makeResizablePop(win);
 
-    win.addEventListener('mousedown', function () { _popZ++; win.style.zIndex = _popZ; });
+    win.addEventListener('mousedown', function () { window._sharedZ++; win.style.zIndex = window._sharedZ; });
+
+    /* Trap scroll inside the popout — prevent vault from scrolling behind it */
+    win.addEventListener('wheel', function (e) {
+      e.stopPropagation();
+      e.preventDefault();
+      var body = win.querySelector('.intel-popwin-body');
+      if (body) body.scrollTop += e.deltaY;
+    }, { passive: false });
 
     /* Close: deregister + save */
     win.querySelector('.intel-popwin-close').addEventListener('click', function () {
@@ -394,40 +404,21 @@
       _saveIntelState();
     });
 
-    /* GROUP button: click to pick a sibling to merge with */
+    /* GROUP button — uses shared picker so canvas widgets and note popouts are included */
     win.querySelector('.intel-popwin-group').addEventListener('click', function (e) {
       e.stopPropagation();
-      var others = document.querySelectorAll('.intel-popwin');
-      if (others.length < 2) { return; }
-      /* Show a mini picker */
-      var picker = document.createElement('div');
-      picker.className = 'intel-group-picker';
-      picker.style.cssText = 'position:fixed;background:#0d0d0d;border:1px solid #E97132;border-top:2px solid #E97132;z-index:99999;min-width:200px;';
-      var rect = win.getBoundingClientRect();
-      picker.style.top  = (rect.top + 36) + 'px';
-      picker.style.left = rect.left + 'px';
-      picker.innerHTML = '<div style="font-size:7px;letter-spacing:.22em;color:#555;padding:8px 12px 4px;text-transform:uppercase;">MERGE WITH:</div>';
-      others.forEach(function (other) {
-        if (other === win) return;
-        var item = document.createElement('div');
-        item.style.cssText = 'padding:9px 14px;font-size:10px;color:#ccc;cursor:pointer;border-bottom:1px solid #111;font-family:Consolas,Menlo,monospace;letter-spacing:.04em;';
-        item.textContent = other._itTitle || 'PANEL';
-        item.addEventListener('mouseenter', function () { item.style.background = '#161616'; item.style.color = '#E97132'; });
-        item.addEventListener('mouseleave', function () { item.style.background = ''; item.style.color = '#ccc'; });
-        item.addEventListener('click', function () {
-          picker.remove();
-          mergeIntoGroup(win, other);
-        });
-        picker.appendChild(item);
-      });
-      document.body.appendChild(picker);
-      setTimeout(function () {
-        document.addEventListener('click', function close() {
-          picker.remove();
-          document.removeEventListener('click', close);
-        });
-      }, 10);
+      window._popwinGroupPicker && window._popwinGroupPicker(win);
     });
+
+    /* Zoom buttons for intel popout */
+    var _popZoom = 1;
+    function applyPopZoom(z) {
+      _popZoom = Math.min(2, Math.max(0.4, z));
+      var b = win.querySelector('.intel-popwin-body');
+      if (b) b.style.zoom = _popZoom;
+    }
+    win.querySelector('.intel-popwin-zoom-in').addEventListener('click', function (e) { e.stopPropagation(); applyPopZoom(_popZoom + 0.1); });
+    win.querySelector('.intel-popwin-zoom-out').addEventListener('click', function (e) { e.stopPropagation(); applyPopZoom(_popZoom - 0.1); });
 
     return win;
   }
@@ -442,13 +433,20 @@
     group.className = 'intel-tab-group';
     group.style.cssText =
       'top:' + rectB.top + 'px;left:' + rectB.left + 'px;' +
-      'width:' + w + 'px;height:' + h + 'px;z-index:' + (++_popZ) + ';';
+      'width:' + w + 'px;height:' + h + 'px;z-index:' + (++window._sharedZ) + ';';
 
     /* Build tab data */
     var tabs = [
       {title: winA._itTitle || 'PANEL', bodyEl: winA.querySelector('.intel-popwin-body')},
       {title: winB._itTitle || 'PANEL', bodyEl: winB.querySelector('.intel-popwin-body')},
     ];
+
+    var _tgZoom = 1;
+    function applyTgZoom(z) {
+      _tgZoom = Math.min(2, Math.max(0.4, z));
+      var b = group.querySelector('.intel-tg-body');
+      if (b) b.style.zoom = _tgZoom;
+    }
 
     function renderGroup(activeIdx) {
       group.innerHTML =
@@ -459,7 +457,11 @@
               '<span class="intel-tg-tab-close" data-idx="' + i + '">×</span>' +
             '</button>';
           }).join('') +
-          '<button class="intel-tg-close-all">✕</button>' +
+          '<div style="margin-left:auto;display:flex;gap:2px;align-items:center;">' +
+            '<button class="intel-tg-zoom-out" title="Zoom out" style="background:none;border:1px solid #222;color:#555;font-size:11px;cursor:pointer;padding:1px 6px;font-family:Consolas,Menlo,monospace;">−</button>' +
+            '<button class="intel-tg-zoom-in"  title="Zoom in"  style="background:none;border:1px solid #222;color:#555;font-size:11px;cursor:pointer;padding:1px 6px;font-family:Consolas,Menlo,monospace;">+</button>' +
+            '<button class="intel-tg-close-all" style="margin-left:4px;">✕</button>' +
+          '</div>' +
         '</div>' +
         '<div class="intel-tg-body" id="intel-tg-body-' + group._uid + '"></div>';
 
@@ -484,21 +486,132 @@
         x.addEventListener('click', function (e) {
           e.stopPropagation();
           var idx = parseInt(x.dataset.idx);
+          var removed = tabs[idx];
           tabs.splice(idx, 1);
           if (!tabs.length) { group.remove(); return; }
+          group._itTitle = tabs.map(function(t){return t.title;}).join(' / ');
           renderGroup(Math.min(idx, tabs.length - 1));
+
+          /* Pop the closed tab back out as a standalone floating window */
+          if (removed && removed.bodyEl && window.createGenericPopout) {
+            var gr = group.getBoundingClientRect();
+            window.createGenericPopout(removed.title, '', function (popBody) {
+              popBody.style.cssText = (removed.bodyEl.style.cssText || '') + ';overflow:auto;';
+              Array.from(removed.bodyEl.childNodes).forEach(function (child) {
+                popBody.appendChild(child);
+              });
+            }, { x: gr.left + 40, y: gr.top + 40, w: gr.width, h: gr.height });
+          }
         });
       });
       group.querySelector('.intel-tg-close-all').addEventListener('click', function () { group.remove(); });
+
+      /* ── TAB DRAG-OUT: drag a tab out of the bar to detach it ── */
+      group.querySelectorAll('.intel-tg-tab').forEach(function (btn) {
+        btn.addEventListener('mousedown', function (e) {
+          if (e.target.classList.contains('intel-tg-tab-close')) return;
+          if (e.button !== 0) return;
+          var idx = parseInt(btn.dataset.idx);
+          var dsx = e.clientX, dsy = e.clientY;
+          var dragging = false;
+          var ghost = null;
+          function onDragMove(ev) {
+            var ddx = ev.clientX - dsx, ddy = ev.clientY - dsy;
+            if (!dragging && ddx*ddx + ddy*ddy > 400) { dragging = true; }
+            if (dragging) {
+              if (!ghost) {
+                ghost = document.createElement('div');
+                ghost.style.cssText = 'position:fixed;pointer-events:none;z-index:999999;background:#0d0d0d;border:1px solid #E97132;padding:5px 12px;font-size:9px;font-family:Consolas,Menlo,monospace;letter-spacing:.08em;color:#E97132;opacity:.9;';
+                ghost.textContent = tabs[idx] ? tabs[idx].title : 'PANEL';
+                document.body.appendChild(ghost);
+              }
+              ghost.style.left = (ev.clientX + 14) + 'px';
+              ghost.style.top  = (ev.clientY - 8)  + 'px';
+              /* Drop-zone detection */
+              document.querySelectorAll('.intel-drop-target').forEach(function (t) { t.classList.remove('intel-drop-target'); });
+              window._popwinDropTarget = null;
+              document.querySelectorAll('.intel-popwin, .intel-tab-group').forEach(function (t) {
+                if (t === group) return;
+                var tr = t.getBoundingClientRect();
+                if (ev.clientX > tr.left && ev.clientX < tr.right && ev.clientY > tr.top && ev.clientY < tr.bottom) {
+                  t.classList.add('intel-drop-target');
+                  window._popwinDropTarget = t;
+                }
+              });
+            }
+          }
+          function onDragUp(ev) {
+            document.removeEventListener('mousemove', onDragMove);
+            document.removeEventListener('mouseup',   onDragUp);
+            if (ghost) ghost.remove();
+            document.querySelectorAll('.intel-drop-target').forEach(function (t) { t.classList.remove('intel-drop-target'); });
+            if (!dragging) return;
+            var tab = tabs[idx];
+            if (!tab) return;
+            /* Remove tab from group */
+            tabs.splice(idx, 1);
+            if (!tabs.length) { group.remove(); }
+            else {
+              group._itTitle = tabs.map(function (t) { return t.title; }).join(' / ');
+              renderGroup(Math.min(idx, tabs.length - 1));
+            }
+            var dropTarget = window._popwinDropTarget;
+            window._popwinDropTarget = null;
+            if (dropTarget) {
+              if (dropTarget.classList.contains('intel-tab-group') && dropTarget._addTab) {
+                dropTarget._addTab(tab.title, tab.bodyEl);
+              } else if (dropTarget.classList.contains('intel-popwin')) {
+                var tmpWin = document.createElement('div');
+                tmpWin.className = 'intel-popwin';
+                tmpWin._itTitle = tab.title;
+                var tmpBody = document.createElement('div');
+                tmpBody.className = 'intel-popwin-body';
+                if (tab.bodyEl) while (tab.bodyEl.firstChild) tmpBody.appendChild(tab.bodyEl.firstChild);
+                tmpWin.appendChild(tmpBody);
+                tmpWin.style.cssText = 'position:fixed;top:-9999px;left:-9999px;';
+                document.body.appendChild(tmpWin);
+                mergeIntoGroup(tmpWin, dropTarget);
+              }
+            } else {
+              /* Drop on empty space — standalone popout */
+              var gr = group.getBoundingClientRect();
+              window.createGenericPopout && window.createGenericPopout(tab.title, '', function (popBody) {
+                if (tab.bodyEl) while (tab.bodyEl.firstChild) popBody.appendChild(tab.bodyEl.firstChild);
+              }, { x: ev.clientX - 50, y: ev.clientY - 20, w: gr.width, h: gr.height });
+            }
+          }
+          document.addEventListener('mousemove', onDragMove);
+          document.addEventListener('mouseup',   onDragUp);
+        });
+      });
+
+      /* Zoom buttons — survive re-renders via delegation on group */
+      var zIn  = group.querySelector('.intel-tg-zoom-in');
+      var zOut = group.querySelector('.intel-tg-zoom-out');
+      if (zIn)  zIn.addEventListener('click',  function (e) { e.stopPropagation(); applyTgZoom(_tgZoom + 0.1); });
+      if (zOut) zOut.addEventListener('click', function (e) { e.stopPropagation(); applyTgZoom(_tgZoom - 0.1); });
+      applyTgZoom(_tgZoom); /* restore zoom after re-render */
     }
 
     group._uid = Date.now();
+    group._itTitle = tabs.map(function(t){return t.title;}).join(' / ');
+    group._addTab = function (title, bodyEl) {
+      tabs.push({title: title, bodyEl: bodyEl});
+      group._itTitle = tabs.map(function(t){return t.title;}).join(' / ');
+      renderGroup(tabs.length - 1);
+    };
     document.body.appendChild(group);
     renderGroup(0);
 
     /* makeResizablePop attaches to group itself (not a child) so only needs wiring once */
     makeResizablePop(group);
-    group.addEventListener('mousedown', function () { _popZ++; group.style.zIndex = _popZ; });
+    group.addEventListener('mousedown', function () { window._sharedZ++; group.style.zIndex = window._sharedZ; });
+    group.addEventListener('wheel', function (e) {
+      e.stopPropagation();
+      e.preventDefault();
+      var body = group.querySelector('.intel-tg-body');
+      if (body) body.scrollTop += e.deltaY;
+    }, { passive: false });
 
     winA.remove();
     winB.remove();
@@ -550,6 +663,33 @@
     } else {
       renderConcept(d, body);
     }
+
+    /* Store story content for note-taking, wire ADD NOTE with selection capture */
+    var parts = [];
+    if (d.overview)          parts.push(d.overview);
+    if (d.relevance)         parts.push('RELEVANCE TO ALTERNATIVE ASSETS:\n' + d.relevance);
+    if (d.whatHappened)      parts.push(d.whatHappened);
+    if (d.impactOnAssets)    parts.push('IMPACT ON ASSETS:\n' + d.impactOnAssets);
+    if (d.lessonForClients)  parts.push('LESSON FOR CLIENTS:\n' + d.lessonForClients);
+    if (d.brokerNote)        parts.push('HOW TO PITCH:\n' + d.brokerNote);
+
+    body._intelNoteData = {
+      subjectType:    'intel',
+      subjectTitle:   d.title  || '',
+      subjectTicker:  d.ticker || '',
+      subjectContent: parts.join('\n\n'),
+    };
+
+    var noteBtn = body.querySelector('.sp-note-btn');
+    if (noteBtn) {
+      noteBtn.removeAttribute('onclick');
+      noteBtn.addEventListener('click', function () {
+        var sel = window.getSelection ? window.getSelection().toString().trim() : '';
+        window.noteModalOpen && noteModalOpen(
+          Object.assign({}, body._intelNoteData, {subjectHighlight: sel})
+        );
+      });
+    }
   }
 
   function renderCompany(d, body) {
@@ -583,7 +723,7 @@
         '<div class="sp-pitch">' + escH(d.brokerNote || '') + '</div>' +
       '</div>' +
       '<div class="sp-section" style="border-top:1px solid #111;padding-top:10px;">' +
-        '<button class="sp-note-btn" onclick="window.noteModalOpen&&noteModalOpen({subjectType:\'intel\',subjectTitle:\'' + escQ(d.title||'') + '\',subjectTicker:\'' + escQ(d.ticker||'') + '\'})">✎ ADD NOTE</button>' +
+        '<button class="sp-note-btn">✎ ADD NOTE</button>' +
       '</div>';
   }
 
@@ -644,7 +784,7 @@
         '<div class="sp-pitch">' + escH(d.brokerNote || '') + '</div>' +
       '</div>' +
       '<div class="sp-section" style="border-top:1px solid #111;padding-top:10px;">' +
-        '<button class="sp-note-btn" onclick="window.noteModalOpen&&noteModalOpen({subjectType:\'intel\',subjectTitle:\'' + escQ(d.title||'') + '\',subjectTicker:\'' + escQ(d.ticker||'') + '\'})">✎ ADD NOTE</button>' +
+        '<button class="sp-note-btn">✎ ADD NOTE</button>' +
       '</div>';
   }
 
@@ -653,22 +793,54 @@
     var ox = 0, oy = 0, sx = 0, sy = 0;
     handle.addEventListener('mousedown', function (e) {
       if (e.target.closest('button')) return;
+      if (_popDir(win, e)) return; /* let border-resize handle it instead */
       e.preventDefault();
       sx = e.clientX; sy = e.clientY;
-      ox = win.offsetLeft; oy = win.offsetTop;
+      var r = win.getBoundingClientRect();
+      ox = r.left; oy = r.top;
+      var _hasMoved = false;
       function onMove(e) {
         win.style.left = (ox + e.clientX - sx) + 'px';
         win.style.top  = (oy + e.clientY - sy) + 'px';
+        var dx = e.clientX - sx, dy = e.clientY - sy;
+        if (!_hasMoved && dx*dx + dy*dy > 100) _hasMoved = true;
+        /* Drop-zone detection: only for floating .intel-popwin windows */
+        if (_hasMoved && win.classList.contains('intel-popwin')) {
+          var cx = e.clientX, cy = e.clientY;
+          var newTarget = null;
+          document.querySelectorAll('.intel-popwin, .intel-tab-group').forEach(function (t) {
+            if (t === win) return;
+            var tr = t.getBoundingClientRect();
+            if (cx > tr.left && cx < tr.right && cy > tr.top && cy < tr.bottom) newTarget = t;
+          });
+          document.querySelectorAll('.intel-drop-target').forEach(function (t) { t.classList.remove('intel-drop-target'); });
+          if (newTarget) newTarget.classList.add('intel-drop-target');
+          window._popwinDropTarget = newTarget;
+        }
       }
       function onUp() {
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+        document.querySelectorAll('.intel-drop-target').forEach(function (t) { t.classList.remove('intel-drop-target'); });
         /* Persist position */
         if (win._popId && _registry[win._popId]) {
           _registry[win._popId].x = win.offsetLeft;
           _registry[win._popId].y = win.offsetTop;
           _saveIntelState();
         }
-        document.removeEventListener('mousemove', onMove);
-        document.removeEventListener('mouseup', onUp);
+        /* Merge if dropped on another window */
+        if (_hasMoved && win.classList.contains('intel-popwin') && window._popwinDropTarget) {
+          var target = window._popwinDropTarget;
+          window._popwinDropTarget = null;
+          if (target.classList.contains('intel-tab-group') && target._addTab) {
+            target._addTab(win._itTitle || 'PANEL', win.querySelector('.intel-popwin-body'));
+            win.remove();
+          } else if (target.classList.contains('intel-popwin')) {
+            mergeIntoGroup(win, target);
+          }
+        } else {
+          window._popwinDropTarget = null;
+        }
       }
       document.addEventListener('mousemove', onMove);
       document.addEventListener('mouseup', onUp);
@@ -709,8 +881,9 @@
       if (!d) return;
       if (e.target.closest('button, a')) return;
       e.preventDefault(); e.stopPropagation();
-      var sw = win.offsetWidth, sh = win.offsetHeight;
-      var sl = win.offsetLeft,  st = win.offsetTop;
+      var r  = win.getBoundingClientRect();
+      var sw = r.width,  sh = r.height;
+      var sl = r.left,   st = r.top;
       var sx = e.clientX,       sy = e.clientY;
       var cur = _popCur(d);
       var ov = document.createElement('div');
@@ -751,5 +924,114 @@
 
   /* ── INIT ── */
   window.intelSearchInit = buildSearchBar;
+
+  /* ── EXPOSE POPOUT UTILITIES FOR CROSS-MODULE USE ── */
+  window._popwinDrag      = makeDraggable;
+  window._popwinResize    = makeResizablePop;
+  window._mergeIntoGroup  = mergeIntoGroup;
+
+  /* Show the GROUP picker for any intel-popwin element */
+  window._popwinGroupPicker = function (win) {
+    var others = document.querySelectorAll('.intel-popwin, .intel-tab-group');
+    var candidates = Array.from(others).filter(function (el) { return el !== win; });
+    if (!candidates.length) return;
+
+    var picker = document.createElement('div');
+    picker.className = 'intel-group-picker';
+    picker.style.cssText = 'position:fixed;background:#0d0d0d;border:1px solid #E97132;border-top:2px solid #E97132;z-index:99999;min-width:200px;';
+    var rect = win.getBoundingClientRect();
+    picker.style.top  = (rect.top + 36) + 'px';
+    picker.style.left = rect.left + 'px';
+    picker.innerHTML = '<div style="font-size:7px;letter-spacing:.22em;color:#555;padding:8px 12px 4px;text-transform:uppercase;">MERGE WITH:</div>';
+
+    candidates.forEach(function (other) {
+      var item = document.createElement('div');
+      item.style.cssText = 'padding:9px 14px;font-size:10px;color:#ccc;cursor:pointer;border-bottom:1px solid #111;font-family:Consolas,Menlo,monospace;letter-spacing:.04em;';
+      item.textContent = other._itTitle || (other.querySelector('.intel-popwin-title,.intel-tg-tab.active') || {}).textContent || 'PANEL';
+      item.addEventListener('mouseenter', function () { item.style.background = '#161616'; item.style.color = '#E97132'; });
+      item.addEventListener('mouseleave', function () { item.style.background = ''; item.style.color = '#ccc'; });
+      item.addEventListener('click', function () {
+        picker.remove();
+        if (other.classList.contains('intel-tab-group')) {
+          /* Add win as a new tab to the existing group */
+          other._addTab && other._addTab(win._itTitle || 'PANEL', win.querySelector('.intel-popwin-body'));
+          win.remove();
+        } else {
+          mergeIntoGroup(win, other);
+        }
+      });
+      picker.appendChild(item);
+    });
+
+    document.body.appendChild(picker);
+    setTimeout(function () {
+      document.addEventListener('click', function close() {
+        picker.remove();
+        document.removeEventListener('click', close);
+      });
+    }, 10);
+  };
+
+  /* Create a generic floating popout window */
+  window.createGenericPopout = function (title, icon, populateFn, opts) {
+    opts = opts || {};
+    window._sharedZ = window._sharedZ || 1000;
+    var win = document.createElement('div');
+    win.className = 'intel-popwin' + (opts.extraClass ? ' ' + opts.extraClass : '');
+    win._itTitle = (icon ? icon + ' ' : '') + title.toUpperCase();
+
+    var x = opts.x != null ? opts.x : (160 + Math.random() * 60);
+    var y = opts.y != null ? opts.y : (80  + Math.random() * 40);
+    var w = opts.w || 420;
+    var h = opts.h || 500;
+    win.style.cssText = 'top:' + y + 'px;left:' + x + 'px;width:' + w + 'px;height:' + h + 'px;z-index:' + (++window._sharedZ) + ';';
+
+    win.innerHTML =
+      '<div class="intel-popwin-titlebar">' +
+        '<span class="intel-popwin-icon">' + escH(icon || '◆') + '</span>' +
+        '<span class="intel-popwin-title">' + escH(title.toUpperCase()) + '</span>' +
+        '<div style="display:flex;gap:4px;margin-left:auto;align-items:center;">' +
+          '<button class="intel-popwin-btn gen-zoom-out" title="Zoom out">−</button>' +
+          '<button class="intel-popwin-btn gen-zoom-in"  title="Zoom in">+</button>' +
+          '<button class="intel-popwin-btn intel-popwin-group" title="Group with another panel">⊞ GROUP</button>' +
+          '<button class="intel-popwin-close">✕</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="intel-popwin-body" style="overflow:hidden;display:flex;flex-direction:column;"></div>';
+
+    document.body.appendChild(win);
+
+    var body = win.querySelector('.intel-popwin-body');
+    populateFn(body);
+
+    makeDraggable(win, win.querySelector('.intel-popwin-titlebar'));
+    makeResizablePop(win);
+    win.addEventListener('mousedown', function () { window._sharedZ++; win.style.zIndex = window._sharedZ; });
+    win.addEventListener('wheel', function (e) {
+      e.stopPropagation(); e.preventDefault();
+      var b = win.querySelector('.intel-popwin-body');
+      if (b) b.scrollTop += e.deltaY;
+    }, { passive: false });
+
+    win.querySelector('.intel-popwin-group').addEventListener('click', function (e) {
+      e.stopPropagation();
+      window._popwinGroupPicker(win);
+    });
+    win.querySelector('.intel-popwin-close').addEventListener('click', function () {
+      opts.onClose && opts.onClose();
+      win.remove();
+    });
+
+    /* Zoom */
+    var _gz = 1;
+    function applyGz(z) {
+      _gz = Math.min(2, Math.max(0.4, z));
+      body.style.zoom = _gz;
+    }
+    win.querySelector('.gen-zoom-in').addEventListener('click',  function (e) { e.stopPropagation(); applyGz(_gz + 0.1); });
+    win.querySelector('.gen-zoom-out').addEventListener('click', function (e) { e.stopPropagation(); applyGz(_gz - 0.1); });
+
+    return win;
+  };
 
 })();

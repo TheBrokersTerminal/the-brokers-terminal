@@ -123,6 +123,9 @@
         return;
       }
 
+      /* Clear any previous error before attempting */
+      if (errorDiv) { errorDiv.textContent = ''; errorDiv.classList.remove('visible'); }
+
       submitBtn.textContent = 'AUTHENTICATING...';
       submitBtn.disabled = true;
 

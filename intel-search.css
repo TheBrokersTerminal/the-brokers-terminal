@@ -284,3 +284,10 @@
 .intel-tg-body::-webkit-scrollbar { width: 4px; }
 .intel-tg-body::-webkit-scrollbar-thumb { background: #1e1e1e; }
 .intel-tg-body .intel-popwin-body { max-height: none; height: 100%; }
+
+/* ── DRAG-TO-MERGE drop zone highlight ── */
+.intel-drop-target {
+  outline: 2px solid #E97132 !important;
+  outline-offset: -2px;
+  box-shadow: 0 0 0 4px rgba(233,113,50,0.18) !important;
+}

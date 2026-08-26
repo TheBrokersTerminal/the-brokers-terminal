@@ -533,10 +533,19 @@ var QUOTE_SYMS = {
   geo:       [{sym:'GLD',mult:10,l:'GOLD/OZ'},{sym:'BNO',mult:1,l:'BRENT CRUDE'},{sym:'VXX',mult:1,l:'VIX FUTURES'},{sym:'TLT',mult:1,l:'US 20YR BOND'}]
 };
 
+var SRC_CAT = {
+  'whisky magazine':'whisky','the spirits business':'whisky','scotch whisky':'whisky',
+  'decanter':'whisky','world whisky':'whisky','whisky advocate':'whisky','master of malt':'whisky',
+  'kitco':'gold','mining.com':'gold','bullionvault':'gold'
+};
 function categorise(s) {
+  /* Source-based match first — catches articles whose headline doesn't name the asset */
+  var src=(s.source||'').toLowerCase();
+  for(var sk in SRC_CAT) if(src.includes(sk)) return SRC_CAT[sk];
+  /* Keyword match against headline + summary */
   var t=((s.headline||'')+' '+(s.summary||'')).toLowerCase();
   for(var c in CATS) for(var i=0;i<CATS[c].length;i++) if(t.includes(CATS[c][i])) return c;
-  return null;
+  return 'markets'; /* fallback — never drop a story */
 }
 function srcInfo(src) {
   var s=(src||'').toLowerCase();
@@ -577,10 +586,9 @@ async function fetchFeed() {
       var k=s.url||s.headline.slice(0,50);
       if(seen.has(k))return false; seen.add(k); return true;
     });
-    var rel=dd.filter(function(s){return categorise(s)!==null;});
-    rel.sort(function(a,b){return b.datetime-a.datetime;});
-    rel.forEach(function(s){s._cat=categorise(s);s._isNew=!seenIds.has(s.id);seenIds.add(s.id);});
-    allStories=rel; render();
+    dd.sort(function(a,b){return b.datetime-a.datetime;});
+    dd.forEach(function(s){s._cat=categorise(s);s._isNew=!seenIds.has(s.id);seenIds.add(s.id);});
+    allStories=dd; render();
     document.getElementById('last-updated').textContent=new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
   } catch(e) {
     document.getElementById('feed-list').innerHTML='<div class="state-msg">FEED ERROR — RETRYING</div>';
@@ -1254,6 +1262,21 @@ var supabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
   var sess=await supabase.auth.getSession();
   if(!sess.data.session){window.location.href='login.html';return;}
   document.getElementById('nav-logout-btn').addEventListener('click',function(e){e.preventDefault();supabase.auth.signOut().then(function(){window.location.href='login.html';});});
+
+  /* Auto-select category based on firm's asset access */
+  try {
+    var userId = sess.data.session.user.id;
+    var {data: userRow} = await supabase.from('users').select('firm_id').eq('id', userId).single();
+    if (userRow && userRow.firm_id) {
+      var {data: firmRow} = await supabase.from('firms').select('asset_access').eq('id', userRow.firm_id).single();
+      var access = firmRow && firmRow.asset_access ? firmRow.asset_access.toLowerCase() : 'both';
+      if (access === 'whisky' || access === 'gold') {
+        var btn = document.querySelector('.cat-tab[data-cat="' + access + '"]');
+        if (btn) { btn.click(); }
+      }
+    }
+  } catch(e) { /* fallback to 'all' */ }
+
   fetchFeed();
 })();
 </script>
