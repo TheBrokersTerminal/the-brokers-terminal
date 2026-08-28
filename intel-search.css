@@ -49,7 +49,7 @@
   width: 100%;
   min-width: 160px;
 }
-#intel-search-input::placeholder { color: #555; font-size: 11px; }
+#intel-search-input::placeholder { color: #fff; font-size: 11px; }
 
 /* ── DROPDOWN ── */
 .intel-dropdown {
@@ -87,10 +87,10 @@
 .intel-drop-badge.co  { background: rgba(233,113,50,.15); color: #E97132; border: 1px solid rgba(233,113,50,.4); }
 .intel-drop-badge.cx  { background: rgba(68,144,204,.15); color: #48a0e8; border: 1px solid rgba(68,144,204,.4); }
 .intel-drop-label { font-size: 11px; color: #e0e0e0; letter-spacing: .03em; flex: 1; }
-.intel-drop-ticker { font-size: 9px; color: #666; letter-spacing: .12em; flex-shrink: 0; }
-.intel-drop-arrow { font-size: 9px; color: #444; flex-shrink: 0; margin-left: 4px; }
+.intel-drop-ticker { font-size: 9px; color: #fff; letter-spacing: .12em; flex-shrink: 0; }
+.intel-drop-arrow { font-size: 9px; color: #fff; flex-shrink: 0; margin-left: 4px; }
 .intel-drop-item:hover .intel-drop-arrow { color: #E97132; }
-.intel-drop-loading { padding: 12px 14px; font-size: 9px; color: #444; letter-spacing: .2em; text-transform: uppercase; }
+.intel-drop-loading { padding: 12px 14px; font-size: 9px; color: #fff; letter-spacing: .2em; text-transform: uppercase; }
 
 /* ── HOVER SUB-PANEL (LSEG-style) ── */
 .intel-sub-panel {
@@ -124,7 +124,7 @@
 .intel-sub-option:hover { background: #161616; }
 .intel-sub-opt-icon { font-size: 11px; color: #E97132; flex-shrink: 0; width: 16px; text-align: center; }
 .intel-sub-opt-lbl { font-size: 10px; color: #d0d0d0; letter-spacing: .06em; }
-.intel-sub-opt-sub { font-size: 8px; color: #555; letter-spacing: .04em; margin-top: 1px; }
+.intel-sub-opt-sub { font-size: 8px; color: #fff; letter-spacing: .04em; margin-top: 1px; }
 
 /* ── POP-OUT WINDOW ── */
 .intel-popwin {
@@ -157,7 +157,7 @@
 .intel-popwin-icon { color: #E97132; font-size: 9px; letter-spacing: .1em; flex-shrink: 0; }
 .intel-popwin-title { font-size: 9px; letter-spacing: .18em; text-transform: uppercase; color: #fff; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .intel-popwin-close {
-  background: none; border: none; color: #555; font-size: 13px; cursor: pointer;
+  background: none; border: none; color: #fff; font-size: 13px; cursor: pointer;
   padding: 0 2px; line-height: 1; flex-shrink: 0; transition: color .1s;
 }
 .intel-popwin-close:hover { color: #e05050; }
@@ -184,7 +184,7 @@
 .sp-badge.listed { background: rgba(68,204,136,.08); border: 1px solid rgba(68,204,136,.25); color: #44cc88; }
 .sp-badge.private { background: rgba(233,113,50,.08); border: 1px solid rgba(233,113,50,.25); color: #E97132; }
 .sp-badge.event { background: rgba(68,144,204,.08); border: 1px solid rgba(68,144,204,.25); color: #48a0e8; }
-.sp-loading { padding: 20px; text-align: center; font-size: 9px; letter-spacing: .2em; color: #444; text-transform: uppercase; }
+.sp-loading { padding: 20px; text-align: center; font-size: 9px; letter-spacing: .2em; color: #fff; text-transform: uppercase; }
 /* remove old single SE handle */
 .sp-resize { display: none; }
 
@@ -192,7 +192,7 @@
 .intel-popwin-btn {
   background: none;
   border: 1px solid #2a2a2a;
-  color: #555;
+  color: #fff;
   font-family: 'Consolas','Menlo',monospace;
   font-size: 8px;
   letter-spacing: .14em;
@@ -237,7 +237,7 @@
   border: none;
   border-right: 1px solid #1a1a1a;
   border-bottom: 2px solid transparent;
-  color: #555;
+  color: #fff;
   font-family: 'Consolas','Menlo',monospace;
   font-size: 9px;
   letter-spacing: .14em;
@@ -251,23 +251,23 @@
   transition: color .1s, border-color .1s;
   margin-bottom: -1px;
 }
-.intel-tg-tab:hover { color: #aaa; }
+.intel-tg-tab:hover { color: #fff; }
 .intel-tg-tab.active { color: #E97132; border-bottom-color: #E97132; background: #0d0d0d; }
 .intel-tg-tab-close {
-  color: #333;
+  color: #fff;
   font-size: 11px;
   line-height: 1;
   transition: color .1s;
   cursor: pointer;
 }
-.intel-tg-tab:hover .intel-tg-tab-close { color: #666; }
+.intel-tg-tab:hover .intel-tg-tab-close { color: #fff; }
 .intel-tg-tab-close:hover { color: #e05050 !important; }
 .intel-tg-close-all {
   margin-left: auto;
   background: none;
   border: none;
   border-left: 1px solid #1a1a1a;
-  color: #444;
+  color: #fff;
   font-size: 13px;
   padding: 0 12px;
   cursor: pointer;

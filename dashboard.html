@@ -285,6 +285,223 @@
     /* ── OFFLINE BANNER ───────────────────────────────────────── */
     .offline-banner { background: var(--accent); color: var(--bg); text-align: center; padding: 8px; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; font-weight: 700; }
 
+    /* ══ TERMINAL TOPBAR ══════════════════════════════════════════ */
+    #tbc-topbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 200;
+      background: #050505;
+      border-bottom: 2px solid #1a1a1a;
+      display: flex;
+      align-items: center;
+      height: 44px;
+      gap: 0;
+    }
+
+    /* Left: logo */
+    .ttb-left {
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
+      padding: 0 16px 0 20px;
+      border-right: 1px solid #1a1a1a;
+      height: 100%;
+    }
+    .ttb-logo {
+      color: var(--accent);
+      font-family: 'Consolas', 'Menlo', monospace;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .ttb-logo:hover { color: #fff; }
+
+    /* Center: intel search */
+    .ttb-center {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 16px;
+      height: 100%;
+    }
+    .ttb-center #intel-search-container {
+      width: 100%;
+      max-width: 520px;
+    }
+
+    /* Right: tabs + user */
+    .ttb-right {
+      display: flex;
+      align-items: stretch;
+      flex-shrink: 0;
+      height: 100%;
+      border-left: 1px solid #1a1a1a;
+    }
+
+    /* Override tbc-tabs to be inline / borderless inside topbar */
+    .ttb-right #tbc-tab-bar {
+      display: flex;
+      align-items: stretch;
+      background: transparent;
+      border-bottom: none;
+      padding: 0 4px;
+      height: 100%;
+    }
+
+    /* User menu */
+    .ttb-user-menu {
+      position: relative;
+      display: flex;
+      align-items: center;
+      border-left: 1px solid #1a1a1a;
+      padding: 0 14px;
+    }
+    .ttb-user-btn {
+      background: none;
+      border: none;
+      color: #888;
+      font-family: 'Consolas', 'Menlo', monospace;
+      font-size: 9px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0;
+      white-space: nowrap;
+      transition: color 0.15s;
+    }
+    .ttb-user-btn:hover { color: #ccc; }
+    .ttb-user-icon { font-size: 11px; }
+    .ttb-user-name { max-width: 80px; overflow: hidden; text-overflow: ellipsis; }
+    .ttb-user-caret { font-size: 8px; }
+    .ttb-user-dropdown {
+      display: none;
+      position: absolute;
+      top: calc(100% + 2px);
+      right: 0;
+      background: #0d0d0d;
+      border: 1px solid #2a2a2a;
+      border-top: 2px solid var(--accent);
+      min-width: 190px;
+      z-index: 9900;
+      box-shadow: 0 12px 40px rgba(0,0,0,.9);
+    }
+    .ttb-user-menu.open .ttb-user-dropdown { display: block; }
+    .ttb-dd-item {
+      display: block;
+      padding: 10px 14px;
+      font-family: 'Consolas', 'Menlo', monospace;
+      font-size: 9px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #aaa;
+      text-decoration: none;
+      border-bottom: 1px solid #161616;
+      transition: background 0.1s, color 0.1s;
+    }
+    .ttb-dd-item:last-child { border-bottom: none; }
+    .ttb-dd-item:hover { background: #161616; color: var(--accent); }
+    .ttb-dd-sep { height: 1px; background: #222; margin: 2px 0; }
+    .ttb-dd-logout { color: #888; }
+    .ttb-dd-logout:hover { color: #c0392b; background: #110000; }
+
+    /* Intel search fills topbar center */
+    .ttb-center .intel-search-wrap,
+    .ttb-center .intel-search-bar { width: 100%; min-width: 0; box-sizing: border-box; }
+
+    /* Ticker: fixed below topbar, hidden until news loads */
+    .content-ticker {
+      position: fixed;
+      top: 44px;
+      left: 0;
+      right: 0;
+      z-index: 199;
+      border-top: none;
+    }
+
+    /* Ticker filter + hide controls */
+    .ticker-controls {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      flex-shrink: 0;
+      border-left: 1px solid var(--border-dim);
+      padding: 0 6px;
+      height: 100%;
+    }
+    .tk-filter {
+      font-family: 'Consolas', 'Menlo', monospace;
+      font-size: 8px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      background: none;
+      border: none;
+      color: #555;
+      cursor: pointer;
+      padding: 0 7px;
+      height: 100%;
+      transition: color 0.15s;
+      white-space: nowrap;
+    }
+    .tk-filter:hover { color: #aaa; }
+    .tk-filter.active { color: var(--accent); }
+    .tk-sep { width: 1px; background: #222; height: 14px; margin: 0 4px; }
+    .tk-hide {
+      font-family: 'Consolas', 'Menlo', monospace;
+      font-size: 9px;
+      background: none;
+      border: none;
+      color: #444;
+      cursor: pointer;
+      padding: 0 6px;
+      height: 100%;
+      transition: color 0.15s;
+      line-height: 1;
+    }
+    .tk-hide:hover { color: #c0392b; }
+
+    /* Topbar ticker restore button */
+    .ttb-ticker-restore {
+      font-family: 'Consolas', 'Menlo', monospace;
+      font-size: 8px;
+      letter-spacing: 0.20em;
+      text-transform: uppercase;
+      background: none;
+      border: 1px solid #2a2a2a;
+      color: #555;
+      cursor: pointer;
+      padding: 3px 8px;
+      margin-left: 10px;
+      transition: color 0.15s, border-color 0.15s;
+      white-space: nowrap;
+    }
+    .ttb-ticker-restore:hover { color: var(--accent); border-color: var(--accent); }
+
+    /* Canvas top-padding when ticker visible */
+    body.ticker-on #tbc-canvas-wrap,
+    body.ticker-on #tbc-news-panel { margin-top: 34px; }
+
+    /* Offset body content below fixed topbar (44px) + ticker (34px when shown) */
+    body { padding-top: 44px; }
+
+    /* Give vault content room below fixed header */
+    #vault-section { padding-top: 4px; }
+
+    /* Hide footer on terminal page — not needed */
+    .site-footer { display: none; }
+
+    /* Hide legacy elements no longer in use */
+    .dashboard-masthead { display: none; }
+    .site-nav { display: none; }
+
     /* ══ RESPONSIVE — TABLET (≤1024px) ════════════════════════ */
     @media (max-width: 1024px) {
       .dashboard-masthead { padding: 0 24px; }
@@ -465,32 +682,43 @@
 </head>
 <body>
 
-<!-- ══ NAV ══════════════════════════════════════════════════════ -->
-<nav class="site-nav">
-  <a class="nav-brand" href="index.html">█ THE BROKERS TERMINAL</a>
-  <ul class="nav-links">
-    <li><a href="index.html">HOME</a></li>
-    <li><a href="dashboard.html">MY DESK</a></li>
-    <li><a href="news.html">NEWS FEED</a></li>
-    <li><a href="#" id="nav-logout-btn">LOG OUT</a></li>
-  </ul>
-</nav>
+<!-- ══ TERMINAL TOPBAR ═══════════════════════════════════════════ -->
+<div id="tbc-topbar">
 
-<!-- ══ MASTHEAD ══════════════════════════════════════════════════ -->
-<div class="dashboard-masthead">
-  <div id="intel-search-container" style="flex:1;display:flex;justify-content:flex-start;"></div>
-  <div class="dashboard-masthead-right">
-    <span>Welcome, <strong style="color: var(--text);" id="user-name">loading...</strong></span>
-    <a href="#" id="manage-subscription-btn" style="display:none; color:var(--text-muted); font-size:11px; letter-spacing:0.08em;">MANAGE SUBSCRIPTION</a>
-    <span id="manage-subscription-sep" style="display:none; color:var(--text-faint);">|</span>
-    <a href="#" id="manage-team-btn" style="display:none; color:var(--text-muted); font-size:11px; letter-spacing:0.08em;">MANAGE TEAM</a>
-    <span id="manage-team-sep" style="display:none; color:var(--text-faint);">|</span>
-    <a href="#" id="edit-profile-btn" style="color:var(--text-muted); font-size:11px; letter-spacing:0.08em;">EDIT PROFILE</a>
-    <span style="color:var(--text-faint);">|</span>
-    <a href="news.html" target="_blank" style="color:var(--text-muted);font-size:11px;letter-spacing:0.08em;">NEWS FEED ↗</a>
-    <span style="color:var(--text-faint);">|</span>
-    <a href="#" id="logout-btn">LOG OUT</a>
+  <!-- Left: logo + ticker restore -->
+  <div class="ttb-left">
+    <a class="ttb-logo" href="index.html">▌ THE BROKERS TERMINAL</a>
+    <button class="ttb-ticker-restore" id="ttb-ticker-restore" title="Show news ticker" style="display:none;">▸ NEWS</button>
   </div>
+
+  <!-- Center: intel search -->
+  <div class="ttb-center">
+    <div id="intel-search-container"></div>
+  </div>
+
+  <!-- Right: tab bar (built by JS) + user menu -->
+  <div class="ttb-right">
+    <div id="tbc-tab-bar"></div>
+    <div class="ttb-user-menu">
+      <button class="ttb-user-btn" id="ttb-user-toggle" title="Account">
+        <span class="ttb-user-icon">◎</span>
+        <span id="user-name" class="ttb-user-name">—</span>
+        <span class="ttb-user-caret">▾</span>
+      </button>
+      <div class="ttb-user-dropdown" id="ttb-user-dropdown">
+        <a href="#" id="edit-profile-btn" class="ttb-dd-item">EDIT PROFILE</a>
+        <a href="#" id="manage-subscription-btn" style="display:none;" class="ttb-dd-item">MANAGE SUBSCRIPTION</a>
+        <span id="manage-subscription-sep" style="display:none;"></span>
+        <a href="#" id="manage-team-btn" style="display:none;" class="ttb-dd-item">MANAGE TEAM</a>
+        <span id="manage-team-sep" style="display:none;"></span>
+        <a href="#" id="fullscreen-news-btn" class="ttb-dd-item">FULL SCREEN NEWS</a>
+        <div class="ttb-dd-sep"></div>
+        <a href="#" id="logout-btn" class="ttb-dd-item ttb-dd-logout">LOG OUT</a>
+        <a href="#" id="nav-logout-btn" style="display:none;"></a>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <!-- ══ EDIT PROFILE MODAL ═════════════════════════════════════════ -->
@@ -537,18 +765,25 @@
 <div class="content-ticker" id="content-ticker" style="display:none;">
   <div class="ticker-label">▸ NEWS</div>
   <div class="ticker-track-wrap">
-    <div class="ticker-track" id="ticker-track">
-      <!-- populated by JS after reports load -->
-    </div>
+    <div class="ticker-track" id="ticker-track"></div>
+  </div>
+  <div class="ticker-controls">
+    <button class="tk-filter active" data-filter="all">ALL</button>
+    <button class="tk-filter" data-filter="gold">GOLD</button>
+    <button class="tk-filter" data-filter="whisky">WHISKY</button>
+    <div class="tk-sep"></div>
+    <button class="tk-hide" id="tk-hide-btn" title="Hide ticker">✕</button>
   </div>
 </div>
-
-<!-- ══ TERMINAL TAB BAR ══════════════════════════════════════════ -->
-<div class="tbc-tabs" id="tbc-tab-bar"></div>
 
 <!-- ══ TERMINAL CANVAS ═══════════════════════════════════════════ -->
 <div id="tbc-canvas-wrap">
   <div id="tbc-canvas" class="tbc-canvas"></div>
+</div>
+
+<!-- ══ NEWS FEED PANEL (static — shown/hidden by tab JS) ═════════ -->
+<div id="tbc-news-panel" style="display:none;">
+  <iframe id="tbc-news-iframe" style="width:100%;height:calc(100vh - 44px);border:none;display:block;" title="News Feed"></iframe>
 </div>
 
 <!-- hidden stats still populated by JS for internal use -->
@@ -853,7 +1088,28 @@
 <script src="terminal-canvas.js"></script>
 <script src="terminal-chat.js"></script>
 <script src="terminal-notes.js"></script>
-<script>document.addEventListener('DOMContentLoaded',function(){intelSearchInit('intel-search-container');});</script>
+<script>document.addEventListener('DOMContentLoaded',function(){
+  intelSearchInit('intel-search-container');
+  /* User menu dropdown toggle */
+  var toggle = document.getElementById('ttb-user-toggle');
+  var menu   = toggle && toggle.closest('.ttb-user-menu');
+  if (toggle && menu) {
+    toggle.addEventListener('click', function (e) {
+      e.stopPropagation();
+      menu.classList.toggle('open');
+    });
+    document.addEventListener('click', function () { menu.classList.remove('open'); });
+  }
+
+  /* Full screen news */
+  var fsNewsBtn = document.getElementById('fullscreen-news-btn');
+  if (fsNewsBtn) {
+    fsNewsBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      window.open('news.html', '_blank');
+    });
+  }
+});</script>
 
 <!-- ══ SUPABASE + DASHBOARD JS ════════════════════════════════════ -->
 <script>
@@ -2069,76 +2325,139 @@
     strip.innerHTML = html;
   }
 
+  /* ── Ticker keyword filters ─────────────────────────────────── */
+  var TICKER_KW = {
+    gold:   ['gold','silver','platinum','precious metal','xau','bullion','comex','spot gold','gold price','gold etf','mining','miner','gdx','lbma'],
+    whisky: ['whisky','whiskey','scotch','bourbon','distillery','single malt','spirits','diageo','pernod','macallan','glenfiddich','glenlivet','balvenie','ardbeg','dalmore','springbank','bruichladdich','laphroaig','talisker','cask']
+  };
+
+  var _tickerFilter  = localStorage.getItem('tkFilter')  || 'all';
+  var _tickerHidden  = localStorage.getItem('tkHidden')  === '1';
+  window._tickerHidden = _tickerHidden; /* expose for tab-switch handler */
+
+  function _tickerMatchesCat(story, cat) {
+    if (cat === 'all') return true;
+    var kw = TICKER_KW[cat] || [];
+    var txt = ((story.title || '') + ' ' + (story.source || '')).toLowerCase();
+    return kw.some(function(k){ return txt.indexOf(k) !== -1; });
+  }
+
   /* ── Build ticker (news headlines) ─────────────────────────── */
   function buildTicker() {
     var track  = document.getElementById('ticker-track');
     var ticker = document.getElementById('content-ticker');
     if (!track || !ticker) return;
 
-    function startWithStories(stories) {
+    /* Restore saved filter button state */
+    ticker.querySelectorAll('.tk-filter').forEach(function(btn) {
+      btn.classList.toggle('active', btn.dataset.filter === _tickerFilter);
+    });
+
+    function renderTicker(stories) {
       if (!stories || !stories.length) return;
-      window._rssCache = stories; /* share with canvas news widget */
+      window._rssCache = stories;
 
-      var items = stories.slice(0, 30);
+      var filtered = stories.filter(function(s){ return _tickerMatchesCat(s, _tickerFilter); });
+      if (!filtered.length) filtered = stories; /* fallback to all if no matches */
+      var items = filtered.slice(0, 30);
 
-      /* Decode HTML entities (&#x2019; etc.) then safely re-escape < > only */
       var _decodeEl = document.createElement('textarea');
-      function decodeEntities(str) {
-        _decodeEl.innerHTML = String(str || '');
-        return _decodeEl.value;
-      }
-      function safeText(str) {
-        return decodeEntities(str).replace(/</g,'&lt;').replace(/>/g,'&gt;');
-      }
-
+      function decodeEntities(str) { _decodeEl.innerHTML = String(str || ''); return _decodeEl.value; }
+      function safeText(str) { return decodeEntities(str).replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
       function buildItemHtml(s) {
-        var hl  = s.title || s.headline || '';
+        var hl = s.title || s.headline || '';
         var src = s.source || '';
         return '<span class="ticker-item is-new"><span class="ticker-dot-new">' + safeText(src) + '</span>  ' + safeText(hl) + '</span>';
       }
 
       var setHtml = items.map(buildItemHtml).join('');
-
-      // Build one set, measure it, then duplicate for seamless loop
       track.innerHTML = setHtml;
-      ticker.style.display = 'flex';
 
-    // Wait for layout then start JS-driven scroll
-    requestAnimationFrame(function() {
-      var singleWidth = track.scrollWidth;
-      track.innerHTML = setHtml + setHtml;
+      /* Only show if on terminal tab and user hasn't hidden it */
+      var onTerminal = !document.querySelector('.tbc-tab[data-tab="terminal"]') ||
+                       document.querySelector('.tbc-tab[data-tab="terminal"].active') !== null;
+      if (!_tickerHidden && onTerminal) {
+        ticker.style.display = 'flex';
+        document.body.classList.add('ticker-on');
+        var restore = document.getElementById('ttb-ticker-restore');
+        if (restore) restore.style.display = 'none';
+      }
 
-      var speed = 60; // pixels per second
-      var pos = 0;
-      var paused = false;
-      track.closest('.ticker-track-wrap').addEventListener('mouseenter', function() { paused = true; });
-      track.closest('.ticker-track-wrap').addEventListener('mouseleave', function() { paused = false; });
-
-      var last = null;
-      function step(ts) {
-        if (!last) last = ts;
-        var delta = ts - last;
-        last = ts;
-        if (!paused) {
-          pos += speed * (delta / 1000);
-          if (pos >= singleWidth) pos -= singleWidth;
-          track.style.transform = 'translateX(-' + pos + 'px)';
+      requestAnimationFrame(function() {
+        var singleWidth = track.scrollWidth;
+        track.innerHTML = setHtml + setHtml;
+        var speed = 60, pos = 0, paused = false, last = null;
+        track.closest('.ticker-track-wrap').addEventListener('mouseenter', function() { paused = true; });
+        track.closest('.ticker-track-wrap').addEventListener('mouseleave', function() { paused = false; });
+        function step(ts) {
+          if (!last) last = ts;
+          var delta = ts - last; last = ts;
+          if (!paused) {
+            pos += speed * (delta / 1000);
+            if (pos >= singleWidth) pos -= singleWidth;
+            track.style.transform = 'translateX(-' + pos + 'px)';
+          }
+          requestAnimationFrame(step);
         }
         requestAnimationFrame(step);
-      }
-      requestAnimationFrame(step);
-    });
-    } /* end startWithStories */
+      });
+    }
 
-    /* Use cached data if the news widget already fetched; otherwise fetch now */
-    if (window._rssCache) {
-      startWithStories(window._rssCache);
-    } else {
+    /* Filter button clicks */
+    ticker.querySelectorAll('.tk-filter').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        _tickerFilter = btn.dataset.filter;
+        localStorage.setItem('tkFilter', _tickerFilter);
+        ticker.querySelectorAll('.tk-filter').forEach(function(b){ b.classList.remove('active'); });
+        btn.classList.add('active');
+        if (window._rssCache) renderTicker(window._rssCache);
+      });
+    });
+
+    /* Hide button */
+    var hideBtn = document.getElementById('tk-hide-btn');
+    if (hideBtn) {
+      hideBtn.addEventListener('click', function() {
+        _tickerHidden = true;
+        window._tickerHidden = true;
+        localStorage.setItem('tkHidden', '1');
+        ticker.style.display = 'none';
+        document.body.classList.remove('ticker-on');
+        var restore = document.getElementById('ttb-ticker-restore');
+        if (restore) restore.style.display = '';
+      });
+    }
+
+    /* Restore button (in topbar) */
+    var restoreBtn = document.getElementById('ttb-ticker-restore');
+    if (restoreBtn) {
+      restoreBtn.addEventListener('click', function() {
+        _tickerHidden = false;
+        window._tickerHidden = false;
+        localStorage.setItem('tkHidden', '0');
+        ticker.style.display = 'flex';
+        document.body.classList.add('ticker-on');
+        restoreBtn.style.display = 'none';
+      });
+      /* Apply saved hidden state */
+      if (_tickerHidden) restoreBtn.style.display = '';
+    }
+
+    function fetchAndRender() {
       fetch('/.netlify/functions/rss')
         .then(function(r) { return r.ok ? r.json() : null; })
-        .then(function(stories) { startWithStories(stories); })
+        .then(function(stories) { if (stories) { window._rssCache = stories; renderTicker(stories); } })
         .catch(function() {});
     }
+
+    if (window._rssCache) {
+      renderTicker(window._rssCache);
+    } else {
+      fetchAndRender();
+    }
+
+    /* Re-fetch fresh stories every 5 minutes */
+    setInterval(function() { fetchAndRender(); }, 300000);
   }
 
   /* ── Build featured card for Gold / Whisky panel ───────────── */
