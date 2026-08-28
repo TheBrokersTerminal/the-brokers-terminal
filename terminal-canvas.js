@@ -2030,10 +2030,13 @@
       function logV(v) { return v > 0 ? Math.log(v) : -9999; }
 
       function paint(hoverIdx) {
+        var dpr = window.devicePixelRatio || 1;
         var W = area.clientWidth || 460;
         var H = area.clientHeight || 230;
-        canvas.width = W; canvas.height = H;
+        canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
+        canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
         var ctx = canvas.getContext('2d');
+        ctx.scale(dpr, dpr);
         var hasOv = !!(overlay && overlay.data && overlay.data.length);
         var P = { t: 20, r: hasOv ? 56 : 18, b: 36, l: 58 };
         var cw = W - P.l - P.r, ch = H - P.t - P.b;
@@ -2504,123 +2507,167 @@
       {q:'Laphroaig 10',          label:'LAPHROAIG 10YO'},
     ];
 
-    /* ── Bloomberg-style auction range chart ── */
-    function paintWhiskyChart(canvas, auc, ret, label) {
+    /* ── Whisky price chart — Bloomberg style, DPR-correct ── */
+    function paintWhiskyChart(canvas, auc, ret) {
       var mv12 = auc.latest_12m || {};
       var hi   = auc.max_auction_price || {};
       var mv   = auc.market_value;
       var lat  = auc.latest_auction_price || {};
 
-      /* We have: min, Q1, median, avg, Q3, max over 12 months + current MV */
-      var pts = [
-        {v: mv12.buyer_price_min,  x: 0.0},
-        {v: mv12.buyer_price_qrt1, x: 0.25},
-        {v: mv12.buyer_price_qrt2, x: 0.50},
-        {v: mv12.buyer_price_avg,  x: 0.65},
-        {v: mv12.buyer_price_qrt3, x: 0.75},
-        {v: mv12.buyer_price_max,  x: 0.90},
-        {v: mv,                    x: 1.0},
-      ].filter(function(p){ return p.v != null && p.v > 0; });
+      var qMin = mv12.buyer_price_min;
+      var qQ1  = mv12.buyer_price_qrt1;
+      var qQ2  = mv12.buyer_price_qrt2;
+      var qAvg = mv12.buyer_price_avg;
+      var qQ3  = mv12.buyer_price_qrt3;
+      var qMax = mv12.buyer_price_max;
+      var latP = lat.buyer_price_avg;
+      var rAvg = ret && ret.retail_price_avg;
 
-      if (pts.length < 3) { canvas.style.display = 'none'; return; }
+      if (!qMin || !qMax || qMax <= qMin) { canvas.style.display = 'none'; return; }
 
-      var W = canvas.offsetWidth || 460, H = canvas.height || 160;
-      canvas.width = W; canvas.height = H;
+      /* ── DPR-correct sizing ── */
+      var dpr = window.devicePixelRatio || 1;
+      var cssW = canvas.parentElement ? canvas.parentElement.clientWidth || 460 : 460;
+      var cssH = 168;
+      canvas.width  = Math.round(cssW * dpr);
+      canvas.height = Math.round(cssH * dpr);
+      canvas.style.width  = cssW + 'px';
+      canvas.style.height = cssH + 'px';
+
       var ctx = canvas.getContext('2d');
-      var P = {t:16, r:12, b:28, l:58};
+      ctx.scale(dpr, dpr);
+
+      var W = cssW, H = cssH;
+      var P = {t:20, r:14, b:28, l:52};
       var cw = W - P.l - P.r, ch = H - P.t - P.b;
 
-      /* Y range */
-      var prices = pts.map(function(p){ return p.v; });
-      var yMin = Math.min.apply(null, prices) * 0.90;
-      var yMax = Math.max.apply(null, prices) * 1.10;
-      /* Include ATH if not extreme */
-      if (hi.buyer_price && hi.buyer_price < yMax * 3) yMax = Math.max(yMax, hi.buyer_price * 1.04);
+      /* ── Y scale: Q range ±12%, ATH shown as annotation if above ── */
+      var yMin = qMin * 0.88;
+      var yMax = qMax * 1.12;
+      /* Pull ATH into range if not extreme (within 2× max) */
+      if (hi.buyer_price && hi.buyer_price <= qMax * 2) yMax = Math.max(yMax, hi.buyer_price * 1.06);
       var yRng = yMax - yMin || 1;
 
-      function xP(x) { return P.l + x * cw; }
       function yP(v) { return P.t + ch - ((v - yMin) / yRng) * ch; }
       function priceLbl(v) {
         if (v == null) return '';
-        if (v >= 100000) return (v/1000).toFixed(0) + 'k';
-        if (v >= 10000)  return (v/1000).toFixed(1) + 'k';
-        if (v >= 1000)   return (v/1000).toFixed(2) + 'k';
-        return v.toFixed(0);
+        if (v >= 100000) return (v / 1000).toFixed(0) + 'k';
+        if (v >= 10000)  return (v / 1000).toFixed(1) + 'k';
+        if (v >= 1000)   return (v / 1000).toFixed(2) + 'k';
+        return Math.round(v).toString();
       }
 
-      /* Background */
+      /* ── Background ── */
       ctx.fillStyle = '#090909'; ctx.fillRect(0, 0, W, H);
 
-      /* Horizontal grid + Y labels */
-      ctx.font = '8px monospace'; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
-      var gridSteps = 5;
-      for (var i = 0; i <= gridSteps; i++) {
-        var gv = yMin + (i / gridSteps) * yRng;
+      /* ── Horizontal grid + Y labels (5 levels) ── */
+      ctx.font = '9px monospace';
+      for (var gi = 0; gi <= 4; gi++) {
+        var gv = yMin + (gi / 4) * yRng;
         var gy = yP(gv);
-        ctx.strokeStyle = 'rgba(255,255,255,0.05)'; ctx.lineWidth = 0.8;
+        ctx.strokeStyle = 'rgba(255,255,255,0.06)'; ctx.lineWidth = 0.7;
         ctx.beginPath(); ctx.moveTo(P.l, gy); ctx.lineTo(P.l + cw, gy); ctx.stroke();
-        ctx.fillStyle = 'rgba(255,255,255,0.6)';
+        ctx.fillStyle = 'rgba(255,255,255,0.65)'; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
         ctx.fillText(priceLbl(gv), P.l - 5, gy);
       }
 
-      /* Area fill under the curve */
-      var grad = ctx.createLinearGradient(0, P.t, 0, P.t + ch);
-      grad.addColorStop(0, 'rgba(233,113,50,0.35)');
-      grad.addColorStop(1, 'rgba(233,113,50,0.0)');
-      ctx.beginPath();
-      ctx.moveTo(xP(pts[0].x), P.t + ch);
-      pts.forEach(function(p) { ctx.lineTo(xP(p.x), yP(p.v)); });
-      ctx.lineTo(xP(pts[pts.length-1].x), P.t + ch);
-      ctx.closePath();
-      ctx.fillStyle = grad; ctx.fill();
+      /* ── IQR shaded band (Q1→Q3) ── */
+      var q1y = yP(qQ1), q3y = yP(qQ3);
+      var bandGrad = ctx.createLinearGradient(0, q3y, 0, q1y);
+      bandGrad.addColorStop(0, 'rgba(233,113,50,0.22)');
+      bandGrad.addColorStop(1, 'rgba(233,113,50,0.06)');
+      ctx.fillStyle = bandGrad;
+      ctx.fillRect(P.l, q3y, cw, q1y - q3y);
 
-      /* Price line */
+      /* ── Whisker lines min→Q1 and Q3→max ── */
+      var x0 = P.l, x1 = P.l + cw;
+      function hLine(y, alpha, dash) {
+        ctx.strokeStyle = 'rgba(255,255,255,' + alpha + ')';
+        ctx.lineWidth = 0.8;
+        if (dash) ctx.setLineDash(dash); else ctx.setLineDash([]);
+        ctx.beginPath(); ctx.moveTo(x0, y); ctx.lineTo(x1, y); ctx.stroke();
+        ctx.setLineDash([]);
+      }
+      hLine(yP(qMin), 0.25, [3,4]);
+      hLine(yP(qMax), 0.25, [3,4]);
+
+      /* ── Area fill from min to line ── */
+      var pts = [
+        {x: x0,           y: yP(qMin)},
+        {x: x0 + cw*0.18, y: yP(qQ1)},
+        {x: x0 + cw*0.40, y: yP(qQ2)},
+        {x: x0 + cw*0.60, y: yP(qAvg)},
+        {x: x0 + cw*0.78, y: yP(qQ3)},
+        {x: x0 + cw*0.92, y: yP(qMax)},
+        {x: x0 + cw,      y: mv != null ? yP(mv) : yP(qMax)},
+      ];
+      var areaGrad = ctx.createLinearGradient(0, P.t, 0, P.t + ch);
+      areaGrad.addColorStop(0, 'rgba(233,113,50,0.28)');
+      areaGrad.addColorStop(1, 'rgba(233,113,50,0.02)');
       ctx.beginPath();
-      pts.forEach(function(p, i) {
-        if (i === 0) ctx.moveTo(xP(p.x), yP(p.v));
-        else ctx.lineTo(xP(p.x), yP(p.v));
-      });
+      ctx.moveTo(pts[0].x, P.t + ch);
+      pts.forEach(function(p) { ctx.lineTo(p.x, p.y); });
+      ctx.lineTo(pts[pts.length-1].x, P.t + ch);
+      ctx.closePath();
+      ctx.fillStyle = areaGrad; ctx.fill();
+
+      /* ── Orange price line ── */
+      ctx.beginPath();
+      pts.forEach(function(p, i) { i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y); });
       ctx.strokeStyle = '#E97132'; ctx.lineWidth = 1.8; ctx.lineJoin = 'round'; ctx.stroke();
 
-      /* Latest value dot */
-      var last = pts[pts.length - 1];
-      ctx.beginPath(); ctx.arc(xP(last.x), yP(last.v), 4, 0, Math.PI * 2);
+      /* ── Median line (bold reference) ── */
+      ctx.strokeStyle = 'rgba(233,113,50,0.5)'; ctx.lineWidth = 1;
+      ctx.setLineDash([2,3]);
+      ctx.beginPath(); ctx.moveTo(x0, yP(qQ2)); ctx.lineTo(x1, yP(qQ2)); ctx.stroke();
+      ctx.setLineDash([]);
+
+      /* ── Market value endpoint dot ── */
+      var endPt = pts[pts.length - 1];
+      ctx.beginPath(); ctx.arc(endPt.x, endPt.y, 4.5, 0, Math.PI * 2);
       ctx.fillStyle = '#E97132'; ctx.fill();
-      ctx.strokeStyle = '#090909'; ctx.lineWidth = 1.5; ctx.stroke();
+      ctx.strokeStyle = '#090909'; ctx.lineWidth = 2; ctx.stroke();
 
-      /* ATH dashed reference */
-      if (hi.buyer_price && hi.buyer_price >= yMin && hi.buyer_price <= yMax) {
-        var hy = yP(hi.buyer_price);
-        ctx.strokeStyle = 'rgba(233,113,50,0.3)'; ctx.lineWidth = 0.8; ctx.setLineDash([2,4]);
-        ctx.beginPath(); ctx.moveTo(P.l, hy); ctx.lineTo(P.l + cw, hy); ctx.stroke();
-        ctx.setLineDash([]);
-        ctx.font = '7px monospace'; ctx.fillStyle = 'rgba(233,113,50,0.7)'; ctx.textAlign = 'right'; ctx.textBaseline = 'bottom';
-        ctx.fillText('ATH', P.l + cw, hy - 2);
-      }
-
-      /* Retail avg */
-      if (ret && ret.retail_price_avg) {
-        var ra = ret.retail_price_avg;
-        if (ra >= yMin && ra <= yMax) {
-          ctx.strokeStyle = 'rgba(90,173,122,0.5)'; ctx.lineWidth = 1;
-          ctx.beginPath(); ctx.moveTo(P.l, yP(ra)); ctx.lineTo(P.l + cw, yP(ra)); ctx.stroke();
-          ctx.font = '7px monospace'; ctx.fillStyle = 'rgba(90,173,122,0.7)'; ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
-          ctx.fillText('RETAIL', P.l + 2, yP(ra) - 2);
+      /* ── ATH reference ── */
+      if (hi.buyer_price) {
+        if (hi.buyer_price <= yMax && hi.buyer_price >= yMin) {
+          var hy = yP(hi.buyer_price);
+          ctx.strokeStyle = 'rgba(233,113,50,0.28)'; ctx.lineWidth = 0.8; ctx.setLineDash([1,4]);
+          ctx.beginPath(); ctx.moveTo(x0, hy); ctx.lineTo(x1, hy); ctx.stroke();
+          ctx.setLineDash([]);
+          ctx.font = '8px monospace'; ctx.fillStyle = 'rgba(233,113,50,0.8)';
+          ctx.textAlign = 'right'; ctx.textBaseline = 'bottom';
+          ctx.fillText('ATH ' + priceLbl(hi.buyer_price), x1, hy - 3);
+        } else {
+          /* ATH out of range — show annotation at top */
+          ctx.font = '8px monospace'; ctx.fillStyle = 'rgba(233,113,50,0.65)';
+          ctx.textAlign = 'right'; ctx.textBaseline = 'top';
+          ctx.fillText('ATH ' + priceLbl(hi.buyer_price) + ' ↑', x1, P.t + 2);
         }
       }
 
-      /* X-axis labels */
-      ctx.font = '7px monospace'; ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.textBaseline = 'top';
-      var now = new Date(), yr = now.getFullYear(), mo = now.getMonth();
-      var oneYrAgo = new Date(yr - 1, mo, 1);
-      function moLabel(d) { return d.toLocaleString('en-GB', {month:'short', year:'2-digit'}); }
-      ctx.textAlign = 'left';  ctx.fillText(moLabel(oneYrAgo), P.l,        P.t + ch + 5);
-      ctx.textAlign = 'center'; ctx.fillText('6M',             P.l + cw/2, P.t + ch + 5);
-      ctx.textAlign = 'right';  ctx.fillText('NOW',            P.l + cw,   P.t + ch + 5);
+      /* ── Retail avg ── */
+      if (rAvg != null && rAvg >= yMin && rAvg <= yMax) {
+        var ry = yP(rAvg);
+        ctx.strokeStyle = 'rgba(90,173,122,0.55)'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(x0, ry); ctx.lineTo(x1, ry); ctx.stroke();
+        ctx.font = '8px monospace'; ctx.fillStyle = 'rgba(90,173,122,0.75)';
+        ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
+        ctx.fillText('RETAIL ' + priceLbl(rAvg), x0 + 3, ry - 3);
+      }
 
-      /* Top label */
-      ctx.font = '7px monospace'; ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
-      ctx.fillText('12M AUCTION RANGE · ' + (mv12.number_of_trades || '—') + ' TRADES', P.l, 3);
+      /* ── X axis: date range ── */
+      var now = new Date(), mo = now.getMonth(), yr = now.getFullYear();
+      var ago = new Date(yr - 1, mo, 1).toLocaleString('en-GB', {month:'short', year:'2-digit'});
+      ctx.font = '8px monospace'; ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.textBaseline = 'top';
+      ctx.textAlign = 'left';   ctx.fillText(ago,  x0,        P.t + ch + 5);
+      ctx.textAlign = 'center'; ctx.fillText('6M', x0 + cw/2, P.t + ch + 5);
+      ctx.textAlign = 'right';  ctx.fillText('NOW', x1,       P.t + ch + 5);
+
+      /* ── Top meta ── */
+      ctx.font = '8px monospace'; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+      ctx.fillStyle = 'rgba(255,255,255,0.35)';
+      ctx.fillText('12M AUCTION RANGE · ' + (mv12.number_of_trades || '—') + ' TRADES', x0, 4);
     }
 
     /* ── Layout ── */
