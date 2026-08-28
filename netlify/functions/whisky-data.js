@@ -1,10 +1,8 @@
 /* ── WHISKY DATA — WhiskyStats API proxy ───────────────────────────
    Keeps the API key server-side. Routes:
    ?type=search&query=X&page=1
-   ?type=details&id=WB208534
-   ?type=pricing&id=BG4591&currency=GBP
-   ?type=rating&id=WB208534
-   ?type=full&id=WB208534&currency=GBP   (details + pricing + rating in one)
+   ?type=full&id=WB208534&currency=GBP
+   ?type=history&id=BG4591&currency=GBP
    ?type=credits
    ─────────────────────────────────────────────────────────────── */
 const https = require('https');
@@ -12,11 +10,22 @@ const https = require('https');
 const BASE = 'data.api.whiskystats.com';
 const KEY  = process.env.WHISKYSTATS_API_KEY;
 
-const hdrs = {
-  'Content-Type': 'application/json',
-  'Access-Control-Allow-Origin': '*',
-  'Cache-Control': 'public, max-age=300, s-maxage=300, stale-while-revalidate=60',
+/* Per-type CDN cache durations (WhiskyStats T&Cs allow 30-day max) */
+const CACHE = {
+  search:  'public, max-age=3600,  s-maxage=3600,  stale-while-revalidate=300',   /* 1h  */
+  full:    'public, max-age=86400, s-maxage=86400, stale-while-revalidate=3600',   /* 24h */
+  history: 'public, max-age=604800,s-maxage=604800,stale-while-revalidate=86400',  /* 7d  */
+  credits: 'private, no-store',
+  default: 'public, max-age=3600,  s-maxage=3600',
 };
+
+function baseHdrs(type) {
+  return {
+    'Content-Type': 'application/json',
+    'Access-Control-Allow-Origin': '*',
+    'Cache-Control': CACHE[type] || CACHE.default,
+  };
+}
 
 function wsGet(path) {
   return new Promise(function (resolve, reject) {
@@ -38,9 +47,9 @@ function wsGet(path) {
 }
 
 exports.handler = async function (event) {
-  if (!KEY) return { statusCode: 500, headers: hdrs, body: JSON.stringify({ error: 'API key not configured' }) };
+  if (!KEY) return { statusCode: 500, headers: baseHdrs('default'), body: JSON.stringify({ error: 'API key not configured' }) };
 
-  var p   = event.queryStringParameters || {};
+  var p    = event.queryStringParameters || {};
   var type = p.type || 'search';
 
   try {
@@ -48,48 +57,19 @@ exports.handler = async function (event) {
     if (type === 'search') {
       var q    = encodeURIComponent(p.query || '');
       var page = parseInt(p.page || '1');
-      if (!q) return { statusCode: 400, headers: hdrs, body: JSON.stringify({ error: 'query required' }) };
+      if (!q) return { statusCode: 400, headers: baseHdrs(type), body: JSON.stringify({ error: 'query required' }) };
       var res = await wsGet('/v01/whisky/bottle_search?query=' + q + '&page=' + page);
-      return { statusCode: 200, headers: hdrs, body: JSON.stringify(res) };
+      return { statusCode: 200, headers: baseHdrs(type), body: JSON.stringify(res) };
     }
 
-    /* ── BOTTLE DETAILS ── */
-    if (type === 'details') {
-      var id = (p.id || '').replace(/[^A-Za-z0-9]/g, '');
-      if (!id) return { statusCode: 400, headers: hdrs, body: JSON.stringify({ error: 'id required' }) };
-      var res = await wsGet('/v01/whisky/bottle_details?whisky_id=' + id);
-      return { statusCode: 200, headers: hdrs, body: JSON.stringify(res) };
-    }
-
-    /* ── AUCTION + RETAIL PRICING ── */
-    if (type === 'pricing') {
-      var id  = (p.id || '').replace(/[^A-Za-z0-9]/g, '');
-      var cur = (p.currency || 'GBP').replace(/[^A-Z]/g, '').slice(0, 3);
-      if (!id) return { statusCode: 400, headers: hdrs, body: JSON.stringify({ error: 'id required' }) };
-      var [auction, retail] = await Promise.all([
-        wsGet('/v01/whisky/auction_pricing?whisky_id=' + id + '&currency_code=' + cur),
-        wsGet('/v01/whisky/retail_pricing?whisky_id='  + id + '&currency_code=' + cur),
-      ]);
-      return { statusCode: 200, headers: hdrs, body: JSON.stringify({ auction, retail }) };
-    }
-
-    /* ── RATING ── */
-    if (type === 'rating') {
-      var id = (p.id || '').replace(/[^A-Za-z0-9]/g, '');
-      if (!id) return { statusCode: 400, headers: hdrs, body: JSON.stringify({ error: 'id required' }) };
-      var res = await wsGet('/v01/whisky/whiskybase_rating?whisky_id=' + id);
-      return { statusCode: 200, headers: hdrs, body: JSON.stringify(res) };
-    }
-
-    /* ── FULL (details + pricing + rating) ── */
+    /* ── FULL (details + pricing + rating in one shot) ── */
     if (type === 'full') {
       var id  = (p.id || '').replace(/[^A-Za-z0-9]/g, '');
       var cur = (p.currency || 'GBP').replace(/[^A-Z]/g, '').slice(0, 3);
-      if (!id) return { statusCode: 400, headers: hdrs, body: JSON.stringify({ error: 'id required' }) };
+      if (!id) return { statusCode: 400, headers: baseHdrs(type), body: JSON.stringify({ error: 'id required' }) };
 
       var details = await wsGet('/v01/whisky/bottle_details?whisky_id=' + id);
-      /* Use BG (bottle group) ID for pricing if available */
-      var bgId = (details.parent_bottle_group_id || id).replace(/[^A-Za-z0-9]/g, '');
+      var bgId    = (details.parent_bottle_group_id || id).replace(/[^A-Za-z0-9]/g, '');
 
       var [auction, retail, rating] = await Promise.all([
         wsGet('/v01/whisky/auction_pricing?whisky_id='  + bgId + '&currency_code=' + cur),
@@ -99,8 +79,8 @@ exports.handler = async function (event) {
 
       return {
         statusCode: 200,
-        headers: hdrs,
-        body: JSON.stringify({ details, auction, retail, rating, currency: cur }),
+        headers: baseHdrs(type),
+        body: JSON.stringify({ details, auction, retail, rating, currency: cur, bg_id: bgId }),
       };
     }
 
@@ -108,25 +88,25 @@ exports.handler = async function (event) {
     if (type === 'history') {
       var id  = (p.id || '').replace(/[^A-Za-z0-9]/g, '');
       var cur = (p.currency || 'GBP').replace(/[^A-Z]/g, '').slice(0, 3);
-      if (!id) return { statusCode: 400, headers: hdrs, body: JSON.stringify({ error: 'id required' }) };
-      /* Try BG_ ID first for history; fall back gracefully */
+      if (!id) return { statusCode: 400, headers: baseHdrs(type), body: JSON.stringify({ error: 'id required' }) };
       try {
         var res = await wsGet('/v01/whisky/auction_price_history?whisky_id=' + id + '&currency_code=' + cur);
-        return { statusCode: 200, headers: hdrs, body: JSON.stringify(res) };
-      } catch(e) {
-        return { statusCode: 200, headers: hdrs, body: JSON.stringify({ prices: [], error: e.message }) };
+        return { statusCode: 200, headers: baseHdrs(type), body: JSON.stringify(res) };
+      } catch (e) {
+        /* Return empty rather than erroring — client caches this too so we don't retry */
+        return { statusCode: 200, headers: baseHdrs(type), body: JSON.stringify({ prices: [] }) };
       }
     }
 
-    /* ── CREDITS ── */
+    /* ── CREDITS (never cached) ── */
     if (type === 'credits') {
       var res = await wsGet('/v01/utilities/credit_balance');
-      return { statusCode: 200, headers: hdrs, body: JSON.stringify(res) };
+      return { statusCode: 200, headers: baseHdrs(type), body: JSON.stringify(res) };
     }
 
-    return { statusCode: 400, headers: hdrs, body: JSON.stringify({ error: 'unknown type' }) };
+    return { statusCode: 400, headers: baseHdrs('default'), body: JSON.stringify({ error: 'unknown type' }) };
 
   } catch (e) {
-    return { statusCode: 502, headers: hdrs, body: JSON.stringify({ error: e.message }) };
+    return { statusCode: 502, headers: baseHdrs('default'), body: JSON.stringify({ error: e.message }) };
   }
 };
