@@ -2481,6 +2481,23 @@
 
   /* ── WHISKY TERMINAL ─────────────────────────────────────────── */
   function renderWhiskyLookup(id, body) {
+    var CURRENCIES = ['GBP','USD','EUR','HKD','JPY','SGD','CHF','AUD','CAD','CNY'];
+    var _cur = 'GBP';
+    var _results = [];
+    var _selectedId = null;
+    var _debounce = null;
+    var _WL_KEY = 'tbt_whisky_wl';
+    var SUGGESTED = [
+      {q:'Macallan 18 Sherry',    label:'MACALLAN 18 SHERRY OAK'},
+      {q:'Ardbeg Uigeadail',      label:'ARDBEG UIGEADAIL'},
+      {q:'Springbank 15',         label:'SPRINGBANK 15YO'},
+      {q:'Glenfarclas 25',        label:'GLENFARCLAS 25YO'},
+      {q:'Port Ellen 1979',       label:'PORT ELLEN 1979'},
+      {q:'Dalmore King Alexander',label:'DALMORE KING ALEXANDER'},
+      {q:'Balvenie 21 Portwood',  label:'BALVENIE 21 PORTWOOD'},
+      {q:'Laphroaig 10',          label:'LAPHROAIG 10YO'},
+    ];
+
     /* ── Layout ── */
     body.style.cssText = 'display:flex;flex-direction:column;height:100%;overflow:hidden;background:#090909;font-family:var(--font,monospace);';
     body.innerHTML =
