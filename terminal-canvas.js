@@ -68,64 +68,20 @@
   function buildTabBar() {
     var bar = document.getElementById('tbc-tab-bar');
     if (!bar) return;
-    bar.innerHTML =
-      '<button class="tbc-tab active" data-tab="terminal">▌ TERMINAL</button>' +
-      '<div class="tbc-tab-sep"></div>' +
-      '<button class="tbc-tab" data-tab="vault">VAULT</button>' +
-      '<button class="tbc-tab" data-tab="news">NEWS FEED</button>' +
-      '<button class="tbc-tab-add" id="tbc-add-btn">＋ ADD WIDGET</button>';
-
-    bar.querySelectorAll('.tbc-tab[data-tab]').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        bar.querySelectorAll('.tbc-tab[data-tab]').forEach(function (b) { b.classList.remove('active'); });
-        btn.classList.add('active');
-        var tab = btn.dataset.tab;
-        document.getElementById('tbc-canvas-wrap').style.display = tab === 'terminal' ? 'block' : 'none';
-        var vault = document.getElementById('vault-section');
-        if (vault) vault.style.display = tab === 'vault' ? 'block' : 'none';
-        /* Hide intel popouts when leaving terminal; restore when returning */
-        var vis = tab === 'terminal' ? '' : 'none';
-        document.querySelectorAll('.intel-popwin, .intel-tab-group').forEach(function (el) {
-          el.style.display = vis;
-        });
-        /* News feed panel — static HTML, lazy-load iframe src */
-        var newsPanel = document.getElementById('tbc-news-panel');
-        if (newsPanel) {
-          if (tab === 'news') {
-            var nif = document.getElementById('tbc-news-iframe');
-            if (nif && !nif.src) nif.src = 'news.html';
-          }
-          newsPanel.style.display = tab === 'news' ? 'block' : 'none';
-        }
-        /* Ticker: only visible on terminal tab, respecting user's hidden preference */
-        var ticker = document.getElementById('content-ticker');
-        var restoreBtn = document.getElementById('ttb-ticker-restore');
-        if (ticker) {
-          if (tab === 'terminal') {
-            /* Restore to user's preference when returning to terminal */
-            var isHidden = window._tickerHidden || localStorage.getItem('tkHidden') === '1';
-            if (!isHidden) {
-              ticker.style.display = 'flex';
-              document.body.classList.add('ticker-on');
-              if (restoreBtn) restoreBtn.style.display = 'none';
-            } else {
-              ticker.style.display = 'none';
-              document.body.classList.remove('ticker-on');
-              if (restoreBtn) restoreBtn.style.display = '';
-            }
-          } else {
-            /* Hide ticker on vault and news feed */
-            ticker.style.display = 'none';
-            document.body.classList.remove('ticker-on');
-            if (restoreBtn) restoreBtn.style.display = 'none';
-          }
-        }
-      });
-    });
-
-    document.getElementById('tbc-add-btn').addEventListener('click', function (e) {
-      toggleAddMenu(e.currentTarget);
-    });
+    /* Vault-only mode — terminal and news are not yet released to subscribers */
+    bar.innerHTML = '<button class="tbc-tab active" data-tab="vault">VAULT</button>';
+    /* Activate vault immediately */
+    var canvas = document.getElementById('tbc-canvas-wrap');
+    var vault  = document.getElementById('vault-section');
+    var newsPanel = document.getElementById('tbc-news-panel');
+    var ticker = document.getElementById('content-ticker');
+    var restoreBtn = document.getElementById('ttb-ticker-restore');
+    if (canvas)    canvas.style.display    = 'none';
+    if (newsPanel) newsPanel.style.display = 'none';
+    if (vault)     vault.style.display     = 'block';
+    if (ticker)    ticker.style.display    = 'none';
+    if (restoreBtn) restoreBtn.style.display = 'none';
+    document.body.classList.remove('ticker-on');
   }
 
   /* ── ADD WIDGET MENU ── */
