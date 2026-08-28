@@ -152,6 +152,7 @@
       {type:'sector_heatmap', icon:'▩', lbl:'SECTOR HEATMAP',        sub:'US equity sectors — day% performance with heatmap colouring'},
       {type:'watchlist',      icon:'◈', lbl:'MY WATCHLIST',          sub:'Pin your own tickers with live prices and day change'},
       {type:'global_map',     icon:'◉', lbl:'GLOBAL MAP',            sub:'World view — macro rates, inflation, gold production, whisky regions'},
+      {type:'whisky_lookup',  icon:'▣', lbl:'WHISKY TERMINAL',        sub:'Live auction & retail prices, ratings, quartile analysis — powered by WhiskyStats'},
     ].map(function (w) {
       return '<div class="tbc-add-item" data-type="' + w.type + '">' +
         '<span class="tbc-add-icon">' + w.icon + '</span>' +
@@ -206,7 +207,7 @@
     el.style.cssText = 'left:' + cfg.x + 'px;top:' + cfg.y + 'px;width:' + cfg.w + 'px;height:' + cfg.h + 'px;z-index:' + (++window._sharedZ) + ';';
 
     var icons = {news:'◈', market:'◉', reports:'▣', notes:'✎', intel:'◆', chat:'◎', calendar:'◷', notes_inbox:'✉', report_viewer:'▤', econ_calendar:'◫', macro_chart:'◐', macro_intel:'◧', macro_monitor:'▦', sector_heatmap:'▩', watchlist:'◈', global_map:'◉'};
-    var titles = {news:'LIVE HEADLINES', market:'MARKET PRICES', reports:'VAULT · LATEST', notes:'MY NOTES', intel:'BROKERS INTEL', chat:'FIRM CHAT', calendar:'CALENDAR', notes_inbox:'FIRM NOTES', report_viewer:'REPORT', econ_calendar:'ECONOMIC CALENDAR', macro_chart:'ASSET COMPARISON', macro_intel:'MACRO INTELLIGENCE', macro_monitor:'MACRO MONITOR', sector_heatmap:'SECTOR HEATMAP', watchlist:'MY WATCHLIST', global_map:'GLOBAL MAP'};
+    var titles = {news:'LIVE HEADLINES', market:'MARKET PRICES', reports:'VAULT · LATEST', notes:'MY NOTES', intel:'BROKERS INTEL', chat:'FIRM CHAT', calendar:'CALENDAR', notes_inbox:'FIRM NOTES', report_viewer:'REPORT', econ_calendar:'ECONOMIC CALENDAR', macro_chart:'ASSET COMPARISON', macro_intel:'MACRO INTELLIGENCE', macro_monitor:'MACRO MONITOR', sector_heatmap:'SECTOR HEATMAP', watchlist:'MY WATCHLIST', global_map:'GLOBAL MAP', whisky_lookup:'WHISKY TERMINAL'};
 
     el.innerHTML =
       '<div class="tbc-widget-bar">' +
@@ -319,6 +320,7 @@
     else if (type === 'global_map')     renderGlobalMap(id, body);
     else if (type === 'macro_chart')    renderMacroChart(id, body);
     else if (type === 'macro_intel')    renderMacroIntel(id, body);
+    else if (type === 'whisky_lookup')  renderWhiskyLookup(id, body);
   }
 
   /* ── NEWS ── */
@@ -2475,6 +2477,236 @@
       .catch(function () {
         body.innerHTML = '<div class="tbw-loading">MACRO INTELLIGENCE UNAVAILABLE</div>';
       });
+  }
+
+  /* ── WHISKY TERMINAL ─────────────────────────────────────────── */
+  function renderWhiskyLookup(id, body) {
+    var CURRENCIES = ['GBP','USD','EUR','HKD','JPY','SGD','CHF','AUD','CAD','CNY'];
+    var _cur = 'GBP';
+    var _results = [];
+    var _selectedId = null;
+    var _selectedBgId = null;
+    var _debounce = null;
+
+    function fmt(n, cur) {
+      if (n == null) return '—';
+      var sym = {GBP:'£',USD:'$',EUR:'€',HKD:'HK$',JPY:'¥',SGD:'S$',CHF:'Fr',AUD:'A$',CAD:'C$',CNY:'¥'}[cur] || cur + ' ';
+      return sym + Number(n).toLocaleString('en-GB', {maximumFractionDigits: 0});
+    }
+    function fmtPct(n) {
+      if (n == null) return '—';
+      var sign = n >= 0 ? '+' : '';
+      return sign + (n * 100).toFixed(1) + '%';
+    }
+    function col(n) { return n == null ? '#555' : n >= 0 ? '#5aad7a' : '#e05050'; }
+
+    body.style.cssText = 'display:flex;flex-direction:column;height:100%;overflow:hidden;background:#090909;font-family:var(--font,monospace);';
+    body.innerHTML =
+      '<div style="padding:10px 10px 6px;border-bottom:1px solid #161616;flex-shrink:0;">' +
+        '<div style="display:flex;gap:6px;align-items:center;">' +
+          '<input id="wl-search-'+id+'" type="text" placeholder="▸ SEARCH — distillery, bottling, age..." '+
+            'style="flex:1;background:#111;border:1px solid #1e1e1e;color:#ccc;font-family:var(--font);font-size:9px;letter-spacing:.14em;padding:6px 8px;outline:none;" />' +
+          '<select id="wl-cur-'+id+'" style="background:#111;border:1px solid #1e1e1e;color:#888;font-family:var(--font);font-size:8px;padding:5px 4px;letter-spacing:.1em;">' +
+            CURRENCIES.map(function(c){ return '<option value="'+c+'"'+(c==='GBP'?' selected':'')+'>'+c+'</option>'; }).join('') +
+          '</select>' +
+        '</div>' +
+      '</div>' +
+      '<div id="wl-results-'+id+'" style="flex-shrink:0;max-height:160px;overflow-y:auto;border-bottom:1px solid #111;"></div>' +
+      '<div id="wl-detail-'+id+'" style="flex:1;overflow-y:auto;"></div>' +
+      '<div style="padding:4px 10px;font-size:6px;letter-spacing:.12em;color:#222;border-top:1px solid #111;flex-shrink:0;">DATA BY WHISKYSTATS · WHISKYBASE</div>';
+
+    var searchEl  = body.querySelector('#wl-search-'+id);
+    var curEl     = body.querySelector('#wl-cur-'+id);
+    var resultsEl = body.querySelector('#wl-results-'+id);
+    var detailEl  = body.querySelector('#wl-detail-'+id);
+
+    function showLoading(el, msg) {
+      el.innerHTML = '<div style="padding:12px 10px;font-size:7px;letter-spacing:.18em;color:#333;">'+msg+'<span class="ld"></span></div>';
+    }
+
+    function renderResults(data) {
+      if (!data || !data.results || !data.results.length) {
+        resultsEl.innerHTML = '<div style="padding:10px;font-size:7px;letter-spacing:.14em;color:#333;">NO RESULTS</div>';
+        return;
+      }
+      _results = data.results;
+      resultsEl.innerHTML = _results.map(function(r, i) {
+        return '<div class="wl-row" data-i="'+i+'" style="display:flex;align-items:center;gap:8px;padding:6px 10px;cursor:pointer;border-bottom:1px solid #0d0d0d;">' +
+          '<img src="'+r.whisky_image_url+'" style="width:24px;height:32px;object-fit:contain;flex-shrink:0;opacity:.85;" onerror="this.style.display=\'none\'" />' +
+          '<div style="flex:1;min-width:0;">' +
+            '<div style="font-size:8px;letter-spacing:.1em;color:#bbb;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+r.whisky_name+'</div>' +
+            '<div style="font-size:6px;letter-spacing:.14em;color:#444;margin-top:1px;">'+r.whisky_id+'</div>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+      resultsEl.querySelectorAll('.wl-row').forEach(function(row) {
+        row.addEventListener('mouseenter', function(){ row.style.background='#111'; });
+        row.addEventListener('mouseleave', function(){ row.style.background=''; });
+        row.addEventListener('click', function() {
+          var item = _results[parseInt(row.dataset.i)];
+          loadBottle(item);
+        });
+      });
+    }
+
+    function loadBottle(item) {
+      _selectedId = item.whisky_id;
+      resultsEl.innerHTML = '';
+      showLoading(detailEl, 'LOADING MARKET DATA');
+      fetch('/.netlify/functions/whisky-data?type=full&id='+encodeURIComponent(item.whisky_id)+'&currency='+_cur)
+        .then(function(r){ return r.json(); })
+        .then(function(d){ renderDetail(d, item); })
+        .catch(function(){ detailEl.innerHTML = '<div style="padding:16px;font-size:7px;letter-spacing:.18em;color:#333;">DATA UNAVAILABLE</div>'; });
+    }
+
+    function renderDetail(d, item) {
+      var det = d.details || {};
+      var auc = d.auction || {};
+      var ret = d.retail  || {};
+      var rat = d.rating  || {};
+      var cur = d.currency || _cur;
+
+      var mv   = auc.market_value;
+      var mv12 = auc.latest_12m || {};
+      var lat  = auc.latest_auction_price || {};
+      var hi   = auc.max_auction_price || {};
+      var chg  = mv12.market_value_change_pct;
+
+      function row(lbl, val, vc) {
+        return '<div style="display:flex;justify-content:space-between;align-items:baseline;padding:3px 0;border-bottom:1px solid #0d0d0d;">' +
+          '<span style="font-size:6.5px;letter-spacing:.18em;color:#3a3a3a;">'+lbl+'</span>' +
+          '<span style="font-size:9px;letter-spacing:.06em;color:'+(vc||'#aaa')+';">'+val+'</span>' +
+        '</div>';
+      }
+
+      /* Price quartile bar */
+      var qMin = mv12.buyer_price_min, qMax = mv12.buyer_price_max;
+      var qQ1 = mv12.buyer_price_qrt1, qQ2 = mv12.buyer_price_qrt2, qQ3 = mv12.buyer_price_qrt3;
+      var qAvg = mv12.buyer_price_avg;
+      var barHtml = '';
+      if (qMin != null && qMax != null && qMax > qMin) {
+        var rng = qMax - qMin;
+        function pct(v) { return ((v - qMin) / rng * 100).toFixed(1); }
+        var q1p = pct(qQ1), q3p = pct(qQ3), q2p = pct(qQ2), avgp = pct(qAvg), mvp = mv != null ? pct(mv) : null;
+        barHtml =
+          '<div style="margin:12px 0 4px;">' +
+            '<div style="display:flex;justify-content:space-between;margin-bottom:4px;">' +
+              '<span style="font-size:6px;letter-spacing:.14em;color:#2e2e2e;">12-MONTH AUCTION RANGE</span>' +
+              '<span style="font-size:6px;letter-spacing:.1em;color:#444;">'+mv12.number_of_trades+' TRADES</span>' +
+            '</div>' +
+            '<div style="position:relative;height:18px;background:#0d0d0d;border:1px solid #1a1a1a;">' +
+              '<div style="position:absolute;left:'+q1p+'%;width:'+(q3p-q1p)+'%;height:100%;background:rgba(233,113,50,0.18);"></div>' +
+              '<div style="position:absolute;left:'+q2p+'%;width:1px;height:100%;background:#E97132;opacity:.7;"></div>' +
+              (mvp!=null?'<div style="position:absolute;left:'+mvp+'%;width:2px;height:100%;background:#E97132;"></div>':'') +
+              '<div style="position:absolute;left:'+avgp+'%;width:1px;height:100%;background:#555;top:0;"></div>' +
+            '</div>' +
+            '<div style="display:flex;justify-content:space-between;margin-top:3px;">' +
+              '<span style="font-size:6px;color:#2e2e2e;">'+fmt(qMin,cur)+'</span>' +
+              '<span style="font-size:6px;color:#555;">AVG '+fmt(qAvg,cur)+'</span>' +
+              '<span style="font-size:6px;color:#2e2e2e;">'+fmt(qMax,cur)+'</span>' +
+            '</div>' +
+          '</div>';
+      }
+
+      /* Retail range */
+      var retHtml = '';
+      if (ret.retail_price_avg != null) {
+        var rMin = ret.retail_price_min, rMax = ret.retail_price_max, rAvg = ret.retail_price_avg;
+        var rRng = rMax - rMin;
+        function rPct(v) { return rRng > 0 ? ((v - rMin) / rRng * 100).toFixed(1) : 50; }
+        retHtml =
+          '<div style="margin:10px 0 4px;">' +
+            '<div style="display:flex;justify-content:space-between;margin-bottom:4px;">' +
+              '<span style="font-size:6px;letter-spacing:.14em;color:#2e2e2e;">RETAIL MARKET · '+ret.number_of_retail_listings+' LISTINGS</span>' +
+            '</div>' +
+            '<div style="position:relative;height:12px;background:#0d0d0d;border:1px solid #1a1a1a;">' +
+              '<div style="position:absolute;left:'+rPct(ret.retail_price_qrt1)+'%;width:'+(rPct(ret.retail_price_qrt3)-rPct(ret.retail_price_qrt1))+'%;height:100%;background:rgba(90,173,122,0.15);"></div>' +
+              '<div style="position:absolute;left:'+rPct(rAvg)+'%;width:1px;height:100%;background:#5aad7a;opacity:.6;"></div>' +
+            '</div>' +
+            '<div style="display:flex;justify-content:space-between;margin-top:3px;">' +
+              '<span style="font-size:6px;color:#2e2e2e;">'+fmt(rMin,cur)+'</span>' +
+              '<span style="font-size:6px;color:#3a7a55;">RETAIL AVG '+fmt(rAvg,cur)+'</span>' +
+              '<span style="font-size:6px;color:#2e2e2e;">'+fmt(rMax,cur)+'</span>' +
+            '</div>' +
+          '</div>';
+      }
+
+      detailEl.innerHTML =
+        '<div style="padding:10px;">' +
+          /* Header */
+          '<div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:10px;">' +
+            '<img src="'+(det.whisky_image_url||'')+'" style="width:40px;object-fit:contain;flex-shrink:0;" onerror="this.style.display=\'none\'" />' +
+            '<div style="flex:1;min-width:0;">' +
+              '<div style="font-size:7px;letter-spacing:.2em;color:#555;margin-bottom:2px;">'+(det.brand||'')+'</div>' +
+              '<div style="font-size:10px;letter-spacing:.08em;color:#ccc;line-height:1.3;">'+(det.bottler_serie||'')+' '+(det.name||'')+'</div>' +
+              '<div style="font-size:6.5px;letter-spacing:.14em;color:#3a3a3a;margin-top:3px;">'+(det.type||'')+(det.age?' · '+det.age+'YO':'')+(det.strength?' · '+det.strength+'%vol':'')+(det.cask_type?' · '+det.cask_type:'')+'</div>' +
+            '</div>' +
+            '<div style="text-align:right;flex-shrink:0;">' +
+              (rat.whiskybase_rating != null ? '<div style="font-size:16px;letter-spacing:.04em;color:#E97132;">'+rat.whiskybase_rating.toFixed(1)+'</div><div style="font-size:6px;letter-spacing:.14em;color:#333;">'+rat.whiskybase_rating_count+' RATINGS</div>' : '') +
+            '</div>' +
+          '</div>' +
+          /* Market value hero */
+          (mv != null ? '<div style="background:#0d0d0d;border:1px solid #1a1a1a;padding:10px;margin-bottom:8px;">' +
+            '<div style="font-size:6.5px;letter-spacing:.2em;color:#3a3a3a;margin-bottom:4px;">MARKET VALUE · '+cur+'</div>' +
+            '<div style="display:flex;align-items:baseline;gap:10px;">' +
+              '<div style="font-size:22px;letter-spacing:.04em;color:#E97132;">'+fmt(mv,cur)+'</div>' +
+              '<div style="font-size:9px;letter-spacing:.06em;color:'+col(chg)+';">'+fmtPct(chg)+' 12M</div>' +
+            '</div>' +
+            '<div style="font-size:6px;letter-spacing:.14em;color:#2e2e2e;margin-top:3px;">LAST UPDATED '+auc.market_value_date+' · '+auc.market_value_trades+' RECENT TRADES</div>' +
+          '</div>' : '') +
+          /* Quartile bar */
+          barHtml +
+          /* Stats grid */
+          '<div style="margin-top:8px;">' +
+            row('LATEST AUCTION', fmt(lat.buyer_price_avg,cur), '#bbb') +
+            row('LATEST AUCTION DATE', lat.price_date || '—') +
+            row('LATEST AUCTION RANGE', lat.buyer_price_min != null ? fmt(lat.buyer_price_min,cur)+' — '+fmt(lat.buyer_price_max,cur) : '—') +
+            row('ALL-TIME HIGH', fmt(hi.buyer_price,cur)+' ('+hi.price_date+')','#E97132') +
+            row('TOTAL AUCTION TRADES', auc.total_trades != null ? auc.total_trades.toLocaleString() : '—') +
+            row('12M MEDIAN', fmt(qQ2,cur)) +
+            row('12M Q1 / Q3', qQ1 != null ? fmt(qQ1,cur)+' / '+fmt(qQ3,cur) : '—') +
+          '</div>' +
+          /* Retail */
+          retHtml +
+          /* Attribution */
+          '<div style="margin-top:10px;display:flex;gap:10px;">' +
+            '<a href="'+(det.whiskystats_url||'#')+'" target="_blank" style="font-size:6px;letter-spacing:.14em;color:#2e2e2e;text-decoration:none;">↗ WHISKYSTATS</a>' +
+            '<a href="'+(det.whiskybase_url||'#')+'" target="_blank" style="font-size:6px;letter-spacing:.14em;color:#2e2e2e;text-decoration:none;">↗ WHISKYBASE</a>' +
+          '</div>' +
+        '</div>';
+    }
+
+    function doSearch(q) {
+      if (!q || q.length < 2) { resultsEl.innerHTML = ''; return; }
+      showLoading(resultsEl, 'SEARCHING');
+      fetch('/.netlify/functions/whisky-data?type=search&query='+encodeURIComponent(q)+'&page=1')
+        .then(function(r){ return r.json(); })
+        .then(renderResults)
+        .catch(function(){ resultsEl.innerHTML = '<div style="padding:10px;font-size:7px;letter-spacing:.14em;color:#333;">SEARCH ERROR</div>'; });
+    }
+
+    searchEl.addEventListener('input', function() {
+      var q = searchEl.value.trim();
+      clearTimeout(_debounce);
+      if (q.length < 2) { resultsEl.innerHTML = ''; return; }
+      _debounce = setTimeout(function(){ doSearch(q); }, 380);
+    });
+
+    curEl.addEventListener('change', function() {
+      _cur = curEl.value;
+      if (_selectedId) {
+        var item = _results.find(function(r){ return r.whisky_id === _selectedId; }) || {whisky_id: _selectedId};
+        loadBottle(item);
+      }
+    });
+
+    /* Placeholder state */
+    detailEl.innerHTML =
+      '<div style="padding:20px 12px;text-align:center;">' +
+        '<div style="font-size:7px;letter-spacing:.22em;color:#222;line-height:2;">WHISKY TERMINAL</div>' +
+        '<div style="font-size:6px;letter-spacing:.16em;color:#1a1a1a;margin-top:6px;">SEARCH ANY BOTTLE TO SEE</div>' +
+        '<div style="font-size:6px;letter-spacing:.16em;color:#1a1a1a;">LIVE AUCTION & RETAIL DATA</div>' +
+      '</div>';
   }
 
   window.terminalPinSearch = function (query, type, ticker, label) {
