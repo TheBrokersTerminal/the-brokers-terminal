@@ -2567,10 +2567,21 @@
     var detailEl= body.querySelector('#wl-detail-'+id);
     var crEl    = body.querySelector('#wl-cr-'+id);
 
-    /* Credits */
-    fetch('/.netlify/functions/whisky-data?type=credits').then(function(r){ return r.json(); }).then(function(d){
-      if (d.credit_usage != null) crEl.textContent = (d.credit_limit - d.credit_usage) + ' CREDITS';
-    }).catch(function(){});
+    /* Credits — fetch once per hour, cache in localStorage */
+    (function(){
+      var CR_KEY = 'tbt_wl_credits', CR_TTL = 3600000;
+      try {
+        var cached = JSON.parse(localStorage.getItem(CR_KEY)||'null');
+        if (cached && Date.now() - cached.ts < CR_TTL) { crEl.textContent = cached.txt; return; }
+      } catch(e){}
+      fetch('/.netlify/functions/whisky-data?type=credits').then(function(r){ return r.json(); }).then(function(d){
+        if (d.credit_usage != null) {
+          var txt = (d.credit_limit - d.credit_usage) + ' CREDITS';
+          crEl.textContent = txt;
+          try { localStorage.setItem(CR_KEY, JSON.stringify({txt:txt, ts:Date.now()})); } catch(e){}
+        }
+      }).catch(function(){});
+    })();
 
     /* ── Helpers ── */
     function fmt(n, cur) {
@@ -2803,13 +2814,29 @@
       });
     }
 
+    /* ── Cache helpers (24h for full data, 7d for history) ── */
+    function cacheGet(key, ttl) {
+      try {
+        var v = JSON.parse(localStorage.getItem(key)||'null');
+        if (v && Date.now() - v.ts < ttl) return v.data;
+      } catch(e){}
+      return null;
+    }
+    function cacheSet(key, data) {
+      try { localStorage.setItem(key, JSON.stringify({data:data, ts:Date.now()})); } catch(e){}
+    }
+
     /* ── Load bottle ── */
     function loadBottle(item) {
       _selectedId = item.whisky_id;
+      var cacheKey = 'tbt_wb_'+item.whisky_id+'_'+_cur;
+      var cached = cacheGet(cacheKey, 86400000); /* 24 hours */
+      if (cached) { renderDetail(cached, item); return; }
+
       detailEl.innerHTML = '<div style="padding:16px;font-size:8px;letter-spacing:.18em;color:#fff;opacity:.4;">LOADING<span class="ld"></span></div>';
-      Promise.all([
-        fetch('/.netlify/functions/whisky-data?type=full&id='+encodeURIComponent(item.whisky_id)+'&currency='+_cur).then(function(r){ return r.json(); }),
-      ]).then(function(res){ renderDetail(res[0], item); })
+      fetch('/.netlify/functions/whisky-data?type=full&id='+encodeURIComponent(item.whisky_id)+'&currency='+_cur)
+        .then(function(r){ return r.json(); })
+        .then(function(d){ cacheSet(cacheKey, d); renderDetail(d, item); })
         .catch(function(){ detailEl.innerHTML='<div style="padding:16px;font-size:8px;letter-spacing:.16em;color:#fff;opacity:.4;">DATA UNAVAILABLE</div>'; });
     }
 
@@ -2881,18 +2908,20 @@
       (function tryPaint(){
         var W = canvas.offsetWidth;
         if (!W && attempt++ < 14) { setTimeout(tryPaint, 50); return; }
-        fetch('/.netlify/functions/whisky-data?type=history&id='+encodeURIComponent(bgId)+'&currency='+cur)
-          .then(function(r){ return r.json(); })
-          .then(function(h){
-            /* Accept any array property that looks like time-series */
-            var pts = h.prices || h.auction_history || h.history || h.data || [];
-            if (Array.isArray(pts) && pts.length >= 3) {
-              paintTimeChart(canvas, pts, mv, cur);
-            } else {
-              paintStatChart(canvas, auc, ret);
-            }
-          })
-          .catch(function(){ paintStatChart(canvas, auc, ret); });
+        var histKey = 'tbt_hist_'+bgId+'_'+cur;
+        var cachedHist = cacheGet(histKey, 604800000); /* 7 days */
+        function applyHistory(h) {
+          var pts = (h && (h.prices || h.auction_history || h.history || h.data)) || [];
+          if (Array.isArray(pts) && pts.length >= 3) paintTimeChart(canvas, pts, mv, cur);
+          else paintStatChart(canvas, auc, ret);
+        }
+        if (cachedHist !== null) { applyHistory(cachedHist); }
+        else {
+          fetch('/.netlify/functions/whisky-data?type=history&id='+encodeURIComponent(bgId)+'&currency='+cur)
+            .then(function(r){ return r.json(); })
+            .then(function(h){ cacheSet(histKey, h); applyHistory(h); })
+            .catch(function(){ paintStatChart(canvas, auc, ret); });
+        }
       })();
 
       /* Watchlist */
