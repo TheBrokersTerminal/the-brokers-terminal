@@ -104,6 +104,20 @@ exports.handler = async function (event) {
       };
     }
 
+    /* ── AUCTION PRICE HISTORY ── */
+    if (type === 'history') {
+      var id  = (p.id || '').replace(/[^A-Za-z0-9]/g, '');
+      var cur = (p.currency || 'GBP').replace(/[^A-Z]/g, '').slice(0, 3);
+      if (!id) return { statusCode: 400, headers: hdrs, body: JSON.stringify({ error: 'id required' }) };
+      /* Try BG_ ID first for history; fall back gracefully */
+      try {
+        var res = await wsGet('/v01/whisky/auction_price_history?whisky_id=' + id + '&currency_code=' + cur);
+        return { statusCode: 200, headers: hdrs, body: JSON.stringify(res) };
+      } catch(e) {
+        return { statusCode: 200, headers: hdrs, body: JSON.stringify({ prices: [], error: e.message }) };
+      }
+    }
+
     /* ── CREDITS ── */
     if (type === 'credits') {
       var res = await wsGet('/v01/utilities/credit_balance');
