@@ -2487,6 +2487,12 @@
     var _selectedId = null;
     var _debounce = null;
     var _WL_KEY = 'tbt_whisky_wl';
+    var _filters = {region:'', age:'', cask:'', distillery:''};
+
+    var REGIONS = ['All Regions','Speyside','Islay','Highland','Lowland','Campbeltown','Islands','Japan','Ireland','USA','India','Taiwan'];
+    var AGES    = ['Any Age','NAS','10YO','12YO','15YO','18YO','21YO','25YO','30YO','40YO+'];
+    var CASKS   = ['Any Cask','Sherry Butt','Bourbon Cask','Port Pipe','Wine Cask','Ex-Bourbon','Oloroso','Pedro Ximenez','Madeira','Rum Cask'];
+
     var SUGGESTED = [
       {q:'Macallan 18 Sherry',    label:'MACALLAN 18 SHERRY OAK'},
       {q:'Ardbeg Uigeadail',      label:'ARDBEG UIGEADAIL'},
@@ -2500,32 +2506,68 @@
 
     /* ── Layout ── */
     body.style.cssText = 'display:flex;flex-direction:column;height:100%;overflow:hidden;background:#090909;font-family:var(--font,monospace);';
+
+    function ddSel(items, key, placeholderIndex) {
+      return '<select class="wl-flt" data-flt="'+key+'" style="background:#111;border:1px solid #252525;color:#fff;font-family:var(--font);font-size:7px;letter-spacing:.12em;padding:4px 5px;cursor:pointer;max-width:90px;">' +
+        items.map(function(v,i){ return '<option value="'+(i===0?'':v)+'">'+(i===0?v:v)+'</option>'; }).join('') +
+      '</select>';
+    }
+
     body.innerHTML =
-      /* Search bar */
-      '<div style="display:flex;gap:5px;padding:8px;border-bottom:1px solid #181818;flex-shrink:0;">' +
-        '<input id="wl-q-'+id+'" type="text" placeholder="▸  Macallan 18  ·  Ardbeg Uigeadail  ·  Port Ellen 1979..." '+
-          'style="flex:1;background:#111;border:1px solid #252525;color:#fff;font-family:var(--font);font-size:9px;letter-spacing:.12em;padding:7px 9px;outline:none;" />' +
-        '<select id="wl-cur-'+id+'" style="background:#111;border:1px solid #252525;color:#fff;font-family:var(--font);font-size:8px;padding:6px 5px;letter-spacing:.1em;cursor:pointer;">' +
+      /* ── Filter bar ── */
+      '<div style="display:flex;gap:4px;align-items:center;padding:6px 8px;border-bottom:1px solid #181818;flex-shrink:0;flex-wrap:wrap;">' +
+        '<span style="font-size:7px;letter-spacing:.16em;color:#fff;opacity:.4;margin-right:2px;">FILTER</span>' +
+        ddSel(REGIONS, 'region') +
+        ddSel(AGES,    'age') +
+        ddSel(CASKS,   'cask') +
+        '<input id="wl-dis-'+id+'" type="text" placeholder="DISTILLERY..." style="background:#111;border:1px solid #252525;color:#fff;font-family:var(--font);font-size:7px;letter-spacing:.12em;padding:4px 7px;outline:none;width:90px;" />' +
+        '<div style="flex:1;"></div>' +
+        '<select id="wl-cur-'+id+'" style="background:#111;border:1px solid #252525;color:#fff;font-family:var(--font);font-size:7px;padding:4px 4px;letter-spacing:.1em;cursor:pointer;">' +
           CURRENCIES.map(function(c){ return '<option value="'+c+'"'+(c==='GBP'?' selected':'')+'>'+c+'</option>'; }).join('') +
         '</select>' +
       '</div>' +
-      /* Results dropdown (hidden until search) */
-      '<div id="wl-drop-'+id+'" style="flex-shrink:0;display:none;max-height:180px;overflow-y:auto;border-bottom:1px solid #181818;background:#0c0c0c;"></div>' +
-      /* Main content */
-      '<div id="wl-main-'+id+'" style="flex:1;overflow-y:auto;"></div>' +
-      /* Footer */
-      '<div style="padding:4px 10px;font-size:7px;letter-spacing:.14em;color:#888;border-top:1px solid #141414;flex-shrink:0;display:flex;justify-content:space-between;">' +
+      /* ── Search bar ── */
+      '<div style="display:flex;gap:5px;padding:6px 8px;border-bottom:1px solid #181818;flex-shrink:0;">' +
+        '<input id="wl-q-'+id+'" type="text" placeholder="▸  Search distillery, bottling, vintage..." '+
+          'style="flex:1;background:#111;border:1px solid #252525;color:#fff;font-family:var(--font);font-size:9px;letter-spacing:.12em;padding:6px 9px;outline:none;" />' +
+      '</div>' +
+      /* ── Split body ── */
+      '<div style="flex:1;display:flex;overflow:hidden;">' +
+        /* Left: results list */
+        '<div id="wl-list-'+id+'" style="width:220px;flex-shrink:0;overflow-y:auto;border-right:1px solid #181818;display:flex;flex-direction:column;">' +
+          /* Onboarding */
+          '<div id="wl-guide-'+id+'" style="padding:12px 10px;">' +
+            '<div style="font-size:7px;letter-spacing:.18em;color:#fff;margin-bottom:8px;">TRY THESE</div>' +
+            '<div style="display:flex;flex-direction:column;gap:4px;">' +
+              SUGGESTED.map(function(s){
+                return '<button class="wl-sug" data-q="'+s.q+'" style="background:#111;border:1px solid #1e1e1e;color:#fff;font-family:var(--font);font-size:7px;letter-spacing:.12em;padding:5px 8px;cursor:pointer;text-align:left;">'+s.label+'</button>';
+              }).join('') +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+        /* Right: detail panel */
+        '<div id="wl-detail-'+id+'" style="flex:1;overflow-y:auto;">' +
+          '<div style="padding:28px 16px;text-align:center;">' +
+            '<div style="font-size:8px;letter-spacing:.2em;color:#fff;opacity:.3;">SELECT A WHISKY</div>' +
+            '<div style="font-size:7px;letter-spacing:.14em;color:#fff;opacity:.2;margin-top:6px;">USE FILTERS OR SEARCH TO FIND A BOTTLE</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+      /* ── Footer ── */
+      '<div style="padding:3px 10px;font-size:7px;letter-spacing:.14em;color:#fff;opacity:.4;border-top:1px solid #141414;flex-shrink:0;display:flex;justify-content:space-between;">' +
         '<span>DATA BY WHISKYSTATS · WHISKYBASE</span>' +
         '<span id="wl-cr-'+id+'"></span>' +
       '</div>';
 
-    var qEl   = body.querySelector('#wl-q-'+id);
-    var curEl = body.querySelector('#wl-cur-'+id);
-    var dropEl= body.querySelector('#wl-drop-'+id);
-    var mainEl= body.querySelector('#wl-main-'+id);
-    var crEl  = body.querySelector('#wl-cr-'+id);
+    var qEl     = body.querySelector('#wl-q-'+id);
+    var disEl   = body.querySelector('#wl-dis-'+id);
+    var curEl   = body.querySelector('#wl-cur-'+id);
+    var listEl  = body.querySelector('#wl-list-'+id);
+    var guideEl = body.querySelector('#wl-guide-'+id);
+    var detailEl= body.querySelector('#wl-detail-'+id);
+    var crEl    = body.querySelector('#wl-cr-'+id);
 
-    /* Show credit remaining */
+    /* Credits */
     fetch('/.netlify/functions/whisky-data?type=credits').then(function(r){ return r.json(); }).then(function(d){
       if (d.credit_usage != null) crEl.textContent = (d.credit_limit - d.credit_usage) + ' CREDITS';
     }).catch(function(){});
@@ -2536,15 +2578,16 @@
       var sym = {GBP:'£',USD:'$',EUR:'€',HKD:'HK$',JPY:'¥',SGD:'S$',CHF:'Fr',AUD:'A$',CAD:'C$',CNY:'¥'}[cur]||cur+' ';
       return sym + Number(n).toLocaleString('en-GB',{maximumFractionDigits:0});
     }
-    function fmtPct(n) {
-      if (n == null) return '—';
-      return (n >= 0 ? '+' : '') + (n * 100).toFixed(1) + '%';
+    function fmtPct(n) { return n == null ? '—' : (n >= 0 ? '+' : '') + (n * 100).toFixed(1) + '%'; }
+    function col(n) { return n == null ? '#fff' : n >= 0 ? '#5aad7a' : '#e05050'; }
+    function priceLbl(v) {
+      if (v == null) return '—';
+      return v >= 100000 ? (v/1000).toFixed(0)+'k' : v >= 10000 ? (v/1000).toFixed(1)+'k' : v >= 1000 ? (v/1000).toFixed(2)+'k' : v.toFixed(0);
     }
-    function col(n) { return n == null ? '#aaa' : n >= 0 ? '#5aad7a' : '#e05050'; }
-    function row(lbl, val, vc) {
+    function statRow(lbl, val, vc) {
       return '<div style="display:flex;justify-content:space-between;align-items:baseline;padding:4px 0;border-bottom:1px solid #141414;">' +
-        '<span style="font-size:8px;letter-spacing:.16em;color:#fff;opacity:.5;">'+lbl+'</span>' +
-        '<span style="font-size:10px;letter-spacing:.06em;color:'+(vc||'#fff')+';">'+val+'</span>' +
+        '<span style="font-size:8px;letter-spacing:.14em;color:#fff;opacity:.45;">'+lbl+'</span>' +
+        '<span style="font-size:10px;letter-spacing:.04em;color:'+(vc||'#fff')+';">'+val+'</span>' +
       '</div>';
     }
 
@@ -2554,157 +2597,220 @@
     function isWl(wid) { return getWl().some(function(x){ return x.whisky_id === wid; }); }
     function toggleWl(item, btn) {
       var wl = getWl();
-      var exists = wl.findIndex(function(x){ return x.whisky_id === item.whisky_id; });
-      if (exists >= 0) { wl.splice(exists, 1); btn.textContent = '☆ ADD TO MONITOR'; btn.style.color='#fff'; }
-      else { wl.push({whisky_id: item.whisky_id, bg_id: item.bg_id, name: item.whisky_name, currency: _cur}); btn.textContent = '★ IN MONITOR'; btn.style.color='#E97132'; }
+      var idx = wl.findIndex(function(x){ return x.whisky_id === item.whisky_id; });
+      if (idx >= 0) { wl.splice(idx, 1); btn.textContent = '☆ ADD TO MONITOR'; btn.style.color='#fff'; }
+      else { wl.push(item); btn.textContent = '★ IN MONITOR'; btn.style.color='#E97132'; }
       saveWl(wl);
     }
 
-    /* ── Canvas price chart ── */
-    function paintWhiskyChart(canvas, det, auc, ret) {
+    /* ── Time-series chart (primary) ── */
+    function paintTimeChart(canvas, pts, mv, cur) {
+      var W = canvas.offsetWidth || 400, H = canvas.height || 160;
+      canvas.width = W; canvas.height = H;
+      var ctx = canvas.getContext('2d');
+      var P = {t:12, r:10, b:22, l:54};
+      var cw = W - P.l - P.r, ch = H - P.t - P.b;
+
+      ctx.fillStyle = '#090909'; ctx.fillRect(0, 0, W, H);
+
+      /* Sort pts by date */
+      pts.sort(function(a,b){ return new Date(a.date||a.price_date||a.d||0) - new Date(b.date||b.price_date||b.d||0); });
+      var prices = pts.map(function(p){ return p.price || p.buyer_price_avg || p.value || p.p || 0; }).filter(function(v){ return v > 0; });
+      if (prices.length < 2) { canvas.style.display='none'; return; }
+
+      var yMin = Math.min.apply(null, prices) * 0.92;
+      var yMax = Math.max.apply(null, prices) * 1.08;
+      if (mv) yMax = Math.max(yMax, mv * 1.08);
+      var yRng = yMax - yMin || 1;
+      function xP(i){ return P.l + (i / (prices.length - 1)) * cw; }
+      function yP(v){ return P.t + ch - ((v - yMin) / yRng) * ch; }
+
+      /* Y grid + labels */
+      ctx.font = '8px monospace'; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+      var gridN = 5;
+      for (var gi = 0; gi <= gridN; gi++) {
+        var gv = yMin + (gi / gridN) * yRng;
+        var gy = yP(gv);
+        ctx.strokeStyle = 'rgba(255,255,255,0.05)'; ctx.lineWidth = 0.8;
+        ctx.beginPath(); ctx.moveTo(P.l, gy); ctx.lineTo(P.l + cw, gy); ctx.stroke();
+        ctx.fillStyle = 'rgba(255,255,255,0.55)';
+        ctx.fillText(priceLbl(gv), P.l - 4, gy);
+      }
+
+      /* Area fill */
+      var grad = ctx.createLinearGradient(0, P.t, 0, P.t + ch);
+      grad.addColorStop(0, 'rgba(233,113,50,0.3)');
+      grad.addColorStop(1, 'rgba(233,113,50,0)');
+      ctx.beginPath();
+      ctx.moveTo(xP(0), P.t + ch);
+      prices.forEach(function(v,i){ ctx.lineTo(xP(i), yP(v)); });
+      ctx.lineTo(xP(prices.length - 1), P.t + ch);
+      ctx.closePath();
+      ctx.fillStyle = grad; ctx.fill();
+
+      /* Price line */
+      ctx.beginPath();
+      prices.forEach(function(v,i){
+        if (i === 0) ctx.moveTo(xP(0), yP(v));
+        else ctx.lineTo(xP(i), yP(v));
+      });
+      ctx.strokeStyle = '#E97132'; ctx.lineWidth = 1.8; ctx.lineJoin = 'round'; ctx.stroke();
+
+      /* Latest price dot */
+      var lastX = xP(prices.length - 1), lastY = yP(prices[prices.length - 1]);
+      ctx.beginPath(); ctx.arc(lastX, lastY, 4, 0, Math.PI * 2);
+      ctx.fillStyle = '#E97132'; ctx.fill();
+      ctx.strokeStyle = '#090909'; ctx.lineWidth = 1.5; ctx.stroke();
+
+      /* X-axis date labels */
+      ctx.font = '7px monospace'; ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+      var firstDate = pts[0] && (pts[0].date || pts[0].price_date || pts[0].d || '');
+      var lastDate  = pts[pts.length-1] && (pts[pts.length-1].date || pts[pts.length-1].price_date || pts[pts.length-1].d || '');
+      if (firstDate) ctx.fillText(firstDate.slice(0,7), P.l, P.t + ch + 4);
+      if (lastDate)  { ctx.textAlign='right'; ctx.fillText(lastDate.slice(0,7), P.l + cw, P.t + ch + 4); }
+    }
+
+    /* ── Fallback statistical chart (when no time series) ── */
+    function paintStatChart(canvas, auc, ret) {
       var mv12 = auc.latest_12m || {};
       var hi   = auc.max_auction_price || {};
       var mv   = auc.market_value;
-      var qMin = mv12.buyer_price_min, qMax = mv12.buyer_price_max;
-      var qQ1 = mv12.buyer_price_qrt1, qQ2 = mv12.buyer_price_qrt2, qQ3 = mv12.buyer_price_qrt3, qAvg = mv12.buyer_price_avg;
-      var rAvg = ret && ret.retail_price_avg;
-      if (!qMin || !qMax || qMax <= qMin) { canvas.style.display='none'; return; }
+      var pts  = [mv12.buyer_price_min, mv12.buyer_price_qrt1, mv12.buyer_price_qrt2, mv12.buyer_price_avg, mv12.buyer_price_qrt3, mv12.buyer_price_max];
+      if (!pts[0] || !pts[5] || pts[5] <= pts[0]) { canvas.style.display='none'; return; }
 
-      var W = canvas.offsetWidth || 520, H = 130;
+      var W = canvas.offsetWidth || 400, H = canvas.height || 160;
       canvas.width = W; canvas.height = H;
       var ctx = canvas.getContext('2d');
-      var P = {t:14, r:12, b:20, l:66};
+      var P = {t:12, r:16, b:22, l:54};
       var cw = W - P.l - P.r, ch = H - P.t - P.b;
 
-      /* Y range: include hi if not extreme (>3x market val) */
-      var hiVal = (hi.buyer_price && mv && hi.buyer_price < mv * 4) ? hi.buyer_price : null;
-      var yMax = hiVal ? Math.max(qMax, hiVal) * 1.08 : qMax * 1.12;
-      var yMin = qMin * 0.88;
+      /* Y scale: min-max of 12M range only, with 8% padding each side */
+      var yMin = pts[0] * 0.92, yMax = pts[5] * 1.08;
       var yRng = yMax - yMin || 1;
       function yP(v){ return P.t + ch - ((v - yMin) / yRng) * ch; }
 
-      /* bg */
       ctx.fillStyle = '#090909'; ctx.fillRect(0, 0, W, H);
 
-      /* grid lines */
+      /* Grid + Y labels */
       ctx.font = '8px monospace'; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
-      var steps = [qMin, qQ1, qQ2, qAvg, qQ3, qMax];
-      steps.forEach(function(v){
+      pts.forEach(function(v){
         if (v == null) return;
         var y = yP(v);
-        ctx.strokeStyle = 'rgba(255,255,255,0.04)'; ctx.lineWidth = 0.8;
+        ctx.strokeStyle = 'rgba(255,255,255,0.05)'; ctx.lineWidth = 0.8;
         ctx.beginPath(); ctx.moveTo(P.l, y); ctx.lineTo(P.l + cw, y); ctx.stroke();
-        var lbl = v >= 10000 ? (v/1000).toFixed(0)+'k' : v >= 1000 ? (v/1000).toFixed(1)+'k' : v.toFixed(0);
-        ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.fillText(lbl, P.l - 4, y);
+        ctx.fillStyle = 'rgba(255,255,255,0.55)'; ctx.fillText(priceLbl(v), P.l - 4, y);
       });
 
-      /* IQR box (Q1→Q3) */
-      var bx = P.l + 20, bw = cw - 40;
-      var q1y = yP(qQ1), q3y = yP(qQ3);
-      ctx.fillStyle = 'rgba(233,113,50,0.12)';
-      ctx.fillRect(bx, q3y, bw, q1y - q3y);
-      ctx.strokeStyle = 'rgba(233,113,50,0.3)'; ctx.lineWidth = 0.8;
+      /* IQR filled band (Q1→Q3) */
+      var bx = P.l + 30, bw = cw - 60;
+      var q1y = yP(pts[1]), q3y = yP(pts[4]);
+      var band = ctx.createLinearGradient(0, q3y, 0, q1y);
+      band.addColorStop(0, 'rgba(233,113,50,0.25)');
+      band.addColorStop(1, 'rgba(233,113,50,0.08)');
+      ctx.fillStyle = band; ctx.fillRect(bx, q3y, bw, q1y - q3y);
+      ctx.strokeStyle = 'rgba(233,113,50,0.35)'; ctx.lineWidth = 0.8;
       ctx.strokeRect(bx, q3y, bw, q1y - q3y);
 
-      /* whiskers min→max */
+      /* Whiskers */
       var mid = P.l + cw / 2;
-      ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.lineWidth = 1;
-      ctx.setLineDash([2, 3]);
-      ctx.beginPath(); ctx.moveTo(mid, yP(qMin)); ctx.lineTo(mid, yP(qMax)); ctx.stroke();
+      ctx.strokeStyle = 'rgba(255,255,255,0.25)'; ctx.lineWidth = 1; ctx.setLineDash([2,3]);
+      ctx.beginPath(); ctx.moveTo(mid, yP(pts[0])); ctx.lineTo(mid, q1y); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(mid, q3y); ctx.lineTo(mid, yP(pts[5])); ctx.stroke();
       ctx.setLineDash([]);
-
-      /* min / max caps */
-      [qMin, qMax].forEach(function(v){
-        ctx.strokeStyle = 'rgba(255,255,255,0.35)'; ctx.lineWidth = 1.5;
-        ctx.beginPath(); ctx.moveTo(mid - 18, yP(v)); ctx.lineTo(mid + 18, yP(v)); ctx.stroke();
+      [pts[0], pts[5]].forEach(function(v){
+        ctx.strokeStyle = 'rgba(255,255,255,0.4)'; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(mid-16, yP(v)); ctx.lineTo(mid+16, yP(v)); ctx.stroke();
       });
 
-      /* median line */
-      ctx.strokeStyle = '#E97132'; ctx.lineWidth = 2;
-      ctx.beginPath(); ctx.moveTo(bx, yP(qQ2)); ctx.lineTo(bx + bw, yP(qQ2)); ctx.stroke();
+      /* Median */
+      ctx.strokeStyle = '#E97132'; ctx.lineWidth = 2.5;
+      ctx.beginPath(); ctx.moveTo(bx, yP(pts[2])); ctx.lineTo(bx + bw, yP(pts[2])); ctx.stroke();
 
-      /* avg dashed */
-      ctx.strokeStyle = 'rgba(255,255,255,0.35)'; ctx.lineWidth = 1;
-      ctx.setLineDash([3, 3]);
-      ctx.beginPath(); ctx.moveTo(bx, yP(qAvg)); ctx.lineTo(bx + bw, yP(qAvg)); ctx.stroke();
+      /* Avg dashed */
+      ctx.strokeStyle = 'rgba(255,255,255,0.4)'; ctx.lineWidth = 1; ctx.setLineDash([3,3]);
+      ctx.beginPath(); ctx.moveTo(bx, yP(pts[3])); ctx.lineTo(bx+bw, yP(pts[3])); ctx.stroke();
       ctx.setLineDash([]);
 
-      /* market value dot */
-      if (mv != null) {
+      /* Market value dot on right */
+      if (mv != null && mv >= yMin && mv <= yMax) {
         var mvy = yP(mv);
-        ctx.beginPath(); ctx.arc(P.l + cw - 8, mvy, 5, 0, Math.PI * 2);
+        ctx.beginPath(); ctx.arc(P.l+cw-10, mvy, 5, 0, Math.PI*2);
         ctx.fillStyle = '#E97132'; ctx.fill();
         ctx.strokeStyle = '#090909'; ctx.lineWidth = 1.5; ctx.stroke();
-        /* dashed horizontal to marker */
-        ctx.strokeStyle = 'rgba(233,113,50,0.3)'; ctx.lineWidth = 0.8;
-        ctx.setLineDash([2, 3]);
-        ctx.beginPath(); ctx.moveTo(P.l, mvy); ctx.lineTo(P.l + cw - 14, mvy); ctx.stroke();
+        ctx.strokeStyle = 'rgba(233,113,50,0.25)'; ctx.lineWidth = 0.8; ctx.setLineDash([2,3]);
+        ctx.beginPath(); ctx.moveTo(P.l, mvy); ctx.lineTo(P.l+cw-16, mvy); ctx.stroke();
         ctx.setLineDash([]);
       }
 
-      /* retail avg line */
+      /* Retail avg */
+      var rAvg = ret && ret.retail_price_avg;
       if (rAvg != null && rAvg >= yMin && rAvg <= yMax) {
-        ctx.strokeStyle = 'rgba(90,173,122,0.55)'; ctx.lineWidth = 1.2;
-        ctx.beginPath(); ctx.moveTo(bx, yP(rAvg)); ctx.lineTo(bx + bw, yP(rAvg)); ctx.stroke();
+        ctx.strokeStyle = 'rgba(90,173,122,0.6)'; ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.moveTo(bx, yP(rAvg)); ctx.lineTo(bx+bw, yP(rAvg)); ctx.stroke();
       }
 
-      /* all-time high marker */
-      if (hiVal) {
-        var hy = yP(hiVal);
-        ctx.fillStyle = 'rgba(233,113,50,0.6)'; ctx.font = '7px monospace'; ctx.textAlign = 'right'; ctx.textBaseline = 'bottom';
-        ctx.fillText('ATH', P.l + cw, hy - 2);
-        ctx.strokeStyle = 'rgba(233,113,50,0.25)'; ctx.lineWidth = 0.8;
-        ctx.setLineDash([1, 4]);
-        ctx.beginPath(); ctx.moveTo(P.l, hy); ctx.lineTo(P.l + cw, hy); ctx.stroke();
+      /* ATH annotation (outside range — show at top with label) */
+      var hiPrice = hi.buyer_price;
+      if (hiPrice && hiPrice > yMax) {
+        ctx.font = '7px monospace'; ctx.fillStyle = 'rgba(233,113,50,0.7)';
+        ctx.textAlign = 'right'; ctx.textBaseline = 'top';
+        ctx.fillText('ATH ' + priceLbl(hiPrice) + ' (' + (hi.price_date||'').slice(0,7) + ')  ↑', P.l+cw, P.t);
+      } else if (hiPrice && hiPrice >= yMin) {
+        ctx.strokeStyle = 'rgba(233,113,50,0.25)'; ctx.lineWidth = 0.8; ctx.setLineDash([1,4]);
+        ctx.beginPath(); ctx.moveTo(P.l, yP(hiPrice)); ctx.lineTo(P.l+cw, yP(hiPrice)); ctx.stroke();
         ctx.setLineDash([]);
+        ctx.font = '7px monospace'; ctx.fillStyle = 'rgba(233,113,50,0.6)'; ctx.textAlign='right'; ctx.textBaseline='bottom';
+        ctx.fillText('ATH', P.l+cw, yP(hiPrice)-1);
       }
 
-      /* x-axis labels */
-      ctx.font = '7px monospace'; ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-      ctx.fillText('MIN', mid - 18, P.t + ch + 4);
-      ctx.fillText('MED', bx + bw/2, P.t + ch + 4);
-      ctx.fillText('MAX', mid + 18, P.t + ch + 4);
-      ctx.fillStyle = '#E97132'; ctx.fillText('MV', P.l + cw - 8, P.t + ch + 4);
+      /* X-axis labels */
+      ctx.font = '7px monospace'; ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.textAlign='center'; ctx.textBaseline='top';
+      ctx.fillText('MIN', mid, P.t+ch+4);
+      ctx.fillText('MED', bx+bw/2, P.t+ch+4);
+      ctx.fillStyle = '#E97132'; ctx.textAlign='right';
+      ctx.fillText('MV', P.l+cw-5, P.t+ch+4);
+      ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.textAlign='left';
+      ctx.fillText('12M AUCTION RANGE · '+(mv12.number_of_trades||0)+' TRADES', P.l, P.t+ch+4);
     }
 
-    /* ── Render search results dropdown ── */
-    function renderDrop(data) {
+    /* ── Render results in left list ── */
+    function renderList(data) {
+      guideEl.style.display = 'none';
       if (!data || !data.results || !data.results.length) {
-        dropEl.innerHTML = '<div style="padding:10px 12px;font-size:8px;letter-spacing:.16em;color:#fff;opacity:.4;">NO RESULTS</div>';
-        dropEl.style.display = 'block'; return;
+        listEl.innerHTML = '<div style="padding:12px 10px;font-size:8px;letter-spacing:.16em;color:#fff;opacity:.4;">NO RESULTS</div>';
+        return;
       }
       _results = data.results;
-      dropEl.innerHTML = _results.map(function(r, i) {
-        return '<div class="wl-row" data-i="'+i+'" style="display:flex;align-items:center;gap:8px;padding:7px 12px;cursor:pointer;border-bottom:1px solid #111;">' +
-          '<img src="'+r.whisky_image_url+'" style="width:22px;height:30px;object-fit:contain;flex-shrink:0;" onerror="this.style.display=\'none\'" />' +
+      var html = _results.map(function(r, i) {
+        return '<div class="wl-row" data-i="'+i+'" style="display:flex;align-items:center;gap:7px;padding:7px 10px;cursor:pointer;border-bottom:1px solid #111;">' +
+          '<img src="'+r.whisky_image_url+'" style="width:20px;height:28px;object-fit:contain;flex-shrink:0;" onerror="this.style.display=\'none\'" />' +
           '<div style="flex:1;min-width:0;">' +
-            '<div style="font-size:9px;letter-spacing:.1em;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+r.whisky_name+'</div>' +
-            '<div style="font-size:7px;letter-spacing:.14em;color:#fff;opacity:.4;margin-top:1px;">'+r.whisky_id+'</div>' +
+            '<div style="font-size:8px;letter-spacing:.08em;color:#fff;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+r.whisky_name+'</div>' +
+            '<div style="font-size:6.5px;letter-spacing:.12em;color:#fff;opacity:.35;margin-top:1px;">'+r.whisky_id+'</div>' +
           '</div>' +
-          '<div style="font-size:7px;color:#E97132;letter-spacing:.12em;flex-shrink:0;">VIEW ↗</div>' +
         '</div>';
       }).join('');
-      dropEl.style.display = 'block';
-      dropEl.querySelectorAll('.wl-row').forEach(function(row) {
-        row.addEventListener('mouseenter', function(){ row.style.background='#141414'; });
-        row.addEventListener('mouseleave', function(){ row.style.background=''; });
+      /* Re-insert guide at bottom */
+      listEl.innerHTML = html;
+      listEl.querySelectorAll('.wl-row').forEach(function(row) {
+        row.addEventListener('mouseenter', function(){ if (!row.classList.contains('active')) row.style.background='#141414'; });
+        row.addEventListener('mouseleave', function(){ if (!row.classList.contains('active')) row.style.background=''; });
         row.addEventListener('click', function() {
-          var item = _results[parseInt(row.dataset.i)];
-          dropEl.style.display = 'none';
-          qEl.value = item.whisky_name;
-          loadBottle(item);
+          listEl.querySelectorAll('.wl-row').forEach(function(r){ r.classList.remove('active'); r.style.background=''; });
+          row.classList.add('active'); row.style.background='#1a1a1a';
+          loadBottle(_results[parseInt(row.dataset.i)]);
         });
       });
     }
 
-    /* ── Load full bottle data ── */
+    /* ── Load bottle ── */
     function loadBottle(item) {
       _selectedId = item.whisky_id;
-      mainEl.innerHTML = '<div style="padding:16px 12px;font-size:8px;letter-spacing:.18em;color:#fff;opacity:.4;">LOADING MARKET DATA<span class="ld"></span></div>';
-      fetch('/.netlify/functions/whisky-data?type=full&id='+encodeURIComponent(item.whisky_id)+'&currency='+_cur)
-        .then(function(r){ return r.json(); })
-        .then(function(d){ renderDetail(d, item); })
-        .catch(function(){ mainEl.innerHTML='<div style="padding:16px;font-size:8px;letter-spacing:.16em;color:#fff;opacity:.4;">DATA UNAVAILABLE</div>'; });
+      detailEl.innerHTML = '<div style="padding:16px;font-size:8px;letter-spacing:.18em;color:#fff;opacity:.4;">LOADING<span class="ld"></span></div>';
+      Promise.all([
+        fetch('/.netlify/functions/whisky-data?type=full&id='+encodeURIComponent(item.whisky_id)+'&currency='+_cur).then(function(r){ return r.json(); }),
+      ]).then(function(res){ renderDetail(res[0], item); })
+        .catch(function(){ detailEl.innerHTML='<div style="padding:16px;font-size:8px;letter-spacing:.16em;color:#fff;opacity:.4;">DATA UNAVAILABLE</div>'; });
     }
 
     /* ── Render bottle detail ── */
@@ -2720,133 +2826,140 @@
       var hi   = auc.max_auction_price || {};
       var chg  = mv12.market_value_change_pct;
       var bgId = det.parent_bottle_group_id || item.whisky_id;
-
       var inWl = isWl(item.whisky_id);
 
-      mainEl.innerHTML =
+      detailEl.innerHTML =
         '<div style="padding:10px 12px;">' +
-          /* ── Header ── */
+          /* Header */
           '<div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid #181818;">' +
-            '<img src="'+(det.whisky_image_url||'')+'" style="width:44px;object-fit:contain;flex-shrink:0;" onerror="this.style.display=\'none\'" />' +
+            '<img src="'+(det.whisky_image_url||'')+'" style="width:42px;object-fit:contain;flex-shrink:0;" onerror="this.style.display=\'none\'" />' +
             '<div style="flex:1;min-width:0;">' +
-              '<div style="font-size:8px;letter-spacing:.22em;color:#fff;opacity:.5;margin-bottom:2px;">'+(det.brand||'')+'</div>' +
-              '<div style="font-size:12px;letter-spacing:.08em;color:#fff;line-height:1.25;">'+(det.bottler_serie||'')+' '+(det.name||'')+'</div>' +
-              '<div style="font-size:8px;letter-spacing:.12em;color:#fff;opacity:.5;margin-top:3px;">'+(det.type||'')+(det.age?' · '+det.age+'YO':'')+(det.strength?' · '+det.strength+'%vol':'')+(det.cask_type?' · '+det.cask_type:'')+(det.bottle_year?' · '+det.bottle_year:'')+'</div>' +
+              '<div style="font-size:7px;letter-spacing:.22em;color:#fff;opacity:.45;margin-bottom:2px;">'+(det.brand||'')+'</div>' +
+              '<div style="font-size:13px;letter-spacing:.06em;color:#fff;line-height:1.2;">'+(det.bottler_serie||'')+' '+(det.name||'')+'</div>' +
+              '<div style="font-size:8px;letter-spacing:.1em;color:#fff;opacity:.45;margin-top:3px;">'+(det.type||'')+(det.age?' · '+det.age+'YO':'')+(det.strength?' · '+det.strength+'%vol':'')+(det.cask_type?' · '+det.cask_type:'')+(det.bottle_year?' · '+det.bottle_year:'')+'</div>' +
             '</div>' +
             '<div style="text-align:right;flex-shrink:0;">' +
-              (rat.whiskybase_rating != null ?
-                '<div style="font-size:20px;letter-spacing:.04em;color:#E97132;font-weight:bold;">'+rat.whiskybase_rating.toFixed(1)+'</div>'+
-                '<div style="font-size:7px;letter-spacing:.12em;color:#fff;opacity:.5;">'+rat.whiskybase_rating_count+' RATINGS</div>' : '') +
+              (rat.whiskybase_rating!=null ? '<div style="font-size:22px;color:#E97132;font-weight:bold;">'+rat.whiskybase_rating.toFixed(1)+'</div><div style="font-size:7px;letter-spacing:.1em;color:#fff;opacity:.4;">'+rat.whiskybase_rating_count+' RATINGS</div>' : '') +
             '</div>' +
           '</div>' +
-          /* ── Market value hero ── */
-          (mv != null ?
-            '<div style="background:#0d0d0d;border:1px solid #1e1e1e;padding:10px 12px;margin-bottom:10px;">' +
-              '<div style="font-size:7px;letter-spacing:.2em;color:#fff;opacity:.4;margin-bottom:4px;">MARKET VALUE · '+cur+'</div>' +
-              '<div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;">' +
-                '<div style="font-size:28px;letter-spacing:.04em;color:#E97132;">'+fmt(mv,cur)+'</div>' +
-                '<div style="font-size:11px;letter-spacing:.06em;color:'+col(chg)+';">'+fmtPct(chg)+' 12M</div>' +
-                '<div style="font-size:8px;letter-spacing:.1em;color:#fff;opacity:.4;margin-left:auto;">'+auc.market_value_date+' · '+auc.market_value_trades+' TRADES</div>' +
+          /* MV hero */
+          (mv!=null ?
+            '<div style="background:#0d0d0d;border:1px solid #1e1e1e;padding:8px 12px;margin-bottom:10px;">' +
+              '<div style="font-size:7px;letter-spacing:.2em;color:#fff;opacity:.4;margin-bottom:3px;">MARKET VALUE · '+cur+'</div>' +
+              '<div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;">' +
+                '<div style="font-size:26px;letter-spacing:.02em;color:#E97132;">'+fmt(mv,cur)+'</div>' +
+                '<div style="font-size:11px;color:'+col(chg)+';">'+fmtPct(chg)+' 12M</div>' +
+                '<div style="font-size:7px;color:#fff;opacity:.35;margin-left:auto;">'+auc.market_value_date+' · '+(auc.market_value_trades||0)+' TRADES</div>' +
               '</div>' +
             '</div>' : '') +
-          /* ── Chart canvas ── */
-          '<canvas id="wl-chart-'+id+'" style="width:100%;display:block;margin-bottom:10px;" height="130"></canvas>' +
-          /* ── 12M legend ── */
-          (mv12.buyer_price_min != null ?
-            '<div style="display:flex;gap:12px;margin-bottom:10px;font-size:7px;letter-spacing:.12em;flex-wrap:wrap;">' +
-              '<span style="color:#fff;opacity:.4;">12M RANGE</span>' +
-              '<span style="color:#fff;">MIN '+fmt(mv12.buyer_price_min,cur)+'</span>' +
-              '<span style="color:#fff;opacity:.6;">Q1 '+fmt(mv12.buyer_price_qrt1,cur)+'</span>' +
-              '<span style="color:#E97132;">MED '+fmt(mv12.buyer_price_qrt2,cur)+'</span>' +
-              '<span style="color:#fff;opacity:.6;">Q3 '+fmt(mv12.buyer_price_qrt3,cur)+'</span>' +
-              '<span style="color:#fff;">MAX '+fmt(mv12.buyer_price_max,cur)+'</span>' +
-              '<span style="color:#fff;opacity:.4;">'+mv12.number_of_trades+' TRADES</span>' +
-            '</div>' : '') +
-          /* ── Stats ── */
+          /* Chart */
+          '<canvas id="wl-chart-'+id+'" height="160" style="width:100%;display:block;margin-bottom:8px;"></canvas>' +
+          /* Stats */
           '<div style="margin-bottom:10px;">' +
-            row('LATEST AUCTION', fmt(lat.buyer_price_avg,cur), '#fff') +
-            row('LAST SOLD', lat.price_date||'—', '#fff') +
-            row('AUCTION RANGE', lat.buyer_price_min!=null ? fmt(lat.buyer_price_min,cur)+' — '+fmt(lat.buyer_price_max,cur) : '—', '#fff') +
-            row('ALL-TIME HIGH', fmt(hi.buyer_price,cur)+(hi.price_date?' ('+hi.price_date+')':''), '#E97132') +
-            row('TOTAL TRADES (ALL TIME)', auc.total_trades!=null ? auc.total_trades.toLocaleString() : '—', '#fff') +
-            (ret.retail_price_avg!=null ? row('RETAIL AVG ('+ret.number_of_retail_listings+' LISTINGS)', fmt(ret.retail_price_avg,cur), '#5aad7a') : '') +
-            (ret.retail_price_min!=null ? row('RETAIL RANGE', fmt(ret.retail_price_min,cur)+' — '+fmt(ret.retail_price_max,cur), '#fff') : '') +
+            statRow('LATEST AUCTION', fmt(lat.buyer_price_avg,cur)) +
+            statRow('LAST SOLD', lat.price_date||'—') +
+            statRow('LAST AUCTION RANGE', lat.buyer_price_min!=null ? fmt(lat.buyer_price_min,cur)+' — '+fmt(lat.buyer_price_max,cur) : '—') +
+            statRow('ALL-TIME HIGH', fmt(hi.buyer_price,cur)+(hi.price_date?' ('+hi.price_date+')':''), '#E97132') +
+            statRow('TOTAL AUCTION TRADES', auc.total_trades!=null ? auc.total_trades.toLocaleString() : '—') +
+            statRow('12M MEDIAN', fmt(mv12.buyer_price_qrt2,cur)) +
+            statRow('12M Q1 / Q3', mv12.buyer_price_qrt1!=null ? fmt(mv12.buyer_price_qrt1,cur)+' / '+fmt(mv12.buyer_price_qrt3,cur) : '—') +
+            (ret.retail_price_avg!=null ? statRow('RETAIL AVG ('+ret.number_of_retail_listings+' LISTINGS)', fmt(ret.retail_price_avg,cur), '#5aad7a') : '') +
+            (ret.retail_price_min!=null ? statRow('RETAIL RANGE', fmt(ret.retail_price_min,cur)+' — '+fmt(ret.retail_price_max,cur)) : '') +
           '</div>' +
-          /* ── Watchlist + links ── */
-          '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
-            '<button id="wl-star-'+id+'" style="background:#111;border:1px solid #252525;color:'+(inWl?'#E97132':'#fff')+';font-family:var(--font);font-size:8px;letter-spacing:.14em;padding:6px 12px;cursor:pointer;">'+
-              (inWl?'★ IN MONITOR':'☆ ADD TO MONITOR')+'</button>' +
-            '<a href="'+(det.whiskystats_url||'#')+'" target="_blank" style="background:#111;border:1px solid #252525;color:#fff;font-family:var(--font);font-size:8px;letter-spacing:.14em;padding:6px 12px;text-decoration:none;display:inline-block;">↗ WHISKYSTATS</a>' +
-            '<a href="'+(det.whiskybase_url||'#')+'" target="_blank" style="background:#111;border:1px solid #252525;color:#fff;font-family:var(--font);font-size:8px;letter-spacing:.14em;padding:6px 12px;text-decoration:none;display:inline-block;">↗ WHISKYBASE</a>' +
+          /* Actions */
+          '<div style="display:flex;gap:6px;flex-wrap:wrap;">' +
+            '<button id="wl-star-'+id+'" style="background:#111;border:1px solid #252525;color:'+(inWl?'#E97132':'#fff')+';font-family:var(--font);font-size:8px;letter-spacing:.12em;padding:6px 10px;cursor:pointer;">'+(inWl?'★ IN MONITOR':'☆ ADD TO MONITOR')+'</button>' +
+            '<a href="'+(det.whiskystats_url||'#')+'" target="_blank" style="background:#111;border:1px solid #252525;color:#fff;font-family:var(--font);font-size:8px;letter-spacing:.12em;padding:6px 10px;text-decoration:none;">↗ WHISKYSTATS</a>' +
+            '<a href="'+(det.whiskybase_url||'#')+'" target="_blank" style="background:#111;border:1px solid #252525;color:#fff;font-family:var(--font);font-size:8px;letter-spacing:.12em;padding:6px 10px;text-decoration:none;">↗ WHISKYBASE</a>' +
           '</div>' +
         '</div>';
 
-      /* Paint chart */
-      var canvas = mainEl.querySelector('#wl-chart-'+id);
-      if (canvas) {
-        var attempt = 0;
-        (function tryPaint(){
-          var W = canvas.offsetWidth;
-          if (!W && attempt++ < 12) { setTimeout(tryPaint, 60); return; }
-          paintWhiskyChart(canvas, det, auc, ret);
-        })();
-      }
+      /* Paint chart — try history first, fall back to stat chart */
+      var canvas = detailEl.querySelector('#wl-chart-'+id);
+      if (!canvas) return;
+      var attempt = 0;
+      (function tryPaint(){
+        var W = canvas.offsetWidth;
+        if (!W && attempt++ < 14) { setTimeout(tryPaint, 50); return; }
+        fetch('/.netlify/functions/whisky-data?type=history&id='+encodeURIComponent(bgId)+'&currency='+cur)
+          .then(function(r){ return r.json(); })
+          .then(function(h){
+            /* Accept any array property that looks like time-series */
+            var pts = h.prices || h.auction_history || h.history || h.data || [];
+            if (Array.isArray(pts) && pts.length >= 3) {
+              paintTimeChart(canvas, pts, mv, cur);
+            } else {
+              paintStatChart(canvas, auc, ret);
+            }
+          })
+          .catch(function(){ paintStatChart(canvas, auc, ret); });
+      })();
 
-      /* Watchlist button */
-      var starBtn = mainEl.querySelector('#wl-star-'+id);
-      if (starBtn) starBtn.addEventListener('click', function(){ toggleWl({whisky_id:item.whisky_id, bg_id:bgId, whisky_name:det.bottler_serie+' '+(det.name||'')}, starBtn); });
+      /* Watchlist */
+      var starBtn = detailEl.querySelector('#wl-star-'+id);
+      if (starBtn) starBtn.addEventListener('click', function(){
+        toggleWl({whisky_id:item.whisky_id, bg_id:bgId, name:(det.bottler_serie||'')+' '+(det.name||''), currency:_cur}, starBtn);
+      });
+    }
+
+    /* ── Build search query from filters + text ── */
+    function buildQuery() {
+      var parts = [];
+      var dis = disEl.value.trim();
+      if (dis) parts.push(dis);
+      if (_filters.region) parts.push(_filters.region);
+      var q   = qEl.value.trim();
+      if (q) parts.push(q);
+      if (_filters.age && _filters.age !== 'NAS') parts.push(_filters.age.replace('YO','').replace('+','') + ' year');
+      else if (_filters.age === 'NAS') parts.push('NAS');
+      if (_filters.cask) parts.push(_filters.cask.split(' ')[0]); /* e.g. "Sherry" from "Sherry Butt" */
+      return parts.join(' ').trim();
     }
 
     /* ── Search ── */
-    function doSearch(q) {
-      if (!q || q.length < 2) { dropEl.style.display='none'; return; }
-      dropEl.innerHTML = '<div style="padding:10px 12px;font-size:8px;letter-spacing:.16em;color:#fff;opacity:.4;">SEARCHING<span class="ld"></span></div>';
-      dropEl.style.display = 'block';
+    function doSearch() {
+      var q = buildQuery();
+      if (!q || q.length < 2) return;
+      listEl.innerHTML = '<div style="padding:10px;font-size:8px;letter-spacing:.16em;color:#fff;opacity:.4;">SEARCHING<span class="ld"></span></div>';
       fetch('/.netlify/functions/whisky-data?type=search&query='+encodeURIComponent(q)+'&page=1')
         .then(function(r){ return r.json(); })
-        .then(renderDrop)
-        .catch(function(){ dropEl.innerHTML='<div style="padding:10px 12px;font-size:8px;letter-spacing:.16em;color:#fff;opacity:.4;">ERROR</div>'; });
+        .then(renderList)
+        .catch(function(){ listEl.innerHTML='<div style="padding:10px;font-size:8px;letter-spacing:.14em;color:#fff;opacity:.4;">ERROR</div>'; });
     }
 
-    qEl.addEventListener('input', function() {
-      var q = qEl.value.trim();
+    /* Search on type */
+    qEl.addEventListener('input', function(){
       clearTimeout(_debounce);
-      if (q.length < 2) { dropEl.style.display='none'; return; }
-      _debounce = setTimeout(function(){ doSearch(q); }, 350);
+      _debounce = setTimeout(doSearch, 380);
+    });
+    disEl.addEventListener('input', function(){
+      clearTimeout(_debounce);
+      _debounce = setTimeout(doSearch, 380);
     });
 
-    curEl.addEventListener('change', function() {
+    /* Filter selects */
+    body.querySelectorAll('.wl-flt').forEach(function(sel){
+      sel.addEventListener('change', function(){
+        _filters[sel.dataset.flt] = sel.value;
+        clearTimeout(_debounce);
+        _debounce = setTimeout(doSearch, 200);
+      });
+    });
+
+    /* Currency */
+    curEl.addEventListener('change', function(){
       _cur = curEl.value;
       if (_selectedId) {
-        var item = _results.find(function(r){ return r.whisky_id === _selectedId; }) || {whisky_id: _selectedId};
+        var item = (_results||[]).find(function(r){ return r.whisky_id === _selectedId; }) || {whisky_id:_selectedId};
         loadBottle(item);
       }
     });
 
-    /* Close dropdown when clicking outside */
-    document.addEventListener('mousedown', function(e){ if (!dropEl.contains(e.target) && e.target !== qEl) dropEl.style.display='none'; });
-
-    /* ── Onboarding guide ── */
-    mainEl.innerHTML =
-      '<div style="padding:16px 12px;">' +
-        '<div style="font-size:8px;letter-spacing:.2em;color:#fff;margin-bottom:12px;">WHISKY TERMINAL · HOW TO USE</div>' +
-        '<div style="font-size:8px;letter-spacing:.12em;color:#fff;opacity:.6;line-height:2;margin-bottom:14px;">' +
-          'Search any whisky by distillery, bottling or age statement.<br>' +
-          'Click a result to see live auction & retail market data.<br>' +
-          'Add to Monitor to track it in your Macro Monitor widget.' +
-        '</div>' +
-        '<div style="font-size:7px;letter-spacing:.18em;color:#fff;opacity:.4;margin-bottom:8px;">TRY SEARCHING FOR</div>' +
-        '<div style="display:flex;flex-wrap:wrap;gap:6px;">' +
-          SUGGESTED.map(function(s){
-            return '<button class="wl-sug" data-q="'+s.q+'" style="background:#111;border:1px solid #252525;color:#fff;font-family:var(--font);font-size:7px;letter-spacing:.14em;padding:5px 10px;cursor:pointer;">'+s.label+'</button>';
-          }).join('') +
-        '</div>' +
-      '</div>';
-
-    mainEl.querySelectorAll('.wl-sug').forEach(function(btn){
+    /* Suggested pills */
+    body.querySelectorAll('.wl-sug').forEach(function(btn){
       btn.addEventListener('click', function(){
         qEl.value = btn.dataset.q;
-        doSearch(btn.dataset.q);
+        doSearch();
       });
     });
   }
