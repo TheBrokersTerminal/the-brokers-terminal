@@ -2374,8 +2374,7 @@
       track.innerHTML = setHtml;
 
       /* Only show if on terminal tab and user hasn't hidden it */
-      var onTerminal = !document.querySelector('.tbc-tab[data-tab="terminal"]') ||
-                       document.querySelector('.tbc-tab[data-tab="terminal"].active') !== null;
+      var onTerminal = document.querySelector('.tbc-tab[data-tab="terminal"].active') !== null;
       if (!_tickerHidden && onTerminal) {
         ticker.style.display = 'flex';
         document.body.classList.add('ticker-on');
