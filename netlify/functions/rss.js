@@ -1,24 +1,21 @@
+/* Only feeds confirmed accessible from cloud/server IPs */
 const FEEDS = [
-  /* General financial news */
-  { url: 'https://feeds.reuters.com/reuters/businessNews',          source: 'Reuters' },
-  { url: 'https://feeds.reuters.com/reuters/topNews',               source: 'Reuters' },
-  { url: 'https://www.cnbc.com/id/100003114/device/rss/rss.html',  source: 'CNBC' },
-  { url: 'https://www.cnbc.com/id/10000664/device/rss/rss.html',   source: 'CNBC' },
-  { url: 'https://feeds.marketwatch.com/marketwatch/realtimeheadlines', source: 'MarketWatch' },
-  { url: 'https://feeds.marketwatch.com/marketwatch/topstories',   source: 'MarketWatch' },
-  { url: 'https://finance.yahoo.com/news/rssindex',                 source: 'Yahoo Finance' },
-  { url: 'https://www.ft.com/rss/home/uk',                         source: 'Financial Times' },
-  { url: 'https://www.investing.com/rss/news.rss',                  source: 'Investing.com' },
-  { url: 'https://www.investing.com/rss/news_285.rss',              source: 'Investing.com' },
-  { url: 'https://feeds.bloomberg.com/markets/news.rss',            source: 'Bloomberg' },
-  { url: 'https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=15839069', source: 'CNBC' },
-  /* Whisky & alternative assets */
-  { url: 'https://www.whiskymag.com/feed/',                         source: 'Whisky Magazine' },
-  { url: 'https://www.thespiritsbusiness.com/feed/',                source: 'The Spirits Business' },
-  { url: 'https://www.decanter.com/feed/',                          source: 'Decanter' },
-  { url: 'https://scotchwhisky.com/feed/',                          source: 'Scotch Whisky' },
-  { url: 'https://www.whiskyadvocate.com/feed/',                    source: 'Whisky Advocate' },
-  { url: 'https://www.masterofmalt.com/blog/feed/',                 source: 'Master of Malt' },
+  /* Financial wire & broadcast */
+  { url: 'https://feeds.bbci.co.uk/news/business/rss.xml',                       source: 'BBC Business' },
+  { url: 'https://rss.nytimes.com/services/xml/rss/nyt/Business.xml',            source: 'NY Times' },
+  { url: 'https://rss.nytimes.com/services/xml/rss/nyt/Economy.xml',             source: 'NY Times' },
+  { url: 'https://feeds.a.dj.com/rss/WSJcomUSBusiness.xml',                      source: 'Wall St Journal' },
+  { url: 'https://feeds.a.dj.com/rss/RSSMarketsMain.xml',                        source: 'Wall St Journal' },
+  { url: 'https://www.theguardian.com/business/rss',                              source: 'The Guardian' },
+  { url: 'https://www.theguardian.com/business/economics/rss',                    source: 'The Guardian' },
+  { url: 'https://feeds.skynews.com/feeds/rss/business.xml',                      source: 'Sky News' },
+  { url: 'https://www.independent.co.uk/topic/business/rss',                      source: 'The Independent' },
+  { url: 'https://feeds.content.dowjones.io/public/rss/mw_realtimeheadlines',    source: 'MarketWatch' },
+  /* Gold & commodities */
+  { url: 'https://www.gold.org/research/rss.xml',                                 source: 'World Gold Council' },
+  { url: 'https://www.mining.com/feed/',                                           source: 'Mining.com' },
+  /* Whisky & spirits */
+  { url: 'https://www.decanter.com/feed/',                                         source: 'Decanter' },
 ];
 
 function parseXML(xml) {
@@ -33,7 +30,6 @@ function parseXML(xml) {
       return x ? x[1].trim() : '';
     };
     const getLinkHref = () => {
-      // Try <link> tag (may be text node or atom:link href)
       const atomLink = /<atom:link[^>]+href="([^"]+)"/i.exec(block);
       if (atomLink) return atomLink[1];
       const linkTag = /<link>([^<]+)<\/link>/i.exec(block);
@@ -55,18 +51,23 @@ function parseXML(xml) {
 }
 
 exports.handler = async () => {
-  const results = await Promise.allSettled(
+  /* Hard 8-second ceiling — whichever settles first wins */
+  const timeout = new Promise(resolve => setTimeout(() => resolve([]), 8000));
+
+  const fetchAll = Promise.allSettled(
     FEEDS.map(async (feed) => {
       const ctrl = new AbortController();
-      const t = setTimeout(() => ctrl.abort(), 8000);
+      /* Keep abort alive through body read — don't clearTimeout early */
+      const t = setTimeout(() => ctrl.abort(), 3000);
       try {
         const res = await fetch(feed.url, {
           signal: ctrl.signal,
-          headers: { 'User-Agent': 'Mozilla/5.0 (compatible; TheBrokersTerminal/1.0)' }
+          redirect: 'follow',
+          headers: { 'User-Agent': 'Mozilla/5.0 (compatible; TheBrokersTerminal/1.0; +https://thebrokersterminal.com)' }
         });
-        clearTimeout(t);
-        if (!res.ok) return [];
+        if (!res.ok) { clearTimeout(t); return []; }
         const text = await res.text();
+        clearTimeout(t);
         return parseXML(text).map(item => ({ ...item, source: feed.source }));
       } catch {
         clearTimeout(t);
@@ -75,10 +76,12 @@ exports.handler = async () => {
     })
   );
 
+  const settled = await Promise.race([fetchAll, timeout]);
+
   const seen = new Set();
   const stories = [];
-  for (const r of results) {
-    if (r.status !== 'fulfilled') continue;
+  for (const r of (Array.isArray(settled) ? settled : [])) {
+    if (!r || r.status !== 'fulfilled') continue;
     for (const s of r.value) {
       const key = s.title.slice(0, 60).toLowerCase();
       if (seen.has(key)) continue;
@@ -94,8 +97,8 @@ exports.handler = async () => {
     headers: {
       'Content-Type': 'application/json',
       'Access-Control-Allow-Origin': '*',
-      'Cache-Control': 'public, max-age=60',
+      'Cache-Control': 'public, max-age=120, s-maxage=120, stale-while-revalidate=60',
     },
-    body: JSON.stringify(stories.slice(0, 400)),
+    body: JSON.stringify(stories.slice(0, 300)),
   };
 };
