@@ -2504,6 +2504,125 @@
       {q:'Laphroaig 10',          label:'LAPHROAIG 10YO'},
     ];
 
+    /* ── Bloomberg-style auction range chart ── */
+    function paintWhiskyChart(canvas, auc, ret, label) {
+      var mv12 = auc.latest_12m || {};
+      var hi   = auc.max_auction_price || {};
+      var mv   = auc.market_value;
+      var lat  = auc.latest_auction_price || {};
+
+      /* We have: min, Q1, median, avg, Q3, max over 12 months + current MV */
+      var pts = [
+        {v: mv12.buyer_price_min,  x: 0.0},
+        {v: mv12.buyer_price_qrt1, x: 0.25},
+        {v: mv12.buyer_price_qrt2, x: 0.50},
+        {v: mv12.buyer_price_avg,  x: 0.65},
+        {v: mv12.buyer_price_qrt3, x: 0.75},
+        {v: mv12.buyer_price_max,  x: 0.90},
+        {v: mv,                    x: 1.0},
+      ].filter(function(p){ return p.v != null && p.v > 0; });
+
+      if (pts.length < 3) { canvas.style.display = 'none'; return; }
+
+      var W = canvas.offsetWidth || 460, H = canvas.height || 160;
+      canvas.width = W; canvas.height = H;
+      var ctx = canvas.getContext('2d');
+      var P = {t:16, r:12, b:28, l:58};
+      var cw = W - P.l - P.r, ch = H - P.t - P.b;
+
+      /* Y range */
+      var prices = pts.map(function(p){ return p.v; });
+      var yMin = Math.min.apply(null, prices) * 0.90;
+      var yMax = Math.max.apply(null, prices) * 1.10;
+      /* Include ATH if not extreme */
+      if (hi.buyer_price && hi.buyer_price < yMax * 3) yMax = Math.max(yMax, hi.buyer_price * 1.04);
+      var yRng = yMax - yMin || 1;
+
+      function xP(x) { return P.l + x * cw; }
+      function yP(v) { return P.t + ch - ((v - yMin) / yRng) * ch; }
+      function priceLbl(v) {
+        if (v == null) return '';
+        if (v >= 100000) return (v/1000).toFixed(0) + 'k';
+        if (v >= 10000)  return (v/1000).toFixed(1) + 'k';
+        if (v >= 1000)   return (v/1000).toFixed(2) + 'k';
+        return v.toFixed(0);
+      }
+
+      /* Background */
+      ctx.fillStyle = '#090909'; ctx.fillRect(0, 0, W, H);
+
+      /* Horizontal grid + Y labels */
+      ctx.font = '8px monospace'; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+      var gridSteps = 5;
+      for (var i = 0; i <= gridSteps; i++) {
+        var gv = yMin + (i / gridSteps) * yRng;
+        var gy = yP(gv);
+        ctx.strokeStyle = 'rgba(255,255,255,0.05)'; ctx.lineWidth = 0.8;
+        ctx.beginPath(); ctx.moveTo(P.l, gy); ctx.lineTo(P.l + cw, gy); ctx.stroke();
+        ctx.fillStyle = 'rgba(255,255,255,0.6)';
+        ctx.fillText(priceLbl(gv), P.l - 5, gy);
+      }
+
+      /* Area fill under the curve */
+      var grad = ctx.createLinearGradient(0, P.t, 0, P.t + ch);
+      grad.addColorStop(0, 'rgba(233,113,50,0.35)');
+      grad.addColorStop(1, 'rgba(233,113,50,0.0)');
+      ctx.beginPath();
+      ctx.moveTo(xP(pts[0].x), P.t + ch);
+      pts.forEach(function(p) { ctx.lineTo(xP(p.x), yP(p.v)); });
+      ctx.lineTo(xP(pts[pts.length-1].x), P.t + ch);
+      ctx.closePath();
+      ctx.fillStyle = grad; ctx.fill();
+
+      /* Price line */
+      ctx.beginPath();
+      pts.forEach(function(p, i) {
+        if (i === 0) ctx.moveTo(xP(p.x), yP(p.v));
+        else ctx.lineTo(xP(p.x), yP(p.v));
+      });
+      ctx.strokeStyle = '#E97132'; ctx.lineWidth = 1.8; ctx.lineJoin = 'round'; ctx.stroke();
+
+      /* Latest value dot */
+      var last = pts[pts.length - 1];
+      ctx.beginPath(); ctx.arc(xP(last.x), yP(last.v), 4, 0, Math.PI * 2);
+      ctx.fillStyle = '#E97132'; ctx.fill();
+      ctx.strokeStyle = '#090909'; ctx.lineWidth = 1.5; ctx.stroke();
+
+      /* ATH dashed reference */
+      if (hi.buyer_price && hi.buyer_price >= yMin && hi.buyer_price <= yMax) {
+        var hy = yP(hi.buyer_price);
+        ctx.strokeStyle = 'rgba(233,113,50,0.3)'; ctx.lineWidth = 0.8; ctx.setLineDash([2,4]);
+        ctx.beginPath(); ctx.moveTo(P.l, hy); ctx.lineTo(P.l + cw, hy); ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.font = '7px monospace'; ctx.fillStyle = 'rgba(233,113,50,0.7)'; ctx.textAlign = 'right'; ctx.textBaseline = 'bottom';
+        ctx.fillText('ATH', P.l + cw, hy - 2);
+      }
+
+      /* Retail avg */
+      if (ret && ret.retail_price_avg) {
+        var ra = ret.retail_price_avg;
+        if (ra >= yMin && ra <= yMax) {
+          ctx.strokeStyle = 'rgba(90,173,122,0.5)'; ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.moveTo(P.l, yP(ra)); ctx.lineTo(P.l + cw, yP(ra)); ctx.stroke();
+          ctx.font = '7px monospace'; ctx.fillStyle = 'rgba(90,173,122,0.7)'; ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
+          ctx.fillText('RETAIL', P.l + 2, yP(ra) - 2);
+        }
+      }
+
+      /* X-axis labels */
+      ctx.font = '7px monospace'; ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.textBaseline = 'top';
+      var now = new Date(), yr = now.getFullYear(), mo = now.getMonth();
+      var oneYrAgo = new Date(yr - 1, mo, 1);
+      function moLabel(d) { return d.toLocaleString('en-GB', {month:'short', year:'2-digit'}); }
+      ctx.textAlign = 'left';  ctx.fillText(moLabel(oneYrAgo), P.l,        P.t + ch + 5);
+      ctx.textAlign = 'center'; ctx.fillText('6M',             P.l + cw/2, P.t + ch + 5);
+      ctx.textAlign = 'right';  ctx.fillText('NOW',            P.l + cw,   P.t + ch + 5);
+
+      /* Top label */
+      ctx.font = '7px monospace'; ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+      ctx.fillText('12M AUCTION RANGE · ' + (mv12.number_of_trades || '—') + ' TRADES', P.l, 3);
+    }
+
     /* ── Layout ── */
     body.style.cssText = 'display:flex;flex-direction:column;height:100%;overflow:hidden;background:#090909;font-family:var(--font,monospace);';
 
@@ -2614,7 +2733,7 @@
       saveWl(wl);
     }
 
-    /* ── Time-series chart (primary) ── */
+    /* ── (unused — replaced by paintWhiskyChart above) ── */
     function paintTimeChart(canvas, pts, mv, cur) {
       var W = canvas.offsetWidth || 400, H = canvas.height || 160;
       canvas.width = W; canvas.height = H;
@@ -2826,109 +2945,130 @@
       try { localStorage.setItem(key, JSON.stringify({data:data, ts:Date.now()})); } catch(e){}
     }
 
-    /* ── Load bottle ── */
+    /* ── Stage 1: browse — details + rating only (3 credits) ── */
     function loadBottle(item) {
       _selectedId = item.whisky_id;
-      var cacheKey = 'tbt_wb_'+item.whisky_id+'_'+_cur;
-      var cached = cacheGet(cacheKey, 86400000); /* 24 hours */
-      if (cached) { renderDetail(cached, item); return; }
-
+      var brKey = 'tbt_br_'+item.whisky_id;
+      var cached = cacheGet(brKey, 86400000);
+      if (cached) { renderBrowse(cached, item); return; }
       detailEl.innerHTML = '<div style="padding:16px;font-size:8px;letter-spacing:.18em;color:#fff;opacity:.4;">LOADING<span class="ld"></span></div>';
-      fetch('/.netlify/functions/whisky-data?type=full&id='+encodeURIComponent(item.whisky_id)+'&currency='+_cur)
+      fetch('/.netlify/functions/whisky-data?type=browse&id='+encodeURIComponent(item.whisky_id))
         .then(function(r){ return r.json(); })
-        .then(function(d){ cacheSet(cacheKey, d); renderDetail(d, item); })
-        .catch(function(){ detailEl.innerHTML='<div style="padding:16px;font-size:8px;letter-spacing:.16em;color:#fff;opacity:.4;">DATA UNAVAILABLE</div>'; });
+        .then(function(d){ cacheSet(brKey, d); renderBrowse(d, item); })
+        .catch(function(){ detailEl.innerHTML='<div style="padding:16px;font-size:8px;letter-spacing:.14em;color:#fff;opacity:.4;">DATA UNAVAILABLE</div>'; });
     }
 
-    /* ── Render bottle detail ── */
-    function renderDetail(d, item) {
-      var det = d.details || {};
-      var auc = d.auction || {};
-      var ret = d.retail  || {};
-      var rat = d.rating  || {};
-      var cur = d.currency || _cur;
-      var mv   = auc.market_value;
-      var mv12 = auc.latest_12m || {};
-      var lat  = auc.latest_auction_price || {};
-      var hi   = auc.max_auction_price || {};
-      var chg  = mv12.market_value_change_pct;
-      var bgId = det.parent_bottle_group_id || item.whisky_id;
+    function renderBrowse(d, item) {
+      var det  = d.details || {};
+      var rat  = d.rating  || {};
+      var bgId = d.bg_id || det.parent_bottle_group_id || item.whisky_id;
       var inWl = isWl(item.whisky_id);
 
       detailEl.innerHTML =
         '<div style="padding:10px 12px;">' +
-          /* Header */
-          '<div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid #181818;">' +
+          '<div style="display:flex;gap:10px;align-items:flex-start;padding-bottom:10px;border-bottom:1px solid #181818;margin-bottom:10px;">' +
             '<img src="'+(det.whisky_image_url||'')+'" style="width:42px;object-fit:contain;flex-shrink:0;" onerror="this.style.display=\'none\'" />' +
             '<div style="flex:1;min-width:0;">' +
               '<div style="font-size:7px;letter-spacing:.22em;color:#fff;opacity:.45;margin-bottom:2px;">'+(det.brand||'')+'</div>' +
               '<div style="font-size:13px;letter-spacing:.06em;color:#fff;line-height:1.2;">'+(det.bottler_serie||'')+' '+(det.name||'')+'</div>' +
-              '<div style="font-size:8px;letter-spacing:.1em;color:#fff;opacity:.45;margin-top:3px;">'+(det.type||'')+(det.age?' · '+det.age+'YO':'')+(det.strength?' · '+det.strength+'%vol':'')+(det.cask_type?' · '+det.cask_type:'')+(det.bottle_year?' · '+det.bottle_year:'')+'</div>' +
+              '<div style="font-size:8px;letter-spacing:.1em;color:#fff;opacity:.45;margin-top:3px;">'+(det.type||'')+(det.age?' · '+det.age+'YO':'')+(det.strength?' · '+det.strength+'%vol':'')+(det.cask_type?' · '+det.cask_type:'')+(det.bottle_year?' · '+det.bottle_year:'')+(det.country?' · '+det.country:'')+'</div>' +
             '</div>' +
             '<div style="text-align:right;flex-shrink:0;">' +
-              (rat.whiskybase_rating!=null ? '<div style="font-size:22px;color:#E97132;font-weight:bold;">'+rat.whiskybase_rating.toFixed(1)+'</div><div style="font-size:7px;letter-spacing:.1em;color:#fff;opacity:.4;">'+rat.whiskybase_rating_count+' RATINGS</div>' : '') +
+              (rat.whiskybase_rating!=null ?
+                '<div style="font-size:22px;color:#E97132;font-weight:bold;">'+rat.whiskybase_rating.toFixed(1)+'</div>'+
+                '<div style="font-size:7px;letter-spacing:.1em;color:#fff;opacity:.4;">'+rat.whiskybase_rating_count+' RATINGS</div>' : '') +
             '</div>' +
           '</div>' +
-          /* MV hero */
+          '<div style="margin-bottom:12px;">' +
+            (det.distillery       ? statRow('DISTILLERY',        det.distillery) : '') +
+            (det.region           ? statRow('REGION',            det.region) : '') +
+            (det.age              ? statRow('AGE STATEMENT',     det.age + ' Years') : '') +
+            (det.vintage          ? statRow('VINTAGE',           det.vintage) : '') +
+            (det.bottle_year      ? statRow('BOTTLED',           det.bottle_year) : '') +
+            (det.strength         ? statRow('STRENGTH',          det.strength + '% vol') : '') +
+            (det.cask_type        ? statRow('CASK TYPE',         det.cask_type) : '') +
+            (det.bottles_produced ? statRow('BOTTLES PRODUCED',  Number(det.bottles_produced).toLocaleString()) : '') +
+          '</div>' +
+          '<div id="wl-mktcta-'+id+'" style="background:#0d0d0d;border:1px solid #1e1e1e;padding:14px 12px;margin-bottom:10px;text-align:center;">' +
+            '<div style="font-size:7px;letter-spacing:.2em;color:#fff;opacity:.4;margin-bottom:8px;">MARKET DATA NOT LOADED</div>' +
+            '<button id="wl-loadmkt-'+id+'" style="background:#E97132;border:none;color:#000;font-family:var(--font);font-size:8px;letter-spacing:.18em;padding:8px 18px;cursor:pointer;font-weight:bold;">LOAD AUCTION & MARKET DATA</button>' +
+            '<div style="font-size:6.5px;letter-spacing:.12em;color:#fff;opacity:.25;margin-top:6px;">CACHED 24H AFTER FIRST LOAD</div>' +
+          '</div>' +
+          '<div><button id="wl-star-'+id+'" style="background:#111;border:1px solid #252525;color:'+(inWl?'#E97132':'#fff')+';font-family:var(--font);font-size:8px;letter-spacing:.12em;padding:6px 10px;cursor:pointer;">'+(inWl?'★ IN MONITOR':'☆ ADD TO MONITOR')+'</button></div>' +
+        '</div>';
+
+      var loadBtn = detailEl.querySelector('#wl-loadmkt-'+id);
+      if (loadBtn) loadBtn.addEventListener('click', function(){ loadMarket(bgId, item, det, rat); });
+      var starBtn = detailEl.querySelector('#wl-star-'+id);
+      if (starBtn) starBtn.addEventListener('click', function(){
+        toggleWl({whisky_id:item.whisky_id, bg_id:bgId, name:(det.bottler_serie||'')+' '+(det.name||''), currency:_cur}, starBtn);
+      });
+      /* Auto-load market if already cached (free) */
+      var mktKey = 'tbt_mkt_'+bgId+'_'+_cur;
+      if (cacheGet(mktKey, 86400000)) loadMarket(bgId, item, det, rat);
+    }
+
+    /* ── Stage 2: market — auction + retail (15 credits, cached 24h) ── */
+    function loadMarket(bgId, item, det, rat) {
+      var mktKey = 'tbt_mkt_'+bgId+'_'+_cur;
+      var ctaEl  = detailEl.querySelector('#wl-mktcta-'+id);
+      if (ctaEl) ctaEl.innerHTML = '<div style="font-size:8px;letter-spacing:.16em;color:#fff;opacity:.4;padding:6px 0;">LOADING MARKET DATA<span class="ld"></span></div>';
+
+      function renderMarket(m) {
+        cacheSet(mktKey, m);
+        var auc  = m.auction || {};
+        var ret  = m.retail  || {};
+        var cur  = m.currency || _cur;
+        var mv   = auc.market_value;
+        var mv12 = auc.latest_12m || {};
+        var lat  = auc.latest_auction_price || {};
+        var hi   = auc.max_auction_price || {};
+        var chg  = mv12.market_value_change_pct;
+        var inWl = isWl(item.whisky_id);
+        var cta  = detailEl.querySelector('#wl-mktcta-'+id);
+        if (!cta) return;
+        cta.outerHTML =
           (mv!=null ?
-            '<div style="background:#0d0d0d;border:1px solid #1e1e1e;padding:8px 12px;margin-bottom:10px;">' +
+            '<div style="background:#0d0d0d;border:1px solid #1e1e1e;padding:8px 12px;margin-bottom:8px;">' +
               '<div style="font-size:7px;letter-spacing:.2em;color:#fff;opacity:.4;margin-bottom:3px;">MARKET VALUE · '+cur+'</div>' +
               '<div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;">' +
                 '<div style="font-size:26px;letter-spacing:.02em;color:#E97132;">'+fmt(mv,cur)+'</div>' +
-                '<div style="font-size:11px;color:'+col(chg)+';">'+fmtPct(chg)+' 12M</div>' +
+                '<div style="font-size:11px;color:'+(chg!=null?(chg>=0?'#5aad7a':'#e05050'):'#fff')+';">'+fmtPct(chg)+' 12M</div>' +
                 '<div style="font-size:7px;color:#fff;opacity:.35;margin-left:auto;">'+auc.market_value_date+' · '+(auc.market_value_trades||0)+' TRADES</div>' +
               '</div>' +
             '</div>' : '') +
-          /* Chart */
           '<canvas id="wl-chart-'+id+'" height="160" style="width:100%;display:block;margin-bottom:8px;"></canvas>' +
-          /* Stats */
           '<div style="margin-bottom:10px;">' +
             statRow('LATEST AUCTION', fmt(lat.buyer_price_avg,cur)) +
             statRow('LAST SOLD', lat.price_date||'—') +
-            statRow('LAST AUCTION RANGE', lat.buyer_price_min!=null ? fmt(lat.buyer_price_min,cur)+' — '+fmt(lat.buyer_price_max,cur) : '—') +
+            statRow('AUCTION RANGE (LAST)', lat.buyer_price_min!=null ? fmt(lat.buyer_price_min,cur)+' — '+fmt(lat.buyer_price_max,cur) : '—') +
             statRow('ALL-TIME HIGH', fmt(hi.buyer_price,cur)+(hi.price_date?' ('+hi.price_date+')':''), '#E97132') +
             statRow('TOTAL AUCTION TRADES', auc.total_trades!=null ? auc.total_trades.toLocaleString() : '—') +
             statRow('12M MEDIAN', fmt(mv12.buyer_price_qrt2,cur)) +
             statRow('12M Q1 / Q3', mv12.buyer_price_qrt1!=null ? fmt(mv12.buyer_price_qrt1,cur)+' / '+fmt(mv12.buyer_price_qrt3,cur) : '—') +
             (ret.retail_price_avg!=null ? statRow('RETAIL AVG ('+ret.number_of_retail_listings+' LISTINGS)', fmt(ret.retail_price_avg,cur), '#5aad7a') : '') +
             (ret.retail_price_min!=null ? statRow('RETAIL RANGE', fmt(ret.retail_price_min,cur)+' — '+fmt(ret.retail_price_max,cur)) : '') +
-          '</div>' +
-          /* Actions */
-          '<div style="display:flex;gap:6px;flex-wrap:wrap;">' +
-            '<button id="wl-star-'+id+'" style="background:#111;border:1px solid #252525;color:'+(inWl?'#E97132':'#fff')+';font-family:var(--font);font-size:8px;letter-spacing:.12em;padding:6px 10px;cursor:pointer;">'+(inWl?'★ IN MONITOR':'☆ ADD TO MONITOR')+'</button>' +
-            '<a href="'+(det.whiskystats_url||'#')+'" target="_blank" style="background:#111;border:1px solid #252525;color:#fff;font-family:var(--font);font-size:8px;letter-spacing:.12em;padding:6px 10px;text-decoration:none;">↗ WHISKYSTATS</a>' +
-            '<a href="'+(det.whiskybase_url||'#')+'" target="_blank" style="background:#111;border:1px solid #252525;color:#fff;font-family:var(--font);font-size:8px;letter-spacing:.12em;padding:6px 10px;text-decoration:none;">↗ WHISKYBASE</a>' +
-          '</div>' +
-        '</div>';
+          '</div>';
 
-      /* Paint chart — try history first, fall back to stat chart */
-      var canvas = detailEl.querySelector('#wl-chart-'+id);
-      if (!canvas) return;
-      var attempt = 0;
-      (function tryPaint(){
-        var W = canvas.offsetWidth;
-        if (!W && attempt++ < 14) { setTimeout(tryPaint, 50); return; }
-        var histKey = 'tbt_hist_'+bgId+'_'+cur;
-        var cachedHist = cacheGet(histKey, 604800000); /* 7 days */
-        function applyHistory(h) {
-          var pts = (h && (h.prices || h.auction_history || h.history || h.data)) || [];
-          if (Array.isArray(pts) && pts.length >= 3) paintTimeChart(canvas, pts, mv, cur);
-          else paintStatChart(canvas, auc, ret);
+        var canvas = detailEl.querySelector('#wl-chart-'+id);
+        if (canvas) {
+          var att = 0;
+          (function tryPaint(){
+            if (!canvas.offsetWidth && att++ < 14) { setTimeout(tryPaint, 50); return; }
+            paintWhiskyChart(canvas, auc, ret);
+          })();
         }
-        if (cachedHist !== null) { applyHistory(cachedHist); }
-        else {
-          fetch('/.netlify/functions/whisky-data?type=history&id='+encodeURIComponent(bgId)+'&currency='+cur)
-            .then(function(r){ return r.json(); })
-            .then(function(h){ cacheSet(histKey, h); applyHistory(h); })
-            .catch(function(){ paintStatChart(canvas, auc, ret); });
-        }
-      })();
+      }
 
-      /* Watchlist */
-      var starBtn = detailEl.querySelector('#wl-star-'+id);
-      if (starBtn) starBtn.addEventListener('click', function(){
-        toggleWl({whisky_id:item.whisky_id, bg_id:bgId, name:(det.bottler_serie||'')+' '+(det.name||''), currency:_cur}, starBtn);
-      });
+      var cached = cacheGet(mktKey, 86400000);
+      if (cached) { renderMarket(cached); return; }
+      fetch('/.netlify/functions/whisky-data?type=market&id='+encodeURIComponent(bgId)+'&currency='+_cur)
+        .then(function(r){ return r.json(); })
+        .then(renderMarket)
+        .catch(function(){
+          var cta = detailEl.querySelector('#wl-mktcta-'+id);
+          if (cta) cta.innerHTML = '<div style="font-size:8px;letter-spacing:.14em;color:#fff;opacity:.4;padding:6px 0;">MARKET DATA UNAVAILABLE</div>';
+        });
     }
 
     /* ── Build search query from filters + text ── */
