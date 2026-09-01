@@ -12,11 +12,14 @@ const KEY  = process.env.WHISKYSTATS_API_KEY;
 
 /* Per-type CDN cache durations (WhiskyStats T&Cs allow 30-day max) */
 const CACHE = {
-  search:  'public, max-age=3600,  s-maxage=3600,  stale-while-revalidate=300',   /* 1h  */
-  browse:  'public, max-age=86400, s-maxage=86400, stale-while-revalidate=3600',   /* 24h */
-  market:  'public, max-age=86400, s-maxage=86400, stale-while-revalidate=3600',   /* 24h */
-  full:    'public, max-age=86400, s-maxage=86400, stale-while-revalidate=3600',   /* 24h */
-  history: 'public, max-age=604800,s-maxage=604800,stale-while-revalidate=86400',  /* 7d  */
+  search:  'public, max-age=604800, s-maxage=604800, stale-while-revalidate=86400',  /* 7d */
+  browse:  'public, max-age=604800, s-maxage=604800, stale-while-revalidate=86400',  /* 7d */
+  market:  'public, max-age=604800, s-maxage=604800, stale-while-revalidate=86400',  /* 7d */
+  full:    'public, max-age=604800, s-maxage=604800, stale-while-revalidate=86400',  /* 7d */
+  history:        'public, max-age=604800, s-maxage=604800, stale-while-revalidate=86400', /* 7d */
+  retail_history: 'public, max-age=604800, s-maxage=604800, stale-while-revalidate=86400', /* 7d */
+  indices:        'public, max-age=604800, s-maxage=604800, stale-while-revalidate=86400', /* 7d */
+  index_history:  'public, max-age=604800, s-maxage=604800, stale-while-revalidate=86400', /* 7d */
   credits: 'private, no-store',
   default: 'public, max-age=3600,  s-maxage=3600',
 };
@@ -110,10 +113,76 @@ exports.handler = async function (event) {
       if (!id) return { statusCode: 400, headers: baseHdrs(type), body: JSON.stringify({ error: 'id required' }) };
       try {
         var res = await wsGet('/v01/whisky/auction_price_history?whisky_id=' + id + '&currency_code=' + cur);
+        /* WhiskyStats returns a JSON 404 object when endpoint unavailable */
+        if (res && res.status === 404) return { statusCode: 200, headers: baseHdrs(type), body: JSON.stringify({ _tbt_empty: true }) };
         return { statusCode: 200, headers: baseHdrs(type), body: JSON.stringify(res) };
       } catch (e) {
-        /* Return empty rather than erroring — client caches this too so we don't retry */
-        return { statusCode: 200, headers: baseHdrs(type), body: JSON.stringify({ prices: [] }) };
+        return { statusCode: 200, headers: baseHdrs(type), body: JSON.stringify({ _tbt_empty: true }) };
+      }
+    }
+
+    /* ── RETAIL PRICE HISTORY ── */
+    if (type === 'retail_history') {
+      var id  = (p.id || '').replace(/[^A-Za-z0-9]/g, '');
+      var cur = (p.currency || 'GBP').replace(/[^A-Z]/g, '').slice(0, 3);
+      if (!id) return { statusCode: 400, headers: baseHdrs(type), body: JSON.stringify({ error: 'id required' }) };
+      try {
+        var res = await wsGet('/v01/whisky/retail_price_history?whisky_id=' + id + '&currency_code=' + cur);
+        if (res && res.status === 404) return { statusCode: 200, headers: baseHdrs(type), body: JSON.stringify({ _tbt_empty: true }) };
+        return { statusCode: 200, headers: baseHdrs(type), body: JSON.stringify(res) };
+      } catch (e) {
+        return { statusCode: 200, headers: baseHdrs(type), body: JSON.stringify({ _tbt_empty: true }) };
+      }
+    }
+
+    /* ── REGION INDICES — overview table ── */
+    if (type === 'indices') {
+      try {
+        /* Try both likely endpoint names */
+        var res = await wsGet('/v01/index/region_indices').catch(function(){ return null; });
+        if (!res || res.status === 404) res = await wsGet('/v01/index/region_index').catch(function(){ return null; });
+        if (!res || res.status === 404) return { statusCode: 200, headers: baseHdrs(type), body: JSON.stringify({ _tbt_empty: true, _tried: 'region_indices,region_index' }) };
+        return { statusCode: 200, headers: baseHdrs(type), body: JSON.stringify(res) };
+      } catch (e) {
+        return { statusCode: 200, headers: baseHdrs(type), body: JSON.stringify({ _tbt_empty: true }) };
+      }
+    }
+
+    /* ── INDEX HISTORY — time-series for one region or global index ── */
+    if (type === 'index_history') {
+      var region = (p.region || '').replace(/[^A-Za-z0-9_\-]/g, '');
+      var cur    = (p.currency || 'GBP').replace(/[^A-Z]/g, '').slice(0, 3);
+      try {
+        var path = region
+          ? '/v01/index/region_index_history?region=' + encodeURIComponent(region) + '&currency_code=' + cur
+          : '/v01/index/whisky_index_history?currency_code=' + cur;
+        var res = await wsGet(path).catch(function(){ return null; });
+        /* Some APIs don't take currency on index endpoints — retry without */
+        if (!res || res.status === 404) {
+          var path2 = region
+            ? '/v01/index/region_index_history?region=' + encodeURIComponent(region)
+            : '/v01/index/whisky_index_history';
+          res = await wsGet(path2).catch(function(){ return null; });
+        }
+        if (!res || res.status === 404) return { statusCode: 200, headers: baseHdrs(type), body: JSON.stringify({ _tbt_empty: true }) };
+        return { statusCode: 200, headers: baseHdrs(type), body: JSON.stringify(res) };
+      } catch (e) {
+        return { statusCode: 200, headers: baseHdrs(type), body: JSON.stringify({ _tbt_empty: true }) };
+      }
+    }
+
+    /* ── INDEX WHISKIES — bottles that make up an index ── */
+    if (type === 'index_whiskies') {
+      var region = (p.region || '').replace(/[^A-Za-z0-9_\-]/g, '');
+      try {
+        var path = region
+          ? '/v01/index/index_whiskies?region=' + encodeURIComponent(region)
+          : '/v01/index/index_whiskies';
+        var res = await wsGet(path).catch(function(){ return null; });
+        if (!res || res.status === 404) return { statusCode: 200, headers: baseHdrs(type), body: JSON.stringify({ _tbt_empty: true }) };
+        return { statusCode: 200, headers: baseHdrs(type), body: JSON.stringify(res) };
+      } catch (e) {
+        return { statusCode: 200, headers: baseHdrs(type), body: JSON.stringify({ _tbt_empty: true }) };
       }
     }
 
