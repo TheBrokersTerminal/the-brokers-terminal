@@ -264,7 +264,7 @@ exports.handler = async function (event) {
       var yhHdrs = { 'User-Agent': 'Mozilla/5.0 (compatible)', 'Accept': 'application/json' };
       var YH_BASE = 'https://query1.finance.yahoo.com/v8/finance/chart/';
 
-      var needGold   = ML_SERIES.some(function(s) { return s.s === 'GOLDPMGBD228NLBM'; });
+      var needGold   = ML_SERIES.some(function(s) { return s.s === 'GOLDAMGBD228NLBM'; });
       var needSilver = ML_SERIES.some(function(s) { return s.s === 'SLVPRUSD'; });
 
       var mlResults = await Promise.all([
@@ -275,12 +275,32 @@ exports.handler = async function (event) {
         })),
         needGold   ? fetchJson('https://api.gold-api.com/price/XAU').catch(function() { return null; }) : Promise.resolve(null),
         needSilver ? fetchJson('https://api.gold-api.com/price/XAG').catch(function() { return null; }) : Promise.resolve(null),
+        needGold   ? fetchJsonWith(YH_BASE + 'GC%3DF?interval=1d&range=2y', yhHdrs).catch(function() { return null; }) : Promise.resolve(null),
       ]);
       var mlFredRes  = mlResults[0];
       var erData     = mlResults[1];
       var yhFetchRes = mlResults[2];
       var goldApiRes = mlResults[3];
       var silvApiRes = mlResults[4];
+      var goldHistRes = mlResults[5];
+
+      /* Build gold historical obs from Yahoo GC=F (FRED GOLDAMGBD228NLBM discontinued 2015) */
+      var goldObs = [];
+      if (needGold && goldHistRes) {
+        try {
+          var ghResult = ((goldHistRes.chart || {}).result || [])[0];
+          if (ghResult) {
+            var ghTs = ghResult.timestamp || [];
+            var ghClose = ((ghResult.indicators || {}).quote || [{}])[0].close || [];
+            ghTs.forEach(function(ts, idx) {
+              var v = ghClose[idx];
+              if (v != null && !isNaN(v)) {
+                goldObs.push({ d: new Date(ts * 1000).toISOString().split('T')[0], v: parseFloat(v.toFixed(2)) });
+              }
+            });
+          }
+        } catch(e) {}
+      }
 
       /* Build Yahoo quote map: FRED series ID → { price, dayPct } */
       var yhQuotes = {};
@@ -337,9 +357,10 @@ exports.handler = async function (event) {
         if (s.fxKey === 'AUDUSD' && erRates['AUD'])        liveLast = parseFloat((1 / erRates['AUD']).toFixed(4));
         if (s.fxKey === 'USDCNY' && erRates['CNY'])        liveLast = parseFloat(erRates['CNY'].toFixed(4));
 
-        /* Gold and silver from gold-api.com */
+        /* Gold: live spot from gold-api.com; history from Yahoo GC=F (FRED series discontinued 2015) */
         if (s.s === 'GOLDAMGBD228NLBM' && goldUSD) {
           liveLast = parseFloat(goldUSD.toFixed(2));
+          if (!obs.length && goldObs.length) obs = goldObs;
         }
         if (s.s === 'SLVPRUSD' && silverUSD) {
           liveLast = parseFloat(silverUSD.toFixed(3));
@@ -464,6 +485,27 @@ exports.handler = async function (event) {
         FEDFUNDS:          { label: 'US Fed Rate',    unit: '%'    },
       };
       var cMeta = labelMap[seriesId] || { label: seriesId, unit: '' };
+
+      /* Gold: FRED series discontinued 2015 — use Yahoo GC=F instead */
+      if (seriesId === 'GOLDAMGBD228NLBM') {
+        var gcHdrs = { 'User-Agent': 'Mozilla/5.0 (compatible)', 'Accept': 'application/json' };
+        var gcRange = cy >= 5 ? '10y' : cy >= 2 ? '5y' : '2y';
+        var gcRaw = await fetchJsonWith('https://query1.finance.yahoo.com/v8/finance/chart/GC%3DF?interval=1wk&range=' + gcRange, gcHdrs).catch(function(){ return null; });
+        var gcData = [];
+        try {
+          var gcResult = ((gcRaw || {}).chart || {}).result || [];
+          if (gcResult[0]) {
+            var gcTs = gcResult[0].timestamp || [];
+            var gcClose = (((gcResult[0].indicators || {}).quote || [{}])[0].close || []);
+            gcTs.forEach(function(ts, idx) {
+              var v = gcClose[idx];
+              if (v != null && !isNaN(v)) gcData.push({ d: new Date(ts * 1000).toISOString().split('T')[0], v: parseFloat(v.toFixed(2)) });
+            });
+          }
+        } catch(e) {}
+        return { statusCode: 200, headers: hdrs, body: JSON.stringify({ label: cMeta.label, unit: cMeta.unit, data: gcData }) };
+      }
+
       var cRaw  = await fetchJson(FB + seriesId);
       return { statusCode: 200, headers: hdrs, body: JSON.stringify({ label: cMeta.label, unit: cMeta.unit, data: clean((cRaw || {}).observations) }) };
     }
