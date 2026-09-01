@@ -6,6 +6,21 @@
   window._sharedZ = window._sharedZ || 1000;
   var _popOffset = 0;
   var _cache = {};    /* session cache: key → parsed response */
+
+  /* ── localStorage cache — 7-day TTL, matches CDN ── */
+  var LS_TTL = 7 * 24 * 3600 * 1000;
+  function lsGet(key) {
+    try {
+      var raw = localStorage.getItem('tbt_ws_' + key);
+      if (!raw) return null;
+      var obj = JSON.parse(raw);
+      if (!obj || Date.now() - (obj.ts || 0) > LS_TTL) { localStorage.removeItem('tbt_ws_' + key); return null; }
+      return obj.data;
+    } catch (e) { return null; }
+  }
+  function lsSet(key, data) {
+    try { localStorage.setItem('tbt_ws_' + key, JSON.stringify({ ts: Date.now(), data: data })); } catch (e) {}
+  }
   var _registry = {}; /* pid → {query, type, ticker, x, y, w, h} */
 
   /* Expose state for terminal-canvas saveLayout */
@@ -705,23 +720,39 @@
             _registry[win._popId].ticker = d.ticker;
           }
         }
-        /* Distillery: fire WhiskyStats search in parallel before rendering */
+        /* Distillery: fetch WhiskyStats expressions (page 1 only — 1 credit) */
         if (d && d.type === 'company' && d.category === 'distillery') {
           var wsKey = 'ws:' + (d.title || cacheKey);
-          if (_cache[wsKey]) {
-            d._wsResults = _cache[wsKey];
-            renderPopout(d, win);
-            return;
-          }
+          var lsKey = 's_' + (d.title || cacheKey).toLowerCase().replace(/\s+/g, '_');
+          /* 1. Session cache */
+          if (_cache[wsKey]) { d._wsResults = _cache[wsKey]; renderPopout(d, win); return; }
+          /* 2. localStorage cache (survives page refresh) */
+          var lsCached = lsGet(lsKey);
+          if (lsCached) { d._wsResults = lsCached; _cache[wsKey] = lsCached; renderPopout(d, win); return; }
           var wsQ = encodeURIComponent(d.title || query);
+          var distWords = (d.title || query).toLowerCase().split(/\s+/).filter(function (w) { return w.length > 3; });
+          d._wsDistWords = distWords;
+          d._wsQ = wsQ;
+          d._wsLsKey = lsKey;
           fetch('/.netlify/functions/whisky-data?type=search&query=' + wsQ + '&page=1')
             .then(function (r) { return r.ok ? r.json() : null; })
             .then(function (ws) {
-              d._wsResults = (ws && ws.results) ? ws.results : [];
-              _cache[wsKey] = d._wsResults;
+              var all = [], seen = {};
+              if (ws && ws.results) {
+                ws.results.forEach(function (r) {
+                  if (seen[r.whisky_id]) return;
+                  var n = (r.whisky_name || '').toLowerCase();
+                  if (!distWords.length || distWords.some(function (w) { return n.indexOf(w) !== -1; })) {
+                    seen[r.whisky_id] = true; all.push(r);
+                  }
+                });
+              }
+              d._wsResults = all;
+              d._wsPage = 1;
+              _cache[wsKey] = all;
+              lsSet(lsKey, all);
               renderPopout(d, win);
-            })
-            .catch(function () { renderPopout(d, win); });
+            }).catch(function () { renderPopout(d, win); });
         } else {
           renderPopout(d, win);
         }
@@ -941,28 +972,100 @@
         });
       });
     }
+
+    /* Load More button — fetches pages 2+3 (2 credits) on demand */
+    var loadMoreBtn = body.querySelector('.dist-load-more');
+    if (loadMoreBtn && d._wsQ) {
+      loadMoreBtn.addEventListener('click', function () {
+        loadMoreBtn.textContent = 'LOADING…';
+        loadMoreBtn.disabled = true;
+        var distWords = d._wsDistWords || [];
+        var lsKey     = d._wsLsKey || '';
+        Promise.all([
+          fetch('/.netlify/functions/whisky-data?type=search&query=' + d._wsQ + '&page=2').then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }),
+          fetch('/.netlify/functions/whisky-data?type=search&query=' + d._wsQ + '&page=3').then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }),
+        ]).then(function (pages) {
+          var list = body.querySelector('.dist-expr-list');
+          if (!list) return;
+          var seen = {};
+          body.querySelectorAll('.dist-expr-row').forEach(function (r) { seen[r.dataset.id] = true; });
+          var newRows = [];
+          pages.forEach(function (ws) {
+            if (ws && ws.results) {
+              ws.results.forEach(function (r) {
+                if (seen[r.whisky_id]) return;
+                var n = (r.whisky_name || '').toLowerCase();
+                if (!distWords.length || distWords.some(function (w) { return n.indexOf(w) !== -1; })) {
+                  seen[r.whisky_id] = true;
+                  newRows.push(r);
+                }
+              });
+            }
+          });
+          /* Append new rows */
+          newRows.forEach(function (r) {
+            var div = document.createElement('div');
+            div.innerHTML = buildExprRow(r);
+            var row = div.firstChild;
+            list.appendChild(row);
+            row.addEventListener('click', function () {
+              body.querySelectorAll('.dist-expr-row').forEach(function (x) { x.classList.remove('dist-expr-active'); });
+              row.classList.add('dist-expr-active');
+              showExpressionSidebar(win, row.dataset.id, row.dataset.name);
+            });
+          });
+          loadMoreBtn.parentNode.removeChild(loadMoreBtn);
+          /* Update cache with full set */
+          var allResults = (d._wsResults || []).concat(newRows);
+          d._wsResults = allResults;
+          _cache['ws:' + (d.title || '')] = allResults;
+          if (lsKey) lsSet(lsKey, allResults);
+          /* Update tab count */
+          var countEl = body.querySelector('.dist-count');
+          if (countEl) countEl.textContent = allResults.length;
+        });
+      });
+    }
+  }
+
+  function buildExprRow(r) {
+    var name = r.whisky_name || '';
+    var tags = [];
+    var ageM = name.match(/(\d+)[\s-]?year[\s-]?old/i) || name.match(/(\d+)\s*yo\b/i);
+    if (ageM) tags.push(ageM[1] + 'YO');
+    var vinM = name.match(/(?:d\.?|vintage\s*)(\d{4})/i) || name.match(/\b(19[3-9]\d|20[0-2]\d)\b/);
+    if (vinM && !ageM) tags.push(vinM[1]);
+    var szM = name.match(/\((\d+(?:\.\d+)?(?:ml|l|cl))\)/i);
+    if (szM) tags.push(szM[1].toLowerCase());
+    var rating = r.rating || r.whiskybase_rating || r.score || null;
+    var price  = r.avg_price || r.latest_price || r.avg_auction_price || null;
+    var metaParts = [];
+    if (tags.length) metaParts.push(tags.join(' · '));
+    if (rating) metaParts.push('★ ' + rating);
+    if (price)  metaParts.push('£' + Math.round(price).toLocaleString('en-GB'));
+    var meta = metaParts.join('  ');
+    return '<div class="dist-expr-row" data-id="' + escH(r.whisky_id) + '" data-name="' + escH(name) + '">' +
+      '<div class="dist-expr-img-wrap">' +
+        (r.whisky_image_url
+          ? '<img src="' + escH(r.whisky_image_url) + '" class="dist-expr-img" onerror="this.style.display=\'none\'" />'
+          : '<div class="dist-expr-img-ph">▣</div>') +
+      '</div>' +
+      '<div class="dist-expr-info">' +
+        '<div class="dist-expr-name">' + escH(name) + '</div>' +
+        '<div class="dist-expr-meta">' + (meta ? escH(meta) : escH(r.whisky_id)) + '</div>' +
+      '</div>' +
+      '<div class="dist-expr-arrow">›</div>' +
+    '</div>';
   }
 
   function buildExpressionsPanel(results) {
     if (!results || !results.length) {
       return '<div style="padding:20px;font-size:9px;letter-spacing:.18em;color:#fff;opacity:.4;text-align:center;">NO EXPRESSIONS FOUND</div>';
     }
-    var rows = results.map(function (r) {
-      return '<div class="dist-expr-row" data-id="' + escH(r.whisky_id) + '" data-name="' + escH(r.whisky_name) + '">' +
-        '<div class="dist-expr-img-wrap">' +
-          (r.whisky_image_url
-            ? '<img src="' + escH(r.whisky_image_url) + '" class="dist-expr-img" onerror="this.style.display=\'none\'" />'
-            : '<div class="dist-expr-img-ph">▣</div>') +
-        '</div>' +
-        '<div class="dist-expr-info">' +
-          '<div class="dist-expr-name">' + escH(r.whisky_name) + '</div>' +
-          '<div class="dist-expr-id">' + escH(r.whisky_id) + '</div>' +
-        '</div>' +
-        '<div class="dist-expr-arrow">›</div>' +
-      '</div>';
-    }).join('');
+    var rows = results.map(buildExprRow).join('');
     return '<div class="dist-expr-search-wrap"><input class="dist-expr-search" placeholder="▸  FILTER EXPRESSIONS…" /></div>' +
-      '<div class="dist-expr-list">' + rows + '</div>';
+      '<div class="dist-expr-list">' + rows + '</div>' +
+      '<button class="dist-load-more">▸ LOAD MORE EXPRESSIONS</button>';
   }
 
   /* ── EXPRESSION SIDEBAR ── */
@@ -999,15 +1102,26 @@
       _exprSidebar = null;
     });
 
-    /* Fetch browse (details + rating) */
+    /* Fetch browse (details + rating) — 3 credits; localStorage-cached for 7 days */
     var sBody = sidebar.querySelector('.dist-sidebar-body');
-    fetch('/.netlify/functions/whisky-data?type=browse&id=' + encodeURIComponent(whiskyId))
-      .then(function (r) { return r.ok ? r.json() : null; })
-      .then(function (data) {
-        if (!data) { sBody.innerHTML = '<div class="sp-loading">DATA UNAVAILABLE</div>'; return; }
-        renderExpressionDetail(data, sBody, whiskyId);
-      })
-      .catch(function () { sBody.innerHTML = '<div class="sp-loading">DATA UNAVAILABLE</div>'; });
+    var bLsKey = 'b_' + whiskyId;
+    var bCached = lsGet(bLsKey) || _cache['browse:' + whiskyId];
+    if (bCached) {
+      renderExpressionDetail(bCached, sBody, whiskyId);
+    } else {
+      fetch('/.netlify/functions/whisky-data?type=browse&id=' + encodeURIComponent(whiskyId))
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (data) {
+          if (!data || data.error) {
+            sBody.innerHTML = '<div class="sp-loading">' + (data && data.error ? 'API ERROR: ' + escH(data.error) : 'DATA UNAVAILABLE') + '</div>';
+            return;
+          }
+          _cache['browse:' + whiskyId] = data;
+          lsSet(bLsKey, data);
+          renderExpressionDetail(data, sBody, whiskyId);
+        })
+        .catch(function () { sBody.innerHTML = '<div class="sp-loading">DATA UNAVAILABLE</div>'; });
+    }
   }
 
   function renderExpressionDetail(data, sBody, whiskyId) {
@@ -1034,7 +1148,7 @@
       '<canvas id="expr-chart-' + escH(whiskyId) + '" style="width:100%;height:120px;display:block;margin:4px 0;"></canvas>' +
       '<div id="expr-mkt-' + escH(whiskyId) + '">' +
         '<button class="dist-load-prices" data-bg="' + escH(bgId) + '" data-canvas="expr-chart-' + escH(whiskyId) + '" data-mkt="expr-mkt-' + escH(whiskyId) + '">' +
-          '▸ LOAD PRICES + CHART <span style="color:#555;font-size:7px;">(15 credits)</span>' +
+          '▸ LOAD PRICES + CHART' +
         '</button>' +
       '</div>';
 
@@ -1047,27 +1161,60 @@
         var mktId = btn.dataset.mkt;
         btn.textContent = 'LOADING…';
         btn.disabled = true;
+        /* Check localStorage first — market/history are expensive (15 credits) */
+        var mLsKey = 'm_' + bgId2;
+        var hLsKey = 'h_' + bgId2;
+        var mCached = lsGet(mLsKey), hCached = lsGet(hLsKey);
         Promise.all([
-          fetch('/.netlify/functions/whisky-data?type=market&id=' + encodeURIComponent(bgId2) + '&currency=GBP').then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }),
-          fetch('/.netlify/functions/whisky-data?type=history&id=' + encodeURIComponent(bgId2) + '&currency=GBP').then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }),
+          mCached ? Promise.resolve(mCached) : fetch('/.netlify/functions/whisky-data?type=market&id='  + encodeURIComponent(bgId2) + '&currency=GBP').then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }),
+          hCached ? Promise.resolve(hCached) : fetch('/.netlify/functions/whisky-data?type=history&id=' + encodeURIComponent(bgId2) + '&currency=GBP').then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }),
         ]).then(function (res) {
           var mkt  = res[0];
           var hist = res[1];
+          /* Persist to localStorage if freshly fetched */
+          if (!mCached && mkt && !mkt.error) lsSet(mLsKey, mkt);
+          if (!hCached && hist)              lsSet(hLsKey, hist);
+
+          /* Credit exhaustion check */
+          var creditErr = (mkt && mkt.error && /credit/i.test(mkt.error));
           var mktEl = document.getElementById(mktId);
-          if (mktEl && mkt) {
-            var auc  = mkt.auction  || {};
-            var lat  = auc.latest_auction_price || {};
-            var ret  = (mkt.retail  || {}).latest_retail_price  || {};
+          if (creditErr) {
+            if (mktEl) mktEl.innerHTML = '<div style="font-size:9px;letter-spacing:.12em;color:#E97132;padding:6px 0;">⚠ INSUFFICIENT CREDITS — PLEASE TOP UP WHISKYSTATS</div>';
+            return;
+          }
+          if (mktEl) {
+            var auc    = (mkt && mkt.auction) || {};
+            var lat    = auc.latest_auction_price || {};
+            var m12    = auc.latest_12m || {};
+            var atMax  = auc.max_auction_price || {};
+            var ret    = (mkt && mkt.retail) || {};
+
+            /* Correct field names from WhiskyStats API */
+            var latAvg  = lat.buyer_price_avg;
+            var latMin  = lat.buyer_price_min;
+            var latMax  = lat.buyer_price_max;
+            var latDate = (lat.price_date || '').slice(0, 7); /* YYYY-MM */
+            var m12Avg  = m12.buyer_price_avg;
+            var m12Min  = m12.buyer_price_min;
+            var m12Max  = m12.buyer_price_max;
+            var m12Chg  = m12.market_value_change_pct;
+            var allMax  = atMax.buyer_price;
+            var retAvg  = ret.retail_price_avg;
+            var retMin  = ret.retail_price_min;
+            var retMax  = ret.retail_price_max;
+
+            var chgStr  = m12Chg != null ? (m12Chg >= 0 ? '+' : '') + Math.round(m12Chg * 100) + '% YOY' : '';
+
             mktEl.innerHTML =
-              '<div class="sp-sec-lbl" style="margin-top:8px;">AUCTION PRICES</div>' +
+              '<div class="sp-sec-lbl" style="margin-top:8px;">AUCTION PRICES' + (chgStr ? ' <span style="color:' + (m12Chg >= 0 ? '#4caf50' : '#e97132') + ';font-size:7px;">' + escH(chgStr) + '</span>' : '') + '</div>' +
               '<div class="dist-stat-block">' +
-                (lat.avg ? sRow('LAST AVG',  '£' + Math.round(lat.avg).toLocaleString('en-GB')) : '') +
-                (lat.min ? sRow('LAST LOW',  '£' + Math.round(lat.min).toLocaleString('en-GB')) : '') +
-                (lat.max ? sRow('LAST HIGH', '£' + Math.round(lat.max).toLocaleString('en-GB')) : '') +
-                (ret.avg ? sRow('RETAIL AVG','£' + Math.round(ret.avg).toLocaleString('en-GB')) : '') +
+                (latAvg  != null ? sRow('LAST SALE',  '£' + Math.round(latAvg).toLocaleString('en-GB') + (latDate ? '  ' + latDate : '')) : '') +
+                (m12Avg  != null ? sRow('12M AVG',    '£' + Math.round(m12Avg).toLocaleString('en-GB')) : '') +
+                (m12Min  != null ? sRow('12M RANGE',  '£' + Math.round(m12Min).toLocaleString('en-GB') + ' – £' + Math.round(m12Max).toLocaleString('en-GB')) : '') +
+                (allMax  != null ? sRow('ALL-TIME HIGH','£' + Math.round(allMax).toLocaleString('en-GB') + (atMax.price_date ? '  ' + atMax.price_date.slice(0,7) : '')) : '') +
+                (retAvg  != null ? sRow('RETAIL',     '£' + Math.round(retAvg).toLocaleString('en-GB') + (retMin !== retMax ? '  (' + Math.round(retMin).toLocaleString('en-GB') + '–' + Math.round(retMax).toLocaleString('en-GB') + ')' : '')) : '') +
               '</div>';
           }
-          /* Draw chart */
           var canvas = document.getElementById(canvasId);
           if (canvas) {
             var dpr = window.devicePixelRatio || 1;
@@ -1077,7 +1224,12 @@
             canvas.height = Math.round(ch * dpr);
             canvas.style.width  = cw + 'px';
             canvas.style.height = ch + 'px';
-            drawExpressionChart(canvas, hist, dpr);
+            /* Use full history if available, else fall back to 12m summary */
+            if (hist && !hist._tbt_empty) {
+              drawExpressionChart(canvas, hist, dpr);
+            } else {
+              draw12mRangeChart(canvas, auc, dpr);
+            }
           }
         });
       });
@@ -1098,8 +1250,9 @@
     }
     var series = [];
     points.forEach(function (p) {
-      var v = parseFloat(p.price || p.avg_price || p.hammer_price || p.value || p.v || 0);
-      var d = p.date || p.sale_date || p.auction_date || p.d || '';
+      var v = parseFloat(p.price || p.avg_price || p.hammer_price || p.avg || p.value || p.v || 0);
+      var d = p.date || p.sale_date || p.auction_date || p.d || p.sold_date || p.month || '';
+      if (!d && p.timestamp) d = new Date(p.timestamp * 1000).toISOString().split('T')[0];
       if (v > 0 && d) series.push({ d: d, v: v });
     });
     series.sort(function (a, b) { return a.d < b.d ? -1 : 1; });
@@ -1166,6 +1319,131 @@
     ctx.fillText('£' + Math.round(minV).toLocaleString('en-GB'), pL, H - 2 * dpr);
     ctx.textAlign = 'right';
     ctx.fillText('£' + Math.round(maxV).toLocaleString('en-GB'), W - pR, pT + 8 * dpr);
+  }
+
+  /* Full-width horizontal box-plot for 12m summary data */
+  function draw12mRangeChart(canvas, auc, dpr) {
+    if (!canvas || !auc) return;
+    dpr = dpr || 1;
+    var m12  = auc.latest_12m || {};
+    var minV = m12.buyer_price_min;
+    var q1V  = m12.buyer_price_qrt1;
+    var q3V  = m12.buyer_price_qrt3;
+    var avgV = m12.buyer_price_avg;
+    var maxV = m12.buyer_price_max;
+    var latV = (auc.latest_auction_price || {}).buyer_price_avg;
+    var allV = (auc.max_auction_price    || {}).buyer_price;
+    if (minV == null || maxV == null) {
+      var ctx0 = canvas.getContext('2d');
+      ctx0.fillStyle = '#1a1a1a'; ctx0.fillRect(0, 0, canvas.width, canvas.height);
+      ctx0.fillStyle = '#444'; ctx0.font = (9 * dpr) + 'px Consolas';
+      ctx0.textAlign = 'center';
+      ctx0.fillText('NO PRICE DATA', canvas.width / 2, canvas.height / 2);
+      return;
+    }
+    var W = canvas.width, H = canvas.height;
+    var ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = '#0d0d0d'; ctx.fillRect(0, 0, W, H);
+
+    var pL = 10 * dpr, pR = 10 * dpr, pT = 16 * dpr, pB = 20 * dpr;
+    var cW = W - pL - pR;
+    /* Horizontal scale: include all-time high if > max */
+    var scaleMin = minV * 0.96;
+    var scaleMax = Math.max(allV || 0, maxV) * 1.04;
+    var rng = scaleMax - scaleMin || 1;
+    function xv(v) { return pL + ((v - scaleMin) / rng) * cW; }
+
+    /* Bar geometry — centred vertically */
+    var barMid = pT + (H - pT - pB) / 2;
+    var barH   = Math.round((H - pT - pB) * 0.38);
+
+    /* Background track: min → max */
+    ctx.fillStyle = '#1c1c1c';
+    ctx.fillRect(xv(minV), barMid - barH / 2, xv(maxV) - xv(minV), barH);
+
+    /* IQR box: Q1 → Q3 */
+    if (q1V != null && q3V != null) {
+      ctx.fillStyle = 'rgba(233,113,50,0.18)';
+      ctx.fillRect(xv(q1V), barMid - barH / 2, xv(q3V) - xv(q1V), barH);
+      ctx.strokeStyle = 'rgba(233,113,50,0.45)';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(xv(q1V), barMid - barH / 2, xv(q3V) - xv(q1V), barH);
+    }
+
+    /* Whisker lines: min→Q1 and Q3→max */
+    ctx.strokeStyle = 'rgba(255,255,255,0.18)';
+    ctx.lineWidth = 1;
+    if (q1V != null) {
+      ctx.beginPath(); ctx.moveTo(xv(minV), barMid); ctx.lineTo(xv(q1V), barMid); ctx.stroke();
+    }
+    if (q3V != null) {
+      ctx.beginPath(); ctx.moveTo(xv(q3V), barMid); ctx.lineTo(xv(maxV), barMid); ctx.stroke();
+    }
+
+    /* End ticks */
+    ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+    [minV, maxV].forEach(function (v) {
+      ctx.beginPath();
+      ctx.moveTo(xv(v), barMid - barH / 2);
+      ctx.lineTo(xv(v), barMid + barH / 2);
+      ctx.stroke();
+    });
+
+    /* Avg vertical line — full bar height + overshoot */
+    if (avgV != null) {
+      ctx.strokeStyle = '#E97132';
+      ctx.lineWidth = 2 * dpr;
+      ctx.beginPath();
+      ctx.moveTo(xv(avgV), barMid - barH / 2 - 4 * dpr);
+      ctx.lineTo(xv(avgV), barMid + barH / 2 + 4 * dpr);
+      ctx.stroke();
+    }
+
+    /* Latest sale dot */
+    if (latV != null) {
+      ctx.beginPath();
+      ctx.arc(xv(latV), barMid, 4 * dpr, 0, Math.PI * 2);
+      ctx.fillStyle = '#E97132'; ctx.fill();
+      /* Dot label above */
+      ctx.fillStyle = 'rgba(255,255,255,0.5)';
+      ctx.font = (7 * dpr) + 'px Consolas';
+      ctx.textAlign = 'center';
+      ctx.fillText('LAST', xv(latV), barMid - barH / 2 - 8 * dpr);
+    }
+
+    /* All-time high dashed vertical */
+    if (allV && allV > maxV) {
+      ctx.setLineDash([2 * dpr, 3 * dpr]);
+      ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+      ctx.lineWidth = 1;
+      var ax = Math.min(xv(allV), W - pR - 1);
+      ctx.beginPath(); ctx.moveTo(ax, pT); ctx.lineTo(ax, H - pB); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = 'rgba(255,255,255,0.18)';
+      ctx.font = (6.5 * dpr) + 'px Consolas';
+      ctx.textAlign = 'right';
+      ctx.fillText('ATH', ax - 2 * dpr, pT + 8 * dpr);
+    }
+
+    /* Bottom labels: min — avg — max */
+    ctx.font = (7.5 * dpr) + 'px Consolas';
+    ctx.fillStyle = 'rgba(255,255,255,0.35)';
+    ctx.textAlign = 'left';
+    ctx.fillText('£' + Math.round(minV).toLocaleString('en-GB'), pL, H - 3 * dpr);
+    ctx.textAlign = 'right';
+    ctx.fillText('£' + Math.round(maxV).toLocaleString('en-GB'), W - pR, H - 3 * dpr);
+    if (avgV != null) {
+      ctx.fillStyle = '#E97132';
+      ctx.textAlign = 'center';
+      ctx.fillText('AVG £' + Math.round(avgV).toLocaleString('en-GB'), xv(avgV), H - 3 * dpr);
+    }
+
+    /* Header */
+    ctx.fillStyle = 'rgba(255,255,255,0.18)';
+    ctx.font = (6.5 * dpr) + 'px Consolas';
+    ctx.textAlign = 'left';
+    ctx.fillText('12-MONTH RANGE', pL, pT - 5 * dpr);
   }
 
   /* ── DRAGGABLE ── */

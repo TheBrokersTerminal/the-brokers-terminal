@@ -346,8 +346,6 @@
 .dist-expr-search::placeholder { color: rgba(255,255,255,.25); }
 .dist-expr-list {
   margin: 0 -14px;
-  overflow-y: auto;
-  max-height: 320px;
 }
 .dist-expr-row {
   display: flex;
@@ -373,6 +371,7 @@
   text-overflow: ellipsis;
 }
 .dist-expr-id { font-size: 7.5px; color: rgba(255,255,255,.3); letter-spacing: .1em; margin-top: 1px; }
+.dist-expr-meta { font-size: 8px; color: rgba(255,255,255,.45); letter-spacing: .1em; margin-top: 2px; }
 .dist-expr-arrow { color: #E97132; font-size: 14px; flex-shrink: 0; opacity: .6; }
 .dist-expr-row:hover .dist-expr-arrow, .dist-expr-row.dist-expr-active .dist-expr-arrow { opacity: 1; }
 
@@ -407,6 +406,23 @@
 }
 .dist-load-prices:hover { background: #171717; border-color: #333; }
 .dist-load-prices:disabled { opacity: .4; cursor: default; }
+.dist-load-more {
+  display: block;
+  width: 100%;
+  background: none;
+  border: none;
+  border-top: 1px solid #181818;
+  color: rgba(255,255,255,.3);
+  font-family: 'Consolas','Menlo',monospace;
+  font-size: 8px;
+  letter-spacing: .18em;
+  padding: 10px 14px;
+  cursor: pointer;
+  text-align: center;
+  transition: color .1s;
+}
+.dist-load-more:hover { color: rgba(255,255,255,.6); }
+.dist-load-more:disabled { opacity: .4; cursor: default; }
 
 /* ── DRAG-TO-MERGE drop zone highlight ── */
 .intel-drop-target {
