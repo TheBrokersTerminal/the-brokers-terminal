@@ -1018,9 +1018,9 @@
   async function loadStats() {
     try {
       var [reportsRes, usersRes, firmsRes] = await Promise.all([
-        supabase.from('reports').select('id, report_type, published_date, status'),
-        supabase.from('users').select('id, last_seen, last_login_at, created_at, status'),
-        supabase.from('firms').select('id, status, subscription_type, created_at')
+        supabaseAdmin.from('reports').select('id, report_type, published_date, status'),
+        supabaseAdmin.from('users').select('id, last_seen, last_login_at, created_at, status'),
+        supabaseAdmin.from('firms').select('id, status, subscription_type, created_at')
       ]);
 
       var reports = reportsRes.data || [];
@@ -1140,7 +1140,7 @@
   // ══ REPORTS ═════════════════════════════════════════════════
   async function loadReports() {
     try {
-      var { data, error } = await supabase
+      var { data, error } = await supabaseAdmin
         .from('reports').select('*').order('published_date', { ascending: false });
       if (error) throw error;
 
@@ -1163,8 +1163,8 @@
 
     tbody.innerHTML = reports.map(function (r) {
       var date      = new Date(r.published_date).toLocaleDateString('en-GB', { year:'numeric', month:'short', day:'2-digit'}).toUpperCase();
-      var typeLabel = r.report_type.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-      var assetLabel = r.asset_class.toUpperCase();
+      var typeLabel = (r.report_type || '').split('_').map(function(w){ return w.charAt(0).toUpperCase() + w.slice(1); }).join(' ') || '—';
+      var assetLabel = (r.asset_class || '—').toUpperCase();
       var statusHtml = r.status === 'published'
         ? '<span class="status-active">PUBLISHED</span>'
         : '<span class="status-inactive">DRAFT</span>';

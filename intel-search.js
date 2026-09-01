@@ -43,11 +43,19 @@
           '<span class="intel-search-lbl">INTEL</span>' +
           '<input id="intel-search-input" type="text" placeholder="Company, distillery, event, crisis…" autocomplete="off" spellcheck="false" readonly>' +
         '</div>' +
-        '<div class="intel-dropdown" id="intel-dropdown" style="display:none;"></div>' +
       '</div>';
 
-    var input = document.getElementById('intel-search-input');
+    /* Append dropdown to body so it escapes any parent stacking context */
     var dropdown = document.getElementById('intel-dropdown');
+    if (!dropdown) {
+      dropdown = document.createElement('div');
+      dropdown.className = 'intel-dropdown';
+      dropdown.id = 'intel-dropdown';
+      dropdown.style.display = 'none';
+      document.body.appendChild(dropdown);
+    }
+
+    var input = document.getElementById('intel-search-input');
 
     /* Chrome won't autofill readonly inputs — remove readonly on first interaction */
     function unlockInput() {
@@ -58,10 +66,17 @@
     input.addEventListener('mousedown', unlockInput);
     input.addEventListener('focus', unlockInput);
 
+    function positionDropdown() {
+      var r = input.getBoundingClientRect();
+      dropdown.style.top  = (r.bottom + 4) + 'px';
+      dropdown.style.left = r.left + 'px';
+    }
+
     input.addEventListener('input', function () {
       clearTimeout(_debounce);
       var q = this.value.trim();
       if (!q || q.length < 2) { dropdown.style.display = 'none'; return; }
+      positionDropdown();
       dropdown.style.display = 'block';
       dropdown.innerHTML = '<div class="intel-drop-loading">SEARCHING<span>...</span></div>';
       _debounce = setTimeout(function () { fetchSuggestions(q, dropdown); }, 320);
@@ -72,7 +87,7 @@
     });
 
     document.addEventListener('click', function (e) {
-      if (!wrap.contains(e.target)) dropdown.style.display = 'none';
+      if (!wrap.contains(e.target) && !dropdown.contains(e.target)) dropdown.style.display = 'none';
     });
   }
 
@@ -448,10 +463,18 @@
     var w = Math.max(winA.offsetWidth, winB.offsetWidth, 480);
     var h = Math.max(winA.offsetHeight, winB.offsetHeight, 500);
 
+    /* Place group inside the canvas so it scrolls with canvas widgets */
+    var _grpCanvas = document.getElementById('tbc-canvas');
+    var _grpCr = _grpCanvas ? _grpCanvas.getBoundingClientRect() : {left:0, top:0};
+    var _grpSX = _grpCanvas ? _grpCanvas.scrollLeft : 0;
+    var _grpSY = _grpCanvas ? _grpCanvas.scrollTop  : 0;
+    var _grpL  = rectB.left - _grpCr.left + _grpSX;
+    var _grpT  = rectB.top  - _grpCr.top  + _grpSY;
+
     var group = document.createElement('div');
     group.className = 'intel-tab-group';
     group.style.cssText =
-      'top:' + rectB.top + 'px;left:' + rectB.left + 'px;' +
+      'position:absolute;top:' + _grpT + 'px;left:' + _grpL + 'px;' +
       'width:' + w + 'px;height:' + h + 'px;z-index:' + (++window._sharedZ) + ';';
 
     /* Build tab data */
@@ -635,7 +658,7 @@
       group._itTitle = tabs.map(function(t){return t.title;}).join(' / ');
       renderGroup(tabs.length - 1);
     };
-    document.body.appendChild(group);
+    if (_grpCanvas) { _grpCanvas.appendChild(group); } else { document.body.appendChild(group); }
     renderGroup(0);
 
     /* makeResizablePop attaches to group itself (not a child) so only needs wiring once */
@@ -842,11 +865,24 @@
       e.preventDefault();
       sx = e.clientX; sy = e.clientY;
       var r = win.getBoundingClientRect();
-      ox = r.left; oy = r.top;
+      /* Use canvas-relative offsetLeft/Top when inside the canvas (offsetParent set),
+         viewport r.left/top for fixed body-appended popouts (offsetParent null) */
+      if (win.offsetParent) {
+        ox = win.offsetLeft; oy = win.offsetTop;
+      } else {
+        ox = r.left; oy = r.top;
+      }
       var _hasMoved = false;
       function onMove(e) {
-        win.style.left = (ox + e.clientX - sx) + 'px';
-        win.style.top  = (oy + e.clientY - sy) + 'px';
+        var rawL = ox + e.clientX - sx, rawT = oy + e.clientY - sy;
+        if (window._snapPosition) {
+          var snapped = window._snapPosition(win, rawL, rawT);
+          win.style.left = snapped.left + 'px';
+          win.style.top  = snapped.top  + 'px';
+        } else {
+          win.style.left = rawL + 'px';
+          win.style.top  = rawT + 'px';
+        }
         var dx = e.clientX - sx, dy = e.clientY - sy;
         if (!_hasMoved && dx*dx + dy*dy > 100) _hasMoved = true;
         /* Drop-zone detection: header-only hit-test, includes canvas widgets */
@@ -944,8 +980,8 @@
         var dx = e.clientX - sx, dy = e.clientY - sy;
         if (d.east)  win.style.width  = Math.max(320, sw + dx) + 'px';
         if (d.south) win.style.height = Math.max(200, sh + dy) + 'px';
-        if (d.west)  { var nw = Math.max(320, sw - dx); win.style.width = nw + 'px'; win.style.left = (sl + sw - nw) + 'px'; }
-        if (d.north) { var nh = Math.max(200, sh - dy); win.style.height = nh + 'px'; win.style.top = (st + sh - nh) + 'px'; }
+        if (d.west)  { var nw = Math.max(320, sw - dx); win.style.width = nw + 'px'; win.style.left = (win.offsetLeft + win.offsetWidth - nw) + 'px'; }
+        if (d.north) { var nh = Math.max(200, sh - dy); win.style.height = nh + 'px'; win.style.top  = (win.offsetTop  + win.offsetHeight - nh) + 'px'; }
       }
       function onUp() {
         ov.remove();

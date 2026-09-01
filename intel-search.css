@@ -53,13 +53,11 @@
 
 /* ── DROPDOWN ── */
 .intel-dropdown {
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 0;
+  position: fixed;
   background: #0e0e0e;
   border: 1px solid #333;
   border-top: 2px solid #E97132;
-  z-index: 9000;
+  z-index: 999999;
   min-width: 340px;
   box-shadow: 0 12px 48px rgba(0,0,0,.9);
 }
@@ -206,9 +204,12 @@
 /* allow popwin to resize freely (remove max-width/max-height for resize to work) */
 .intel-popwin { max-width: none; max-height: none; min-width: 320px; min-height: 200px; }
 
+/* clip group content so scrolling never paints over the ticker or outside the group */
+.intel-tab-group { overflow: hidden; }
+
 /* ── TAB GROUP ── */
 .intel-tab-group {
-  position: fixed;
+  position: absolute;
   background: #0a0a0a;
   border: 1px solid #2a2a2a;
   border-top: 2px solid #E97132;

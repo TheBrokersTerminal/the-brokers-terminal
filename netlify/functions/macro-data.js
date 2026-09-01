@@ -45,6 +45,41 @@ function clean(obs) {
     .map(function (o) { return { d: o.date, v: parseFloat(o.value) }; });
 }
 
+/* ── MACRO MONITOR CATALOGUE — full list of available series ── */
+var MM_CATALOGUE = [
+  { s:'GOLDAMGBD228NLBM', n:'Gold',                   u:'USD/oz',  cat:'COMMODITIES', chartId:'GOLDAMGBD228NLBM', fxKey:null,     def:true  },
+  { s:'DCOILWTICO',       n:'WTI Oil',                 u:'USD/bbl', cat:'COMMODITIES', chartId:'DCOILWTICO',       fxKey:null,     def:true  },
+  { s:'DCOILBRENTEU',     n:'Brent Crude',             u:'USD/bbl', cat:'COMMODITIES', chartId:'DCOILBRENTEU',     fxKey:null,     def:false },
+  { s:'SLVPRUSD',         n:'Silver',                  u:'USD/oz',  cat:'COMMODITIES', chartId:'SLVPRUSD',         fxKey:null,     def:false },
+  { s:'VIXCLS',           n:'VIX',                     u:'idx',     cat:'COMMODITIES', chartId:'VIXCLS',           fxKey:null,     def:false },
+  { s:'SP500',            n:'S&P 500',                 u:'pts',     cat:'EQUITIES',    chartId:'SP500',            fxKey:null,     def:true  },
+  { s:'NASDAQCOM',        n:'NASDAQ',                  u:'pts',     cat:'EQUITIES',    chartId:'NASDAQCOM',        fxKey:null,     def:false },
+  { s:'DEXUSUK',          n:'GBP/USD',                 u:'FX',      cat:'FX',          chartId:'DEXUSUK',          fxKey:'GBPUSD', def:true  },
+  { s:'DEXUSEU',          n:'EUR/USD',                 u:'FX',      cat:'FX',          chartId:'DEXUSEU',          fxKey:'EURUSD', def:true  },
+  { s:'DEXJPUS',          n:'USD/JPY',                 u:'JPY',     cat:'FX',          chartId:'DEXJPUS',          fxKey:'USDJPY', def:false },
+  { s:'DEXSZUS',          n:'USD/CHF',                 u:'FX',      cat:'FX',          chartId:'DEXSZUS',          fxKey:'USDCHF', def:false },
+  { s:'DEXCAUS',          n:'USD/CAD',                 u:'FX',      cat:'FX',          chartId:'DEXCAUS',          fxKey:'USDCAD', def:false },
+  { s:'DEXUSAL',          n:'AUD/USD',                 u:'FX',      cat:'FX',          chartId:'DEXUSAL',          fxKey:'AUDUSD', def:false },
+  { s:'DEXCHUS',          n:'USD/CNY',                 u:'FX',      cat:'FX',          chartId:'DEXCHUS',          fxKey:'USDCNY', def:false },
+  { s:'IRLTLT01GBM156N',  n:'UK Gilt 10Y',             u:'%',       cat:'RATES',       chartId:'IRLTLT01GBM156N',  fxKey:null,     def:true  },
+  { s:'DGS10',            n:'US 10Y',                  u:'%',       cat:'RATES',       chartId:'DGS10',            fxKey:null,     def:true  },
+  { s:'DGS2',             n:'US 2Y',                   u:'%',       cat:'RATES',       chartId:'DGS2',             fxKey:null,     def:true  },
+  { s:'DGS5',             n:'US 5Y',                   u:'%',       cat:'RATES',       chartId:'DGS5',             fxKey:null,     def:false },
+  { s:'T10Y2Y',           n:'Yield Curve',             u:'%',       cat:'RATES',       chartId:'T10Y2Y',           fxKey:null,     def:true  },
+  { s:'IRSTCI01GBM156N',  n:'UK Rate',                 u:'%',       cat:'RATES',       chartId:'IRSTCI01GBM156N',  fxKey:null,     def:true  },
+  { s:'FEDFUNDS',         n:'US Fed Rate',             u:'%',       cat:'RATES',       chartId:'FEDFUNDS',         fxKey:null,     def:true  },
+  { s:'ECBDFR',           n:'ECB Rate',                u:'%',       cat:'RATES',       chartId:'ECBDFR',           fxKey:null,     def:false },
+  { s:'CPALTT01GBM659N',  n:'UK CPI',                  u:'%',       cat:'INFLATION',   chartId:'CPALTT01GBM659N',  fxKey:null,     def:true  },
+  { s:'CPIAUCSL',         n:'US CPI',                  u:'idx',     cat:'INFLATION',   chartId:'CPIAUCSL',         fxKey:null,     def:true  },
+  { s:'CPILFESL',         n:'US Core CPI',             u:'idx',     cat:'INFLATION',   chartId:'CPILFESL',         fxKey:null,     def:false },
+  { s:'PCEPI',            n:'US PCE',                  u:'idx',     cat:'INFLATION',   chartId:'PCEPI',            fxKey:null,     def:false },
+  { s:'M2SL',             n:'US M2',                   u:'$bn',     cat:'LIQUIDITY',   chartId:'M2SL',             fxKey:null,     def:true  },
+  { s:'WALCL',            n:'Fed Balance Sheet',       u:'$tn',     cat:'LIQUIDITY',   chartId:'WALCL',            fxKey:null,     def:false },
+  { s:'UNRATE',           n:'US Unemployment',         u:'%',       cat:'EMPLOYMENT',  chartId:'UNRATE',           fxKey:null,     def:false },
+  { s:'PAYEMS',           n:'US Nonfarm Payrolls',     u:'Mppl',    cat:'EMPLOYMENT',  chartId:'PAYEMS',           fxKey:null,     def:false },
+  { s:'UMCSENT',          n:'UoM Consumer Sentiment',  u:'idx',     cat:'SENTIMENT',   chartId:'UMCSENT',          fxKey:null,     def:false },
+];
+
 exports.handler = async function (event) {
   var FRED    = process.env.FRED_API_KEY;
   var FINN    = process.env.FINNHUB_KEY || 'da6p77hr01qqqkkgl7b0da6p77hr01qqqkkgl7bg';
@@ -173,6 +208,14 @@ exports.handler = async function (event) {
       };
     }
 
+    /* ── CATALOGUE — return all available series metadata ── */
+    if (type === 'catalogue') {
+      var catOut = MM_CATALOGUE.map(function(s) {
+        return { s: s.s, n: s.n, u: s.u, cat: s.cat, def: s.def };
+      });
+      return { statusCode: 200, headers: Object.assign({}, hdrs, { 'Cache-Control': 'public, max-age=86400' }), body: JSON.stringify(catOut) };
+    }
+
     /* ── MACRO MONITOR LIVE (FRED + open.er-api.com FX overlay) ── */
     if (type === 'monitor-live') {
       var mlNow = new Date();
@@ -187,22 +230,11 @@ exports.handler = async function (event) {
       /* 1Y% column uses price from 366 days ago */
       var mlOneYearAgo = new Date(mlNow.getTime() - 366 * 86400000).toISOString().split('T')[0];
 
-      var ML_SERIES = [
-        { s:'GOLDPMGBD228NLBM', n:'Gold (GBP)',   u:'GBP/oz',  cat:'COMMODITIES', chartId:'GOLDPMGBD228NLBM', fxKey:null, finnhub:'OANDA:XAU_USD', finnhubFxKey:'GBP' },
-        { s:'DCOILWTICO',       n:'WTI Oil',      u:'USD/bbl', cat:'COMMODITIES', chartId:'DCOILWTICO',       fxKey:null, finnhub:'OANDA:WTICO_USD', finnhubFxKey:null },
-        { s:'SP500',            n:'S&P 500',      u:'pts',     cat:'EQUITIES',    chartId:'SP500',            fxKey:null, finnhub:'OANDA:SPX500_USD', finnhubFxKey:null },
-        { s:'DEXUSUK',          n:'GBP/USD',      u:'FX',      cat:'FX',          chartId:'DEXUSUK',          fxKey:'GBPUSD', finnhub:null, finnhubFxKey:null },
-        { s:'DEXUSEU',          n:'EUR/USD',      u:'FX',      cat:'FX',          chartId:'DEXUSEU',          fxKey:'EURUSD', finnhub:null, finnhubFxKey:null },
-        { s:'IRLTLT01GBM156N',  n:'UK Gilt 10Y',  u:'%',       cat:'RATES',       chartId:'IRLTLT01GBM156N',  fxKey:null, finnhub:null, finnhubFxKey:null },
-        { s:'DGS10',            n:'US 10Y',       u:'%',       cat:'RATES',       chartId:'DGS10',            fxKey:null, finnhub:null, finnhubFxKey:null },
-        { s:'DGS2',             n:'US 2Y',        u:'%',       cat:'RATES',       chartId:'DGS2',             fxKey:null, finnhub:null, finnhubFxKey:null },
-        { s:'T10Y2Y',           n:'Yield Curve',  u:'%',       cat:'RATES',       chartId:'T10Y2Y',           fxKey:null, finnhub:null, finnhubFxKey:null },
-        { s:'IRSTCI01GBM156N',  n:'UK Rate',      u:'%',       cat:'RATES',       chartId:'IRSTCI01GBM156N',  fxKey:null, finnhub:null, finnhubFxKey:null },
-        { s:'FEDFUNDS',         n:'US Fed Rate',  u:'%',       cat:'RATES',       chartId:'FEDFUNDS',         fxKey:null, finnhub:null, finnhubFxKey:null },
-        { s:'CPALTT01GBM659N',  n:'UK CPI',       u:'%',       cat:'INFLATION',   chartId:'CPALTT01GBM659N',  fxKey:null, finnhub:null, finnhubFxKey:null },
-        { s:'CPIAUCSL',         n:'US CPI',       u:'idx',     cat:'INFLATION',   chartId:'CPIAUCSL',         fxKey:null, finnhub:null, finnhubFxKey:null },
-        { s:'M2SL',             n:'US M2',        u:'$bn',     cat:'LIQUIDITY',   chartId:'M2SL',             fxKey:null, finnhub:null, finnhubFxKey:null },
-      ];
+      /* Filter catalogue to user's series list if provided, else use defaults */
+      var userSeriesParam = p.series ? p.series.split(',').filter(Boolean) : null;
+      var ML_SERIES = userSeriesParam
+        ? MM_CATALOGUE.filter(function(s) { return userSeriesParam.indexOf(s.s) !== -1; })
+        : MM_CATALOGUE.filter(function(s) { return s.def; });
 
       function mlNearest(obs, dateStr) {
         var t = new Date(dateStr).getTime();
@@ -215,29 +247,59 @@ exports.handler = async function (event) {
 
       var MF2 = 'https://api.stlouisfed.org/fred/series/observations?file_type=json&api_key=' + FRED + '&observation_start=' + mlQueryStart + '&series_id=';
 
-      /* Unique Finnhub symbols needed */
-      var finnhubSymbols = [];
-      ML_SERIES.forEach(function (s) { if (s.finnhub && finnhubSymbols.indexOf(s.finnhub) === -1) finnhubSymbols.push(s.finnhub); });
+      /* Live price sources:
+         - gold-api.com  → Gold (XAU) and Silver (XAG) in USD
+         - Yahoo Finance v8 chart → Oil, VIX, Equities
+         - open.er-api.com → FX (GBP/USD, EUR/USD) and GBP conversion for metals */
+      var YAHOO_MAP = {
+        'DCOILWTICO':  'CL%3DF',   /* CL=F  WTI crude futures  */
+        'DCOILBRENTEU':'BZ%3DF',   /* BZ=F  Brent crude        */
+        'VIXCLS':      '%5EVIX',   /* ^VIX                     */
+        'SP500':       '%5EGSPC',  /* ^GSPC S&P 500            */
+        'NASDAQCOM':   '%5EIXIC',  /* ^IXIC NASDAQ             */
+      };
 
-      var FH2 = 'https://finnhub.io/api/v1/quote?token=' + FINN + '&symbol=';
+      /* Collect only the Yahoo symbols we actually need for this request */
+      var yhSeriesIds = ML_SERIES.filter(function(s) { return !!YAHOO_MAP[s.s]; });
+      var yhHdrs = { 'User-Agent': 'Mozilla/5.0 (compatible)', 'Accept': 'application/json' };
+      var YH_BASE = 'https://query1.finance.yahoo.com/v8/finance/chart/';
+
+      var needGold   = ML_SERIES.some(function(s) { return s.s === 'GOLDPMGBD228NLBM'; });
+      var needSilver = ML_SERIES.some(function(s) { return s.s === 'SLVPRUSD'; });
 
       var mlResults = await Promise.all([
         Promise.allSettled(ML_SERIES.map(function (s) { return fetchJson(MF2 + s.s); })),
         fetchJson('https://open.er-api.com/v6/latest/USD').catch(function () { return null; }),
-        Promise.allSettled(finnhubSymbols.map(function (sym) { return fetchJson(FH2 + sym); })),
+        Promise.allSettled(yhSeriesIds.map(function(s) {
+          return fetchJsonWith(YH_BASE + YAHOO_MAP[s.s] + '?interval=1d&range=5d', yhHdrs);
+        })),
+        needGold   ? fetchJson('https://api.gold-api.com/price/XAU').catch(function() { return null; }) : Promise.resolve(null),
+        needSilver ? fetchJson('https://api.gold-api.com/price/XAG').catch(function() { return null; }) : Promise.resolve(null),
       ]);
       var mlFredRes  = mlResults[0];
       var erData     = mlResults[1];
-      var finnhubRes = mlResults[2];
+      var yhFetchRes = mlResults[2];
+      var goldApiRes = mlResults[3];
+      var silvApiRes = mlResults[4];
 
-      /* Build finnhub quote map: symbol → { c, dp } */
-      var fhQuotes = {};
-      finnhubSymbols.forEach(function (sym, i) {
-        var r = finnhubRes[i];
-        if (r.status === 'fulfilled' && r.value && r.value.c) {
-          fhQuotes[sym] = { c: r.value.c, dp: r.value.dp || null };
-        }
+      /* Build Yahoo quote map: FRED series ID → { price, dayPct } */
+      var yhQuotes = {};
+      yhSeriesIds.forEach(function(s, i) {
+        var r = yhFetchRes[i];
+        if (r.status !== 'fulfilled') return;
+        var result = ((r.value || {}).chart || {}).result;
+        if (!result || !result[0]) return;
+        var meta = result[0].meta || {};
+        var price = meta.regularMarketPrice;
+        var prevClose = meta.chartPreviousClose || meta.previousClose;
+        if (!price) return;
+        var dayPct = prevClose ? parseFloat(((price - prevClose) / prevClose * 100).toFixed(3)) : null;
+        yhQuotes[s.s] = { price: price, dayPct: dayPct };
       });
+
+      /* Gold and silver from gold-api.com (USD price, will convert to GBP/USD below) */
+      var goldUSD   = (goldApiRes && goldApiRes.price) ? goldApiRes.price : null;
+      var silverUSD = (silvApiRes && silvApiRes.price) ? silvApiRes.price : null;
 
       var erRates  = (erData && erData.rates) ? erData.rates : {};
       var erGBP    = erRates['GBP'] || null;
@@ -245,37 +307,55 @@ exports.handler = async function (event) {
       var erGBPUSD = erGBP ? parseFloat((1 / erGBP).toFixed(4)) : null;
       var erEURUSD = erEUR ? parseFloat((1 / erEUR).toFixed(4)) : null;
 
+      var hasLiveSrc = {};
+      ML_SERIES.forEach(function(s) {
+        hasLiveSrc[s.s] = !!(YAHOO_MAP[s.s] || s.fxKey ||
+          s.s === 'GOLDAMGBD228NLBM' || s.s === 'SLVPRUSD');
+      });
+
       var mlRows = ML_SERIES.map(function (s, i) {
         var r   = mlFredRes[i];
         var row = { s: s.s, chartId: s.chartId, n: s.n, u: s.u, cat: s.cat,
           last: null, net: null, day: null, wtd: null, qtd: null, ytd: null, y1: null,
-          isLive: (s.fxKey !== null || s.finnhub !== null) };
-        if (r.status !== 'fulfilled') return row;
-        var obs = clean((r.value || {}).observations);
-        if (!obs.length) return row;
+          isLive: !!hasLiveSrc[s.s] };
 
-        var fredLast = obs[obs.length - 1];
+        /* FRED historical obs — used for % calculations; may be empty for some series */
+        var obs = (r.status === 'fulfilled') ? clean((r.value || {}).observations) : [];
+        var fredLast = obs.length ? obs[obs.length - 1] : null;
         var prev     = obs.length > 1 ? obs[obs.length - 2].v : null;
 
-        var liveLast = fredLast.v;
-        var liveDay  = null; /* will use Finnhub dp if available */
+        /* Start from FRED last value (may be null if no obs) */
+        var liveLast = fredLast ? fredLast.v : null;
+        var liveDay  = null;
 
-        /* Override with live FX from er-api.com */
-        if (s.fxKey === 'GBPUSD' && erGBPUSD) liveLast = erGBPUSD;
-        if (s.fxKey === 'EURUSD' && erEURUSD) liveLast = erEURUSD;
+        /* FX live overrides from ER-API */
+        if (s.fxKey === 'GBPUSD' && erGBPUSD)              liveLast = erGBPUSD;
+        if (s.fxKey === 'EURUSD' && erEURUSD)              liveLast = erEURUSD;
+        if (s.fxKey === 'USDJPY' && erRates['JPY'])        liveLast = parseFloat(erRates['JPY'].toFixed(2));
+        if (s.fxKey === 'USDCHF' && erRates['CHF'])        liveLast = parseFloat(erRates['CHF'].toFixed(4));
+        if (s.fxKey === 'USDCAD' && erRates['CAD'])        liveLast = parseFloat(erRates['CAD'].toFixed(4));
+        if (s.fxKey === 'AUDUSD' && erRates['AUD'])        liveLast = parseFloat((1 / erRates['AUD']).toFixed(4));
+        if (s.fxKey === 'USDCNY' && erRates['CNY'])        liveLast = parseFloat(erRates['CNY'].toFixed(4));
 
-        /* Override with live Finnhub quote for equities/commodities */
-        if (s.finnhub && fhQuotes[s.finnhub]) {
-          var fhq = fhQuotes[s.finnhub];
-          var fhPrice = fhq.c;
-          /* Gold: Finnhub gives USD price; convert to GBP if needed */
-          if (s.finnhubFxKey === 'GBP' && erGBP) fhPrice = parseFloat((fhPrice * erGBP).toFixed(2));
-          liveLast = fhPrice;
-          liveDay  = fhq.dp; /* Finnhub day% change */
+        /* Gold and silver from gold-api.com */
+        if (s.s === 'GOLDAMGBD228NLBM' && goldUSD) {
+          liveLast = parseFloat(goldUSD.toFixed(2));
+        }
+        if (s.s === 'SLVPRUSD' && silverUSD) {
+          liveLast = parseFloat(silverUSD.toFixed(3));
         }
 
+        /* Yahoo Finance live quotes for equities/commodities */
+        if (yhQuotes[s.s]) {
+          liveLast = yhQuotes[s.s].price;
+          liveDay  = yhQuotes[s.s].dayPct;
+        }
+
+        /* No price from any source → skip row */
+        if (liveLast === null) return row;
+
         row.last = liveLast;
-        row.date = fredLast.d;
+        row.date = fredLast ? fredLast.d : null;
         row.net  = (prev !== null) ? parseFloat((liveLast - prev).toFixed(4)) : null;
         row.day  = liveDay !== null ? parseFloat(liveDay.toFixed(3)) : mlPct(liveLast, prev);
         row.wtd  = mlPct(liveLast, mlNearest(obs, mlWtdStart));
@@ -377,7 +457,7 @@ exports.handler = async function (event) {
 
       var labelMap = {
         DEXUSUK:           { label: 'GBP/USD',        unit: 'Rate' },
-        GOLDPMGBD228NLBM:  { label: 'Gold (GBP/oz)',  unit: 'GBP'  },
+        GOLDAMGBD228NLBM:  { label: 'Gold (USD/oz)',  unit: 'USD'  },
         IRSTCI01GBM156N:   { label: 'UK Rate',        unit: '%'    },
         IRLTLT01GBM156N:   { label: 'UK 10-Yr Gilt',  unit: '%'    },
         CPALTT01GBM659N:   { label: 'UK CPI (YoY)',   unit: '%'    },
@@ -397,7 +477,7 @@ exports.handler = async function (event) {
       var fredBase = 'https://api.stlouisfed.org/fred/series/observations?file_type=json&api_key=' + FRED + '&observation_start=' + startStr + '&frequency=m&aggregation_method=eop&series_id=';
 
       var hResults = await Promise.allSettled([
-        fetchJson(fredBase + 'GOLDPMGBD228NLBM'), /* Gold (GBP) monthly */
+        fetchJson(fredBase + 'GOLDAMGBD228NLBM'), /* Gold (USD) daily agg monthly */
         fetchJson(fredBase + 'SP500'),             /* S&P 500            */
         fetchJson(fredBase + 'CPALTT01GBM659N'),   /* UK CPI index       */
         fetchJson(fredBase + 'BOEBR'),             /* BoE base rate      */
@@ -449,23 +529,32 @@ exports.handler = async function (event) {
     /* ── SECTOR HEATMAP ── */
     if (type === 'sectors') {
       var SECTORS = [
-        {etf:'XLK',  name:'Technology'},
-        {etf:'XLV',  name:'Healthcare'},
-        {etf:'XLF',  name:'Financials'},
-        {etf:'XLE',  name:'Energy'},
-        {etf:'XLI',  name:'Industrials'},
-        {etf:'XLP',  name:'Staples'},
-        {etf:'XLU',  name:'Utilities'},
-        {etf:'XLRE', name:'Real Estate'},
-        {etf:'XLB',  name:'Materials'},
-        {etf:'XLY',  name:'Discretionary'},
-        {etf:'XLC',  name:'Comms'},
+        {etf:'XLK',  name:'Technology',       span:4},
+        {etf:'XLV',  name:'Healthcare',        span:2},
+        {etf:'XLF',  name:'Financials',        span:2},
+        {etf:'XLY',  name:'Discretionary',     span:2},
+        {etf:'XLC',  name:'Comm Services',     span:2},
+        {etf:'XLI',  name:'Industrials',       span:3},
+        {etf:'XLP',  name:'Staples',           span:2},
+        {etf:'XLE',  name:'Energy',            span:2},
+        {etf:'XLRE', name:'Real Estate',       span:2},
+        {etf:'XLB',  name:'Materials',         span:2},
+        {etf:'XLU',  name:'Utilities',         span:1},
       ];
-      var FHS = 'https://finnhub.io/api/v1/quote?token=' + FINN + '&symbol=';
-      var sRes = await Promise.allSettled(SECTORS.map(function(s){ return fetchJson(FHS + s.etf); }));
+      var SYH = 'https://query1.finance.yahoo.com/v8/finance/chart/';
+      var sYhHdrs = { 'User-Agent': 'Mozilla/5.0 (compatible)', 'Accept': 'application/json' };
+      var sRes = await Promise.allSettled(SECTORS.map(function(s){
+        return fetchJsonWith(SYH + s.etf + '?interval=1d&range=5d', sYhHdrs);
+      }));
       var sRows = SECTORS.map(function(s, i){
-        var r = sRes[i], q = r.status === 'fulfilled' ? r.value : null;
-        return { etf:s.etf, name:s.name, c:(q&&q.c)?q.c:null, pc:(q&&q.pc)?q.pc:null, dp:(q&&q.dp)?q.dp:null };
+        var r = sRes[i];
+        var meta = (r.status === 'fulfilled' && r.value && r.value.chart && r.value.chart.result && r.value.chart.result[0]) ? r.value.chart.result[0].meta : null;
+        var c  = meta ? (meta.regularMarketPrice || null) : null;
+        var pc = meta ? (meta.chartPreviousClose || meta.previousClose || null) : null;
+        var h  = meta ? (meta.regularMarketDayHigh  || null) : null;
+        var l  = meta ? (meta.regularMarketDayLow   || null) : null;
+        var dp = (c && pc) ? parseFloat(((c - pc) / pc * 100).toFixed(2)) : null;
+        return { etf:s.etf, name:s.name, span:s.span, c:c, pc:pc, h:h, l:l, dp:dp };
       });
       return { statusCode:200, headers:Object.assign({},hdrs,{'Cache-Control':'public,max-age=60'}), body:JSON.stringify(sRows) };
     }
