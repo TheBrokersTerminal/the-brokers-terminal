@@ -701,12 +701,30 @@
       .then(function (d) {
         if (d && !d.error) {
           _cache[cacheKey] = d;
-          /* store resolved ticker so persistence can re-fetch exactly */
           if (win._popId && _registry[win._popId] && d.ticker) {
             _registry[win._popId].ticker = d.ticker;
           }
         }
-        renderPopout(d, win);
+        /* Distillery: fire WhiskyStats search in parallel before rendering */
+        if (d && d.type === 'company' && d.category === 'distillery') {
+          var wsKey = 'ws:' + (d.title || cacheKey);
+          if (_cache[wsKey]) {
+            d._wsResults = _cache[wsKey];
+            renderPopout(d, win);
+            return;
+          }
+          var wsQ = encodeURIComponent(d.title || query);
+          fetch('/.netlify/functions/whisky-data?type=search&query=' + wsQ + '&page=1')
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .then(function (ws) {
+              d._wsResults = (ws && ws.results) ? ws.results : [];
+              _cache[wsKey] = d._wsResults;
+              renderPopout(d, win);
+            })
+            .catch(function () { renderPopout(d, win); });
+        } else {
+          renderPopout(d, win);
+        }
       })
       .catch(function () {
         var body = win.querySelector('.intel-popwin-body');
@@ -726,7 +744,9 @@
     var titleEl = win.querySelector('.intel-popwin-title');
     if (titleEl && d.title) titleEl.textContent = d.title.toUpperCase();
 
-    if (d.type === 'company') {
+    if (d.type === 'company' && d.category === 'distillery') {
+      renderDistillery(d, d._wsResults || [], body, win);
+    } else if (d.type === 'company') {
       renderCompany(d, body);
     } else {
       renderConcept(d, body);
@@ -854,6 +874,298 @@
       '<div class="sp-section" style="border-top:1px solid #111;padding-top:10px;">' +
         '<button class="sp-note-btn">✎ ADD NOTE</button>' +
       '</div>';
+  }
+
+  /* ── DISTILLERY PANEL ── */
+  function sRow(lbl, val) {
+    return '<div class="dist-stat-row"><span class="dist-stat-lbl">' + escH(lbl) + '</span><span class="dist-stat-val">' + escH(String(val)) + '</span></div>';
+  }
+
+  function renderDistillery(d, wsResults, body, win) {
+    /* Widen window if it's still at default narrow width */
+    if (win && win.offsetWidth < 460) win.style.width = '460px';
+    var region = d.exchange && d.exchange !== 'Private' ? d.exchange : '';
+    body.innerHTML =
+      '<div class="sp-badge private">● DISTILLERY' + (region ? ' · ' + escH(region) : '') + '</div>' +
+      '<div class="sp-tagline">' + escH(d.tagline || '') + '</div>' +
+      '<div class="dist-tabs">' +
+        '<button class="dist-tab active" data-tab="overview">OVERVIEW</button>' +
+        '<button class="dist-tab" data-tab="expressions">EXPRESSIONS' +
+          (wsResults.length ? ' <span class="dist-count">' + wsResults.length + '</span>' : '') +
+        '</button>' +
+        '<button class="dist-tab" data-tab="pitch">PITCH</button>' +
+      '</div>' +
+      '<div class="dist-panel" data-panel="overview">' +
+        '<div class="sp-section"><div class="sp-sec-lbl">OVERVIEW</div><div class="sp-text">' + escH(d.overview || '') + '</div></div>' +
+        (d.keyFacts && d.keyFacts.length ?
+          '<div class="sp-section"><div class="sp-sec-lbl">KEY FACTS</div><ul class="sp-facts">' +
+          d.keyFacts.map(function (f) { return '<li>' + escH(f) + '</li>'; }).join('') +
+          '</ul></div>' : '') +
+        '<div class="sp-section"><div class="sp-sec-lbl">RELEVANCE TO ALTERNATIVE ASSETS</div><div class="sp-text">' + escH(d.relevance || '') + '</div></div>' +
+      '</div>' +
+      '<div class="dist-panel" data-panel="expressions" style="display:none;">' +
+        buildExpressionsPanel(wsResults) +
+      '</div>' +
+      '<div class="dist-panel" data-panel="pitch" style="display:none;">' +
+        '<div class="sp-section"><div class="sp-sec-lbl">HOW TO PITCH IT — SAY THIS TO YOUR CLIENT</div><div class="sp-pitch">' + escH(d.brokerNote || '') + '</div></div>' +
+        '<div class="sp-section" style="border-top:1px solid #111;padding-top:10px;"><button class="sp-note-btn">✎ ADD NOTE</button></div>' +
+      '</div>';
+
+    /* Tab switching */
+    body.querySelectorAll('.dist-tab').forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        body.querySelectorAll('.dist-tab').forEach(function (t) { t.classList.remove('active'); });
+        body.querySelectorAll('.dist-panel').forEach(function (p) { p.style.display = 'none'; });
+        tab.classList.add('active');
+        var panel = body.querySelector('.dist-panel[data-panel="' + tab.dataset.tab + '"]');
+        if (panel) panel.style.display = '';
+      });
+    });
+
+    /* Expression row click → sidebar */
+    body.querySelectorAll('.dist-expr-row').forEach(function (row) {
+      row.addEventListener('click', function () {
+        body.querySelectorAll('.dist-expr-row').forEach(function (r) { r.classList.remove('dist-expr-active'); });
+        row.classList.add('dist-expr-active');
+        showExpressionSidebar(win, row.dataset.id, row.dataset.name);
+      });
+    });
+
+    /* Expression filter input */
+    var srch = body.querySelector('.dist-expr-search');
+    if (srch) {
+      srch.addEventListener('input', function () {
+        var q = this.value.toLowerCase();
+        body.querySelectorAll('.dist-expr-row').forEach(function (row) {
+          row.style.display = (!q || (row.dataset.name || '').toLowerCase().indexOf(q) !== -1) ? '' : 'none';
+        });
+      });
+    }
+  }
+
+  function buildExpressionsPanel(results) {
+    if (!results || !results.length) {
+      return '<div style="padding:20px;font-size:9px;letter-spacing:.18em;color:#fff;opacity:.4;text-align:center;">NO EXPRESSIONS FOUND</div>';
+    }
+    var rows = results.map(function (r) {
+      return '<div class="dist-expr-row" data-id="' + escH(r.whisky_id) + '" data-name="' + escH(r.whisky_name) + '">' +
+        '<div class="dist-expr-img-wrap">' +
+          (r.whisky_image_url
+            ? '<img src="' + escH(r.whisky_image_url) + '" class="dist-expr-img" onerror="this.style.display=\'none\'" />'
+            : '<div class="dist-expr-img-ph">▣</div>') +
+        '</div>' +
+        '<div class="dist-expr-info">' +
+          '<div class="dist-expr-name">' + escH(r.whisky_name) + '</div>' +
+          '<div class="dist-expr-id">' + escH(r.whisky_id) + '</div>' +
+        '</div>' +
+        '<div class="dist-expr-arrow">›</div>' +
+      '</div>';
+    }).join('');
+    return '<div class="dist-expr-search-wrap"><input class="dist-expr-search" placeholder="▸  FILTER EXPRESSIONS…" /></div>' +
+      '<div class="dist-expr-list">' + rows + '</div>';
+  }
+
+  /* ── EXPRESSION SIDEBAR ── */
+  var _exprSidebar = null;
+
+  function showExpressionSidebar(win, whiskyId, whiskyName) {
+    /* Remove old sidebar */
+    if (_exprSidebar && _exprSidebar.parentNode) _exprSidebar.parentNode.removeChild(_exprSidebar);
+
+    var wr = win.getBoundingClientRect();
+    var sidebar = document.createElement('div');
+    sidebar.className = 'intel-popwin';
+    sidebar.style.cssText = 'position:fixed;top:' + wr.top + 'px;left:' + (wr.right + 4) + 'px;' +
+      'width:310px;height:' + wr.height + 'px;z-index:9600;min-width:260px;min-height:200px;max-width:none;max-height:none;';
+    sidebar.innerHTML =
+      '<div class="intel-popwin-titlebar dist-sidebar-bar">' +
+        '<span class="intel-popwin-icon">▣</span>' +
+        '<span class="intel-popwin-title">' + escH(whiskyName) + '</span>' +
+        '<button class="intel-popwin-close dist-sidebar-close">✕</button>' +
+      '</div>' +
+      '<div class="intel-popwin-body dist-sidebar-body">' +
+        '<div class="sp-loading">LOADING…</div>' +
+      '</div>';
+
+    document.body.appendChild(sidebar);
+    _exprSidebar = sidebar;
+
+    var bar = sidebar.querySelector('.dist-sidebar-bar');
+    makeDraggable(sidebar, bar);
+    makeResizablePop(sidebar);
+
+    sidebar.querySelector('.dist-sidebar-close').addEventListener('click', function () {
+      if (sidebar.parentNode) sidebar.parentNode.removeChild(sidebar);
+      _exprSidebar = null;
+    });
+
+    /* Fetch browse (details + rating) */
+    var sBody = sidebar.querySelector('.dist-sidebar-body');
+    fetch('/.netlify/functions/whisky-data?type=browse&id=' + encodeURIComponent(whiskyId))
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (data) {
+        if (!data) { sBody.innerHTML = '<div class="sp-loading">DATA UNAVAILABLE</div>'; return; }
+        renderExpressionDetail(data, sBody, whiskyId);
+      })
+      .catch(function () { sBody.innerHTML = '<div class="sp-loading">DATA UNAVAILABLE</div>'; });
+  }
+
+  function renderExpressionDetail(data, sBody, whiskyId) {
+    var det = data.details || {};
+    var rat = data.rating  || {};
+    var bgId = data.bg_id  || whiskyId;
+
+    var fullName = [(det.bottler_serie || ''), (det.name || '')].filter(Boolean).join(' ');
+    var meta = [det.region, det.age ? det.age + ' YO' : null, det.vintage ? 'Vintage ' + det.vintage : null].filter(Boolean).join(' · ');
+
+    sBody.innerHTML =
+      (meta ? '<div class="sp-badge private">● ' + escH(meta) + '</div>' : '') +
+      '<div class="sp-tagline" style="font-size:11px;">' + escH(fullName) + '</div>' +
+      '<div class="dist-stat-block">' +
+        (det.distillery  ? sRow('DISTILLERY', det.distillery)  : '') +
+        (det.age         ? sRow('AGE',        det.age + ' Years') : '') +
+        (det.vintage     ? sRow('VINTAGE',    det.vintage)     : '') +
+        (det.region      ? sRow('REGION',     det.region)      : '') +
+        (det.cask_type   ? sRow('CASK',       det.cask_type)   : '') +
+        (det.abv         ? sRow('ABV',        det.abv + '%')   : '') +
+        (rat.whiskybase_rating != null ? sRow('RATING', rat.whiskybase_rating + ' / 100') : '') +
+      '</div>' +
+      '<div class="sp-sec-lbl" style="margin-top:10px;">PRICE HISTORY</div>' +
+      '<canvas id="expr-chart-' + escH(whiskyId) + '" style="width:100%;height:120px;display:block;margin:4px 0;"></canvas>' +
+      '<div id="expr-mkt-' + escH(whiskyId) + '">' +
+        '<button class="dist-load-prices" data-bg="' + escH(bgId) + '" data-canvas="expr-chart-' + escH(whiskyId) + '" data-mkt="expr-mkt-' + escH(whiskyId) + '">' +
+          '▸ LOAD PRICES + CHART <span style="color:#555;font-size:7px;">(15 credits)</span>' +
+        '</button>' +
+      '</div>';
+
+    /* Wire load prices button */
+    var btn = sBody.querySelector('.dist-load-prices');
+    if (btn) {
+      btn.addEventListener('click', function () {
+        var bgId2 = btn.dataset.bg;
+        var canvasId = btn.dataset.canvas;
+        var mktId = btn.dataset.mkt;
+        btn.textContent = 'LOADING…';
+        btn.disabled = true;
+        Promise.all([
+          fetch('/.netlify/functions/whisky-data?type=market&id=' + encodeURIComponent(bgId2) + '&currency=GBP').then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }),
+          fetch('/.netlify/functions/whisky-data?type=history&id=' + encodeURIComponent(bgId2) + '&currency=GBP').then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }),
+        ]).then(function (res) {
+          var mkt  = res[0];
+          var hist = res[1];
+          var mktEl = document.getElementById(mktId);
+          if (mktEl && mkt) {
+            var auc  = mkt.auction  || {};
+            var lat  = auc.latest_auction_price || {};
+            var ret  = (mkt.retail  || {}).latest_retail_price  || {};
+            mktEl.innerHTML =
+              '<div class="sp-sec-lbl" style="margin-top:8px;">AUCTION PRICES</div>' +
+              '<div class="dist-stat-block">' +
+                (lat.avg ? sRow('LAST AVG',  '£' + Math.round(lat.avg).toLocaleString('en-GB')) : '') +
+                (lat.min ? sRow('LAST LOW',  '£' + Math.round(lat.min).toLocaleString('en-GB')) : '') +
+                (lat.max ? sRow('LAST HIGH', '£' + Math.round(lat.max).toLocaleString('en-GB')) : '') +
+                (ret.avg ? sRow('RETAIL AVG','£' + Math.round(ret.avg).toLocaleString('en-GB')) : '') +
+              '</div>';
+          }
+          /* Draw chart */
+          var canvas = document.getElementById(canvasId);
+          if (canvas) {
+            var dpr = window.devicePixelRatio || 1;
+            var cw = canvas.offsetWidth || 280;
+            var ch = 120;
+            canvas.width  = Math.round(cw * dpr);
+            canvas.height = Math.round(ch * dpr);
+            canvas.style.width  = cw + 'px';
+            canvas.style.height = ch + 'px';
+            drawExpressionChart(canvas, hist, dpr);
+          }
+        });
+      });
+    }
+  }
+
+  function drawExpressionChart(canvas, histData, dpr) {
+    if (!canvas) return;
+    dpr = dpr || 1;
+    /* Extract series from various WhiskyStats response shapes */
+    var points = [];
+    if (Array.isArray(histData)) { points = histData; }
+    else {
+      var tryKeys = ['prices', 'auction_price_history', 'auction_prices', 'price_history', 'history', 'results', 'data', 'records', 'items', 'sales'];
+      for (var k = 0; k < tryKeys.length; k++) {
+        if (histData && Array.isArray(histData[tryKeys[k]])) { points = histData[tryKeys[k]]; break; }
+      }
+    }
+    var series = [];
+    points.forEach(function (p) {
+      var v = parseFloat(p.price || p.avg_price || p.hammer_price || p.value || p.v || 0);
+      var d = p.date || p.sale_date || p.auction_date || p.d || '';
+      if (v > 0 && d) series.push({ d: d, v: v });
+    });
+    series.sort(function (a, b) { return a.d < b.d ? -1 : 1; });
+
+    var W = canvas.width, H = canvas.height;
+    var ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, W, H);
+
+    if (!series.length) {
+      ctx.fillStyle = '#1a1a1a';
+      ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = '#444';
+      ctx.font = (9 * dpr) + 'px Consolas';
+      ctx.textAlign = 'center';
+      ctx.fillText('NO PRICE HISTORY', W / 2, H / 2);
+      return;
+    }
+
+    var vals = series.map(function (p) { return p.v; });
+    var minV = Math.min.apply(null, vals), maxV = Math.max.apply(null, vals);
+    var rng  = maxV - minV || 1;
+    var pL = 8 * dpr, pR = 8 * dpr, pT = 10 * dpr, pB = 18 * dpr;
+    var cW = W - pL - pR, cH = H - pT - pB;
+    var n = series.length;
+
+    function xp(i)  { return pL + (n > 1 ? (i / (n - 1)) * cW : cW / 2); }
+    function yp(v)  { return pT + cH - ((v - minV) / rng) * cH; }
+
+    /* Grid line at midpoint */
+    ctx.beginPath();
+    ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+    ctx.lineWidth = 1;
+    ctx.moveTo(pL, pT + cH / 2);
+    ctx.lineTo(pL + cW, pT + cH / 2);
+    ctx.stroke();
+
+    /* Fill area */
+    ctx.beginPath();
+    ctx.moveTo(xp(0), pT + cH);
+    series.forEach(function (p, i) { ctx.lineTo(xp(i), yp(p.v)); });
+    ctx.lineTo(xp(n - 1), pT + cH);
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(233,113,50,0.10)';
+    ctx.fill();
+
+    /* Line */
+    ctx.beginPath();
+    series.forEach(function (p, i) { i === 0 ? ctx.moveTo(xp(i), yp(p.v)) : ctx.lineTo(xp(i), yp(p.v)); });
+    ctx.strokeStyle = '#E97132';
+    ctx.lineWidth = 1.5 * dpr;
+    ctx.lineJoin = 'round';
+    ctx.stroke();
+
+    /* Last dot */
+    ctx.beginPath();
+    ctx.arc(xp(n - 1), yp(series[n - 1].v), 3 * dpr, 0, Math.PI * 2);
+    ctx.fillStyle = '#E97132';
+    ctx.fill();
+
+    /* Price labels */
+    ctx.fillStyle = 'rgba(255,255,255,0.35)';
+    ctx.font = (8 * dpr) + 'px Consolas';
+    ctx.textAlign = 'left';
+    ctx.fillText('£' + Math.round(minV).toLocaleString('en-GB'), pL, H - 2 * dpr);
+    ctx.textAlign = 'right';
+    ctx.fillText('£' + Math.round(maxV).toLocaleString('en-GB'), W - pR, pT + 8 * dpr);
   }
 
   /* ── DRAGGABLE ── */
