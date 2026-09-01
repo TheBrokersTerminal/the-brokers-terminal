@@ -711,7 +711,6 @@
         <span id="manage-subscription-sep" style="display:none;"></span>
         <a href="#" id="manage-team-btn" style="display:none;" class="ttb-dd-item">MANAGE TEAM</a>
         <span id="manage-team-sep" style="display:none;"></span>
-        <a href="#" id="fullscreen-news-btn" class="ttb-dd-item">FULL SCREEN NEWS</a>
         <div class="ttb-dd-sep"></div>
         <a href="#" id="logout-btn" class="ttb-dd-item ttb-dd-logout">LOG OUT</a>
         <a href="#" id="nav-logout-btn" style="display:none;"></a>
@@ -1508,7 +1507,7 @@
     window._userName = userName;
 
     // ── Init terminal canvas (firmId now resolved) ──
-    if (window.terminalCanvasInit) terminalCanvasInit(supabase, session.user.id, window._canonicalFirmId, userName);
+    if (window.terminalCanvasInit) terminalCanvasInit(supabase, session.user.id, window._canonicalFirmId, userName, userEmail);
 
     // Log session start for every subscriber
     supabase.from('activity_log').insert({
@@ -2353,12 +2352,17 @@
       btn.classList.toggle('active', btn.dataset.filter === _tickerFilter);
     });
 
+    var _tickerGen = 0; /* increment to kill any running loop */
+    var _tickerPaused = false;
+    track.closest('.ticker-track-wrap').addEventListener('mouseenter', function() { _tickerPaused = true; });
+    track.closest('.ticker-track-wrap').addEventListener('mouseleave', function() { _tickerPaused = false; });
+
     function renderTicker(stories) {
       if (!stories || !stories.length) return;
       window._rssCache = stories;
 
       var filtered = stories.filter(function(s){ return _tickerMatchesCat(s, _tickerFilter); });
-      if (!filtered.length) filtered = stories; /* fallback to all if no matches */
+      if (!filtered.length) filtered = stories;
       var items = filtered.slice(0, 30);
 
       var _decodeEl = document.createElement('textarea');
@@ -2373,26 +2377,25 @@
       var setHtml = items.map(buildItemHtml).join('');
       track.innerHTML = setHtml;
 
-      /* Only show if on terminal tab and user hasn't hidden it */
-      var onTerminal = !document.querySelector('.tbc-tab[data-tab="terminal"]') ||
-                       document.querySelector('.tbc-tab[data-tab="terminal"].active') !== null;
-      if (!_tickerHidden && onTerminal) {
+      var terminalTabActive = document.querySelector('.tbc-tab[data-tab="terminal"].active') !== null;
+      if (!_tickerHidden && terminalTabActive) {
         ticker.style.display = 'flex';
         document.body.classList.add('ticker-on');
         var restore = document.getElementById('ttb-ticker-restore');
         if (restore) restore.style.display = 'none';
       }
 
+      var gen = ++_tickerGen; /* this loop's generation — any older loop will bail */
       requestAnimationFrame(function() {
+        if (_tickerGen !== gen) return; /* superseded before we even started */
         var singleWidth = track.scrollWidth;
-        track.innerHTML = setHtml + setHtml;
-        var speed = 60, pos = 0, paused = false, last = null;
-        track.closest('.ticker-track-wrap').addEventListener('mouseenter', function() { paused = true; });
-        track.closest('.ticker-track-wrap').addEventListener('mouseleave', function() { paused = false; });
+        track.innerHTML = setHtml + setHtml; /* double for seamless wrap */
+        var speed = 60, pos = 0, last = null;
         function step(ts) {
+          if (_tickerGen !== gen) return; /* killed by a newer renderTicker call */
           if (!last) last = ts;
-          var delta = ts - last; last = ts;
-          if (!paused) {
+          var delta = Math.min(ts - last, 100); last = ts; /* clamp delta — avoids jump after tab switch */
+          if (!_tickerPaused) {
             pos += speed * (delta / 1000);
             if (pos >= singleWidth) pos -= singleWidth;
             track.style.transform = 'translateX(-' + pos + 'px)';
