@@ -5145,39 +5145,11 @@
       return DEST_M49_FALLBACK[destCountry] || null;
     }
 
-    /* GBP/USD annual averages for bilateral value conversion */
-    var _GBP_RATES = {
-      2019:0.783, 2020:0.779, 2021:0.727, 2022:0.812,
-      2023:0.802, 2024:0.790, 2025:0.790,
-    };
-
-    var REPORTER_CODES_FWD = { scotland:826, ireland:372, japan:392, usa:840 };
-
-    function _extractBilateralRow(data, year) {
-      var rows = (data && data.data) || [];
-      /* Priority: isAggregate=true, motCode=0, partner2Code=0 or null */
-      var agg = rows.filter(function(r) {
-        return r.partnerCode && r.isAggregate === true && r.motCode === 0 &&
-               (r.partner2Code === 0 || r.partner2Code == null);
-      });
-      if (!agg.length) agg = rows.filter(function(r) {
-        return r.partnerCode && r.isAggregate === true && r.motCode === 0;
-      });
-      if (!agg.length) agg = rows.filter(function(r) {
-        return r.partnerCode && r.isAggregate === true;
-      });
-      if (!agg.length) return null;
-      var valueUSD = Math.max.apply(null, agg.map(function(r){ return r.primaryValue || 0; }));
-      if (!valueUSD) return null;
-      var rate = _GBP_RATES[year] || 0.79;
-      return { year: year, valueUSD: Math.round(valueUSD), valueGBP: Math.round(valueUSD * rate), yoy: null };
-    }
-
     function fetchRouteHistory(originKey, m49) {
       if (!m49) return;
       var histKey = originKey + '_' + m49;
       if (_liveHist[histKey] && _liveHist[histKey].rows && _liveHist[histKey].rows.length) return;
-      var cacheKey = 'tbt_rh3_' + histKey;
+      var cacheKey = 'tbt_rh4_' + histKey;
       var TTL = 86400000 * 7;
       try {
         var cached = JSON.parse(localStorage.getItem(cacheKey) || 'null');
@@ -5187,40 +5159,18 @@
           return;
         }
       } catch(e) {}
-
-      /* Fetch years in parallel directly from UN Comtrade public API (CORS allowed).
-         Browser IP avoids the server-side rate limiting that hits the Netlify proxy. */
-      var reporterCode = REPORTER_CODES_FWD[originKey] || 826;
-      var now = new Date();
-      var lastYear = now.getFullYear() - 1;
-      var YEARS = [];
-      for (var y = 2019; y <= lastYear; y++) YEARS.push(y);
-
-      var base = 'https://comtradeapi.un.org/public/v1/preview/C/A/HS' +
-        '?reporterCode=' + reporterCode + '&partnerCode=' + m49 +
-        '&flowCode=X&cmdCode=220830&includeDesc=false&period=';
-
-      Promise.allSettled(YEARS.map(function(yr) {
-        return fetch(base + yr, { signal: AbortSignal.timeout ? AbortSignal.timeout(12000) : undefined })
-          .then(function(r) { return r.json(); })
-          .then(function(data) { return _extractBilateralRow(data, yr); });
-      })).then(function(results) {
-        var rows = [];
-        results.forEach(function(res) {
-          if (res.status === 'fulfilled' && res.value) rows.push(res.value);
-        });
-        if (!rows.length) return;
-        rows.sort(function(a, b) { return a.year - b.year; });
-        /* Compute YoY */
-        for (var ri = 1; ri < rows.length; ri++) {
-          var prev = rows[ri-1], curr = rows[ri];
-          curr.yoy = Math.round(((curr.valueGBP - prev.valueGBP) / prev.valueGBP) * 1000) / 10;
-        }
-        var payload = { rows: rows, source: 'UN Comtrade · HS 220830', updatedAt: now.toISOString().slice(0,10), _ts: Date.now() };
-        _liveHist[histKey] = payload;
-        try { localStorage.setItem(cacheKey, JSON.stringify(payload)); } catch(e) {}
-        buildUI();
-      });
+      /* Route-history function fetches years sequentially (26s timeout) to avoid rate limiting */
+      fetch('/.netlify/functions/route-history?origin=' + originKey + '&dest=' + m49)
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (data && data.rows && data.rows.length) {
+            data._ts = Date.now();
+            _liveHist[histKey] = data;
+            try { localStorage.setItem(cacheKey, JSON.stringify(data)); } catch(e) {}
+            buildUI();
+          }
+        })
+        .catch(function() {});
     }
 
     function _getExportNodes(originKey) {
