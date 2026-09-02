@@ -7,7 +7,7 @@
   <title>THE BROKERS TERMINAL — Subscriber Desk</title>
   <link rel="stylesheet" href="site.css">
   <link rel="stylesheet" href="intel-search.css">
-  <link rel="stylesheet" href="terminal-canvas.css">
+  <link rel="stylesheet" href="terminal-canvas.css?v=20260902b">
   <link rel="stylesheet" href="terminal-chat.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.0"></script>
   <style>
@@ -1084,7 +1084,7 @@
 
 <script src="site.js"></script>
 <script src="intel-search.js"></script>
-<script src="terminal-canvas.js"></script>
+<script src="terminal-canvas.js?v=20260902e"></script>
 <script src="terminal-chat.js"></script>
 <script src="terminal-notes.js"></script>
 <script>document.addEventListener('DOMContentLoaded',function(){
@@ -2370,8 +2370,7 @@
       function safeText(str) { return decodeEntities(str).replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
       function buildItemHtml(s) {
         var hl = s.title || s.headline || '';
-        var src = s.source || '';
-        return '<span class="ticker-item is-new"><span class="ticker-dot-new">' + safeText(src) + '</span>  ' + safeText(hl) + '</span>';
+        return '<span class="ticker-item is-new">' + safeText(hl) + '</span>';
       }
 
       var setHtml = items.map(buildItemHtml).join('');
