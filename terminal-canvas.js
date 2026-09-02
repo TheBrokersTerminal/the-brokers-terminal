@@ -5159,8 +5159,9 @@
           return;
         }
       } catch(e) {}
-      /* Route-history function fetches years sequentially (26s timeout) to avoid rate limiting */
-      fetch('/.netlify/functions/route-history?origin=' + originKey + '&dest=' + m49)
+      /* Route-history function fetches years sequentially (26s timeout) to avoid rate limiting.
+         v=2 busts the Netlify CDN cache from the old parallel-fetch version. */
+      fetch('/.netlify/functions/route-history?v=2&origin=' + originKey + '&dest=' + m49)
         .then(function(r) { return r.json(); })
         .then(function(data) {
           if (data && data.rows && data.rows.length) {

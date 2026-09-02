@@ -137,8 +137,11 @@ exports.handler = async function(event) {
       if (row) rows.push(row);
     } catch(e) { /* skip failed years */ }
     /* Small pause between requests to stay under rate limit */
-    if (yi < YEARS.length - 1) await new Promise(function(r){ setTimeout(r, 300); });
+    if (yi < YEARS.length - 1) await new Promise(function(resolve){ setTimeout(resolve, 300); });
   }
+
+  /* Sort ascending (oldest first) for chart rendering */
+  rows.sort(function(a, b) { return a.year - b.year; });
 
   if (!rows.length) {
     return { statusCode: 502, headers: hdrs, body: JSON.stringify({ error: 'no data for this route' }) };
