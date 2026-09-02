@@ -5481,7 +5481,7 @@
 
       /* ── Row 2: Chart ── */
       html += '<div style="padding:10px 14px 6px;border-bottom:1px solid #181818;flex-shrink:0;">' +
-        '<div style="'+F+'font-size:8px;letter-spacing:.2em;color:'+(isLiveChart?'rgba(233,113,50,0.6)':'#444')+';margin-bottom:8px;">'+chartLbl+'</div>' +
+        '<div style="'+F+'font-size:8px;letter-spacing:.2em;color:'+(hasLivePatch?'rgba(233,113,50,0.6)':'#444')+';margin-bottom:8px;">'+chartLbl+'</div>' +
         '<div style="height:130px;">'+buildBarChartSVG(histBars, projBars)+'</div>' +
         '</div>';
 
@@ -5528,10 +5528,10 @@
           '<div style="'+F+'font-size:12px;color:'+tariffCol+';font-weight:700;margin-bottom:6px;">'+flow.tariffStatus+'</div>' +
           '<div style="'+F+'font-size:9.5px;color:#ffffff;line-height:1.65;">'+flow.tariff+'</div>' +
           '</div></div>';
-      } else if (isLiveChart) {
+      } else if (hasLivePatch) {
         html += '<div style="padding:12px 14px;">' +
           '<div style="'+F+'font-size:8px;letter-spacing:.18em;color:#444;margin-bottom:8px;">DATA SOURCE</div>' +
-          '<div style="'+F+'font-size:9px;color:rgba(255,255,255,0.55);line-height:1.7;">UN Comtrade<br>HS 220830 — Whisky<br>' + liveHistData.source + '<br>Updated ' + (liveHistData.updatedAt || '') + '</div>' +
+          '<div style="'+F+'font-size:9px;color:rgba(255,255,255,0.55);line-height:1.7;">UN Comtrade · HS 220830<br>Bilateral export value<br>Period: ' + liveYr + '</div>' +
           '</div>';
       }
       html += '</div>'; /* end left */
@@ -5551,11 +5551,10 @@
             '</div>';
         });
       }
-      if (isLiveChart && (!flow || !flow.note)) {
+      if (hasLivePatch && (!flow || !flow.note)) {
         html += '<div style="'+F+'font-size:8px;letter-spacing:.18em;color:#444;margin-bottom:8px;">LIVE COMTRADE DATA</div>' +
           '<div style="'+F+'font-size:10px;color:rgba(255,255,255,0.55);line-height:1.8;">' +
-          'Annual export values from UN Comtrade (HS 220830 — Whisky). Figures are FOB USD converted at annual GBP/USD averages. ' +
-          'CAGR computed from ' + histBars[0].yr + '–' + lastBar.yr + ' outturn.' +
+          'UN Comtrade verified export value for ' + liveYr + ' (HS 220830 — Whisky). Historical bars are industry estimates.' +
           '</div>';
       }
       html += '</div>'; /* end right */
