@@ -5420,54 +5420,52 @@
 
       var F = 'font-family:Consolas,monospace;';
 
-      /* Live bilateral route history */
-      var histKey = current + '_' + _drillM49;
-      var liveHistData = (_drillM49 && _liveHist[histKey] && _liveHist[histKey].rows && _liveHist[histKey].rows.length >= 1)
-        ? _liveHist[histKey] : null;
-
-      if (!flow && !liveHistData) {
+      if (!flow) {
         return '<div style="display:flex;flex-direction:column;height:100%;">' +
           '<div style="padding:8px 12px;border-bottom:1px solid #181818;flex-shrink:0;">' +
           '<button class="oweb-back" style="'+F+'font-size:9px;letter-spacing:.14em;padding:4px 12px;border:1px solid #2a2a2a;background:transparent;color:rgba(255,255,255,0.5);cursor:pointer;">← BACK</button></div>' +
-          '<div style="padding:24px;'+F+'font-size:10px;color:#ffffff;letter-spacing:.1em;">LOADING ROUTE DATA…</div></div>';
+          '<div style="padding:24px;'+F+'font-size:10px;color:#ffffff;letter-spacing:.1em;">DETAILED FLOW DATA NOT YET AVAILABLE FOR THIS MARKET</div></div>';
       }
 
-      /* ── Compute chart bars and CAGR from live data or FLOWS fallback ── */
-      var isLiveChart = !!(liveHistData);
-      var histBars, projBars;
-      if (isLiveChart) {
-        histBars = liveHistData.rows.map(function(r) {
-          return { yr: r.year, v: Math.max(1, Math.round(r.valueGBP / 1000000)) };
+      /* Pull live bilateral value from already-loaded scotch-exports data.
+         The export destinations include valueGBP for the current period — use
+         this to replace the most recent static bar with a verified actual. */
+      var liveDestNode = null;
+      var le = _liveExp[current];
+      if (le && le.destinations) {
+        le.destinations.forEach(function(d) {
+          if (_drillM49 ? d.m49 === _drillM49 : d.country === drillKey) liveDestNode = d;
         });
-        projBars = [];
-      } else {
-        histBars = flow.hist;
-        projBars = flow.proj || [];
+      }
+      var liveYr    = le ? parseInt(le.period) : null;
+      var liveGBPm  = liveDestNode ? Math.round(liveDestNode.valueGBP / 1000000) : null;
+
+      /* Build chart bars — use static FLOWS as base, patch most recent bar if live data */
+      var histBars = flow.hist.map(function(b) { return { yr: b.yr, v: b.v }; });
+      var projBars = flow.proj || [];
+      var hasLivePatch = !!(liveYr && liveGBPm);
+      if (hasLivePatch) {
+        var lastStatic = histBars[histBars.length - 1];
+        if (liveYr > lastStatic.yr) {
+          /* Newer year — append as an extra actual bar, remove projection */
+          histBars.push({ yr: liveYr, v: liveGBPm, _live: true });
+          projBars = [];
+        } else if (liveYr === lastStatic.yr) {
+          /* Same year — replace estimate with real figure */
+          histBars[histBars.length - 1] = { yr: liveYr, v: liveGBPm, _live: true };
+        }
       }
 
-      function _cagr(rows, n) {
-        if (!rows || rows.length < 2) return null;
-        var iEnd = rows.length - 1, iStart = Math.max(0, iEnd - n);
-        if (iEnd === iStart) return null;
-        var vEnd = rows[iEnd].valueGBP, vStart = rows[iStart].valueGBP;
-        if (!vEnd || !vStart) return null;
-        var yrs = rows[iEnd].year - rows[iStart].year;
-        if (!yrs) return null;
-        var rate = Math.pow(vEnd / vStart, 1 / yrs) - 1;
-        return (rate >= 0 ? '+' : '') + (rate * 100).toFixed(1) + '%';
-      }
-      var cagr3 = isLiveChart ? (_cagr(liveHistData.rows, 3) || (flow ? flow.cagr3 : '—')) : (flow ? flow.cagr3 : '—');
-      var cagr5 = isLiveChart ? (_cagr(liveHistData.rows, 5) || (flow ? flow.cagr5 : '—')) : (flow ? flow.cagr5 : '—');
-
-      var tariffCol = flow ? (flow.tariffCol || '#44cc64') : '#444';
+      var tariffCol = flow.tariffCol || '#44cc64';
+      var cagr3 = flow.cagr3; var cagr5 = flow.cagr5;
       var cagr3Col = (cagr3||'').charAt(0) === '-' ? '#e05050' : '#44cc64';
       var cagr5Col = (cagr5||'').charAt(0) === '-' ? '#e05050' : '#44cc64';
+      var peak = histBars.reduce(function(m,p){return p.v>m.v?p:m;}, histBars[0]);
       var lastBar = histBars[histBars.length - 1] || {};
-      var peak = histBars.reduce(function(m,p){return p.v>m.v?p:m;}, histBars[0] || {v:0,yr:'—'});
       var lastVal = (lastBar.v||0) >= 1000 ? '£'+((lastBar.v||0)/1000).toFixed(2)+'bn' : '£'+(lastBar.v||0)+'m';
-      var lastYrLbl = isLiveChart ? String(lastBar.yr) : (flow ? String(flow.hist[flow.hist.length-1].yr) : '—');
-      var chartLbl = isLiveChart
-        ? 'UN COMTRADE LIVE · HS 220830 · ' + histBars[0].yr + '–' + lastBar.yr
+      var lastYrLbl = String(lastBar.yr || '—') + (hasLivePatch && lastBar._live ? ' LIVE' : '');
+      var chartLbl = hasLivePatch
+        ? 'INDUSTRY ESTIMATES · UN COMTRADE LIVE — ' + liveYr + ' ACTUAL'
         : 'IMPORT VALUE — 2019–2025 ACTUAL · 2026 PROJECTED';
 
       var html = '<div style="display:flex;flex-direction:column;height:100%;overflow:hidden;">';
@@ -5866,7 +5864,6 @@
           r.addEventListener('click', function() {
             drillKey = dest;
             _drillM49 = m49attr || _getDestM49(current, dest);
-            fetchRouteHistory(current, _drillM49);
             buildUI();
           });
           r.addEventListener('mouseenter', function() { r.setAttribute('fill', 'rgba(30,55,100,0.95)'); });
