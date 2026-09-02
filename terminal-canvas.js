@@ -177,6 +177,7 @@
       {type:'watchlist',      icon:'◈', lbl:'MY WATCHLIST',          sub:'Pin your own tickers with live prices and day change'},
       {type:'global_map',     icon:'◉', lbl:'GLOBAL MAP',            sub:'World view — macro rates, inflation, gold production, whisky regions'},
       {type:'whisky_lookup',  icon:'▣', lbl:'WHISKY TERMINAL',        sub:'Live auction & retail prices, ratings, quartile analysis — powered by WhiskyStats'},
+      {type:'cask_calc',      icon:'◫', lbl:'CASK CALCULATOR',        sub:'Project cask value, bottle yield, angel\'s share & ROI at any age milestone'},
       {type:'origin_web',     icon:'◎', lbl:'ORIGIN WEB',             sub:'Distillery supply network — countries, distilleries, auction markets'},
     ].map(function (w) {
       return '<div class="tbc-add-item" data-type="' + w.type + '">' +
@@ -205,8 +206,8 @@
           id: 'w-' + Date.now(),
           type: type,
           x: 40 + offset, y: 40 + offset,
-          w: type === 'notes' ? 280 : type === 'news' ? 400 : type === 'chat' ? 480 : type === 'calendar' || type === 'econ_calendar' ? 420 : type === 'macro_chart' ? 520 : type === 'macro_intel' ? 580 : type === 'macro_monitor' ? 720 : type === 'sector_heatmap' ? 620 : type === 'watchlist' ? 320 : type === 'global_map' ? 760 : type === 'origin_web' ? 920 : 340,
-          h: type === 'news' || type === 'notes' ? 480 : type === 'chat' ? 440 : type === 'calendar' ? 380 : type === 'econ_calendar' ? 500 : type === 'macro_chart' ? 360 : type === 'macro_intel' ? 500 : type === 'macro_monitor' ? 480 : type === 'sector_heatmap' ? 380 : type === 'watchlist' ? 420 : type === 'global_map' ? 480 : type === 'origin_web' ? 600 : 240,
+          w: type === 'notes' ? 280 : type === 'news' ? 400 : type === 'chat' ? 480 : type === 'calendar' || type === 'econ_calendar' ? 420 : type === 'macro_chart' ? 520 : type === 'macro_intel' ? 580 : type === 'macro_monitor' ? 720 : type === 'sector_heatmap' ? 620 : type === 'watchlist' ? 320 : type === 'global_map' ? 760 : type === 'origin_web' ? 920 : type === 'cask_calc' ? 720 : 340,
+          h: type === 'news' || type === 'notes' ? 480 : type === 'chat' ? 440 : type === 'calendar' ? 380 : type === 'econ_calendar' ? 500 : type === 'macro_chart' ? 360 : type === 'macro_intel' ? 500 : type === 'macro_monitor' ? 480 : type === 'sector_heatmap' ? 380 : type === 'watchlist' ? 420 : type === 'global_map' ? 480 : type === 'origin_web' ? 600 : type === 'cask_calc' ? 620 : 240,
           data: type === 'market' ? {cat:'gold'} : {},
         };
         spawnWidget(cfg);
@@ -232,7 +233,7 @@
     el.style.cssText = 'left:' + cfg.x + 'px;top:' + cfg.y + 'px;width:' + cfg.w + 'px;height:' + cfg.h + 'px;z-index:' + (++window._sharedZ) + ';';
 
     var icons = {news:'◈', market:'◉', reports:'▣', notes:'✎', intel:'◆', chat:'◎', calendar:'◷', notes_inbox:'✉', report_viewer:'▤', econ_calendar:'◫', macro_chart:'◐', macro_intel:'◧', macro_monitor:'▦', sector_heatmap:'▩', watchlist:'◈', global_map:'◉', origin_web:'◎'};
-    var titles = {news:'LIVE HEADLINES', market:'MARKET PRICES', reports:'VAULT · LATEST', notes:'MY NOTES', intel:'BROKERS INTEL', chat:'FIRM CHAT', calendar:'CALENDAR', notes_inbox:'FIRM NOTES', report_viewer:'REPORT', econ_calendar:'ECONOMIC CALENDAR', macro_chart:'ASSET COMPARISON', macro_intel:'MACRO INTELLIGENCE', macro_monitor:'MACRO MONITOR', sector_heatmap:'SECTOR HEATMAP', watchlist:'MY WATCHLIST', global_map:'GLOBAL MAP', whisky_lookup:'WHISKY TERMINAL', origin_web:'ORIGIN WEB'};
+    var titles = {news:'LIVE HEADLINES', market:'MARKET PRICES', reports:'VAULT · LATEST', notes:'MY NOTES', intel:'BROKERS INTEL', chat:'FIRM CHAT', calendar:'CALENDAR', notes_inbox:'FIRM NOTES', report_viewer:'REPORT', econ_calendar:'ECONOMIC CALENDAR', macro_chart:'ASSET COMPARISON', macro_intel:'MACRO INTELLIGENCE', macro_monitor:'MACRO MONITOR', sector_heatmap:'SECTOR HEATMAP', watchlist:'MY WATCHLIST', global_map:'GLOBAL MAP', whisky_lookup:'WHISKY TERMINAL', cask_calc:'CASK CALCULATOR', origin_web:'ORIGIN WEB'};
 
     el.innerHTML =
       '<div class="tbc-widget-bar">' +
@@ -346,6 +347,7 @@
     else if (type === 'macro_chart')    renderMacroChart(id, body);
     else if (type === 'macro_intel')    renderMacroIntel(id, body);
     else if (type === 'whisky_lookup')  renderWhiskyLookup(id, body);
+    else if (type === 'cask_calc')      renderCaskCalc(id, body);
     else if (type === 'origin_web')     renderOriginWeb(id, body);
   }
 
@@ -360,6 +362,71 @@
     var txt = ((s.title||'') + ' ' + (s.source||'')).toLowerCase();
     return kw.some(function(k){ return txt.includes(k); });
   }
+  function openNewsStoryPopout(story) {
+    var hl      = decodeRssEntities(story.title || story.headline || '');
+    var src     = story.source || '';
+    var ts      = story.datetime ? new Date(story.datetime * 1000).toISOString() : (story.pubDate || '');
+    var ago     = ts ? timeAgo(ts) : '';
+    var summary = story.description || story.summary || '';
+
+    /* Guess category for the explain prompt */
+    var cat = 'macro';
+    if (_newsRelevant(story, 'whisky')) cat = 'whisky';
+    else if (_newsRelevant(story, 'gold')) cat = 'gold';
+
+    var z = (window._sharedZ || 1000) + 1;
+    window._sharedZ = z;
+
+    var pop = document.createElement('div');
+    pop.className = 'tnp-popout';
+    pop.style.cssText = 'top:90px;left:220px;z-index:' + z + ';';
+    pop.innerHTML =
+      '<div class="tnp-bar">' +
+        '<span class="tnp-bar-lbl">▌ NEWS</span>' +
+        '<span class="tnp-bar-src">' + escH(src) + (ago ? ' · ' + ago : '') + '</span>' +
+        '<button class="tnp-close">✕</button>' +
+      '</div>' +
+      '<div class="tnp-body">' +
+        '<div class="tnp-headline">' + escH(hl) + '</div>' +
+        (summary ? '<div class="tnp-summary">' + escH(summary) + '</div>' : '') +
+        '<div class="tnp-intel-wrap">' +
+          '<button class="tnp-intel-btn">▌ BROKERS INTELLIGENCE — LOAD PITCH &amp; ANALYSIS</button>' +
+        '</div>' +
+      '</div>';
+
+    document.body.appendChild(pop);
+    makeDraggable(pop, pop.querySelector('.tnp-bar'));
+    pop.addEventListener('mousedown', function () { window._sharedZ++; pop.style.zIndex = window._sharedZ; });
+    pop.querySelector('.tnp-close').addEventListener('click', function () { pop.remove(); });
+
+    pop.querySelector('.tnp-intel-btn').addEventListener('click', function () {
+      var wrap = pop.querySelector('.tnp-intel-wrap');
+      wrap.innerHTML = '<div class="tnp-intel-loading">ANALYSING<span class="tnp-ld"></span></div>';
+      fetch('/.netlify/functions/explain', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ headline: hl, summary: summary, category: cat }),
+      })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (d) {
+          if (!d || d.error) { wrap.innerHTML = '<div class="tnp-intel-err">Intelligence unavailable.</div>'; return; }
+          var riskCls = d.risk === 'RISK ON' ? 'tnp-risk-on' : d.risk === 'RISK OFF' ? 'tnp-risk-off' : 'tnp-risk-neu';
+          var html = '<div class="tnp-intel-panel">';
+          if (d.what) html += '<div class="tnp-sec"><div class="tnp-sec-lbl">WHAT IT MEANS</div><div class="tnp-text">' + escH(d.what) + '</div>' + (d.analogy ? '<div class="tnp-analogy">"' + escH(d.analogy) + '"</div>' : '') + '</div>';
+          if (d.risk) html += '<div class="tnp-sec"><div class="tnp-sec-lbl">RISK SIGNAL</div><div class="tnp-risk ' + riskCls + '"><span class="tnp-risk-dot"></span>' + escH(d.risk) + '</div>' + (d.riskReason ? '<div class="tnp-risk-reason">' + escH(d.riskReason) + '</div>' : '') + '</div>';
+          html += '<div class="tnp-sec tnp-pitch-block"><div class="tnp-sec-lbl">HOW TO PITCH IT</div>';
+          if (d.openingLine) html += '<div class="tnp-pitch-row"><div class="tnp-pitch-lbl">OPEN WITH</div><div class="tnp-quote">"' + escH(d.openingLine) + '"</div></div>';
+          if (d.pitch)       html += '<div class="tnp-pitch-row"><div class="tnp-pitch-lbl">THE LOGICAL CASE</div><div class="tnp-pitch-txt">' + escH(d.pitch) + '</div></div>';
+          if (d.futurePace)  html += '<div class="tnp-pitch-row"><div class="tnp-pitch-lbl">FUTURE PACE</div><div class="tnp-pitch-txt tnp-future">' + escH(d.futurePace) + '</div></div>';
+          if (d.spinQuestion)html += '<div class="tnp-pitch-row"><div class="tnp-pitch-lbl">ASK THEM</div><div class="tnp-quote">"' + escH(d.spinQuestion) + '"</div></div>';
+          if (d.urgency)     html += '<div class="tnp-pitch-row"><div class="tnp-pitch-lbl">TIMING</div><div class="tnp-pitch-txt tnp-urgency">' + escH(d.urgency) + '</div></div>';
+          html += '</div></div>';
+          wrap.innerHTML = html;
+        })
+        .catch(function () { wrap.innerHTML = '<div class="tnp-intel-err">Intelligence unavailable.</div>'; });
+    });
+  }
+
   function renderNews(id, body) {
     var LS_KEY = 'tbt_rss_v2', LS_TS = 'tbt_rss_ts_v2', MAX_AGE = 600000; /* 10 min localStorage TTL */
 
@@ -402,49 +469,70 @@
           body.querySelector('.tbw-loading').addEventListener('click', function(){ renderNews(id, body); });
           return;
         }
-        var asset = (window.firmAccess || 'both').toLowerCase();
-        var top;
-        var twoHrsAgo = Math.floor(Date.now()/1000) - 7200;
-        function supplementWithRecent(matched, limit) {
-          /* If latest match is stale (>2h old), pad with fresh general financial news */
-          var isStale = !matched.length || matched[0].datetime < twoHrsAgo;
-          if (!isStale) return matched.slice(0, limit);
-          var seen = {};
-          matched.forEach(function(s){ seen[s.url] = true; });
-          var extras = stories.filter(function(s){ return !seen[s.url]; }).slice(0, limit - matched.length);
-          return matched.concat(extras).slice(0, limit);
+
+        var activeFilter = 'all';
+
+        function getFiltered(filter) {
+          var twoHrsAgo = Math.floor(Date.now()/1000) - 7200;
+          function pad(matched) {
+            var isStale = !matched.length || matched[0].datetime < twoHrsAgo;
+            if (!isStale) return matched.slice(0, 20);
+            var seen = {}; matched.forEach(function(s){ seen[s.url]=true; });
+            return matched.concat(stories.filter(function(s){ return !seen[s.url]; }).slice(0, 20 - matched.length)).slice(0, 20);
+          }
+          if (filter === 'whisky') return pad(stories.filter(function(s){ return _newsRelevant(s,'whisky'); }));
+          if (filter === 'gold')   return pad(stories.filter(function(s){ return _newsRelevant(s,'gold'); }));
+          if (filter === 'macro')  return pad(stories.filter(function(s){ return _newsRelevant(s,'macro'); }));
+          return pad(stories.filter(function(s){ return _newsRelevant(s,'whisky')||_newsRelevant(s,'gold')||_newsRelevant(s,'macro'); }));
         }
-        if (asset === 'whisky' || asset === 'gold') {
-          top = supplementWithRecent(stories.filter(function(s){ return _newsRelevant(s, asset) || _newsRelevant(s, 'macro'); }), 15);
-        } else {
-          top = supplementWithRecent(stories.filter(function(s){
-            return _newsRelevant(s, 'whisky') || _newsRelevant(s, 'gold') || _newsRelevant(s, 'macro');
-          }), 15);
+
+        function renderList(filter) {
+          activeFilter = filter;
+          var top = getFiltered(filter);
+
+          /* Update tab active states */
+          body.querySelectorAll('.tbw-filter-tab').forEach(function(t){
+            t.classList.toggle('active', t.dataset.filter === filter);
+          });
+
+          var listEl = body.querySelector('.tbw-news-list');
+          listEl.innerHTML = top.length ? top.map(function(s) {
+            var ts  = s.datetime ? new Date(s.datetime * 1000).toISOString() : (s.pubDate || '');
+            var ago = timeAgo(ts);
+            var hl  = decodeRssEntities(s.title || s.headline || '');
+            return '<div class="tbw-news-item">' +
+              '<div class="tbw-news-meta"><span class="tbw-news-time">' + ago + '</span></div>' +
+              '<div class="tbw-news-hl">' + escH(hl) + '</div>' +
+            '</div>';
+          }).join('') : '<div class="tbw-loading">NO STORIES FOR THIS FILTER</div>';
+
+          listEl.querySelectorAll('.tbw-news-item').forEach(function(row, i) {
+            row.addEventListener('click', function(){ openNewsStoryPopout(top[i]); });
+          });
         }
+
         body.style.display = 'flex';
         body.style.flexDirection = 'column';
-        body.innerHTML = top.map(function (s) {
-          /* RSS fn returns: {title, url, datetime (unix secs), source} */
-          var ts  = s.datetime ? new Date(s.datetime * 1000).toISOString() : (s.pubDate || '');
-          var ago = timeAgo(ts);
-          var hl  = decodeRssEntities(s.title || s.headline || '');
-          var url = s.url   || s.link     || '';
-          return '<div class="tbw-news-item" data-url="' + escH(url) + '">' +
-            '<div class="tbw-news-meta"><span class="tbw-news-src">' + escH(s.source||'') + '</span><span class="tbw-news-time">' + ago + '</span></div>' +
-            '<div class="tbw-news-hl">' + escH(hl) + '</div>' +
-            '</div>';
-        }).join('') +
-        '<div class="tbw-news-footer">' +
-          '<span class="tbw-news-refresh">Updated ' + new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) + '</span>' +
-          '<a class="tbw-news-link" href="news.html" target="_blank" rel="noopener">FULL TERMINAL ↗</a>' +
-        '</div>';
-        body.querySelectorAll('.tbw-news-item').forEach(function (row) {
-          row.addEventListener('click', function () {
-            var url = row.dataset.url;
-            if (url) window.open(url, '_blank', 'noopener');
-          });
+        body.innerHTML =
+          '<div class="tbw-filter-bar">' +
+            '<button class="tbw-filter-tab active" data-filter="all">ALL</button>' +
+            '<button class="tbw-filter-tab" data-filter="whisky">WHISKY</button>' +
+            '<button class="tbw-filter-tab" data-filter="gold">GOLD</button>' +
+            '<button class="tbw-filter-tab" data-filter="macro">MACRO</button>' +
+          '</div>' +
+          '<div class="tbw-news-list"></div>' +
+          '<div class="tbw-news-footer">' +
+            '<span class="tbw-news-refresh">Updated ' + new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) + '</span>' +
+            '<a class="tbw-news-link" href="news.html" target="_blank" rel="noopener">FULL TERMINAL ↗</a>' +
+          '</div>';
+
+        body.querySelectorAll('.tbw-filter-tab').forEach(function(tab) {
+          tab.addEventListener('click', function(){ renderList(tab.dataset.filter); });
         });
-        /* auto-refresh every 5 min — bust cache so fresh stories are fetched */
+
+        renderList('all');
+
+        /* auto-refresh every 5 min */
         clearTimeout(el_refresh_timer(id));
         set_refresh_timer(id, setTimeout(function () { window._rssCache = null; renderNews(id, body); }, 300000));
       })
@@ -4206,6 +4294,474 @@
     }
   }
 
+  /* ── CASK CALCULATOR ─────────────────────────────────────── */
+  function renderCaskCalc(id, body) {
+    var CURRENT_YEAR = 2026;
+    var MILESTONES = [10, 12, 15, 18, 21, 25, 30, 35, 40];
+    var CURRENCIES = {
+      GBP:{sym:'£',   rate:1.0},
+      USD:{sym:'$',   rate:1.27},
+      EUR:{sym:'€',   rate:1.18},
+      HKD:{sym:'HK$', rate:9.90},
+      SGD:{sym:'S$',  rate:1.70},
+      AED:{sym:'AED ',rate:4.67}
+    };
+
+    function angelRate(age) {
+      if (age < 5)  return 0.02;
+      if (age < 15) return 0.015;
+      if (age < 25) return 0.01;
+      return 0.005;
+    }
+    function calcRLA(rla, fromAge, years) {
+      for (var y = 0; y < years; y++) rla *= (1 - angelRate(fromAge + y));
+      return rla;
+    }
+    function calcABV(abv, years) { return Math.max(40, abv - years * 0.1); }
+    function calcBtls(rla, tAbv) { return Math.floor(rla * 1000 / (700 * tAbv / 100)); }
+    function calcCAGR(finalVal, initVal, years) {
+      if (years <= 0 || initVal <= 0 || finalVal <= 0) return null;
+      return (Math.pow(finalVal / initVal, 1 / years) - 1) * 100;
+    }
+    function fM(n, curKey) {
+      var c = CURRENCIES[curKey] || CURRENCIES.GBP;
+      var v = n * c.rate;
+      if (Math.abs(v) >= 1000000) return c.sym + (v/1000000).toFixed(2) + 'm';
+      return c.sym + Math.round(v).toLocaleString('en-GB');
+    }
+    function fPct(n) { return (n >= 0 ? '+' : '') + n.toFixed(1) + '%'; }
+    function fNum(n) { return Math.round(n).toLocaleString('en-GB'); }
+
+    function ccInp(iid, ph, val, num) {
+      return '<input class="cc-inp"' + (num ? ' type="number" step="any"' : ' type="text"') +
+             ' id="' + iid + '" placeholder="' + ph + '"' +
+             (val !== undefined && val !== '' ? ' value="' + val + '"' : '') + '>';
+    }
+    function ccField(lab, inputHtml) {
+      return '<div class="cc-field"><span class="cc-lbl">' + lab + '</span>' + inputHtml + '</div>';
+    }
+    function makePriceField(fieldId, label) {
+      var div = document.createElement('div');
+      div.className = 'cc-field';
+      div.innerHTML =
+        '<span class="cc-lbl">' + label + '</span>' +
+        '<div class="cc-price-row">' +
+          '<input class="cc-inp cc-price-inp" type="number" step="any" id="' + fieldId + '" placeholder="0.00">' +
+          '<button class="cc-lookup-btn" data-field="' + fieldId + '" title="Search WhiskyStats">▌</button>' +
+        '</div>' +
+        '<div class="cc-lookup-results" id="lkp-' + fieldId + '" style="display:none;"></div>';
+      return div;
+    }
+
+    body.innerHTML =
+      '<div class="cc-wrap">' +
+        '<div class="cc-sec-hdr">CASK DETAILS</div>' +
+        '<div class="cc-grid-3">' +
+          ccField('DISTILLERY', ccInp('cc-distillery', 'e.g. Glenfarclas', '')) +
+          ccField('CASK TYPE', '<select class="cc-inp" id="cc-cask-type">' +
+            '<option>Hogshead (~250L)</option>' +
+            '<option>Sherry Butt (~500L)</option>' +
+            '<option>Barrel (~200L)</option>' +
+            '<option>Puncheon (~500L)</option>' +
+            '<option>Quarter Cask (~50L)</option>' +
+          '</select>') +
+          ccField('YEAR DISTILLED', ccInp('cc-year', '2020', '', true)) +
+          ccField('YEAR PURCHASED', ccInp('cc-yr-purchased', CURRENT_YEAR, CURRENT_YEAR, true)) +
+          ccField('CASK REFERENCE', ccInp('cc-ref', 'e.g. HH/2020/001', '')) +
+          ccField('CLIENT NAME', ccInp('cc-client', 'Optional', '')) +
+          ccField('CURRENT RLA (LPA)', ccInp('cc-rla', '0.0', '', true)) +
+          ccField('CURRENT ABV (%)', ccInp('cc-abv', '63.5', '', true)) +
+          ccField('PURCHASE PRICE (£)', ccInp('cc-purchase', '0', '', true)) +
+        '</div>' +
+
+        '<div class="cc-sec-hdr">BOTTLING ASSUMPTIONS</div>' +
+        '<div class="cc-grid-4">' +
+          ccField('TARGET ABV (%)', ccInp('cc-target-abv', '46', 46, true)) +
+          ccField('OWN-MAKE DISC (%)', ccInp('cc-discount', '40', 40, true)) +
+          ccField('STORAGE / YR (£)', ccInp('cc-storage', '150', 150, true)) +
+          ccField('BOTTLING / BTL (£)', ccInp('cc-bottling', '10', 10, true)) +
+          ccField('REGAUGING (£)', ccInp('cc-regauge-cost', '75', 75, true)) +
+          ccField('REGAUGE EVERY (YRS)', ccInp('cc-regauge-every', '5', 5, true)) +
+          ccField('MIN BOTTLE RUN', ccInp('cc-min-bottles', '120', 120, true)) +
+          ccField('DISPLAY CURRENCY', '<select class="cc-inp" id="cc-currency">' +
+            '<option value="GBP">GBP — £</option>' +
+            '<option value="USD">USD — $</option>' +
+            '<option value="EUR">EUR — €</option>' +
+            '<option value="HKD">HKD — HK$</option>' +
+            '<option value="SGD">SGD — S$</option>' +
+            '<option value="AED">AED</option>' +
+          '</select>') +
+        '</div>' +
+
+        '<div class="cc-sec-hdr">SPIRIT DUTY</div>' +
+        '<div class="cc-duty-row">' +
+          '<label class="cc-radio-lbl"><input type="radio" name="cc-duty-' + id + '" value="bond" id="cc-duty-bond" checked> IN-BOND SALE <span class="cc-radio-sub">(buyer pays duty)</span></label>' +
+          '<label class="cc-radio-lbl"><input type="radio" name="cc-duty-' + id + '" value="retail" id="cc-duty-retail"> RETAIL BOTTLING <span class="cc-radio-sub">(duty paid by you)</span></label>' +
+          '<div class="cc-duty-rate-wrap" id="cc-duty-rate-wrap" style="display:none;">' +
+            '<span class="cc-lbl">DUTY RATE (£/LPA)</span>' +
+            ccInp('cc-duty-rate', '31.64', 31.64, true) +
+          '</div>' +
+        '</div>' +
+
+        '<div class="cc-sec-hdr">COMPARABLE PRICES <span class="cc-hint-lbl">— from WhiskyStats · click ▌ to search</span></div>' +
+        '<div id="cc-price-fields" class="cc-grid-3"></div>' +
+
+        '<button class="cc-calc-btn" id="cc-calc-btn">▌ CALCULATE CASK VALUE</button>' +
+        '<div id="cc-results"></div>' +
+      '</div>';
+
+    /* duty toggle */
+    body.querySelector('#cc-duty-retail').addEventListener('change', function() {
+      body.querySelector('#cc-duty-rate-wrap').style.display = 'flex';
+    });
+    body.querySelector('#cc-duty-bond').addEventListener('change', function() {
+      body.querySelector('#cc-duty-rate-wrap').style.display = 'none';
+    });
+
+    var yearInp = body.querySelector('#cc-year');
+
+    function refreshMilestoneFields() {
+      var yr  = parseInt(yearInp.value) || 0;
+      var age = (yr > 1900 && yr <= CURRENT_YEAR) ? (CURRENT_YEAR - yr) : -1;
+      var container = body.querySelector('#cc-price-fields');
+      container.innerHTML = '';
+      var nowLbl = age >= 0 ? 'NOW · ' + age + 'YO (£/BTL)' : 'CURRENT AGE (£/BTL)';
+      container.appendChild(makePriceField('cc-price-now', nowLbl));
+      if (age >= 0 && age < 50) {
+        MILESTONES.filter(function(m) { return m > age && m <= 50; }).forEach(function(m) {
+          container.appendChild(makePriceField('cc-price-' + m, m + 'YO (£/BTL)'));
+        });
+      }
+    }
+
+    yearInp.addEventListener('input', refreshMilestoneFields);
+    refreshMilestoneFields();
+
+    /* WhiskyStats inline price lookup */
+    body.addEventListener('click', function(e) {
+      var btn = e.target.closest('.cc-lookup-btn');
+      if (!btn) return;
+      var distillery = body.querySelector('#cc-distillery').value.trim();
+      var fieldId    = btn.dataset.field;
+      var ageHint    = fieldId === 'cc-price-now' ? '' : fieldId.replace('cc-price-', '') + 'yo';
+      var resDiv     = body.querySelector('#lkp-' + fieldId);
+      if (!distillery) {
+        resDiv.style.display = 'block';
+        resDiv.innerHTML = '<div class="cc-lkp-msg">Enter a distillery name first.</div>';
+        return;
+      }
+      var q = distillery + (ageHint ? ' ' + ageHint : '');
+      resDiv.style.display = 'block';
+      resDiv.innerHTML = '<div class="cc-lkp-msg">Searching WhiskyStats…</div>';
+      fetch('/.netlify/functions/whisky-data?type=search&query=' + encodeURIComponent(q) + '&currency=GBP')
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          var items = (data.results || data.data || []).slice(0, 6);
+          if (!items.length) { resDiv.innerHTML = '<div class="cc-lkp-msg">No results — try a broader search.</div>'; return; }
+          resDiv.innerHTML = items.map(function(item) {
+            var price = item.avg_auction_price || item.retail_avg || item.latest_price || 0;
+            var name  = escH(item.title || item.name || '');
+            return '<div class="cc-lkp-item" data-price="' + price + '" data-field="' + fieldId + '">' +
+              '<span class="cc-lkp-name">' + name + '</span>' +
+              '<span class="cc-lkp-price">' + (price ? '£' + Math.round(price) : 'n/a') + '</span>' +
+            '</div>';
+          }).join('');
+        })
+        .catch(function() { resDiv.innerHTML = '<div class="cc-lkp-msg">Search failed.</div>'; });
+    });
+
+    /* fill price field from lookup result */
+    body.addEventListener('click', function(e) {
+      var item = e.target.closest('.cc-lkp-item');
+      if (!item) return;
+      var price = parseFloat(item.dataset.price) || 0;
+      var fieldId = item.dataset.field;
+      if (price > 0) {
+        var inp = body.querySelector('#' + fieldId);
+        if (inp) inp.value = price.toFixed(2);
+      }
+      var resDiv = body.querySelector('#lkp-' + fieldId);
+      if (resDiv) resDiv.style.display = 'none';
+    });
+
+    /* close lookup dropdowns when clicking elsewhere */
+    body.addEventListener('click', function(e) {
+      if (!e.target.closest('.cc-lookup-btn') && !e.target.closest('.cc-lkp-item')) {
+        body.querySelectorAll('.cc-lookup-results').forEach(function(d) { d.style.display = 'none'; });
+      }
+    });
+
+    body.querySelector('#cc-calc-btn').addEventListener('click', function() {
+      var distillery   = body.querySelector('#cc-distillery').value.trim() || 'CASK';
+      var caskType     = body.querySelector('#cc-cask-type').value;
+      var yr           = parseInt(yearInp.value) || 0;
+      var yrPurchased  = parseInt(body.querySelector('#cc-yr-purchased').value) || CURRENT_YEAR;
+      var caskRef      = body.querySelector('#cc-ref').value.trim();
+      var clientName   = body.querySelector('#cc-client').value.trim();
+      var rla          = parseFloat(body.querySelector('#cc-rla').value) || 0;
+      var abv          = parseFloat(body.querySelector('#cc-abv').value) || 0;
+      var purchase     = parseFloat(body.querySelector('#cc-purchase').value) || 0;
+      var tAbv         = Math.max(40, parseFloat(body.querySelector('#cc-target-abv').value) || 46);
+      var disc         = Math.min(100, Math.max(0, parseFloat(body.querySelector('#cc-discount').value) || 40));
+      var storage      = parseFloat(body.querySelector('#cc-storage').value) || 0;
+      var bottlingFee  = parseFloat(body.querySelector('#cc-bottling').value) || 0;
+      var regaugeCost  = parseFloat(body.querySelector('#cc-regauge-cost').value) || 0;
+      var regaugeEvery = parseInt(body.querySelector('#cc-regauge-every').value) || 5;
+      var minBtls      = parseInt(body.querySelector('#cc-min-bottles').value) || 120;
+      var curKey       = body.querySelector('#cc-currency').value || 'GBP';
+      var retailDuty   = body.querySelector('#cc-duty-retail').checked;
+      var dutyRate     = retailDuty ? (parseFloat(body.querySelector('#cc-duty-rate').value) || 31.64) : 0;
+      var priceNow     = parseFloat(body.querySelector('#cc-price-now').value) || 0;
+      var resultsEl    = body.querySelector('#cc-results');
+      var fC = function(n) { return fM(n, curKey); };
+
+      if (!yr || yr < 1900 || yr > CURRENT_YEAR) {
+        resultsEl.innerHTML = '<div class="cc-error">Enter a valid distillation year.</div>'; return;
+      }
+      if (rla <= 0) {
+        resultsEl.innerHTML = '<div class="cc-error">Enter the current RLA (litres of pure alcohol).</div>'; return;
+      }
+      if (abv < 40 || abv > 99) {
+        resultsEl.innerHTML = '<div class="cc-error">Enter a valid current ABV (40–99%).</div>'; return;
+      }
+      if (purchase <= 0) {
+        resultsEl.innerHTML = '<div class="cc-error">Enter the purchase price paid.</div>'; return;
+      }
+
+      var curAge     = CURRENT_YEAR - yr;
+      var ownMult    = 1 - disc / 100;
+      var yrsHeldNow = Math.max(0, CURRENT_YEAR - yrPurchased);
+
+      function calcRegauging(yrs) {
+        return regaugeEvery > 0 ? Math.floor(yrs / regaugeEvery) * regaugeCost : 0;
+      }
+
+      /* --- sell now --- */
+      var nowBtls     = calcBtls(rla, tAbv);
+      var nowDuty     = retailDuty ? rla * dutyRate : 0;
+      var nowGross    = priceNow > 0 ? nowBtls * priceNow * ownMult : 0;
+      var nowBotCost  = nowBtls * bottlingFee;
+      var nowNet      = nowGross - nowBotCost - nowDuty;
+      var nowGrossROI = purchase > 0 ? (nowGross - purchase) / purchase * 100 : 0;
+      var nowNetROI   = purchase > 0 ? (nowNet   - purchase) / purchase * 100 : 0;
+      var nowCAGRNet  = calcCAGR(nowNet, purchase, yrsHeldNow);
+      var nowBelowMin = nowBtls < minBtls;
+
+      /* --- future projections --- */
+      var futureMiles = MILESTONES.filter(function(m) { return m > curAge && m <= 50; });
+      var rows = [], chartRows = [], breakEvenAge = null;
+
+      futureMiles.forEach(function(tAge) {
+        var yrs       = tAge - curAge;
+        var priceEl   = body.querySelector('#cc-price-' + tAge);
+        var refPrice  = priceEl ? (parseFloat(priceEl.value) || 0) : 0;
+        var pRLA      = calcRLA(rla, curAge, yrs);
+        var pABV      = calcABV(abv, yrs);
+        var btls      = calcBtls(pRLA, tAbv);
+        var storeCost = yrs * storage;
+        var rgCost    = calcRegauging(yrs);
+        var botCost   = btls * bottlingFee;
+        var dutyAmt   = retailDuty ? pRLA * dutyRate : 0;
+        var totalHeld = Math.max(0, (yr + tAge) - yrPurchased);
+
+        if (refPrice > 0) {
+          var gross = btls * refPrice * ownMult;
+          var net   = gross - storeCost - rgCost - botCost - dutyAmt;
+          var gROI  = purchase > 0 ? (gross - purchase) / purchase * 100 : 0;
+          var nROI  = purchase > 0 ? (net   - purchase) / purchase * 100 : 0;
+          var cGross= calcCAGR(gross, purchase, totalHeld);
+          var cNet  = calcCAGR(net,   purchase, totalHeld);
+          if (breakEvenAge === null && net >= purchase) breakEvenAge = tAge;
+          rows.push({ age:tAge, yrs:yrs, pRLA:pRLA, pABV:pABV, abvWarn:(pABV<=40.5),
+            btls:btls, btlWarn:(btls<minBtls), gross:gross, storeCost:storeCost,
+            rgCost:rgCost, botCost:botCost, dutyAmt:dutyAmt,
+            net:net, gROI:gROI, nROI:nROI, cGross:cGross, cNet:cNet, hasPrice:true });
+          chartRows.push({ age:tAge, gross:gross, net:net });
+        } else {
+          rows.push({ age:tAge, yrs:yrs, pRLA:pRLA, pABV:pABV, abvWarn:(pABV<=40.5),
+            btls:btls, btlWarn:(btls<minBtls), hasPrice:false });
+        }
+      });
+
+      /* --- render --- */
+      var html = '<div class="cc-results-inner">';
+
+      /* header */
+      html += '<div class="cc-res-hdr">' +
+        escH(distillery).toUpperCase() + ' · ' + curAge + 'YO · ' + escH(caskType) +
+        (caskRef    ? ' &nbsp;<span class="cc-dim2">REF ' + escH(caskRef) + '</span>' : '') +
+        (clientName ? ' &nbsp;<span class="cc-dim2">CLIENT ' + escH(clientName) + '</span>' : '') +
+      '</div>';
+
+      /* sell-now card */
+      if (priceNow > 0) {
+        html += '<div class="cc-now-card">' +
+          '<div class="cc-now-title">▌ SELL NOW — ' + curAge + 'YO' +
+            (nowBelowMin ? ' &nbsp;<span class="cc-warn">⚠ BELOW MIN RUN (' + minBtls + ' BOTTLES)</span>' : '') +
+          '</div>' +
+          '<div class="cc-now-grid">' +
+            '<div class="cc-now-stat"><div class="cc-now-val">' + fNum(nowBtls) + '</div><div class="cc-now-sub">BOTTLES AT ' + tAbv + '%</div></div>' +
+            '<div class="cc-now-stat"><div class="cc-now-val">' + fC(nowGross) + '</div><div class="cc-now-sub">GROSS REVENUE</div></div>' +
+            (retailDuty ? '<div class="cc-now-stat cc-neg-bg"><div class="cc-now-val">(' + fC(nowDuty) + ')</div><div class="cc-now-sub">SPIRIT DUTY</div></div>' : '') +
+            '<div class="cc-now-stat"><div class="cc-now-val">' + fC(nowNet) + '</div><div class="cc-now-sub">NET VALUE</div></div>' +
+            '<div class="cc-now-stat ' + (nowGrossROI >= 0 ? 'cc-pos-bg' : 'cc-neg-bg') + '"><div class="cc-now-val">' + fPct(nowGrossROI) + '</div><div class="cc-now-sub">GROSS ROI</div></div>' +
+            '<div class="cc-now-stat ' + (nowNetROI >= 0 ? 'cc-pos-bg' : 'cc-neg-bg') + '"><div class="cc-now-val">' + fPct(nowNetROI) + '</div><div class="cc-now-sub">NET ROI</div></div>' +
+            (nowCAGRNet !== null ? '<div class="cc-now-stat"><div class="cc-now-val">' + fPct(nowCAGRNet) + '/yr</div><div class="cc-now-sub">NET CAGR</div></div>' : '') +
+          '</div>' +
+        '</div>';
+      } else {
+        html += '<div class="cc-hint-box">Enter the current age comparable price to see the sell-now value.</div>';
+      }
+
+      /* break-even */
+      var priceRows = rows.filter(function(r) { return r.hasPrice; });
+      var noPrRows  = rows.filter(function(r) { return !r.hasPrice; });
+      if (priceRows.length) {
+        if (breakEvenAge !== null) {
+          html += '<div class="cc-breakeven">▌ BREAK-EVEN: Net value covers purchase price at <strong>' + breakEvenAge + 'YO</strong> · ' + (yr + breakEvenAge) + '</div>';
+        } else {
+          html += '<div class="cc-breakeven cc-breakeven--none">▌ BREAK-EVEN: Not reached within the milestones entered</div>';
+        }
+      }
+
+      /* projection table */
+      if (priceRows.length) {
+        var dutyMode = retailDuty ? 'RETAIL — DUTY PAID @ £' + dutyRate.toFixed(2) + '/LPA' : 'IN-BOND SALE';
+        html += '<div class="cc-proj-title">▌ FUTURE PROJECTIONS <span class="cc-proj-sub">· ' + dutyMode + '</span></div>';
+        html += '<div class="cc-tbl-wrap"><table class="cc-tbl"><thead><tr>' +
+          '<th>AGE</th><th>HOLD</th><th>RLA</th><th>BOTTLES</th><th>ABV</th>' +
+          '<th>GROSS REV</th>' + (retailDuty ? '<th>DUTY</th>' : '') +
+          '<th>STORAGE</th><th>REGAUGE</th><th>BOTTLING</th>' +
+          '<th>NET VALUE</th><th>CAGR</th><th>GROSS ROI</th><th>NET ROI</th>' +
+        '</tr></thead><tbody>';
+        priceRows.forEach(function(r) {
+          var abvW = r.abvWarn ? ' <span class="cc-warn" title="ABV approaching 40% Scotch legal minimum">⚠</span>' : '';
+          var btlW = r.btlWarn ? ' <span class="cc-warn" title="Below minimum bottling run of ' + minBtls + ' bottles">⚠</span>' : '';
+          var cagrTxt = r.cNet !== null ? fPct(r.cNet) + '/yr' : '—';
+          html += '<tr' + (r.btlWarn ? ' class="cc-row-warn"' : '') + '>' +
+            '<td><strong>' + r.age + 'YO</strong></td>' +
+            '<td class="cc-dim">' + r.yrs + 'yr</td>' +
+            '<td class="cc-dim">' + r.pRLA.toFixed(1) + '</td>' +
+            '<td>' + fNum(r.btls) + btlW + '</td>' +
+            '<td class="cc-dim">' + r.pABV.toFixed(1) + '%' + abvW + '</td>' +
+            '<td>' + fC(r.gross) + '</td>' +
+            (retailDuty ? '<td class="cc-neg">(' + fC(r.dutyAmt) + ')</td>' : '') +
+            '<td class="cc-dim">' + fC(r.storeCost) + '</td>' +
+            '<td class="cc-dim">' + (r.rgCost > 0 ? fC(r.rgCost) : '—') + '</td>' +
+            '<td class="cc-dim">' + fC(r.botCost) + '</td>' +
+            '<td><strong>' + fC(r.net) + '</strong></td>' +
+            '<td class="' + (r.cNet !== null && r.cNet >= 0 ? 'cc-pos' : 'cc-neg') + '">' + cagrTxt + '</td>' +
+            '<td class="' + (r.gROI >= 0 ? 'cc-pos' : 'cc-neg') + '">' + fPct(r.gROI) + '</td>' +
+            '<td class="' + (r.nROI >= 0 ? 'cc-pos' : 'cc-neg') + '"><strong>' + fPct(r.nROI) + '</strong></td>' +
+          '</tr>';
+        });
+        html += '</tbody></table></div>';
+        html += '<canvas id="cc-chart-' + id + '" class="cc-chart"></canvas>';
+      }
+
+      if (noPrRows.length) {
+        var missing = noPrRows.map(function(r) { return r.age + 'YO'; }).join(', ');
+        html += '<div class="cc-hint-box">Enter comparable prices for ' + missing + ' to see those projections.</div>';
+      }
+
+      html += '</div>';
+      resultsEl.innerHTML = html;
+
+      if (priceRows.length) {
+        var canvas = body.querySelector('#cc-chart-' + id);
+        if (canvas) drawCaskChart(canvas, purchase, chartRows, curKey);
+      }
+    });
+  }
+
+  function drawCaskChart(canvas, purchase, rows, curKey) {
+    var DPR = window.devicePixelRatio || 1;
+    var W   = canvas.offsetWidth || 660;
+    var H   = 160;
+    canvas.width  = W * DPR;
+    canvas.height = H * DPR;
+    canvas.style.width  = W + 'px';
+    canvas.style.height = H + 'px';
+    var ctx = canvas.getContext('2d');
+    ctx.scale(DPR, DPR);
+
+    var CURRENCIES = {GBP:{sym:'£',rate:1},USD:{sym:'$',rate:1.27},EUR:{sym:'€',rate:1.18},HKD:{sym:'HK$',rate:9.90},SGD:{sym:'S$',rate:1.70},AED:{sym:'AED ',rate:4.67}};
+    var c   = CURRENCIES[curKey] || CURRENCIES.GBP;
+    var vals = [purchase * c.rate];
+    rows.forEach(function(r) { vals.push(r.gross * c.rate, r.net * c.rate); });
+    var maxV = Math.max.apply(null, vals);
+    var minV = Math.min(0, Math.min.apply(null, vals));
+    var span = maxV - minV || 1;
+
+    var P = {t:20, r:90, b:28, l:66};
+    var cw = W - P.l - P.r, ch = H - P.t - P.b;
+    var n  = rows.length;
+
+    function xOf(i) { return P.l + (n > 1 ? i / (n - 1) * cw : cw / 2); }
+    function yOf(v) { return P.t + ch - (v - minV) / span * ch; }
+
+    ctx.clearRect(0, 0, W, H);
+
+    /* grid */
+    ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+    ctx.lineWidth = 1;
+    [0, 0.33, 0.66, 1].forEach(function(f) {
+      var y = P.t + ch * (1 - f);
+      ctx.beginPath(); ctx.moveTo(P.l, y); ctx.lineTo(W - P.r, y); ctx.stroke();
+    });
+
+    /* purchase cost baseline */
+    var py = yOf(purchase * c.rate);
+    ctx.save();
+    ctx.strokeStyle = 'rgba(255,255,255,0.22)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath(); ctx.moveTo(P.l, py); ctx.lineTo(W - P.r, py); ctx.stroke();
+    ctx.restore();
+    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+    ctx.font = '9px monospace'; ctx.textAlign = 'right';
+    ctx.fillText('COST', P.l - 4, py + 4);
+
+    function drawLine(getV, color) {
+      ctx.beginPath(); ctx.strokeStyle = color; ctx.lineWidth = 2;
+      rows.forEach(function(r, i) {
+        var x = xOf(i), y = yOf(getV(r) * c.rate);
+        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+      rows.forEach(function(r, i) {
+        ctx.fillStyle = color;
+        ctx.beginPath(); ctx.arc(xOf(i), yOf(getV(r) * c.rate), 3, 0, Math.PI * 2); ctx.fill();
+      });
+    }
+    drawLine(function(r) { return r.gross; }, '#E97132');
+    drawLine(function(r) { return r.net;   }, '#ffffff');
+
+    /* x labels */
+    ctx.fillStyle = 'rgba(255,255,255,0.55)';
+    ctx.font = '9px monospace'; ctx.textAlign = 'center';
+    rows.forEach(function(r, i) { ctx.fillText(r.age + 'yr', xOf(i), H - P.b + 11); });
+
+    /* y labels */
+    ctx.textAlign = 'right';
+    [0, 0.5, 1].forEach(function(f) {
+      var v = minV + span * f;
+      var y = P.t + ch * (1 - f);
+      var lbl = Math.abs(v) >= 1000000 ? c.sym + (v/1000000).toFixed(1) + 'm' :
+                Math.abs(v) >= 1000    ? c.sym + (v/1000).toFixed(0) + 'k' : c.sym + Math.round(v);
+      ctx.fillText(lbl, P.l - 4, y + 4);
+    });
+
+    /* legend */
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#E97132';
+    ctx.fillRect(W - P.r + 8, P.t, 14, 2);
+    ctx.fillText('GROSS', W - P.r + 26, P.t + 5);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(W - P.r + 8, P.t + 14, 14, 2);
+    ctx.fillText('NET', W - P.r + 26, P.t + 19);
+  }
+
   /* ── ORIGIN WEB ── three-mode macro picture with drill-down ── */
   function renderOriginWeb(id, body) {
     var OD = {
@@ -4561,36 +5117,120 @@
     var current = 'scotland';
     var mode = 'supply';
     var drillKey = null;
-    var liveExports = null;   /* populated async from scotch-exports function */
 
-    /* ── Live export data loader ── */
-    function fetchLiveExports() {
-      /* Check localStorage cache (24h) */
-      try {
-        var cached = localStorage.getItem('tbt_scotch_exports');
-        if (cached) {
-          var c = JSON.parse(cached);
-          if (c && c._ts && (Date.now() - c._ts) < 86400000) {
-            liveExports = c;
-            return;
-          }
-        }
-      } catch(e) {}
+    /* ── Per-origin live data stores ── */
+    var _liveExp  = {};  /* keyed by origin: UN Comtrade export data */
+    var _livePrc  = {};  /* keyed by origin: WhiskyStats distillery prices */
+    var _liveHist = {};  /* keyed by "origin_m49": UN Comtrade bilateral route history */
+    var _drillM49 = null; /* M49 partner code for the currently drilled destination */
 
-      fetch('/.netlify/functions/scotch-exports')
-        .then(function(r) { return r.json(); })
-        .then(function(data) {
-          if (!data || !data.destinations || !data.destinations.length) return;
-          data._ts = Date.now();
-          liveExports = data;
-          try { localStorage.setItem('tbt_scotch_exports', JSON.stringify(data)); } catch(e) {}
-          /* Re-render if currently on Scotland market view */
-          if (current === 'scotland' && mode === 'market') buildUI();
-        })
-        .catch(function() { /* silently fall back to static data */ });
+    function _getDestM49(originKey, destCountry) {
+      var le = _liveExp[originKey];
+      if (!le || !le.destinations) return null;
+      for (var i = 0; i < le.destinations.length; i++) {
+        if (le.destinations[i].country === destCountry) return le.destinations[i].m49;
+      }
+      return null;
     }
 
-    fetchLiveExports();
+    function fetchRouteHistory(originKey, m49) {
+      if (!m49) return;
+      var histKey = originKey + '_' + m49;
+      if (_liveHist[histKey] && _liveHist[histKey].rows && _liveHist[histKey].rows.length) return;
+      var cacheKey = 'tbt_rh2_' + histKey;
+      var TTL = 86400000 * 7;
+      try {
+        var cached = JSON.parse(localStorage.getItem(cacheKey) || 'null');
+        if (cached && cached._ts && (Date.now() - cached._ts) < TTL && cached.rows && cached.rows.length) {
+          _liveHist[histKey] = cached;
+          buildUI();
+          return;
+        }
+      } catch(e) {}
+      fetch('/.netlify/functions/route-history?origin=' + originKey + '&dest=' + m49)
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (data && data.rows && data.rows.length) {
+            data._ts = Date.now();
+            _liveHist[histKey] = data;
+            try { localStorage.setItem(cacheKey, JSON.stringify(data)); } catch(e) {}
+            buildUI();
+          }
+        })
+        .catch(function() {});
+    }
+
+    function _getExportNodes(originKey) {
+      var le = _liveExp[originKey];
+      if (!le || !le.destinations || !le.destinations.length) return null;
+      return le.destinations.slice(0, 10).map(function(dest) {
+        var gbpM = dest.valueGBP ? Math.round(dest.valueGBP / 1000000) : null;
+        return {
+          country: dest.country,
+          pct:     dest.pct,
+          val:     gbpM ? (gbpM >= 1000 ? '£' + (gbpM/1000).toFixed(1) + 'bn' : '£' + gbpM + 'm') : '',
+          yoy:     dest.yoy != null ? dest.yoy : undefined,  /* undefined = hide YoY label */
+          flag:    '',
+          m49:     dest.m49,
+          _live:   true,
+        };
+      });
+    }
+
+    function _getMergedDistilleries(originKey) {
+      var base = OD[originKey].distilleries;
+      var lp   = _livePrc[originKey];
+      if (!lp || !lp.distilleries || !lp.distilleries.length) return base;
+      return base.map(function(d) {
+        var live = null;
+        for (var li = 0; li < lp.distilleries.length; li++) {
+          if (lp.distilleries[li].name === d.name) { live = lp.distilleries[li]; break; }
+        }
+        return (live && live.avg) ? { name: d.name, region: d.region, avg: live.avg, yoy: d.yoy, _live: true } : d;
+      });
+    }
+
+    /* ── Live data fetcher (exports + distillery prices) ── */
+    function fetchLiveData(originKey) {
+      var expKey = 'tbt_exp2_' + originKey;
+      var prcKey = 'tbt_prc2_' + originKey;
+      var EXP_TTL = 86400000 * 7;   /* 7 days (matches CDN cache) */
+      var PRC_TTL = 86400000 * 7;
+
+      try {
+        var ce = localStorage.getItem(expKey);
+        if (ce) { var c = JSON.parse(ce); if (c && c._ts && (Date.now()-c._ts)<EXP_TTL) _liveExp[originKey]=c; }
+        var cp = localStorage.getItem(prcKey);
+        if (cp) { var p = JSON.parse(cp); if (p && p._ts && (Date.now()-p._ts)<PRC_TTL) _livePrc[originKey]=p; }
+      } catch(e) {}
+
+      if (!_liveExp[originKey]) {
+        fetch('/.netlify/functions/scotch-exports?origin=' + originKey)
+          .then(function(r){return r.json();})
+          .then(function(data){
+            if (!data || !data.destinations || !data.destinations.length) return;
+            data._ts = Date.now();
+            _liveExp[originKey] = data;
+            try { localStorage.setItem(expKey, JSON.stringify(data)); } catch(e) {}
+            if (current === originKey) buildUI();
+          }).catch(function(){});
+      }
+
+      if (!_livePrc[originKey]) {
+        fetch('/.netlify/functions/distillery-prices?origin=' + originKey)
+          .then(function(r){return r.json();})
+          .then(function(data){
+            if (!data || !data.distilleries || !data.distilleries.length) return;
+            data._ts = Date.now();
+            _livePrc[originKey] = data;
+            try { localStorage.setItem(prcKey, JSON.stringify(data)); } catch(e) {}
+            if (current === originKey) buildUI();
+          }).catch(function(){});
+      }
+    }
+
+    /* Kick off Scotland immediately; others load on demand */
+    fetchLiveData('scotland');
 
     /* ── SVG helpers ── */
     function svgNode(s, x, y, w, h, name, sub1, sub2, stat, acol, bgcol, borderCol) {
@@ -4598,7 +5238,7 @@
       var nm = name.length > 17 ? name.slice(0,16) + '…' : name;
       s += '<text x="' + (x+8) + '" y="' + (y+14) + '" font-family="Consolas,monospace" font-size="9" fill="#ffffff" font-weight="700">' + nm + '</text>';
       if (sub1) s += '<text x="' + (x+8) + '" y="' + (y+25) + '" font-family="Consolas,monospace" font-size="7" fill="' + acol + '" letter-spacing="0.08em">' + sub1 + '</text>';
-      if (stat) s += '<text x="' + (x+8) + '" y="' + (y+38) + '" font-family="Consolas,monospace" font-size="7.5" fill="#888">' + stat + '</text>';
+      if (stat) s += '<text x="' + (x+8) + '" y="' + (y+38) + '" font-family="Consolas,monospace" font-size="7.5" fill="rgba(255,255,255,0.45)">' + stat + '</text>';
       if (sub2) s += '<text x="' + (x+8+52) + '" y="' + (y+38) + '" font-family="Consolas,monospace" font-size="7.5" fill="' + acol + '">' + sub2 + '</text>';
       return s;
     }
@@ -4611,7 +5251,7 @@
 
     function buildWebSVG(rightNodes, rightLabel, lineColor) {
       var d = OD[current];
-      var distils = d.distilleries;
+      var distils = _getMergedDistilleries(current);
       var W = 800, H = 430;
       var NW = 162, NH = 46, MW = 162, MH = 46, CW = 164, CH = 110;
       var centerX = (W - CW) / 2, centerY = (H - CH) / 2, cMidY = centerY + CH / 2;
@@ -4668,25 +5308,32 @@
         if (mode === 'supply') {
           stat2 = 'Vol: '; sub2a = pct+'%'; sub2b = '£'+(rn.avg||0)+' avg';
           s = svgNode(s, rightX, ny2, MW, MH, rn.name, rn.loc||'', sub2a, stat2, rc2, rb2, rc2);
-          s += '<text x="'+(rightX+8+52)+'" y="'+(ny2+38)+'" font-family="Consolas,monospace" font-size="7.5" fill="#888">  '+sub2b+'</text>';
+          s += '<text x="'+(rightX+8+52)+'" y="'+(ny2+38)+'" font-family="Consolas,monospace" font-size="7.5" fill="rgba(255,255,255,0.45)">  '+sub2b+'</text>';
         } else {
-          var yoy2 = rn.yoy||0; var yc2 = yoy2>=15?'#44cc64':yoy2>=5?'#2ea84a':'#888';
-          stat2 = rn.val; sub2a = (yoy2>=0?'+':'')+yoy2+'% YoY';
+          var yoy2 = rn.yoy; var hasYoy = yoy2 != null && yoy2 !== undefined;
+          var yc2 = hasYoy && yoy2>=15?'#44cc64':hasYoy && yoy2>=5?'#2ea84a':'rgba(255,255,255,0.45)';
+          stat2 = rn.val; sub2a = hasYoy ? ((yoy2>=0?'+':'')+yoy2+'% YoY') : '';
           var destKey = rn.country;
           var hasFlow = !!(FLOWS[current] && FLOWS[current][destKey]);
-          var borderStyle = hasFlow ? rc2 : '#1e3050';
-          s += '<rect x="'+rightX+'" y="'+ny2+'" width="'+MW+'" height="'+MH+'" fill="'+rb2+'" stroke="'+borderStyle+'" stroke-width="1" data-dest="'+destKey+'" style="cursor:'+(hasFlow?'pointer':'default')+'"/>';
+          var hasM49  = !!(rn._live && rn.m49);  /* live node with M49 — can fetch history */
+          var isDrill = hasFlow || hasM49;
+          var borderStyle = isDrill ? rc2 : '#1e3050';
+          s += '<rect x="'+rightX+'" y="'+ny2+'" width="'+MW+'" height="'+MH+'" fill="'+rb2+'" stroke="'+borderStyle+'" stroke-width="1" data-dest="'+destKey+'" data-m49="'+(rn.m49||'')+'" style="cursor:'+(isDrill?'pointer':'default')+'"/>';
           var nm2 = rn.country.length>17?rn.country.slice(0,16)+'…':rn.country;
           s += '<text x="'+(rightX+8)+'" y="'+(ny2+14)+'" font-family="Consolas,monospace" font-size="9" fill="#ffffff" font-weight="700" pointer-events="none">'+nm2+'</text>';
           s += '<text x="'+(rightX+8)+'" y="'+(ny2+25)+'" font-family="Consolas,monospace" font-size="7" fill="'+rc2+'" letter-spacing="0.08em" pointer-events="none">'+pct+'% of exports</text>';
-          s += '<text x="'+(rightX+8)+'" y="'+(ny2+38)+'" font-family="Consolas,monospace" font-size="7.5" fill="#888" pointer-events="none">'+stat2+'  </text>';
+          s += '<text x="'+(rightX+8)+'" y="'+(ny2+38)+'" font-family="Consolas,monospace" font-size="7.5" fill="rgba(255,255,255,0.45)" pointer-events="none">'+stat2+'  </text>';
           s += '<text x="'+(rightX+8+52)+'" y="'+(ny2+38)+'" font-family="Consolas,monospace" font-size="7.5" fill="'+yc2+'" pointer-events="none">'+sub2a+'</text>';
-          if (hasFlow) s += '<text x="'+(rightX+MW-6)+'" y="'+(ny2+NH/2+3)+'" font-family="Consolas,monospace" font-size="9" fill="#E97132" text-anchor="middle" pointer-events="none">›</text>';
+          if (isDrill) s += '<text x="'+(rightX+MW-6)+'" y="'+(ny2+NH/2+3)+'" font-family="Consolas,monospace" font-size="9" fill="#E97132" text-anchor="middle" pointer-events="none">›</text>';
         }
       }
-      s += '<text x="'+(NW/2)+'" y="'+(H-6)+'" font-family="Consolas,monospace" font-size="7" fill="#333" text-anchor="middle" letter-spacing="0.15em">DISTILLERIES</text>';
-      s += '<text x="'+(rightX+MW/2)+'" y="'+(H-6)+'" font-family="Consolas,monospace" font-size="7" fill="#333" text-anchor="middle" letter-spacing="0.15em">'+rightLabel.toUpperCase()+'</text>';
-      if (mode === 'exports') s += '<text x="'+(rightX+MW-4)+'" y="'+(H-6)+'" font-family="Consolas,monospace" font-size="6.5" fill="#333" text-anchor="end" letter-spacing="0.1em">› CLICK FOR DETAIL</text>';
+      var distSrc  = (_livePrc[current] && _livePrc[current].distilleries) ? 'WhiskyStats live' : 'est.';
+      var expSrc   = (_liveExp[current] && _liveExp[current].period) ? 'UN Comtrade ' + _liveExp[current].period : 'est.';
+      var leftSrc  = mode === 'supply' ? '' : ' · prices: ' + distSrc;
+      var rightSrc = mode === 'exports' ? ' · ' + expSrc : '';
+      s += '<text x="'+(NW/2)+'" y="'+(H-6)+'" font-family="Consolas,monospace" font-size="6.5" fill="rgba(255,255,255,0.2)" text-anchor="middle" letter-spacing="0.1em">DISTILLERIES'+leftSrc+'</text>';
+      s += '<text x="'+(rightX+MW/2)+'" y="'+(H-6)+'" font-family="Consolas,monospace" font-size="6.5" fill="rgba(255,255,255,0.2)" text-anchor="middle" letter-spacing="0.1em">'+rightLabel.toUpperCase()+rightSrc+'</text>';
+      if (mode === 'exports') s += '<text x="'+(rightX+MW-4)+'" y="'+(H-6)+'" font-family="Consolas,monospace" font-size="6.5" fill="rgba(233,113,50,0.4)" text-anchor="end" letter-spacing="0.1em">› CLICK FOR DETAIL</text>';
       s += '</svg>';
       return s;
     }
@@ -4713,7 +5360,7 @@
         s += '<line x1="'+PAD.l+'" y1="'+y+'" x2="'+(W-PAD.r)+'" y2="'+y+'" stroke="#1c1c1c" stroke-width="1"/>';
         var lv = maxV * f;
         var lbl = lv >= 1000 ? '£'+(lv/1000).toFixed(1)+'bn' : '£'+Math.round(lv)+'m';
-        s += '<text x="'+(PAD.l-4)+'" y="'+(y+3.5)+'" font-family="Consolas,monospace" font-size="9" fill="#3a3a3a" text-anchor="end">'+lbl+'</text>';
+        s += '<text x="'+(PAD.l-4)+'" y="'+(y+3.5)+'" font-family="Consolas,monospace" font-size="9" fill="rgba(255,255,255,0.3)" text-anchor="end">'+lbl+'</text>';
       });
 
       /* projection divider */
@@ -4721,7 +5368,7 @@
         var dx = PAD.l + hist.length * barGap;
         var projLbl = proj[0] && proj[0].yr ? proj[0].yr+' PROJ' : 'PROJECTED';
         s += '<line x1="'+dx+'" y1="'+PAD.t+'" x2="'+dx+'" y2="'+(PAD.t+cH)+'" stroke="#282828" stroke-width="1" stroke-dasharray="4,3"/>';
-        s += '<text x="'+(dx+4)+'" y="'+(PAD.t+10)+'" font-family="Consolas,monospace" font-size="8" fill="#333" letter-spacing="0.1em">'+projLbl+'</text>';
+        s += '<text x="'+(dx+4)+'" y="'+(PAD.t+10)+'" font-family="Consolas,monospace" font-size="8" fill="rgba(255,255,255,0.22)" letter-spacing="0.1em">'+projLbl+'</text>';
       }
 
       /* bars */
@@ -4737,8 +5384,8 @@
           s += '<rect x="'+bx+'" y="'+by+'" width="'+barW+'" height="'+bh+'" fill="#C05A18"/>';
           s += '<rect x="'+bx+'" y="'+by+'" width="'+barW+'" height="5" fill="#E97132"/>';
         }
-        s += '<text x="'+(bx+barW/2)+'" y="'+(by-5)+'" font-family="Consolas,monospace" font-size="9" fill="'+(isProj?'rgba(233,113,50,0.7)':'#b0b0b0')+'" text-anchor="middle">'+valStr+'</text>';
-        s += '<text x="'+(bx+barW/2)+'" y="'+(PAD.t+cH+16)+'" font-family="Consolas,monospace" font-size="9" fill="'+(isProj?'#505050':'#606060')+'" text-anchor="middle">'+pt.yr+'</text>';
+        s += '<text x="'+(bx+barW/2)+'" y="'+(by-5)+'" font-family="Consolas,monospace" font-size="9" fill="'+(isProj?'rgba(233,113,50,0.7)':'rgba(255,255,255,0.7)')+'" text-anchor="middle">'+valStr+'</text>';
+        s += '<text x="'+(bx+barW/2)+'" y="'+(PAD.t+cH+16)+'" font-family="Consolas,monospace" font-size="9" fill="'+(isProj?'rgba(255,255,255,0.22)':'rgba(255,255,255,0.4)')+'" text-anchor="middle">'+pt.yr+'</text>';
       });
 
       s += '</svg>';
@@ -4751,47 +5398,89 @@
       var exp = null;
       d.exports.forEach(function(e){ if (e.country === drillKey) exp = e; });
 
-      var F = 'font-family:Consolas,monospace;';
-
-      if (!flow) {
-        return '<div style="display:flex;flex-direction:column;height:100%;">' +
-          '<div style="padding:8px 12px;border-bottom:1px solid #181818;flex-shrink:0;">' +
-          '<button class="oweb-back" style="'+F+'font-size:9px;letter-spacing:.14em;padding:4px 12px;border:1px solid #2a2a2a;background:transparent;color:#888;cursor:pointer;">← BACK</button></div>' +
-          '<div style="padding:24px;'+F+'font-size:10px;color:#555;letter-spacing:.1em;">DETAILED FLOW DATA NOT YET AVAILABLE FOR THIS MARKET</div></div>';
+      /* Try live export nodes too — pct/val may be more current */
+      if (!exp) {
+        var liveNodes = _getExportNodes(current);
+        if (liveNodes) liveNodes.forEach(function(n){ if (n.country === drillKey) exp = n; });
       }
 
-      var tariffCol = flow.tariffCol || '#44cc64';
-      var cagr3Col = (flow.cagr3||'').charAt(0) === '-' ? '#e05050' : '#44cc64';
-      var cagr5Col = (flow.cagr5||'').charAt(0) === '-' ? '#e05050' : '#44cc64';
-      var last = flow.hist[flow.hist.length-1];
-      var peak = flow.hist.reduce(function(m,p){return p.v>m.v?p:m;},flow.hist[0]);
-      var lastVal = last.v >= 1000 ? '£'+(last.v/1000).toFixed(2)+'bn' : '£'+last.v+'m';
+      var F = 'font-family:Consolas,monospace;';
+
+      /* Live bilateral route history */
+      var histKey = current + '_' + _drillM49;
+      var liveHistData = (_drillM49 && _liveHist[histKey] && _liveHist[histKey].rows && _liveHist[histKey].rows.length >= 2)
+        ? _liveHist[histKey] : null;
+
+      if (!flow && !liveHistData) {
+        return '<div style="display:flex;flex-direction:column;height:100%;">' +
+          '<div style="padding:8px 12px;border-bottom:1px solid #181818;flex-shrink:0;">' +
+          '<button class="oweb-back" style="'+F+'font-size:9px;letter-spacing:.14em;padding:4px 12px;border:1px solid #2a2a2a;background:transparent;color:rgba(255,255,255,0.5);cursor:pointer;">← BACK</button></div>' +
+          '<div style="padding:24px;'+F+'font-size:10px;color:#ffffff;letter-spacing:.1em;">LOADING ROUTE DATA…</div></div>';
+      }
+
+      /* ── Compute chart bars and CAGR from live data or FLOWS fallback ── */
+      var isLiveChart = !!(liveHistData);
+      var histBars, projBars;
+      if (isLiveChart) {
+        histBars = liveHistData.rows.map(function(r) {
+          return { yr: r.year, v: Math.max(1, Math.round(r.valueGBP / 1000000)) };
+        });
+        projBars = [];
+      } else {
+        histBars = flow.hist;
+        projBars = flow.proj || [];
+      }
+
+      function _cagr(rows, n) {
+        if (!rows || rows.length < 2) return null;
+        var iEnd = rows.length - 1, iStart = Math.max(0, iEnd - n);
+        if (iEnd === iStart) return null;
+        var vEnd = rows[iEnd].valueGBP, vStart = rows[iStart].valueGBP;
+        if (!vEnd || !vStart) return null;
+        var yrs = rows[iEnd].year - rows[iStart].year;
+        if (!yrs) return null;
+        var rate = Math.pow(vEnd / vStart, 1 / yrs) - 1;
+        return (rate >= 0 ? '+' : '') + (rate * 100).toFixed(1) + '%';
+      }
+      var cagr3 = isLiveChart ? (_cagr(liveHistData.rows, 3) || (flow ? flow.cagr3 : '—')) : (flow ? flow.cagr3 : '—');
+      var cagr5 = isLiveChart ? (_cagr(liveHistData.rows, 5) || (flow ? flow.cagr5 : '—')) : (flow ? flow.cagr5 : '—');
+
+      var tariffCol = flow ? (flow.tariffCol || '#44cc64') : '#444';
+      var cagr3Col = (cagr3||'').charAt(0) === '-' ? '#e05050' : '#44cc64';
+      var cagr5Col = (cagr5||'').charAt(0) === '-' ? '#e05050' : '#44cc64';
+      var lastBar = histBars[histBars.length - 1] || {};
+      var peak = histBars.reduce(function(m,p){return p.v>m.v?p:m;}, histBars[0] || {v:0,yr:'—'});
+      var lastVal = (lastBar.v||0) >= 1000 ? '£'+((lastBar.v||0)/1000).toFixed(2)+'bn' : '£'+(lastBar.v||0)+'m';
+      var lastYrLbl = isLiveChart ? String(lastBar.yr) : (flow ? String(flow.hist[flow.hist.length-1].yr) : '—');
+      var chartLbl = isLiveChart
+        ? 'UN COMTRADE LIVE · HS 220830 · ' + histBars[0].yr + '–' + lastBar.yr
+        : 'IMPORT VALUE — 2019–2025 ACTUAL · 2026 PROJECTED';
 
       var html = '<div style="display:flex;flex-direction:column;height:100%;overflow:hidden;">';
 
       /* ── Row 1: Back + destination header ── */
       html += '<div style="display:flex;align-items:center;gap:10px;padding:7px 12px;border-bottom:1px solid #181818;flex-shrink:0;background:#0d0d0d;">' +
-        '<button class="oweb-back" style="'+F+'font-size:9px;letter-spacing:.14em;padding:4px 12px;border:1px solid #2a2a2a;background:transparent;color:#888;cursor:pointer;white-space:nowrap;flex-shrink:0;">← BACK</button>' +
+        '<button class="oweb-back" style="'+F+'font-size:9px;letter-spacing:.14em;padding:4px 12px;border:1px solid #2a2a2a;background:transparent;color:rgba(255,255,255,0.5);cursor:pointer;white-space:nowrap;flex-shrink:0;">← BACK</button>' +
         '<span style="'+F+'font-size:11px;color:#E97132;font-weight:700;letter-spacing:.14em;">'+OD[current].label+'</span>' +
         '<span style="'+F+'font-size:11px;color:#3a3a3a;margin:0 2px;">→</span>' +
         '<span style="'+F+'font-size:11px;color:#ffffff;font-weight:700;letter-spacing:.14em;">'+drillKey.toUpperCase()+'</span>' +
-        (exp?'<span style="'+F+'font-size:9px;color:#555;margin-left:auto;white-space:nowrap;">'+exp.pct+'% OF EXPORTS · '+exp.val+'</span>':'') +
+        (exp?'<span style="'+F+'font-size:9px;color:rgba(255,255,255,0.5);margin-left:auto;white-space:nowrap;">'+exp.pct+'% OF EXPORTS · '+exp.val+'</span>':'') +
         '</div>';
 
       /* ── Row 2: Chart ── */
       html += '<div style="padding:10px 14px 6px;border-bottom:1px solid #181818;flex-shrink:0;">' +
-        '<div style="'+F+'font-size:8px;letter-spacing:.2em;color:#444;margin-bottom:8px;">IMPORT VALUE — 2019–2025 ACTUAL · 2026 PROJECTED</div>' +
-        '<div style="height:130px;">'+buildBarChartSVG(flow.hist, flow.proj)+'</div>' +
+        '<div style="'+F+'font-size:8px;letter-spacing:.2em;color:'+(isLiveChart?'rgba(233,113,50,0.6)':'#444')+';margin-bottom:8px;">'+chartLbl+'</div>' +
+        '<div style="height:130px;">'+buildBarChartSVG(histBars, projBars)+'</div>' +
         '</div>';
 
       /* ── Row 3: Stat tiles ── */
       html += '<div style="display:flex;border-bottom:1px solid #181818;flex-shrink:0;">';
       [
-        {lbl:'2024 VALUE', val:lastVal,          col:'#E97132'},
-        {lbl:'3-YR CAGR',  val:flow.cagr3,       col:cagr3Col},
-        {lbl:'5-YR CAGR',  val:flow.cagr5,       col:cagr5Col},
-        {lbl:'PEAK YEAR',  val:String(peak.yr),   col:'#4898d8'},
-        {lbl:'TARIFF',     val:flow.tariffStatus, col:tariffCol},
+        {lbl:lastYrLbl+' VALUE', val:lastVal,                     col:'#E97132'},
+        {lbl:'3-YR CAGR',        val:cagr3,                       col:cagr3Col},
+        {lbl:'5-YR CAGR',        val:cagr5,                       col:cagr5Col},
+        {lbl:'PEAK YEAR',        val:String(peak.yr||'—'),         col:'#4898d8'},
+        {lbl:'TARIFF',           val:flow?(flow.tariffStatus||'—'):'—', col:tariffCol},
       ].forEach(function(t) {
         html += '<div style="flex:1;padding:10px 12px;border-right:1px solid #181818;min-width:0;">' +
           '<div style="'+F+'font-size:7.5px;letter-spacing:.16em;color:#444;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+t.lbl+'</div>' +
@@ -4805,38 +5494,58 @@
 
       /* Left: categories + tariff */
       html += '<div style="width:38%;border-right:1px solid #181818;display:flex;flex-direction:column;overflow-y:auto;">';
-      html += '<div style="padding:12px 14px;border-bottom:1px solid #181818;">' +
-        '<div style="'+F+'font-size:8px;letter-spacing:.18em;color:#444;margin-bottom:12px;">CATEGORY SPLIT</div>';
-      flow.cats.forEach(function(c) {
-        html += '<div style="margin-bottom:10px;">' +
-          '<div style="display:flex;justify-content:space-between;margin-bottom:4px;">' +
-          '<span style="'+F+'font-size:10px;color:#c0c0c0;">'+c.n+'</span>' +
-          '<span style="'+F+'font-size:10px;color:#E97132;font-weight:700;">'+c.p+'%</span>' +
-          '</div>' +
-          '<div style="height:3px;background:#1a1a1a;border-radius:2px;">' +
-          '<div style="height:3px;background:#E97132;width:'+c.p+'%;border-radius:2px;"></div>' +
+      if (flow && flow.cats && flow.cats.length) {
+        html += '<div style="padding:12px 14px;border-bottom:1px solid #181818;">' +
+          '<div style="'+F+'font-size:8px;letter-spacing:.18em;color:#444;margin-bottom:12px;">CATEGORY SPLIT</div>';
+        flow.cats.forEach(function(c) {
+          html += '<div style="margin-bottom:10px;">' +
+            '<div style="display:flex;justify-content:space-between;margin-bottom:4px;">' +
+            '<span style="'+F+'font-size:10px;color:#ffffff;">'+c.n+'</span>' +
+            '<span style="'+F+'font-size:10px;color:#E97132;font-weight:700;">'+c.p+'%</span>' +
+            '</div>' +
+            '<div style="height:3px;background:#1a1a1a;border-radius:2px;">' +
+            '<div style="height:3px;background:#E97132;width:'+c.p+'%;border-radius:2px;"></div>' +
+            '</div></div>';
+        });
+        html += '</div>';
+      }
+      if (flow && flow.tariffStatus) {
+        html += '<div style="padding:12px 14px;">' +
+          '<div style="'+F+'font-size:8px;letter-spacing:.18em;color:#444;margin-bottom:8px;">TARIFF STATUS</div>' +
+          '<div style="border-left:3px solid '+tariffCol+';padding:8px 12px;background:rgba(0,0,0,0.35);">' +
+          '<div style="'+F+'font-size:12px;color:'+tariffCol+';font-weight:700;margin-bottom:6px;">'+flow.tariffStatus+'</div>' +
+          '<div style="'+F+'font-size:9.5px;color:#ffffff;line-height:1.65;">'+flow.tariff+'</div>' +
           '</div></div>';
-      });
-      html += '</div>';
-      html += '<div style="padding:12px 14px;">' +
-        '<div style="'+F+'font-size:8px;letter-spacing:.18em;color:#444;margin-bottom:8px;">TARIFF STATUS</div>' +
-        '<div style="border-left:3px solid '+tariffCol+';padding:8px 12px;background:rgba(0,0,0,0.35);">' +
-        '<div style="'+F+'font-size:12px;color:'+tariffCol+';font-weight:700;margin-bottom:6px;">'+flow.tariffStatus+'</div>' +
-        '<div style="'+F+'font-size:9.5px;color:#888;line-height:1.65;">'+flow.tariff+'</div>' +
-        '</div></div>';
+      } else if (isLiveChart) {
+        html += '<div style="padding:12px 14px;">' +
+          '<div style="'+F+'font-size:8px;letter-spacing:.18em;color:#444;margin-bottom:8px;">DATA SOURCE</div>' +
+          '<div style="'+F+'font-size:9px;color:rgba(255,255,255,0.55);line-height:1.7;">UN Comtrade<br>HS 220830 — Whisky<br>' + liveHistData.source + '<br>Updated ' + (liveHistData.updatedAt || '') + '</div>' +
+          '</div>';
+      }
       html += '</div>'; /* end left */
 
       /* Right: note + drivers */
       html += '<div style="flex:1;overflow-y:auto;padding:12px 14px;">';
-      html += '<div style="'+F+'font-size:8px;letter-spacing:.18em;color:#444;margin-bottom:8px;">MARKET NOTE</div>' +
-        '<div style="'+F+'font-size:10.5px;color:#a8a8a8;line-height:1.75;margin-bottom:18px;">'+flow.note+'</div>';
-      html += '<div style="'+F+'font-size:8px;letter-spacing:.18em;color:#444;margin-bottom:10px;">GROWTH DRIVERS</div>';
-      flow.drivers.forEach(function(dr) {
-        html += '<div style="display:flex;gap:8px;margin-bottom:10px;align-items:flex-start;">' +
-          '<span style="'+F+'font-size:10px;color:#E97132;flex-shrink:0;margin-top:2px;">▪</span>' +
-          '<span style="'+F+'font-size:10.5px;color:#a8a8a8;line-height:1.6;">'+dr+'</span>' +
+      if (flow && flow.note) {
+        html += '<div style="'+F+'font-size:8px;letter-spacing:.18em;color:#444;margin-bottom:8px;">MARKET NOTE</div>' +
+          '<div style="'+F+'font-size:10.5px;color:#ffffff;line-height:1.75;margin-bottom:18px;">'+flow.note+'</div>';
+      }
+      if (flow && flow.drivers && flow.drivers.length) {
+        html += '<div style="'+F+'font-size:8px;letter-spacing:.18em;color:#444;margin-bottom:10px;">GROWTH DRIVERS</div>';
+        flow.drivers.forEach(function(dr) {
+          html += '<div style="display:flex;gap:8px;margin-bottom:10px;align-items:flex-start;">' +
+            '<span style="'+F+'font-size:10px;color:#E97132;flex-shrink:0;margin-top:2px;">▪</span>' +
+            '<span style="'+F+'font-size:10.5px;color:#ffffff;line-height:1.6;">'+dr+'</span>' +
+            '</div>';
+        });
+      }
+      if (isLiveChart && (!flow || !flow.note)) {
+        html += '<div style="'+F+'font-size:8px;letter-spacing:.18em;color:#444;margin-bottom:8px;">LIVE COMTRADE DATA</div>' +
+          '<div style="'+F+'font-size:10px;color:rgba(255,255,255,0.55);line-height:1.8;">' +
+          'Annual export values from UN Comtrade (HS 220830 — Whisky). Figures are FOB USD converted at annual GBP/USD averages. ' +
+          'CAGR computed from ' + histBars[0].yr + '–' + lastBar.yr + ' outturn.' +
           '</div>';
-      });
+      }
       html += '</div>'; /* end right */
 
       html += '</div>'; /* end row 4 */
@@ -4944,15 +5653,15 @@
       });
       radarLeg += '</div>';
 
-      /* ── Donut chart ─────────────────────────────────────────── */
-      /* Use live UN Comtrade data for Scotland when available */
+      /* ── Donut chart — use live UN Comtrade data when available ── */
       var liveLabel = '';
       var exps = d.exports;
-      if (current === 'scotland' && liveExports && liveExports.destinations && liveExports.destinations.length) {
-        exps = liveExports.destinations.slice(0, 10).map(function(dest) {
+      var _le = _liveExp[current];
+      if (_le && _le.destinations && _le.destinations.length) {
+        exps = _le.destinations.slice(0, 10).map(function(dest) {
           return { country: dest.country, pct: dest.pct, yoy: dest.yoy || 0 };
         });
-        liveLabel = ' · LIVE ' + liveExports.period + ' DATA';
+        liveLabel = ' · LIVE ' + _le.period + ' DATA';
       }
       var totalPct = 0;
       for (var ei = 0; ei < exps.length; ei++) totalPct += (exps[ei].pct || 0);
@@ -4985,9 +5694,9 @@
       dnutSVG += '</svg>';
 
       /* Donut explanation strip — mirrors radarExpl */
-      var liveSource = (liveExports && current === 'scotland')
+      var liveSource = _le
         ? '<span style="color:#44cc64;"> · UN Comtrade HS 220830'+liveLabel+'</span>'
-        : '';
+        : '<span style="color:rgba(255,255,255,0.3);"> · loading live data…</span>';
       var donutExpl = '<div style="padding:6px 10px 4px;border-top:1px solid #181818;border-bottom:1px solid #181818;background:#0b0b0b;flex-shrink:0;">' +
         '<div style="'+F+'font-size:7.5px;color:#ffffff;letter-spacing:.04em;line-height:1.7;">' +
         '<span style="color:'+curCol+';font-weight:700;">DESTINATION MIX</span> — Slice size = % of total exports. ' +
@@ -5018,16 +5727,17 @@
       }
       dnutLeg += '</div>';
 
-      /* ── Stat strip — patch with live data for Scotland ─────── */
+      /* ── Stat strip — patch with live UN Comtrade totals when available ── */
       var mLive = m;
-      if (current === 'scotland' && liveExports && liveExports.totalGBP) {
-        var gbpBn = (liveExports.totalGBP / 1000000000).toFixed(1);
-        var yoyStr = liveExports.totalYoy ? (liveExports.totalYoy >= 0 ? '+' : '') + liveExports.totalYoy + '%' : '';
-        mLive = JSON.parse(JSON.stringify(m));  /* shallow clone */
+      if (_le && _le.totalGBP) {
+        var _gbp = _le.totalGBP;
+        var _gbpStr = _gbp >= 1000000000 ? '£' + (_gbp/1000000000).toFixed(1) + 'bn' : '£' + Math.round(_gbp/1000000) + 'm';
+        var _yoyStr = _le.totalYoy ? (_le.totalYoy >= 0 ? '+' : '') + _le.totalYoy + '%' : '';
+        mLive = JSON.parse(JSON.stringify(m));
         mLive.exportVal = {
           lbl: 'TOTAL EXPORTS',
-          val: '£' + gbpBn + 'bn',
-          sub: 'UN Comtrade ' + liveExports.period + (yoyStr ? ' · ' + yoyStr + ' YoY' : ''),
+          val: _gbpStr,
+          sub: 'UN Comtrade ' + _le.period + (_yoyStr ? ' · ' + _yoyStr + ' YoY' : ''),
         };
       }
       var statKeys = Object.keys(mLive);
@@ -5102,9 +5812,11 @@
       if (mode === 'exports' && drillKey) {
         content = '<div style="flex:1;overflow:auto;">'+buildDrillDown()+'</div>';
       } else if (mode === 'supply') {
-        content = '<div style="flex:1;overflow:auto;padding:2px 4px 4px;">'+buildWebSVG(d.markets, 'AUCTION MARKETS', 'rgba(68,144,220,0.3)')+'</div>';
+        var supplyNote = '<div style="font-family:Consolas,monospace;font-size:7px;color:rgba(255,255,255,0.28);padding:4px 10px;text-align:right;letter-spacing:.06em;">Auction market share — industry estimates · No public API available</div>';
+        content = '<div style="flex:1;overflow:auto;padding:2px 4px 4px;display:flex;flex-direction:column;">'+buildWebSVG(d.markets, 'AUCTION MARKETS', 'rgba(68,144,220,0.3)')+supplyNote+'</div>';
       } else if (mode === 'exports') {
-        content = '<div style="flex:1;overflow:auto;padding:2px 4px 4px;">'+buildWebSVG(d.exports, 'EXPORT MARKETS', 'rgba(160,100,220,0.3)')+'</div>';
+        var liveNodes = _getExportNodes(current) || d.exports;
+        content = '<div style="flex:1;overflow:auto;padding:2px 4px 4px;">'+buildWebSVG(liveNodes, 'EXPORT MARKETS', 'rgba(160,100,220,0.3)')+'</div>';
       } else {
         content = '<div style="flex:1;overflow:auto;">'+buildMarketData()+'</div>';
       }
@@ -5120,12 +5832,12 @@
 
       /* Country + mode selector listeners */
       body.querySelectorAll('.oweb-c').forEach(function(btn) {
-        btn.addEventListener('click', function() { current = btn.dataset.k; drillKey = null; buildUI(); });
+        btn.addEventListener('click', function() { current = btn.dataset.k; drillKey = null; _drillM49 = null; fetchLiveData(current); buildUI(); });
         btn.addEventListener('mouseenter', function() { if (btn.dataset.k!==current){btn.style.color='#ffffff';btn.style.borderColor='#3a3a3a';} });
         btn.addEventListener('mouseleave', function() { if (btn.dataset.k!==current){btn.style.color='#ffffff';btn.style.borderColor='#222';} });
       });
       body.querySelectorAll('.oweb-m').forEach(function(btn) {
-        btn.addEventListener('click', function() { mode = btn.dataset.m; drillKey = null; buildUI(); });
+        btn.addEventListener('click', function() { mode = btn.dataset.m; drillKey = null; _drillM49 = null; buildUI(); });
         btn.addEventListener('mouseenter', function() { if (btn.dataset.m!==mode) btn.style.color='#ffffff'; });
         btn.addEventListener('mouseleave', function() { if (btn.dataset.m!==mode) btn.style.color='#ffffff'; });
       });
@@ -5134,9 +5846,15 @@
       if (mode === 'exports' && !drillKey) {
         body.querySelectorAll('rect[data-dest]').forEach(function(r) {
           var dest = r.getAttribute('data-dest');
+          var m49attr = parseInt(r.getAttribute('data-m49') || '0') || null;
           var hasFlow = !!(FLOWS[current] && FLOWS[current][dest]);
-          if (!hasFlow) return;
-          r.addEventListener('click', function() { drillKey = dest; buildUI(); });
+          if (!hasFlow && !m49attr) return;
+          r.addEventListener('click', function() {
+            drillKey = dest;
+            _drillM49 = m49attr || _getDestM49(current, dest);
+            fetchRouteHistory(current, _drillM49);
+            buildUI();
+          });
           r.addEventListener('mouseenter', function() { r.setAttribute('fill', 'rgba(30,55,100,0.95)'); });
           r.addEventListener('mouseleave', function() { r.setAttribute('fill', r.getAttribute('data-origfill') || 'rgba(14,28,60,0.9)'); });
         });
@@ -5144,7 +5862,7 @@
 
       /* Back button */
       var backBtn = body.querySelector('.oweb-back');
-      if (backBtn) backBtn.addEventListener('click', function() { drillKey = null; buildUI(); });
+      if (backBtn) backBtn.addEventListener('click', function() { drillKey = null; _drillM49 = null; buildUI(); });
 
       /* ── Market data interactivity ── */
       if (mode === 'market') {
