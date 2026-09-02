@@ -119,32 +119,26 @@ exports.handler = async function(event) {
     return { statusCode: 400, headers: hdrs, body: JSON.stringify({ error: 'dest (M49 code) required' }) };
   }
 
-  /* Parse year range */
   var now      = new Date();
   var lastYear = now.getFullYear() - 1;
-  var yearRange = (p.years || ('2019-' + lastYear)).split('-');
-  var fromYear  = parseInt(yearRange[0]) || 2019;
-  var toYear    = parseInt(yearRange[1]) || lastYear;
-  if (fromYear < 2000 || toYear > now.getFullYear() || fromYear > toYear) {
-    return { statusCode: 400, headers: hdrs, body: JSON.stringify({ error: 'invalid year range' }) };
-  }
 
-  var years = [];
-  for (var y = fromYear; y <= toYear; y++) years.push(y);
-
-  /* Fetch all years in parallel */
-  var fetched = await Promise.allSettled(
-    years.map(function(yr) {
-      return fetchUrl(comtradeUrl(yr, reporterCode, destCode));
-    })
-  );
+  /* Fetch years SEQUENTIALLY to avoid UN Comtrade rate limiting.
+     Parallel requests from one server IP get throttled — sequential avoids this.
+     We fetch newest-first so recent data always wins if we run short on time. */
+  var YEARS = [];
+  for (var y = lastYear; y >= 2019; y--) YEARS.push(y);
 
   var rows = [];
-  fetched.forEach(function(result, i) {
-    if (result.status !== 'fulfilled') return;
-    var row = extractRow(result.value, years[i]);
-    if (row) rows.push(row);
-  });
+  for (var yi = 0; yi < YEARS.length; yi++) {
+    var yr = YEARS[yi];
+    try {
+      var data = await fetchUrl(comtradeUrl(yr, reporterCode, destCode));
+      var row  = extractRow(data, yr);
+      if (row) rows.push(row);
+    } catch(e) { /* skip failed years */ }
+    /* Small pause between requests to stay under rate limit */
+    if (yi < YEARS.length - 1) await new Promise(function(r){ setTimeout(r, 300); });
+  }
 
   if (!rows.length) {
     return { statusCode: 502, headers: hdrs, body: JSON.stringify({ error: 'no data for this route' }) };
