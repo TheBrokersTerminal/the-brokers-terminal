@@ -5427,34 +5427,8 @@
           '<div style="padding:24px;'+F+'font-size:10px;color:#ffffff;letter-spacing:.1em;">DETAILED FLOW DATA NOT YET AVAILABLE FOR THIS MARKET</div></div>';
       }
 
-      /* Pull live bilateral value from already-loaded scotch-exports data.
-         The export destinations include valueGBP for the current period — use
-         this to replace the most recent static bar with a verified actual. */
-      var liveDestNode = null;
-      var le = _liveExp[current];
-      if (le && le.destinations) {
-        le.destinations.forEach(function(d) {
-          if (_drillM49 ? d.m49 === _drillM49 : d.country === drillKey) liveDestNode = d;
-        });
-      }
-      var liveYr    = le ? parseInt(le.period) : null;
-      var liveGBPm  = liveDestNode ? Math.round(liveDestNode.valueGBP / 1000000) : null;
-
-      /* Build chart bars — use static FLOWS as base, patch most recent bar if live data */
-      var histBars = flow.hist.map(function(b) { return { yr: b.yr, v: b.v }; });
+      var histBars = flow.hist;
       var projBars = flow.proj || [];
-      var hasLivePatch = !!(liveYr && liveGBPm);
-      if (hasLivePatch) {
-        var lastStatic = histBars[histBars.length - 1];
-        if (liveYr > lastStatic.yr) {
-          /* Newer year — append as an extra actual bar, remove projection */
-          histBars.push({ yr: liveYr, v: liveGBPm, _live: true });
-          projBars = [];
-        } else if (liveYr === lastStatic.yr) {
-          /* Same year — replace estimate with real figure */
-          histBars[histBars.length - 1] = { yr: liveYr, v: liveGBPm, _live: true };
-        }
-      }
 
       var tariffCol = flow.tariffCol || '#44cc64';
       var cagr3 = flow.cagr3; var cagr5 = flow.cagr5;
@@ -5463,10 +5437,8 @@
       var peak = histBars.reduce(function(m,p){return p.v>m.v?p:m;}, histBars[0]);
       var lastBar = histBars[histBars.length - 1] || {};
       var lastVal = (lastBar.v||0) >= 1000 ? '£'+((lastBar.v||0)/1000).toFixed(2)+'bn' : '£'+(lastBar.v||0)+'m';
-      var lastYrLbl = String(lastBar.yr || '—') + (hasLivePatch && lastBar._live ? ' LIVE' : '');
-      var chartLbl = hasLivePatch
-        ? 'INDUSTRY ESTIMATES · UN COMTRADE LIVE — ' + liveYr + ' ACTUAL'
-        : 'IMPORT VALUE — 2019–2025 ACTUAL · 2026 PROJECTED';
+      var lastYrLbl = String(lastBar.yr || '—');
+      var chartLbl = 'IMPORT VALUE — SWA DATA 2019–2025 · 2026 PROJECTED';
 
       var html = '<div style="display:flex;flex-direction:column;height:100%;overflow:hidden;">';
 
@@ -5481,7 +5453,7 @@
 
       /* ── Row 2: Chart ── */
       html += '<div style="padding:10px 14px 6px;border-bottom:1px solid #181818;flex-shrink:0;">' +
-        '<div style="'+F+'font-size:8px;letter-spacing:.2em;color:'+(hasLivePatch?'rgba(233,113,50,0.6)':'#444')+';margin-bottom:8px;">'+chartLbl+'</div>' +
+        '<div style="'+F+'font-size:8px;letter-spacing:.2em;color:#444;margin-bottom:8px;">'+chartLbl+'</div>' +
         '<div style="height:130px;">'+buildBarChartSVG(histBars, projBars)+'</div>' +
         '</div>';
 
@@ -5528,11 +5500,6 @@
           '<div style="'+F+'font-size:12px;color:'+tariffCol+';font-weight:700;margin-bottom:6px;">'+flow.tariffStatus+'</div>' +
           '<div style="'+F+'font-size:9.5px;color:#ffffff;line-height:1.65;">'+flow.tariff+'</div>' +
           '</div></div>';
-      } else if (hasLivePatch) {
-        html += '<div style="padding:12px 14px;">' +
-          '<div style="'+F+'font-size:8px;letter-spacing:.18em;color:#444;margin-bottom:8px;">DATA SOURCE</div>' +
-          '<div style="'+F+'font-size:9px;color:rgba(255,255,255,0.55);line-height:1.7;">UN Comtrade · HS 220830<br>Bilateral export value<br>Period: ' + liveYr + '</div>' +
-          '</div>';
       }
       html += '</div>'; /* end left */
 
@@ -5550,12 +5517,6 @@
             '<span style="'+F+'font-size:10.5px;color:#ffffff;line-height:1.6;">'+dr+'</span>' +
             '</div>';
         });
-      }
-      if (hasLivePatch && (!flow || !flow.note)) {
-        html += '<div style="'+F+'font-size:8px;letter-spacing:.18em;color:#444;margin-bottom:8px;">LIVE COMTRADE DATA</div>' +
-          '<div style="'+F+'font-size:10px;color:rgba(255,255,255,0.55);line-height:1.8;">' +
-          'UN Comtrade verified export value for ' + liveYr + ' (HS 220830 — Whisky). Historical bars are industry estimates.' +
-          '</div>';
       }
       html += '</div>'; /* end right */
 
