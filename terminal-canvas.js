@@ -5124,13 +5124,25 @@
     var _liveHist = {};  /* keyed by "origin_m49": UN Comtrade bilateral route history */
     var _drillM49 = null; /* M49 partner code for the currently drilled destination */
 
+    /* Static M49 fallback for common FLOWS destinations — used when live export
+       data hasn't loaded yet so the drilldown can still fetch route history. */
+    var DEST_M49_FALLBACK = {
+      'USA': 842, 'France': 250, 'Germany': 276, 'India': 356,
+      'Singapore': 702, 'Japan': 392, 'Taiwan': 158, 'Australia': 36,
+      'S. Korea': 410, 'Canada': 124, 'Belgium': 56, 'Netherlands': 528,
+      'Switzerland': 756, 'Spain': 724, 'Italy': 380, 'Poland': 616,
+      'Thailand': 764, 'UAE': 784, 'China': 156, 'Hong Kong': 344,
+      'UK': 826, 'EU': null,  /* EU has no single M49 */
+    };
+
     function _getDestM49(originKey, destCountry) {
       var le = _liveExp[originKey];
-      if (!le || !le.destinations) return null;
-      for (var i = 0; i < le.destinations.length; i++) {
-        if (le.destinations[i].country === destCountry) return le.destinations[i].m49;
+      if (le && le.destinations) {
+        for (var i = 0; i < le.destinations.length; i++) {
+          if (le.destinations[i].country === destCountry) return le.destinations[i].m49;
+        }
       }
-      return null;
+      return DEST_M49_FALLBACK[destCountry] || null;
     }
 
     function fetchRouteHistory(originKey, m49) {
