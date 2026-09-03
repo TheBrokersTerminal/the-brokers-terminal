@@ -5311,13 +5311,24 @@
     function _getExportNodes(originKey) {
       var le = _liveExp[originKey];
       if (!le || !le.destinations || !le.destinations.length) return null;
+      var flowData = FLOWS[originKey] || {};
       return le.destinations.slice(0, 10).map(function(dest) {
-        var gbpM = dest.valueGBP ? Math.round(dest.valueGBP / 1000000) : null;
+        /* Prefer SWA/official static FLOWS value over UN Comtrade absolute.
+           UN Comtrade reporter 826 (UK) inflates Scotland figures ~2x by
+           including non-Scotch re-exports. FLOWS hist uses verified SWA data. */
+        var flow = flowData[dest.country];
+        var gbpM;
+        if (flow && flow.hist && flow.hist.length) {
+          var lastBar = flow.hist[flow.hist.length - 1];
+          gbpM = lastBar.v;  /* already in £m, SWA-verified */
+        } else {
+          gbpM = dest.valueGBP ? Math.round(dest.valueGBP / 1000000) : null;
+        }
         return {
           country: dest.country,
           pct:     dest.pct,
-          val:     gbpM ? (gbpM >= 1000 ? '£' + (gbpM/1000).toFixed(1) + 'bn' : '£' + gbpM + 'm') : '',
-          yoy:     dest.yoy != null ? dest.yoy : undefined,  /* undefined = hide YoY label */
+          val:     gbpM ? (gbpM >= 1000 ? '£' + (gbpM/1000).toFixed(2) + 'bn' : '£' + gbpM + 'm') : '',
+          yoy:     dest.yoy != null ? dest.yoy : undefined,
           flag:    '',
           m49:     dest.m49,
           _live:   true,
@@ -5834,9 +5845,20 @@
       }
       dnutLeg += '</div>';
 
-      /* ── Stat strip — patch with live UN Comtrade totals when available ── */
+      /* ── Stat strip — use SWA/official verified totals where available ── */
+      /* UN Comtrade reporter 826 (UK) overstates Scotland figures; prefer SWA. */
+      var _VERIFIED_TOTALS = {
+        scotland: { val:'£5.3bn', sub:'SWA official 2025 · -1.9% YoY' },
+        japan:    { val:'£253m',  sub:'Japan MoF customs 2024 · -12.8% YoY' },
+        usa:      { val:'£1.03bn',sub:'DISCUS official 2024 · -5.4% YoY' },
+        ireland:  { val:'~£855m', sub:'Drinks Ireland est. 2024' },
+      };
       var mLive = m;
-      if (_le && _le.totalGBP) {
+      var _vt = _VERIFIED_TOTALS[current];
+      if (_vt) {
+        mLive = JSON.parse(JSON.stringify(m));
+        mLive.exportVal = { lbl: 'TOTAL EXPORTS', val: _vt.val, sub: _vt.sub };
+      } else if (_le && _le.totalGBP) {
         var _gbp = _le.totalGBP;
         var _gbpStr = _gbp >= 1000000000 ? '£' + (_gbp/1000000000).toFixed(1) + 'bn' : '£' + Math.round(_gbp/1000000) + 'm';
         var _yoyStr = _le.totalYoy ? (_le.totalYoy >= 0 ? '+' : '') + _le.totalYoy + '%' : '';
