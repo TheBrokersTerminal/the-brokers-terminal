@@ -4884,15 +4884,15 @@
           {country:'China',        pct:6,  val:'£31m',   yoy:+40, flag:'🇨🇳'},
         ],
         macro: {
-          exportVal:  {lbl:'TOTAL EXPORTS',        val:'£515m',    sub:'est. 2024'},
-          cagr:       {lbl:'5-YR EXPORT CAGR',     val:'+28%',     sub:'fastest growing origin'},
-          bottles:    {lbl:'BOTTLES EXPORTED',     val:'~8m',      sub:'annual premium estimate'},
-          avgBottle:  {lbl:'AVG EXPORT VALUE',     val:'£85',      sub:'per 70cl bottle'},
+          exportVal:  {lbl:'TOTAL EXPORTS',        val:'£228m',    sub:'MoF customs 2024 · ¥43.7bn'},
+          cagr:       {lbl:'10-YR EXPORT CAGR',    val:'+28%',     sub:'fastest growing origin'},
+          bottles:    {lbl:'BOTTLES EXPORTED',     val:'~18m',     sub:'2024 · all grades · 70cl equiv'},
+          avgBottle:  {lbl:'AVG EXPORT VALUE',     val:'£12.70',   sub:'per 70cl bottle · FOB customs'},
           smShare:    {lbl:'SUNTORY SHARE',         val:'60%',      sub:'of total Japanese export'},
           topGrowth:  {lbl:'TOP GROWTH MARKET',    val:'China',    sub:'+40% YoY demand'},
-          distCount:  {lbl:'ACTIVE DISTILLERIES',  val:'14',       sub:'including craft'},
+          distCount:  {lbl:'ACTIVE DISTILLERIES',  val:'120+',     sub:'incl. craft boom since 2015'},
           lpaExport:  {lbl:'SUPPLY CONSTRAINT',    val:'CRITICAL', sub:'aging stock 3-5yr shortage'},
-          premiumShare:{lbl:'RARE/LIMITED SHARE',  val:'£290m',    sub:'incl. Chichibu, Yamazaki'},
+          premiumShare:{lbl:'RARE/LIMITED SHARE',  val:'£91m',     sub:'~40% · Chichibu, Yamazaki'},
           ukTariff:   {lbl:'PRICE TREND',          val:'STEEP UP', sub:'shortage driving premiums'},
         },
       },
@@ -5882,7 +5882,7 @@
       /* UN Comtrade reporter 826 (UK) overstates Scotland figures; prefer SWA. */
       var _VERIFIED_TOTALS = {
         scotland: { val:'£5.3bn', sub:'SWA official 2025 · -1.9% YoY' },
-        japan:    { val:'£253m',  sub:'Japan MoF customs 2024 · -12.8% YoY' },
+        japan:    { val:'£228m',  sub:'Japan MoF customs 2024 · ¥43.7bn · -10.6% YoY' },
         usa:      { val:'£1.03bn',sub:'DISCUS official 2024 · -5.4% YoY' },
         ireland:  { val:'~£855m', sub:'Drinks Ireland est. 2024' },
       };
