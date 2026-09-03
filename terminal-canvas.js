@@ -50,6 +50,15 @@
     loadPreferences().then(function (prefs) {
       var layout = (prefs && prefs.dashboard_layout) ? prefs.dashboard_layout : DEFAULT_LAYOUT;
       var notes  = (prefs && prefs.notes_content)    ? prefs.notes_content    : '';
+      /* One-time migration: strip the erroneous 44px nav offset that was added by a bad clamp.
+         Flag stored in localStorage so it only runs once per browser. */
+      var migrated = localStorage.getItem('tbt_layout_nav_fix') === '1';
+      if (!migrated) {
+        layout.forEach(function (cfg) { if (cfg.y >= 44) cfg.y = Math.max(0, cfg.y - 44); });
+        localStorage.setItem('tbt_layout_nav_fix', '1');
+        /* Persist corrected positions immediately */
+        setTimeout(saveLayout, 200);
+      }
       layout.forEach(function (cfg) {
         if (cfg.type === 'notes') cfg.data = cfg.data || {};
         if (cfg.type === 'notes' && !cfg.data.text) cfg.data.text = notes;
@@ -240,7 +249,17 @@
   }
 
   /* ── SPAWN WIDGET ── */
+  function _minWidgetTop() {
+    /* body has padding-top:44px for nav; ticker-on adds margin-top:34px to canvas-wrap.
+       Both are handled by CSS so widget top:0 is always correct — no JS offset needed. */
+    return 0;
+  }
+
   function spawnWidget(cfg) {
+    /* Clamp saved position — just prevent negatives */
+    cfg.x = Math.max(0, cfg.x || 0);
+    cfg.y = Math.max(0, cfg.y || 0);
+
     var el = document.createElement('div');
     el.className = 'tbc-widget';
     el.id = cfg.id;
@@ -883,9 +902,10 @@
     if (snapX === null && vL < SNAP_EDGE) snapX = -offX;
     if (snapY === null && vT < SNAP_EDGE) snapY = -offY;
 
+    /* Keep widget bar reachable — clamp to 0 (nav offset handled by body padding) or ticker height */
     return {
-      left: Math.max(0, snapX !== null ? snapX : Math.round(rawLeft / SNAP_GRID) * SNAP_GRID),
-      top:  Math.max(0, snapY !== null ? snapY : Math.round(rawTop  / SNAP_GRID) * SNAP_GRID)
+      left: Math.max(0,              snapX !== null ? snapX : Math.round(rawLeft / SNAP_GRID) * SNAP_GRID),
+      top:  Math.max(_minWidgetTop(), snapY !== null ? snapY : Math.round(rawTop / SNAP_GRID) * SNAP_GRID)
     };
   }
 
@@ -894,6 +914,19 @@
   /* ── DRAG ── */
   function makeDraggable(el, handle) {
     var ox, oy, startX, startY;
+
+    /* Double-click the bar → recentre the widget so it's always reachable */
+    handle.addEventListener('dblclick', function (e) {
+      if (e.target.classList.contains('tbc-widget-btn')) return;
+      var minTop = _minWidgetTop();
+      var vw = window.innerWidth, vh = window.innerHeight;
+      var w  = el.offsetWidth,   h  = el.offsetHeight;
+      el.style.left = Math.max(0,      Math.round((vw - w) / 2)) + 'px';
+      el.style.top  = Math.max(minTop, Math.round((vh - 44 - h) / 2)) + 'px';
+      updateCfgPos(el.id);
+      saveLayout();
+    });
+
     handle.addEventListener('mousedown', function (e) {
       if (e.target.classList.contains('tbc-widget-btn')) return;
       ox = el.offsetLeft; oy = el.offsetTop;
@@ -4963,7 +4996,7 @@
           hist:[{yr:2019,v:432},{yr:2020,v:375},{yr:2021,v:387},{yr:2022,v:488},{yr:2023,v:474},{yr:2024,v:419},{yr:2025,v:404}],
           proj:[{yr:2026,v:430}],
           cagr3:'+2.7%', cagr5:'-0.6%',
-          cats:[{n:'Blended Scotch',p:55},{n:'Single Malt',p:28},{n:'Blended Malt',p:10},{n:'Single Grain',p:7}],
+          cats:[{n:'Blended Scotch',p:62},{n:'Single Malt',p:28},{n:'Single Grain',p:7},{n:'Blended Malt',p:3}],
           tariff:'No significant tariff barriers. EU–UK Trade and Cooperation Agreement provides duty-free access.',
           tariffStatus:'ZERO', tariffCol:'#44cc64',
           drivers:['Long-established blended Scotch culture','Café & restaurant on-trade strength','Growing single malt education','Premium gifting market'],
@@ -4973,7 +5006,7 @@
           hist:[{yr:2019,v:300},{yr:2020,v:247},{yr:2021,v:212},{yr:2022,v:316},{yr:2023,v:378},{yr:2024,v:310},{yr:2025,v:274}],
           proj:[{yr:2026,v:295}],
           cagr3:'+13.4%', cagr5:'+0.7%',
-          cats:[{n:'Single Malt',p:52},{n:'Blended Scotch',p:28},{n:'Ultra Premium',p:14},{n:'Other',p:6}],
+          cats:[{n:'Single Malt',p:56},{n:'Blended Scotch',p:26},{n:'Blended Malt',p:12},{n:'Single Grain',p:6}],
           tariff:'Zero tariff. Singapore operates as a free port — significant portion re-exported to Malaysia, Indonesia, Vietnam and wider ASEAN.',
           tariffStatus:'ZERO', tariffCol:'#44cc64',
           drivers:['APAC travel retail hub','Re-export gateway to SE Asia','Ultra-premium collector auctions (Bonhams HK corridor)','Growing HNWI wealth in region','Changi Airport duty-free — world\'s largest spirits retail'],
@@ -4983,7 +5016,7 @@
           hist:[{yr:2019,v:185},{yr:2020,v:139},{yr:2021,v:148},{yr:2022,v:202},{yr:2023,v:197},{yr:2024,v:169},{yr:2025,v:177}],
           proj:[{yr:2026,v:185}],
           cagr3:'+4.5%', cagr5:'-1.8%',
-          cats:[{n:'Blended Scotch',p:50},{n:'Single Malt',p:36},{n:'Other',p:14}],
+          cats:[{n:'Blended Scotch',p:50},{n:'Single Malt',p:38},{n:'Blended Malt',p:8},{n:'Single Grain',p:4}],
           tariff:'No tariff. EU–UK TCA duty-free access. EU market stability dependent on UK maintaining equivalence.',
           tariffStatus:'ZERO', tariffCol:'#44cc64',
           drivers:['Largest economy in EU','Whisky festival culture (Berlin, Hamburg)','Growing specialist retail','On-trade recovery'],
@@ -4993,7 +5026,7 @@
           hist:[{yr:2019,v:166},{yr:2020,v:100},{yr:2021,v:146},{yr:2022,v:282},{yr:2023,v:218},{yr:2024,v:248},{yr:2025,v:286}],
           proj:[{yr:2026,v:390}],
           cagr3:'+19.3%', cagr5:'+8.4%',
-          cats:[{n:'Blended Scotch',p:62},{n:'Single Malt',p:28},{n:'Premium Blend',p:10}],
+          cats:[{n:'Blended Scotch',p:75},{n:'Single Malt',p:18},{n:'Blended Malt',p:4},{n:'Single Grain',p:3}],
           tariff:'UK-India FTA entered into force 15 July 2026. Tariff cut from 150% to 75% immediately. Further reductions to 40% by January 2036 on a phased 10-year schedule. Retail impact: a ₹5,000 bottle expected to retail at ₹3,500–4,000. SWA projects £1bn additional exports over 5 years.',
           tariffStatus:'75% (DOWN FROM 150%)', tariffCol:'#E97132',
           drivers:['FTA tariff halved — price accessibility unlocks mass-affluent tier','Rapidly expanding HNWI and aspirational middle class','Aspirational gifting culture: Scotch as status signal','Spirits premiumisation already underway pre-deal','Growing urban on-trade in Mumbai, Delhi, Bengaluru'],
@@ -5023,7 +5056,7 @@
           hist:[{yr:2019,v:110},{yr:2020,v:90},{yr:2021,v:105},{yr:2022,v:120},{yr:2023,v:127},{yr:2024,v:130},{yr:2025,v:136}],
           proj:[{yr:2026,v:146}],
           cagr3:'+4.3%', cagr5:'+8.6%',
-          cats:[{n:'Single Malt',p:48},{n:'Blended Scotch',p:36},{n:'Other',p:16}],
+          cats:[{n:'Single Malt',p:48},{n:'Blended Scotch',p:38},{n:'Blended Malt',p:9},{n:'Single Grain',p:5}],
           tariff:'No tariff. Australia–UK Free Trade Agreement (2023) — Scotch tariffs already zero, confirmed and locked in.',
           tariffStatus:'ZERO FTA', tariffCol:'#44cc64',
           drivers:['Strong craft spirits culture','Growing single malt affinity','UK cultural ties driving brand familiarity','Langton\'s auction market expanding','On-trade premium spirits adoption'],
@@ -5045,7 +5078,7 @@
           hist:[{yr:2019,v:20},{yr:2020,v:20},{yr:2021,v:30},{yr:2022,v:30},{yr:2023,v:22},{yr:2024,v:19},{yr:2025,v:21}],
           proj:[{yr:2026,v:23}],
           cagr3:'-14.1%', cagr5:'-1.0%',
-          cats:[{n:'Single Malt',p:62},{n:'Blended',p:28},{n:'Grain',p:10}],
+          cats:[{n:'Single Malt',p:65},{n:'Blended',p:28},{n:'Grain',p:7}],
           tariff:'EU–Japan Economic Partnership Agreement (2019) — spirits duty reduced to zero.',
           tariffStatus:'ZERO', tariffCol:'#44cc64',
           drivers:['Strong French affinity for Japanese culture and aesthetics','Whisky bars in Paris driving education','Sommelier community adopting Japanese expressions','Ultra-premium positioning resonates with luxury French market'],
@@ -5055,7 +5088,7 @@
           hist:[{yr:2019,v:10},{yr:2020,v:13},{yr:2021,v:12},{yr:2022,v:22},{yr:2023,v:22},{yr:2024,v:19},{yr:2025,v:21}],
           proj:[{yr:2026,v:24}],
           cagr3:'+16.5%', cagr5:'+13.7%',
-          cats:[{n:'Single Malt',p:65},{n:'Blended',p:22},{n:'Ultra Rare',p:13}],
+          cats:[{n:'Single Malt',p:72},{n:'Blended',p:20},{n:'Grain',p:8}],
           tariff:'Zero tariff. Singapore–Japan Comprehensive Economic Partnership Agreement.',
           tariffStatus:'ZERO', tariffCol:'#44cc64',
           drivers:['APAC re-export hub for Yamazaki, Hakushu, Hibiki','Bonhams and Christie\'s HK auction corridor','HNWI collector demand in SE Asia','Luxury retail corridor Orchard Road'],
@@ -5065,7 +5098,7 @@
           hist:[{yr:2019,v:18},{yr:2020,v:58},{yr:2021,v:112},{yr:2022,v:117},{yr:2023,v:72},{yr:2024,v:58},{yr:2025,v:65}],
           proj:[{yr:2026,v:72}],
           cagr3:'-19.6%', cagr5:'+26.3%',
-          cats:[{n:'Blended Premium',p:48},{n:'Single Malt',p:38},{n:'Ultra Rare',p:14}],
+          cats:[{n:'Blended',p:52},{n:'Single Malt',p:38},{n:'Grain',p:10}],
           tariff:'10% import duty. Subject to China–Japan diplomatic relationship — risk factor to monitor.',
           tariffStatus:'10% DUTY', tariffCol:'#E97132',
           drivers:['Expanding HNWI population in Tier 1 cities','Status gifting culture — premium spirits as currency','Baijiu crossover interest in aged expressions','Growing whisky bar scene in Shanghai, Beijing'],
@@ -5075,7 +5108,7 @@
           hist:[{yr:2019,v:5},{yr:2020,v:4},{yr:2021,v:7},{yr:2022,v:12},{yr:2023,v:12},{yr:2024,v:10},{yr:2025,v:11}],
           proj:[{yr:2026,v:13}],
           cagr3:'+12.5%', cagr5:'+14.9%',
-          cats:[{n:'Single Malt',p:60},{n:'Blended',p:28},{n:'Grain',p:12}],
+          cats:[{n:'Single Malt',p:65},{n:'Blended',p:28},{n:'Grain',p:7}],
           tariff:'EU–Japan Economic Partnership Agreement (EPA), in force February 2019. Spirits import duty reduced to zero on entry into force.',
           tariffStatus:'ZERO', tariffCol:'#44cc64',
           drivers:["Largest whisky market in continental Europe after France","Strong whisky festival culture — Berlin, Hamburg, Munich","Deep specialist retail network (WiskyBase-listed stores)","EU–Japan EPA zero tariff accelerated import surge from 2019","Suntory and Nikka dedicated German distribution","Educated collector base paying premium for limited expressions"],
@@ -5095,7 +5128,7 @@
           hist:[{yr:2019,v:8},{yr:2020,v:8},{yr:2021,v:10},{yr:2022,v:9},{yr:2023,v:6},{yr:2024,v:5},{yr:2025,v:6}],
           proj:[{yr:2026,v:7}],
           cagr3:'-20.6%', cagr5:'-9.9%',
-          cats:[{n:'Single Malt',p:70},{n:'Blended Premium',p:22},{n:'Grain',p:8}],
+          cats:[{n:'Single Malt',p:70},{n:'Blended',p:22},{n:'Grain',p:8}],
           tariff:'UK–Japan Comprehensive Economic Partnership Agreement (CEPA), in force January 2021. Zero duty on spirits. Rolled over from EU–Japan EPA with continuity provisions.',
           tariffStatus:'ZERO', tariffCol:'#44cc64',
           drivers:["The Whisky Exchange and Master of Malt — world's largest online specialists","London auction market (Bonhams, Christie's, Whisky Auctioneer)","Whisky Show and UK festival circuit driving education","Sophisticated bar culture adopting Japanese expressions","UK food & drink media creating collector demand"],
@@ -5117,7 +5150,7 @@
           hist:[{yr:2019,v:79},{yr:2020,v:65},{yr:2021,v:64},{yr:2022,v:90},{yr:2023,v:69},{yr:2024,v:68},{yr:2025,v:72}],
           proj:[{yr:2026,v:76}],
           cagr3:'+2.1%', cagr5:'-2.9%',
-          cats:[{n:'Bourbon',p:65},{n:'Tennessee',p:20},{n:'Rye',p:10},{n:'Single Barrel',p:5}],
+          cats:[{n:'Bourbon',p:62},{n:'Tennessee',p:25},{n:'Rye',p:10},{n:'Other',p:3}],
           tariff:'Zero tariff post-Brexit UK–US trade negotiations — currently MFN rate 0%. UK–US FTA discussions ongoing. UK applies zero duty on spirits imports under its post-Brexit tariff schedule.',
           tariffStatus:'ZERO', tariffCol:'#44cc64',
           drivers:['Strong bourbon cocktail culture in London & major cities','Buffalo Trace, Maker\'s Mark brand recognition','US whiskey specialist retailers growing','Bourbon replacing blended Scotch in on-trade well spirit role'],
@@ -5127,7 +5160,7 @@
           hist:[{yr:2019,v:55},{yr:2020,v:50},{yr:2021,v:69},{yr:2022,v:82},{yr:2023,v:85},{yr:2024,v:63},{yr:2025,v:68}],
           proj:[{yr:2026,v:73}],
           cagr3:'-3.0%', cagr5:'+4.8%',
-          cats:[{n:'Bourbon',p:58},{n:'Rye',p:22},{n:'Tennessee',p:15},{n:'Other',p:5}],
+          cats:[{n:'Bourbon',p:65},{n:'Tennessee',p:18},{n:'Rye',p:12},{n:'Other',p:5}],
           tariff:'US–Japan Trade Agreement (2020) removed tariffs on American whiskey exports to Japan. Zero duty.',
           tariffStatus:'ZERO', tariffCol:'#44cc64',
           drivers:['American whiskey complements Japanese cocktail culture','Highball format driving bourbon consumption','Four Roses and Knob Creek strong Japanese retail presence','Whisky magazine culture creating educated consumer base'],
@@ -5137,7 +5170,7 @@
           hist:[{yr:2019,v:68},{yr:2020,v:57},{yr:2021,v:61},{yr:2022,v:94},{yr:2023,v:98},{yr:2024,v:90},{yr:2025,v:96}],
           proj:[{yr:2026,v:104}],
           cagr3:'+13.9%', cagr5:'+5.7%',
-          cats:[{n:'Bourbon',p:68},{n:'Tennessee',p:15},{n:'Rye',p:12},{n:'Single Barrel',p:5}],
+          cats:[{n:'Bourbon',p:70},{n:'Tennessee',p:18},{n:'Rye',p:9},{n:'Other',p:3}],
           tariff:'No US–Australia FTA exists. Australia applies a 5% WTO MFN customs duty on imported spirits. This has not been addressed in bilateral negotiations.',
           tariffStatus:'5% DUTY', tariffCol:'#44cc64',
           drivers:['Bourbon firmly embedded in Australian bar and cocktail culture','US cultural influence driving brand recognition','Dan Murphy\'s and BWS national retail distribution','Bourbon trail tourism creating affinity among Australian visitors to the US','Growing single barrel and small-batch collector segment'],
@@ -5157,7 +5190,7 @@
           hist:[{yr:2019,v:40},{yr:2020,v:32},{yr:2021,v:42},{yr:2022,v:52},{yr:2023,v:58},{yr:2024,v:63},{yr:2025,v:70}],
           proj:[{yr:2026,v:80}],
           cagr3:'+10.4%', cagr5:'+16.9%',
-          cats:[{n:'Bourbon',p:60},{n:'Tennessee',p:22},{n:'Rye',p:12},{n:'Single Barrel',p:6}],
+          cats:[{n:'Bourbon',p:62},{n:'Tennessee',p:22},{n:'Rye',p:12},{n:'Other',p:4}],
           tariff:'Zero tariff. US–Singapore Free Trade Agreement (USSFTA), in force January 2004 — one of the first US bilateral FTAs, providing full zero-tariff access for spirits.',
           tariffStatus:'ZERO', tariffCol:'#44cc64',
           drivers:['US–Singapore FTA zero tariff since 2004','American whiskey cocktail culture at Marina Bay Sands and luxury hotels','Re-export to ASEAN markets','Expatriate professional community driving premium consumption','Changi Airport travel retail','Allocated bourbons (Buffalo Trace, Pappy) trading at premium in specialist retail'],
@@ -5167,7 +5200,7 @@
           hist:[{yr:2019,v:28},{yr:2020,v:22},{yr:2021,v:30},{yr:2022,v:38},{yr:2023,v:44},{yr:2024,v:50},{yr:2025,v:58}],
           proj:[{yr:2026,v:68}],
           cagr3:'+15.2%', cagr5:'+21.4%',
-          cats:[{n:'Bourbon',p:55},{n:'Tennessee',p:25},{n:'Single Barrel',p:15},{n:'Rye',p:5}],
+          cats:[{n:'Tennessee',p:40},{n:'Bourbon',p:45},{n:'Rye',p:10},{n:'Other',p:5}],
           tariff:'UAE applies a 5% customs duty on spirits imports under its standard import schedule. Duty-free sales at Dubai Duty Free — one of the world\'s top 5 spirits retailers — are exempt from this duty.',
           tariffStatus:'5% DUTY', tariffCol:'#44cc64',
           drivers:['Dubai Duty Free — top 5 global spirits retailer by value','International HNWI and expat community in Dubai and Abu Dhabi','Jack Daniel\'s dominant brand recognition across Gulf region','Luxury hotel and rooftop bar on-trade (DIFC, Downtown Dubai)','Re-export gateway to Gulf and South Asian markets'],
@@ -5179,7 +5212,7 @@
           hist:[{yr:2019,v:140},{yr:2020,v:155},{yr:2021,v:175},{yr:2022,v:195},{yr:2023,v:210},{yr:2024,v:220},{yr:2025,v:238}],
           proj:[{yr:2026,v:262}],
           cagr3:'+6.9%', cagr5:'+8.9%',
-          cats:[{n:'Blended Irish',p:55},{n:'Single Pot Still',p:25},{n:'Single Malt',p:15},{n:'Single Grain',p:5}],
+          cats:[{n:'Blended Irish',p:65},{n:'Single Pot Still',p:18},{n:'Single Malt',p:13},{n:'Single Grain',p:4}],
           tariff:'Zero tariff. Irish whiskey was not subject to the 2019 US tariffs (which only applied to Scotch). This gave Irish producers a significant competitive advantage during 2019–2022.',
           tariffStatus:'ZERO', tariffCol:'#44cc64',
           drivers:['Irish diaspora — 40m Americans claim Irish heritage','St Patrick\'s Day seasonal demand peak','Jameson\'s dominant market position and marketing investment','Single pot still category education growing','On-trade Irish bar culture in major US cities'],
@@ -5189,7 +5222,7 @@
           hist:[{yr:2019,v:45},{yr:2020,v:40},{yr:2021,v:48},{yr:2022,v:58},{yr:2023,v:63},{yr:2024,v:66},{yr:2025,v:70}],
           proj:[{yr:2026,v:77}],
           cagr3:'+6.4%', cagr5:'+11.8%',
-          cats:[{n:'Blended Irish',p:65},{n:'Single Malt',p:20},{n:'Single Pot Still',p:15}],
+          cats:[{n:'Blended Irish',p:68},{n:'Single Pot Still',p:16},{n:'Single Malt',p:12},{n:'Single Grain',p:4}],
           tariff:'Zero tariff. EU Single Market — Ireland is a member of the EU, so intra-EU trade applies for Irish exports to France via the TCA framework.',
           tariffStatus:'ZERO', tariffCol:'#44cc64',
           drivers:['Celtic cultural affinity','Tourism reverse flow — French visitors to Ireland driving brand awareness','Premium Irish malt growing in French specialist retail','Cocktail adoption'],
@@ -5209,7 +5242,7 @@
           hist:[{yr:2019,v:28},{yr:2020,v:22},{yr:2021,v:28},{yr:2022,v:35},{yr:2023,v:40},{yr:2024,v:44},{yr:2025,v:48}],
           proj:[{yr:2026,v:54}],
           cagr3:'+11.1%', cagr5:'+16.8%',
-          cats:[{n:'Blended Irish',p:65},{n:'Single Malt',p:20},{n:'Single Pot Still',p:15}],
+          cats:[{n:'Blended Irish',p:68},{n:'Single Pot Still',p:15},{n:'Single Malt',p:13},{n:'Single Grain',p:4}],
           tariff:'Zero tariff. Ireland and Germany are both EU members — fully frictionless intra-EU Single Market trade. No tariff, no customs checks.',
           tariffStatus:'ZERO', tariffCol:'#44cc64',
           drivers:['EU Single Market — zero barriers','Jameson brand investment in German on-trade marketing','Irish pub culture in Berlin, Hamburg, Munich, Frankfurt','Growing interest in premium Irish single pot still among German collectors','Teeling and Waterford building direct German distribution channels'],
@@ -5219,7 +5252,7 @@
           hist:[{yr:2019,v:20},{yr:2020,v:18},{yr:2021,v:22},{yr:2022,v:26},{yr:2023,v:30},{yr:2024,v:33},{yr:2025,v:36}],
           proj:[{yr:2026,v:40}],
           cagr3:'+11.5%', cagr5:'+14.9%',
-          cats:[{n:'Blended Irish',p:62},{n:'Single Malt',p:22},{n:'Single Pot Still',p:12},{n:'Grain',p:4}],
+          cats:[{n:'Blended Irish',p:66},{n:'Single Pot Still',p:15},{n:'Single Malt',p:15},{n:'Single Grain',p:4}],
           tariff:'Reduced tariff under CETA (EU–Canada Comprehensive Economic and Trade Agreement), in force provisionally since 2017. Irish whiskey benefits as an EU product — spirits tariff reduced significantly below Canada\'s WTO MFN rate.',
           tariffStatus:'CETA — LOW', tariffCol:'#44cc64',
           drivers:['Irish diaspora — 4.5m Canadians claim Irish heritage','St Patrick\'s Day volume peak','Jameson dominant in Ontario LCBO and BC Liquor government retail','CETA preferential market access for EU spirits','Growing premium Irish category awareness beyond Jameson'],
@@ -5229,7 +5262,7 @@
           hist:[{yr:2019,v:16},{yr:2020,v:14},{yr:2021,v:18},{yr:2022,v:22},{yr:2023,v:25},{yr:2024,v:28},{yr:2025,v:31}],
           proj:[{yr:2026,v:35}],
           cagr3:'+12.1%', cagr5:'+17.2%',
-          cats:[{n:'Blended Irish',p:60},{n:'Single Malt',p:25},{n:'Single Pot Still',p:15}],
+          cats:[{n:'Blended Irish',p:65},{n:'Single Pot Still',p:15},{n:'Single Malt',p:16},{n:'Single Grain',p:4}],
           tariff:'EU–Australia FTA negotiations stalled in 2023. Australia applies its WTO MFN rate of 5% customs duty on spirits imported from Ireland. No preferential deal currently in force.',
           tariffStatus:'5% DUTY', tariffCol:'#44cc64',
           drivers:['Irish diaspora — 2.5m Australians claim Irish heritage','St Patrick\'s Day cultural event driving volume peaks','Jameson distribution across Dan Murphy\'s and BWS national chains','Growing craft spirits interest benefiting premium Irish expressions','Irish pub network in Sydney, Melbourne, Brisbane'],
@@ -5239,7 +5272,7 @@
           hist:[{yr:2019,v:18},{yr:2020,v:14},{yr:2021,v:18},{yr:2022,v:23},{yr:2023,v:26},{yr:2024,v:28},{yr:2025,v:31}],
           proj:[{yr:2026,v:35}],
           cagr3:'+10.5%', cagr5:'+17.2%',
-          cats:[{n:'Blended Irish',p:70},{n:'Single Malt',p:18},{n:'Single Pot Still',p:12}],
+          cats:[{n:'Blended Irish',p:74},{n:'Single Pot Still',p:14},{n:'Single Malt',p:9},{n:'Single Grain',p:3}],
           tariff:'Zero tariff. Both Ireland and Spain are EU member states — fully frictionless intra-EU Single Market trade.',
           tariffStatus:'ZERO', tariffCol:'#44cc64',
           drivers:['EU Single Market zero barriers','Jameson & tonic format popular in Spanish bars — standard cocktail offering','Tourism reverse flow — Spanish visitors to Ireland building brand familiarity','Jameson on-trade investment in Spanish hospitality sector','Growing whiskey curiosity among Spanish consumers transitioning from gin and vermouth'],
