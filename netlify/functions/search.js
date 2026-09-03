@@ -70,6 +70,48 @@ ASSET NEUTRALITY: In ALL pitch fields NEVER name a specific asset. Use "physical
 
 Respond with valid JSON only — no markdown fences, no extra text. CRITICAL: never use double-quote characters inside string values — use single quotes or rephrase instead.`;
 
+/* ── SECTION-SPECIFIC PROMPTS (faster, focused) ── */
+
+const OVERVIEW_PROMPT = (query, profile) => `Research request: "${query}"
+${profile ? `Finnhub profile data: ${JSON.stringify(profile)}` : ''}
+
+Generate a company overview briefing ONLY — no pitch playbook. Return this exact JSON:
+{
+  "type": "company",
+  "title": "Full company name",
+  "ticker": "Ticker symbol or empty string if private",
+  "exchange": "Exchange name or 'Private' if not listed",
+  "category": "One of: distillery, spirits, commodities, precious metals, financial institution, central bank, private equity, regulator, other",
+  "tagline": "One sentence — what this company does, in plain English a non-expert understands instantly",
+  "overview": "2-3 sentences. Who they are, what they do, why a broker should care. No jargon.",
+  "keyFacts": ["Specific number or verified data point", "Fact 2", "Fact 3", "Fact 4"],
+  "relevance": "2-3 sentences. The angle connecting this company to physical assets, wealth protection, or macro forces.",
+  "brokerNote": "One paragraph. What the broker says if this subject comes up naturally. Asset-neutral, plain English, confident."
+}`;
+
+const PITCH_PROMPT = (query) => `Generate ONLY the sales pitch playbook for "${query}". Return this exact JSON:
+{
+  "type": "company",
+  "title": "${query.replace(/"/g, "'")}",
+  "pitch": {
+    "openingLine": "The exact first sentence to open with a client. One punchy attention-grabbing line. A question or provocative statement — not a pitch. Asset-neutral.",
+    "logicalCase": ["Most compelling fact — specific, verified, simple", "Second pillar — different angle", "Logical conclusion for their wealth"],
+    "emotionalCase": "Future pace in 2 sentences. Their worry gone. The outcome they want, achieved. Asset-neutral.",
+    "painPoint": "The one precise fear this client has right now. One sentence. Be specific.",
+    "spinQuestions": [
+      "Situation — where is their money now and how do they feel about it",
+      "Problem/Implication — the cost of doing nothing",
+      "Need-Payoff — lets them articulate the benefit themselves. Starts with 'So if you had...' or 'What would it mean if...'"
+    ],
+    "objections": [
+      {"objection": "Most common first objection", "rebuttal": "Acknowledge genuinely, reframe as evidence for action, close with need-payoff question. Conversational, not scripted."},
+      {"objection": "Second objection", "rebuttal": "Same three-part structure. Different angle. Asset-neutral."}
+    ],
+    "urgencyLine": "One real, verifiable reason why acting now is smarter than waiting. Never manufactured.",
+    "socialProof": "One sentence. What sophisticated or institutional money is doing relative to this subject."
+  }
+}`;
+
 const COMPANY_PROMPT = (query, profile) => `Research request: "${query}"
 ${profile ? `Finnhub profile data: ${JSON.stringify(profile)}` : ''}
 
@@ -229,11 +271,11 @@ exports.handler = async (event) => {
     let body;
     try { body = JSON.parse(event.body || '{}'); } catch { body = {}; }
 
-    const { query, type, ticker } = body;
+    const { query, type, ticker, section } = body;
     if (!query) return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: 'query required' }) };
 
-    /* Cache key: company uses ticker, concept uses normalised query */
-    const cacheKey = 'search:' + type + ':' + (ticker || query.trim().toLowerCase().slice(0, 80));
+    /* Cache key includes section so overview and pitch are stored separately */
+    const cacheKey = 'search:' + type + ':' + (section ? section + ':' : '') + (ticker || query.trim().toLowerCase().slice(0, 80));
 
     const cached = await cacheGet(cacheKey);
     if (cached) {
@@ -244,7 +286,14 @@ exports.handler = async (event) => {
       };
     }
 
-    const userMsg = type === 'concept' ? CONCEPT_PROMPT(query) : COMPANY_PROMPT(query, null);
+    let userMsg;
+    if (section === 'overview') {
+      userMsg = OVERVIEW_PROMPT(query, null);
+    } else if (section === 'pitch') {
+      userMsg = PITCH_PROMPT(query);
+    } else {
+      userMsg = type === 'concept' ? CONCEPT_PROMPT(query) : COMPANY_PROMPT(query, null);
+    }
 
     try {
       const claudeResp = await fetch('https://api.anthropic.com/v1/messages', {
@@ -256,7 +305,7 @@ exports.handler = async (event) => {
         },
         body: JSON.stringify({
           model: 'claude-haiku-4-5-20251001',
-          max_tokens: 1400,
+          max_tokens: 2000,
           system: SEARCH_SYSTEM,
           messages: [{ role: 'user', content: userMsg }],
         }),
