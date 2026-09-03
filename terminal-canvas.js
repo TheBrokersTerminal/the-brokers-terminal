@@ -4965,10 +4965,10 @@
           {country:'Spain',        pct:5,  val:'£28m',   yoy:+7,  flag:'🇪🇸'},
         ],
         macro: {
-          exportVal:  {lbl:'TOTAL EXPORTS',        val:'£550m',    sub:'Irish whiskey 2024'},
+          exportVal:  {lbl:'TOTAL EXPORTS',        val:'£785m',    sub:'Bord Bia 2024 · ~€930m'},
           cagr:       {lbl:'5-YR EXPORT CAGR',     val:'+15%',     sub:'fastest EU growth origin'},
-          bottles:    {lbl:'BOTTLES SOLD',         val:'14m+',     sub:'global annual volume'},
-          avgBottle:  {lbl:'AVG EXPORT VALUE',     val:'£39',      sub:'per 70cl bottle'},
+          bottles:    {lbl:'BOTTLES SOLD',         val:'~190m',    sub:'15–16.4m cases × 12 · all grades'},
+          avgBottle:  {lbl:'AVG EXPORT VALUE',     val:'£4.15',    sub:'per 70cl bottle · FOB customs'},
           smShare:    {lbl:'MIDLETON GROUP SHARE',  val:'65%',      sub:'of Irish total volume'},
           topGrowth:  {lbl:'TOP GROWTH MARKET',    val:'USA',      sub:'+18% YoY — largest market'},
           distCount:  {lbl:'ACTIVE DISTILLERIES',  val:'32',       sub:'revival from 3 in 1990s'},
@@ -5884,7 +5884,7 @@
         scotland: { val:'£5.3bn', sub:'SWA official 2025 · -1.9% YoY' },
         japan:    { val:'£228m',  sub:'Japan MoF customs 2024 · ¥43.7bn · -10.6% YoY' },
         usa:      { val:'£1.03bn',sub:'DISCUS official 2024 · -5.4% YoY' },
-        ireland:  { val:'~£855m', sub:'Drinks Ireland est. 2024' },
+        ireland:  { val:'£785m',  sub:'Bord Bia 2024 · €930m converted' },
       };
       var mLive = m;
       var _vt = _VERIFIED_TOTALS[current];
