@@ -5817,7 +5817,7 @@
       var totalPct = 0;
       for (var ei = 0; ei < exps.length; ei++) totalPct += (exps[ei].pct || 0);
       var expsFull = exps.slice();
-      if (totalPct < 99) expsFull.push({country:'Other', pct: 100 - totalPct, yoy: 0});
+      if (totalPct < 99) expsFull.push({country:'Other', pct: Math.round((100 - totalPct) * 10) / 10, yoy: 0});
 
       function sliceCol(yoy) {
         return yoy >= 20 ? '#44cc64' : yoy >= 10 ? '#2ea84a' : yoy >= 5 ? '#3a7ccc' : '#2a2a2a';
@@ -5871,7 +5871,7 @@
             (yoyStr ? '<div style="'+F+'font-size:8px;color:'+lec+';">'+yoyStr+'</div>' : '<div style="'+F+'font-size:8px;color:rgba(255,255,255,0.3);">—</div>') +
           '</div>' +
           '<div style="text-align:right;flex-shrink:0;">' +
-            '<div style="'+F+'font-size:15px;color:#ffffff;font-weight:700;line-height:1;">'+le.pct+'<span style="'+F+'font-size:9px;color:rgba(255,255,255,0.5);">%</span></div>' +
+            '<div style="'+F+'font-size:15px;color:#ffffff;font-weight:700;line-height:1;">'+(Math.round(le.pct*10)/10)+'<span style="'+F+'font-size:9px;color:rgba(255,255,255,0.5);">%</span></div>' +
             '<div style="height:3px;background:'+lec+';width:'+barW+'px;margin-top:3px;margin-left:auto;"></div>' +
           '</div>' +
         '</div>';
