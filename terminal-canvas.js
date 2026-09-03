@@ -160,30 +160,44 @@
     _addMenu = document.createElement('div');
     _addMenu.className = 'tbc-add-menu';
     _addMenu.style.cssText = 'top:' + (rect.bottom + 4) + 'px;right:' + (window.innerWidth - rect.right) + 'px;';
-    _addMenu.innerHTML = [
-      {type:'news',     icon:'◈', lbl:'LIVE HEADLINES',  sub:'Latest news from all feeds'},
-      {type:'market',   icon:'◉', lbl:'MARKET PRICES',   sub:'Live Finnhub price tiles'},
-      {type:'reports',  icon:'▣', lbl:'VAULT REPORTS',   sub:'Your latest reports'},
-      {type:'notes',    icon:'✎', lbl:'MY NOTES',        sub:'Private scratchpad'},
-      {type:'chat',        icon:'◎', lbl:'FIRM CHAT',       sub:'Realtime firm messaging'},
-      {type:'calendar',    icon:'◷', lbl:'CALENDAR',        sub:'Events & reminders'},
-      {type:'notes_inbox',   icon:'✉', lbl:'FIRM NOTES',          sub:'Shared intel notes from your firm'},
-      {type:'econ_calendar', icon:'◫', lbl:'ECONOMIC CALENDAR',   sub:'Upcoming market & macro events'},
-      {type:'macro_monitor',  icon:'▦', lbl:'MACRO MONITOR',        sub:'Cross-asset heatmap — 14 series with WTD/QTD/YTD/1Y'},
-      {type:'macro_chart',    icon:'◐', lbl:'ASSET COMPARISON',     sub:'Gold vs S&P 500 vs inflation chart'},
-      {type:'macro_intel',    icon:'◧', lbl:'MACRO INTELLIGENCE',   sub:'Professor + sales engine — 5 macro themes'},
-      {type:'ticker',         icon:'▸', lbl:'NEWS TICKER',          sub:'Scrolling headline bar — show/filter by gold or whisky'},
-      {type:'sector_heatmap', icon:'▩', lbl:'SECTOR HEATMAP',        sub:'US equity sectors — day% performance with heatmap colouring'},
-      {type:'watchlist',      icon:'◈', lbl:'MY WATCHLIST',          sub:'Pin your own tickers with live prices and day change'},
-      {type:'global_map',     icon:'◉', lbl:'GLOBAL MAP',            sub:'World view — macro rates, inflation, gold production, whisky regions'},
-      {type:'whisky_lookup',  icon:'▣', lbl:'WHISKY TERMINAL',        sub:'Live auction & retail prices, ratings, quartile analysis — powered by WhiskyStats'},
-      {type:'cask_calc',      icon:'◫', lbl:'CASK CALCULATOR',        sub:'Project cask value, bottle yield, angel\'s share & ROI at any age milestone'},
-      {type:'origin_web',     icon:'◎', lbl:'ORIGIN WEB',             sub:'Distillery supply network — countries, distilleries, auction markets'},
-    ].map(function (w) {
-      return '<div class="tbc-add-item" data-type="' + w.type + '">' +
-        '<span class="tbc-add-icon">' + w.icon + '</span>' +
-        '<div><div class="tbc-add-lbl">' + w.lbl + '</div><div class="tbc-add-sub">' + w.sub + '</div></div>' +
-        '</div>';
+    var _menuSections = [
+      { cat: 'MARKETS', items: [
+        {type:'market',        icon:'◉', lbl:'MARKET PRICES',      sub:'Live price tiles — gold, indices, FX'},
+        {type:'watchlist',     icon:'◈', lbl:'MY WATCHLIST',        sub:'Pin tickers with live prices and day change'},
+        {type:'sector_heatmap',icon:'▩', lbl:'SECTOR HEATMAP',      sub:'US equity sectors — day% with heatmap colouring'},
+        {type:'macro_chart',   icon:'◐', lbl:'ASSET COMPARISON',    sub:'Gold vs S&P 500 vs inflation chart'},
+      ]},
+      { cat: 'INTELLIGENCE', items: [
+        {type:'macro_intel',   icon:'◧', lbl:'MACRO INTELLIGENCE',  sub:'Professor + sales engine — 5 macro themes'},
+        {type:'macro_monitor', icon:'▦', lbl:'MACRO MONITOR',       sub:'Cross-asset heatmap — 14 series WTD/QTD/YTD/1Y'},
+        {type:'origin_web',    icon:'◎', lbl:'ORIGIN WEB',          sub:'Distillery supply network — countries, auction markets'},
+        {type:'global_map',    icon:'◉', lbl:'GLOBAL MAP',          sub:'Macro rates, inflation, gold production, whisky regions'},
+      ]},
+      { cat: 'WHISKY', items: [
+        {type:'whisky_lookup', icon:'▣', lbl:'WHISKY TERMINAL',     sub:'Live auction & retail prices — powered by WhiskyStats'},
+        {type:'cask_calc',     icon:'◫', lbl:'CASK CALCULATOR',     sub:'Cask value, bottle yield, angel\'s share & ROI'},
+      ]},
+      { cat: 'NEWS & DATA', items: [
+        {type:'news',          icon:'◈', lbl:'LIVE HEADLINES',      sub:'Latest news from all feeds'},
+        {type:'ticker',        icon:'▸', lbl:'NEWS TICKER',         sub:'Scrolling headline bar — gold or whisky filter'},
+        {type:'econ_calendar', icon:'◫', lbl:'ECONOMIC CALENDAR',   sub:'Upcoming market & macro events'},
+      ]},
+      { cat: 'WORKSPACE', items: [
+        {type:'reports',       icon:'▣', lbl:'VAULT REPORTS',       sub:'Your latest saved reports'},
+        {type:'notes',         icon:'✎', lbl:'MY NOTES',            sub:'Private scratchpad'},
+        {type:'calendar',      icon:'◷', lbl:'CALENDAR',            sub:'Events & reminders'},
+        {type:'chat',          icon:'◎', lbl:'FIRM CHAT',           sub:'Realtime firm messaging'},
+        {type:'notes_inbox',   icon:'✉', lbl:'FIRM NOTES',          sub:'Shared intel notes from your firm'},
+      ]},
+    ];
+    _addMenu.innerHTML = _menuSections.map(function(sec) {
+      return '<div class="tbc-add-category">' + sec.cat + '</div>' +
+        sec.items.map(function(w) {
+          return '<div class="tbc-add-item" data-type="' + w.type + '">' +
+            '<span class="tbc-add-icon">' + w.icon + '</span>' +
+            '<div><div class="tbc-add-lbl">' + w.lbl + '</div><div class="tbc-add-sub">' + w.sub + '</div></div>' +
+            '</div>';
+        }).join('');
     }).join('');
     _addMenu.querySelectorAll('.tbc-add-item').forEach(function (row) {
       row.addEventListener('click', function () {
