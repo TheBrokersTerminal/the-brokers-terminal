@@ -145,6 +145,7 @@ html, body { height: 100%; overflow: hidden; }
 .rtag { font-family: var(--font); font-size: 7px; letter-spacing: .20em; font-weight: 700; text-transform: uppercase; padding: 1px 6px; border: 1px solid; }
 .rt-gold      { color: var(--accent,#E97132); border-color: rgba(233,113,50,.35); }
 .rt-macro     { color: #888; border-color: #2a2a2a; }
+.rs-fj        { color: #7cb8e8; }
 .rt-forex     { color: #5a9fc8; border-color: rgba(90,159,200,.3); }
 .rt-commodity { color: #7ab87a; border-color: rgba(122,184,122,.3); }
 .rt-markets   { color: #9878c8; border-color: rgba(152,120,200,.3); }
@@ -338,6 +339,17 @@ html, body { height: 100%; overflow: hidden; }
 .intel-risk.off .intel-risk-dot { background: #ff5555; }
 .intel-risk.neu .intel-risk-dot { background: var(--accent,#E97132); }
 .intel-risk-reason { font-size: 10px; color: #999; line-height: 1.6; }
+.intel-panel--idle { background: none; border: none; padding: 4px 0; }
+.intel-load-btn { display: inline-block; background: none; border: 1px solid #E97132; color: #E97132; font-size: 11px; letter-spacing: .2em; text-transform: uppercase; padding: 18px 36px; cursor: pointer; text-align: center; font-family: inherit; transition: background .15s, color .15s; }
+.intel-load-btn:hover { background: #E97132; color: #fff; }
+.intel-pitch-block { border-top: 1px solid #1a1a1a; padding-top: 14px; }
+.intel-pitch-row { margin-bottom: 10px; }
+.intel-pitch-row:last-child { margin-bottom: 0; }
+.intel-pitch-lbl { font-size: 7px; letter-spacing: .25em; text-transform: uppercase; color: #555; margin-bottom: 4px; }
+.intel-pitch-quote { font-size: 11px; color: #e8e8e8; line-height: 1.85; font-style: italic; border-left: 2px solid #E97132; padding-left: 10px; }
+.intel-future-pace { border-left-color: #444; color: #c0c0c0; }
+.intel-spin-q { border-left-color: #E97132; color: #e8e8e8; }
+.intel-urgency-row .intel-pitch { border-left-color: #555; background: #0a0a0a; font-style: normal; font-size: 10px; color: #aaa; }
 
 /* ── CHART + RELATED SIDE-BY-SIDE ────────────────────────────── */
 .art-market-row {
@@ -551,7 +563,8 @@ var QUOTE_SYMS = {
 var SRC_CAT = {
   'whisky magazine':'whisky','the spirits business':'whisky','scotch whisky':'whisky',
   'decanter':'whisky','world whisky':'whisky','whisky advocate':'whisky','master of malt':'whisky',
-  'kitco':'gold','mining.com':'gold','bullionvault':'gold'
+  'kitco':'gold','mining.com':'gold','bullionvault':'gold',
+  'financialjuice':'macro'
 };
 function categorise(s) {
   /* Source-based match first — catches articles whose headline doesn't name the asset */
@@ -569,6 +582,7 @@ function srcInfo(src) {
   if(s.includes('bloomberg'))                       return {cls:'rs-bbg', lbl:'BBG'};
   if(s.includes('wsj')||s.includes('wall street')) return {cls:'rs-wsj', lbl:'WSJ'};
   if(s.includes('cnbc'))                            return {cls:'rs-cnbc',lbl:'CNBC'};
+  if(s.includes('financialjuice'))                  return {cls:'rs-fj',  lbl:'FJ'};
   return {cls:'rs-default',lbl:(src||'WIRE').substring(0,5).toUpperCase()};
 }
 function hms(ts)  { return new Date(ts*1000).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'}); }
@@ -729,12 +743,8 @@ function renderArticle(story) {
       '<ul class="art-bullets">'+bulletHTML+'</ul>'+
       bodyHTML+
       '<div id="art-ext-'+story.id+'"></div>'+
-      '<div id="art-intel-'+story.id+'" class="intel-panel">'+
-        '<div class="intel-hdr">'+
-          '<span class="intel-hdr-lbl">▌ BROKERS INTELLIGENCE</span>'+
-          '<span class="intel-hdr-sub">AI-GENERATED · FOR BROKER USE</span>'+
-        '</div>'+
-        '<div class="intel-loading">ANALYSING<span class="ld"></span></div>'+
+      '<div id="art-intel-'+story.id+'" class="intel-panel intel-panel--idle">'+
+        '<button class="intel-load-btn" data-sid="'+story.id+'">▌ BROKERS INTELLIGENCE — LOAD PITCH &amp; ANALYSIS</button>'+
       '</div>'+
       marketRow+
       '<div class="art-attribution">SOURCE: '+src.toUpperCase()+'</div>'+
@@ -748,10 +758,24 @@ function renderArticle(story) {
     if(s2) openStoryTab(s2);
   });
 
+  /* Click-to-load intelligence button */
+  document.getElementById('art-intel-'+story.id).addEventListener('click', function(e) {
+    var btn = e.target.closest('.intel-load-btn');
+    if (!btn) return;
+    var el = document.getElementById('art-intel-'+story.id);
+    el.classList.remove('intel-panel--idle');
+    el.innerHTML =
+      '<div class="intel-hdr">'+
+        '<span class="intel-hdr-lbl">▌ BROKERS INTELLIGENCE</span>'+
+        '<span class="intel-hdr-sub">FOR BROKER USE</span>'+
+      '</div>'+
+      '<div class="intel-loading">ANALYSING<span class="ld"></span></div>';
+    fetchIntelligence(story);
+  });
+
   fetchQuotes(cat);
   if(chartCfg) drawChart(story.id, chartCfg);
   if(story.url) extendArticle(story);
-  fetchIntelligence(story);
 }
 
 /* ── BROKERS INTELLIGENCE — AI EXPLANATION ─────────────────── */
@@ -777,14 +801,14 @@ async function fetchIntelligence(story, elId) {
     el.innerHTML=
       '<div class="intel-hdr">'+
         '<span class="intel-hdr-lbl">▌ BROKERS INTELLIGENCE</span>'+
-        '<span class="intel-hdr-sub">AI-GENERATED · FOR BROKER USE</span>'+
+        '<span class="intel-hdr-sub">FOR BROKER USE</span>'+
       '</div>'+
       '<div class="intel-body">'+
 
         '<div class="intel-section">'+
           '<div class="intel-sec-lbl">WHAT IT MEANS</div>'+
           '<div class="intel-text">'+(d.what||'')+'</div>'+
-          (d.analogy?'<div class="intel-analogy">"'+(d.analogy)+'"</div>':'')+
+          (d.analogy?'<div class="intel-analogy">“'+(d.analogy)+'”</div>':'')+
         '</div>'+
 
         '<div class="intel-section">'+
@@ -793,9 +817,39 @@ async function fetchIntelligence(story, elId) {
           '<div class="intel-risk-reason">'+(d.riskReason||'')+'</div>'+
         '</div>'+
 
-        '<div class="intel-section">'+
-          '<div class="intel-sec-lbl">HOW TO PITCH IT — SAY THIS TO YOUR CLIENT</div>'+
-          '<div class="intel-pitch">'+(d.pitch||'')+'</div>'+
+        '<div class="intel-section intel-pitch-block">'+
+          '<div class="intel-sec-lbl">HOW TO PITCH IT</div>'+
+
+          (d.openingLine?
+            '<div class="intel-pitch-row">'+
+              '<div class="intel-pitch-lbl">OPEN WITH</div>'+
+              '<div class="intel-pitch-quote">“'+(d.openingLine)+'”</div>'+
+            '</div>':'')+
+
+          (d.pitch?
+            '<div class="intel-pitch-row">'+
+              '<div class="intel-pitch-lbl">THE LOGICAL CASE</div>'+
+              '<div class="intel-pitch">'+(d.pitch)+'</div>'+
+            '</div>':'')+
+
+          (d.futurePace?
+            '<div class="intel-pitch-row">'+
+              '<div class="intel-pitch-lbl">FUTURE PACE</div>'+
+              '<div class="intel-pitch intel-future-pace">'+(d.futurePace)+'</div>'+
+            '</div>':'')+
+
+          (d.spinQuestion?
+            '<div class="intel-pitch-row">'+
+              '<div class="intel-pitch-lbl">ASK THEM</div>'+
+              '<div class="intel-pitch-quote intel-spin-q">“'+(d.spinQuestion)+'”</div>'+
+            '</div>':'')+
+
+          (d.urgency?
+            '<div class="intel-pitch-row intel-urgency-row">'+
+              '<div class="intel-pitch-lbl">TIMING</div>'+
+              '<div class="intel-pitch">'+(d.urgency)+'</div>'+
+            '</div>':'')+
+
         '</div>'+
 
       '</div>';

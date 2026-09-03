@@ -48,11 +48,6 @@
       renderContacts(widgetId, contacts, state, sb, user);
     });
 
-    /* ── Request notification permission silently on load ── */
-    if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
-      Notification.requestPermission();
-    }
-
     /* ── Shared handler for incoming messages ── */
     var _seenIds = {};
     function handleIncoming(msg) {

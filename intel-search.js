@@ -190,16 +190,16 @@
         '<div><div class="intel-sub-opt-lbl">COMPANY PROFILE</div><div class="intel-sub-opt-sub">Overview · Key facts · Broker note</div></div>' +
       '</div>' +
       '<div class="intel-sub-option" data-action="news">' +
-        '<span class="intel-sub-opt-icon">◈</span>' +
+        '<span class="intel-sub-opt-icon">▌</span>' +
         '<div><div class="intel-sub-opt-lbl">LATEST NEWS</div><div class="intel-sub-opt-sub">Recent stories · Headlines</div></div>' +
       '</div>' +
       '<div class="intel-sub-option" data-action="market">' +
-        '<span class="intel-sub-opt-icon">▲</span>' +
+        '<span class="intel-sub-opt-icon">▌</span>' +
         '<div><div class="intel-sub-opt-lbl">MARKET DATA</div><div class="intel-sub-opt-sub">Live price · Price change</div></div>' +
       '</div>' +
       '<div class="intel-sub-option" data-action="intel">' +
-        '<span class="intel-sub-opt-icon">⬡</span>' +
-        '<div><div class="intel-sub-opt-lbl">BROKERS INTELLIGENCE</div><div class="intel-sub-opt-sub">AI briefing · Pitch language</div></div>' +
+        '<span class="intel-sub-opt-icon">▌</span>' +
+        '<div><div class="intel-sub-opt-lbl">BROKERS INTELLIGENCE</div><div class="intel-sub-opt-sub">Pitch playbook</div></div>' +
       '</div>';
 
     row.appendChild(sub);
@@ -209,17 +209,19 @@
       if (!row.contains(e.relatedTarget)) sub.remove();
     });
 
-    /* Handle option clicks */
+    /* Handle option clicks — dropdown stays open so user can pick multiple panels */
     sub.querySelectorAll('.intel-sub-option').forEach(function (opt) {
       opt.addEventListener('click', function (e) {
         e.stopPropagation();
         var action = opt.dataset.action;
-        var dropdown = document.getElementById('intel-dropdown');
-        if (dropdown) dropdown.style.display = 'none';
-        document.querySelectorAll('.intel-sub-panel').forEach(function (s) { s.remove(); });
+        /* Flash selection feedback without closing dropdown */
+        opt.style.background = '#1a1a1a';
+        setTimeout(function () { opt.style.background = ''; }, 200);
 
-        if (action === 'profile' || action === 'intel') {
-          window._intelSearch(label, 'company', ticker);
+        if (action === 'profile') {
+          window._intelSearchSection(label, 'company', ticker, 'overview');
+        } else if (action === 'intel') {
+          window._intelSearchSection(label, 'company', ticker, 'pitch');
         } else if (action === 'news') {
           openNewsPopout(label, ticker);
         } else if (action === 'market') {
@@ -383,6 +385,17 @@
 
     var win = createPopout(query, type);
     fetchDetail(query, type, ticker || '', win);
+  };
+
+  window._intelSearchSection = function (query, type, ticker, section) {
+    var dropdown = document.getElementById('intel-dropdown');
+    var input = document.getElementById('intel-search-input');
+    if (dropdown) dropdown.style.display = 'none';
+    if (input) input.value = '';
+
+    var suffix = section === 'overview' ? ' — PROFILE' : section === 'pitch' ? ' — PITCH' : '';
+    var win = createPopout(query + suffix, type);
+    fetchDetailSection(query, type, ticker || '', section, win);
   };
 
   /* ── TAB GROUP REGISTRY ── */
@@ -763,6 +776,129 @@
       });
   }
 
+  /* ── FETCH SECTION DETAIL (overview or pitch) ── */
+  function fetchDetailSection(query, type, ticker, section, win) {
+    var cacheKey = type + ':' + section + ':' + (ticker || query);
+    if (_cache[cacheKey]) {
+      renderSection(_cache[cacheKey], section, win);
+      return;
+    }
+    fetch('/.netlify/functions/search', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query: query, type: type, ticker: ticker, section: section }),
+    })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        if (d && !d.error) { _cache[cacheKey] = d; }
+        renderSection(d, section, win);
+      })
+      .catch(function () {
+        var body = win.querySelector('.intel-popwin-body');
+        if (body) body.innerHTML = '<div class="sp-loading">INTELLIGENCE UNAVAILABLE</div>';
+      });
+  }
+
+  function renderSection(d, section, win) {
+    var body = win.querySelector('.intel-popwin-body');
+    if (!body || !d || d.error) {
+      if (body) body.innerHTML = '<div class="sp-loading">INTELLIGENCE UNAVAILABLE</div>';
+      return;
+    }
+    var titleEl = win.querySelector('.intel-popwin-title');
+    if (titleEl && d.title) {
+      var suffix = section === 'overview' ? ' — PROFILE' : ' — PITCH PLAYBOOK';
+      titleEl.textContent = d.title.toUpperCase() + suffix;
+    }
+    if (section === 'overview') {
+      renderOverview(d, body);
+    } else if (section === 'pitch') {
+      renderPitchOnly(d, body);
+    }
+    wireNoteBtn(d, body);
+  }
+
+  function renderOverview(d, body) {
+    var isListed = d.ticker && d.ticker.length > 0;
+    var pitchBtn = d.title ?
+      '<button class="sp-pitch-shortcut" data-title="' + escH(d.title) + '" data-ticker="' + escH(d.ticker || '') + '">▌ PITCH PLAYBOOK</button>' : '';
+    body.innerHTML =
+      '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">' +
+        '<div class="sp-badge ' + (isListed ? 'listed' : 'private') + '" style="margin-bottom:0;">' +
+          (isListed ? '● LISTED · ' + escH(d.ticker) + ' · ' + escH(d.exchange || '') : '● PRIVATE COMPANY') +
+        '</div>' +
+        pitchBtn +
+      '</div>' +
+      '<div class="sp-tagline">' + escH(d.tagline || '') + '</div>' +
+      '<div class="sp-section">' +
+        '<div class="sp-sec-lbl">OVERVIEW</div>' +
+        '<div class="sp-text">' + escH(d.overview || '') + '</div>' +
+      '</div>' +
+      (d.keyFacts && d.keyFacts.length ?
+        '<div class="sp-section">' +
+          '<div class="sp-sec-lbl">KEY FACTS</div>' +
+          '<ul class="sp-facts">' +
+            d.keyFacts.map(function (f) { return '<li>' + escH(f) + '</li>'; }).join('') +
+          '</ul>' +
+        '</div>' : '') +
+      '<div class="sp-section">' +
+        '<div class="sp-sec-lbl">RELEVANCE TO ALTERNATIVE ASSETS</div>' +
+        '<div class="sp-text">' + escH(d.relevance || '') + '</div>' +
+      '</div>' +
+      (d.brokerNote ?
+        '<div class="sp-section">' +
+          '<div class="sp-sec-lbl">BROKER NOTE</div>' +
+          '<div class="sp-pitch">' + escH(d.brokerNote) + '</div>' +
+        '</div>' : '') +
+      '<div class="sp-section" style="border-top:1px solid #111;padding-top:10px;">' +
+        '<button class="sp-note-btn">✎ ADD NOTE</button>' +
+      '</div>';
+  }
+
+  function renderPitchOnly(d, body) {
+    body.innerHTML =
+      '<div class="sp-tagline">' + escH((d.title || '') + ' — PITCH PLAYBOOK') + '</div>' +
+      buildPitchPlaybook(d.pitch, d.brokerNote) +
+      '<div class="sp-section" style="border-top:1px solid #111;padding-top:10px;">' +
+        '<button class="sp-note-btn">✎ ADD NOTE</button>' +
+      '</div>';
+  }
+
+  function wirePitchShortcut(d, body) {
+    var btn = body.querySelector('.sp-pitch-shortcut');
+    if (!btn) return;
+    btn.addEventListener('click', function () {
+      window._intelSearchSection(d.title, 'company', d.ticker || '', 'pitch');
+    });
+  }
+
+  function wireNoteBtn(d, body) {
+    wirePitchShortcut(d, body);
+    var parts = [];
+    if (d.overview)         parts.push(d.overview);
+    if (d.relevance)        parts.push('RELEVANCE:\n' + d.relevance);
+    if (d.brokerNote)       parts.push('BROKER NOTE:\n' + d.brokerNote);
+    if (d.pitch) {
+      var p = d.pitch;
+      if (p.openingLine)   parts.push('OPENING LINE:\n"' + p.openingLine + '"');
+      if (p.logicalCase && p.logicalCase.length)
+                            parts.push('LOGICAL CASE:\n' + p.logicalCase.map(function (f, i) { return (i + 1) + '. ' + f; }).join('\n'));
+      if (p.urgencyLine)   parts.push('TIMING: ' + p.urgencyLine);
+    }
+    body._intelNoteData = {
+      subjectType: 'intel', subjectTitle: d.title || '', subjectTicker: d.ticker || '',
+      subjectContent: parts.join('\n\n'),
+    };
+    var noteBtn = body.querySelector('.sp-note-btn');
+    if (noteBtn) {
+      noteBtn.removeAttribute('onclick');
+      noteBtn.addEventListener('click', function () {
+        var sel = window.getSelection ? window.getSelection().toString().trim() : '';
+        window.noteModalOpen && noteModalOpen(Object.assign({}, body._intelNoteData, { subjectHighlight: sel }));
+      });
+    }
+  }
+
   /* ── RENDER POP-OUT CONTENT ── */
   function renderPopout(d, win) {
     var body = win.querySelector('.intel-popwin-body');
@@ -791,6 +927,19 @@
     if (d.impactOnAssets)    parts.push('IMPACT ON ASSETS:\n' + d.impactOnAssets);
     if (d.lessonForClients)  parts.push('LESSON FOR CLIENTS:\n' + d.lessonForClients);
     if (d.brokerNote)        parts.push('HOW TO PITCH:\n' + d.brokerNote);
+    if (d.pitch) {
+      var p = d.pitch;
+      if (p.openingLine)    parts.push('OPENING LINE:\n"' + p.openingLine + '"');
+      if (p.logicalCase && p.logicalCase.length)
+                            parts.push('LOGICAL CASE:\n' + p.logicalCase.map(function (f, i) { return (i + 1) + '. ' + f; }).join('\n'));
+      if (p.emotionalCase)  parts.push('FUTURE PACE:\n' + p.emotionalCase);
+      if (p.spinQuestions && p.spinQuestions.length)
+                            parts.push('SPIN QUESTIONS:\n' + p.spinQuestions.map(function (q, i) { return ['Situation', 'Problem/Implication', 'Need-Payoff'][i] + ': ' + q; }).join('\n'));
+      if (p.objections && p.objections.length)
+                            parts.push('OBJECTIONS:\n' + p.objections.map(function (o) { return '"' + o.objection + '"\n→ ' + o.rebuttal; }).join('\n\n'));
+      if (p.urgencyLine)    parts.push('TIMING: ' + p.urgencyLine);
+      if (p.socialProof)    parts.push('SOCIAL PROOF: ' + p.socialProof);
+    }
 
     body._intelNoteData = {
       subjectType:    'intel',
@@ -809,6 +958,83 @@
         );
       });
     }
+  }
+
+  function buildPitchPlaybook(pitch, brokerNote) {
+    if (!pitch && !brokerNote) return '';
+    if (!pitch) {
+      return '<div class="sp-section">' +
+        '<div class="sp-sec-lbl">BROKER NOTE</div>' +
+        '<div class="sp-pitch">' + escH(brokerNote) + '</div>' +
+      '</div>';
+    }
+    var html = '<div class="sp-pitch-playbook">';
+
+    /* 1 — Opening line */
+    if (pitch.openingLine) {
+      html += '<div class="sp-section">' +
+        '<div class="sp-sec-lbl">OPENING LINE</div>' +
+        '<div class="sp-pitch">“' + escH(pitch.openingLine) + '”</div>' +
+      '</div>';
+    }
+
+    /* 2 — The logical case */
+    if (pitch.logicalCase && pitch.logicalCase.length) {
+      html += '<div class="sp-section">' +
+        '<div class="sp-sec-lbl">THE LOGICAL CASE — BUILD CERTAINTY FIRST</div>' +
+        '<ul class="sp-facts">' +
+          pitch.logicalCase.map(function (f) { return '<li>' + escH(f) + '</li>'; }).join('') +
+        '</ul>' +
+      '</div>';
+    }
+
+    /* 3 — Emotional future pace */
+    if (pitch.emotionalCase) {
+      html += '<div class="sp-section">' +
+        '<div class="sp-sec-lbl">FUTURE PACE — MAKE THEM FEEL THE OUTCOME</div>' +
+        '<div class="sp-pitch">' + escH(pitch.emotionalCase) + '</div>' +
+      '</div>';
+    }
+
+    /* 4 — SPIN questions */
+    if (pitch.spinQuestions && pitch.spinQuestions.length) {
+      html += '<div class="sp-section">' +
+        '<div class="sp-sec-lbl">QUESTIONS TO ASK FIRST — SPIN INTELLIGENCE</div>' +
+        '<ul class="sp-facts sp-spin">' +
+          pitch.spinQuestions.map(function (q, i) {
+            var labels = ['SITUATION', 'PROBLEM / IMPLICATION', 'NEED-PAYOFF'];
+            return '<li><span class="sp-spin-lbl">' + (labels[i] || 'Q' + (i + 1)) + '</span>' + escH(q) + '</li>';
+          }).join('') +
+        '</ul>' +
+      '</div>';
+    }
+
+    /* 5 — Handle objections */
+    if (pitch.objections && pitch.objections.length) {
+      html += '<div class="sp-section">' +
+        '<div class="sp-sec-lbl">HANDLE OBJECTIONS — LOOP AND BUILD CERTAINTY</div>' +
+        pitch.objections.map(function (o) {
+          return '<div class="sp-objection">' +
+            '<div class="sp-obj-q">“' + escH(o.objection || '') + '”</div>' +
+            '<div class="sp-obj-a">' + escH(o.rebuttal || '') + '</div>' +
+          '</div>';
+        }).join('') +
+      '</div>';
+    }
+
+    /* 6 — Urgency + social proof */
+    var urgencyRow = '';
+    if (pitch.urgencyLine) urgencyRow += '<div class="sp-intel-row"><span class="sp-intel-lbl">TIMING</span><span class="sp-intel-val">' + escH(pitch.urgencyLine) + '</span></div>';
+    if (pitch.socialProof) urgencyRow += '<div class="sp-intel-row"><span class="sp-intel-lbl">SOCIAL PROOF</span><span class="sp-intel-val">' + escH(pitch.socialProof) + '</span></div>';
+    if (urgencyRow) {
+      html += '<div class="sp-section">' +
+        '<div class="sp-sec-lbl">CREATE URGENCY</div>' +
+        '<div class="sp-intel-grid">' + urgencyRow + '</div>' +
+      '</div>';
+    }
+
+    html += '</div>';
+    return html;
   }
 
   function renderCompany(d, body) {
@@ -837,10 +1063,8 @@
         '<div class="sp-text">' + escH(d.relevance || '') + '</div>' +
       '</div>' +
 
-      '<div class="sp-section">' +
-        '<div class="sp-sec-lbl">HOW TO PITCH IT — SAY THIS TO YOUR CLIENT</div>' +
-        '<div class="sp-pitch">' + escH(d.brokerNote || '') + '</div>' +
-      '</div>' +
+      buildPitchPlaybook(d.pitch, d.brokerNote) +
+
       '<div class="sp-section" style="border-top:1px solid #111;padding-top:10px;">' +
         '<button class="sp-note-btn">✎ ADD NOTE</button>' +
       '</div>';
@@ -898,10 +1122,8 @@
         '<div class="sp-text">' + escH(d.lessonForClients || '') + '</div>' +
       '</div>' +
 
-      '<div class="sp-section">' +
-        '<div class="sp-sec-lbl">HOW TO PITCH IT — SAY THIS TO YOUR CLIENT</div>' +
-        '<div class="sp-pitch">' + escH(d.brokerNote || '') + '</div>' +
-      '</div>' +
+      buildPitchPlaybook(d.pitch, d.brokerNote) +
+
       '<div class="sp-section" style="border-top:1px solid #111;padding-top:10px;">' +
         '<button class="sp-note-btn">✎ ADD NOTE</button>' +
       '</div>';
@@ -938,7 +1160,7 @@
         buildExpressionsPanel(wsResults) +
       '</div>' +
       '<div class="dist-panel" data-panel="pitch" style="display:none;">' +
-        '<div class="sp-section"><div class="sp-sec-lbl">HOW TO PITCH IT — SAY THIS TO YOUR CLIENT</div><div class="sp-pitch">' + escH(d.brokerNote || '') + '</div></div>' +
+        buildPitchPlaybook(d.pitch, d.brokerNote) +
         '<div class="sp-section" style="border-top:1px solid #111;padding-top:10px;"><button class="sp-note-btn">✎ ADD NOTE</button></div>' +
       '</div>';
 
@@ -1525,7 +1747,7 @@
   }
 
   /* ── RESIZABLE (all edges/corners via border detection) ── */
-  var _RM = 7; /* resize margin px */
+  var _RM = 10; /* resize margin px */
   function _popDir(win, e) {
     var r = win.getBoundingClientRect();
     var n = e.clientY - r.top    < _RM;
@@ -1549,8 +1771,10 @@
   }
   function makeResizablePop(win) {
     win.addEventListener('mousemove', function (e) {
+      var d = _popDir(win, e);
+      if (d) { win.style.cursor = _popCur(d); return; } /* edge wins over titlebar */
       if (e.target.closest('.intel-popwin-titlebar, .intel-tg-bar')) { win.style.cursor = ''; return; }
-      win.style.cursor = _popCur(_popDir(win, e)) || '';
+      win.style.cursor = '';
     });
     win.addEventListener('mouseleave', function () { win.style.cursor = ''; });
     win.addEventListener('mousedown', function (e) {
@@ -1674,7 +1898,7 @@
           '<button class="intel-popwin-close">✕</button>' +
         '</div>' +
       '</div>' +
-      '<div class="intel-popwin-body" style="overflow:hidden;display:flex;flex-direction:column;"></div>';
+      '<div class="intel-popwin-body" style="overflow-y:auto;display:flex;flex-direction:column;"></div>';
 
     document.body.appendChild(win);
 
