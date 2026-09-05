@@ -5178,7 +5178,7 @@
         label:'SCHWAB NETWORK', tag:'MARKETS',
         sub:'US markets · trading · macro · 24/7',
         desc:'Professional financial television. Live market commentary, trading analysis, macro intelligence and earnings coverage. Formerly TD Ameritrade Network.',
-        embed: null,
+        embed: null, yt: true,
         direct:'https://schwabnetwork.com'
       },
       {
@@ -5186,7 +5186,7 @@
         label:'BLOOMBERG TV', tag:'MARKETS',
         sub:'Global business & markets live',
         desc:'Real-time business news, markets data and financial analysis from Bloomberg\'s global newsroom. Coverage of equities, fixed income, FX and commodities.',
-        embed: null,
+        embed: null, yt: false,
         direct:'https://www.bloomberg.com/live'
       },
       {
@@ -5194,7 +5194,7 @@
         label:'FRANCE 24', tag:'INT\'L',
         sub:'English · international · 24/7',
         desc:'International live news from a global perspective. Breaking news, world events, geopolitics and in-depth analysis broadcast in English around the clock.',
-        embed:'https://www.france24.com/en/live-news-iframe',
+        embed:'https://www.france24.com/en/live-news-iframe', yt: false,
         direct:'https://www.france24.com/en/live/'
       },
       {
@@ -5202,7 +5202,7 @@
         label:'AL JAZEERA', tag:'GLOBAL',
         sub:'English · world news · 24/7',
         desc:'Award-winning international news coverage from Al Jazeera English. Global affairs, conflict coverage, investigative journalism and economic reporting.',
-        embed: null,
+        embed: null, yt: true,
         direct:'https://www.aljazeera.com/live/'
       },
       {
@@ -5210,7 +5210,7 @@
         label:'SKY NEWS', tag:'UK',
         sub:'UK & world breaking news',
         desc:'Sky News live: breaking UK news, political analysis, business coverage and world events updated continuously throughout the day and night.',
-        embed: null,
+        embed: null, yt: true,
         direct:'https://news.sky.com/watch-sky-news-live'
       },
       {
@@ -5218,8 +5218,16 @@
         label:'DW NEWS', tag:'EUROPE',
         sub:'European & global analysis',
         desc:'Deutsche Welle English: European politics, economics and world news. Independent international broadcasting with strong coverage of EU affairs, global trade and emerging markets.',
-        embed: null,
+        embed: null, yt: true,
         direct:'https://www.dw.com/en/live-tv/s-9831'
+      },
+      {
+        key:'cnbc',
+        label:'CNBC', tag:'MARKETS',
+        sub:'US business · markets · economy',
+        desc:'CNBC live: real-time US market coverage, earnings, economic data and business news from America\'s leading financial news network.',
+        embed: null, yt: true,
+        direct:'https://www.cnbc.com/live-tv/'
       }
     ];
 
@@ -5229,6 +5237,9 @@
     var _playing = null;      /* { id, title } when a clip is open */
     var _clips   = [];
     var _clipsLoaded = false;
+    var _liveIds  = {};       /* resolved YouTube live video IDs: { key: videoId } */
+    var _liveLoading = false;
+    var _liveLoaded  = false;
 
     var CLIP_TAGS = ['ALL','REUTERS','BLOOMBERG','CNBC','FT','YAHOO FINANCE','SKY BUSINESS'];
 
@@ -5376,6 +5387,37 @@
       '</div>';
     }
 
+    function buildChannelContent(ch) {
+      /* official iframe embed */
+      if (ch.embed) {
+        return '<div style="flex:1;position:relative;background:#000;min-height:0;overflow:hidden;">' +
+          '<iframe src="' + ch.embed + '" style="width:100%;height:100%;border:none;display:block;" allow="autoplay;fullscreen" allowfullscreen referrerpolicy="no-referrer"></iframe>' +
+        '</div>';
+      }
+      /* YouTube live embed — resolved server-side */
+      if (ch.yt) {
+        var vid = _liveIds[ch.key];
+        if (_liveLoading && !vid) {
+          return '<div style="flex:1;display:flex;align-items:center;justify-content:center;background:#000;">' +
+            '<div style="text-align:center;">' +
+              '<div style="width:5px;height:5px;border-radius:50%;background:' + A + ';animation:blink 1.4s step-start infinite;margin:0 auto 10px;"></div>' +
+              '<div style="font-size:8px;letter-spacing:.1em;color:rgba(255,255,255,0.35);font-family:Consolas,monospace;">CONNECTING TO LIVE FEED…</div>' +
+            '</div>' +
+          '</div>';
+        }
+        if (vid) {
+          return '<div style="flex:1;position:relative;background:#000;min-height:0;overflow:hidden;">' +
+            '<iframe src="https://www.youtube-nocookie.com/embed/' + vid + '?autoplay=1&rel=0&modestbranding=1&iv_load_policy=3" ' +
+              'style="width:100%;height:100%;border:none;display:block;" allow="autoplay;fullscreen" allowfullscreen></iframe>' +
+          '</div>';
+        }
+        /* fallback launch card if resolve failed */
+        return '<div style="flex:1;position:relative;min-height:0;overflow:hidden;">' + buildLaunchCard(ch) + '</div>';
+      }
+      /* channel with no embed (Bloomberg etc) — launch card */
+      return '<div style="flex:1;position:relative;min-height:0;overflow:hidden;">' + buildLaunchCard(ch) + '</div>';
+    }
+
     function render() {
       if (_mode === 'clips') { renderClips(); return; }
 
@@ -5395,11 +5437,7 @@
           }).join('') +
         '</div>';
 
-      var contentArea = ch.embed
-        ? '<div style="flex:1;position:relative;background:#000;min-height:0;overflow:hidden;">' +
-            '<iframe src="' + ch.embed + '" style="width:100%;height:100%;border:none;display:block;" allow="autoplay;fullscreen" allowfullscreen referrerpolicy="no-referrer"></iframe>' +
-          '</div>'
-        : '<div style="flex:1;position:relative;min-height:0;overflow:hidden;">' + buildLaunchCard(ch) + '</div>';
+      var contentArea = buildChannelContent(ch);
 
       var statusBar =
         '<div style="flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:5px 10px;background:#050505;border-top:1px solid #1a1a1a;">' +
@@ -5431,6 +5469,25 @@
       });
     }
 
+    function loadLiveIds() {
+      if (_liveLoading || _liveLoaded) return;
+      _liveLoading = true;
+      render(); /* show loading spinners */
+      fetch('/.netlify/functions/live-streams')
+        .then(function(r){ return r.json(); })
+        .then(function(d){
+          _liveIds = d || {};
+          _liveLoaded = true;
+          _liveLoading = false;
+          if (_mode === 'live') render();
+        })
+        .catch(function(){
+          _liveLoaded = true;
+          _liveLoading = false;
+          if (_mode === 'live') render();
+        });
+    }
+
     function loadClips() {
       _clipsLoaded = false;
       renderClips(); /* shows loading state */
@@ -5449,6 +5506,7 @@
     }
 
     render();
+    loadLiveIds(); /* resolve YouTube live IDs in background */
   }
 
   /* ── GLOBAL MAP ──────────────────────────────────────────────── */
