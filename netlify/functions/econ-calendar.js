@@ -22,13 +22,16 @@ function fetchJson(url) {
 /* Normalise ForexFactory item → internal event schema */
 function normFF(item) {
   return {
-    event:    item.title   || '',
-    country:  item.country || '',
-    date:     item.date    || '',
+    event:    item.title    || '',
+    country:  item.country  || '',
+    date:     item.date     || '',
     impact:   (item.impact || 'low').toLowerCase().replace('holiday', 'low'),
     actual:   item.actual   != null ? String(item.actual)   : '',
     estimate: item.forecast != null ? String(item.forecast) : '',
     previous: item.previous != null ? String(item.previous) : '',
+    revised:  item.revised  != null ? String(item.revised)  : '',
+    period:   item.period   || '',
+    unit:     item.unit     || '',
   };
 }
 

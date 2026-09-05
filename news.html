@@ -259,14 +259,16 @@ html, body { height: 100%; overflow: hidden; }
 .qp-hdr { padding: 10px 12px 8px; font-family: var(--font); font-size: 7px; letter-spacing: .30em; text-transform: uppercase; color: #fff; border-bottom: 1px solid #141414; flex-shrink: 0; }
 .qp-list { flex: 1; overflow-y: auto; scrollbar-width: none; }
 .qp-list::-webkit-scrollbar { display: none; }
-.q-row { padding: 11px 12px; border-bottom: 1px solid #111; cursor: default; transition: background .1s; }
+.q-row { padding: 9px 12px 7px; border-bottom: 1px solid #111; cursor: default; transition: background .1s; }
 .q-row:hover { background: #111; }
-.q-lbl   { font-family: var(--font); font-size: 8.5px; letter-spacing: .12em; color: #fff; margin-bottom: 4px; text-transform: uppercase; }
-.q-price { font-family: var(--font); font-size: 15px; font-weight: 700; color: #fff; font-variant-numeric: tabular-nums; line-height: 1; margin-bottom: 4px; }
-.q-chg   { font-family: var(--font); font-size: 8.5px; font-variant-numeric: tabular-nums; letter-spacing: .06em; }
+.q-top   { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 2px; }
+.q-lbl   { font-family: var(--font); font-size: 7.5px; letter-spacing: .12em; color: #fff; text-transform: uppercase; }
+.q-price { font-family: var(--font); font-size: 13px; font-weight: 700; color: #fff; font-variant-numeric: tabular-nums; line-height: 1; margin-bottom: 2px; }
+.q-chg   { font-family: var(--font); font-size: 8px; font-variant-numeric: tabular-nums; letter-spacing: .06em; }
 .q-up    { color: #4caf50; }
 .q-dn    { color: #e05050; }
 .q-flat  { color: #fff; }
+.q-spark { display: block; width: 100%; height: 28px; margin-top: 4px; }
 .qp-ftr  { padding: 7px 12px; font-family: var(--font); font-size: 6px; letter-spacing: .18em; color: #fff; border-top: 1px solid #141414; flex-shrink: 0; }
 
 .art-read-link { margin-left: auto; font-family: var(--font); font-size: 7.5px; letter-spacing: .18em; text-transform: uppercase; color: var(--accent,#E97132); text-decoration: none; border: 1px solid rgba(233,113,50,.35); padding: 3px 8px; white-space: nowrap; transition: background .1s; }
@@ -319,8 +321,8 @@ html, body { height: 100%; overflow: hidden; }
 .intel-panel { margin: 22px 0 8px; border: 1px solid #1e1e1e; border-left: 3px solid var(--accent,#E97132); background: #0c0c0c; }
 .intel-hdr { display: flex; align-items: center; gap: 10px; padding: 9px 14px; border-bottom: 1px solid #1a1a1a; }
 .intel-hdr-lbl { font-size: 7px; letter-spacing: .35em; text-transform: uppercase; color: var(--accent,#E97132); font-weight: 700; }
-.intel-hdr-sub { font-size: 7px; letter-spacing: .12em; text-transform: uppercase; color: #555; }
-.intel-loading { padding: 16px 14px; font-size: 9px; letter-spacing: .2em; color: #444; text-transform: uppercase; }
+.intel-hdr-sub { font-size: 7px; letter-spacing: .12em; text-transform: uppercase; color: rgba(255,255,255,0.5); }
+.intel-loading { padding: 16px 14px; font-size: 9px; letter-spacing: .2em; color: #ffffff; text-transform: uppercase; }
 .intel-loading .ld::after { content: '...'; animation: ldots 1.2s steps(3,end) infinite; }
 @keyframes ldots { 0%{content:'.'} 33%{content:'..'} 66%{content:'...'} }
 .intel-body { padding: 14px; }
@@ -517,6 +519,7 @@ html, body { height: 100%; overflow: hidden; }
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="site.js"></script>
+<script src="assetProfiles.js"></script>
 <script src="intel-search.js"></script>
 <script>document.addEventListener('DOMContentLoaded',function(){intelSearchInit('intel-search-container');});</script>
 <script>
@@ -543,7 +546,7 @@ var CAT_TAG     = { whisky:'WHISKY', gold:'PRECIOUS', macro:'MACRO', forex:'FORE
 /* All US ETF/stock symbols — confirmed working on Finnhub free tier */
 var CAT_CHART = {
   whisky:    {lbl:'S&P 500  ·  GLOBAL EQUITIES BENCHMARK',          sym:'DEO', mult:1,  fred:'SP500',       fredU:'INDEX'},
-  gold:      {lbl:'S&P 500  ·  GLOBAL MARKET CONTEXT',              sym:'GLD', mult:10, fred:'SP500',       fredU:'INDEX'},
+  gold:      {lbl:'GOLD SPOT PRICE  ·  USD / TROY OZ',               sym:'GLD', mult:10, fred:'GOLDAMGBD228NLBM', fredU:'USD'},
   macro:     {lbl:'US 20YR TREASURY YIELD  ·  %',                   sym:'TLT', mult:1,  fred:'DGS20',       fredU:'%'},
   forex:     {lbl:'GBP / USD  ·  STERLING · DOLLAR',                sym:'UUP', mult:1,  fred:'DEXUSUK',     fredU:'USD'},
   commodity: {lbl:'WTI CRUDE OIL  ·  USD / BARREL',                 sym:'BNO', mult:1,  fred:'DCOILWTICO',  fredU:'USD/BBL'},
@@ -551,13 +554,76 @@ var CAT_CHART = {
   geo:       {lbl:'US 20YR TREASURY YIELD  ·  RISK GAUGE',          sym:'GLD', mult:10, fred:'DGS20',       fredU:'%'}
 };
 var QUOTE_SYMS = {
-  whisky:    [{sym:'DEO', mult:1,l:'DIAGEO (DEO)'},{sym:'BF.B',mult:1,l:'BROWN-FORMAN'},{sym:'MGPI',mult:1,l:'MGP INGREDIENTS'},{sym:'GLD',mult:10,l:'GOLD/OZ'}],
-  gold:      [{sym:'GLD',mult:10,l:'GOLD/OZ'},{sym:'SLV',mult:1,l:'SILVER'},{sym:'UUP',mult:1,l:'USD INDEX'},{sym:'TLT',mult:1,l:'US 20YR BOND'}],
-  macro:     [{sym:'TLT',mult:1,l:'US 20YR BOND'},{sym:'IEF',mult:1,l:'US 10YR BOND'},{sym:'SHY',mult:1,l:'US 2YR BOND'},{sym:'UUP',mult:1,l:'USD INDEX'}],
-  forex:     [{sym:'UUP',mult:1,l:'USD INDEX'},{sym:'FXE',mult:1,l:'EUR/USD'},{sym:'FXB',mult:1,l:'GBP/USD'},{sym:'FXY',mult:1,l:'JPY'}],
-  commodity: [{sym:'BNO',mult:1,l:'BRENT CRUDE'},{sym:'USO',mult:1,l:'WTI CRUDE'},{sym:'UNG',mult:1,l:'NATURAL GAS'},{sym:'GLD',mult:10,l:'GOLD/OZ'}],
-  markets:   [{sym:'SPY',mult:1,l:'S&P 500'},{sym:'QQQ',mult:1,l:'NASDAQ 100'},{sym:'VXX',mult:1,l:'VIX FUTURES'},{sym:'TLT',mult:1,l:'US 20YR BOND'}],
-  geo:       [{sym:'GLD',mult:10,l:'GOLD/OZ'},{sym:'BNO',mult:1,l:'BRENT CRUDE'},{sym:'VXX',mult:1,l:'VIX FUTURES'},{sym:'TLT',mult:1,l:'US 20YR BOND'}]
+  whisky:    [
+    {sym:'DEO', mult:1, l:'DIAGEO (DEO)',      fred:'DTWEXBGS'},
+    {sym:'BF.B',mult:1, l:'BROWN-FORMAN',      fred:null},
+    {sym:'MGPI',mult:1, l:'MGP INGREDIENTS',   fred:null},
+    {sym:'GLD', mult:10,l:'GOLD / OZ',         fred:'GOLDAMGBD228NLBM'},
+    {sym:'TLT', mult:1, l:'US 20YR BOND',      fred:'DGS20'},
+    {sym:'UUP', mult:1, l:'USD INDEX',         fred:'DTWEXBGS'},
+    {sym:'FXB', mult:1, l:'GBP / USD',         fred:'DEXUSUK'},
+    {sym:'SPY', mult:1, l:'S&P 500',           fred:'SP500'},
+  ],
+  gold:      [
+    {sym:'GLD', mult:10,l:'GOLD / OZ',         fred:'GOLDAMGBD228NLBM'},
+    {sym:'SLV', mult:1, l:'SILVER',            fred:'SLVPRUSD'},
+    {sym:'UUP', mult:1, l:'USD INDEX',         fred:'DTWEXBGS'},
+    {sym:'TLT', mult:1, l:'US 20YR BOND',      fred:'DGS20'},
+    {sym:'IEF', mult:1, l:'US 10YR BOND',      fred:'DGS10'},
+    {sym:'FXB', mult:1, l:'GBP / USD',         fred:'DEXUSUK'},
+    {sym:'SPY', mult:1, l:'S&P 500',           fred:'SP500'},
+    {sym:'VXX', mult:1, l:'VIX FUTURES',       fred:null},
+  ],
+  macro:     [
+    {sym:'TLT', mult:1, l:'US 20YR BOND',      fred:'DGS20'},
+    {sym:'IEF', mult:1, l:'US 10YR BOND',      fred:'DGS10'},
+    {sym:'SHY', mult:1, l:'US 2YR BOND',       fred:'DGS2'},
+    {sym:'UUP', mult:1, l:'USD INDEX',         fred:'DTWEXBGS'},
+    {sym:'SPY', mult:1, l:'S&P 500',           fred:'SP500'},
+    {sym:'GLD', mult:10,l:'GOLD / OZ',         fred:'GOLDAMGBD228NLBM'},
+    {sym:'VXX', mult:1, l:'VIX FUTURES',       fred:null},
+    {sym:'FXB', mult:1, l:'GBP / USD',         fred:'DEXUSUK'},
+  ],
+  forex:     [
+    {sym:'UUP', mult:1, l:'USD INDEX',         fred:'DTWEXBGS'},
+    {sym:'FXE', mult:1, l:'EUR / USD',         fred:'DEXUSEU'},
+    {sym:'FXB', mult:1, l:'GBP / USD',         fred:'DEXUSUK'},
+    {sym:'FXY', mult:1, l:'JPY / USD',         fred:'DEXJPUS'},
+    {sym:'GLD', mult:10,l:'GOLD / OZ',         fred:'GOLDAMGBD228NLBM'},
+    {sym:'TLT', mult:1, l:'US 20YR BOND',      fred:'DGS20'},
+    {sym:'EWJ', mult:1, l:'JAPAN EQUITIES',    fred:null},
+    {sym:'SPY', mult:1, l:'S&P 500',           fred:'SP500'},
+  ],
+  commodity: [
+    {sym:'BNO', mult:1, l:'BRENT CRUDE',       fred:'DCOILBRENTEU'},
+    {sym:'USO', mult:1, l:'WTI CRUDE',         fred:'DCOILWTICO'},
+    {sym:'UNG', mult:1, l:'NATURAL GAS',       fred:'DHHNGSP'},
+    {sym:'GLD', mult:10,l:'GOLD / OZ',         fred:'GOLDAMGBD228NLBM'},
+    {sym:'SLV', mult:1, l:'SILVER',            fred:'SLVPRUSD'},
+    {sym:'COPX',mult:1, l:'COPPER MINERS',     fred:null},
+    {sym:'UUP', mult:1, l:'USD INDEX',         fred:'DTWEXBGS'},
+    {sym:'TLT', mult:1, l:'US 20YR BOND',      fred:'DGS20'},
+  ],
+  markets:   [
+    {sym:'SPY', mult:1, l:'S&P 500',           fred:'SP500'},
+    {sym:'QQQ', mult:1, l:'NASDAQ 100',        fred:'NASDAQCOM'},
+    {sym:'VXX', mult:1, l:'VIX FUTURES',       fred:null},
+    {sym:'TLT', mult:1, l:'US 20YR BOND',      fred:'DGS20'},
+    {sym:'GLD', mult:10,l:'GOLD / OZ',         fred:'GOLDAMGBD228NLBM'},
+    {sym:'UUP', mult:1, l:'USD INDEX',         fred:'DTWEXBGS'},
+    {sym:'FXB', mult:1, l:'GBP / USD',         fred:'DEXUSUK'},
+    {sym:'BNO', mult:1, l:'BRENT CRUDE',       fred:'DCOILBRENTEU'},
+  ],
+  geo:       [
+    {sym:'GLD', mult:10,l:'GOLD / OZ',         fred:'GOLDAMGBD228NLBM'},
+    {sym:'BNO', mult:1, l:'BRENT CRUDE',       fred:'DCOILBRENTEU'},
+    {sym:'VXX', mult:1, l:'VIX FUTURES',       fred:null},
+    {sym:'TLT', mult:1, l:'US 20YR BOND',      fred:'DGS20'},
+    {sym:'UUP', mult:1, l:'USD INDEX',         fred:'DTWEXBGS'},
+    {sym:'SLV', mult:1, l:'SILVER',            fred:'SLVPRUSD'},
+    {sym:'FXB', mult:1, l:'GBP / USD',         fred:'DEXUSUK'},
+    {sym:'SPY', mult:1, l:'S&P 500',           fred:'SP500'},
+  ]
 };
 
 var SRC_CAT = {
@@ -758,20 +824,29 @@ function renderArticle(story) {
     if(s2) openStoryTab(s2);
   });
 
-  /* Click-to-load intelligence button */
-  document.getElementById('art-intel-'+story.id).addEventListener('click', function(e) {
-    var btn = e.target.closest('.intel-load-btn');
-    if (!btn) return;
-    var el = document.getElementById('art-intel-'+story.id);
-    el.classList.remove('intel-panel--idle');
-    el.innerHTML =
-      '<div class="intel-hdr">'+
-        '<span class="intel-hdr-lbl">▌ BROKERS INTELLIGENCE</span>'+
-        '<span class="intel-hdr-sub">FOR BROKER USE</span>'+
-      '</div>'+
-      '<div class="intel-loading">ANALYSING<span class="ld"></span></div>';
-    fetchIntelligence(story);
-  });
+  /* Click-to-load intelligence button — use querySelector to avoid URL-in-ID breakage */
+  var _intelPanel = document.querySelector('#art-scroll .intel-panel');
+  if (_intelPanel) {
+    _intelPanel.addEventListener('click', function(e) {
+      var btn = e.target.closest('.intel-load-btn');
+      if (!btn) return;
+      var el = this;
+      if (!el.classList.contains('intel-panel--idle')) return;
+      el.classList.remove('intel-panel--idle');
+      el.innerHTML =
+        '<div class="intel-hdr">'+
+          '<span class="intel-hdr-lbl">▌ BROKERS INTELLIGENCE</span>'+
+          '<span class="intel-hdr-sub">FOR BROKER USE</span>'+
+        '</div>'+
+        '<div class="intel-loading"><span class="il-msg">READING THE BRIEF</span><span class="ld"></span></div>';
+      (function(){
+        var msgs=['READING THE BRIEF','ANALYSING CONTEXT','IDENTIFYING OPPORTUNITIES','DRAFTING INTELLIGENCE','FINALISING BRIEF'];
+        var mi=0, ms=el.querySelector('.il-msg');
+        el._lTimer=setInterval(function(){ mi=(mi+1)%msgs.length; if(ms)ms.textContent=msgs[mi]; },1600);
+      })();
+      fetchIntelligence(story, null, el);
+    });
+  }
 
   fetchQuotes(cat);
   if(chartCfg) drawChart(story.id, chartCfg);
@@ -779,25 +854,38 @@ function renderArticle(story) {
 }
 
 /* ── BROKERS INTELLIGENCE — AI EXPLANATION ─────────────────── */
-async function fetchIntelligence(story, elId) {
-  var el=document.getElementById(elId||('art-intel-'+story.id));
+async function fetchIntelligence(story, elId, directEl) {
+  var el=directEl||(elId?document.getElementById(elId):document.querySelector('#art-scroll .intel-panel'));
   if(!el) return;
+  /* start or hand off cycling loading messages */
+  (function(){
+    var ms=el.querySelector('.il-msg');
+    if(!ms) return;
+    if(el._lTimer) { clearInterval(el._lTimer); el._lTimer=null; }
+    var msgs=['READING THE BRIEF','ANALYSING CONTEXT','IDENTIFYING OPPORTUNITIES','DRAFTING INTELLIGENCE','FINALISING BRIEF'];
+    var mi=0;
+    el._lTimer=setInterval(function(){ mi=(mi+1)%msgs.length; if(ms&&ms.parentNode)ms.textContent=msgs[mi]; },1600);
+  })();
+  function _clearTimer(){ if(el._lTimer){ clearInterval(el._lTimer); el._lTimer=null; } }
   try {
     var res=await fetch('/.netlify/functions/explain',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
-        headline: story.headline,
-        summary:  story.summary,
-        category: story._cat||'markets'
+        headline:    story.headline,
+        summary:     story.summary,
+        category:    story._cat||'markets',
+        lensKey:     (window._assetLens && window._assetLens.key)         || 'universal',
+        lensContext: (window._assetLens && window._assetLens.promptContext) || ''
       })
     });
     var d=res.ok?await res.json():null;
-    if(!d||d.error) { el.querySelector('.intel-loading').textContent='Intelligence unavailable.'; return; }
+    if(!d||d.error) { _clearTimer(); el.querySelector('.intel-loading').textContent='Intelligence unavailable.'; return; }
 
     var riskCls=d.risk==='RISK ON'?'on':d.risk==='RISK OFF'?'off':'neu';
     var riskLbl=d.risk||'NEUTRAL';
 
+    _clearTimer();
     el.innerHTML=
       '<div class="intel-hdr">'+
         '<span class="intel-hdr-lbl">▌ BROKERS INTELLIGENCE</span>'+
@@ -854,13 +942,53 @@ async function fetchIntelligence(story, elId) {
 
       '</div>';
   } catch(e) {
+    _clearTimer();
     var lo=el.querySelector('.intel-loading');
     if(lo) lo.textContent='Intelligence unavailable.';
   }
 }
 
 /* ── DATA HELPERS ──────────────────────────────────────────── */
-async function finnhubQ(sym){ return fetch('https://finnhub.io/api/v1/quote?symbol='+sym+'&token='+FINNHUB_KEY).then(function(r){return r.json();}); }
+/* ── FRED MINI SPARKLINE FOR QUOTES PANEL ──────────────────── */
+async function _fredSparkline(series, svgId, col) {
+  try {
+    if (!_fredCache[series]) {
+      var res = await fetch('/.netlify/functions/macro-data?type=chart&series=' + series + '&years=1');
+      var json = res.ok ? await res.json() : {};
+      _fredCache[series] = (json.data && json.data.length) ? json.data : null;
+    }
+    var data = _fredCache[series];
+    if (!data || data.length < 2) return;
+    var cutoff = Date.now() - 60 * 86400 * 1000; /* 60 days */
+    var slice = data.filter(function(pt){ return new Date(pt.d).getTime() >= cutoff; });
+    if (slice.length < 4) slice = data.slice(-30);
+    var vals = slice.map(function(pt){ return pt.v; });
+    var mn = Math.min.apply(null, vals), mx = Math.max.apply(null, vals);
+    var rng = mx - mn || 1;
+    var W = 158, H = 28, pad = 2;
+    var pts = vals.map(function(v, i){
+      var x = pad + (i / (vals.length - 1)) * (W - pad * 2);
+      var y = H - pad - ((v - mn) / rng) * (H - pad * 2);
+      return x.toFixed(1) + ',' + y.toFixed(1);
+    });
+    var svg = document.getElementById(svgId);
+    if (!svg) return;
+    var last = vals[vals.length - 1], first = vals[0];
+    var fillCol = last >= first ? 'rgba(76,175,80,.12)' : 'rgba(224,80,80,.12)';
+    var lineCol = last >= first ? '#4caf50' : '#e05050';
+    var area = pts.join(' ') + ' ' + (W - pad).toFixed(1) + ',' + (H - pad) + ' ' + pad + ',' + (H - pad);
+    svg.innerHTML =
+      '<polygon points="'+area+'" fill="'+fillCol+'"/>'+
+      '<polyline points="'+pts.join(' ')+'" fill="none" stroke="'+lineCol+'" stroke-width="1.2"/>';
+  } catch(e) { /* silent fail */ }
+}
+
+async function finnhubQ(sym){
+  var ctrl=new AbortController(), t=setTimeout(function(){ctrl.abort();},8000);
+  try{var r=await fetch('https://finnhub.io/api/v1/quote?symbol='+sym+'&token='+FINNHUB_KEY,{signal:ctrl.signal});return r.json();}
+  catch(e){return null;}
+  finally{clearTimeout(t);}
+}
 
 /* open.er-api.com: free, no key, CORS-enabled. rates[GBP]=0.786 means 1 USD = 0.786 GBP */
 var _erRates=null, _erAge=0;
@@ -1017,7 +1145,19 @@ async function drawChart(storyId, cfg) {
   try {
     var q=await finnhubQ(cfg.sym);
     if(!q||(q.c==null&&q.pc==null)){
-      if(document.getElementById('cwrap-'+storyId)===wrap) wrap.innerHTML=unavail;
+      /* Live price unavailable — still render the FRED historical chart */
+      if(document.getElementById('cwrap-'+storyId)===wrap){
+        wrap.innerHTML=buildSnapHTML(storyId,0,0,0,0,0,'#555','–',0,0,cfg);
+        _fetchAndPaintChart(storyId,cfg,'#E97132','1Y');
+        var cw2b=document.getElementById('mkt-chart-'+storyId);
+        if(cw2b) cw2b.querySelectorAll('.mkt-cp').forEach(function(btn){
+          btn.addEventListener('click',function(){
+            cw2b.querySelectorAll('.mkt-cp').forEach(function(b){b.classList.remove('active');});
+            btn.classList.add('active');
+            _fetchAndPaintChart(storyId,cfg,'#E97132',btn.dataset.p);
+          });
+        });
+      }
       return;
     }
     var mult=cfg.mult||1;
@@ -1046,31 +1186,43 @@ async function drawChart(storyId, cfg) {
 /* ── FETCH QUOTES (Finnhub ETFs + open.er-api.com forex) ───── */
 async function fetchQuotes(cat) {
   if(quotesLock)return; quotesLock=true;
-  var syms=QUOTE_SYMS[cat]||QUOTE_SYMS.gold;
-  var ql=document.getElementById('quotes-list');
-  ql.innerHTML='<div class="state-msg" style="padding:14px 10px;font-size:7px;">LOADING<span class="ld"></span></div>';
-  var erRates=null; try{erRates=await loadFxRates();}catch(e){}
-  var res=await Promise.allSettled(syms.map(function(s){
-    if(s.kind==='fx'){
-      if(!erRates||!erRates[s.p]) return Promise.resolve(null);
-      var c=erRate(erRates,s.p,s.inv);
-      return Promise.resolve({l:s.l,c:c,pc:c,noChg:true});
-    }
-    if(s.sym) return finnhubQ(s.sym).then(function(q){var m=s.mult||1;var raw=q&&(q.c||q.pc);return raw?{l:s.l,c:(q.c||q.pc)*m,pc:(q.pc||q.c||raw)*m}:null;});
-    return Promise.resolve(null);
-  }));
-  ql.innerHTML='';
-  res.forEach(function(r){
-    if(r.status!=='fulfilled'||!r.value)return;
-    var v=r.value, chg=v.c-v.pc, pct=v.pc&&!v.noChg?(chg/v.pc*100):0;
-    var dir=pct>0.005?'up':pct<-0.005?'dn':'flat';
-    var chgStr=v.noChg?'—':(pct>=0?'+':'')+pct.toFixed(2)+'%'+(chg>=0?' ▲':' ▼');
-    var qrow=document.createElement('div'); qrow.className='q-row';
-    qrow.innerHTML='<div class="q-lbl">'+v.l+'</div><div class="q-price">'+fmtPrice(v.c)+'</div><div class="q-chg q-'+dir+'">'+chgStr+'</div>';
-    ql.appendChild(qrow);
-  });
-  if(!ql.children.length)ql.innerHTML='<div class="state-msg" style="padding:14px 10px;font-size:7px;">—</div>';
-  quotesLock=false;
+  try {
+    var syms=QUOTE_SYMS[cat]||QUOTE_SYMS.gold;
+    var ql=document.getElementById('quotes-list');
+    ql.innerHTML='<div class="state-msg" style="padding:14px 10px;font-size:7px;">LOADING<span class="ld"></span></div>';
+    var erRates=null; try{erRates=await loadFxRates();}catch(e){}
+    var res=await Promise.allSettled(syms.map(function(s){
+      if(s.kind==='fx'){
+        if(!erRates||!erRates[s.p]) return Promise.resolve(null);
+        var c=erRate(erRates,s.p,s.inv);
+        return Promise.resolve({l:s.l,c:c,pc:c,noChg:true});
+      }
+      if(s.sym) return finnhubQ(s.sym).then(function(q){var m=s.mult||1;var raw=q&&(q.c||q.pc);return raw?{l:s.l,c:(q.c||q.pc)*m,pc:(q.pc||q.c||raw)*m}:null;});
+      return Promise.resolve(null);
+    }));
+    ql.innerHTML='';
+    res.forEach(function(r, ri){
+      if(r.status!=='fulfilled'||!r.value)return;
+      var v=r.value, chg=v.c-v.pc, pct=v.pc&&!v.noChg?(chg/v.pc*100):0;
+      var dir=pct>0.005?'up':pct<-0.005?'dn':'flat';
+      var chgStr=v.noChg?'—':(pct>=0?'+':'')+pct.toFixed(2)+'%'+(chg>=0?' ▲':' ▼');
+      var spkId='qspk-'+ri+'-'+Date.now();
+      var qrow=document.createElement('div'); qrow.className='q-row';
+      qrow.innerHTML=
+        '<div class="q-top"><span class="q-lbl">'+v.l+'</span><span class="q-chg q-'+dir+'">'+chgStr+'</span></div>'+
+        '<div class="q-price">'+fmtPrice(v.c)+'</div>'+
+        (v.fred?'<svg class="q-spark" id="'+spkId+'" viewBox="0 0 158 28" preserveAspectRatio="none"></svg>':'');
+      ql.appendChild(qrow);
+      /* async sparkline from FRED */
+      if(v.fred)(function(fredSeries, svgId, upColor){
+        var col=upColor;
+        _fredSparkline(fredSeries, svgId, col);
+      })(v.fred, spkId, dir==='up'?'#4caf50':dir==='dn'?'#e05050':'#888');
+    });
+    if(!ql.children.length)ql.innerHTML='<div class="state-msg" style="padding:14px 10px;font-size:7px;">—</div>';
+  } finally {
+    quotesLock=false;
+  }
 }
 
 /* ── EXTENDED FETCH (best effort) ──────────────────────────── */
@@ -1208,7 +1360,7 @@ function buildArticleHTML(story, pfx) {
           '<span class="intel-hdr-lbl">▌ BROKERS INTELLIGENCE</span>'+
           '<span class="intel-hdr-sub">AI-GENERATED · FOR BROKER USE</span>'+
         '</div>'+
-        '<div class="intel-loading">ANALYSING<span class="ld"></span></div>'+
+        '<div class="intel-loading"><span class="il-msg">READING THE BRIEF</span><span class="ld"></span></div>'+
       '</div>'+
       chartHTML+relHTML+
       '<div class="art-attribution">SOURCE: '+src.toUpperCase()+'</div>'+

@@ -84,8 +84,10 @@
 }
 .intel-drop-badge.co  { background: rgba(233,113,50,.15); color: #E97132; border: 1px solid rgba(233,113,50,.4); }
 .intel-drop-badge.cx  { background: rgba(68,144,204,.15); color: #48a0e8; border: 1px solid rgba(68,144,204,.4); }
+.intel-drop-badge.sc  { background: rgba(61,170,106,.15); color: #3DAA6A; border: 1px solid rgba(61,170,106,.4); }
 .intel-drop-item:hover .intel-drop-badge.co { background: rgba(255,255,255,.2); color: #fff; border-color: rgba(255,255,255,.4); }
 .intel-drop-item:hover .intel-drop-badge.cx { background: rgba(255,255,255,.2); color: #fff; border-color: rgba(255,255,255,.4); }
+.intel-drop-item:hover .intel-drop-badge.sc { background: rgba(255,255,255,.2); color: #fff; border-color: rgba(255,255,255,.4); }
 .intel-drop-label { font-size: 11px; color: #e0e0e0; letter-spacing: .03em; flex: 1; }
 .intel-drop-item:hover .intel-drop-label { color: #fff; }
 .intel-drop-ticker { font-size: 9px; color: #fff; letter-spacing: .12em; flex-shrink: 0; }
@@ -197,6 +199,9 @@
 .sp-badge.private { background: rgba(233,113,50,.08); border: 1px solid rgba(233,113,50,.25); color: #E97132; }
 .sp-badge.event { background: rgba(68,144,204,.08); border: 1px solid rgba(68,144,204,.25); color: #48a0e8; }
 .sp-loading { padding: 20px; text-align: center; font-size: 9px; letter-spacing: .2em; color: #fff; text-transform: uppercase; }
+.sp-intel-load { padding: 20px; text-align: center; font-size: 9px; letter-spacing: .2em; color: #E97132; text-transform: uppercase; display: flex; align-items: center; justify-content: center; gap: 6px; }
+.sp-intel-ld::after { content: ''; display: inline-block; width: 12px; animation: sp-ld-dots 1.2s steps(4, end) infinite; }
+@keyframes sp-ld-dots { 0%{content:''} 25%{content:'.'} 50%{content:'..'} 75%{content:'...'} 100%{content:''} }
 /* remove old single SE handle */
 .sp-resize { display: none; }
 
