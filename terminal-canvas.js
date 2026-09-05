@@ -199,7 +199,7 @@
       ]},
       { cat: 'NEWS & DATA', items: [
         {type:'news',          icon:'◈', lbl:'LIVE HEADLINES',      sub:'Latest news from all feeds'},
-        {type:'live_tv',       icon:'▶', lbl:'NEWS TV',             sub:'Live streaming — Al Jazeera · Sky · CNBC · Bloomberg'},
+        {type:'live_tv',       icon:'▶', lbl:'NEWS TV',             sub:'Live channels + Reuters · Bloomberg · FT · CNBC · Yahoo Finance clips'},
         {type:'ticker',        icon:'▸', lbl:'NEWS TICKER',         sub:'Scrolling headline bar — gold or whisky filter'},
         {type:'econ_calendar', icon:'◫', lbl:'ECONOMIC CALENDAR',   sub:'Upcoming market & macro events'},
       ]},
@@ -5167,52 +5167,285 @@
 
   /* ── LIVE TV WIDGET ─────────────────────────────────────────── */
   function renderLiveTVWidget(id, body) {
-    var TV_CHANNELS = [
-      { key:'france24',  label:'FRANCE 24',   cid:'UCQfwfsi5VrQ8yKZ-UWmAEFg', tag:'INT\'L',   sub:'English · 24/7 live' },
-      { key:'euronews',  label:'EURONEWS',    cid:'UCW5DxBMHwDkWBxVv3MhO27A', tag:'EUROPE',   sub:'English · 24/7 live' },
-      { key:'wion',      label:'WION',        cid:'UCw0PBPuKMmEYxORQ5sPiQEA', tag:'GLOBAL',   sub:'English · 24/7 live' },
-      { key:'dw',        label:'DW NEWS',     cid:'UCknLrEdhRCp1aegoMqRaCZg', tag:'EUROPE',   sub:'English · 24/7 live' },
-      { key:'cnbc',      label:'CNBC',        cid:'UCvJJ_dzjViJCoLf5uKUTwoA', tag:'MARKETS',  sub:'English · business live' },
-      { key:'bloomberg', label:'BLOOMBERG TV',cid:'UCIALMKvObZNtJ6AmdCLP7Lg', tag:'MARKETS',  sub:'May require subscription' },
-    ];
-    var _ch = 'france24';
+    var A = '#E97132';
 
-    function render() {
-      var ch = TV_CHANNELS.find(function(c){ return c.key === _ch; }) || TV_CHANNELS[0];
-      var A = '#E97132';
-      /* YouTube dropped live_stream?channel= — use the nocookie embed which is more permissive */
-      var embedSrc = 'https://www.youtube-nocookie.com/embed/live_stream?channel=' + ch.cid + '&autoplay=1&mute=1&rel=0&modestbranding=1&enablejsapi=1';
+    /* Each channel: embed = iframe src (official embed endpoint); direct = opens in new tab.
+       France 24 publishes a dedicated iframe endpoint. Others open their own live pages.
+       This removes all YouTube dependency and branding. */
+    var TV_CHANNELS = [
+      {
+        key:'schwab',
+        label:'SCHWAB NETWORK', tag:'MARKETS',
+        sub:'US markets · trading · macro · 24/7',
+        desc:'Professional financial television. Live market commentary, trading analysis, macro intelligence and earnings coverage. Formerly TD Ameritrade Network.',
+        embed: null,
+        direct:'https://schwabnetwork.com'
+      },
+      {
+        key:'bloomberg',
+        label:'BLOOMBERG TV', tag:'MARKETS',
+        sub:'Global business & markets live',
+        desc:'Real-time business news, markets data and financial analysis from Bloomberg\'s global newsroom. Coverage of equities, fixed income, FX and commodities.',
+        embed: null,
+        direct:'https://www.bloomberg.com/live'
+      },
+      {
+        key:'france24',
+        label:'FRANCE 24', tag:'INT\'L',
+        sub:'English · international · 24/7',
+        desc:'International live news from a global perspective. Breaking news, world events, geopolitics and in-depth analysis broadcast in English around the clock.',
+        embed:'https://www.france24.com/en/live-news-iframe',
+        direct:'https://www.france24.com/en/live/'
+      },
+      {
+        key:'aljazeera',
+        label:'AL JAZEERA', tag:'GLOBAL',
+        sub:'English · world news · 24/7',
+        desc:'Award-winning international news coverage from Al Jazeera English. Global affairs, conflict coverage, investigative journalism and economic reporting.',
+        embed: null,
+        direct:'https://www.aljazeera.com/live/'
+      },
+      {
+        key:'sky',
+        label:'SKY NEWS', tag:'UK',
+        sub:'UK & world breaking news',
+        desc:'Sky News live: breaking UK news, political analysis, business coverage and world events updated continuously throughout the day and night.',
+        embed: null,
+        direct:'https://news.sky.com/watch-sky-news-live'
+      },
+      {
+        key:'dw',
+        label:'DW NEWS', tag:'EUROPE',
+        sub:'European & global analysis',
+        desc:'Deutsche Welle English: European politics, economics and world news. Independent international broadcasting with strong coverage of EU affairs, global trade and emerging markets.',
+        embed: null,
+        direct:'https://www.dw.com/en/live-tv/s-9831'
+      }
+    ];
+
+    var _ch    = 'schwab';
+    var _mode  = 'live';      /* 'live' | 'clips' */
+    var _ctag  = 'ALL';
+    var _playing = null;      /* { id, title } when a clip is open */
+    var _clips   = [];
+    var _clipsLoaded = false;
+
+    var CLIP_TAGS = ['ALL','REUTERS','BLOOMBERG','CNBC','FT','YAHOO FINANCE','SKY BUSINESS'];
+
+    function buildLaunchCard(ch) {
+      return '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:30px;box-sizing:border-box;background:linear-gradient(160deg,#080808 0%,#0d0d0d 100%);">' +
+        /* grid lines decorative */
+        '<div style="position:absolute;inset:0;background-image:linear-gradient(rgba(233,113,50,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(233,113,50,0.04) 1px,transparent 1px);background-size:32px 32px;pointer-events:none;"></div>' +
+        '<div style="position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:18px;max-width:340px;text-align:center;">' +
+          /* live pill */
+          '<div style="display:flex;align-items:center;gap:6px;background:rgba(233,113,50,0.12);border:1px solid rgba(233,113,50,0.3);border-radius:20px;padding:4px 10px;">' +
+            '<div style="width:5px;height:5px;border-radius:50%;background:' + A + ';animation:blink 1.4s step-start infinite;"></div>' +
+            '<span style="font-size:7px;letter-spacing:.15em;color:' + A + ';font-family:Consolas,monospace;">LIVE NOW</span>' +
+          '</div>' +
+          /* channel name */
+          '<div style="font-size:20px;font-weight:700;letter-spacing:.06em;color:#fff;font-family:Consolas,monospace;line-height:1.1;">' + ch.label + '</div>' +
+          /* tag */
+          '<div style="font-size:7px;letter-spacing:.2em;color:rgba(255,255,255,0.3);font-family:Consolas,monospace;">' + ch.tag + '  ·  ' + ch.sub.toUpperCase() + '</div>' +
+          /* divider */
+          '<div style="width:40px;height:1px;background:rgba(233,113,50,0.4);"></div>' +
+          /* description */
+          '<div style="font-size:9.5px;line-height:1.65;color:rgba(255,255,255,0.55);font-family:Consolas,monospace;">' + ch.desc + '</div>' +
+          /* launch button */
+          '<a href="' + ch.direct + '" target="_blank" rel="noopener" style="' +
+            'display:inline-flex;align-items:center;gap:8px;' +
+            'background:' + A + ';color:#000;' +
+            'font-family:Consolas,monospace;font-size:8px;font-weight:700;letter-spacing:.15em;' +
+            'padding:10px 22px;border-radius:2px;text-decoration:none;margin-top:4px;' +
+            'border:none;cursor:pointer;transition:opacity .15s;"' +
+            ' onmouseover="this.style.opacity=\'0.85\'" onmouseout="this.style.opacity=\'1\'">' +
+            '▶  OPEN LIVE STREAM' +
+          '</a>' +
+          '<div style="font-size:7px;color:rgba(255,255,255,0.2);letter-spacing:.08em;font-family:Consolas,monospace;">Opens in new window · no account required</div>' +
+        '</div>' +
+      '</div>';
+    }
+
+    function renderPlayer(vid) {
+      /* full-widget YouTube embed for a specific video ID */
       body.innerHTML =
-        '<div style="display:flex;flex-direction:column;height:100%;overflow:hidden;background:#000;">' +
-          '<div style="display:flex;gap:0;flex-shrink:0;border-bottom:1px solid #1a1a1a;background:#000;overflow-x:auto;scrollbar-width:none;">' +
-            TV_CHANNELS.map(function(c) {
-              var act = c.key === _ch;
-              return '<button id="tv-ch-' + c.key + '-' + id + '" style="' +
-                'flex-shrink:0;padding:7px 12px;font-size:8px;letter-spacing:.1em;font-family:Consolas,monospace;' +
-                'border:none;border-bottom:2px solid ' + (act ? A : 'transparent') + ';' +
-                'background:transparent;color:' + (act ? A : '#ffffff') + ';' +
-                'cursor:pointer;white-space:nowrap;">' +
-                c.label +
-                '<span style="font-size:6.5px;color:' + (act ? A : 'rgba(255,255,255,0.45)') + ';margin-left:6px;">' + c.tag + '</span>' +
-              '</button>';
-            }).join('') +
+        '<div style="display:flex;flex-direction:column;height:100%;background:#000;">' +
+          '<div style="flex-shrink:0;display:flex;align-items:center;gap:8px;padding:6px 10px;background:#050505;border-bottom:1px solid #1a1a1a;">' +
+            '<button id="tv-back-' + id + '" style="background:none;border:none;color:' + A + ';font-size:8px;letter-spacing:.1em;font-family:Consolas,monospace;cursor:pointer;padding:0;">← BACK</button>' +
+            '<span style="font-size:7.5px;color:rgba(255,255,255,0.4);font-family:Consolas,monospace;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' +
+              (vid.tag ? '[' + vid.tag + ']  ' : '') + (vid.title || '') +
+            '</span>' +
           '</div>' +
-          '<div style="flex:1;position:relative;background:#000;min-height:0;overflow:hidden;">' +
-            '<iframe src="' + embedSrc + '" ' +
-              'style="width:100%;height:100%;border:none;display:block;" ' +
-              'allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" ' +
-              'referrerpolicy="no-referrer" allowfullscreen></iframe>' +
-          '</div>' +
-          '<div style="flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:5px 10px;background:#050505;border-top:1px solid #1a1a1a;">' +
-            '<div style="font-size:6px;letter-spacing:.1em;color:' + A + ';">' + ch.label + '  <span style="color:rgba(255,255,255,0.25);">·  ' + ch.sub.toUpperCase() + '</span></div>' +
-            '<div style="display:flex;align-items:center;gap:5px;"><div style="width:5px;height:5px;border-radius:50%;background:' + A + ';animation:blink 1.4s step-start infinite;"></div><div style="font-size:6px;letter-spacing:.12em;color:rgba(255,255,255,0.3);">LIVE</div></div>' +
+          '<div style="flex:1;min-height:0;">' +
+            '<iframe src="https://www.youtube-nocookie.com/embed/' + vid.id + '?autoplay=1&rel=0&modestbranding=1" ' +
+              'style="width:100%;height:100%;border:none;" allow="autoplay;fullscreen" allowfullscreen></iframe>' +
           '</div>' +
         '</div>';
+      var backBtn = body.querySelector('#tv-back-' + id);
+      if (backBtn) backBtn.addEventListener('click', function() { _playing = null; render(); });
+    }
+
+    function renderClips() {
+      var visible = _ctag === 'ALL' ? _clips : _clips.filter(function(c){ return c.tag === _ctag; });
+
+      var tagBar =
+        '<div style="display:flex;gap:0;flex-shrink:0;border-bottom:1px solid #1a1a1a;background:#000;overflow-x:auto;scrollbar-width:none;">' +
+          CLIP_TAGS.map(function(t) {
+            var act = t === _ctag;
+            return '<button id="tv-ctag-' + t.replace(/\s/g,'') + '-' + id + '" style="' +
+              'flex-shrink:0;padding:6px 10px;font-size:7.5px;letter-spacing:.1em;font-family:Consolas,monospace;' +
+              'border:none;border-bottom:2px solid ' + (act ? A : 'transparent') + ';' +
+              'background:transparent;color:' + (act ? A : 'rgba(255,255,255,0.55)') + ';cursor:pointer;white-space:nowrap;">' +
+              t + '</button>';
+          }).join('') +
+        '</div>';
+
+      var gridHtml;
+      if (!_clipsLoaded) {
+        gridHtml = '<div style="display:flex;align-items:center;justify-content:center;flex:1;color:rgba(255,255,255,0.3);font-size:8px;letter-spacing:.1em;font-family:Consolas,monospace;">LOADING CLIPS…</div>';
+      } else if (visible.length === 0) {
+        gridHtml = '<div style="display:flex;align-items:center;justify-content:center;flex:1;color:rgba(255,255,255,0.3);font-size:8px;letter-spacing:.1em;font-family:Consolas,monospace;">NO CLIPS AVAILABLE</div>';
+      } else {
+        var cards = visible.map(function(v) {
+          var ago = '';
+          try {
+            var ms = Date.now() - new Date(v.published).getTime();
+            var h = Math.floor(ms/3600000);
+            ago = h < 24 ? h + 'h ago' : Math.floor(h/24) + 'd ago';
+          } catch(e){}
+          return '<div id="tv-clip-' + v.id + '-' + id + '" style="' +
+            'cursor:pointer;background:#0c0c0c;border:1px solid #1a1a1a;border-radius:2px;overflow:hidden;' +
+            'display:flex;flex-direction:column;transition:border-color .15s;" ' +
+            'onmouseover="this.style.borderColor=\'' + A + '\'" onmouseout="this.style.borderColor=\'#1a1a1a\'">' +
+            '<div style="position:relative;aspect-ratio:16/9;overflow:hidden;background:#050505;">' +
+              '<img src="' + v.thumb + '" style="width:100%;height:100%;object-fit:cover;display:block;" loading="lazy" onerror="this.style.display=\'none\'">' +
+              '<div style="position:absolute;top:4px;left:4px;background:rgba(0,0,0,0.7);border:1px solid rgba(233,113,50,0.4);padding:2px 5px;font-size:6px;letter-spacing:.1em;color:' + A + ';font-family:Consolas,monospace;">' + (v.tag||'') + '</div>' +
+              '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;background:rgba(0,0,0,0.4);transition:opacity .15s;" class="tv-play-overlay-' + id + '">'+
+                '<div style="width:28px;height:28px;border-radius:50%;background:' + A + ';display:flex;align-items:center;justify-content:center;font-size:10px;color:#000;">▶</div>' +
+              '</div>' +
+            '</div>' +
+            '<div style="padding:6px 8px;flex:1;display:flex;flex-direction:column;gap:3px;">' +
+              '<div style="font-size:8px;line-height:1.4;color:rgba(255,255,255,0.85);font-family:Consolas,monospace;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">' + (v.title||'') + '</div>' +
+              '<div style="font-size:6.5px;color:rgba(255,255,255,0.3);font-family:Consolas,monospace;">' + (v.channel||v.tag||'') + '  ·  ' + ago + '</div>' +
+            '</div>' +
+          '</div>';
+        }).join('');
+
+        gridHtml =
+          '<div style="flex:1;overflow-y:auto;padding:8px;display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;align-content:start;">' +
+            cards +
+          '</div>';
+      }
+
+      body.innerHTML =
+        '<div style="display:flex;flex-direction:column;height:100%;overflow:hidden;background:#000;">' +
+          buildModeBar() + tagBar + gridHtml +
+        '</div>';
+
+      CLIP_TAGS.forEach(function(t) {
+        var btn = body.querySelector('#tv-ctag-' + t.replace(/\s/g,'') + '-' + id);
+        if (btn) btn.addEventListener('click', function() { _ctag = t; renderClips(); });
+      });
+
+      visible.forEach(function(v) {
+        var card = body.querySelector('#tv-clip-' + v.id + '-' + id);
+        if (!card) return;
+        card.addEventListener('mouseover', function() {
+          var ov = card.querySelector('.tv-play-overlay-' + id);
+          if (ov) ov.style.opacity = '1';
+        });
+        card.addEventListener('mouseout', function() {
+          var ov = card.querySelector('.tv-play-overlay-' + id);
+          if (ov) ov.style.opacity = '0';
+        });
+        card.addEventListener('click', function() { _playing = v; renderPlayer(v); });
+      });
+    }
+
+    function buildModeBar() {
+      return '<div style="display:flex;gap:0;flex-shrink:0;border-bottom:1px solid #222;background:#000;">' +
+        ['LIVE TV','VIDEO CLIPS'].map(function(m) {
+          var key = m === 'LIVE TV' ? 'live' : 'clips';
+          var act = _mode === key;
+          return '<button id="tv-mode-' + key + '-' + id + '" style="' +
+            'flex-shrink:0;padding:7px 14px;font-size:8px;letter-spacing:.12em;font-family:Consolas,monospace;' +
+            'border:none;border-bottom:2px solid ' + (act ? A : 'transparent') + ';' +
+            'background:transparent;color:' + (act ? '#fff' : 'rgba(255,255,255,0.4)') + ';cursor:pointer;">' +
+            m + '</button>';
+        }).join('') +
+        '<div style="flex:1;border-bottom:2px solid transparent;"></div>' +
+      '</div>';
+    }
+
+    function render() {
+      if (_mode === 'clips') { renderClips(); return; }
+
+      var ch = TV_CHANNELS.find(function(c){ return c.key === _ch; }) || TV_CHANNELS[0];
+
+      var channelBar =
+        '<div style="display:flex;gap:0;flex-shrink:0;border-bottom:1px solid #1a1a1a;background:#000;overflow-x:auto;scrollbar-width:none;">' +
+          TV_CHANNELS.map(function(c) {
+            var act = c.key === _ch;
+            return '<button id="tv-ch-' + c.key + '-' + id + '" style="' +
+              'flex-shrink:0;padding:7px 12px;font-size:8px;letter-spacing:.1em;font-family:Consolas,monospace;' +
+              'border:none;border-bottom:2px solid ' + (act ? A : 'transparent') + ';' +
+              'background:transparent;color:' + (act ? A : '#fff') + ';cursor:pointer;white-space:nowrap;">' +
+              c.label +
+              '<span style="font-size:6.5px;color:' + (act ? A : 'rgba(255,255,255,0.4)') + ';margin-left:6px;">' + c.tag + '</span>' +
+            '</button>';
+          }).join('') +
+        '</div>';
+
+      var contentArea = ch.embed
+        ? '<div style="flex:1;position:relative;background:#000;min-height:0;overflow:hidden;">' +
+            '<iframe src="' + ch.embed + '" style="width:100%;height:100%;border:none;display:block;" allow="autoplay;fullscreen" allowfullscreen referrerpolicy="no-referrer"></iframe>' +
+          '</div>'
+        : '<div style="flex:1;position:relative;min-height:0;overflow:hidden;">' + buildLaunchCard(ch) + '</div>';
+
+      var statusBar =
+        '<div style="flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:5px 10px;background:#050505;border-top:1px solid #1a1a1a;">' +
+          '<div style="font-size:6px;letter-spacing:.1em;color:' + A + ';">' + ch.label + '  <span style="color:rgba(255,255,255,0.22);">·  ' + ch.sub.toUpperCase() + '</span></div>' +
+          '<div style="display:flex;align-items:center;gap:5px;">' +
+            '<div style="width:5px;height:5px;border-radius:50%;background:' + A + ';animation:blink 1.4s step-start infinite;"></div>' +
+            '<div style="font-size:6px;letter-spacing:.12em;color:rgba(255,255,255,0.3);">LIVE</div>' +
+          '</div>' +
+        '</div>';
+
+      body.innerHTML =
+        '<div style="display:flex;flex-direction:column;height:100%;overflow:hidden;background:#000;">' +
+          buildModeBar() + channelBar + contentArea + statusBar +
+        '</div>';
+
+      /* mode buttons */
+      var liveBtn  = body.querySelector('#tv-mode-live-' + id);
+      var clipsBtn = body.querySelector('#tv-mode-clips-' + id);
+      if (liveBtn)  liveBtn.addEventListener('click',  function() { _mode = 'live';  render(); });
+      if (clipsBtn) clipsBtn.addEventListener('click', function() {
+        _mode = 'clips';
+        if (!_clipsLoaded) loadClips();
+        else renderClips();
+      });
 
       TV_CHANNELS.forEach(function(c) {
         var btn = body.querySelector('#tv-ch-' + c.key + '-' + id);
         if (btn) btn.addEventListener('click', function() { _ch = c.key; render(); });
       });
+    }
+
+    function loadClips() {
+      _clipsLoaded = false;
+      renderClips(); /* shows loading state */
+      fetch('/.netlify/functions/media-feed')
+        .then(function(r){ return r.json(); })
+        .then(function(d){
+          _clips = d.videos || [];
+          _clipsLoaded = true;
+          if (_mode === 'clips' && !_playing) renderClips();
+        })
+        .catch(function(){
+          _clipsLoaded = true;
+          _clips = [];
+          if (_mode === 'clips' && !_playing) renderClips();
+        });
     }
 
     render();
