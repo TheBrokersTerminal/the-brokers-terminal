@@ -9844,6 +9844,121 @@
           CONTRACTIONARY:    'The UK is in or near recession — CPI ' + ukCpiStr + ', BoE base rate ' + baseStr + ', 10Y gilt ' + giltStr + '. BoE rate cuts are coming. Sterling weakness and UK monetary easing are the dual catalyst for GBP-denominated hard asset performance. Scotch whisky sits at the intersection of UK supply and global dollar demand.'
         }
       };
+      /* ── Lens-aware angle variants ── */
+      var _lk = (window._assetLens && window._assetLens.key) || 'universal';
+      var _taxL = ['eis','vct','offshore'];
+      var _eqL  = ['pe','trusts'];
+
+      if (_taxL.indexOf(_lk) !== -1) {
+        var taxPitches = {
+          cycle: {
+            EXPANSIONARY:      'Business cycle CFNAI ' + cfnaiStr + ', yield curve ' + curveStr + ', GDP ' + gdpStr + ' annualised. Expansion phases are the ideal vintage window for new EIS commitments — companies accessed at growth-cycle valuations deliver the strongest loss-relief-adjusted returns. This is the environment for adding to client EIS exposure while business conditions support underlying portfolio performance.',
+            'MIXED / POSITIVE': 'Cycle breadth narrowing — CFNAI ' + cfnaiStr + ', yield curve ' + curveStr + ', GDP ' + gdpStr + ' annualised. Mixed signals favour VCT managers with defensive sector exposure: SaaS, healthcare services, and business services over consumer cyclicals. 30% upfront relief creates a structural return floor regardless of cycle direction.',
+            'MIXED / CAUTION':  'Late-cycle signals building — CFNAI ' + cfnaiStr + ', yield curve ' + curveStr + ', GDP ' + gdpStr + '. VCT and EIS investments with contracted, recurring revenues outperform in cycle deterioration. The 30% income tax relief is realised immediately — portfolio-level performance is secondary to tax capture at commitment.',
+            CONTRACTIONARY:    'Contraction confirmed — CFNAI ' + cfnaiStr + ', yield curve ' + curveStr + ', GDP ' + gdpStr + '. This is precisely when EIS loss relief becomes most valuable: downside is capped to 70p/£ after 30% relief and 45% loss relief on the remainder. Offshore investment bonds with gross roll-up allow repositioning without crystallising losses.'
+          },
+          inflation: {
+            EXPANSIONARY:      'Inflationary pressure building — CPI ' + cpiStr + ' YoY, Core PCE ' + corePCEStr + ', PPI ' + ppiStr + '. Real returns on cash are negative. The gross roll-up inside an offshore investment bond eliminates annual income tax drag — compounding at the pre-tax rate is the inflation protection that ISAs and GIAs cannot match.',
+            'MIXED / POSITIVE': 'Inflation above target — CPI ' + cpiStr + ' YoY, Core PCE ' + corePCEStr + ', PPI ' + ppiStr + '. EIS investments with pricing power — SaaS with index-linked contracts, healthcare services with fee escalators — protect against real value erosion inside a tax-efficient wrapper. VCT income is tax-free regardless of inflation level.',
+            'MIXED / CAUTION':  'Sticky inflation — CPI ' + cpiStr + ' YoY, Core PCE ' + corePCEStr + ', PPI ' + ppiStr + '. Higher-for-longer rates compress equity multiples but do not affect VCT distribution yield, which is tax-free. Offshore bond gross roll-up outperforms GIA alternatives by 45-55% over a decade at current inflation differentials.',
+            CONTRACTIONARY:    'Disinflation — CPI ' + cpiStr + ' YoY, Core PCE ' + corePCEStr + ', PPI ' + ppiStr + '. Rate pivot approaching. Gross roll-up inside offshore bonds captures the full pre-tax compounding that a falling rate environment delivers — without triggering income tax on each year\'s gain. Position in the bond before the pivot is confirmed.'
+          },
+          liquidity: {
+            EXPANSIONARY:      'Liquidity expanding — M2 ' + m2Str + ' YoY, Fed balance sheet ' + walclStr + '. Ample credit supports EIS portfolio company growth and VCT NAV appreciation. EIS managers in scale-up and growth equity see the strongest exit conditions when liquidity supports acquirer balance sheets.',
+            'MIXED / POSITIVE': 'Mixed liquidity — M2 ' + m2Str + ' YoY, Fed balance sheet ' + walclStr + '. EIS managers with conservative leverage in portfolio companies are better positioned for the tightening phase. VCT allocation to later-stage, cashflow-positive businesses is the prudent positioning.',
+            'MIXED / CAUTION':  'Liquidity tightening — M2 ' + m2Str + ' YoY, Fed balance sheet ' + walclStr + '. EIS and VCT companies relying on external capital face headwinds; those with internal cash generation are resilient. The 30% upfront relief on new EIS commitments provides immediate return regardless of exit timing.',
+            CONTRACTIONARY:    'Liquidity contraction — M2 ' + m2Str + ' YoY, Fed balance sheet ' + walclStr + '. Credit stress elevates the value of IHT-exempt EIS portfolios and loss-relief structures. Offshore bonds provide the gross roll-up that eliminates annual tax drag in conditions where investment returns are under pressure.'
+          },
+          rates: {
+            EXPANSIONARY:      'Accommodative rates — Fed Funds ' + ffStr + ', 10Y ' + t10Str + ', breakeven ' + beStr + '. Falling rates compress the return on cash and bonds — the relative advantage of gross roll-up inside offshore investment bonds increases with every basis point cut. This is the rate environment that makes the offshore bond conversation easiest.',
+            'MIXED / POSITIVE': 'Rates near peak — Fed Funds ' + ffStr + ', 10Y ' + t10Str + ', breakeven ' + beStr + '. Peak rates are the locking-in moment for offshore investment bond returns — gross roll-up captures the full pre-tax yield before rates and returns fall. Clients who commit at peak rates compound at the most favourable base for the cycle.',
+            'MIXED / CAUTION':  'Higher-for-longer — Fed Funds ' + ffStr + ', 10Y ' + t10Str + ', breakeven ' + beStr + '. Elevated rates make gross roll-up in offshore bonds more valuable: the tax that would otherwise be paid annually on bond returns is deferred and potentially eliminated via top-slicing relief. Every year of deferral at current rates is meaningful.',
+            CONTRACTIONARY:    'Rate stress — Fed Funds ' + ffStr + ', 10Y ' + t10Str + ', breakeven ' + beStr + '. EIS and VCT performance is tax-certain regardless of rate direction: 30% relief is taken on input, not dependent on exit conditions. Offshore bonds sitting in gross roll-up are immune to rate volatility on the tax treatment of their returns.'
+          },
+          labour: {
+            EXPANSIONARY:      'Tight labour markets — unemployment ' + unrateStr + ', initial claims ' + claimsStr + ', openings ' + openStr + '. Strong employment supports VCT portfolio company revenues and enables growth-stage EIS companies to scale. This is the labour environment where EIS commitments to services, technology, and healthcare see the strongest underlying performance.',
+            'MIXED / POSITIVE': 'Labour softening — unemployment ' + unrateStr + ', claims ' + claimsStr + ', openings ' + openStr + '. EIS managers in asset-light, scalable business models are better positioned for labour cost normalisation. VCT managers with operational expertise — cost-out capability — create value as wage pressure eases.',
+            'MIXED / CAUTION':  'Labour deteriorating — unemployment ' + unrateStr + ', claims ' + claimsStr + ', openings ' + openStr + '. EIS and VCT loss-relief structures provide the downside floor: even if portfolio companies face revenue pressure, the tax relief realised on commitment provides a structural return cushion.',
+            CONTRACTIONARY:    'Labour contraction — unemployment ' + unrateStr + ', claims ' + claimsStr + ', openings ' + openStr + '. Rising unemployment triggers the BoE easing cycle. VCT distributions remain tax-free regardless of employment conditions. EIS IHT relief eliminates inheritance tax on portfolios held through the cycle.'
+          },
+          housing: {
+            EXPANSIONARY:      'Housing demand solid — 30Y mortgage ' + mtgStr + ', prices ' + hpiStr + ', sales ' + salesStr + '. Property wealth effect is supporting VCT and EIS exit valuations for companies serving the construction and property services sector. Offshore bonds allow clients to compound property-adjacent gains without triggering CGT annually.',
+            'MIXED / POSITIVE': 'Housing showing stress — mortgage ' + mtgStr + ', prices ' + hpiStr + ', sales ' + salesStr + '. Clients unable to deploy into property are actively seeking alternatives. EIS and VCT provide the tax-efficient vehicle for capital that cannot access the property market at current affordability levels.',
+            'MIXED / CAUTION':  'Housing affordability deteriorated — mortgage ' + mtgStr + ', prices ' + hpiStr + ', sales ' + salesStr + '. Transaction volumes falling and buyers locked out. The conversation for clients sitting on large property profits is EIS and VCT: CGT reinvestment relief defers the property gain, 30% relief on the EIS commitment, and IHT exemption after 2 years.',
+            CONTRACTIONARY:    'Housing contracting — mortgage ' + mtgStr + ', prices ' + hpiStr + ', sales ' + salesStr + '. Property as a traditional store of wealth is under pressure. EIS portfolios qualifying for IHT Business Relief are the alternative: illiquid, tax-sheltered, and uncorrelated to residential property transaction volumes.'
+          },
+          consumer: {
+            EXPANSIONARY:      'Consumer confidence strong — UMich ' + sentStr + ', savings ' + saveStr + ', retail ' + retailStr + '. High-confidence consumers are more receptive to tax planning conversations. EIS and VCT structuring is most easily completed when clients feel financially secure — this is the window to initiate and complete complex tax-efficient investment structures.',
+            'MIXED / POSITIVE': 'Consumer cautious — UMich ' + sentStr + ', savings ' + saveStr + ', retail ' + retailStr + '. VCT and EIS provide certainty in an uncertain consumer environment: 30% relief is taken regardless of market conditions. Offshore bond gross roll-up is independent of retail sales momentum.',
+            'MIXED / CAUTION':  'Consumer deteriorating — UMich ' + sentStr + ', savings ' + saveStr + ', retail ' + retailStr + '. Declining real incomes make tax efficiency arguments more compelling: 30% immediate relief on EIS, tax-free VCT dividends, and CGT deferral are measurable, certain outcomes in an environment where investment returns are uncertain.',
+            CONTRACTIONARY:    'Consumer retrenchment — UMich ' + sentStr + ', savings ' + saveStr + ', retail ' + retailStr + '. EIS loss relief is the structural floor: 45% of the net 70p investment is recoverable against income if a company fails. VCT distributions remain tax-free in a downturn. These are the certainties in an environment of uncertain consumer outcomes.'
+          },
+          uk_macro: {
+            EXPANSIONARY:      'UK economy expanding — CPI ' + ukCpiStr + ' (target: 2%), BoE base ' + baseStr + ', 10Y gilt ' + giltStr + '. Positive UK macro supports VCT and EIS portfolio company revenues. UK-domiciled investors benefit: EIS and VCT are UK-specific schemes; this is the environment where UK tax-efficient structures deliver the strongest combination of tax relief and underlying performance.',
+            'MIXED / POSITIVE': 'UK mixed signals — CPI ' + ukCpiStr + ', BoE base ' + baseStr + ', gilt ' + giltStr + '. UK-specific tax wrappers (EIS, VCT, offshore bonds) are independent of UK macro direction: 30% relief and tax-free VCT income are legislated certainties, not macro-dependent outcomes. The wrappers work regardless of the growth rate.',
+            'MIXED / CAUTION':  'UK conditions deteriorating — CPI ' + ukCpiStr + ', BoE ' + baseStr + ', gilt ' + giltStr + '. The case for offshore investment bonds strengthens when UK macro is weak: gross roll-up inside an offshore bond avoids the annual income tax drag that makes GIA returns more painful in a slower-growth environment. Tax certainty is the alternative to macro uncertainty.',
+            CONTRACTIONARY:    'UK in or near recession — CPI ' + ukCpiStr + ', BoE ' + baseStr + ', gilt ' + giltStr + '. BoE rate cuts are building — the gross roll-up inside offshore investment bonds will benefit from the full pre-tax compounding of falling rates without annual income tax crystallisation. EIS IHT relief ensures that even in a downturn, estate planning objectives are met.'
+          }
+        };
+        var tabTaxPitches = taxPitches[tabId] || taxPitches.cycle;
+        return tabTaxPitches[s] || tabTaxPitches['MIXED / CAUTION'];
+      }
+
+      if (_eqL.indexOf(_lk) !== -1) {
+        var eqPitches = {
+          cycle: {
+            EXPANSIONARY:      'Business cycle expanding — CFNAI ' + cfnaiStr + ', yield curve ' + curveStr + ', GDP ' + gdpStr + ' annualised. Late-cycle expansion is when PE exit multiples are highest and investment trust discounts have typically compressed from their crisis wides. The active positioning question for trusts is not whether to own the cycle — it is which closed-end structures still trade at discounts despite the recovery.',
+            'MIXED / POSITIVE': 'Cycle breadth narrowing — CFNAI ' + cfnaiStr + ', yield curve ' + curveStr + ', GDP ' + gdpStr + ' annualised. Mixed signals favour trusts with contracted, non-GDP-correlated revenues: infrastructure, renewable energy, specialist lending. Discounts in these sectors have not compressed with the cycle — they are the late-cycle positioning opportunity.',
+            'MIXED / CAUTION':  'Late-cycle — CFNAI ' + cfnaiStr + ', yield curve ' + curveStr + ', GDP ' + gdpStr + '. Investment trust discounts widen in uncertainty. Closed-end structures cannot be forced to sell — the discount widens on paper but the portfolio is intact. This is the entry point, not the exit. PE J-curve exposure initiated in late-cycle draws at the most favourable vintage points.',
+            CONTRACTIONARY:    'Contraction — CFNAI ' + cfnaiStr + ', yield curve ' + curveStr + ', GDP ' + gdpStr + '. Investment trust discounts at maximum — the historically most profitable entry point for closed-end vehicles. No redemption pressure means managers can hold through the dislocation. PE co-investments in distressed situations and secondary purchases of PE fund interests are available at deepest discounts in this environment.'
+          },
+          inflation: {
+            EXPANSIONARY:      'Inflation rising — CPI ' + cpiStr + ' YoY, Core PCE ' + corePCEStr + ', PPI ' + ppiStr + '. Infrastructure trusts with RPI/CPI-linked revenues reprice upward in real terms. This is the environment where inflation-linked trust NAVs diverge most sharply from NAV-insensitive trust prices — creating a fundamental mispricing that patient investors capture.',
+            'MIXED / POSITIVE': 'Inflation above target — CPI ' + cpiStr + ', Core PCE ' + corePCEStr + ', PPI ' + ppiStr + '. The trust structures that benefit most from persistent inflation are those with contractual revenue indexation: regulated utilities, PFI, social housing. Their NAVs are compounding in real terms while their discounts reflect market pessimism.',
+            'MIXED / CAUTION':  'Sticky inflation — CPI ' + cpiStr + ', Core PCE ' + corePCEStr + ', PPI ' + ppiStr + '. Inflation-linked infrastructure and renewable trusts are the few asset classes where high inflation is accretive to NAV. Trust managers with RPI-linked contracts are the structural beneficiaries of every percentage point above target.',
+            CONTRACTIONARY:    'Disinflation — CPI ' + cpiStr + ', Core PCE ' + corePCEStr + ', PPI ' + ppiStr + '. Rate pivot approaching. Infrastructure trust discounts typically compress most sharply in the transition from high inflation to disinflation and rate cuts: the period of maximum compression opportunity for patient trust investors begins here.'
+          },
+          liquidity: {
+            EXPANSIONARY:      'Liquidity expanding — M2 ' + m2Str + ' YoY, Fed balance sheet ' + walclStr + '. QE periods are the most powerful drivers of investment trust discount compression: institutional capital flows back into listed vehicles, discounts narrow from wide to premium. Renewable energy and infrastructure trusts have historically been the primary beneficiaries of each QE cycle.',
+            'MIXED / POSITIVE': 'Mixed liquidity — M2 ' + m2Str + ' YoY, balance sheet ' + walclStr + '. Monitor RRP drain as the signal for the end of excess liquidity. When excess reserve balances approach zero, the trust discount widening cycle typically begins — providing the entry point for the subsequent compression trade.',
+            'MIXED / CAUTION':  'Liquidity tightening — M2 ' + m2Str + ' YoY, balance sheet ' + walclStr + '. Trust discounts widening as institutional capital leaves listed vehicles. The closed-end structure means managers cannot be forced to sell at trough prices — the NAV holds while the discount widens, creating the entry point.',
+            CONTRACTIONARY:    'Liquidity contraction — M2 ' + m2Str + ' YoY, balance sheet ' + walclStr + '. Maximum trust discount widening. Infrastructure and renewable energy trusts historically trading at widest discounts to NAV. This phase precedes the QE/easing cycle that drives the compression — the entry-point window is now.'
+          },
+          rates: {
+            EXPANSIONARY:      'Accommodative rates — Fed Funds ' + ffStr + ', 10Y ' + t10Str + ', breakeven ' + beStr + '. Infrastructure trust NAVs are rising as discount rates fall. Each 25bp cut increases NPV of contracted cash flows by 1-2% — trusts with 20-30 year contracts see the most significant NAV uplift. The rate cut cycle is the trust investor\'s most reliable re-rating driver.',
+            'MIXED / POSITIVE': 'Rates near peak — Fed Funds ' + ffStr + ', 10Y ' + t10Str + ', breakeven ' + beStr + '. Every prior rate peak has been followed by trust discount compression. The trusts currently trading at widest discounts to stale NAV — infrastructure, renewable energy, specialist finance — are positioned to benefit most from the first cut. This is the staging point.',
+            'MIXED / CAUTION':  'Higher-for-longer — Fed Funds ' + ffStr + ', 10Y ' + t10Str + ', breakeven ' + beStr + '. Rate pressure keeping trust discounts wide. This is the accumulation phase: building positions in quality infrastructure and renewable trusts at the widest discounts of the cycle, before the rate pivot compresses them.',
+            CONTRACTIONARY:    'Rate stress — Fed Funds ' + ffStr + ', 10Y ' + t10Str + ', breakeven ' + beStr + '. Trust discounts at maximum. The mechanism is well-established: high rates → high discount rate → wide NAV discounts → eventual rate cuts → NPV re-rating → discount compression. We are at the widest point before the compression trade begins.'
+          },
+          labour: {
+            EXPANSIONARY:      'Tight labour — unemployment ' + unrateStr + ', claims ' + claimsStr + ', openings ' + openStr + '. PE portfolio companies with pricing power are raising prices ahead of wage costs. Trust managers with operational improvement focus are capturing the margin expansion that scale creates when labour markets are tight and revenue growth covers cost.',
+            'MIXED / POSITIVE': 'Labour softening — unemployment ' + unrateStr + ', claims ' + claimsStr + ', openings ' + openStr + '. Job openings leading payrolls — the margin expansion is coming. PE managers who built position in labour-intensive businesses at peak wage costs are now seeing the operating leverage materialise as the cost base normalises.',
+            'MIXED / CAUTION':  'Labour market deteriorating — unemployment ' + unrateStr + ', claims ' + claimsStr + ', openings ' + openStr + '. PE managers with buy-and-build strategies are acquiring at falling entry multiples — the vintage point is improving as cycle deterioration reduces competition for assets. Investment trust managers with essential services exposure are seeing relative NAV resilience.',
+            CONTRACTIONARY:    'Labour contraction — unemployment ' + unrateStr + ', claims ' + claimsStr + ', openings ' + openStr + '. PE co-investments at distressed valuations and secondary market LP interest purchases at widest discounts are available in this environment. Investment trust dividend heroes — those with covered, non-GDP-sensitive distributions — are the defensive trust positions through the employment cycle.'
+          },
+          housing: {
+            EXPANSIONARY:      'Housing demand solid — mortgage ' + mtgStr + ', prices ' + hpiStr + ', sales ' + salesStr + '. Property trust NAVs are stable to appreciating. Trusts with residential rental, student accommodation, and build-to-rent exposure benefit from underlying asset appreciation — and their closed-end structure provides the liquidity that direct property investment does not.',
+            'MIXED / POSITIVE': 'Housing stressed — mortgage ' + mtgStr + ', prices ' + hpiStr + ', sales ' + salesStr + '. Rental demand is benefiting from ownership affordability crisis. Build-to-rent trusts and student accommodation REITs are capturing the structural demand from buyers who cannot purchase. Trust discounts in this sector are not reflecting the NAV resilience.',
+            'MIXED / CAUTION':  'Housing deteriorating — mortgage ' + mtgStr + ', prices ' + hpiStr + ', sales ' + salesStr + '. Transaction volumes collapsing and price discovery impaired. Property trust NAVs are being marked down — but the discount-to-NAV remains the entry signal. Specialist property trusts with operational platforms outperform passive REIT exposure in down markets.',
+            CONTRACTIONARY:    'Housing contracting — mortgage ' + mtgStr + ', prices ' + hpiStr + ', sales ' + salesStr + '. Property trust discounts at maximum. The trust structure — professional asset management, portfolio diversification, no forced selling — outperforms direct ownership in down markets. The recovery trade is built on buying quality property trusts at the widest discounts.'
+          },
+          consumer: {
+            EXPANSIONARY:      'Consumer confidence strong — UMich ' + sentStr + ', savings ' + saveStr + ', retail ' + retailStr + '. Trust sectors with consumer-facing exposure — leisure, retail property, premium consumer — are performing. PE managers with consumer-discretionary portfolio companies are seeing the exit conditions that generate the strongest DPI for LPs.',
+            'MIXED / POSITIVE': 'Consumer cautious — UMich ' + sentStr + ', savings ' + saveStr + ', retail ' + retailStr + '. Trust managers rotating toward essential services and away from consumer discretionary are the active-management beneficiaries of the mixed environment. PE managers with B2B, SaaS, and healthcare exposure are less exposed to consumer spending cycle risk.',
+            'MIXED / CAUTION':  'Consumer deteriorating — UMich ' + sentStr + ', savings ' + saveStr + ', retail ' + retailStr + '. Closed-end trust structures cannot be forced to sell at consumer-driven trough prices — the discount widens but the portfolio is intact. Infrastructure and specialist lending trusts with non-consumer revenues are the defensive sector rotation within the listed closed-end universe.',
+            CONTRACTIONARY:    'Consumer retrenchment — UMich ' + sentStr + ', savings ' + saveStr + ', retail ' + retailStr + '. PE secondary market purchases of LP interests in consumer-cyclical funds are available at maximum discounts. Infrastructure trust discounts diverge from consumer trust discounts — the non-correlated revenue case is validated in real-time by the sector data.'
+          },
+          uk_macro: {
+            EXPANSIONARY:      'UK expanding — CPI ' + ukCpiStr + ', BoE base ' + baseStr + ', gilt ' + giltStr + '. UK listed infrastructure, renewable energy, and specialist investment trusts are the primary beneficiary of UK macro recovery. Trust discounts are compressing as gilt yields normalise and institutional capital returns to UK listed closed-end vehicles.',
+            'MIXED / POSITIVE': 'UK mixed — CPI ' + ukCpiStr + ', BoE ' + baseStr + ', gilt ' + giltStr + '. UK investment trusts with non-UK portfolio exposure are benefiting from sterling weakness and international diversification. Global infrastructure trusts with GBP reporting see NAV uplift from dollar-denominated assets.',
+            'MIXED / CAUTION':  'UK deteriorating — CPI ' + ukCpiStr + ', BoE ' + baseStr + ', gilt ' + giltStr + '. UK gilt yields at elevated levels are the trust investor\'s entry signal. UK infrastructure trust discounts are widest when gilts are highest — and they compress most sharply when the BoE cuts. The gilt chart is the trust positioning guide.',
+            CONTRACTIONARY:    'UK in or near recession — CPI ' + ukCpiStr + ', BoE ' + baseStr + ', gilt ' + giltStr + '. BoE rate cuts building. UK infrastructure and renewable energy trust discounts at maximum. Each cut in the BoE rate cycle directly reduces the discount rate applied to trust cash flows — the magnitude of discount compression is historically largest from the widest entry points.'
+          }
+        };
+        var tabEqPitches = eqPitches[tabId] || eqPitches.cycle;
+        return tabEqPitches[s] || tabEqPitches['MIXED / CAUTION'];
+      }
+
       var tabPitches = pitches[tabId] || pitches.cycle;
       return tabPitches[s] || tabPitches['MIXED / CAUTION'];
     }
@@ -10676,6 +10791,15 @@
     });
 
     window._bcTab = function(tabId) { renderTab(tabId); };
+
+    /* Refresh sales angle when lens changes — no re-fetch needed */
+    window.addEventListener('lens:change', function () {
+      var cached = seriesCache[activeTab];
+      if (!cached) return;
+      var st = tabStatus(activeTab, cached);
+      var angleEl = document.getElementById('bc-sales-angle');
+      if (angleEl) angleEl.textContent = salesAngle(activeTab, cached, st);
+    });
 
     renderTab('cycle');
   }
