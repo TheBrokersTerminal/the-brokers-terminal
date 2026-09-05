@@ -56,7 +56,7 @@
         '<div class="intel-search-bar">' +
           '<span class="intel-search-icon">⌕</span>' +
           '<span class="intel-search-lbl">INTEL</span>' +
-          '<input id="intel-search-input" type="text" placeholder="Company, distillery, event, crisis…" autocomplete="off" spellcheck="false" readonly>' +
+          '<input id="intel-search-input" type="text" placeholder="Company, event, or describe a client scenario…" autocomplete="off" spellcheck="false" readonly>' +
         '</div>' +
       '</div>';
 
@@ -138,6 +138,14 @@
           '<span class="intel-drop-ticker">' + escH(item.ticker || '') + '</span>' +
           '<span class="intel-drop-arrow">›</span>' +
           '</div>';
+      } else if (item.type === 'scenario') {
+        return '<div class="intel-drop-item concept" ' +
+          'data-label="' + escH(item.label) + '" ' +
+          'data-query="' + escH(item.query || item.label) + '" ' +
+          'data-type="scenario">' +
+          '<span class="intel-drop-badge sc">IFA</span>' +
+          '<span class="intel-drop-label">' + escH(item.label) + '</span>' +
+          '</div>';
       } else {
         return '<div class="intel-drop-item concept" ' +
           'data-label="' + escH(item.label) + '" ' +
@@ -166,6 +174,13 @@
     dropdown.querySelectorAll('.intel-drop-item[data-type="concept"]').forEach(function (row) {
       row.addEventListener('click', function () {
         window._intelSearch(row.dataset.query || row.dataset.label, 'concept', '');
+      });
+    });
+
+    /* Scenario items: click directly */
+    dropdown.querySelectorAll('.intel-drop-item[data-type="scenario"]').forEach(function (row) {
+      row.addEventListener('click', function () {
+        window._intelSearch(row.dataset.query || row.dataset.label, 'scenario', '');
       });
     });
   }
@@ -429,13 +444,23 @@
         '</div>' +
       '</div>' +
       '<div class="intel-popwin-body">' +
-        '<div class="sp-loading">LOADING INTELLIGENCE<span>...</span></div>' +
+        '<div class="sp-intel-load">READING THE BRIEF<span class="sp-intel-ld"></span></div>' +
       '</div>';
 
     /* Register in state */
     _registry[pid] = {query: query, type: type || 'company', ticker: '', x: x, y: y, w: 440, h: 500};
 
     document.body.appendChild(win);
+
+    /* Cycling status messages while fetch is in-flight */
+    var _IST = ['READING THE BRIEF','ANALYSING CONTEXT','IDENTIFYING OPPORTUNITIES','DRAFTING INTELLIGENCE','FINALISING BRIEF'];
+    var _isi = 0;
+    var _ldEl = win.querySelector('.sp-intel-load');
+    win._loadingTimer = setInterval(function () {
+      _isi = (_isi + 1) % _IST.length;
+      if (_ldEl) _ldEl.innerHTML = _IST[_isi] + '<span class="sp-intel-ld"></span>';
+    }, 1600);
+
     makeDraggable(win, win.querySelector('.intel-popwin-titlebar'));
     makeResizablePop(win);
 
@@ -530,6 +555,8 @@
           '<div style="margin-left:auto;display:flex;gap:2px;align-items:center;">' +
             '<button class="intel-tg-zoom-out" title="Zoom out" style="background:none;border:1px solid #222;color:#555;font-size:11px;cursor:pointer;padding:1px 6px;font-family:Consolas,Menlo,monospace;">−</button>' +
             '<button class="intel-tg-zoom-in"  title="Zoom in"  style="background:none;border:1px solid #222;color:#555;font-size:11px;cursor:pointer;padding:1px 6px;font-family:Consolas,Menlo,monospace;">+</button>' +
+            '<button class="intel-tg-minimize" title="Minimise to dock" style="background:none;border:1px solid #222;color:#555;font-size:11px;cursor:pointer;padding:1px 6px;font-family:Consolas,Menlo,monospace;">─</button>' +
+            '<button class="intel-tg-fullscreen" title="Full screen" style="background:none;border:1px solid #222;color:#555;font-size:11px;cursor:pointer;padding:1px 6px;font-family:Consolas,Menlo,monospace;">⛶</button>' +
             '<button class="intel-tg-close-all" style="margin-left:4px;">✕</button>' +
           '</div>' +
         '</div>' +
@@ -677,7 +704,69 @@
       if (zIn)  zIn.addEventListener('click',  function (e) { e.stopPropagation(); applyTgZoom(_tgZoom + 0.1); });
       if (zOut) zOut.addEventListener('click', function (e) { e.stopPropagation(); applyTgZoom(_tgZoom - 0.1); });
       applyTgZoom(_tgZoom); /* restore zoom after re-render */
+      /* Minimize + Fullscreen — re-wired each render */
+      var _minBtn = group.querySelector('.intel-tg-minimize');
+      var _fsBtn  = group.querySelector('.intel-tg-fullscreen');
+      if (_minBtn) _minBtn.addEventListener('click', function(e) { e.stopPropagation(); enterGrpMinimize(); });
+      if (_fsBtn)  {
+        _fsBtn.textContent = _grpFullscreen ? '⊠' : '⛶';
+        _fsBtn.title = _grpFullscreen ? 'Exit full screen' : 'Full screen';
+        _fsBtn.addEventListener('click', function(e) { e.stopPropagation(); _grpFullscreen ? exitGrpFullscreen() : enterGrpFullscreen(); });
+      }
     }
+
+    /* Minimize + Fullscreen state */
+    var _grpMinimized    = false;
+    var _grpSavedStyle   = null;
+    var _grpFullscreen   = false;
+    var _grpSavedStyleFs = null;
+
+    function enterGrpMinimize() {
+      var dock = document.getElementById('tbc-dock');
+      if (!dock) return;
+      _grpMinimized = true;
+      _grpSavedStyle = { left: group.style.left, top: group.style.top, width: group.style.width, height: group.style.height };
+      group.style.display = 'none';
+      dock.style.pointerEvents = 'auto';
+      var chip = document.createElement('button');
+      chip.id = 'dock-chip-grp-' + group._uid;
+      chip.style.cssText = 'display:inline-flex;align-items:center;gap:5px;background:#181818;border:1px solid #2a2a2a;border-radius:3px;color:#ffffff;font-size:8px;font-family:Consolas,monospace;padding:3px 10px;cursor:pointer;letter-spacing:.06em;white-space:nowrap;height:24px;transition:border-color .15s;';
+      chip.innerHTML = '<span style="color:#E97132;">⊞</span> ' + escH((group._itTitle || 'GROUP')).slice(0, 40);
+      chip.addEventListener('mouseenter', function() { chip.style.borderColor = '#E97132'; });
+      chip.addEventListener('mouseleave', function() { chip.style.borderColor = '#2a2a2a'; });
+      chip.addEventListener('click', function() {
+        _grpMinimized = false;
+        group.style.display = '';
+        if (_grpSavedStyle) { group.style.left = _grpSavedStyle.left; group.style.top = _grpSavedStyle.top; group.style.width = _grpSavedStyle.width; group.style.height = _grpSavedStyle.height; }
+        group.style.zIndex = ++window._sharedZ;
+        chip.remove();
+        if (!dock.querySelector('button')) dock.style.pointerEvents = 'none';
+      });
+      dock.appendChild(chip);
+    }
+
+    function enterGrpFullscreen() {
+      _grpFullscreen = true;
+      _grpSavedStyleFs = { left: group.style.left, top: group.style.top, width: group.style.width, height: group.style.height, zIndex: group.style.zIndex };
+      var wrap = document.getElementById('tbc-canvas-wrap');
+      var dockH = 36;
+      group.style.left   = '0px';
+      group.style.top    = '0px';
+      group.style.width  = (wrap ? wrap.clientWidth  : window.innerWidth)  + 'px';
+      group.style.height = ((wrap ? wrap.clientHeight : window.innerHeight) - dockH) + 'px';
+      group.style.zIndex = 7900;
+      var fsBtn = group.querySelector('.intel-tg-fullscreen');
+      if (fsBtn) { fsBtn.textContent = '⊠'; fsBtn.title = 'Exit full screen'; }
+    }
+
+    function exitGrpFullscreen() {
+      _grpFullscreen = false;
+      if (_grpSavedStyleFs) { group.style.left = _grpSavedStyleFs.left; group.style.top = _grpSavedStyleFs.top; group.style.width = _grpSavedStyleFs.width; group.style.height = _grpSavedStyleFs.height; group.style.zIndex = _grpSavedStyleFs.zIndex; }
+      var fsBtn = group.querySelector('.intel-tg-fullscreen');
+      if (fsBtn) { fsBtn.textContent = '⛶'; fsBtn.title = 'Full screen'; }
+    }
+
+    document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && _grpFullscreen) exitGrpFullscreen(); });
 
     group._uid = Date.now();
     group._itTitle = tabs.map(function(t){return t.title;}).join(' / ');
@@ -715,7 +804,9 @@
 
   /* ── FETCH FULL DETAIL ── */
   function fetchDetail(query, type, ticker, win) {
-    var cacheKey = type + ':' + (ticker || query);
+    var lensKey = (window._assetLens && window._assetLens.key) || 'universal';
+    var lensContext = (window._assetLens && window._assetLens.promptContext) || '';
+    var cacheKey = type + ':' + lensKey + ':' + (ticker || query);
     if (_cache[cacheKey]) {
       renderPopout(_cache[cacheKey], win);
       return;
@@ -723,7 +814,7 @@
     fetch('/.netlify/functions/search', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query: query, type: type, ticker: ticker }),
+      body: JSON.stringify({ query: query, type: type, ticker: ticker, lensKey: lensKey, lensContext: lensContext }),
     })
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (d) {
@@ -778,7 +869,9 @@
 
   /* ── FETCH SECTION DETAIL (overview or pitch) ── */
   function fetchDetailSection(query, type, ticker, section, win) {
-    var cacheKey = type + ':' + section + ':' + (ticker || query);
+    var lensKey = (window._assetLens && window._assetLens.key) || 'universal';
+    var lensContext = (window._assetLens && window._assetLens.promptContext) || '';
+    var cacheKey = type + ':' + lensKey + ':' + section + ':' + (ticker || query);
     if (_cache[cacheKey]) {
       renderSection(_cache[cacheKey], section, win);
       return;
@@ -786,7 +879,7 @@
     fetch('/.netlify/functions/search', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query: query, type: type, ticker: ticker, section: section }),
+      body: JSON.stringify({ query: query, type: type, ticker: ticker, section: section, lensKey: lensKey, lensContext: lensContext }),
     })
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (d) {
@@ -900,18 +993,82 @@
   }
 
   /* ── RENDER POP-OUT CONTENT ── */
+  /* ── SCENARIO / IFA ADVISORY RESULT ── */
+  function renderScenario(d, body) {
+    var A = '#E97132', GRN = '#3DAA6A', RED = '#D14040', BLU = '#4A90D9';
+    var suitCol = function(s) { return s === 'HIGH' ? GRN : s === 'MEDIUM' ? A : 'rgba(255,255,255,0.45)'; };
+
+    body.innerHTML =
+      '<div class="sp-badge private" style="margin-bottom:8px;background:rgba(233,113,50,0.12);border-color:' + A + ';color:' + A + ';">▌ IFA ADVISORY BRIEF</div>' +
+
+      '<div class="sp-section">' +
+        '<div class="sp-sec-lbl">SITUATION SUMMARY</div>' +
+        '<div class="sp-text">' + escH(d.situation || '') + '</div>' +
+      '</div>' +
+
+      (d.openingLine ? '<div class="sp-section"><div class="sp-sec-lbl">OPEN WITH</div><div class="sp-pitch-quote" style="font-size:11px;">"' + escH(d.openingLine) + '"</div></div>' : '') +
+
+      (d.keyConsiderations && d.keyConsiderations.length ?
+        '<div class="sp-section">' +
+          '<div class="sp-sec-lbl">KEY PLANNING CONSIDERATIONS</div>' +
+          '<ul class="sp-facts">' + d.keyConsiderations.map(function(c){ return '<li>' + escH(c) + '</li>'; }).join('') + '</ul>' +
+        '</div>' : '') +
+
+      (d.solutionAreas && d.solutionAreas.length ?
+        '<div class="sp-section">' +
+          '<div class="sp-sec-lbl">SOLUTION AREAS</div>' +
+          d.solutionAreas.map(function(s) {
+            return '<div style="margin-bottom:10px;padding:10px;background:#0c0c0c;border:1px solid #1a1a1a;border-left:2px solid ' + suitCol(s.suitability) + ';">' +
+              '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px;">' +
+                '<div style="font-size:9px;font-weight:700;letter-spacing:.1em;color:#fff;">' + escH(s.asset || '') + '</div>' +
+                '<div style="font-size:7px;letter-spacing:.12em;color:' + suitCol(s.suitability) + ';">' + escH(s.suitability || '') + '</div>' +
+              '</div>' +
+              '<div style="font-size:10px;color:rgba(255,255,255,0.75);line-height:1.6;margin-bottom:5px;">' + escH(s.rationale || '') + '</div>' +
+              (s.keyPoint ? '<div style="font-size:9px;color:' + A + ';font-style:italic;">"' + escH(s.keyPoint) + '"</div>' : '') +
+            '</div>';
+          }).join('') +
+        '</div>' : '') +
+
+      (d.riskFlags && d.riskFlags.length ?
+        '<div class="sp-section">' +
+          '<div class="sp-sec-lbl" style="color:' + RED + ';">RISK FLAGS</div>' +
+          '<ul class="sp-facts">' + d.riskFlags.map(function(r){ return '<li style="color:' + RED + ';">' + escH(r) + '</li>'; }).join('') + '</ul>' +
+        '</div>' : '') +
+
+      (d.brokerBrief ?
+        '<div class="sp-section">' +
+          '<div class="sp-sec-lbl">HOW TO POSITION</div>' +
+          '<div class="sp-pitch">' + escH(d.brokerBrief) + '</div>' +
+        '</div>' : '') +
+
+      (d.nextSteps && d.nextSteps.length ?
+        '<div class="sp-section">' +
+          '<div class="sp-sec-lbl">NEXT STEPS</div>' +
+          '<ul class="sp-facts">' + d.nextSteps.map(function(n,i){ return '<li><strong style="color:' + A + ';">' + (i+1) + '.</strong> ' + escH(n) + '</li>'; }).join('') + '</ul>' +
+        '</div>' : '') +
+
+      '<div class="sp-section" style="border-top:1px solid #111;padding-top:10px;">' +
+        '<button class="sp-note-btn">✎ SAVE TO NOTES</button>' +
+      '</div>';
+  }
+
   function renderPopout(d, win) {
+    if (win._loadingTimer) { clearInterval(win._loadingTimer); win._loadingTimer = null; }
     var body = win.querySelector('.intel-popwin-body');
     if (!body || !d) {
       if (body) body.innerHTML = '<div class="sp-loading">INTELLIGENCE UNAVAILABLE</div>';
       return;
     }
+    body.style.cssText += 'opacity:0;transition:opacity .35s ease;';
+    requestAnimationFrame(function () { requestAnimationFrame(function () { body.style.opacity = '1'; }); });
 
     /* Update title bar */
     var titleEl = win.querySelector('.intel-popwin-title');
     if (titleEl && d.title) titleEl.textContent = d.title.toUpperCase();
 
-    if (d.type === 'company' && d.category === 'distillery') {
+    if (d.type === 'scenario') {
+      renderScenario(d, body);
+    } else if (d.type === 'company' && d.category === 'distillery') {
       renderDistillery(d, d._wsResults || [], body, win);
     } else if (d.type === 'company') {
       renderCompany(d, body);

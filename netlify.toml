@@ -15,3 +15,6 @@
 
 [functions."route-history"]
   timeout_seconds = 26
+
+[functions."fetch-cftc-data"]
+  schedule = "0 21 * * 5"

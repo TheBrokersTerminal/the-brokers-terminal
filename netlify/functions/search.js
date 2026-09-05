@@ -37,6 +37,27 @@ async function cacheSet(key, response) {
   } catch {}
 }
 
+function logSearch(query, type, lensKey, section, cacheHit, ticker) {
+  if (!SUPABASE_KEY) return;
+  fetch(`${SUPABASE_URL}/rest/v1/intel_searches`, {
+    method: 'POST',
+    headers: {
+      apikey: SUPABASE_KEY,
+      Authorization: `Bearer ${SUPABASE_KEY}`,
+      'Content-Type': 'application/json',
+      Prefer: 'return=minimal',
+    },
+    body: JSON.stringify({
+      query:     (query || '').slice(0, 200),
+      type:      type    || null,
+      lens_key:  lensKey || null,
+      section:   section || null,
+      cache_hit: !!cacheHit,
+      ticker:    ticker  || null,
+    }),
+  }).catch(() => {}); /* fire-and-forget — never blocks the response */
+}
+
 const CORS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'Content-Type',
@@ -219,6 +240,43 @@ CONCEPT FORMAT:
   }
 }`;
 
+/* ── SCENARIO / IFA ADVISORY PROMPT ── */
+const SCENARIO_PROMPT = (query) => `An investment professional has described the following client scenario or preparation task:
+
+"${query}"
+
+Analyse this as a senior wealth strategist would. Return ONLY this exact JSON:
+{
+  "type": "scenario",
+  "title": "2-4 word brief title for this scenario",
+  "situation": "Plain English summary of the client's situation and key facts (2-3 sentences)",
+  "keyConsiderations": [
+    "Most important planning consideration — be specific",
+    "Second consideration — regulatory, tax, or suitability angle",
+    "Third consideration — timing, risk, or portfolio angle"
+  ],
+  "solutionAreas": [
+    {
+      "asset": "Asset class name",
+      "rationale": "Why this asset fits this client's situation specifically (2 sentences)",
+      "suitability": "HIGH / MEDIUM / LOWER",
+      "keyPoint": "The single most compelling talking point for this client right now"
+    }
+  ],
+  "riskFlags": [
+    "Any suitability, regulatory, or concentration risk to flag",
+    "Second risk if applicable"
+  ],
+  "nextSteps": [
+    "Concrete first action for the broker",
+    "Second action — preparation or client follow-up"
+  ],
+  "brokerBrief": "2-3 sentence plain English brief: what to say to this client, what angle to lead with, and what need-payoff question to close on. Asset-neutral pitch framing.",
+  "openingLine": "The exact first sentence to say to this client on the call — a question or statement that shows you understand their situation. Not a pitch."
+}
+
+IMPORTANT: solutionAreas should only include asset classes genuinely relevant to this client's situation. Include 2-5 areas. Be specific to the scenario — not generic. CRITICAL: never use double-quote characters inside string values.`;
+
 exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') {
     return { statusCode: 204, headers: CORS, body: '' };
@@ -230,6 +288,21 @@ exports.handler = async (event) => {
     if (!q || q.length < 2) {
       return { statusCode: 200, headers: CORS, body: JSON.stringify([]) };
     }
+    /* Detect conversational / scenario queries: 5+ words or sentence-like */
+    const wordCount = q.trim().split(/\s+/).length;
+    const isScenario = wordCount >= 5 || /\b(client|meeting|ifa|preparing|portfolio|invest|advise|scenario|fact.find|sipp|isa|pension|planning)\b/i.test(q);
+
+    if (isScenario) {
+      /* Skip Finnhub for scenarios — return only the scenario option */
+      return {
+        statusCode: 200,
+        headers: { ...CORS, 'Cache-Control': 'no-store' },
+        body: JSON.stringify([
+          { type: 'scenario', label: `Advisory brief: "${q.length > 60 ? q.slice(0, 60) + '…' : q}"`, query: q },
+        ]),
+      };
+    }
+
     try {
       const r = await fetch(
         `https://finnhub.io/api/v1/search?q=${encodeURIComponent(q)}&token=${FINNHUB_KEY}`,
@@ -242,7 +315,7 @@ exports.handler = async (event) => {
         ticker: item.symbol,
         exchange: item.type || '',
       }));
-      /* Always offer a concept search option */
+      /* Always offer a concept / scenario search option */
       const suggestions = [
         ...companies,
         { type: 'concept', label: `Search: "${q}"`, query: q },
@@ -271,28 +344,42 @@ exports.handler = async (event) => {
     let body;
     try { body = JSON.parse(event.body || '{}'); } catch { body = {}; }
 
-    const { query, type, ticker, section } = body;
+    const { query, type, ticker, section, lensKey, lensContext } = body;
     if (!query) return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: 'query required' }) };
 
-    /* Cache key includes section so overview and pitch are stored separately */
-    const cacheKey = 'search:' + type + ':' + (section ? section + ':' : '') + (ticker || query.trim().toLowerCase().slice(0, 80));
+    const isScenario = type === 'scenario';
 
-    const cached = await cacheGet(cacheKey);
-    if (cached) {
-      return {
-        statusCode: 200,
-        headers: { ...CORS, 'Cache-Control': 'public, max-age=3600', 'X-Cache': 'HIT' },
-        body: JSON.stringify(cached),
-      };
+    /* Scenarios: skip cache (bespoke per query), use more tokens */
+    let cached = null;
+    const lensTag = lensKey ? ':' + lensKey : '';
+    const cacheKey = 'search:' + type + ':' + (section ? section + ':' : '') + (ticker || query.trim().toLowerCase().slice(0, 80)) + lensTag;
+
+    if (!isScenario) {
+      cached = await cacheGet(cacheKey);
+      if (cached) {
+        logSearch(query, type, lensKey, section, true, ticker);
+        return {
+          statusCode: 200,
+          headers: { ...CORS, 'Cache-Control': 'public, max-age=3600', 'X-Cache': 'HIT' },
+          body: JSON.stringify(cached),
+        };
+      }
     }
 
+    /* Lens context appended to non-scenario prompts */
+    const lensAppend = (!isScenario && lensContext)
+      ? `\n\nACTIVE BROKER LENS — tailor ALL pitch content (relevance, brokerNote, pitch playbook) specifically to this asset class context:\n${lensContext}`
+      : '';
+
     let userMsg;
-    if (section === 'overview') {
-      userMsg = OVERVIEW_PROMPT(query, null);
+    if (isScenario) {
+      userMsg = SCENARIO_PROMPT(query);
+    } else if (section === 'overview') {
+      userMsg = OVERVIEW_PROMPT(query, null) + lensAppend;
     } else if (section === 'pitch') {
-      userMsg = PITCH_PROMPT(query);
+      userMsg = PITCH_PROMPT(query) + lensAppend;
     } else {
-      userMsg = type === 'concept' ? CONCEPT_PROMPT(query) : COMPANY_PROMPT(query, null);
+      userMsg = (type === 'concept' ? CONCEPT_PROMPT(query) : COMPANY_PROMPT(query, null)) + lensAppend;
     }
 
     try {
@@ -305,7 +392,7 @@ exports.handler = async (event) => {
         },
         body: JSON.stringify({
           model: 'claude-haiku-4-5-20251001',
-          max_tokens: 2000,
+          max_tokens: isScenario ? 3000 : 2000,
           system: SEARCH_SYSTEM,
           messages: [{ role: 'user', content: userMsg }],
         }),
@@ -365,11 +452,12 @@ exports.handler = async (event) => {
         parsed = JSON.parse(fixed);
       }
 
-      cacheSet(cacheKey, parsed); /* fire-and-forget */
+      if (!isScenario) cacheSet(cacheKey, parsed); /* fire-and-forget; scenarios not cached */
+      logSearch(query, type, lensKey, section, false, ticker); /* fire-and-forget */
 
       return {
         statusCode: 200,
-        headers: { ...CORS, 'Cache-Control': 'public, max-age=3600', 'X-Cache': 'MISS' },
+        headers: { ...CORS, 'Cache-Control': isScenario ? 'no-store' : 'public, max-age=3600', 'X-Cache': 'MISS' },
         body: JSON.stringify(parsed),
       };
     } catch (e) {
