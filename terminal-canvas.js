@@ -12,6 +12,8 @@
   var _widgets = {};  /* id → {el, cfg} */
   var _currentTab = 'terminal'; /* tracks active page for per-page widget visibility */
   window._sharedZ = window._sharedZ || 1000;
+  /* Hard ceiling keeps widgets below topbar (10000) and ticker (9999) */
+  function _nextZ() { window._sharedZ = Math.min(window._sharedZ + 1, 8000); return window._sharedZ; }
 
   var FINNHUB_KEY = 'da6p77hr01qqqkkgl7b0da6p77hr01qqqkkgl7bg';
 
@@ -275,7 +277,7 @@
     var el = document.createElement('div');
     el.className = 'tbc-widget';
     el.id = cfg.id;
-    el.style.cssText = 'left:' + cfg.x + 'px;top:' + cfg.y + 'px;width:' + cfg.w + 'px;height:' + cfg.h + 'px;z-index:' + (++window._sharedZ) + ';';
+    el.style.cssText = 'left:' + cfg.x + 'px;top:' + cfg.y + 'px;width:' + cfg.w + 'px;height:' + cfg.h + 'px;z-index:' + (_nextZ()) + ';';
 
     var icons = {news:'◈', live_tv:'▶', reports:'▣', notes:'✎', intel:'◆', chat:'◎', calendar:'◷', notes_inbox:'✉', report_viewer:'▤', econ_calendar:'◫', macro_intel:'◧', business_cycle:'◑', macro_monitor:'▦', sector_heatmap:'▩', watchlist:'◈', global_map:'◉', origin_web:'◎', call_signal:'▲', obj_handler:'◐', analogy_lib:'◎', scenario_mod:'◩', gold_intel:'◈'};
     var titles = {news:'LIVE HEADLINES', live_tv:'NEWS TV', reports:'VAULT · LATEST', notes:'MY NOTES', intel:'BROKERS INTEL', chat:'FIRM CHAT', calendar:'CALENDAR', notes_inbox:'FIRM NOTES', report_viewer:'REPORT', econ_calendar:'ECONOMIC CALENDAR', macro_intel:'MACRO INTELLIGENCE', business_cycle:'MACRO DASHBOARD', macro_monitor:'MACRO MONITOR', sector_heatmap:'SECTOR HEATMAP', watchlist:'MY WATCHLIST', global_map:'GLOBAL MAP', whisky_lookup:'WHISKY TERMINAL', cask_calc:'CASK CALCULATOR', origin_web:'ORIGIN WEB', call_signal:'CALL SIGNAL', obj_handler:'OBJECTION HANDLER', analogy_lib:'ANALOGY LIBRARY', scenario_mod:'SCENARIO MODELLER', gold_intel:'GOLD INTELLIGENCE'};
@@ -300,7 +302,7 @@
     _widgets[cfg.id] = {el: el, cfg: cfg};
 
     el.addEventListener('mousedown', function () {
-      el.style.zIndex = ++window._sharedZ;
+      el.style.zIndex = _nextZ();
     });
 
     el.querySelector('.tbc-widget-btn.close').addEventListener('click', function () {
@@ -353,7 +355,7 @@
         _minimized = false;
         el.style.display = '';
         if (_savedStyleBeforeMin) { el.style.width = _savedStyleBeforeMin.w; el.style.height = _savedStyleBeforeMin.h; el.style.left = _savedStyleBeforeMin.left; el.style.top = _savedStyleBeforeMin.top; }
-        el.style.zIndex = ++window._sharedZ;
+        el.style.zIndex = _nextZ();
         chip.remove();
         if (!dock.querySelector('button')) dock.style.pointerEvents = 'none';
       });
@@ -487,8 +489,7 @@
     if (_newsRelevant(story, 'whisky')) cat = 'whisky';
     else if (_newsRelevant(story, 'gold')) cat = 'gold';
 
-    var z = (window._sharedZ || 1000) + 1;
-    window._sharedZ = z;
+    var z = _nextZ();
 
     var pop = document.createElement('div');
     pop.className = 'tnp-popout';
@@ -509,7 +510,7 @@
 
     document.body.appendChild(pop);
     makeDraggable(pop, pop.querySelector('.tnp-bar'));
-    pop.addEventListener('mousedown', function () { window._sharedZ++; pop.style.zIndex = window._sharedZ; });
+    pop.addEventListener('mousedown', function () { _nextZ(); pop.style.zIndex = window._sharedZ; });
     pop.querySelector('.tnp-close').addEventListener('click', function () { pop.remove(); });
 
     pop.querySelector('.tnp-intel-btn').addEventListener('click', function () {
@@ -2627,7 +2628,7 @@
        ════════════════════════════════════════════════════════════════════ */
     function renderNews() {
       var ch = NEWS_CHANNELS.find(function(c){ return c.key === _newsChannel; }) || NEWS_CHANNELS[0];
-      var embedSrc = 'https://www.youtube.com/embed/live_stream?channel=' + ch.cid + '&autoplay=1&mute=1&rel=0&modestbranding=1&controls=0&showinfo=0&iv_load_policy=3&disablekb=1';
+      var embedSrc = 'https://www.youtube-nocookie.com/embed/live_stream?channel=' + ch.cid + '&autoplay=1&mute=1&rel=0&modestbranding=1&enablejsapi=1';
       var MASK = 'position:absolute;left:0;right:0;pointer-events:none;background:#000;z-index:2;';
 
       var html = '<div style="display:flex;flex-direction:column;height:100%;overflow:hidden;">';
@@ -2651,7 +2652,7 @@
       html += '<div style="flex:1;position:relative;background:#000;min-height:0;overflow:hidden;">';
       html += '<iframe id="gi-news-frame-' + id + '" src="' + embedSrc + '" ' +
         'style="width:100%;height:100%;border:none;display:block;" ' +
-        'allow="autoplay;encrypted-media;picture-in-picture" allowfullscreen></iframe>';
+        'allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="no-referrer" allowfullscreen></iframe>';
 
       /* Branding masks */
       html += '<div style="' + MASK + 'top:0;height:40px;"></div>';
@@ -3669,7 +3670,7 @@
     var existing = Object.keys(_widgets).find(function (wid) { return _widgets[wid].cfg.type === 'notes_inbox'; });
     if (existing) {
       var el = _widgets[existing].el;
-      el.style.zIndex = ++window._sharedZ;
+      el.style.zIndex = _nextZ();
       el.style.outline = '2px solid #E97132';
       setTimeout(function () { el.style.outline = ''; }, 1400);
       /* Refresh its content */
@@ -4427,7 +4428,8 @@
     function render() {
       var ch = TV_CHANNELS.find(function(c){ return c.key === _ch; }) || TV_CHANNELS[0];
       var A = '#E97132';
-      var embedSrc = 'https://www.youtube.com/embed/live_stream?channel=' + ch.cid + '&autoplay=1&mute=1&rel=0&modestbranding=1&controls=0&showinfo=0&iv_load_policy=3&disablekb=1';
+      /* YouTube dropped live_stream?channel= — use the nocookie embed which is more permissive */
+      var embedSrc = 'https://www.youtube-nocookie.com/embed/live_stream?channel=' + ch.cid + '&autoplay=1&mute=1&rel=0&modestbranding=1&enablejsapi=1';
       body.innerHTML =
         '<div style="display:flex;flex-direction:column;height:100%;overflow:hidden;background:#000;">' +
           '<div style="display:flex;gap:0;flex-shrink:0;border-bottom:1px solid #1a1a1a;background:#000;overflow-x:auto;scrollbar-width:none;">' +
@@ -4446,7 +4448,8 @@
           '<div style="flex:1;position:relative;background:#000;min-height:0;overflow:hidden;">' +
             '<iframe src="' + embedSrc + '" ' +
               'style="width:100%;height:100%;border:none;display:block;" ' +
-              'allow="autoplay;encrypted-media;picture-in-picture" allowfullscreen></iframe>' +
+              'allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" ' +
+              'referrerpolicy="no-referrer" allowfullscreen></iframe>' +
           '</div>' +
           '<div style="flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:5px 10px;background:#050505;border-top:1px solid #1a1a1a;">' +
             '<div style="font-size:6px;letter-spacing:.1em;color:' + A + ';">' + ch.label + '  <span style="color:rgba(255,255,255,0.25);">·  ' + ch.sub.toUpperCase() + '</span></div>' +
@@ -10312,18 +10315,21 @@
           if (!btn) return;
           var active = _depthMode === modes[k];
           if (k === 'd' && !hasDeep) {
+            /* Disabled — no deep data for this indicator */
             btn.style.background = 'transparent';
-            btn.style.color = '#333';
-            btn.style.borderColor = '#1a1a1a';
-            btn.style.cursor = 'default';
-            btn.title = 'No deep analysis available for this indicator';
+            btn.style.color = 'rgba(255,255,255,0.18)';
+            btn.style.borderColor = '#161616';
+            btn.style.cursor = 'not-allowed';
+            btn.style.opacity = '0.5';
+            btn.title = 'No deep analysis for this indicator';
             return;
           }
-          btn.style.cursor = '';
+          btn.style.cursor = 'pointer';
+          btn.style.opacity = '';
           btn.title = '';
           btn.style.background = active ? ACCENT : 'transparent';
-          btn.style.color = active ? '#fff' : '#666';
-          btn.style.borderColor = active ? ACCENT : '#2a2a2a';
+          btn.style.color = active ? '#fff' : '#ffffff';
+          btn.style.borderColor = active ? ACCENT : '#3a3a3a';
         });
       }
 
