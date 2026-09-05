@@ -7,7 +7,7 @@
   <title>THE BROKERS TERMINAL — Subscriber Desk</title>
   <link rel="stylesheet" href="site.css">
   <link rel="stylesheet" href="intel-search.css">
-  <link rel="stylesheet" href="terminal-canvas.css?v=20260902b">
+  <link rel="stylesheet" href="terminal-canvas.css?v=20260905c">
   <link rel="stylesheet" href="terminal-chat.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.0"></script>
   <style>
@@ -19,7 +19,7 @@
       display: flex;
       align-items: center;
       height: 34px;
-      overflow: hidden;
+      overflow: visible;
     }
     .ticker-label {
       color: var(--accent);
@@ -34,6 +34,7 @@
       height: 100%;
       display: flex;
       align-items: center;
+      position: relative;
     }
     .ticker-track-wrap { flex: 1; overflow: hidden; position: relative; }
     .ticker-track {
@@ -55,7 +56,7 @@
       border-right: 1px solid var(--border-dim);
     }
     .ticker-item.is-flash { color: var(--accent); font-weight: 700; }
-    .ticker-item.is-new   { color: var(--text-muted); }
+    .ticker-item.is-new   { color: #fff; }
     .ticker-dot-flash { color: var(--accent); font-size: 8px; }
     .ticker-dot-new   { color: var(--text-faint); font-size: 8px; }
 
@@ -291,7 +292,7 @@
       top: 0;
       left: 0;
       right: 0;
-      z-index: 200;
+      z-index: 600;
       background: #050505;
       border-bottom: 2px solid #1a1a1a;
       display: flex;
@@ -423,7 +424,7 @@
       top: 44px;
       left: 0;
       right: 0;
-      z-index: 199;
+      z-index: 599;
       border-top: none;
     }
 
@@ -437,22 +438,42 @@
       padding: 0 6px;
       height: 100%;
     }
-    .tk-filter {
-      font-family: 'Consolas', 'Menlo', monospace;
-      font-size: 8px;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      background: none;
-      border: none;
-      color: #555;
+    .tk-dd-trigger {
       cursor: pointer;
-      padding: 0 7px;
-      height: 100%;
-      transition: color 0.15s;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+      position: relative;
+    }
+    .tk-dd-trigger:hover { color: var(--accent) !important; }
+    .tk-dd-caret { font-size: 7px; opacity: 0.7; }
+    .tk-dropdown {
+      position: absolute;
+      top: calc(100% + 2px);
+      left: 0;
+      background: #0d0d0d;
+      border: 1px solid #2a2a2a;
+      border-bottom: 2px solid var(--accent);
+      z-index: 9999;
+      min-width: 160px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.8);
+    }
+    .tk-dd-item {
+      font-family: 'Consolas', 'Menlo', monospace;
+      font-size: 9px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: #ffffff;
+      padding: 9px 14px;
+      cursor: pointer;
+      border-bottom: 1px solid #1a1a1a;
       white-space: nowrap;
     }
-    .tk-filter:hover { color: #aaa; }
-    .tk-filter.active { color: var(--accent); }
+    .tk-dd-item:last-child { border-bottom: none; }
+    .tk-dd-item:hover { background: #1a1a1a; color: var(--accent); }
+    .tk-dd-item.active { color: var(--accent); }
     .tk-sep { width: 1px; background: #222; height: 14px; margin: 0 4px; }
     .tk-hide {
       font-family: 'Consolas', 'Menlo', monospace;
@@ -488,6 +509,28 @@
     /* Canvas top-padding when ticker visible */
     body.ticker-on #tbc-canvas-wrap,
     body.ticker-on #tbc-news-panel { margin-top: 34px; }
+
+    /* Widget canvas overlay — widgets float above vault/news panels */
+    #tbc-canvas-wrap.canvas-overlay {
+      position: fixed;
+      top: 44px;
+      left: 0; right: 0; bottom: 0;
+      pointer-events: none;
+      z-index: 500;
+      margin-top: 0 !important;
+    }
+    body.ticker-on #tbc-canvas-wrap.canvas-overlay { top: 78px; }
+    #tbc-canvas-wrap.canvas-overlay .tbc-canvas {
+      background: transparent !important;
+      background-image: none !important;
+      min-height: 100%;
+      overflow: visible;
+    }
+    #tbc-canvas-wrap.canvas-overlay .tbc-canvas-empty { display: none; }
+    /* Widgets and dock remain interactive in overlay mode */
+    #tbc-canvas-wrap.canvas-overlay .tbc-widget,
+    #tbc-canvas-wrap.canvas-overlay #tbc-dock,
+    #tbc-canvas-wrap.canvas-overlay #tbc-dock > * { pointer-events: all; }
 
     /* Offset body content below fixed topbar (44px) + ticker (34px when shown) */
     body { padding-top: 44px; }
@@ -678,6 +721,23 @@
       .card-audio-bar .audio-scrub { width: 100%; order: 3; }
     }
 
+    /* ── Asset Lens selector ── */
+    .ttb-lens { position:relative; display:none; align-items:center; flex-shrink:0; margin:0 8px; }
+    .ttb-lens.visible { display:flex; }
+    .ttb-lens-btn { display:flex; align-items:center; gap:6px; background:transparent; border:1px solid #2a2a2a; padding:5px 12px; cursor:pointer; font-family:Consolas,monospace; font-size:11px; letter-spacing:0.12em; color:#ffffff; white-space:nowrap; }
+    .ttb-lens-btn:hover { border-color:#E97132; }
+    .ttb-lens-icon { color:#E97132; font-size:10px; }
+    .ttb-lens-caret { color:#E97132; font-size:9px; margin-left:2px; }
+    .ttb-lens-dropdown { display:none; position:absolute; top:calc(100% + 6px); left:0; background:#000; border:1px solid #1a1a1a; min-width:240px; z-index:9999; box-shadow:0 8px 32px rgba(0,0,0,0.9); }
+    .ttb-lens.open .ttb-lens-dropdown { display:block; }
+    .ttb-lens-group-hdr { padding:7px 14px 5px; font-family:Consolas,monospace; font-size:6.5px; letter-spacing:.22em; color:#E97132; background:#050505; border-bottom:1px solid #111; text-transform:uppercase; }
+    .ttb-lens-item { display:flex; align-items:center; gap:10px; padding:9px 14px; cursor:pointer; font-family:Consolas,monospace; font-size:10px; letter-spacing:0.1em; color:#ffffff; border-bottom:1px solid #111; }
+    .ttb-lens-item:last-child { border-bottom:none; }
+    .ttb-lens-item:hover { background:#111; color:#E97132; }
+    .ttb-lens-item.active { color:#E97132; }
+    .ttb-lens-item .li-icon { color:#E97132; font-size:9px; flex-shrink:0; }
+    .ttb-lens-item .li-sub { font-size:7px; color:#ffffff; opacity:0.55; margin-left:auto; letter-spacing:0.04em; white-space:nowrap; }
+
   </style>
 </head>
 <body>
@@ -689,6 +749,16 @@
   <div class="ttb-left">
     <a class="ttb-logo" href="index.html">▌ THE BROKERS TERMINAL</a>
     <button class="ttb-ticker-restore" id="ttb-ticker-restore" title="Show news ticker" style="display:none;">▸ NEWS</button>
+  </div>
+
+  <!-- Asset Lens selector -->
+  <div class="ttb-lens" id="ttb-lens-selector">
+    <button class="ttb-lens-btn" id="ttb-lens-btn">
+      <span class="ttb-lens-icon" id="ttb-lens-icon">◆</span>
+      <span class="ttb-lens-label" id="ttb-lens-label">WHISKY</span>
+      <span class="ttb-lens-caret">▾</span>
+    </button>
+    <div class="ttb-lens-dropdown" id="ttb-lens-dropdown"></div>
   </div>
 
   <!-- Center: intel search -->
@@ -762,14 +832,20 @@
 
 <!-- ══ CONTENT TICKER ════════════════════════════════════════════ -->
 <div class="content-ticker" id="content-ticker" style="display:none;">
-  <div class="ticker-label">▸ NEWS</div>
+  <div class="ticker-label tk-dd-trigger" id="tk-dd-trigger" title="Filter news source">▸ NEWS <span class="tk-dd-caret">▾</span></div>
+  <div id="tk-dropdown" class="tk-dropdown" style="display:none;">
+    <div class="tk-dd-item active" data-filter="all">ALL SOURCES</div>
+    <div class="tk-dd-item" data-filter="gold">GOLD &amp; METALS</div>
+    <div class="tk-dd-item" data-filter="whisky">WHISKY &amp; SPIRITS</div>
+    <div class="tk-dd-item" data-filter="property">PROPERTY</div>
+    <div class="tk-dd-item" data-filter="macro">MACRO &amp; RATES</div>
+    <div class="tk-dd-item" data-filter="markets">EQUITIES</div>
+    <div class="tk-dd-item" data-filter="wine">FINE WINE</div>
+  </div>
   <div class="ticker-track-wrap">
     <div class="ticker-track" id="ticker-track"></div>
   </div>
   <div class="ticker-controls">
-    <button class="tk-filter active" data-filter="all">ALL</button>
-    <button class="tk-filter" data-filter="gold">GOLD</button>
-    <button class="tk-filter" data-filter="whisky">WHISKY</button>
     <div class="tk-sep"></div>
     <button class="tk-hide" id="tk-hide-btn" title="Hide ticker">✕</button>
   </div>
@@ -1085,7 +1161,8 @@
 
 <script src="site.js"></script>
 <script src="intel-search.js"></script>
-<script src="terminal-canvas.js?v=20260904v"></script>
+<script src="assetProfiles.js"></script>
+<script src="terminal-canvas.js?v=20260905d"></script>
 <script src="terminal-chat.js"></script>
 <script src="terminal-notes.js"></script>
 <script>document.addEventListener('DOMContentLoaded',function(){
@@ -1109,6 +1186,65 @@
       window.open('news.html', '_blank');
     });
   }
+
+  /* ── Asset Lens selector ── */
+  (function () {
+    var lensEl   = document.getElementById('ttb-lens-selector');
+    var lensBtn  = document.getElementById('ttb-lens-btn');
+    var lensIcon = document.getElementById('ttb-lens-icon');
+    var lensLab  = document.getElementById('ttb-lens-label');
+    var lensDD   = document.getElementById('ttb-lens-dropdown');
+    if (!lensEl || !window.ASSET_PROFILES) return;
+
+    var LENS_GROUPS = [
+      { hdr: 'PHYSICAL & ALTERNATIVE', keys: ['whisky','wine','gold','art','land'] },
+      { hdr: 'PROPERTY & EQUITY',      keys: ['property','pe','trusts'] },
+      { hdr: 'TAX-EFFICIENT',          keys: ['eis','vct','offshore'] },
+      { hdr: 'CROSS-ASSET',            keys: ['universal'] },
+    ];
+    function buildDropdown() {
+      var profiles = window.ASSET_PROFILES;
+      var html = '';
+      LENS_GROUPS.forEach(function(grp) {
+        var items = grp.keys.map(function(k){ return profiles[k]; }).filter(Boolean);
+        if (!items.length) return;
+        html += '<div class="ttb-lens-group-hdr">' + grp.hdr + '</div>';
+        items.forEach(function(p) {
+          var isActive = window._assetLens && window._assetLens.key === p.key;
+          html += '<div class="ttb-lens-item' + (isActive ? ' active' : '') + '" data-lens="' + p.key + '">' +
+            '<span class="li-icon">◆</span>' +
+            '<span>' + p.label + '</span>' +
+            '<span class="li-sub">' + (p.tag||'').split('·')[0].trim() + '</span>' +
+          '</div>';
+        });
+      });
+      lensDD.innerHTML = html;
+      lensDD.querySelectorAll('.ttb-lens-item').forEach(function (el) {
+        el.addEventListener('click', function () {
+          window._setAssetLens(el.getAttribute('data-lens'));
+          lensEl.classList.remove('open');
+        });
+      });
+    }
+
+    function updateLabel() {
+      var lens = window._assetLens;
+      if (!lens) return;
+      lensIcon.textContent = '◆';
+      lensLab.textContent  = lens.shortLabel.toUpperCase();
+    }
+
+    lensBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      buildDropdown();
+      lensEl.classList.toggle('open');
+    });
+    document.addEventListener('click', function () { lensEl.classList.remove('open'); });
+    window.addEventListener('lens:change', function () { updateLabel(); });
+
+    updateLabel();
+    lensEl.classList.add('visible');
+  })();
 });</script>
 
 <!-- ══ SUPABASE + DASHBOARD JS ════════════════════════════════════ -->
@@ -2327,8 +2463,12 @@
 
   /* ── Ticker keyword filters ─────────────────────────────────── */
   var TICKER_KW = {
-    gold:   ['gold','silver','platinum','precious metal','xau','bullion','comex','spot gold','gold price','gold etf','mining','miner','gdx','lbma'],
-    whisky: ['whisky','whiskey','scotch','bourbon','distillery','single malt','spirits','diageo','pernod','macallan','glenfiddich','glenlivet','balvenie','ardbeg','dalmore','springbank','bruichladdich','laphroaig','talisker','cask']
+    gold:     ['gold','silver','platinum','precious metal','xau','bullion','comex','spot gold','gold price','gold etf','mining','miner','gdx','lbma'],
+    whisky:   ['whisky','whiskey','scotch','bourbon','distillery','single malt','spirits','diageo','pernod','macallan','glenfiddich','glenlivet','balvenie','ardbeg','dalmore','springbank','bruichladdich','laphroaig','talisker','cask'],
+    property: ['property','real estate','housing','house price','mortgage','reit','land','stamp duty','rental','buy to let','housebuilder','developer','planning'],
+    macro:    ['fed','bank of england','boe','ecb','interest rate','inflation','cpi','rpi','gdp','recession','yield curve','treasury','gilt','debt','fiscal','budget','chancellor','powell','bailey'],
+    markets:  ['s&p','nasdaq','ftse','dow jones','equities','stocks','shares','market rally','sell off','earnings','ipo','dividend','pe ratio','hedge fund'],
+    wine:     ['wine','champagne','bordeaux','burgundy','vintage','liv-ex','fine wine','claret','chateau','domaine','port','sotheby','christie']
   };
 
   var _tickerFilter  = localStorage.getItem('tkFilter')  || 'all';
@@ -2348,13 +2488,14 @@
     var ticker = document.getElementById('content-ticker');
     if (!track || !ticker) return;
 
-    /* Restore saved filter button state */
-    ticker.querySelectorAll('.tk-filter').forEach(function(btn) {
-      btn.classList.toggle('active', btn.dataset.filter === _tickerFilter);
+    /* Restore saved dropdown state */
+    ticker.querySelectorAll('.tk-dd-item').forEach(function(el) {
+      el.classList.toggle('active', el.dataset.filter === _tickerFilter);
     });
 
     var _tickerGen = 0; /* increment to kill any running loop */
     var _tickerPaused = false;
+    if (window._tickerPos === undefined) window._tickerPos = 0;
     track.closest('.ticker-track-wrap').addEventListener('mouseenter', function() { _tickerPaused = true; });
     track.closest('.ticker-track-wrap').addEventListener('mouseleave', function() { _tickerPaused = false; });
 
@@ -2390,7 +2531,8 @@
         if (_tickerGen !== gen) return; /* superseded before we even started */
         var singleWidth = track.scrollWidth;
         track.innerHTML = setHtml + setHtml; /* double for seamless wrap */
-        var speed = 60, pos = 0, last = null;
+        var speed = 60, last = null;
+        var pos = window._tickerPos % (singleWidth || 1);
         function step(ts) {
           if (_tickerGen !== gen) return; /* killed by a newer renderTicker call */
           if (!last) last = ts;
@@ -2398,6 +2540,7 @@
           if (!_tickerPaused) {
             pos += speed * (delta / 1000);
             if (pos >= singleWidth) pos -= singleWidth;
+            window._tickerPos = pos;
             track.style.transform = 'translateX(-' + pos + 'px)';
           }
           requestAnimationFrame(step);
@@ -2406,16 +2549,27 @@
       });
     }
 
-    /* Filter button clicks */
-    ticker.querySelectorAll('.tk-filter').forEach(function(btn) {
-      btn.addEventListener('click', function() {
-        _tickerFilter = btn.dataset.filter;
-        localStorage.setItem('tkFilter', _tickerFilter);
-        ticker.querySelectorAll('.tk-filter').forEach(function(b){ b.classList.remove('active'); });
-        btn.classList.add('active');
-        if (window._rssCache) renderTicker(window._rssCache);
+    /* Ticker source dropdown */
+    var tkDdTrigger = document.getElementById('tk-dd-trigger');
+    var tkDd = document.getElementById('tk-dropdown');
+    if (tkDdTrigger && tkDd) {
+      tkDdTrigger.addEventListener('click', function(e) {
+        e.stopPropagation();
+        tkDd.style.display = tkDd.style.display === 'none' ? 'block' : 'none';
       });
-    });
+      document.addEventListener('click', function() { tkDd.style.display = 'none'; });
+      tkDd.querySelectorAll('.tk-dd-item').forEach(function(item) {
+        item.addEventListener('click', function(e) {
+          e.stopPropagation();
+          _tickerFilter = item.dataset.filter;
+          localStorage.setItem('tkFilter', _tickerFilter);
+          tkDd.querySelectorAll('.tk-dd-item').forEach(function(i){ i.classList.remove('active'); });
+          item.classList.add('active');
+          tkDd.style.display = 'none';
+          if (window._rssCache) renderTicker(window._rssCache);
+        });
+      });
+    }
 
     /* Hide button */
     var hideBtn = document.getElementById('tk-hide-btn');

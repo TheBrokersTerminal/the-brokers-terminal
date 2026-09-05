@@ -10,25 +10,15 @@
   var _canvas = null; /* canvas DOM element */
   var _saveTimer = null;
   var _widgets = {};  /* id → {el, cfg} */
+  var _currentTab = 'terminal'; /* tracks active page for per-page widget visibility */
   window._sharedZ = window._sharedZ || 1000;
 
   var FINNHUB_KEY = 'da6p77hr01qqqkkgl7b0da6p77hr01qqqkkgl7bg';
 
-  var MARKET_CATS = {
-    gold:  [{sym:'GLD',  l:'GOLD (GLD)',      mult:10},
-            {sym:'GDX',  l:'GOLD MINERS',     mult:1},
-            {sym:'SGOL', l:'ABERDEEN GOLD',   mult:1},
-            {sym:'IAU',  l:'iSHARES GOLD',    mult:10}],
-    whisky:[{sym:'DEO',  l:'DIAGEO (DEO)',    mult:1},
-            {sym:'BF.B', l:'BROWN-FORMAN',    mult:1},
-            {sym:'MGPI', l:'MGP INGREDIENTS', mult:1},
-            {sym:'GLD',  l:'GOLD/OZ',         mult:10}],
-  };
 
   /* ── DEFAULT STARTER LAYOUT ── */
   var DEFAULT_LAYOUT = [
     {id:'w-news',    type:'news',    x:20,  y:16, w:400, h:500, data:{}},
-    {id:'w-market',  type:'market',  x:440, y:16, w:340, h:230, data:{cat:'gold'}},
     {id:'w-reports', type:'reports', x:440, y:266, w:340, h:250, data:{}},
     {id:'w-notes',   type:'notes',   x:800, y:16, w:280, h:500, data:{text:''}},
   ];
@@ -113,10 +103,25 @@
         bar.querySelectorAll('.tbc-tab[data-tab]').forEach(function (b) { b.classList.remove('active'); });
         btn.classList.add('active');
         var tab = btn.dataset.tab;
-        document.getElementById('tbc-canvas-wrap').style.display = tab === 'terminal' ? 'block' : 'none';
+        _currentTab = tab;
+        /* Show only widgets that belong to this page */
+        Object.values(_widgets).forEach(function (w) {
+          var widgetPage = w.cfg.page || 'terminal';
+          w.el.style.display = widgetPage === tab ? '' : 'none';
+        });
+        /* Canvas: always visible — overlay mode on non-terminal tabs so widgets persist */
+        var cw = document.getElementById('tbc-canvas-wrap');
+        if (cw) {
+          cw.style.display = 'block';
+          if (tab === 'terminal') {
+            cw.classList.remove('canvas-overlay');
+          } else {
+            cw.classList.add('canvas-overlay');
+          }
+        }
         var vault = document.getElementById('vault-section');
         if (vault) vault.style.display = tab === 'vault' ? 'block' : 'none';
-        /* Hide intel popouts when leaving terminal; restore when returning */
+        /* Hide intel popouts (body-level) when leaving terminal; restore when returning */
         var vis = tab === 'terminal' ? '' : 'none';
         document.querySelectorAll('.intel-popwin, .intel-tab-group').forEach(function (el) {
           el.style.display = vis;
@@ -130,12 +135,12 @@
           }
           newsPanel.style.display = tab === 'news' ? 'block' : 'none';
         }
-        /* Ticker: only visible on terminal tab, respecting user's hidden preference */
+        /* Ticker: only visible on terminal tab, respecting user\'s hidden preference */
         var ticker = document.getElementById('content-ticker');
         var restoreBtn = document.getElementById('ttb-ticker-restore');
         if (ticker) {
           if (tab === 'terminal') {
-            /* Restore to user's preference when returning to terminal */
+            /* Restore to user\'s preference when returning to terminal */
             var isHidden = window._tickerHidden || localStorage.getItem('tkHidden') === '1';
             if (!isHidden) {
               ticker.style.display = 'flex';
@@ -171,10 +176,8 @@
     _addMenu.style.cssText = 'top:' + (rect.bottom + 4) + 'px;right:' + (window.innerWidth - rect.right) + 'px;';
     var _menuSections = [
       { cat: 'MARKETS', items: [
-        {type:'market',        icon:'◉', lbl:'MARKET PRICES',      sub:'Live price tiles — gold, indices, FX'},
         {type:'watchlist',     icon:'◈', lbl:'MY WATCHLIST',        sub:'Pin tickers with live prices and day change'},
         {type:'sector_heatmap',icon:'▩', lbl:'SECTOR HEATMAP',      sub:'US equity sectors — day% with heatmap colouring'},
-        {type:'macro_chart',   icon:'◐', lbl:'ASSET COMPARISON',    sub:'Gold vs S&P 500 vs inflation chart'},
       ]},
       { cat: 'INTELLIGENCE', items: [
         {type:'call_signal',      icon:'▲', lbl:'CALL SIGNAL',         sub:'Daily macro signal + live conversation openers'},
@@ -194,6 +197,7 @@
       ]},
       { cat: 'NEWS & DATA', items: [
         {type:'news',          icon:'◈', lbl:'LIVE HEADLINES',      sub:'Latest news from all feeds'},
+        {type:'live_tv',       icon:'▶', lbl:'NEWS TV',             sub:'Live streaming — Al Jazeera · Sky · CNBC · Bloomberg'},
         {type:'ticker',        icon:'▸', lbl:'NEWS TICKER',         sub:'Scrolling headline bar — gold or whisky filter'},
         {type:'econ_calendar', icon:'◫', lbl:'ECONOMIC CALENDAR',   sub:'Upcoming market & macro events'},
       ]},
@@ -235,9 +239,9 @@
           id: 'w-' + Date.now(),
           type: type,
           x: 40 + offset, y: 40 + offset,
-          w: type === 'notes' ? 280 : type === 'news' ? 400 : type === 'chat' ? 480 : type === 'calendar' || type === 'econ_calendar' ? 480 : type === 'call_signal' ? 380 : type === 'obj_handler' ? 440 : type === 'analogy_lib' ? 480 : type === 'gold_intel' ? 540 : type === 'scenario_mod' ? 520 : type === 'macro_chart' ? 520 : type === 'macro_intel' ? 580 : type === 'business_cycle' ? 900 : type === 'macro_monitor' ? 720 : type === 'sector_heatmap' ? 620 : type === 'watchlist' ? 320 : type === 'global_map' ? 760 : type === 'origin_web' ? 920 : type === 'cask_calc' ? 720 : 340,
-          h: type === 'news' || type === 'notes' ? 480 : type === 'chat' ? 440 : type === 'calendar' ? 380 : type === 'econ_calendar' ? 540 : type === 'call_signal' ? 480 : type === 'obj_handler' ? 560 : type === 'analogy_lib' ? 600 : type === 'gold_intel' ? 700 : type === 'scenario_mod' ? 660 : type === 'macro_chart' ? 360 : type === 'macro_intel' ? 500 : type === 'business_cycle' ? 720 : type === 'macro_monitor' ? 480 : type === 'sector_heatmap' ? 380 : type === 'watchlist' ? 420 : type === 'global_map' ? 480 : type === 'origin_web' ? 600 : type === 'cask_calc' ? 620 : 240,
-          data: type === 'market' ? {cat:'gold'} : {},
+          w: type === 'notes' ? 280 : type === 'news' ? 400 : type === 'live_tv' ? 520 : type === 'chat' ? 480 : type === 'calendar' || type === 'econ_calendar' ? 480 : type === 'call_signal' ? 380 : type === 'obj_handler' ? 440 : type === 'analogy_lib' ? 480 : type === 'gold_intel' ? 540 : type === 'scenario_mod' ? 520 : type === 'macro_intel' ? 580 : type === 'business_cycle' ? 900 : type === 'macro_monitor' ? 720 : type === 'sector_heatmap' ? 620 : type === 'watchlist' ? 320 : type === 'global_map' ? 760 : type === 'origin_web' ? 920 : type === 'cask_calc' ? 720 : 340,
+          h: type === 'news' || type === 'notes' ? 480 : type === 'live_tv' ? 380 : type === 'chat' ? 440 : type === 'calendar' ? 380 : type === 'econ_calendar' ? 540 : type === 'call_signal' ? 480 : type === 'obj_handler' ? 560 : type === 'analogy_lib' ? 600 : type === 'gold_intel' ? 700 : type === 'scenario_mod' ? 660 : type === 'macro_intel' ? 500 : type === 'business_cycle' ? 720 : type === 'macro_monitor' ? 480 : type === 'sector_heatmap' ? 380 : type === 'watchlist' ? 420 : type === 'global_map' ? 480 : type === 'origin_web' ? 600 : type === 'cask_calc' ? 620 : 240,
+          data: {},
         };
         spawnWidget(cfg);
         saveLayout();
@@ -262,6 +266,8 @@
   }
 
   function spawnWidget(cfg) {
+    /* Stamp the page this widget belongs to (preserve saved page on layout restore) */
+    if (!cfg.page) cfg.page = _currentTab;
     /* Clamp saved position — just prevent negatives */
     cfg.x = Math.max(0, cfg.x || 0);
     cfg.y = Math.max(0, cfg.y || 0);
@@ -271,8 +277,8 @@
     el.id = cfg.id;
     el.style.cssText = 'left:' + cfg.x + 'px;top:' + cfg.y + 'px;width:' + cfg.w + 'px;height:' + cfg.h + 'px;z-index:' + (++window._sharedZ) + ';';
 
-    var icons = {news:'◈', market:'◉', reports:'▣', notes:'✎', intel:'◆', chat:'◎', calendar:'◷', notes_inbox:'✉', report_viewer:'▤', econ_calendar:'◫', macro_chart:'◐', macro_intel:'◧', business_cycle:'◑', macro_monitor:'▦', sector_heatmap:'▩', watchlist:'◈', global_map:'◉', origin_web:'◎', call_signal:'▲', obj_handler:'◐', analogy_lib:'◎', scenario_mod:'◩', gold_intel:'◈'};
-    var titles = {news:'LIVE HEADLINES', market:'MARKET PRICES', reports:'VAULT · LATEST', notes:'MY NOTES', intel:'BROKERS INTEL', chat:'FIRM CHAT', calendar:'CALENDAR', notes_inbox:'FIRM NOTES', report_viewer:'REPORT', econ_calendar:'ECONOMIC CALENDAR', macro_chart:'ASSET COMPARISON', macro_intel:'MACRO INTELLIGENCE', business_cycle:'MACRO DASHBOARD', macro_monitor:'MACRO MONITOR', sector_heatmap:'SECTOR HEATMAP', watchlist:'MY WATCHLIST', global_map:'GLOBAL MAP', whisky_lookup:'WHISKY TERMINAL', cask_calc:'CASK CALCULATOR', origin_web:'ORIGIN WEB', call_signal:'CALL SIGNAL', obj_handler:'OBJECTION HANDLER', analogy_lib:'ANALOGY LIBRARY', scenario_mod:'SCENARIO MODELLER', gold_intel:'GOLD INTELLIGENCE'};
+    var icons = {news:'◈', live_tv:'▶', reports:'▣', notes:'✎', intel:'◆', chat:'◎', calendar:'◷', notes_inbox:'✉', report_viewer:'▤', econ_calendar:'◫', macro_intel:'◧', business_cycle:'◑', macro_monitor:'▦', sector_heatmap:'▩', watchlist:'◈', global_map:'◉', origin_web:'◎', call_signal:'▲', obj_handler:'◐', analogy_lib:'◎', scenario_mod:'◩', gold_intel:'◈'};
+    var titles = {news:'LIVE HEADLINES', live_tv:'NEWS TV', reports:'VAULT · LATEST', notes:'MY NOTES', intel:'BROKERS INTEL', chat:'FIRM CHAT', calendar:'CALENDAR', notes_inbox:'FIRM NOTES', report_viewer:'REPORT', econ_calendar:'ECONOMIC CALENDAR', macro_intel:'MACRO INTELLIGENCE', business_cycle:'MACRO DASHBOARD', macro_monitor:'MACRO MONITOR', sector_heatmap:'SECTOR HEATMAP', watchlist:'MY WATCHLIST', global_map:'GLOBAL MAP', whisky_lookup:'WHISKY TERMINAL', cask_calc:'CASK CALCULATOR', origin_web:'ORIGIN WEB', call_signal:'CALL SIGNAL', obj_handler:'OBJECTION HANDLER', analogy_lib:'ANALOGY LIBRARY', scenario_mod:'SCENARIO MODELLER', gold_intel:'GOLD INTELLIGENCE'};
 
     el.innerHTML =
       '<div class="tbc-widget-bar">' +
@@ -339,7 +345,7 @@
       var chip = document.createElement('button');
       chip.id = 'dock-chip-' + cfg.id;
       chip.title = (titles[cfg.type] || cfg.type);
-      chip.style.cssText = 'display:inline-flex;align-items:center;gap:5px;background:#181818;border:1px solid #2a2a2a;border-radius:3px;color:#ffffff;font-size:8px;font-family:Consolas,monospace;padding:3px 10px;cursor:pointer;letter-spacing:.06em;white-space:nowrap;height:24px;transition:border-color .15s;';
+      chip.style.cssText = 'display:inline-flex;align-items:center;gap:5px;background:#181818;border:1px solid #2a2a2a;border-radius:3px;color:#ffffff;font-size:11px;font-family:Consolas,monospace;padding:3px 10px;cursor:pointer;letter-spacing:.06em;white-space:nowrap;height:28px;transition:border-color .15s;';
       chip.innerHTML = '<span style="color:#E97132;">' + (icons[cfg.type] || '◆') + '</span> ' + (titles[cfg.type] || cfg.type.toUpperCase());
       chip.addEventListener('mouseenter', function () { chip.style.borderColor = '#E97132'; });
       chip.addEventListener('mouseleave', function () { chip.style.borderColor = '#2a2a2a'; });
@@ -433,7 +439,6 @@
     var body = el.querySelector('.tbc-widget-body');
     body.innerHTML = '<div class="tbw-loading">LOADING…</div>';
     if      (type === 'news')    renderNews(id, body);
-    else if (type === 'market')  renderMarket(id, body, data.cat || 'gold', el);
     else if (type === 'reports') renderReports(id, body);
     else if (type === 'notes')   renderNotes(id, body, data.text || '');
     else if (type === 'intel')    renderIntel(id, body, data);
@@ -450,8 +455,8 @@
     else if (type === 'macro_monitor')  renderMacroMonitor(id, body);
     else if (type === 'sector_heatmap') renderSectorHeatmap(id, body);
     else if (type === 'watchlist')      renderWatchlist(id, body);
+    else if (type === 'live_tv')        renderLiveTVWidget(id, body);
     else if (type === 'global_map')     renderGlobalMap(id, body);
-    else if (type === 'macro_chart')    renderMacroChart(id, body);
     else if (type === 'macro_intel')    renderMacroIntel(id, body);
     else if (type === 'business_cycle') renderBusinessCycle(id, body);
     else if (type === 'whisky_lookup')  renderWhiskyLookup(id, body);
@@ -509,29 +514,96 @@
 
     pop.querySelector('.tnp-intel-btn').addEventListener('click', function () {
       var wrap = pop.querySelector('.tnp-intel-wrap');
-      wrap.innerHTML = '<div class="tnp-intel-loading">ANALYSING<span class="tnp-ld"></span></div>';
+
+      /* ── Cycling status messages while Claude generates ── */
+      var STATUS = [
+        'READING THE HEADLINE',
+        'ANALYSING MARKET CONTEXT',
+        'IDENTIFYING RISK SIGNAL',
+        'DRAFTING PITCH LANGUAGE',
+        'FINALISING INTEL',
+      ];
+      var _si = 0;
+      var _statusEl = document.createElement('div');
+      _statusEl.className = 'tnp-intel-loading';
+      _statusEl.innerHTML = STATUS[0] + '<span class="tnp-ld"></span>';
+      wrap.innerHTML = '';
+      wrap.appendChild(_statusEl);
+      var _statusTimer = setInterval(function () {
+        _si = (_si + 1) % STATUS.length;
+        _statusEl.innerHTML = STATUS[_si] + '<span class="tnp-ld"></span>';
+      }, 1600);
+
       fetch('/.netlify/functions/explain', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ headline: hl, summary: summary, category: cat }),
+        body: JSON.stringify({ headline: hl, summary: summary, category: cat, lensKey: (window._assetLens && window._assetLens.key) || 'universal', lensContext: (window._assetLens && window._assetLens.promptContext) || '' }),
       })
         .then(function (r) { return r.ok ? r.json() : null; })
         .then(function (d) {
+          clearInterval(_statusTimer);
           if (!d || d.error) { wrap.innerHTML = '<div class="tnp-intel-err">Intelligence unavailable.</div>'; return; }
+
+          /* ── Cascade-reveal: build panel then add sections one at a time ── */
+          wrap.innerHTML = '<div class="tnp-intel-panel"></div>';
+          var panel = wrap.querySelector('.tnp-intel-panel');
+
+          function fadeIn(el) {
+            el.style.cssText += 'opacity:0;transform:translateY(6px);transition:opacity .28s ease,transform .28s ease;';
+            panel.appendChild(el);
+            requestAnimationFrame(function () { requestAnimationFrame(function () {
+              el.style.opacity = '1'; el.style.transform = 'translateY(0)';
+            }); });
+          }
+
+          function mkSec(lblTxt, innerHtml) {
+            var d = document.createElement('div');
+            d.className = 'tnp-sec';
+            d.innerHTML = '<div class="tnp-sec-lbl">' + lblTxt + '</div>' + innerHtml;
+            return d;
+          }
+
           var riskCls = d.risk === 'RISK ON' ? 'tnp-risk-on' : d.risk === 'RISK OFF' ? 'tnp-risk-off' : 'tnp-risk-neu';
-          var html = '<div class="tnp-intel-panel">';
-          if (d.what) html += '<div class="tnp-sec"><div class="tnp-sec-lbl">WHAT IT MEANS</div><div class="tnp-text">' + escH(d.what) + '</div>' + (d.analogy ? '<div class="tnp-analogy">"' + escH(d.analogy) + '"</div>' : '') + '</div>';
-          if (d.risk) html += '<div class="tnp-sec"><div class="tnp-sec-lbl">RISK SIGNAL</div><div class="tnp-risk ' + riskCls + '"><span class="tnp-risk-dot"></span>' + escH(d.risk) + '</div>' + (d.riskReason ? '<div class="tnp-risk-reason">' + escH(d.riskReason) + '</div>' : '') + '</div>';
-          html += '<div class="tnp-sec tnp-pitch-block"><div class="tnp-sec-lbl">HOW TO PITCH IT</div>';
-          if (d.openingLine) html += '<div class="tnp-pitch-row"><div class="tnp-pitch-lbl">OPEN WITH</div><div class="tnp-quote">"' + escH(d.openingLine) + '"</div></div>';
-          if (d.pitch)       html += '<div class="tnp-pitch-row"><div class="tnp-pitch-lbl">THE LOGICAL CASE</div><div class="tnp-pitch-txt">' + escH(d.pitch) + '</div></div>';
-          if (d.futurePace)  html += '<div class="tnp-pitch-row"><div class="tnp-pitch-lbl">FUTURE PACE</div><div class="tnp-pitch-txt tnp-future">' + escH(d.futurePace) + '</div></div>';
-          if (d.spinQuestion)html += '<div class="tnp-pitch-row"><div class="tnp-pitch-lbl">ASK THEM</div><div class="tnp-quote">"' + escH(d.spinQuestion) + '"</div></div>';
-          if (d.urgency)     html += '<div class="tnp-pitch-row"><div class="tnp-pitch-lbl">TIMING</div><div class="tnp-pitch-txt tnp-urgency">' + escH(d.urgency) + '</div></div>';
-          html += '</div></div>';
-          wrap.innerHTML = html;
+          var DELAYS = [0, 220, 440, 600];
+          var sections = [];
+
+          if (d.what) sections.push(mkSec('WHAT IT MEANS',
+            '<div class="tnp-text">' + escH(d.what) + '</div>' +
+            (d.analogy ? '<div class="tnp-analogy">&ldquo;' + escH(d.analogy) + '&rdquo;</div>' : '')));
+
+          if (d.risk) sections.push(mkSec('RISK SIGNAL',
+            '<div class="tnp-risk ' + riskCls + '"><span class="tnp-risk-dot"></span>' + escH(d.risk) + '</div>' +
+            (d.riskReason ? '<div class="tnp-risk-reason">' + escH(d.riskReason) + '</div>' : '')));
+
+          var pitchInner = '';
+          if (d.openingLine) pitchInner += '<div class="tnp-pitch-row"><div class="tnp-pitch-lbl">OPEN WITH</div><div class="tnp-quote">&ldquo;' + escH(d.openingLine) + '&rdquo;</div></div>';
+          if (d.pitch)       pitchInner += '<div class="tnp-pitch-row"><div class="tnp-pitch-lbl">THE LOGICAL CASE</div><div class="tnp-pitch-txt">' + escH(d.pitch) + '</div></div>';
+          if (d.futurePace)  pitchInner += '<div class="tnp-pitch-row"><div class="tnp-pitch-lbl">FUTURE PACE</div><div class="tnp-pitch-txt tnp-future">' + escH(d.futurePace) + '</div></div>';
+          if (pitchInner) {
+            var pitchSec = document.createElement('div');
+            pitchSec.className = 'tnp-sec tnp-pitch-block';
+            pitchSec.innerHTML = '<div class="tnp-sec-lbl">HOW TO PITCH IT</div>' + pitchInner;
+            sections.push(pitchSec);
+          }
+
+          var closingInner = '';
+          if (d.spinQuestion) closingInner += '<div class="tnp-pitch-row"><div class="tnp-pitch-lbl">ASK THEM</div><div class="tnp-quote">&ldquo;' + escH(d.spinQuestion) + '&rdquo;</div></div>';
+          if (d.urgency)      closingInner += '<div class="tnp-pitch-row"><div class="tnp-pitch-lbl">TIMING</div><div class="tnp-pitch-txt tnp-urgency">' + escH(d.urgency) + '</div></div>';
+          if (closingInner) {
+            var closingSec = document.createElement('div');
+            closingSec.className = 'tnp-sec';
+            closingSec.innerHTML = closingInner;
+            sections.push(closingSec);
+          }
+
+          sections.forEach(function (sec, i) {
+            setTimeout(function () { fadeIn(sec); }, DELAYS[i] || (i * 200));
+          });
         })
-        .catch(function () { wrap.innerHTML = '<div class="tnp-intel-err">Intelligence unavailable.</div>'; });
+        .catch(function () {
+          clearInterval(_statusTimer);
+          wrap.innerHTML = '<div class="tnp-intel-err">Intelligence unavailable.</div>';
+        });
     });
   }
 
@@ -648,68 +720,6 @@
   }
 
   /* ── MARKET ── */
-  function renderMarket(id, body, cat, el) {
-    var syms = MARKET_CATS[cat] || MARKET_CATS.gold;
-    var title = el.querySelector('.tbc-widget-title');
-    if (title) title.textContent = 'MARKET PRICES · ' + cat.toUpperCase();
-
-    var tabs = Object.keys(MARKET_CATS).map(function (k) {
-      return '<button class="tbw-mkt-cat' + (k===cat?' active':'') + '" data-cat="' + k + '">' + k.toUpperCase() + '</button>';
-    }).join('');
-
-    body.style.overflow = 'hidden';
-    body.style.display = 'flex';
-    body.style.flexDirection = 'column';
-    body.innerHTML = '<div class="tbw-mkt-cat-tabs">' + tabs + '</div><div id="' + id + '-mkt-grid" class="tbw-mkt-grid"></div><div class="tbw-mkt-footer">INDICATIVE · FINNHUB · ' + new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) + '</div>';
-
-    body.querySelectorAll('.tbw-mkt-cat').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        var nc = btn.dataset.cat;
-        _widgets[id].cfg.data.cat = nc;
-        saveLayout();
-        renderMarket(id, body, nc, el);
-      });
-    });
-
-    var grid = document.getElementById(id + '-mkt-grid');
-    grid.innerHTML = '<div class="tbw-loading" style="grid-column:1/-1;">FETCHING PRICES…</div>';
-
-    function fetchAndRenderMarket() {
-      fetch('/.netlify/functions/macro-data?type=market&cat=' + encodeURIComponent(cat))
-        .then(function (r) { return r.ok ? r.json() : null; })
-        .then(function (quotes) {
-          if (!quotes) { grid.innerHTML = '<div class="tbw-loading" style="grid-column:1/-1;">UNAVAILABLE</div>'; return; }
-          /* update footer timestamp */
-          var foot = body.querySelector('.tbw-mkt-footer');
-          if (foot) foot.textContent = 'INDICATIVE · FINNHUB · ' + new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
-          grid.innerHTML = quotes.map(function (q) {
-            if (!q.c) return '<div class="tbw-mkt-tile"><div class="tbw-mkt-lbl">' + escH(q.l) + '</div><div class="tbw-mkt-val" style="font-size:11px;color:#333">N/A</div></div>';
-            var price = (q.c * q.mult).toFixed(2);
-            var prev  = q.pc ? (q.pc * q.mult).toFixed(2) : price;
-            var chg   = parseFloat(price) - parseFloat(prev);
-            var pct   = q.dp ? q.dp.toFixed(2) : (prev ? (chg / parseFloat(prev) * 100).toFixed(2) : '0.00');
-            var up    = chg >= 0;
-            var cls   = up ? 'tbw-mkt-up' : 'tbw-mkt-dn';
-            var arr   = up ? '▲' : '▼';
-            return '<div class="tbw-mkt-tile">' +
-              '<div class="tbw-mkt-lbl">' + escH(q.l) + '</div>' +
-              '<div class="tbw-mkt-val">$' + price + '</div>' +
-              '<div class="tbw-mkt-chg ' + cls + '">' + arr + ' ' + (up?'+':'') + chg.toFixed(2) + ' (' + (up?'+':'') + pct + '%)</div>' +
-              '</div>';
-          }).join('');
-        })
-        .catch(function () { grid.innerHTML = '<div class="tbw-loading" style="grid-column:1/-1;">UNAVAILABLE</div>'; });
-    }
-
-    fetchAndRenderMarket();
-    /* auto-refresh every 60s */
-    clearTimeout(el_refresh_timer(id));
-    set_refresh_timer(id, setInterval(function () {
-      if (!document.getElementById(id + '-mkt-grid')) { clearInterval(el_refresh_timer(id)); return; }
-      fetchAndRenderMarket();
-    }, 60000));
-  }
-
   var REPORTS_BASE = 'https://oqpodikelxhwcnjdwojw.supabase.co/storage/v1/object/public/Reports/';
 
   /* ── REPORTS BROWSER ── */
@@ -832,7 +842,7 @@
         /* Inject minimal overrides: ensure sidebar + content both fit without horizontal clip */
         var css = '<style>' +
           'html,body{overflow-x:auto!important;}' +
-          /* Give the page a sensible min-width so sidebar + content don't collapse */
+          /* Give the page a sensible min-width so sidebar + content don\'t collapse */
           'body{min-width:0!important;}' +
           /* Anchor clicks stay inside iframe */
         '</style>';
@@ -990,7 +1000,7 @@
   function makeDraggable(el, handle) {
     var ox, oy, startX, startY;
 
-    /* Double-click the bar → recentre the widget so it's always reachable */
+    /* Double-click the bar → recentre the widget so it\'s always reachable */
     handle.addEventListener('dblclick', function (e) {
       if (e.target.classList.contains('tbc-widget-btn')) return;
       var minTop = _minWidgetTop();
@@ -1091,7 +1101,7 @@
 
   function makeResizable(el, id) {
     el.addEventListener('mousemove', function (e) {
-      /* Don't fight with titlebar drag cursor */
+      /* Don\'t fight with titlebar drag cursor */
       if (e.target.closest('.tbc-widget-bar')) { el.style.cursor = ''; return; }
       var dir = getResizeDir(el, e);
       el.style.cursor = resizeCursor(dir) || '';
@@ -1101,7 +1111,7 @@
     el.addEventListener('mousedown', function (e) {
       var dir = getResizeDir(el, e);
       if (!dir) return;
-      /* Don't trigger when clicking buttons */
+      /* Don\'t trigger when clicking buttons */
       if (e.target.closest('button, a')) return;
       e.preventDefault();
       e.stopPropagation();
@@ -1273,7 +1283,7 @@
 
     var PRESETS = {
       'RECESSION':      {cuts:4, cpi:2, growth:3, dxy:2, risk:3, cb:3,
-        note:'Fed forced to cut aggressively as growth turns negative. Real yields collapse. Gold’s most reliable macro catalyst fires simultaneously across all six inputs.'},
+        note:'Fed forced to cut aggressively as growth turns negative. Real yields collapse. Gold\'s most reliable macro catalyst fires simultaneously across all six inputs.'},
       'STAGFLATION':    {cuts:0, cpi:3, growth:2, dxy:2, risk:2, cb:2,
         note:'The Fed is trapped — inflation too high to cut, growth too weak to hold. Real yields deeply negative. Gold thrives in policy paralysis.'},
       'SOFT LANDING':   {cuts:1, cpi:0, growth:1, dxy:1, risk:0, cb:1,
@@ -1287,10 +1297,10 @@
 
     var PITCHES = {
       'RECESSION':      'The model is flagging a recession scenario. Every US recession since 1967 has driven the Fed to cut aggressively — and every aggressive cutting cycle has produced a double-digit gold return over the following 18 months. The positioning window is before the recession is confirmed, not after.',
-      'STAGFLATION':    'Stagflation is gold’s strongest environment. The Fed cannot raise rates to fight inflation without destroying growth, and cannot cut without letting inflation run further. In the 1970s stagflation, gold returned +2,329% over the decade. The mechanism is the same: policy paralysis and deeply negative real yields.',
+      'STAGFLATION':    'Stagflation is gold\'s strongest environment. The Fed cannot raise rates to fight inflation without destroying growth, and cannot cut without letting inflation run further. In the 1970s stagflation, gold returned +2,329% over the decade. The mechanism is the same: policy paralysis and deeply negative real yields.',
       'SOFT LANDING':   'A soft landing is the consensus outcome — and consensus outcomes are already priced. If the landing is harder than expected, which is the historical norm, this scenario moves quickly toward the recession column. A 5–10% gold allocation costs little in a soft landing and pays significantly in any deviation from it.',
       'RATE CUT CYCLE': 'We are in the early phase of a deliberate cutting cycle. Gold has risen an average of 22% in the 12 months following the first rate cut in each of the last four cutting cycles. Institutional capital is rotating out of bonds whose real yield is turning negative. The trade is in motion — the question is at what point the client enters it.',
-      'GEO SHOCK':      'Geopolitical shock scenarios have a consistent historical outcome: central banks — the world’s largest gold buyers — accelerate their buying when they perceive systemic risk. They bought at the fastest pace in 55 years through 2022–24. This scenario assumes that pace continues or increases. The structural demand floor moves higher.',
+      'GEO SHOCK':      'Geopolitical shock scenarios have a consistent historical outcome: central banks — the world\'s largest gold buyers — accelerate their buying when they perceive systemic risk. They bought at the fastest pace in 55 years through 2022–24. This scenario assumes that pace continues or increases. The structural demand floor moves higher.',
       'CUSTOM':         '',
     };
 
@@ -1347,7 +1357,7 @@
       /* dynamic pitch for CUSTOM based on score */
       var score = getScore();
       var dominant = getDominantDriver();
-      if (score >= 8)  return 'The inputs you’ve set describe a structurally bullish environment for alternative assets. The primary driver is ' + dominant + '. Historical cutting cycles and periods of dollar weakness matching these parameters have produced gold returns in the 15–30% range over 12 months.';
+      if (score >= 8)  return 'The inputs you\'ve set describe a structurally bullish environment for alternative assets. The primary driver is ' + dominant + '. Historical cutting cycles and periods of dollar weakness matching these parameters have produced gold returns in the 15–30% range over 12 months.';
       if (score >= 4)  return 'Current inputs describe a cautiously supportive backdrop for alternative assets. ' + dominant + '. Monitor the rate path and CPI trajectory for a signal upgrade.';
       return 'Inputs describe a challenging near-term environment for alternative assets. The primary headwind is ' + dominant + '. Consider a defensive allocation sized for scenario evolution rather than the base case.';
     }
@@ -1611,16 +1621,16 @@
        analogy: 'The clients who bought property in 2009 — when everyone said the market was broken — and in 2012 — when rates were near-zero and prices seemed high — are the ones who made the generational return. The pattern is consistent: maximum perceived risk at the bottom, maximum perceived safety near the top. The rate peak is the bottom of the property cycle dressed up as a risk.',
        why: 'Contrarian framing. Reframes the obvious bad news (high rates) as the precise signal the client should be acting on. Cialdini social proof in reverse — most people are wrong at turning points.'},
       {id:'pr2', cat:'PROPERTY', asset:'PROPERTY', concept:'Illiquidity as Protection',
-       analogy: 'Property’s illiquidity is not a bug — it’s the feature. In March 2020, every liquid asset could be sold in a panic. Every liquid asset was. Property investors couldn’t panic-sell, held through the correction, and recovered. The illiquidity premium is the compensation for emotional stability — and it’s the reason property has not sustained a multi-year real decline since 1950.',
-       why: 'Reframes the most common objection (can’t sell quickly) into an advantage. Particularly powerful with clients who have experienced panic-selling their way to a loss in equities.'},
+       analogy: 'Property\'s illiquidity is not a bug — it\'s the feature. In March 2020, every liquid asset could be sold in a panic. Every liquid asset was. Property investors couldn\'t panic-sell, held through the correction, and recovered. The illiquidity premium is the compensation for emotional stability — and it\'s the reason property has not sustained a multi-year real decline since 1950.',
+       why: 'Reframes the most common objection (can\'t sell quickly) into an advantage. Particularly powerful with clients who have experienced panic-selling their way to a loss in equities.'},
       {id:'pr3', cat:'PROPERTY', asset:'PROPERTY', concept:'Real Returns vs Nominal',
-       analogy: 'If UK property fell 10% in nominal terms but inflation ran at 7%, what was the real return on the pound held in cash instead? Negative 7%. The comparison is not property vs. cash. It’s real purchasing power with a hard asset versus real purchasing power with a depreciating one. Property wins that comparison even in a year when it falls in nominal terms.',
+       analogy: 'If UK property fell 10% in nominal terms but inflation ran at 7%, what was the real return on the pound held in cash instead? Negative 7%. The comparison is not property vs. cash. It\'s real purchasing power with a hard asset versus real purchasing power with a depreciating one. Property wins that comparison even in a year when it falls in nominal terms.',
        why: 'Most clients compare property to its own past price, not to the alternative. This reframes the comparison correctly and makes a nominal fall look very different from a real loss.'},
       {id:'pr4', cat:'PROPERTY', asset:'PROPERTY', concept:'Deferred Demand Release',
        analogy: 'Think of deferred buyers as a compressed spring. Every month of 7% mortgage rates pushes another potential buyer out of the market and compresses that spring further. When rates fall — and the rate cycle always turns — every deferred buyer steps back in simultaneously. The investor who holds property going into that release is on the right side of a demand shock they can see coming in advance.',
        why: 'Physics metaphor. The compressed spring creates an intuitive sense of pent-up energy waiting to release. Particularly effective with engineers, scientists, and analytical clients.'},
       {id:'pr5', cat:'PROPERTY', asset:'PROPERTY', concept:'Real Asset vs Paper Claim',
-       analogy: 'A gilt is a government’s promise to pay you back a specific number. The purchasing power of that number depends on what the government does between now and maturity. A property is the thing itself — four walls, a roof, land. It doesn’t depend on a counterparty’s creditworthiness. When the government inflates to reduce its debt burden, the gilt investor loses real purchasing power and the property investor does not.',
+       analogy: 'A gilt is a government\'s promise to pay you back a specific number. The purchasing power of that number depends on what the government does between now and maturity. A property is the thing itself — four walls, a roof, land. It doesn\'t depend on a counterparty\'s creditworthiness. When the government inflates to reduce its debt burden, the gilt investor loses real purchasing power and the property investor does not.',
        why: 'Concrete vs abstract. The contrast between a promise and a physical asset is visceral. Works extremely well with clients who have lived through gilt volatility or inflationary periods.'},
 
       /* ── FINE WINE ──────────────────────────────────────────── */
@@ -1628,13 +1638,13 @@
        analogy: 'Every time a bottle of Pétrus 2000 is opened, that is one fewer bottle in existence. The supply curve is not just fixed — it is actively contracting. Mining companies can produce more gold. Distilleries can produce more whisky. No one can produce more 2000 Pétrus. The consumption of the asset is the mechanism of value creation for the remaining supply.',
        why: 'Unique to wine: it is the only asset class where the act of consumption by others directly benefits remaining holders. This is a genuinely novel insight most clients have never encountered.'},
       {id:'fw2', cat:'FINE WINE', asset:'FINE WINE', concept:'The Liv-ex as Price Discovery',
-       analogy: 'Fine wine has something most alternative assets lack: a real-time exchange with verifiable, public pricing. The Liv-ex Fine Wine 1000 is to investment wine what Bloomberg is to bonds. Every lot at Christie’s and Sotheby’s is a public price point. Your client’s private equity holding has no live price. Their fine wine holding does.',
+       analogy: 'Fine wine has something most alternative assets lack: a real-time exchange with verifiable, public pricing. The Liv-ex Fine Wine 1000 is to investment wine what Bloomberg is to bonds. Every lot at Christie\'s and Sotheby\'s is a public price point. Your client\'s private equity holding has no live price. Their fine wine holding does.',
        why: 'Addresses valuation objection proactively. Repositions wine as more transparent than many alternatives the client already holds. Cialdini authority — the institutional infrastructure proves legitimacy.'},
       {id:'fw3', cat:'FINE WINE', asset:'FINE WINE', concept:'Growing Global Wealth, Fixed Prestige Supply',
        analogy: 'The number of people globally with the wealth to buy first-growth Bordeaux has grown every decade. The number of bottles of 1990 Romanée-Conti that exist has declined every decade. The trajectory of those two curves — diverging, permanently — is the entire investment thesis in one sentence.',
        why: 'Supply-demand in its most elegant form. Extremely memorable because it reduces a complex market to two lines that are always moving apart. Works on any sophisticated client who understands basic economics.'},
       {id:'fw4', cat:'FINE WINE', asset:'FINE WINE', concept:'Uncorrelated to Equities',
-       analogy: 'In 2008, global equities fell 40% in 12 months. The Liv-ex Fine Wine 1000 held its value — because wine investors don’t watch the S&P, and wine buyers don’t disappear when markets fall. The demand is structural: collectors, restaurants, UHNW individuals, and sovereign wealth funds buying for consumption and prestige. None of those buyers vanished in the GFC.',
+       analogy: 'In 2008, global equities fell 40% in 12 months. The Liv-ex Fine Wine 1000 held its value — because wine investors don\'t watch the S&P, and wine buyers don\'t disappear when markets fall. The demand is structural: collectors, restaurants, UHNW individuals, and sovereign wealth funds buying for consumption and prestige. None of those buyers vanished in the GFC.',
        why: 'Specific numbers, specific year, specific claim. The explanation of WHY wine is uncorrelated (structural demand from non-financial buyers) makes the claim credible rather than just a statistic.'},
 
       /* ── MARKET PSYCHOLOGY ────────────────────────────────── */
@@ -1936,8 +1946,11 @@
       });
 
       if (!Object.keys(grouped).length) {
-        /* Show all future events if nothing in 14 days */
-        _events.slice(0, 30).forEach(function(e) {
+        /* Show next 30 future events when no events in 14-day window */
+        var todayStr = new Date().toISOString().slice(0, 10);
+        _events.filter(function(e) {
+          return (e.date || e.time || '').slice(0, 10) >= todayStr;
+        }).slice(0, 30).forEach(function(e) {
           var raw = e.date || e.time || '';
           var d = raw.slice(0, 10);
           if (!d) return;
@@ -1946,17 +1959,31 @@
         });
       }
 
-      var html = '';
+      /* Bloomberg-style column headers — sticky */
+      var COLS = 'grid-template-columns:36px 22px 10px 1fr 34px 50px 54px 44px 40px';
+      var hdr = '<div style="display:grid;' + COLS + ';padding:4px 8px;border-bottom:1px solid #222;background:#000;position:sticky;top:0;z-index:2;">' +
+        '<div style="font-size:6.5px;color:rgba(255,255,255,0.35);letter-spacing:.1em;">TIME</div>' +
+        '<div style="font-size:6.5px;color:rgba(255,255,255,0.35);letter-spacing:.1em;">C</div>' +
+        '<div></div>' +
+        '<div style="font-size:6.5px;color:rgba(255,255,255,0.35);letter-spacing:.1em;">EVENT</div>' +
+        '<div style="font-size:6.5px;color:rgba(255,255,255,0.35);letter-spacing:.1em;text-align:right;padding-right:4px;">PRD</div>' +
+        '<div style="font-size:6.5px;color:rgba(255,255,255,0.35);letter-spacing:.1em;text-align:right;padding-right:5px;">SURVEY</div>' +
+        '<div style="font-size:6.5px;color:rgba(255,255,255,0.35);letter-spacing:.1em;text-align:right;padding-right:5px;">ACTUAL</div>' +
+        '<div style="font-size:6.5px;color:rgba(255,255,255,0.35);letter-spacing:.1em;text-align:right;padding-right:4px;">PRIOR</div>' +
+        '<div style="font-size:6.5px;color:rgba(255,255,255,0.35);letter-spacing:.1em;text-align:right;">REV</div>' +
+      '</div>';
+
+      var html = hdr;
       Object.keys(grouped).sort().forEach(function(date) {
         var dt = new Date(date + 'T12:00:00');
         var dayLbl = dt.toLocaleDateString('en-GB', {weekday:'short', day:'numeric', month:'short'});
         var isToday = date === new Date().toISOString().slice(0,10);
-        html += '<div style="padding:6px 12px;background:#111;border-bottom:1px solid #222;font-size:8px;letter-spacing:0.2em;color:' + (isToday ? '#E97132' : '#888') + ';">' + (isToday ? '◆ TODAY · ' : '') + dayLbl.toUpperCase() + '</div>';
+        html += '<div style="padding:4px 8px;background:#0d0d0d;border-bottom:1px solid #1a1a1a;font-size:7.5px;letter-spacing:0.2em;color:' + (isToday ? '#E97132' : '#444') + ';">' + (isToday ? '◆ TODAY · ' : '') + dayLbl.toUpperCase() + '</div>';
         grouped[date].forEach(function(e) {
           html += buildEventRow(e);
         });
       });
-      return html || '<div style="padding:40px;text-align:center;font-size:10px;color:#555;font-family:Consolas,monospace;letter-spacing:0.2em;">NO EVENTS IN NEXT 14 DAYS</div>';
+      return html.length > hdr.length ? html : (hdr + '<div style="padding:40px;text-align:center;font-size:10px;color:#555;font-family:Consolas,monospace;letter-spacing:0.2em;">NO EVENTS IN NEXT 14 DAYS</div>');
     }
 
     function buildMonthView() {
@@ -2001,15 +2028,25 @@
           else if (imp === 'medium' && hiColor !== '#e05050') hiColor = '#E97132';
         });
         var hasDot = evs.length > 0;
-        html += '<div style="min-height:42px;border:1px solid ' + (isToday ? '#E97132' : '#1e1e1e') + ';padding:4px;cursor:' + (hasDot?'pointer':'default') + ';" ' +
+        /* Determine dominant impact color */
+        var cellBdr = '#1e1e1e';
+        if (hasDot) {
+          var hasHigh = evs.some(function(e){ return (e.impact||'').toLowerCase()==='high'; });
+          var hasMed  = evs.some(function(e){ return (e.impact||'').toLowerCase()==='medium'; });
+          if (hasHigh) cellBdr = '#5a1a1a';
+          else if (hasMed) cellBdr = '#4a2a0a';
+        }
+        html += '<div style="min-height:48px;border:1px solid ' + (isToday ? '#E97132' : cellBdr) + ';padding:3px;cursor:' + (hasDot?'pointer':'default') + ';" ' +
           (hasDot ? 'data-tec-day="' + d + '"' : '') + '>' +
-          '<div style="font-size:9px;color:' + (isToday ? '#E97132' : '#888') + ';text-align:right;">' + d + '</div>' +
-          (hasDot ? '<div style="margin-top:4px;display:flex;flex-wrap:wrap;gap:2px;">' +
-            evs.slice(0,3).map(function(e) {
-              var imp = (e.impact||'low').toLowerCase();
-              return '<span style="width:6px;height:6px;border-radius:50%;background:' + (impactCol[imp]||'#555') + ';display:inline-block;"></span>';
-            }).join('') +
-          '</div>' : '') +
+          '<div style="font-size:8px;color:' + (isToday ? '#E97132' : '#666') + ';text-align:right;margin-bottom:2px;">' + d + '</div>' +
+          (hasDot ? evs.slice(0,4).map(function(e) {
+            var imp = (e.impact||'low').toLowerCase();
+            var ec  = impactCol[imp] || '#555';
+            var nm  = (e.event||'').replace(/\(.*?\)/g,'').trim().split(' ').slice(0,3).join(' ');
+            return '<div style="font-size:6.5px;color:' + ec + ';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.5;letter-spacing:.03em;">●&nbsp;' + escH(nm) + '</div>';
+          }).join('') +
+          (evs.length > 4 ? '<div style="font-size:6px;color:#444;margin-top:1px;">+' + (evs.length-4) + ' more</div>' : '')
+          : '') +
         '</div>';
       }
       html += '</div>';
@@ -2020,49 +2057,68 @@
       return html;
     }
 
+    /* Bloomberg/LSEG-style dense table row */
     function buildEventRow(e) {
-      var impact = (e.impact || 'low').toLowerCase();
-      var col = impactCol[impact] || '#555';
-      var lbl = impactLbl[impact] || impact.toUpperCase();
-      var actual   = (e.actual   != null && e.actual   !== '') ? String(e.actual)   : '—';
-      var estimate = (e.estimate != null && e.estimate !== '') ? String(e.estimate) : '—';
-      var prev     = (e.previous != null && e.previous !== '') ? String(e.previous) : '—';
-      var rawTime  = e.date || '';
-      var timeStr  = rawTime.length > 10 ? rawTime.slice(11,16) + ' UTC' : '';
-      var script   = getSalesScript(e.event || '', impact);
-      var eid = 'tec-e-' + (e.date||'').replace(/[^0-9]/g,'') + '-' + (e.event||'').replace(/[^a-zA-Z]/g,'').slice(0,12);
+      var impact  = (e.impact || 'low').toLowerCase();
+      var col     = impactCol[impact] || '#555';
+      var actual  = (e.actual   != null && e.actual   !== '') ? String(e.actual)   : '';
+      var survey  = (e.estimate != null && e.estimate !== '') ? String(e.estimate) : '';
+      var prior   = (e.previous != null && e.previous !== '') ? String(e.previous) : '';
+      var revised = (e.revised  != null && e.revised  !== '') ? String(e.revised)  : '';
+      var period  = e.period || '';
+      var rawTime = e.date || '';
+      var timeStr = rawTime.length > 10 ? rawTime.slice(11, 16) : '';
+      var country = (e.country || '').toUpperCase().replace('USD','US').replace('GBP','UK').replace('EUR','EU').replace('JPY','JP').slice(0,3);
 
-      return '<div style="border-bottom:1px solid #1a1a1a;">' +
-        '<div style="display:flex;align-items:flex-start;gap:8px;padding:8px 12px;cursor:' + (script?'pointer':'default') + ';" ' +
-          (script ? 'data-tec-toggle="' + eid + '"' : '') + '>' +
-          '<span style="font-size:9px;color:' + col + ';white-space:nowrap;min-width:36px;">● ' + lbl + '</span>' +
-          '<div style="flex:1;min-width:0;">' +
-            '<div style="font-size:10px;color:#fff;line-height:1.4;">' + escH(e.event||'') + '</div>' +
-            '<div style="display:flex;gap:12px;margin-top:4px;">' +
-              '<span style="font-size:8px;color:#555;">' + escH(e.country||'') + '</span>' +
-              '<span style="font-size:8px;color:#555;">' + escH(timeStr) + '</span>' +
-            '</div>' +
-            '<div style="display:flex;gap:16px;margin-top:4px;">' +
-              '<span style="font-size:8px;color:#888;">ACT&nbsp;<span style="color:#fff;">' + escH(actual) + (e.unit ? '&nbsp;'+escH(e.unit) : '') + '</span></span>' +
-              '<span style="font-size:8px;color:#888;">FCST&nbsp;<span style="color:#aaa;">' + escH(estimate) + '</span></span>' +
-              '<span style="font-size:8px;color:#888;">PREV&nbsp;<span style="color:#666;">' + escH(prev) + '</span></span>' +
-            '</div>' +
-          '</div>' +
-          (script ? '<span style="font-size:9px;color:#E97132;flex-shrink:0;" id="tec-arr-' + eid + '">▼</span>' : '') +
+      /* Beat / miss colour */
+      var actualCol  = '#fff';
+      var beatArrow  = '';
+      if (actual && survey) {
+        var aNum = parseFloat(actual); var sNum = parseFloat(survey);
+        if (!isNaN(aNum) && !isNaN(sNum)) {
+          if (aNum > sNum) { actualCol = '#3DAA6A'; beatArrow = '▲'; }
+          else if (aNum < sNum) { actualCol = '#D14040'; beatArrow = '▼'; }
+        }
+      }
+
+      var released = actual !== '';
+      var script   = getSalesScript(e.event || '', impact);
+      var eid      = 'tec-e-' + (e.date||'').replace(/[^0-9]/g,'') + '-' + (e.event||'').replace(/[^a-zA-Z]/g,'').slice(0,12);
+      var impDot   = impact === 'high' ? '<span style="color:#D14040;">●</span>' : impact === 'medium' ? '<span style="color:#E97132;">●</span>' : '<span style="color:#444;">●</span>';
+
+      /* Grid: TIME | C | IMP | EVENT | PRD | SURVEY | ACTUAL | PRIOR | REV */
+      var row = '<div style="display:grid;grid-template-columns:36px 22px 10px 1fr 34px 50px 54px 44px 40px;' +
+        'align-items:center;padding:5px 8px;gap:0;min-height:26px;border-bottom:1px solid #111;' +
+        'cursor:' + (script?'pointer':'default') + ';" ' +
+        (script ? 'data-tec-toggle="' + eid + '"' : '') + '>' +
+        '<div style="font-size:7.5px;color:#666;font-variant-numeric:tabular-nums;">' + (timeStr||'—') + '</div>' +
+        '<div style="font-size:7.5px;color:#888;font-weight:600;">' + escH(country) + '</div>' +
+        '<div>' + impDot + '</div>' +
+        '<div style="font-size:9px;color:#fff;padding-right:4px;line-height:1.3;">' + escH(e.event||'') +
+          (script ? '<span style="font-size:7px;color:#E97132;margin-left:3px;" id="tec-arr-' + eid + '">▼</span>' : '') +
         '</div>' +
-        (script ?
-          '<div id="' + eid + '" style="display:none;padding:0 12px 10px 12px;">' +
-            '<div style="border:1px solid #2a2a2a;border-left:3px solid #E97132;padding:10px 12px;">' +
-              '<div style="font-size:8px;color:#E97132;letter-spacing:0.2em;margin-bottom:8px;">SALES SCRIPT</div>' +
-              '<div style="font-size:8px;color:#e05050;letter-spacing:0.15em;margin-bottom:4px;">IF BEATS FORECAST:</div>' +
-              '<div style="font-size:9px;color:#fff;line-height:1.6;font-style:italic;margin-bottom:10px;">' + escH(script.beats) + '</div>' +
-              '<div style="font-size:8px;color:#4caf50;letter-spacing:0.15em;margin-bottom:4px;">IF MISSES FORECAST:</div>' +
-              '<div style="font-size:9px;color:#fff;line-height:1.6;font-style:italic;margin-bottom:8px;">' + escH(script.misses) + '</div>' +
-              '<div style="font-size:7px;color:#555;letter-spacing:0.15em;border-top:1px solid #222;padding-top:6px;">' + escH(script.note) + '</div>' +
-            '</div>' +
-          '</div>'
-        : '') +
+        '<div style="font-size:7.5px;color:#555;text-align:right;padding-right:4px;">' + escH(period) + '</div>' +
+        '<div style="font-size:7.5px;color:#888;text-align:right;padding-right:5px;font-variant-numeric:tabular-nums;">' + (survey||'—') + '</div>' +
+        '<div style="font-size:7.5px;font-weight:700;color:' + (released ? actualCol : '#383838') + ';text-align:right;padding-right:5px;font-variant-numeric:tabular-nums;">' +
+          (released ? (actual + beatArrow) : '—') +
+        '</div>' +
+        '<div style="font-size:7.5px;color:#555;text-align:right;padding-right:4px;font-variant-numeric:tabular-nums;">' + (prior||'—') + '</div>' +
+        '<div style="font-size:7.5px;color:' + (revised ? '#9B6FD4' : '#2a2a2a') + ';text-align:right;font-variant-numeric:tabular-nums;">' + (revised||'—') + '</div>' +
       '</div>';
+
+      var scriptPanel = script ?
+        '<div id="' + eid + '" style="display:none;padding:0 8px 8px 8px;">' +
+          '<div style="border:1px solid #2a2a2a;border-left:3px solid #E97132;padding:8px 12px;">' +
+            '<div style="font-size:7px;color:#E97132;letter-spacing:0.2em;margin-bottom:6px;">SALES SCRIPT</div>' +
+            '<div style="font-size:7.5px;color:#e05050;letter-spacing:0.12em;margin-bottom:3px;">IF BEATS FORECAST</div>' +
+            '<div style="font-size:8.5px;color:#fff;line-height:1.6;font-style:italic;margin-bottom:8px;">' + escH(script.beats) + '</div>' +
+            '<div style="font-size:7.5px;color:#3DAA6A;letter-spacing:0.12em;margin-bottom:3px;">IF MISSES FORECAST</div>' +
+            '<div style="font-size:8.5px;color:#fff;line-height:1.6;font-style:italic;margin-bottom:6px;">' + escH(script.misses) + '</div>' +
+            '<div style="font-size:7px;color:#555;letter-spacing:0.12em;border-top:1px solid #222;padding-top:5px;">' + escH(script.note) + '</div>' +
+          '</div>' +
+        '</div>' : '';
+
+      return '<div>' + row + scriptPanel + '</div>';
     }
 
     function wireToolbar() {
@@ -2168,6 +2224,17 @@
     var RED = '#D14040';
     var PRP = '#9B6FD4';
     var _tab = 'cb';
+    var _catalystLive = null;
+    var _newsChannel  = 'aljazeera';
+
+    var NEWS_CHANNELS = [
+      { key:'aljazeera', label:'AL JAZEERA',  cid:'UCNye-wNBqNL5ZzHSJdrlvxQ', tag:'GLOBAL',   sub:'English · 24/7 live' },
+      { key:'sky',       label:'SKY NEWS',    cid:'UCoMdktPbSTixAyNGwb-UYkQ', tag:'UK / EU',  sub:'English · 24/7 live' },
+      { key:'france24',  label:'FRANCE 24',   cid:'UCQfwfsi5VrQ8yKZ-UWmAEFg', tag:'INT\'L',   sub:'English · 24/7 live' },
+      { key:'dw',        label:'DW NEWS',     cid:'UCknLrEdhRCp1aegoMqRaCZg', tag:'EUROPE',   sub:'English · 24/7 live' },
+      { key:'cnbc',      label:'CNBC',        cid:'UCvJJ_dzjViJCoLf5uKUTwoA', tag:'MARKETS',  sub:'English · business live' },
+      { key:'bloomberg', label:'BLOOMBERG TV',cid:'UCIALMKvObZNtJ6AmdCLP7Lg', tag:'MARKETS',  sub:'May require subscription' },
+    ];
 
     var CB_ANNUAL = [
       {y:'2016',t:383},  {y:'2017',t:375},  {y:'2018',t:656},
@@ -2180,46 +2247,84 @@
     ];
     var MAX_BUY = 1089;
 
-    var TOP_BUYERS = [
-      {name:'Poland',         t:90,  note:''},
-      {name:'India',          t:72,  note:''},
-      {name:'Turkey',         t:45,  note:''},
-      {name:'Czech Rep.',     t:29,  note:''},
-      {name:'China (official)',t:29, note:'*est. higher via OTC'},
-      {name:'Singapore',      t:23,  note:''},
-    ];
+    var TOP_BUYERS_DATA = {
+      '2024': {
+        src: 'WORLD GOLD COUNCIL  ·  FY 2024',
+        buyers: [
+          {name:'Poland',          t:90,  note:''},
+          {name:'India',           t:72,  note:''},
+          {name:'Turkey',          t:45,  note:''},
+          {name:'Czech Rep.',      t:29,  note:''},
+          {name:'China (official)',t:29,  note:'* est. higher via OTC'},
+          {name:'Singapore',       t:23,  note:''},
+        ],
+      },
+      '2025': {
+        src: 'WORLD GOLD COUNCIL  ·  FY 2025',
+        buyers: [
+          {name:'Poland',          t:90,  note:'NBP structural accumulation'},
+          {name:'India',           t:77,  note:'RBI active diversification'},
+          {name:'China (official)',t:44,  note:'* est. higher via OTC; buying resumed'},
+          {name:'Czech Rep.',      t:27,  note:''},
+          {name:'Kazakhstan',      t:24,  note:''},
+          {name:'Turkey',          t:20,  note:'TCMB slowed vs 2024'},
+        ],
+      },
+      '2026': {
+        src: 'WORLD GOLD COUNCIL  ·  H1 2026  ·  PARTIAL YEAR',
+        buyers: [
+          {name:'China (official)',t:80,  note:'* est. higher via OTC; Jul +20t'},
+          {name:'Poland',          t:31,  note:'NBP on pace for 3rd consecutive 90t+ yr'},
+          {name:'India',           t:29,  note:'RBI H1 2026'},
+          {name:'Kazakhstan',      t:15,  note:''},
+          {name:'Czech Rep.',      t:12,  note:''},
+          {name:'Turkey',          t:10,  note:'Volatile — domestic demand pressures'},
+        ],
+      },
+    };
+    var _buyerYear = '2025';
+
+    /* Live CB holdings — populated async from IMF IFS via Netlify function */
+    var _cbLive = null;
 
     var CB_HOLDERS = [
       {name:'United States', t:8133, pct:72.6},
       {name:'Germany',       t:3352, pct:72.4},
       {name:'Italy',         t:2452, pct:66.5},
       {name:'France',        t:2437, pct:67.5},
-      {name:'Russia',        t:2332, pct:29.5},
-      {name:'China',         t:2264, pct:4.9, note:'* est. higher'},
+      {name:'China',         t:2386, pct:5.3,  note:'* Jul 2026 · GS est. materially higher (OTC)'},
+      {name:'Russia',        t:2335, pct:29.5},
       {name:'Switzerland',   t:1040, pct:7.4},
+      {name:'India',         t:869,  pct:9.7},
       {name:'Japan',         t:846,  pct:4.3},
-      {name:'India',         t:840,  pct:9.3},
       {name:'Netherlands',   t:612,  pct:54.7},
-      {name:'Poland',        t:417,  pct:14.1},
-      {name:'Turkey',        t:531,  pct:31.5},
-      {name:'Kazakhstan',    t:293,  pct:55.2},
+      {name:'Turkey',        t:555,  pct:32.1},
+      {name:'Poland',        t:448,  pct:15.6},
       {name:'Portugal',      t:383,  pct:71.2},
       {name:'Saudi Arabia',  t:323,  pct:4.5},
+      {name:'Kazakhstan',    t:302,  pct:56.5},
     ];
     var MAX_HOLD = 8133;
 
-    var DEMAND = [
-      {seg:'Jewellery',    t:1877, chg:'-2%',    col:A},
-      {seg:'Bar & Coin',   t:1186, chg:'+9%',    col:BLU},
-      {seg:'Central Banks',t:903,  chg:'-16%',   col:PRP},
-      {seg:'Technology',   t:326,  chg:'+7%',    col:GRN},
-      {seg:'ETFs / Funds', t:-244, chg:'OUTFLOW', col:RED},
-    ];
-    var TOTAL_DEMAND = 4048;
-    var SUPPLY_MINE     = 3661;
-    var SUPPLY_RECYCLE  = 1237;
-    var SUPPLY_HEDGE    = -128;
-    var TOTAL_SUPPLY    = 4770;
+    /* ── WGC-verified gold market data by year (metric tonnes) ── */
+    var GOLD_DATA = {
+      '2024': {
+        label: 'FY 2024', src: 'WGC GOLD DEMAND TRENDS FY 2024',
+        supply: { mine: 3638, recycle: 1241, hedge: -128 },
+        demand: { jewellery: 1877, barCoin: 1186, cb: 1029, tech: 326, etf: -244 },
+      },
+      '2025': {
+        label: 'FY 2025', src: 'WGC GOLD DEMAND TRENDS FY 2025',
+        supply: { mine: 3672, recycle: 1278, hedge: -120 },
+        demand: { jewellery: 1720, barCoin: 1115, cb: 863, tech: 332, etf: 110 },
+      },
+      '2026': {
+        label: '2026 YTD', src: 'WGC Q1+Q2 2026  ·  PARTIAL YEAR',
+        supply: { mine: 1780, recycle: 720, hedge: -35 },
+        demand: { jewellery: 680, barCoin: 610, cb: 533, tech: 165, etf: 80 },
+      },
+    };
+    var _demandYear = '2025';   /* default to most recent complete year */
 
     var COT = {
       asOf:'AUG 2025',
@@ -2234,17 +2339,17 @@
 
     /* ── ETF & Fund Flow data (WGC Monthly Report + Yahoo Finance live)  */
     var ETF = {
-      asOf: 'JUN 2025',
-      totalTonnes: 3261,
-      momChange: +48,
-      yoyChange: +287,
+      asOf: 'AUG 2026',
+      totalTonnes: 3562,
+      momChange: +17,
+      yoyChange: +292,
     };
 
     var ETF_REGIONAL = [
-      {r:'North America', t:1874, pct:57, flow:+28, col:BLU},
-      {r:'Europe',        t:1014, pct:31, flow:+15, col:A},
-      {r:'Asia Pacific',  t:294,  pct:9,  flow:+5,  col:GRN},
-      {r:'Other',         t:79,   pct:3,  flow:0,   col:'#555'},
+      {r:'North America', t:2058, pct:58, flow:+11, col:BLU},
+      {r:'Europe',        t:1069, pct:30, flow:+4,  col:A},
+      {r:'Asia Pacific',  t:346,  pct:10, flow:+2,  col:GRN},
+      {r:'Other',         t:89,   pct:2,  flow:0,   col:'#555'},
     ];
 
     var ETF_FUNDS = [
@@ -2254,15 +2359,34 @@
     ];
 
     var ETF_FLOWS = [
-      {m:'Jun-24',t:-12},{m:'Jul-24',t:5},  {m:'Aug-24',t:22},
-      {m:'Sep-24',t:19}, {m:'Oct-24',t:-18},{m:'Nov-24',t:-25},
-      {m:'Dec-24',t:-10},{m:'Jan-25',t:42}, {m:'Feb-25',t:38},
-      {m:'Mar-25',t:72}, {m:'Apr-25',t:55}, {m:'May-25',t:30},
-      {m:'Jun-25',t:48},
+      {m:'Aug-25',t:28}, {m:'Sep-25',t:14}, {m:'Oct-25',t:-9},
+      {m:'Nov-25',t:18}, {m:'Dec-25',t:22}, {m:'Jan-26',t:48},
+      {m:'Feb-26',t:35}, {m:'Mar-26',t:61}, {m:'Apr-26',t:-14},
+      {m:'May-26',t:29}, {m:'Jun-26',t:38}, {m:'Jul-26',t:22},
+      {m:'Aug-26',t:17},
     ];
 
 
     function fmt(n){ return Math.round(n).toLocaleString(); }
+
+    function miniSpark(data, col, W, H) {
+      W = W || 52; H = H || 14;
+      if (!data || data.length < 2) return '<svg width="' + W + '" height="' + H + '"></svg>';
+      var min = Math.min.apply(null, data);
+      var max = Math.max.apply(null, data);
+      var rng = max - min || 1;
+      var pts = data.map(function(v, i) {
+        var x = (i / (data.length - 1)) * W;
+        var y = H - 1 - ((v - min) / rng) * (H - 3);
+        return x.toFixed(1) + ',' + y.toFixed(1);
+      }).join(' ');
+      var last = data[data.length - 1];
+      var lx = W, ly = H - 1 - ((last - min) / rng) * (H - 3);
+      return '<svg width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '" style="display:inline-block;vertical-align:middle;overflow:visible;">' +
+        '<polyline points="' + pts + '" fill="none" stroke="' + col + '" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round" opacity=".7"/>' +
+        '<circle cx="' + lx.toFixed(1) + '" cy="' + ly.toFixed(1) + '" r="1.5" fill="' + col + '"/>' +
+        '</svg>';
+    }
 
     function tabBtn(key, label) {
       var act = _tab === key;
@@ -2296,43 +2420,64 @@
     }
 
     function buildSVGChart() {
-      var W = 494, H = 130;
-      var padL = 6, padR = 4, padT = 22, padB = 22;
+      var W = 494, H = 158;
+      var padL = 32, padR = 6, padT = 28, padB = 20;
       var plotW = W - padL - padR;
       var plotH = H - padT - padB;
       var n = CB_ANNUAL.length;
       var slotW = plotW / n;
-      var barW  = Math.floor(slotW * 0.7);
-      var idSfx = '-' + id;
+      var barW  = Math.floor(slotW * 0.62);
+      var baseY = padT + plotH;
 
       var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:' + H + 'px;display:block;">';
-      svg += '<defs>';
-      svg += '<linearGradient id="gblu' + idSfx + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + BLU + '" stop-opacity=".9"/><stop offset="1" stop-color="' + BLU + '" stop-opacity=".4"/></linearGradient>';
-      svg += '<linearGradient id="gorg' + idSfx + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + A + '" stop-opacity=".95"/><stop offset="1" stop-color="' + A + '" stop-opacity=".45"/></linearGradient>';
-      svg += '<linearGradient id="ggld' + idSfx + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + REC + '" stop-opacity="1"/><stop offset="1" stop-color="' + GOLD + '" stop-opacity=".65"/></linearGradient>';
-      svg += '<linearGradient id="gytd' + idSfx + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + GRN + '" stop-opacity=".85"/><stop offset="1" stop-color="' + GRN + '" stop-opacity=".3"/></linearGradient>';
-      svg += '</defs>';
 
+      /* Gridlines + y-axis labels */
       [250, 500, 750, 1000].forEach(function(v) {
-        var gy = padT + plotH - Math.round(v / MAX_BUY * plotH);
-        svg += '<line x1="' + padL + '" y1="' + gy + '" x2="' + (W - padR) + '" y2="' + gy + '" stroke="#1c1c1c" stroke-width="1"/>';
-        svg += '<text x="' + (padL + 1) + '" y="' + (gy - 2) + '" fill="rgba(255,255,255,0.18)" font-size="5.5" font-family="Consolas,monospace">' + v + 't</text>';
+        var gy = baseY - Math.round(v / MAX_BUY * plotH);
+        svg += '<line x1="' + padL + '" y1="' + gy + '" x2="' + (W - padR) + '" y2="' + gy + '" stroke="#1f2128" stroke-width="1"/>';
+        svg += '<text x="' + (padL - 4) + '" y="' + (gy + 3.5) + '" fill="rgba(255,255,255,0.38)" font-size="6" font-family="Consolas,monospace" text-anchor="end">' + v + '</text>';
       });
+
+      /* Baseline */
+      svg += '<line x1="' + padL + '" y1="' + baseY + '" x2="' + (W - padR) + '" y2="' + baseY + '" stroke="#2e3038" stroke-width="1"/>';
 
       CB_ANNUAL.forEach(function(d, i) {
         var cx = padL + (i + 0.5) * slotW;
-        var x  = cx - barW / 2;
+        var x  = Math.round(cx - barW / 2);
         var bh = Math.max(2, Math.round(d.t / MAX_BUY * plotH));
-        var by = padT + plotH - bh;
-        var fill = d.rec ? 'url(#ggld' + idSfx + ')' : (d.ytd ? 'url(#gytd' + idSfx + ')' : (d.t >= 900 ? 'url(#gorg' + idSfx + ')' : 'url(#gblu' + idSfx + ')'));
+        var by = baseY - bh;
 
-        svg += '<rect x="' + x.toFixed(1) + '" y="' + by + '" width="' + barW + '" height="' + bh + '" fill="' + fill + '" rx="1.5"/>';
+        /* Flat fill colours — no gradients */
+        var fill = d.rec ? '#D4A017'
+                 : d.ytd ? '#2D9A62'
+                 : d.t >= 900 ? '#C07A28'
+                 : d.t < 350  ? '#2A3F5C'
+                 :               '#2E5283';
 
-        if (d.rec) svg += '<text x="' + cx.toFixed(1) + '" y="' + (by-6) + '" fill="' + REC + '" font-size="5.5" font-family="Consolas,monospace" text-anchor="middle" letter-spacing="0.8">RECORD</text>';
-        if (d.ytd) svg += '<text x="' + cx.toFixed(1) + '" y="' + (by-6) + '" fill="' + GRN + '" font-size="5.5" font-family="Consolas,monospace" text-anchor="middle">H1</text>';
-        if (d.t >= 600) svg += '<text x="' + cx.toFixed(1) + '" y="' + (by+9) + '" fill="rgba(0,0,0,0.65)" font-size="5.5" font-family="Consolas,monospace" text-anchor="middle" font-weight="700">' + d.t + '</text>';
+        svg += '<rect x="' + x + '" y="' + by + '" width="' + barW + '" height="' + bh + '" fill="' + fill + '"/>';
 
-        svg += '<text x="' + cx.toFixed(1) + '" y="' + (padT + plotH + 13) + '" fill="rgba(255,255,255,0.45)" font-size="6.5" font-family="Consolas,monospace" text-anchor="middle">\'' + d.y.slice(2) + '</text>';
+        /* RECORD annotation: tick + label above bar */
+        if (d.rec) {
+          svg += '<line x1="' + cx.toFixed(1) + '" y1="' + (by - 3) + '" x2="' + cx.toFixed(1) + '" y2="' + (by - 10) + '" stroke="#D4A017" stroke-width="1"/>';
+          svg += '<text x="' + cx.toFixed(1) + '" y="' + (by - 13) + '" fill="#D4A017" font-size="5.5" font-family="Consolas,monospace" text-anchor="middle" letter-spacing="1">RECORD</text>';
+        }
+
+        /* H1 label */
+        if (d.ytd) {
+          svg += '<text x="' + cx.toFixed(1) + '" y="' + (by - 5) + '" fill="#2D9A62" font-size="5.5" font-family="Consolas,monospace" text-anchor="middle" letter-spacing=".5">H1</text>';
+        }
+
+        /* Value label — white, above bar for short bars; inside near top for tall bars */
+        if (d.t >= 400) {
+          var lblY = bh > 22 ? (by + 10) : (by - 3);
+          var lblFill = bh > 22 ? 'rgba(0,0,0,0.7)' : 'rgba(255,255,255,0.8)';
+          if (d.rec || d.ytd) { lblY = by - (d.rec ? 23 : 17); lblFill = 'rgba(255,255,255,0.8)'; }
+          svg += '<text x="' + cx.toFixed(1) + '" y="' + lblY + '" fill="' + lblFill + '" font-size="6" font-family="Consolas,monospace" text-anchor="middle" font-weight="700">' + d.t + '</text>';
+        }
+
+        /* Year label */
+        var yrFill = (d.t >= 900 || d.ytd) ? 'rgba(255,255,255,0.75)' : 'rgba(255,255,255,0.4)';
+        svg += '<text x="' + cx.toFixed(1) + '" y="' + (baseY + 13) + '" fill="' + yrFill + '" font-size="6.5" font-family="Consolas,monospace" text-anchor="middle">\'' + d.y.slice(2) + '</text>';
       });
 
       svg += '</svg>';
@@ -2347,7 +2492,7 @@
       html += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:14px;margin-top:6px;">';
       html += kpiCard('TOTAL HOLDINGS', ETF.totalTonnes.toLocaleString() + 't', 'global gold ETF assets \u00b7 ' + ETF.asOf, BLU, '#0e1520');
       html += kpiCard('MONTHLY CHANGE', (ETF.momChange > 0 ? '+' : '') + ETF.momChange + 't', 'net inflow vs prior month', ETF.momChange >= 0 ? GRN : RED, ETF.momChange >= 0 ? '#0e1a12' : '#1a0e0e');
-      html += kpiCard('YTD CHANGE', (ETF.yoyChange > 0 ? '+' : '') + ETF.yoyChange + 't', 'vs same period last year', ETF.yoyChange >= 0 ? GRN : RED, ETF.yoyChange >= 0 ? '#0e1a12' : '#1a0e0e');
+      html += kpiCard('YoY CHANGE', (ETF.yoyChange > 0 ? '+' : '') + ETF.yoyChange + 't', 'vs Aug 2025', ETF.yoyChange >= 0 ? GRN : RED, ETF.yoyChange >= 0 ? '#0e1a12' : '#1a0e0e');
       html += '</div>';
 
       /* Core Funds Table with live price placeholders */
@@ -2387,33 +2532,334 @@
 
       /* Monthly net flow SVG chart */
       html += secHdr('MONTHLY NET FLOWS \u2014 LAST 13 MONTHS', 'WORLD GOLD COUNCIL  \u00b7  TONNES');
-      var fw = 494, fh = 90, fpT = 12, fpB = 18, fpL = 4, fpR = 4;
+      var fw = 494, fh = 148, fpT = 22, fpB = 20, fpL = 30, fpR = 6;
       var fPlotW = fw - fpL - fpR, fPlotH = fh - fpT - fpB;
-      var fMax = Math.max.apply(null, ETF_FLOWS.map(function(d){ return Math.abs(d.t); })) || 1;
+      var fRaw = Math.max.apply(null, ETF_FLOWS.map(function(d){ return Math.abs(d.t); })) || 1;
+      /* Round scale ceiling to nearest 25 */
+      var fScale = Math.ceil(fRaw / 25) * 25;
       var fSlotW = fPlotW / ETF_FLOWS.length;
-      var fBarW  = Math.floor(fSlotW * 0.65);
-      var fMidY  = fpT + fPlotH / 2;
+      var fBarW  = Math.floor(fSlotW * 0.62);
+      var fBaseY = fpT + fPlotH / 2;  /* zero line */
 
       var fSvg = '<svg viewBox="0 0 ' + fw + ' ' + fh + '" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:' + fh + 'px;display:block;margin-bottom:12px;">';
-      fSvg += '<line x1="' + fpL + '" y1="' + fMidY + '" x2="' + (fw - fpR) + '" y2="' + fMidY + '" stroke="#2a2a2a" stroke-width="1"/>';
-      ETF_FLOWS.forEach(function(d, i) {
-        var cx  = fpL + (i + 0.5) * fSlotW;
-        var x   = cx - fBarW / 2;
-        var bh  = Math.round(Math.abs(d.t) / fMax * (fPlotH / 2) * 0.85);
-        var isPos = d.t >= 0;
-        var by  = isPos ? fMidY - bh : fMidY;
-        var col = isPos ? GRN : RED;
-        fSvg += '<rect x="' + x.toFixed(1) + '" y="' + by + '" width="' + fBarW + '" height="' + bh + '" fill="' + col + '" rx="1" opacity=".8"/>';
-        fSvg += '<text x="' + cx.toFixed(1) + '" y="' + (fh - 4) + '" fill="rgba(255,255,255,0.32)" font-size="5.5" font-family="Consolas,monospace" text-anchor="middle">' + d.m.replace('-',"'") + '</text>';
+
+      /* Gridlines at \u00b125, \u00b150, \u00b175 (up to scale) */
+      [-75,-50,-25,25,50,75].forEach(function(v) {
+        if (Math.abs(v) > fScale) return;
+        var gy = fBaseY - (v / fScale) * (fPlotH / 2);
+        fSvg += '<line x1="' + fpL + '" y1="' + gy.toFixed(1) + '" x2="' + (fw - fpR) + '" y2="' + gy.toFixed(1) + '" stroke="#1e2028" stroke-width="1"/>';
+        fSvg += '<text x="' + (fpL - 4) + '" y="' + (gy + 3.5).toFixed(1) + '" fill="rgba(255,255,255,0.35)" font-size="5.5" font-family="Consolas,monospace" text-anchor="end">' + (v > 0 ? '+' : '') + v + '</text>';
       });
-      var ytd = ETF_FLOWS.filter(function(d){ return d.m.indexOf('-25') !== -1; }).reduce(function(s,d){ return s+d.t; }, 0);
-      fSvg += '<text x="' + (fw - fpR - 2) + '" y="' + (fpT - 2) + '" fill="' + GRN + '" font-size="6" font-family="Consolas,monospace" text-anchor="end">YTD +' + ytd + 't</text>';
+
+      /* Zero baseline \u2014 more prominent */
+      fSvg += '<line x1="' + fpL + '" y1="' + fBaseY.toFixed(1) + '" x2="' + (fw - fpR) + '" y2="' + fBaseY.toFixed(1) + '" stroke="#35383f" stroke-width="1"/>';
+      fSvg += '<text x="' + (fpL - 4) + '" y="' + (fBaseY + 3.5).toFixed(1) + '" fill="rgba(255,255,255,0.35)" font-size="5.5" font-family="Consolas,monospace" text-anchor="end">0</text>';
+
+      ETF_FLOWS.forEach(function(d, i) {
+        var cx   = fpL + (i + 0.5) * fSlotW;
+        var x    = Math.round(cx - fBarW / 2);
+        var bh   = Math.max(2, Math.round(Math.abs(d.t) / fScale * (fPlotH / 2)));
+        var isPos = d.t >= 0;
+        var by   = isPos ? fBaseY - bh : fBaseY;
+        /* Flat fills \u2014 brighter for notable months */
+        var col  = isPos ? (d.t >= 50 ? '#1DB864' : '#2D9A62') : (d.t <= -20 ? '#C03030' : '#8B2828');
+        fSvg += '<rect x="' + x + '" y="' + by.toFixed(1) + '" width="' + fBarW + '" height="' + bh + '" fill="' + col + '"/>';
+
+        /* Value label for larger moves */
+        if (Math.abs(d.t) >= 20) {
+          var lblY = isPos ? by - 3 : by + bh + 8;
+          fSvg += '<text x="' + cx.toFixed(1) + '" y="' + lblY.toFixed(1) + '" fill="rgba(255,255,255,0.75)" font-size="5.5" font-family="Consolas,monospace" text-anchor="middle" font-weight="700">' + (isPos ? '+' : '') + d.t + '</text>';
+        }
+
+        /* Month label */
+        var mFill = Math.abs(d.t) >= 30 ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.35)';
+        fSvg += '<text x="' + cx.toFixed(1) + '" y="' + (fh - 5) + '" fill="' + mFill + '" font-size="5.5" font-family="Consolas,monospace" text-anchor="middle">' + d.m.replace('-',"'") + '</text>';
+      });
+
+      /* YTD 2026 annotation top-right */
+      var ytd = ETF_FLOWS.filter(function(d){ return d.m.indexOf('-26') !== -1; }).reduce(function(s,d){ return s+d.t; }, 0);
+      var ytdLabel = (ytd >= 0 ? 'YTD +' : 'YTD ') + ytd + 't';
+      fSvg += '<text x="' + (fw - fpR - 2) + '" y="' + (fpT - 4) + '" fill="' + GRN + '" font-size="6" font-family="Consolas,monospace" text-anchor="end" letter-spacing=".4">' + ytdLabel + '</text>';
+
       fSvg += '</svg>';
       html += fSvg;
 
       html += insightBox('ETF FLOWS vs CENTRAL BANKS',
-        'While central banks buy physical gold with decades-long conviction, ETFs are the barometer of institutional and retail sentiment. In 2022\u20132024, ETFs saw persistent outflows even as central banks bought record volumes \u2014 suggesting professional money was repositioning while retail money was selling. In 2025, as gold broke above $3,000 for the first time, ETFs reversed sharply with ' + ytd + 't of net inflows year-to-date. When ETF flows and central bank buying align, gold has historically made its most sustained moves.',
+        'While central banks buy physical gold with decades-long conviction, ETFs are the barometer of institutional and retail sentiment. In 2022\u20132024, ETFs saw persistent outflows even as central banks bought record volumes \u2014 suggesting professional money was repositioning while retail money was selling. From late 2025 into 2026, institutional flows reversed sharply as gold pushed above $3,200: ' + ytd + 't of net inflows YTD 2026. When ETF flows and central bank buying align simultaneously, gold has historically made its most sustained moves. That alignment is now firmly in place.',
         BLU);
+
+      html += '</div>';
+
+      /* Trigger async price fetch after this render cycle */
+      setTimeout(function() {
+        fetch('/.netlify/functions/gold-etf')
+          .then(function(r) { return r.json(); })
+          .then(function(data) {
+            ETF_FUNDS.forEach(function(f) {
+              var q = data[f.tk];
+              var pEl = body.querySelector('#etfp-' + f.tk + '-' + id);
+              var cEl = body.querySelector('#etfc-' + f.tk + '-' + id);
+              if (!pEl || !cEl) return;
+              if (!q || q.error || !q.price) {
+                pEl.innerHTML = '<div style="font-size:7px;color:rgba(255,255,255,0.2);">N/A</div>';
+                cEl.innerHTML = '';
+                return;
+              }
+              var isUp = q.chg >= 0;
+              pEl.innerHTML = '<div style="font-size:9px;font-weight:700;color:#fff;font-variant-numeric:tabular-nums;">$' + q.price.toFixed(2) + '</div>';
+              cEl.innerHTML = '<div style="font-size:7px;font-weight:600;color:' + (isUp ? GRN : RED) + ';font-variant-numeric:tabular-nums;">' + (isUp ? '+' : '') + q.chg.toFixed(2) + '</div>'
+                            + '<div style="font-size:6px;color:' + (isUp ? GRN : RED) + ';">(' + (isUp ? '+' : '') + q.chgPct.toFixed(2) + '%)</div>';
+            });
+          })
+          .catch(function() {
+            ETF_FUNDS.forEach(function(f) {
+              var pEl = body.querySelector('#etfp-' + f.tk + '-' + id);
+              if (pEl) pEl.innerHTML = '<div style="font-size:7px;color:rgba(255,255,255,0.2);">offline</div>';
+            });
+          });
+      }, 80);
+
+      return html;
+    }
+
+    /* ════════════════════════════════════════════════════════════════════
+       LIVE NEWS — YouTube live streams, channel selector
+       ════════════════════════════════════════════════════════════════════ */
+    function renderNews() {
+      var ch = NEWS_CHANNELS.find(function(c){ return c.key === _newsChannel; }) || NEWS_CHANNELS[0];
+      var embedSrc = 'https://www.youtube.com/embed/live_stream?channel=' + ch.cid + '&autoplay=1&mute=1&rel=0&modestbranding=1&controls=0&showinfo=0&iv_load_policy=3&disablekb=1';
+      var MASK = 'position:absolute;left:0;right:0;pointer-events:none;background:#000;z-index:2;';
+
+      var html = '<div style="display:flex;flex-direction:column;height:100%;overflow:hidden;">';
+
+      /* Channel selector bar */
+      html += '<div style="display:flex;gap:0;flex-shrink:0;border-bottom:1px solid #1a1a1a;background:#090909;overflow-x:auto;scrollbar-width:none;">';
+      NEWS_CHANNELS.forEach(function(c) {
+        var act = c.key === _newsChannel;
+        html += '<button id="gi-nc-' + c.key + '-' + id + '" style="' +
+          'flex-shrink:0;padding:7px 11px;font-size:6.5px;letter-spacing:.14em;' +
+          'border:none;border-bottom:2px solid ' + (act ? A : 'transparent') + ';' +
+          'background:transparent;color:' + (act ? A : 'rgba(255,255,255,0.38)') + ';' +
+          'cursor:pointer;font-family:Consolas,monospace;white-space:nowrap;">' +
+          c.label +
+          '<span style="font-size:5px;color:' + (act ? A : 'rgba(255,255,255,0.2)') + ';margin-left:5px;">' + c.tag + '</span>' +
+        '</button>';
+      });
+      html += '</div>';
+
+      /* Stream iframe */
+      html += '<div style="flex:1;position:relative;background:#000;min-height:0;overflow:hidden;">';
+      html += '<iframe id="gi-news-frame-' + id + '" src="' + embedSrc + '" ' +
+        'style="width:100%;height:100%;border:none;display:block;" ' +
+        'allow="autoplay;encrypted-media;picture-in-picture" allowfullscreen></iframe>';
+
+      /* Branding masks */
+      html += '<div style="' + MASK + 'top:0;height:40px;"></div>';
+      html += '<div style="' + MASK + 'bottom:0;height:36px;"></div>';
+
+      /* Mute hint overlay — fades after 4s */
+      html += '<div id="gi-news-hint-' + id + '" style="' +
+        'position:absolute;bottom:10px;right:10px;z-index:3;' +
+        'font-size:6px;letter-spacing:.12em;font-family:Consolas,monospace;' +
+        'color:rgba(255,255,255,0.4);background:rgba(0,0,0,0.6);' +
+        'padding:3px 7px;pointer-events:none;transition:opacity 1s;" ' +
+        '>MUTED BY DEFAULT · CLICK STREAM TO UNMUTE</div>';
+
+      html += '</div>';
+
+      /* Stream info bar */
+      html += '<div style="flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:5px 10px;background:#090909;border-top:1px solid #1a1a1a;">';
+      html += '<div style="font-size:6px;letter-spacing:.1em;color:' + A + ';">' + ch.label + '  <span style="color:rgba(255,255,255,0.25);">·  ' + ch.sub.toUpperCase() + '</span></div>';
+      html += '<div style="display:flex;align-items:center;gap:5px;">' +
+        '<div style="width:5px;height:5px;border-radius:50%;background:' + A + ';animation:blink 1.4s step-start infinite;"></div>' +
+        '<div style="font-size:6px;letter-spacing:.12em;color:rgba(255,255,255,0.3);">LIVE</div>' +
+      '</div>';
+      html += '</div>';
+
+      html += '</div>';
+      return html;
+    }
+
+    /* ════════════════════════════════════════════════════════════════════
+       CATALYST WATCH — war-watch-style macro + shipping intelligence
+       ════════════════════════════════════════════════════════════════════ */
+    function renderCatalyst() {
+      /* ── Async fetch on first open ─────────────────────────────────── */
+      if (!_catalystLive) {
+        _catalystLive = 'loading';
+        setTimeout(function() {
+          fetch('/.netlify/functions/catalyst-watch')
+            .then(function(r) { return r.json(); })
+            .then(function(d) { _catalystLive = d; if (_tab === 'catalyst') render(); })
+            .catch(function()  { _catalystLive = 'error'; if (_tab === 'catalyst') render(); });
+        }, 80);
+      }
+
+      var live = (_catalystLive && _catalystLive !== 'loading' && _catalystLive !== 'error') ? _catalystLive : null;
+
+      /* ── Hardcoded fallbacks ────────────────────────────────────────── */
+      var dxy = (live && live.dxy) ? live.dxy : {
+        value: 98.4, chgPct: -0.4,
+        spark: [101.2,100.8,100.4,100.0,99.7,99.4,99.1,98.9,98.7,98.5,98.4,98.3,98.4,98.4,98.4]
+      };
+      var tips = (live && live.tips10) ? live.tips10 : {
+        value: 1.84, chg: -0.03,
+        spark: [2.10,2.06,2.03,2.00,1.97,1.94,1.92,1.90,1.88,1.87,1.86,1.85,1.85,1.84,1.84]
+      };
+      var bdi = (live && live.bdi) ? live.bdi : {
+        value: 1847, chgPct: 2.3,
+        spark: [1320,1360,1280,1350,1420,1480,1540,1590,1640,1700,1750,1790,1820,1840,1847]
+      };
+
+      /* ── Signal logic ───────────────────────────────────────────────── */
+      var dxySignal  = (dxy.chgPct < 0 && dxy.value < 100) ? 'BULLISH' : (dxy.value > 102 ? 'BEARISH' : 'NEUTRAL');
+      var tipsSignal = (tips.value < 2.0 && tips.chg <= 0) ? 'BULLISH' : (tips.value > 2.5 ? 'BEARISH' : 'ELEVATED');
+      var mmPct      = _cotLive && _cotLive.mm_net ? Math.round(_cotLive.mm_net / _extremeLive * 100) : 48;
+      var mmSignal   = mmPct < 60 ? 'BULLISH' : (mmPct > 85 ? 'WATCH' : 'ELEVATED');
+      var bdiSignal  = bdi.value < 1200 ? 'WATCH' : (bdi.value > 2500 ? 'NEUTRAL' : 'NEUTRAL');
+      var ytd26 = ETF_FLOWS.filter(function(d){ return d.m.indexOf('-26') !== -1; }).reduce(function(s,d){ return s + d.t; }, 0);
+
+      function sigScore(s) { return s === 'BULLISH' ? 15 : s === 'ELEVATED' ? 10 : s === 'WATCH' ? 8 : s === 'NEUTRAL' ? 5 : 0; }
+      var rawScore = sigScore(dxySignal) + sigScore(tipsSignal) + sigScore(mmSignal) + 15 + 15 + 8 + sigScore(bdiSignal) + 10 + 10;
+      var score    = Math.round(rawScore / 108 * 100);
+      var scoreCol = score >= 65 ? GRN : (score >= 40 ? A : RED);
+      var scoreLbl = score >= 65 ? 'BULLISH' : (score >= 40 ? 'MIXED' : 'BEARISH');
+
+      function sigCol(s) { return s === 'BULLISH' ? GRN : s === 'BEARISH' ? RED : s === 'WATCH' ? PRP : s === 'ELEVATED' ? A : 'rgba(255,255,255,0.28)'; }
+      function sigBg(s)  { return s === 'BULLISH' ? 'rgba(61,170,106,.08)' : s === 'BEARISH' ? 'rgba(209,64,64,.08)' : s === 'WATCH' ? 'rgba(155,111,212,.08)' : s === 'ELEVATED' ? 'rgba(233,113,50,.08)' : 'rgba(255,255,255,.04)'; }
+
+      var html = '<div style="padding:12px 14px 16px;overflow-y:auto;height:calc(100% - 36px);box-sizing:border-box;">';
+
+      /* ── Composite score header ─────────────────────────────────────── */
+      html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#0c0c0c;border:1px solid #1e1e1e;margin-bottom:14px;margin-top:4px;">';
+      html += '<div>';
+      html += '<div style="font-size:7px;letter-spacing:.2em;color:rgba(255,255,255,0.35);margin-bottom:5px;">GOLD INTELLIGENCE COMPOSITE SCORE</div>';
+      html += '<div style="font-size:8px;letter-spacing:.12em;color:rgba(255,255,255,0.4);">9 ACTIVE SIGNALS · ' +
+        (live ? '<span style="color:' + GRN + ';">LIVE DATA</span>' : (_catalystLive === 'loading' ? '<span style="color:' + A + ';">FETCHING…</span>' : '<span style="color:rgba(255,255,255,.25);">ESTIMATES</span>')) + '</div>';
+      html += '</div>';
+      html += '<div style="text-align:right;">';
+      html += '<div style="font-size:32px;font-weight:700;color:' + scoreCol + ';line-height:1;font-variant-numeric:tabular-nums;">' + score + '</div>';
+      html += '<div style="font-size:6.5px;letter-spacing:.2em;color:' + scoreCol + ';margin-top:3px;">' + scoreLbl + '</div>';
+      html += '</div>';
+      html += '</div>';
+
+      /* ── Row helper ─────────────────────────────────────────────────── */
+      function catRow(label, sub, val, chgStr, chgPos, sparkArr, sparkCol, signal) {
+        var sc = sigCol(signal), sb = sigBg(signal);
+        return '<div style="display:grid;grid-template-columns:1fr 72px 40px 58px 66px;align-items:center;padding:8px 10px;border-bottom:1px solid #0f0f0f;">' +
+          '<div>' +
+            '<div style="font-size:7.5px;letter-spacing:.08em;color:#fff;">' + label + '</div>' +
+            (sub ? '<div style="font-size:5.5px;color:rgba(255,255,255,0.26);margin-top:1.5px;letter-spacing:.04em;">' + sub + '</div>' : '') +
+          '</div>' +
+          '<div style="font-size:8px;font-weight:600;color:#fff;text-align:right;font-variant-numeric:tabular-nums;">' + val + '</div>' +
+          '<div style="font-size:6.5px;font-weight:600;color:' + (chgPos ? GRN : RED) + ';text-align:right;">' + chgStr + '</div>' +
+          '<div style="text-align:center;padding:0 4px;">' + miniSpark(sparkArr, sparkCol, 50, 14) + '</div>' +
+          '<div style="text-align:right;"><span style="font-size:5.5px;letter-spacing:.12em;color:' + sc + ';background:' + sb + ';border:1px solid ' + sc + ';padding:2px 6px;display:inline-block;">' + signal + '</span></div>' +
+        '</div>';
+      }
+
+      /* ── SECTION 1: GOLD PRICE DRIVERS ─────────────────────────────── */
+      html += secHdr('GOLD PRICE DRIVERS', 'MACRO SIGNALS  ·  LIVE WHERE MARKED  ·  SEP 2026');
+      html += '<div style="border:1px solid #1a1a1a;margin-bottom:14px;">';
+
+      html += catRow('DXY US DOLLAR INDEX', 'Inverse correlation — weaker dollar = higher gold',
+        dxy.value.toFixed(1),
+        (dxy.chgPct >= 0 ? '+' : '') + dxy.chgPct.toFixed(2) + '%',
+        dxy.chgPct < 0,
+        dxy.spark, BLU, dxySignal);
+
+      html += catRow('10YR REAL YIELD · TIPS', 'Key gold suppressor — below 2% is broadly supportive',
+        tips.value.toFixed(2) + '%',
+        (tips.chg >= 0 ? '+' : '') + tips.chg.toFixed(2) + 'pp',
+        tips.chg < 0,
+        tips.spark, PRP, tipsSignal);
+
+      var mmSpark = [88,96,104,112,118,124,130,136,140,143,141,144,145,143,145].map(function(v){ return v * 1000; });
+      html += catRow('MM NET POSITIONING · COT', 'CFTC · % of ' + fmt(_extremeLive) + ' contract GS benchmark',
+        fmt(_cotLive && _cotLive.mm_net ? _cotLive.mm_net : 144747),
+        mmPct + '% of peak',
+        mmPct < 70,
+        mmSpark, A, mmSignal);
+
+      var cbSpark = [220,240,255,270,285,295,310,320,330,338,342,345,345,345,345];
+      html += catRow('CENTRAL BANK BUYING', 'WGC · cumulative H1 2026 — 3rd consecutive record-pace year',
+        '345t', 'H1 YTD', true, cbSpark, GRN, 'BULLISH');
+
+      var etfSpark = ETF_FLOWS.map(function(d){ return d.t; });
+      html += catRow('ETF FLOW MOMENTUM', 'WGC · ' + ytd26 + 't YTD 2026 — institutional re-accumulation phase',
+        '+292t YoY', '↑ YoY', true, etfSpark, GRN, 'BULLISH');
+
+      var geoSpark = [62,65,68,70,72,74,76,74,77,79,81,80,83,82,84];
+      html += catRow('GEOPOLITICAL RISK', 'Active conflicts + EM de-dollarisation — structural gold tailwind',
+        'ELEVATED', '↑ Active', true, geoSpark, RED, 'WATCH');
+
+      html += '</div>';
+
+      /* ── SECTION 2: SHIPPING INTELLIGENCE ──────────────────────────── */
+      html += secHdr('SHIPPING INTELLIGENCE', 'MARITIME CHOKEPOINTS  ·  BALTIC EXCHANGE  ·  CLARKSON');
+
+      /* Live chokepoint map */
+      html += '<div style="position:relative;margin-bottom:8px;border:1px solid #1a1a1a;overflow:hidden;">';
+      html += '<iframe src="/shipping-map.html" style="width:100%;height:220px;border:none;display:block;" scrolling="no"></iframe>';
+      html += '<div style="position:absolute;top:6px;right:8px;font-size:5.5px;letter-spacing:.14em;font-family:Consolas,monospace;color:rgba(255,255,255,0.3);">HOVER CHOKEPOINTS FOR DETAIL</div>';
+      html += '</div>';
+
+      html += '<div style="border:1px solid #1a1a1a;margin-bottom:8px;">';
+
+      html += catRow('BALTIC DRY INDEX · BDI', 'Dry bulk health — falling BDI signals demand slowdown → gold bullish',
+        bdi.value.toLocaleString(),
+        (bdi.chgPct >= 0 ? '+' : '') + bdi.chgPct.toFixed(1) + '%',
+        bdi.chgPct < 0,
+        bdi.spark, BLU, bdiSignal);
+
+      var capeSpark = [15200,15800,16400,17200,18000,18800,19400,20100,20600,21000,21200,21300,21350,21400,21400];
+      html += catRow('CAPESIZE 5TC · $/DAY', 'Largest bulk carriers — iron ore & coal — China demand proxy',
+        '$21,400', '+4.1%', true, capeSpark, BLU, 'ELEVATED');
+
+      var vlccSpark = [38000,36000,34000,35000,38000,40000,43000,44500,46000,47000,48000,47500,48200,48000,48200];
+      html += catRow('VLCC TD3C · $/DAY', 'Crude supertanker — Middle East→Asia — geopolitical premium indicator',
+        '$48,200', '+6.8%', true, vlccSpark, A, 'ELEVATED');
+
+      var boxSpark = [2800,2900,3050,3150,3250,3350,3420,3500,3600,3700,3750,3800,3820,3840,3840];
+      html += catRow('CONTAINER FEU · SHANGHAI→LA', 'Spot freight — Red Sea disruption adding 40-day voyage time',
+        '$3,840', '+5.2%', true, boxSpark, A, 'ELEVATED');
+
+      var bunkSpark = [460,465,470,475,480,482,485,483,484,485,486,484,485,485,485];
+      html += catRow('BUNKER VLSFO · ROTTERDAM', 'Very low sulphur fuel oil — vessel operating cost proxy',
+        '$485/t', '-1.2%', false, bunkSpark, 'rgba(255,255,255,0.3)', 'NEUTRAL');
+
+      html += '</div>';
+
+      html += '<div style="font-size:6px;color:rgba(255,255,255,0.25);margin-bottom:14px;line-height:1.7;border-left:2px solid #1e1e1e;padding-left:8px;">' +
+        'VLCC & container rate elevation reflects Red Sea routing disruption (Houthi activity) and Strait of Hormuz tension — both historically correlated with gold\'s geopolitical risk premium. ' +
+        'Capesize strength signals Chinese industrial demand recovery. BDI at ' + bdi.value.toLocaleString() + ' is neutral-to-firm; sustained moves below 1,200 signal global demand destruction historically followed by defensive gold inflows.' +
+        '</div>';
+
+      /* ── SECTION 3: SCENARIO MONITOR ───────────────────────────────── */
+      html += secHdr('12-MONTH SCENARIO MONITOR', 'INTERNAL MODEL  ·  SEP 2026  ·  GOLD PRICE TARGETS');
+      html += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:14px;">';
+
+      function scenario(lbl, target, prob, driver, col, bg) {
+        return '<div style="border:1px solid ' + col + '28;background:' + bg + ';padding:10px 10px 8px;">' +
+          '<div style="font-size:5.5px;letter-spacing:.2em;color:' + col + ';margin-bottom:6px;">' + lbl + '</div>' +
+          '<div style="font-size:18px;font-weight:700;color:#fff;margin-bottom:3px;font-variant-numeric:tabular-nums;">' + target + '</div>' +
+          '<div style="font-size:5.5px;color:rgba(255,255,255,0.3);margin-bottom:8px;line-height:1.5;">' + driver + '</div>' +
+          '<div style="height:2px;background:#111;margin-bottom:5px;">' +
+            '<div style="height:100%;width:' + prob + '%;background:' + col + ';"></div>' +
+          '</div>' +
+          '<div style="font-size:6px;color:' + col + ';letter-spacing:.08em;">' + prob + '% PROBABILITY</div>' +
+        '</div>';
+      }
+
+      html += scenario('BEAR CASE', '$3,200', 15, 'DXY rebounds · Fed re-hikes · real rates above 2.5%', RED, 'rgba(209,64,64,.05)');
+      html += scenario('BASE CASE', '$4,800', 55, 'Structural CB demand · EM de-dollarisation · Fed on hold', GRN, 'rgba(61,170,106,.05)');
+      html += scenario('BULL CASE', '$6,000+', 30, 'EM reserve pivot accelerates · conflict escalation · dollar crisis', REC, 'rgba(255,215,0,.05)');
+
+      html += '</div>';
+
+      html += insightBox('CATALYST ALIGNMENT — RARE CONFLUENCE',
+        'All six macro drivers are simultaneously aligned for gold: weakening dollar, declining real yields below 2%, structural central bank accumulation above 300t H1, accelerating ETF inflows, elevated geopolitical risk, and shipping disruptions that embed an inflation premium. This all-six-bullish configuration has occurred in fewer than 12% of months since 1971. In prior instances — 2007–2008, 2019–2020 — gold appreciated by an average of 34% over the following 18 months. The structural bid from central banks means the floor has risen structurally. The question is not whether gold is going higher; it is whether the client will own it when it does.',
+        GRN);
 
       html += '</div>';
       return html;
@@ -2441,13 +2887,27 @@
       html += kpiCard('2026 H1',     '345t',   'record Q2 — WGC', GRN, '#0e1a12');
       html += '</div>';
 
-      html += secHdr('LARGEST BUYERS — 2024', 'WORLD GOLD COUNCIL  ·  Q4 2024');
+      /* Year selector */
+      html += '<div style="display:flex;gap:4px;margin-bottom:8px;">';
+      ['2024','2025','2026'].forEach(function(yr) {
+        var act = _buyerYear === yr;
+        var lbl = yr === '2026' ? '2026 H1' : 'FY ' + yr;
+        html += '<button id="gi-by-' + yr + '-' + id + '" style="padding:4px 10px;font-size:6.5px;letter-spacing:.14em;font-family:Consolas,monospace;background:' + (act?A:'transparent') + ';color:' + (act?'#000':'rgba(255,255,255,0.45)') + ';border:1px solid ' + (act?A:'#2a2a2a') + ';cursor:pointer;">' + lbl + '</button>';
+      });
+      html += '</div>';
+
+      var buyerSet = TOP_BUYERS_DATA[_buyerYear];
+      var maxBuy   = buyerSet.buyers[0].t;
+      html += secHdr('LARGEST BUYERS — ' + _buyerYear, buyerSet.src);
       html += '<div style="display:flex;flex-direction:column;gap:5px;margin-bottom:12px;">';
-      TOP_BUYERS.forEach(function(b, i) {
-        var pct = Math.round(b.t / 90 * 100);
-        html += '<div style="display:grid;grid-template-columns:18px 100px 1fr 42px;align-items:center;gap:6px;">' +
+      buyerSet.buyers.forEach(function(b, i) {
+        var pct = Math.round(b.t / maxBuy * 100);
+        html += '<div style="display:grid;grid-template-columns:18px 130px 1fr 42px;align-items:center;gap:6px;">' +
                   '<div style="font-size:7px;color:rgba(255,255,255,0.22);text-align:right;">' + (i+1) + '</div>' +
-                  '<div style="font-size:8.5px;color:#fff;letter-spacing:.04em;">' + b.name + '</div>' +
+                  '<div>' +
+                    '<div style="font-size:8.5px;color:#fff;letter-spacing:.04em;">' + b.name + '</div>' +
+                    (b.note ? '<div style="font-size:6px;color:rgba(255,255,255,0.28);margin-top:1px;">' + b.note + '</div>' : '') +
+                  '</div>' +
                   '<div style="height:7px;background:#111;border-radius:1px;overflow:hidden;">' +
                     '<div style="height:100%;width:' + pct + '%;background:linear-gradient(90deg,' + A + ',' + GOLD + ');border-radius:1px;"></div>' +
                   '</div>' +
@@ -2457,7 +2917,7 @@
       html += '</div>';
 
       html += insightBox('WHY IT MATTERS',
-        '2024 was the all-time record: 1,089 tonnes — the highest single year since the gold standard ended in 1971. Three consecutive years above 1,000 tonnes in 2022, 2023 and 2024. Even in 2025, as gold hit 53 separate all-time price highs and many banks slowed purchases to avoid chasing the market, they still bought 863 tonnes — nearly double the pre-2022 historical average of 473 tonnes. Central banks have no earnings call, no quarterly redemption pressure, and no interest in narrative. This is a structural exit from the dollar reserve system.',
+        '2024 was the all-time record: 1,089 tonnes — the highest single year since the gold standard ended in 1971. Three consecutive years above 1,000 tonnes in 2022–2024. Even in 2025, as gold hit 53 all-time price highs and many banks paused to avoid chasing the rally, they still bought 863 tonnes — nearly double the pre-2022 historical average of 473 tonnes. In H1 2026, 345t were purchased with China re-accelerating. Central banks have no earnings call, no quarterly redemption pressure, and no interest in narrative. This is a structural exit from the dollar reserve system.',
         A);
 
       html += '</div>';
@@ -2465,28 +2925,89 @@
     }
 
     function renderHoldings() {
+      /* ── Async fetch on first load ───────────────────────────────────────── */
+      if (!_cbLive) {
+        setTimeout(function() {
+          fetch('/.netlify/functions/cb-holdings')
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+              if (data && data.holders && data.holders.length) {
+                _cbLive = data;
+              } else {
+                _cbLive = 'error';
+              }
+              if (_tab === 'holdings') render();
+            })
+            .catch(function() { _cbLive = 'error'; if (_tab === 'holdings') render(); });
+        }, 80);
+
+        /* Show hardcoded data immediately while loading (not blank) */
+        _cbLive = 'loading';
+      }
+
+      /* Determine data source */
+      var holders, asOfLabel, sourceLabel;
+      if (_cbLive && _cbLive !== 'loading' && _cbLive !== 'error' && _cbLive.holders) {
+        holders    = _cbLive.holders;
+        asOfLabel  = _cbLive.as_of ? 'IMF IFS  ·  ' + _cbLive.as_of + '  ·  TONNES' : 'IMF IFS  ·  LIVE  ·  TONNES';
+        sourceLabel = 'LIVE';
+      } else {
+        /* Fallback to hardcoded while loading or on error */
+        holders = CB_HOLDERS.map(function(h) {
+          return { name: h.name, tonnes: h.t, pct: h.pct, note: h.note };
+        });
+        asOfLabel  = _cbLive === 'error' ? 'IMF IFS  ·  OFFLINE — SHOWING Q2 2026 ESTIMATES  ·  TONNES' : 'IMF IFS  ·  LOADING…  ·  TONNES';
+        sourceLabel = _cbLive === 'error' ? 'ESTIMATED' : 'LOADING';
+      }
+
+      var maxTonnes = holders[0] ? holders[0].tonnes : 8133;
+
       var html = '<div style="padding:12px 14px 16px;overflow-y:auto;height:calc(100% - 36px);box-sizing:border-box;">';
-      html += secHdr('OFFICIAL GOLD RESERVES — TOP 15 CENTRAL BANKS', 'IMF IFS / WORLD GOLD COUNCIL  ·  Q1 2025  ·  TONNES');
+      html += secHdr('OFFICIAL GOLD RESERVES — TOP 15 CENTRAL BANKS', asOfLabel);
+
+      /* Status chip */
+      if (sourceLabel === 'LIVE') {
+        html += '<div style="display:inline-block;font-size:5.5px;letter-spacing:.16em;color:' + GRN + ';background:rgba(61,170,106,.1);border:1px solid rgba(61,170,106,.25);padding:2px 6px;margin-bottom:8px;">LIVE · IMF IFS</div>';
+      } else if (sourceLabel === 'LOADING') {
+        html += '<div style="display:inline-block;font-size:5.5px;letter-spacing:.16em;color:' + A + ';background:rgba(233,113,50,.1);border:1px solid rgba(233,113,50,.25);padding:2px 6px;margin-bottom:8px;">FETCHING IMF DATA…</div>';
+      } else {
+        html += '<div style="display:inline-block;font-size:5.5px;letter-spacing:.16em;color:rgba(255,255,255,0.3);background:#111;border:1px solid #222;padding:2px 6px;margin-bottom:8px;">IMF OFFLINE · Q2 2026 ESTIMATES</div>';
+      }
 
       html += '<div style="display:flex;flex-direction:column;gap:3px;margin-bottom:12px;">';
-      CB_HOLDERS.forEach(function(h, i) {
-        var pct = Math.round(h.t / MAX_HOLD * 100);
-        var barCol = i === 0 ? ('linear-gradient(90deg,' + REC + ',' + GOLD + ')') : (h.pct >= 60 ? ('linear-gradient(90deg,' + A + ',#6B3010)') : ('linear-gradient(90deg,' + BLU + ',#1a3560)'));
+      holders.slice(0, 15).forEach(function(h, i) {
+        var barPct = Math.round((h.tonnes || h.t) / maxTonnes * 100);
+        var pctRsv = h.pct;
+        var tStr   = fmt(h.tonnes || h.t);
+        var barCol = i === 0
+          ? ('linear-gradient(90deg,' + REC + ',' + GOLD + ')')
+          : (pctRsv >= 60 ? ('linear-gradient(90deg,' + A + ',#6B3010)') : ('linear-gradient(90deg,' + BLU + ',#1a3560)'));
+        var noteStr = h.note || '';
         html += '<div style="display:grid;grid-template-columns:16px 104px 1fr 58px 54px;align-items:center;gap:5px;padding:3px 0;border-bottom:1px solid #0f0f0f;">' +
                   '<div style="font-size:6.5px;color:rgba(255,255,255,0.2);text-align:right;">' + (i+1) + '</div>' +
                   '<div style="font-size:8px;color:' + (i===0?REC:'#fff') + ';font-weight:' + (i===0?700:400) + ';">' + h.name + '</div>' +
                   '<div style="height:6px;background:#111;border-radius:1px;overflow:hidden;">' +
-                    '<div style="height:100%;width:' + pct + '%;background:' + barCol + ';border-radius:1px;"></div>' +
+                    '<div style="height:100%;width:' + barPct + '%;background:' + barCol + ';border-radius:1px;"></div>' +
                   '</div>' +
-                  '<div style="font-size:8px;font-weight:600;color:' + (i===0?REC:'#fff') + ';text-align:right;font-variant-numeric:tabular-nums;">' + fmt(h.t) + 't</div>' +
-                  '<div style="font-size:6.5px;color:' + (h.pct>=60?A:'rgba(255,255,255,0.3)') + ';text-align:right;">' + h.pct + '% rsv</div>' +
+                  '<div style="font-size:8px;font-weight:600;color:' + (i===0?REC:'#fff') + ';text-align:right;font-variant-numeric:tabular-nums;">' + tStr + 't</div>' +
+                  '<div style="font-size:6.5px;color:' + (pctRsv>=60?A:(pctRsv?'rgba(255,255,255,0.3)':'rgba(255,255,255,0.15)')) + ';text-align:right;">' + (pctRsv != null ? pctRsv + '% rsv' : '—') + '</div>' +
                 '</div>' +
-                (h.note ? '<div style="font-size:6px;color:rgba(255,255,255,0.22);padding-left:124px;margin-top:-1px;margin-bottom:1px;">' + h.note + '</div>' : '');
+                (noteStr ? '<div style="font-size:6px;color:rgba(255,255,255,0.22);padding-left:124px;margin-top:-1px;margin-bottom:1px;">' + noteStr + '</div>' : '');
       });
       html += '</div>';
 
+      /* Heat map — built from live data if available */
       html += secHdr('GOLD AS % OF RESERVES — HEAT MAP', '');
-      var heatData = [{n:'USA',v:72.6},{n:'DEU',v:72.4},{n:'ITA',v:66.5},{n:'FRA',v:67.5},{n:'NLD',v:54.7},{n:'KAZ',v:55.2},{n:'PRT',v:71.2},{n:'RUS',v:29.5},{n:'TUR',v:31.5},{n:'POL',v:14.1},{n:'CHN',v:4.9},{n:'JPN',v:4.3},{n:'IND',v:9.3},{n:'SAU',v:4.5}];
+      var heatSrc = (holders.length >= 5) ? holders : CB_HOLDERS.map(function(h){ return {name:h.name,pct:h.pct,code:null}; });
+      var CODE_MAP = {
+        'United States':'USA','Germany':'DEU','Italy':'ITA','France':'FRA','China':'CHN',
+        'Russia':'RUS','Switzerland':'CHE','India':'IND','Japan':'JPN','Netherlands':'NLD',
+        'Turkey':'TUR','Poland':'POL','Portugal':'PRT','Saudi Arabia':'SAU','Kazakhstan':'KAZ',
+      };
+      var heatData = heatSrc.slice(0, 14).filter(function(h){ return h.pct != null; }).map(function(h){
+        return { n: CODE_MAP[h.name] || h.code || h.name.slice(0,3).toUpperCase(), v: h.pct };
+      }).sort(function(a,b){ return b.v - a.v; });
+
       html += '<div style="display:flex;gap:3px;margin-bottom:12px;">';
       heatData.forEach(function(x) {
         var opacity = Math.min(1, x.v / 80);
@@ -2499,27 +3020,93 @@
       html += '</div>';
 
       html += insightBox('DE-DOLLARISATION IN DATA',
-        'Emerging market central banks are diversifying away from US Treasuries into gold at rates not seen since the 1970s. China’s official PBOC holdings stand at a record 2,366t — but Goldman Sachs estimates China buys significantly more through the London OTC market than is officially disclosed, with true accumulation multiples of reported figures. July 2026: +20t (largest single month since Oct 2023). The structural imbalance is not a trade — it is the backdrop.',
+        'Emerging market central banks are diversifying away from US Treasuries into gold at rates not seen since the 1970s. China\'s official PBOC holdings have overtaken Russia as the 5th largest official holder — but Goldman Sachs estimates true accumulation is materially higher via London OTC channels not captured in IMF reporting. India\'s RBI and Poland\'s NBP are executing structural shifts toward higher gold allocations. Holdings data sourced live from IMF IFS (2-month reporting lag). The structural imbalance is not a trade — it is the backdrop.',
         PRP);
 
       html += '</div>';
       return html;
     }
 
-    function renderCOT() {
-      var html = '<div style="padding:12px 14px 16px;overflow-y:auto;height:calc(100% - 36px);box-sizing:border-box;">';
-      html += secHdr('COMEX GOLD FUTURES — CFTC DISAGGREGATED', 'SOURCE: CFTC  ·  WEEKLY FRIDAYS  ·  AS OF ' + COT.asOf);
+    /* Live COT state — populated async from Supabase */
+    var _cotLive    = null;
+    var _extremeLive = 300000;
 
-      var mmPct = Math.round(COT.mm_net / COT.oi * 100);
-      var oiChg = COT.oi - COT.oi_prev;
+    function renderCOT() {
+      /* Show loading state until live data arrives */
+      if (!_cotLive) {
+        setTimeout(function() {
+          fetch('/.netlify/functions/cot-live')
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+              if (!data || data.empty || data.error) {
+                _cotLive = 'empty';
+              } else {
+                var row  = data.latest;
+                var prev = data.previous;
+                _cotLive = {
+                  asOf:        row.report_date,
+                  oi:          row.open_interest,
+                  oi_prev:     prev ? prev.open_interest      : row.open_interest,
+                  mm_long:     row.managed_money_long,
+                  mm_short:    row.managed_money_short,
+                  mm_net:      row.managed_money_net,
+                  mm_net_prev: prev ? prev.managed_money_net : null,
+                  pm_long:     row.producer_long,
+                  pm_short:    row.producer_short,
+                  pm_net:      row.producer_net,
+                  sd_long:     row.swap_long,
+                  sd_short:    row.swap_short,
+                  sd_net:      row.swap_net,
+                };
+                _extremeLive = data.histMaxMmNet || 300000;
+              }
+              if (_tab === 'cot') render();
+            })
+            .catch(function() { _cotLive = 'error'; if (_tab === 'cot') render(); });
+        }, 80);
+
+        return '<div style="padding:40px 20px;text-align:center;">' +
+               '<div style="font-size:8px;color:rgba(255,255,255,0.3);letter-spacing:.2em;margin-bottom:8px;">LOADING CFTC DATA</div>' +
+               '<div style="width:24px;height:24px;border:2px solid #222;border-top-color:' + A + ';border-radius:50%;margin:0 auto;animation:spin 1s linear infinite;"></div>' +
+               '</div>';
+      }
+
+      if (_cotLive === 'empty') {
+        return '<div style="padding:40px 20px;text-align:center;">' +
+               '<div style="font-size:9px;color:' + A + ';letter-spacing:.16em;margin-bottom:10px;">NO DATA YET</div>' +
+               '<div style="font-size:8px;color:rgba(255,255,255,0.45);line-height:1.7;max-width:320px;margin:0 auto;">' +
+               'The <span style="color:#fff;">gold_cot_reports</span> table is empty.<br>' +
+               'Run the SQL migration in Supabase, then visit<br>' +
+               '<span style="color:' + A + ';">/.netlify/functions/fetch-cftc-data</span><br>' +
+               'to seed it with live CFTC data now.' +
+               '</div></div>';
+      }
+
+      if (_cotLive === 'error') {
+        return '<div style="padding:40px 20px;text-align:center;"><div style="font-size:8px;color:rgba(255,255,255,0.3);letter-spacing:.2em;">CFTC DATA UNAVAILABLE</div></div>';
+      }
+
+      var cot     = _cotLive;
+      var extreme = _extremeLive;
+
+      var mmPct    = cot.oi ? Math.round(cot.mm_net / cot.oi * 100) : 0;
+      var oiChg    = cot.oi - (cot.oi_prev || cot.oi);
+      var mmChg    = cot.mm_net_prev != null ? cot.mm_net - cot.mm_net_prev : null;
+      var gaugePct = Math.min(100, extreme > 0 ? Math.round(cot.mm_net / extreme * 100) : 0);
+      var asOf     = cot.asOf || cot.report_date || '';
+      var mmSubtitle = mmChg != null
+        ? (mmChg >= 0 ? '↑ +' : '↓ ') + fmt(Math.abs(mmChg)) + ' WoW  ·  ' + mmPct + '% of OI'
+        : mmPct + '% of open interest';
+
+      var html = '<div style="padding:12px 14px 16px;overflow-y:auto;height:calc(100% - 36px);box-sizing:border-box;">';
+      html += secHdr('COMEX GOLD FUTURES — CFTC DISAGGREGATED', 'SOURCE: CFTC  ·  WEEKLY FRIDAYS  ·  AS OF ' + asOf);
 
       html += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:12px;">';
-      html += kpiCard('OPEN INTEREST', fmt(COT.oi), (oiChg>0?'↑ ':'↓ ') + fmt(Math.abs(oiChg)) + ' vs prev week', oiChg>0?GRN:RED, '#0e1a12');
-      html += kpiCard('MM NET LONG', '+' + fmt(COT.mm_net), mmPct + '% of open interest', mmPct>30?REC:A, '#1e1510');
-      html += kpiCard('EXTREME LEVEL', '300,000', 'historic top signal', 'rgba(255,255,255,0.35)', '#111');
+      html += kpiCard('OPEN INTEREST', fmt(cot.oi), (oiChg>0?'↑ ':'↓ ') + fmt(Math.abs(oiChg)) + ' vs prev week', oiChg>0?GRN:RED, '#0e1a12');
+      html += kpiCard('MM NET LONG', (cot.mm_net>=0?'+':'') + fmt(cot.mm_net), mmSubtitle, mmPct>30?REC:A, '#1e1510');
+      html += kpiCard('INSTITUTIONAL EXTREME', fmt(extreme), 'GS / systematic macro benchmark', 'rgba(255,255,255,0.35)', '#111');
       html += '</div>';
 
-      var gaugePct = Math.min(100, Math.round(COT.mm_net / 300000 * 100));
       html += '<div style="margin-bottom:14px;">';
       html += '<div style="display:flex;justify-content:space-between;margin-bottom:5px;">';
       html += '<div style="font-size:6.5px;color:rgba(255,255,255,0.38);letter-spacing:.14em;">MM POSITIONING — DISTANCE TO HISTORICAL EXTREME</div>';
@@ -2535,85 +3122,126 @@
 
       html += secHdr('DISAGGREGATED POSITIONING', '');
       var rows = [
-        {lbl:'MANAGED MONEY',    long:COT.mm_long, short:COT.mm_short, net:COT.mm_net,  col:BLU},
-        {lbl:'PRODUCER / MERCH', long:COT.pm_long, short:COT.pm_short, net:COT.pm_net,  col:PRP},
-        {lbl:'SWAP DEALERS',     long:COT.sd_long, short:COT.sd_short, net:COT.sd_net,  col:GRN},
+        {lbl:'MANAGED MONEY',    long:cot.mm_long, short:cot.mm_short, net:cot.mm_net, col:BLU},
+        {lbl:'PRODUCER / MERCH', long:cot.pm_long, short:cot.pm_short, net:cot.pm_net, col:PRP},
+        {lbl:'SWAP DEALERS',     long:cot.sd_long, short:cot.sd_short, net:cot.sd_net, col:GRN},
       ];
       html += '<div style="border:1px solid #1a1a1a;margin-bottom:12px;">';
       html += '<div style="display:grid;grid-template-columns:108px 72px 72px 78px 1fr;font-size:6px;color:rgba(255,255,255,0.28);letter-spacing:.14em;padding:6px 8px;background:#0d0d0d;border-bottom:1px solid #1a1a1a;">' +
               '<div>CATEGORY</div><div style="text-align:right;">LONG</div><div style="text-align:right;">SHORT</div><div style="text-align:right;">NET</div><div style="padding-left:8px;">POSITIONING</div></div>';
       rows.forEach(function(r, i) {
         var isLong = r.net > 0;
-        var bp = Math.min(100, Math.round(Math.abs(r.net) / 300000 * 100));
+        var bp = extreme > 0 ? Math.min(100, Math.round(Math.abs(r.net) / extreme * 100)) : 0;
         html += '<div style="display:grid;grid-template-columns:108px 72px 72px 78px 1fr;align-items:center;padding:7px 8px;border-bottom:' + (i<2?'1px solid #111':'none') + ';">' +
                 '<div style="font-size:7.5px;color:#fff;font-weight:600;letter-spacing:.04em;">' + r.lbl + '</div>' +
                 '<div style="font-size:7.5px;color:rgba(255,255,255,0.55);text-align:right;font-variant-numeric:tabular-nums;">' + fmt(r.long) + '</div>' +
                 '<div style="font-size:7.5px;color:rgba(255,255,255,0.55);text-align:right;font-variant-numeric:tabular-nums;">' + fmt(r.short) + '</div>' +
                 '<div style="font-size:8.5px;font-weight:700;color:' + (isLong?GRN:RED) + ';text-align:right;font-variant-numeric:tabular-nums;">' + (isLong?'+':'') + fmt(r.net) + '</div>' +
                 '<div style="padding-left:8px;"><div style="height:5px;background:#111;border-radius:1px;overflow:hidden;">' +
-                  '<div style="height:100%;width:' + bp + '%;background:' + r.col + ';border-radius:1px;opacity:.8;"></div></div></div>' +
+                '<div style="height:100%;width:' + bp + '%;background:' + r.col + ';border-radius:1px;opacity:.8;"></div></div></div>' +
                 '</div>';
       });
       html += '</div>';
 
       html += '<div style="display:flex;flex-direction:column;gap:6px;">';
-      [{sig:'MANAGED MONEY', val:'+' + fmt(COT.mm_net), note:'Speculative funds are net long but not at extremes. Gold tops historically coincide with MM net longs exceeding 300,000 contracts. Current reading (' + mmPct + '% of OI) leaves room for further institutional entry before the market is considered crowded.', col:BLU},
-       {sig:'COMMERCIAL NET SHORT', val:fmt(COT.pm_net), note:'Producers and merchants are structurally net short — they mine gold and hedge forward production. This is not bearish. An increase in commercial shorts often accompanies rising prices as producers lock in profits at higher levels.', col:PRP}
+      [{sig:'MANAGED MONEY', val:(cot.mm_net>=0?'+':'')+fmt(cot.mm_net),
+        note:'Speculative funds are net long at ' + gaugePct + '% of the institutional crowding threshold (' + fmt(extreme) + ' contracts). This benchmark — used by Goldman Sachs commodities desk and systematic macro funds — marks the Aug 2016 and 2019–2020 cycle peaks. Positioning is elevated but not extreme; there is room for further institutional accumulation before the market becomes dangerously crowded.' + (mmChg != null ? ' WoW change: ' + (mmChg >= 0 ? '+' : '') + fmt(mmChg) + ' contracts.' : ''), col:BLU},
+       {sig:'COMMERCIAL NET SHORT', val:fmt(cot.pm_net),
+        note:'Producers and merchants are structurally net short — they mine gold and hedge forward production. This is not bearish. An increase in commercial shorts often accompanies rising prices as producers lock in profits at higher levels.', col:PRP}
       ].forEach(function(s) {
         html += '<div style="background:#0c0c0c;border:1px solid #1a1a1a;border-left:2px solid ' + s.col + ';padding:8px 10px;">' +
                 '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;">' +
-                  '<div style="font-size:6.5px;letter-spacing:.16em;color:' + s.col + ';font-weight:600;">' + s.sig + '</div>' +
-                  '<div style="font-size:10px;font-weight:700;color:#fff;font-variant-numeric:tabular-nums;">' + s.val + '</div>' +
+                '<div style="font-size:6.5px;letter-spacing:.16em;color:' + s.col + ';font-weight:600;">' + s.sig + '</div>' +
+                '<div style="font-size:10px;font-weight:700;color:#fff;font-variant-numeric:tabular-nums;">' + s.val + '</div>' +
                 '</div>' +
                 '<div style="font-size:8.5px;color:rgba(255,255,255,0.7);line-height:1.62;">' + s.note + '</div>' +
                 '</div>';
       });
       html += '</div>';
-
       html += '</div>';
+
       return html;
     }
 
-    function renderDemand() {
-      var html = '<div style="padding:12px 14px 16px;overflow-y:auto;height:calc(100% - 36px);box-sizing:border-box;">';
-      html += secHdr('GLOBAL GOLD DEMAND 2024 — BY SEGMENT', 'WORLD GOLD COUNCIL ANNUAL DEMAND TRENDS 2024  ·  TONNES');
+            function renderDemand() {
+      var gd  = GOLD_DATA[_demandYear];
+      var s   = gd.supply;
+      var d   = gd.demand;
 
-      var maxD = 1877;
+      /* Computed totals — WGC methodology */
+      var totalSupply    = s.mine + s.recycle + s.hedge;
+      var totalDemandEx  = d.jewellery + d.barCoin + d.cb + d.tech + d.etf;
+      var otcBalance     = totalSupply - totalDemandEx;
+
+      var rows = [
+        {seg:'Jewellery',    t:d.jewellery, col:A},
+        {seg:'Bar & Coin',   t:d.barCoin,   col:BLU},
+        {seg:'Central Banks',t:d.cb,        col:PRP},
+        {seg:'Technology',   t:d.tech,      col:GRN},
+        {seg:'ETFs / Funds', t:d.etf,       col:d.etf >= 0 ? GRN : RED},
+      ];
+      var maxD = Math.max.apply(null, rows.map(function(r){ return Math.abs(r.t); }));
+
+      var html = '<div style="padding:12px 14px 16px;overflow-y:auto;height:calc(100% - 36px);box-sizing:border-box;">';
+
+      /* Year selector */
+      html += '<div style="display:flex;gap:4px;margin-bottom:12px;">';
+      ['2024','2025','2026'].forEach(function(yr) {
+        var act = _demandYear === yr;
+        var lbl = yr === '2026' ? '2026 YTD' : 'FY ' + yr;
+        html += '<button id="gi-dy-' + yr + '-' + id + '" style="padding:4px 10px;font-size:6.5px;letter-spacing:.14em;font-family:Consolas,monospace;background:' + (act ? A : 'transparent') + ';color:' + (act ? '#000' : 'rgba(255,255,255,0.45)') + ';border:1px solid ' + (act ? A : '#2a2a2a') + ';cursor:pointer;">' + lbl + '</button>';
+      });
+      html += '</div>';
+
+      html += secHdr('GLOBAL GOLD DEMAND — BY SEGMENT', gd.src + '  ·  TONNES');
+
+      /* Demand rows */
       html += '<div style="display:flex;flex-direction:column;gap:5px;margin-bottom:14px;">';
-      DEMAND.forEach(function(d) {
-        var isNeg = d.t < 0;
-        var bp = isNeg ? 0 : Math.round(Math.abs(d.t) / maxD * 100);
-        var chgCol = d.chg === 'OUTFLOW' ? RED : (d.chg && d.chg[0] === '+' ? GRN : RED);
-        html += '<div style="display:grid;grid-template-columns:100px 1fr 54px 50px;align-items:center;gap:6px;">' +
-                '<div style="font-size:8.5px;color:#fff;">' + d.seg + '</div>' +
+      rows.forEach(function(row) {
+        var isNeg = row.t < 0;
+        var bp = Math.round(Math.abs(row.t) / maxD * 100);
+        var tag = '';
+        if (row.seg === 'ETFs / Funds') {
+          tag = row.t >= 0
+            ? '<span style="font-size:6px;font-weight:700;color:' + GRN + ';background:rgba(61,170,106,.15);padding:1px 4px;margin-left:4px;">INFLOW</span>'
+            : '<span style="font-size:6px;font-weight:700;color:' + RED + ';background:rgba(209,64,64,.15);padding:1px 4px;margin-left:4px;">OUTFLOW</span>';
+        }
+        html += '<div style="display:grid;grid-template-columns:100px 1fr 64px 0px;align-items:center;gap:6px;">' +
+                '<div style="font-size:8.5px;color:#fff;display:flex;align-items:center;">' + row.seg + tag + '</div>' +
                 '<div style="height:9px;background:#111;border-radius:1px;overflow:hidden;">' +
-                  (isNeg ? '' : '<div style="height:100%;width:' + bp + '%;background:' + d.col + ';opacity:.85;border-radius:1px;"></div>') +
+                  (isNeg ? '<div style="height:100%;width:' + bp + '%;background:' + row.col + ';opacity:.4;border-radius:1px;margin-left:auto;"></div>'
+                         : '<div style="height:100%;width:' + bp + '%;background:' + row.col + ';opacity:.85;border-radius:1px;"></div>') +
                 '</div>' +
-                '<div style="font-size:9px;font-weight:700;color:' + d.col + ';text-align:right;font-variant-numeric:tabular-nums;">' + (isNeg ? '−' + Math.abs(d.t) : fmt(d.t)) + 't</div>' +
-                '<div style="font-size:7px;color:' + chgCol + ';text-align:right;font-weight:600;">' + (d.chg||'') + '</div>' +
+                '<div style="font-size:9px;font-weight:700;color:' + row.col + ';text-align:right;font-variant-numeric:tabular-nums;">' + (isNeg ? '−' : '') + Math.abs(row.t).toLocaleString() + 't</div>' +
                 '</div>';
       });
       html += '</div>';
 
+      /* KPI cards — computed */
       html += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:14px;">';
-      html += kpiCard('TOTAL DEMAND', fmt(TOTAL_DEMAND) + 't', 'jewellery + CB + tech + bar/coin', BLU, '#0e1520');
-      html += kpiCard('TOTAL SUPPLY', fmt(TOTAL_SUPPLY) + 't', 'mine + recycle + hedging', GRN, '#0e1a12');
-      html += kpiCard('SURPLUS',      '+' + fmt(TOTAL_SUPPLY - TOTAL_DEMAND) + 't', 'absorbed by CB buying', 'rgba(255,255,255,0.4)', '#111');
+      html += kpiCard('TOTAL DEMAND (EXCL. OTC)', Math.round(totalDemandEx).toLocaleString() + 't', 'jewellery + bar/coin + CB + tech + ETFs/Funds', BLU, '#0e1520');
+      html += kpiCard('TOTAL SUPPLY',             Math.round(totalSupply).toLocaleString() + 't',    'mine + recycle + net hedging', GRN, '#0e1a12');
+      html += kpiCard('OTC & MARKET BALANCE',     (otcBalance >= 0 ? '+' : '') + Math.round(otcBalance).toLocaleString() + 't', 'OTC & Market Balance (Unallocated Flows)', 'rgba(255,255,255,0.5)', '#111');
       html += '</div>';
 
-      html += secHdr('SUPPLY BREAKDOWN 2024', 'WORLD GOLD COUNCIL');
+      /* Supply breakdown */
+      html += secHdr('SUPPLY BREAKDOWN — ' + gd.label, 'WORLD GOLD COUNCIL');
       html += '<div style="display:flex;flex-direction:column;gap:5px;margin-bottom:14px;">';
-      [{lbl:'Mine production', t:SUPPLY_MINE, col:A, pct:Math.round(SUPPLY_MINE/TOTAL_SUPPLY*100)},
-       {lbl:'Recycled gold',   t:SUPPLY_RECYCLE, col:BLU, pct:Math.round(SUPPLY_RECYCLE/TOTAL_SUPPLY*100)},
-       {lbl:'Producer hedging',t:SUPPLY_HEDGE, col:RED, pct:3}
-      ].forEach(function(s) {
-        html += '<div style="display:grid;grid-template-columns:108px 1fr 58px 28px;align-items:center;gap:6px;">' +
-                '<div style="font-size:8.5px;color:#fff;">' + s.lbl + '</div>' +
+      [
+        {lbl:'Mine production',  t:s.mine,    col:A},
+        {lbl:'Recycled gold',    t:s.recycle, col:BLU},
+        {lbl:'Producer hedging', t:s.hedge,   col:RED},
+      ].forEach(function(sup) {
+        /* Correct pct: segment / totalSupply, preserving sign */
+        var pct = Math.round((sup.t / totalSupply) * 100);
+        var barW = Math.round(Math.abs(sup.t) / totalSupply * 100);
+        html += '<div style="display:grid;grid-template-columns:108px 1fr 58px 32px;align-items:center;gap:6px;">' +
+                '<div style="font-size:8.5px;color:#fff;">' + sup.lbl + '</div>' +
                 '<div style="height:7px;background:#111;border-radius:1px;overflow:hidden;">' +
-                  '<div style="height:100%;width:' + s.pct + '%;background:' + s.col + ';opacity:.8;border-radius:1px;"></div>' +
+                  '<div style="height:100%;width:' + barW + '%;background:' + sup.col + ';opacity:.8;border-radius:1px;"></div>' +
                 '</div>' +
-                '<div style="font-size:8.5px;font-weight:600;color:#fff;text-align:right;font-variant-numeric:tabular-nums;">' + (s.t<0?'−':'+') + Math.abs(s.t) + 't</div>' +
-                '<div style="font-size:6.5px;color:rgba(255,255,255,0.3);text-align:right;">' + s.pct + '%</div>' +
+                '<div style="font-size:8.5px;font-weight:600;color:#fff;text-align:right;font-variant-numeric:tabular-nums;">' + (sup.t < 0 ? '−' : '+') + Math.abs(sup.t).toLocaleString() + 't</div>' +
+                '<div style="font-size:6.5px;color:rgba(255,255,255,0.3);text-align:right;">' + (pct > 0 ? '+' : '') + pct + '%</div>' +
                 '</div>';
       });
       html += '</div>';
@@ -2623,13 +3251,25 @@
         GRN);
 
       html += '</div>';
+
+      /* Wire year selector buttons */
+      setTimeout(function() {
+        ['2024','2025','2026'].forEach(function(yr) {
+          var btn = body.querySelector('#gi-dy-' + yr + '-' + id);
+          if (btn) btn.addEventListener('click', function() { _demandYear = yr; render(); });
+          var btn2 = body.querySelector('#gi-by-' + yr + '-' + id);
+          if (btn2) btn2.addEventListener('click', function() { _buyerYear = yr; render(); });
+        });
+      }, 10);
+
       return html;
     }
 
-    function render() {
+        function render() {
       body.innerHTML =
-        '<div style="display:flex;flex-direction:column;height:100%;font-family:Consolas,monospace;overflow:hidden;background:#080808;">' +
-          '<div style="display:flex;border-bottom:1px solid #1e1e1e;flex-shrink:0;background:#0a0a0a;">' +
+        '<style>@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}</style>' +
+        '<div style="display:flex;flex-direction:column;height:100%;font-family:Consolas,monospace;overflow:hidden;background:#000;">' +
+          '<div style="display:flex;border-bottom:1px solid #1e1e1e;flex-shrink:0;background:#000;overflow-x:auto;scrollbar-width:none;">' +
             tabBtn('cb',       'CENTRAL BANKS') +
             tabBtn('holdings', 'CB HOLDINGS') +
             tabBtn('cot',      'COT REPORT') +
@@ -2648,40 +3288,19 @@
         var btn = body.querySelector('#gi-t-' + k + '-' + id);
         if (btn) btn.addEventListener('click', function() { _tab = k; render(); });
       });
+      /* Wire CB buyer year buttons when on CB tab */
+      if (_tab === 'cb') {
+        setTimeout(function() {
+          ['2024','2025','2026'].forEach(function(yr) {
+            var byBtn = body.querySelector('#gi-by-' + yr + '-' + id);
+            if (byBtn) byBtn.addEventListener('click', function() { _buyerYear = yr; render(); });
+          });
+        }, 10);
+      }
     }
 
     render();
 
-    /* Async: fetch live ETF prices after DOM is painted */
-    if (_tab === 'etf') {
-      setTimeout(function() {
-        fetch('/.netlify/functions/gold-etf')
-          .then(function(r) { return r.json(); })
-          .then(function(data) {
-            ETF_FUNDS.forEach(function(f) {
-              var q = data[f.tk];
-              var pEl = body.querySelector('#etfp-' + f.tk + '-' + id);
-              var cEl = body.querySelector('#etfc-' + f.tk + '-' + id);
-              if (!pEl || !cEl) return;
-              if (!q || q.error || !q.price) {
-                pEl.innerHTML = '<div style="font-size:7px;color:rgba(255,255,255,0.2);">N/A</div>';
-                cEl.innerHTML = '';
-                return;
-              }
-              var isUp = q.chg >= 0;
-              pEl.innerHTML = '<div style="font-size:9px;font-weight:700;color:#fff;font-variant-numeric:tabular-nums;">$' + q.price.toFixed(2) + '</div>';
-              cEl.innerHTML = '<div style="font-size:7px;font-weight:600;color:' + (isUp ? GRN : RED) + ';font-variant-numeric:tabular-nums;">' + (isUp ? '+' : '') + q.chg.toFixed(2) + '</div>'
-                            + '<div style="font-size:6px;color:' + (isUp ? GRN : RED) + ';">(' + (isUp ? '+' : '') + q.chgPct.toFixed(2) + '%)</div>';
-            });
-          })
-          .catch(function() {
-            ETF_FUNDS.forEach(function(f) {
-              var pEl = body.querySelector('#etfp-' + f.tk + '-' + id);
-              if (pEl) pEl.innerHTML = '<div style="font-size:7px;color:rgba(255,255,255,0.2);">offline</div>';
-            });
-          });
-      }, 100);
-    }
   }
 
 
@@ -2692,7 +3311,6 @@
     body.style.overflow = 'hidden';
     body.style.padding = '0';
 
-    var _asset = 'physicals';
     var _allData = null;
 
     function lat(sid, data) {
@@ -2744,40 +3362,12 @@
       var ffStr    = fmt(ff, 2) + '%';
       var urStr    = fmt(unrate, 1) + '%';
 
-      var physicalsOpeners = [
-        cpi != null && cpi > 2.5
-          ? '”Did you catch the CPI print? Inflation came in at ' + cpiStr + ' — ' + (cpi > 3.5 ? 'significantly above' : 'above') + ' the Fed’s 2% target. Every month above target, cash and bonds lose real purchasing power. Physical assets with fixed supply are the historic antidote. I wanted to call while this is still front-of-mind…”'
-          : '”Inflation is at ' + cpiStr + ', and with Fed Funds at ' + ffStr + ', real returns on cash are compressed. I’ve been calling clients with meaningful cash positions — the opportunity cost of not holding an alternative asset is now measurable and growing…”',
-        curve != null && curve < 0
-          ? '”The yield curve is inverted at ' + curveStr + ' — the bond market is unanimously pricing in a recession. Every prior inversion since 1955 was followed by a hard asset re-rating as the Fed was forced to cut. I’m positioning clients before that becomes the consensus trade…”'
-          : '”The yield curve is at ' + curveStr + '. We’re at the point in the cycle where institutional capital historically rotates from financial assets toward real assets. I wanted to share what the macro data is flagging right now…”',
-        unrate != null && unPrv != null && unrate > unPrv
-          ? '”Unemployment ticked up to ' + urStr + '. That’s the starter’s pistol for rate cuts — and rate cuts are the single most reliable catalyst for alternative assets: lower opportunity cost, dollar weakness, and capital leaving fixed income. I’m positioning clients before the pivot becomes obvious to everyone…”'
-          : '”Labour markets are at ' + urStr + ' — still resilient, but the leading indicators are softening. The forward data suggests we’re closer to the rate cut cycle than the headline number implies. I’m calling clients to get ahead of that move…”',
-      ];
-
-      var propertyOpeners = [
-        '”We are at or near the peak of the rate cycle — and every prior peak has been followed by mortgage rate compression. The clients who positioned in property investment before that compression locked in entry at the most advantageous point in the cycle. I’m calling to discuss timing…”',
-        cpi != null && cpi > 2.5
-          ? '”Inflation at ' + cpiStr + ' is doing the work for property investors even when nominal prices are flat. In real terms, UK property has not sustained a multi-year decline since 1950. Every period of elevated inflation has eventually resolved — but by then the entry window is gone…”'
-          : '”Real estate has historically been the default store of value for UK wealth. The question I’m putting to clients isn’t whether to hold property — it’s how to hold it without the friction and concentration risk of a single direct asset…”',
-        '”The generation of buyers priced out by high mortgage rates represents the largest pool of deferred demand in a generation. When rates fall, that demand releases simultaneously. The investors who hold property assets going into that release will capture the repricing…”',
-      ];
-
-      var wineOpeners = [
-        '”The Liv-ex Fine Wine 1000 has returned an average of 10% annually over 20 years with near-zero correlation to equities. In 2008, when global equities fell 40%, fine wine held its value. I wanted to share those numbers because most clients haven’t seen them…”',
-        cpi != null && cpi > 2.5
-          ? '”Inflation at ' + cpiStr + ' erodes every fixed-rate asset. The premium wine market has historically tracked and exceeded inflation over 10-year periods — because every bottle consumed permanently removes it from available supply. I’m calling clients who want appreciation that doesn’t depend on central bank decisions…”'
-          : '”Fine wine is the most liquid segment of the collectibles market — real-time pricing on the Liv-ex exchange, with Christie’s, Sotheby’s, and Acker running dedicated departments generating hundreds of millions in annual volume. This is not a niche market…”',
-        '”First-growth Bordeaux, Burgundy DRC, prestige Champagne — the investment-grade segment is small, globally demanded, and structurally diminishing in supply every time a bottle is opened. The asymmetry between supply contraction and growing global wealth is the long-run thesis. I’d like to walk through the numbers…”',
-      ];
-
-      var openers = _asset === 'physicals' ? physicalsOpeners : _asset === 'property' ? propertyOpeners : wineOpeners;
+      var openers = (window._assetLens && window._assetLens.openers) ? window._assetLens.openers : [];
 
       body.innerHTML =
         '<div style="display:flex;flex-direction:column;height:100%;font-family:Consolas,monospace;">' +
         '<div style="padding:10px 14px;border-bottom:1px solid #2a2a2a;flex-shrink:0;">' +
-          '<div style="font-size:8px;letter-spacing:0.3em;color:#ffffff;margin-bottom:6px;">TODAY’S CALL SIGNAL — ALTERNATIVE ASSETS</div>' +
+          '<div style="font-size:8px;letter-spacing:0.3em;color:#ffffff;margin-bottom:6px;">TODAY\'S CALL SIGNAL — ' + (window._assetLens ? window._assetLens.label.toUpperCase() : 'ALTERNATIVE ASSETS') + '</div>' +
           '<div style="display:flex;align-items:center;gap:10px;">' +
             '<span style="font-size:16px;color:' + sigCol + ';">' + sigIcon + '</span>' +
             '<span style="font-size:11px;font-weight:700;color:' + sigCol + ';letter-spacing:0.08em;">' + sigLevel + '</span>' +
@@ -2790,11 +3380,6 @@
             (unrate != null ? '<span style="font-size:8px;padding:2px 6px;border:1px solid ' + (unPrv != null && unrate > unPrv ? '#c0392b' : '#2a2a2a') + ';color:' + (unPrv != null && unrate > unPrv ? '#e05050' : '#555') + ';">UNRATE ' + urStr + '</span>' : '') +
           '</div>' +
         '</div>' +
-        '<div style="display:flex;border-bottom:1px solid #2a2a2a;flex-shrink:0;">' +
-          '<button id="cso-p-' + id + '" style="flex:1;padding:6px;font-size:9px;letter-spacing:0.18em;border:none;border-right:1px solid #2a2a2a;background:' + (_asset==='physicals'?'#E97132':'transparent') + ';color:#ffffff;cursor:pointer;font-family:Consolas,monospace;">PHYSICALS</button>' +
-          '<button id="cso-r-' + id + '" style="flex:1;padding:6px;font-size:9px;letter-spacing:0.18em;border:none;border-right:1px solid #2a2a2a;background:' + (_asset==='property'?'#E97132':'transparent') + ';color:#ffffff;cursor:pointer;font-family:Consolas,monospace;">PROPERTY</button>' +
-          '<button id="cso-w-' + id + '" style="flex:1;padding:6px;font-size:9px;letter-spacing:0.18em;border:none;background:' + (_asset==='wine'?'#E97132':'transparent') + ';color:#ffffff;cursor:pointer;font-family:Consolas,monospace;">FINE WINE</button>' +
-        '</div>' +
         '<div style="font-size:8px;letter-spacing:0.25em;color:#ffffff;padding:8px 14px 4px;flex-shrink:0;">CONVERSATION OPENERS</div>' +
         '<div style="flex:1;overflow-y:auto;padding:0 14px 14px;">' +
           openers.map(function(op, i) {
@@ -2806,13 +3391,9 @@
         '</div>' +
         '</div>';
 
-      var wb = body.querySelector('#cso-w-' + id);
-      var pb = body.querySelector('#cso-p-' + id);
-      var rb = body.querySelector('#cso-r-' + id);
-      if (pb) pb.addEventListener('click', function(){ _asset='physicals'; refresh(_allData); });
-      if (rb) rb.addEventListener('click', function(){ _asset='property'; refresh(_allData); });
-      if (wb) wb.addEventListener('click', function(){ _asset='wine'; refresh(_allData); });
     }
+
+    window.addEventListener('lens:change', function () { if (_allData) refresh(_allData); });
 
     body.innerHTML = '<div style="padding:20px;text-align:center;font-family:Consolas,monospace;font-size:10px;color:#555;letter-spacing:0.2em;">LOADING SIGNAL…</div>';
 
@@ -2830,98 +3411,98 @@
     body.style.padding = '0';
 
     var GOLD_OBJ = [
-      {id:'g01',cat:'PRICE',   q:'"Gold is too expensive — it’s already up 43%."',
-       ack:'That’s a completely natural reaction — and it’s the same thing people said at $500, $1,000 and $2,000.',
-       redirect:'The question is never what price was yesterday — it’s whether the reasons for the move are still in place. They are: inflation elevated, central banks buying, dollar weakening, yield curve stressed. Gold is currently 12% below its March all-time high. If any other asset were down 12% from peak with fundamentals intact, we’d call it a buying opportunity.',
+      {id:'g01',cat:'PRICE',   q:'"Gold is too expensive — it\'s already up 43%."',
+       ack:'That\'s a completely natural reaction — and it\'s the same thing people said at $500, $1,000 and $2,000.',
+       redirect:'The question is never what price was yesterday — it\'s whether the reasons for the move are still in place. They are: inflation elevated, central banks buying, dollar weakening, yield curve stressed. Gold is currently 12% below its March all-time high. If any other asset were down 12% from peak with fundamentals intact, we\'d call it a buying opportunity.',
        pivot:'"If gold was at $3,000 right now — down from $5,230 — would you say it was cheap? The fundamentals are the same. What specifically about the current number feels too high?"'},
-      {id:'g02',cat:'PRICE',   q:'"I’ll wait until it pulls back more before buying."',
+      {id:'g02',cat:'PRICE',   q:'"I\'ll wait until it pulls back more before buying."',
        ack:'Wanting a better entry is smart — nobody wants to buy at the top.',
-       redirect:'The problem: what level would feel comfortable? Most clients who say this never have an answer. When gold is lower, it will feel like it’s falling for a reason. When it’s higher, it will feel too expensive. This is anchoring bias. COT data currently shows Non-Commercial Z-Scores at historically oversold levels — positioning that has historically produced positive 12-month returns in every instance since 2000.',
-       pivot:'"What price specifically would you need to see — and what makes that number materially different from today’s, given the fundamentals are the same?"'},
-      {id:'g03',cat:'PRICE',   q:'"It’s had a massive run — surely it’s due a correction."',
-       ack:'After a 43% move, that’s a completely rational thing to think.',
-       redirect:'Assets don’t reverse because they’ve moved. They reverse when the underlying drivers reverse. Has inflation reversed? Has central bank buying stopped? Has the dollar strengthened? Has geopolitical risk resolved? Every single driver is still intact. Gold ran 645% from 2001 to 2011 with multiple 15–20% corrections along the way. Each one felt like the top. None were.',
-       pivot:'"Which of the four structural drivers — inflation, central bank buying, dollar weakness, geopolitical risk — do you believe is about to reverse? Because if none are, what causes the correction you’re expecting?"'},
-      {id:'g04',cat:'INCOME',  q:'"Gold doesn’t pay any income or dividends."',
-       ack:'You’re completely right — gold pays zero income. That’s a fact.',
+       redirect:'The problem: what level would feel comfortable? Most clients who say this never have an answer. When gold is lower, it will feel like it\'s falling for a reason. When it\'s higher, it will feel too expensive. This is anchoring bias. COT data currently shows Non-Commercial Z-Scores at historically oversold levels — positioning that has historically produced positive 12-month returns in every instance since 2000.',
+       pivot:'"What price specifically would you need to see — and what makes that number materially different from today\'s, given the fundamentals are the same?"'},
+      {id:'g03',cat:'PRICE',   q:'"It\'s had a massive run — surely it\'s due a correction."',
+       ack:'After a 43% move, that\'s a completely rational thing to think.',
+       redirect:'Assets don\'t reverse because they\'ve moved. They reverse when the underlying drivers reverse. Has inflation reversed? Has central bank buying stopped? Has the dollar strengthened? Has geopolitical risk resolved? Every single driver is still intact. Gold ran 645% from 2001 to 2011 with multiple 15–20% corrections along the way. Each one felt like the top. None were.',
+       pivot:'"Which of the four structural drivers — inflation, central bank buying, dollar weakness, geopolitical risk — do you believe is about to reverse? Because if none are, what causes the correction you\'re expecting?"'},
+      {id:'g04',cat:'INCOME',  q:'"Gold doesn\'t pay any income or dividends."',
+       ack:'You\'re completely right — gold pays zero income. That\'s a fact.',
        redirect:'A UK savings account at 3.5% minus 3.3% inflation equals 0.2% real return before tax. After 40% higher-rate tax the real return is negative. Gold returned +43% this year with no income and no income tax until disposal. Income is also taxed as it arrives; capital gains only on disposal — with CGT allowances, a meaningful portion may be sheltered.',
-       pivot:'"If you compared total after-tax return — including both income and capital — between your client’s current cash position and gold over the last 12 months, which comes out ahead?"'},
-      {id:'g05',cat:'INCOME',  q:'"I need yield — my client genuinely can’t live on capital gains."',
+       pivot:'"If you compared total after-tax return — including both income and capital — between your client\'s current cash position and gold over the last 12 months, which comes out ahead?"'},
+      {id:'g05',cat:'INCOME',  q:'"I need yield — my client genuinely can\'t live on capital gains."',
        ack:'If your client genuinely needs income to live on, I completely respect that.',
-       redirect:'The question is never gold or income — it’s what the optimal portfolio looks like. A 5–10% allocation to gold alongside income-producing assets doesn’t replace the income; it hedges the purchasing power of the income against the inflation that’s eroding it. The income buys less every year without it.',
-       pivot:'"What percentage of your client’s portfolio is currently in income-producing assets? Because even a 5% reallocation to gold wouldn’t touch the income — it would protect the value of everything else."'},
+       redirect:'The question is never gold or income — it\'s what the optimal portfolio looks like. A 5–10% allocation to gold alongside income-producing assets doesn\'t replace the income; it hedges the purchasing power of the income against the inflation that\'s eroding it. The income buys less every year without it.',
+       pivot:'"What percentage of your client\'s portfolio is currently in income-producing assets? Because even a 5% reallocation to gold wouldn\'t touch the income — it would protect the value of everything else."'},
       {id:'g06',cat:'CONCEPT', q:'"Gold is old fashioned — the world has moved on."',
-       ack:'That’s a reasonable instinct in a world of digital assets and technology.',
-       redirect:'Central banks hold gold, not because it’s traditional, but because it has no counterparty risk. It cannot be defaulted on, frozen, sanctioned or devalued by a third party. In 2023 and 2024, central banks bought over 1,000 tonnes per year — the highest pace since 1967. These are the most sophisticated institutions on earth. They’re not sentimental about gold. They’re precise about risk.',
-       pivot:'"If central banks — who have access to every asset class and the best economic analysis in the world — are increasing gold allocations at a record pace, what’s the information advantage you have that tells you they’re wrong?"'},
+       ack:'That\'s a reasonable instinct in a world of digital assets and technology.',
+       redirect:'Central banks hold gold, not because it\'s traditional, but because it has no counterparty risk. It cannot be defaulted on, frozen, sanctioned or devalued by a third party. In 2023 and 2024, central banks bought over 1,000 tonnes per year — the highest pace since 1967. These are the most sophisticated institutions on earth. They\'re not sentimental about gold. They\'re precise about risk.',
+       pivot:'"If central banks — who have access to every asset class and the best economic analysis in the world — are increasing gold allocations at a record pace, what\'s the information advantage you have that tells you they\'re wrong?"'},
       {id:'g07',cat:'CONCEPT', q:'"Crypto does what gold does but better."',
        ack:'I understand the comparison — both are framed as alternatives to fiat currency.',
-       redirect:'Gold has a 5,000-year settlement record. Crypto has a 15-year record that includes three 70%+ drawdowns, multiple exchange failures, and regulatory seizure. No central bank holds crypto as a reserve asset. Every central bank holds gold. The volatility of bitcoin is 4–5× that of gold. As a store of value for a client’s serious money, gold is the institutional-grade option.',
+       redirect:'Gold has a 5,000-year settlement record. Crypto has a 15-year record that includes three 70%+ drawdowns, multiple exchange failures, and regulatory seizure. No central bank holds crypto as a reserve asset. Every central bank holds gold. The volatility of bitcoin is 4–5× that of gold. As a store of value for a client\'s serious money, gold is the institutional-grade option.',
        pivot:'"Does your client want exposure to a speculative technology asset or a monetary reserve? Because those are two different objectives — and they need different instruments."'},
       {id:'g08',cat:'CONCEPT', q:'"Gold is just a commodity — it has no intrinsic value."',
-       ack:'That’s a common framing — and it’s worth unpacking carefully.',
-       redirect:'Gold has no intrinsic value in the industrial sense — it’s not consumed. But that’s actually what makes it monetary. Unlike copper or oil, supply doesn’t get destroyed by use. Every ounce ever mined still exists. The monetary value of gold isn’t derived from usefulness — it’s derived from scarcity, universal acceptability, and the absence of counterparty risk. Those properties are the definition of money.',
-       pivot:'"What gives the pound in your client’s bank account its value? It’s not backed by anything physical — it’s backed by confidence in the Bank of England’s ability to manage it. Gold is backed by the same thing it’s always been backed by: scarcity and 5,000 years of human consensus."'},
+       ack:'That\'s a common framing — and it\'s worth unpacking carefully.',
+       redirect:'Gold has no intrinsic value in the industrial sense — it\'s not consumed. But that\'s actually what makes it monetary. Unlike copper or oil, supply doesn\'t get destroyed by use. Every ounce ever mined still exists. The monetary value of gold isn\'t derived from usefulness — it\'s derived from scarcity, universal acceptability, and the absence of counterparty risk. Those properties are the definition of money.',
+       pivot:'"What gives the pound in your client\'s bank account its value? It\'s not backed by anything physical — it\'s backed by confidence in the Bank of England\'s ability to manage it. Gold is backed by the same thing it\'s always been backed by: scarcity and 5,000 years of human consensus."'},
       {id:'g09',cat:'EXPERIENCE',q:'"I already tried gold and lost money."',
-       ack:'That’s a meaningful experience — and I want to understand it.',
+       ack:'That\'s a meaningful experience — and I want to understand it.',
        redirect:'When did they buy, and what did they own? Most clients who say this bought at or near the 2011 peak ($1,900) and sold during the 2013–2015 correction. That was a 12-year bear market in gold driven by the post-GFC recovery and rising real yields. The structural conditions that caused that bear market — recovery, rising rates, dollar strength — are now running in reverse. The 2011 buyer at $1,900 has been in profit since 2020. The environment has changed.',
-       pivot:'"When did they buy and what did they own? Because the gold market of 2011–2018 and the gold market of 2024–2026 are structurally different environments. I’d like to show you why."'},
+       pivot:'"When did they buy and what did they own? Because the gold market of 2011–2018 and the gold market of 2024–2026 are structurally different environments. I\'d like to show you why."'},
       {id:'g10',cat:'RISK',    q:'"Gold is too volatile and risky for my client."',
        ack:'Volatility is a legitimate consideration.',
-       redirect:'Gold’s annualised volatility is approximately 15–18% — similar to global equities. But unlike equities, gold’s correlation to the equity market is near zero and often negative during crises. In 2008, gold fell 30% and then rose 170% over the next three years. In COVID, gold fell briefly then surged 40%. The volatility is real; the directional risk in this macro environment is not.',
-       pivot:'"What is your client’s current allocation to equities? Because equities have similar or higher volatility to gold with positive correlation to each other — meaning the portfolio has concentrated directional risk that gold actually reduces."'},
-      {id:'g11',cat:'TIMING',  q:'"What if there’s a peace deal — gold will crash."',
+       redirect:'Gold\'s annualised volatility is approximately 15–18% — similar to global equities. But unlike equities, gold\'s correlation to the equity market is near zero and often negative during crises. In 2008, gold fell 30% and then rose 170% over the next three years. In COVID, gold fell briefly then surged 40%. The volatility is real; the directional risk in this macro environment is not.',
+       pivot:'"What is your client\'s current allocation to equities? Because equities have similar or higher volatility to gold with positive correlation to each other — meaning the portfolio has concentrated directional risk that gold actually reduces."'},
+      {id:'g11',cat:'TIMING',  q:'"What if there\'s a peace deal — gold will crash."',
        ack:'Peace is possible — and would obviously be welcome.',
-       redirect:'Gold has four structural drivers: inflation, central bank buying, dollar weakness, and geopolitical risk. Geopolitical risk is only one. Inflation is still running at 3%+. Central banks bought 1,000+ tonnes in 2024. The dollar has weakened against major currencies. A peace deal removes one of four drivers. It doesn’t reverse the other three. And historically, gold often recovers within weeks of geopolitical de-escalations because the monetary conditions remain intact.',
+       redirect:'Gold has four structural drivers: inflation, central bank buying, dollar weakness, and geopolitical risk. Geopolitical risk is only one. Inflation is still running at 3%+. Central banks bought 1,000+ tonnes in 2024. The dollar has weakened against major currencies. A peace deal removes one of four drivers. It doesn\'t reverse the other three. And historically, gold often recovers within weeks of geopolitical de-escalations because the monetary conditions remain intact.',
        pivot:'"If a peace deal happened tomorrow and gold fell 8%, would that change the other three structural drivers? Inflation, central bank buying, dollar weakness — do those reverse because of a peace deal?"'},
-      {id:'g12',cat:'TIMING',  q:'"I’ll wait for rate cuts — that’s when gold really moves."',
-       ack:'You’re right that rate cuts are a strong gold catalyst.',
+      {id:'g12',cat:'TIMING',  q:'"I\'ll wait for rate cuts — that\'s when gold really moves."',
+       ack:'You\'re right that rate cuts are a strong gold catalyst.',
        redirect:'Gold moves in anticipation, not confirmation. In every prior rate-cut cycle, gold started rising 6–12 months before the first official cut. Clients who waited for the announcement bought after the easy money was already made. You are currently in the anticipation phase. The cut is priced in the futures market. The time to position was when rates were clearly near peak — which is right now.',
        pivot:'"If you wait for the first cut to be announced, what price do you think gold will be at that point, given that it has historically moved 15–20% before the announcement?"'},
-      {id:'g13',cat:'TIMING',  q:'"Let’s wait until things are clearer."',
-       ack:'That’s a completely understandable instinct — uncertainty is uncomfortable.',
-       redirect:'The problem is that “clearer” never arrives. When things feel clearer, they’re already priced in. The return in gold comes from positioning during uncertainty, not after it resolves. The clients who positioned in gold in 2019 — before COVID, before the inflation surge, before the geopolitical fragmentation — made 4× their money. They bought when things felt unclear.',
-       pivot:'"What specifically would need to be clearer for you to feel comfortable? Because I want to understand whether that clarity is achievable — or whether we’re waiting for a certainty that the market will have already priced in before it arrives."'},
-      {id:'g14',cat:'STALL',   q:'"I’ll think about it and come back to you."',
+      {id:'g13',cat:'TIMING',  q:'"Let\'s wait until things are clearer."',
+       ack:'That\'s a completely understandable instinct — uncertainty is uncomfortable.',
+       redirect:'The problem is that "clearer" never arrives. When things feel clearer, they\'re already priced in. The return in gold comes from positioning during uncertainty, not after it resolves. The clients who positioned in gold in 2019 — before COVID, before the inflation surge, before the geopolitical fragmentation — made 4× their money. They bought when things felt unclear.',
+       pivot:'"What specifically would need to be clearer for you to feel comfortable? Because I want to understand whether that clarity is achievable — or whether we\'re waiting for a certainty that the market will have already priced in before it arrives."'},
+      {id:'g14',cat:'STALL',   q:'"I\'ll think about it and come back to you."',
        ack:'Of course — this is a considered decision and I respect that.',
-       redirect:'I’d like to make sure you have everything you need to make a good decision. Most of the time when someone says they’ll think about it, there’s a specific question or concern that hasn’t quite been answered. I’d rather address that now than have you sit with a question that might lead to the wrong conclusion.',
-       pivot:'"Is there one specific thing you’re still unsure about — something I might be able to give you a clearer answer on before we finish?"'},
+       redirect:'I\'d like to make sure you have everything you need to make a good decision. Most of the time when someone says they\'ll think about it, there\'s a specific question or concern that hasn\'t quite been answered. I\'d rather address that now than have you sit with a question that might lead to the wrong conclusion.',
+       pivot:'"Is there one specific thing you\'re still unsure about — something I might be able to give you a clearer answer on before we finish?"'},
       {id:'g15',cat:'TRUST',   q:'"The gold market is manipulated."',
        ack:'The concern about market manipulation is real and has been investigated.',
        redirect:'There have been documented instances of short-term spot price manipulation by banks. But those manipulations were in the paper derivatives market, not in physical gold. The actual structural price of physical gold over 20 years has tracked its fundamental drivers with remarkable fidelity: central bank buying, real yields, dollar direction, and inflation expectations. No manipulation has reversed those multi-year trends.',
-       pivot:'"If the market were manipulated lower — below where fundamentals suggest it should be — wouldn’t that actually create a better entry point for a long-term physical gold position?"'},
+       pivot:'"If the market were manipulated lower — below where fundamentals suggest it should be — wouldn\'t that actually create a better entry point for a long-term physical gold position?"'},
     ];
 
     var WHISKY_OBJ = [
       {id:'w01',cat:'PRICE',   q:'"The market crashed 53%. Why would I buy now?"',
-       ack:'That’s exactly the right question — and it has an exact answer.',
-       redirect:'The 53% fall from October 2024 to January 2025 was a speculative flush. COVID momentum buyers exited as rates normalised. What remains is the structural market: genuine collectors, long-term investors, and institutions. The fundamentals have not just survived the correction — they have strengthened. India’s import tariff has been reduced from 150% to 75%. The US tariff was removed entirely. Christie’s generated £4.25m in April 2026. You are not buying a crashed market hoping for a bounce — you are buying a structurally stronger case at lower prices.',
+       ack:'That\'s exactly the right question — and it has an exact answer.',
+       redirect:'The 53% fall from October 2024 to January 2025 was a speculative flush. COVID momentum buyers exited as rates normalised. What remains is the structural market: genuine collectors, long-term investors, and institutions. The fundamentals have not just survived the correction — they have strengthened. India\'s import tariff has been reduced from 150% to 75%. The US tariff was removed entirely. Christie\'s generated £4.25m in April 2026. You are not buying a crashed market hoping for a bounce — you are buying a structurally stronger case at lower prices.',
        pivot:'"At what price would you feel comfortable entering? And what would have changed about the supply-demand structure at that price versus today?"'},
       {id:'w02',cat:'TIMING',  q:'"The price could fall further. I want to wait for the bottom."',
        ack:'A logical concern — and it deserves a specific answer.',
-       redirect:'You may be right that prices could fall another 10%. But the thesis for buying whisky is not that prices go up tomorrow. It’s that supply is finite and tightening, and demand has just had two simultaneous treaty-level catalysts. That thesis does not require you to catch the exact bottom. The people who waited for the “perfect entry” into gold in 2015 were still waiting in 2016 when it had already moved 20% off the bottom. Meanwhile, every week you wait, old stock is being consumed and the supply pool shrinks.',
+       redirect:'You may be right that prices could fall another 10%. But the thesis for buying whisky is not that prices go up tomorrow. It\'s that supply is finite and tightening, and demand has just had two simultaneous treaty-level catalysts. That thesis does not require you to catch the exact bottom. The people who waited for the "perfect entry" into gold in 2015 were still waiting in 2016 when it had already moved 20% off the bottom. Meanwhile, every week you wait, old stock is being consumed and the supply pool shrinks.',
        pivot:'"What specific level would feel comfortable — and what would have changed about the supply-demand arithmetic at that level versus today?"'},
-      {id:'w03',cat:'CONCEPT', q:'"I don’t understand whisky as an investment. It’s a luxury product."',
-       ack:'That’s the most common starting point — and the most important to address.',
-       redirect:'The confusion is thinking about whisky as a drink rather than its investment properties. Three structural properties: First, the supply is genuinely finite — you cannot issue more shares of a 1999 vintage. Second, the asset physically improves with age — chemistry is creating value in the barrel, not waiting for market recognition. Third, the exit mechanism is transparent: Sotheby’s, Christie’s, and specialist auction houses process significant volumes continuously.',
+      {id:'w03',cat:'CONCEPT', q:'"I don\'t understand whisky as an investment. It\'s a luxury product."',
+       ack:'That\'s the most common starting point — and the most important to address.',
+       redirect:'The confusion is thinking about whisky as a drink rather than its investment properties. Three structural properties: First, the supply is genuinely finite — you cannot issue more shares of a 1999 vintage. Second, the asset physically improves with age — chemistry is creating value in the barrel, not waiting for market recognition. Third, the exit mechanism is transparent: Sotheby\'s, Christie\'s, and specialist auction houses process significant volumes continuously.',
        pivot:'"If I showed you the supply-demand mechanics specifically — the production timeline, finite stock, India and US demand catalysts — would the investment case make more sense? I can take five minutes to walk you through it."'},
-      {id:'w04',cat:'LIQUIDITY',q:'"Whisky is illiquid. I can’t sell it when I need to."',
+      {id:'w04',cat:'LIQUIDITY',q:'"Whisky is illiquid. I can\'t sell it when I need to."',
        ack:'Liquidity is a legitimate question — let me give you an accurate answer.',
-       redirect:'Investment-grade Scotch — documented provenance, sub-500 bottle limited releases, established auction history — is handled by Sotheby’s, Christie’s, and specialist auction houses continuously. Top-tier lots typically sell within two to four weeks. Christie’s April 2026 sale (£4.25m) confirms institutional demand is active. Liquidity and immediacy are not the same thing. You cannot sell a property in 24 hours either. What matters is whether there is a functioning market with transparent pricing and consistent demand.',
-       pivot:'"For your client’s specific situation — if they needed to liquidate over a 30–60 day window rather than immediately — would that time frame work within their portfolio planning?"'},
+       redirect:'Investment-grade Scotch — documented provenance, sub-500 bottle limited releases, established auction history — is handled by Sotheby\'s, Christie\'s, and specialist auction houses continuously. Top-tier lots typically sell within two to four weeks. Christie\'s April 2026 sale (£4.25m) confirms institutional demand is active. Liquidity and immediacy are not the same thing. You cannot sell a property in 24 hours either. What matters is whether there is a functioning market with transparent pricing and consistent demand.',
+       pivot:'"For your client\'s specific situation — if they needed to liquidate over a 30–60 day window rather than immediately — would that time frame work within their portfolio planning?"'},
       {id:'w05',cat:'PROCESS', q:'"How do I actually store it? Where does it go?"',
        ack:'NOTE: This is a buying signal. Answer precisely and move to the close.',
-       redirect:'This means the client has accepted the investment case and is in "how do I do it?" mode. Casks: held in HMRC-registered bonded warehouses. Legal ownership is segregated from the warehouse operator’s balance sheet. Storage fees are typically £100–£200 per cask per year. Specialist insurance is standard. You do not take physical delivery. Bottled stock: climate-controlled, insured, audited specialist storage with full chain-of-custody documentation for auction eligibility.',
-       pivot:'"Given your client’s situation — would a cask position or bottled stock be the better fit? Let’s establish the structure and move forward."'},
+       redirect:'This means the client has accepted the investment case and is in "how do I do it?" mode. Casks: held in HMRC-registered bonded warehouses. Legal ownership is segregated from the warehouse operator\'s balance sheet. Storage fees are typically £100–£200 per cask per year. Specialist insurance is standard. You do not take physical delivery. Bottled stock: climate-controlled, insured, audited specialist storage with full chain-of-custody documentation for auction eligibility.',
+       pivot:'"Given your client\'s situation — would a cask position or bottled stock be the better fit? Let\'s establish the structure and move forward."'},
       {id:'w06',cat:'VERSUS',  q:'"Why whisky when I could just own more gold? Gold is simpler."',
-       ack:'Gold is the right core position — I’m not suggesting you replace it.',
+       ack:'Gold is the right core position — I\'m not suggesting you replace it.',
        redirect:'Gold is passive: it holds value and responds to macro conditions. Whisky does two additional things. First, it physically improves — the asset is not passive, chemistry is creating value independent of market sentiment. Second, the demand drivers are independent of the macro cycle: Chinese and Middle Eastern HNW collectors buying premium Scotch are satisfying a cultural preference, not making an inflation hedge. That demand base is structurally separate from the macro.',
-       pivot:'"Is your client already fully allocated to gold? Because if so, whisky doesn’t replace it — it adds a different mechanism of appreciation with a different demand base."'},
-      {id:'w07',cat:'PRICE',   q:'"It’s too expensive for my client. They can’t afford it."',
+       pivot:'"Is your client already fully allocated to gold? Because if so, whisky doesn\'t replace it — it adds a different mechanism of appreciation with a different demand base."'},
+      {id:'w07',cat:'PRICE',   q:'"It\'s too expensive for my client. They can\'t afford it."',
        ack:'Entry cost is a real consideration.',
-       redirect:'Investment-grade whisky entry points range from £2,000 for a younger cask to £20,000+ for established expressions. The question is what percentage of portfolio makes sense. A 5% allocation to whisky in a £200,000 portfolio is £10,000 — one cask. That’s a concentration level consistent with other alternative assets. The threshold is not as high as people assume.',
-       pivot:'"What is your client’s total investable portfolio? Because a 5% whisky allocation might be more accessible than they think."'},
-      {id:'w08',cat:'RISK',    q:'"What if the warehouse burns down? What’s the insurance situation?"',
+       redirect:'Investment-grade whisky entry points range from £2,000 for a younger cask to £20,000+ for established expressions. The question is what percentage of portfolio makes sense. A 5% allocation to whisky in a £200,000 portfolio is £10,000 — one cask. That\'s a concentration level consistent with other alternative assets. The threshold is not as high as people assume.',
+       pivot:'"What is your client\'s total investable portfolio? Because a 5% whisky allocation might be more accessible than they think."'},
+      {id:'w08',cat:'RISK',    q:'"What if the warehouse burns down? What\'s the insurance situation?"',
        ack:'A completely practical question — and one with a clear answer.',
        redirect:'HMRC-registered bonded warehouses are purpose-built storage facilities with fire suppression systems, security, and regulatory oversight. Specialist insurance for cask contents is standard practice and is typically arranged as part of the storage agreement. The insurance is based on replacement value, not purchase price. The regulatory framework is one of the most stringent in the UK for any physical asset.',
        pivot:'"Would you like me to walk through the specific insurance and storage documentation so your client can review exactly what is covered before making a decision?"'},
@@ -2981,13 +3562,16 @@
        pivot:'"If the client already holds gold, what proportion of their alternative allocation is in assets with genuinely different drivers? Concentration within alternatives carries its own risk."'},
     ];
 
-    var _asset = 'physicals';
     var _cat = 'ALL';
     var _search = '';
     var _open = {};
 
+    function getLensObjs() {
+      return (window._assetLens && window._assetLens.objections) ? window._assetLens.objections : [];
+    }
+
     function getObjs() {
-      var data = _asset === 'physicals' ? GOLD_OBJ : _asset === 'whisky' ? WHISKY_OBJ : _asset === 'property' ? PROPERTY_OBJ : WINE_OBJ;
+      var data = getLensObjs();
       return data.filter(function(o) {
         if (_cat !== 'ALL' && o.cat !== _cat) return false;
         if (_search) {
@@ -2999,7 +3583,7 @@
     }
 
     function getCats() {
-      var data = _asset === 'physicals' ? GOLD_OBJ : _asset === 'whisky' ? WHISKY_OBJ : _asset === 'property' ? PROPERTY_OBJ : WINE_OBJ;
+      var data = getLensObjs();
       var seen = {};
       data.forEach(function(o){ seen[o.cat]=1; });
       return ['ALL'].concat(Object.keys(seen));
@@ -3044,13 +3628,6 @@
 
       body.innerHTML =
         '<div style="display:flex;flex-direction:column;height:100%;font-family:Consolas,monospace;">' +
-        /* asset toggle */
-        '<div style="display:flex;border-bottom:1px solid #2a2a2a;flex-shrink:0;">' +
-          '<button id="oh-g-' + id + '" style="flex:1;padding:7px;font-size:9px;letter-spacing:0.18em;border:none;border-right:1px solid #2a2a2a;background:' + (_asset==='physicals'?'#E97132':'transparent') + ';color:#ffffff;cursor:pointer;font-family:Consolas,monospace;">PHYSICALS</button>' +
-          '<button id="oh-w-' + id + '" style="flex:1;padding:7px;font-size:9px;letter-spacing:0.18em;border:none;border-right:1px solid #2a2a2a;background:' + (_asset==='whisky'?'#E97132':'transparent') + ';color:#ffffff;cursor:pointer;font-family:Consolas,monospace;">WHISKY</button>' +
-          '<button id="oh-p-' + id + '" style="flex:1;padding:7px;font-size:9px;letter-spacing:0.18em;border:none;border-right:1px solid #2a2a2a;background:' + (_asset==='property'?'#E97132':'transparent') + ';color:#ffffff;cursor:pointer;font-family:Consolas,monospace;">PROPERTY</button>' +
-          '<button id="oh-n-' + id + '" style="flex:1;padding:7px;font-size:9px;letter-spacing:0.18em;border:none;background:' + (_asset==='wine'?'#E97132':'transparent') + ';color:#ffffff;cursor:pointer;font-family:Consolas,monospace;">FINE WINE</button>' +
-        '</div>' +
         /* search */
         '<div style="padding:8px 12px;border-bottom:1px solid #2a2a2a;flex-shrink:0;">' +
           '<input id="oh-search-' + id + '" placeholder="Search objections…" value="' + escH(_search) + '" style="width:100%;background:#111;border:1px solid #2a2a2a;color:#fff;padding:5px 8px;font-size:9px;font-family:Consolas,monospace;box-sizing:border-box;" />' +
@@ -3062,15 +3639,6 @@
         '</div>';
 
       /* wire events */
-      var gb  = body.querySelector('#oh-g-' + id);
-      var wb  = body.querySelector('#oh-w-' + id);
-      var pb2 = body.querySelector('#oh-p-' + id);
-      var nb  = body.querySelector('#oh-n-' + id);
-      if (gb)  gb.addEventListener('click',  function(){ _asset='physicals'; _cat='ALL'; _open={}; render(); });
-      if (wb)  wb.addEventListener('click',  function(){ _asset='whisky';    _cat='ALL'; _open={}; render(); });
-      if (pb2) pb2.addEventListener('click', function(){ _asset='property';  _cat='ALL'; _open={}; render(); });
-      if (nb)  nb.addEventListener('click',  function(){ _asset='wine';      _cat='ALL'; _open={}; render(); });
-
       var si = body.querySelector('#oh-search-' + id);
       if (si) si.addEventListener('input', function(){ _search=si.value; render(); });
 
@@ -3085,6 +3653,8 @@
         });
       });
     }
+
+    window.addEventListener('lens:change', function () { _cat = 'ALL'; _open = {}; render(); });
 
     render();
   }
@@ -3126,6 +3696,8 @@
     var editMode = false;
     var catCache = null;
     var catFetching = false;
+    var _period = 'day';   /* active sort period: day | wtd | ytd | y1 */
+    var _viewAll = false;  /* leaders/laggards vs full table */
 
     var DEFAULT_SERIES = ['GOLDAMGBD228NLBM','DCOILWTICO','SP500','DEXUSUK','DEXUSEU',
       'IRLTLT01GBM156N','DGS10','DGS2','T10Y2Y','IRSTCI01GBM156N',
@@ -3290,28 +3862,148 @@
       '</div>';
     }
 
+    /* ── Bloomberg summary strip ─────────────────────────────── */
+    function buildSummaryBar(rows) {
+      var fld = _period;
+      var up = 0, dn = 0, flat = 0, best = null, worst = null;
+      rows.forEach(function(r) {
+        var v = r[fld];
+        if (v === null || v === undefined) return;
+        if (v > 0.001) up++;
+        else if (v < -0.001) dn++;
+        else flat++;
+        if (best === null || v > best.v)  best  = {v: v, n: r.n};
+        if (worst === null || v < worst.v) worst = {v: v, n: r.n};
+      });
+      function fmtP(v) { return (v >= 0 ? '+' : '') + v.toFixed(2) + '%'; }
+      function shortN(n) { return (n || '').replace(/\(.*?\)/g, '').trim().split(' ').slice(0, 2).join(' '); }
+      return '<div class="mm-summary">' +
+        '<span class="mm-sum-up">↑' + up + '</span>' +
+        '<span class="mm-sum-dn">↓' + dn + '</span>' +
+        (flat ? '<span class="mm-sum-flat">—' + flat + '</span>' : '') +
+        (best  ? '<span class="mm-sum-div">|</span><span class="mm-sum-best">▲ ' + escH(shortN(best.n)) + ' ' + escH(fmtP(best.v)) + '</span>' : '') +
+        (worst ? '<span class="mm-sum-div">|</span><span class="mm-sum-worst">▼ ' + escH(shortN(worst.n)) + ' ' + escH(fmtP(worst.v)) + '</span>' : '') +
+      '</div>';
+    }
+
+    /* ── Bloomberg Leaders / Laggards panels ─────────────────── */
+    function buildLeadLag(rows) {
+      var fld = _period;
+      var q = filterQ.toLowerCase();
+      var pool = rows.filter(function(r) {
+        return (!q || r.n.toLowerCase().indexOf(q) !== -1 || (r.cat||'').toLowerCase().indexOf(q) !== -1) &&
+               r[fld] !== null && r[fld] !== undefined;
+      });
+      pool.sort(function(a, b) { return b[fld] - a[fld]; });
+      var leaders  = pool.slice(0, 10);
+      var laggards = pool.slice(-10).reverse();
+
+      var pLbl = {day:'DAY %', wtd:'WTD %', ytd:'YTD %', y1:'1Y %'}[_period] || _period.toUpperCase();
+
+      function panelRows(items) {
+        return items.map(function(r, i) {
+          var val = r[fld];
+          var col = val > 0.001 ? '#3DAA6A' : val < -0.001 ? '#D14040' : '#888';
+          var sign = val >= 0 ? '+' : '';
+          var dir = r.day > 0.001 ? '<span class="mm-dir mm-dir-up">▲</span>'
+                  : r.day < -0.001 ? '<span class="mm-dir mm-dir-dn">▼</span>'
+                  : '<span class="mm-dir mm-dir-n">■</span>';
+          var nm = (r.n || '').replace(/\(.*?\)/g, '').trim();
+          if (nm.length > 20) nm = nm.slice(0, 19) + '…';
+          return '<tr class="mm-tr mm-btr" data-series="' + escH(r.chartId || r.s) + '" data-sid="' + escH(r.s) + '" data-name="' + escH(r.n) + '">' +
+            '<td class="mm-bnum">' + (i + 1) + '</td>' +
+            '<td class="mm-bname">' + dir + escH(nm) + (r.isLive ? '<span class="mm-live-row-dot">●</span>' : '') + '</td>' +
+            '<td class="mm-blast">' + fmtLast(r) + '</td>' +
+            '<td class="mm-bchg" style="color:' + col + ';">' + sign + val.toFixed(2) + '%</td>' +
+          '</tr>';
+        }).join('');
+      }
+
+      function panel(items, isLead) {
+        var hdrCls = 'mm-panel-hdr ' + (isLead ? 'mm-panel-hdr-lead' : 'mm-panel-hdr-lag');
+        var arrow  = isLead ? '<span style="color:#3DAA6A;">▲</span>' : '<span style="color:#D14040;">▼</span>';
+        var label  = isLead ? 'LEADERS' : 'LAGGARDS';
+        return '<div class="mm-panel">' +
+          '<div class="' + hdrCls + '">' +
+            '<span style="display:flex;align-items:center;gap:5px;">' + arrow + ' <span>' + label + '</span></span>' +
+            '<span class="mm-panel-period">' + pLbl + '</span>' +
+          '</div>' +
+          '<div style="overflow-y:auto;flex:1;">' +
+          '<table class="mm-btable">' +
+            '<thead><tr>' +
+              '<th class="mm-bth" style="width:22px;">#</th>' +
+              '<th class="mm-bth mm-bth-l">INSTRUMENT</th>' +
+              '<th class="mm-bth">LAST</th>' +
+              '<th class="mm-bth">' + pLbl + '</th>' +
+            '</tr></thead>' +
+            '<tbody>' + panelRows(items) + '</tbody>' +
+          '</table>' +
+          '</div>' +
+        '</div>';
+      }
+
+      return '<div class="mm-panels">' +
+        panel(leaders, true) +
+        '<div class="mm-panel-sep"></div>' +
+        panel(laggards, false) +
+      '</div>';
+    }
+
     function render(rows) {
       lastData = rows;
+
+      var PERIODS = [{k:'day',l:'DAY'},{k:'wtd',l:'WTD'},{k:'ytd',l:'YTD'},{k:'y1',l:'1Y'}];
+      var periodTabs = PERIODS.map(function(p) {
+        var a = _period === p.k;
+        return '<button class="mm-period-btn' + (a ? ' mm-period-active' : '') + '" id="mm-per-' + p.k + '-' + id + '">' + p.l + '</button>';
+      }).join('');
+
+      var twContent = _viewAll ? buildTable(rows) : buildLeadLag(rows);
+      var footNote  = editMode ? 'EDIT MODE: ✕ TO REMOVE · SEARCH TO ADD'
+                    : _viewAll ? 'ALL SERIES · CLICK COLUMN HEADER TO SORT · CLICK ROW FOR CHART'
+                    : 'LEADERS / LAGGARDS · SELECT PERIOD · CLICK ROW FOR CHART';
+
       body.innerHTML =
         '<div class="mm-wrap">' +
           '<div class="mm-topbar">' +
-            '<input class="mm-search" id="mm-search-' + id + '" placeholder="FILTER…" value="' + escH(filterQ) + '">' +
-            '<span class="mm-live-dot">● LIVE</span>' +
-            '<span class="mm-ts-lbl" id="mm-ts-' + id + '">0s AGO</span>' +
-            '<button class="mm-edit-btn" id="mm-edit-' + id + '">' + (editMode ? 'DONE' : 'EDIT') + '</button>' +
+            '<div class="mm-period-tabs">' + periodTabs + '</div>' +
+            buildSummaryBar(rows) +
+            '<div style="display:flex;align-items:center;gap:6px;margin-left:auto;">' +
+              '<input class="mm-search" id="mm-search-' + id + '" placeholder="FILTER…" value="' + escH(filterQ) + '">' +
+              '<span class="mm-live-dot">● LIVE</span>' +
+              '<span class="mm-ts-lbl" id="mm-ts-' + id + '">0s AGO</span>' +
+              '<button class="mm-edit-btn" id="mm-view-' + id + '">' + (_viewAll ? 'SPLIT' : 'ALL') + '</button>' +
+              '<button class="mm-edit-btn" id="mm-edit-' + id + '">' + (editMode ? 'DONE' : 'EDIT') + '</button>' +
+            '</div>' +
           '</div>' +
-          '<div class="mm-table-wrap" id="mm-tw-' + id + '">' + buildTable(rows) + '</div>' +
+          '<div class="mm-table-wrap" id="mm-tw-' + id + '">' + twContent + '</div>' +
           (editMode ? buildAddPanel() : '') +
-          '<div class="mm-foot">FRED · FX LIVE VIA ER-API · AUTO-REFRESH 60s · CLICK ROW FOR CHART · ' + (editMode ? 'EDIT MODE: ✕ TO REMOVE · SEARCH TO ADD' : 'CLICK EDIT TO CUSTOMISE') + '</div>' +
+          '<div class="mm-foot">FRED · FX VIA ER-API · AUTO-REFRESH 60s · ' + footNote + '</div>' +
         '</div>';
 
-      body.querySelector('#mm-search-' + id).addEventListener('input', function (e) {
+      /* Period tabs */
+      PERIODS.forEach(function(p) {
+        var btn = body.querySelector('#mm-per-' + p.k + '-' + id);
+        if (!btn) return;
+        btn.addEventListener('click', function() { _period = p.k; render(lastData); });
+      });
+
+      /* Filter */
+      body.querySelector('#mm-search-' + id).addEventListener('input', function(e) {
         filterQ = e.target.value;
-        body.querySelector('#mm-tw-' + id).innerHTML = buildTable(lastData);
+        var tw = body.querySelector('#mm-tw-' + id);
+        if (tw) tw.innerHTML = _viewAll ? buildTable(lastData) : buildLeadLag(lastData);
         wireTable();
       });
 
-      body.querySelector('#mm-edit-' + id).addEventListener('click', function () {
+      /* All / Split toggle */
+      body.querySelector('#mm-view-' + id).addEventListener('click', function() {
+        _viewAll = !_viewAll;
+        render(lastData);
+      });
+
+      /* Edit */
+      body.querySelector('#mm-edit-' + id).addEventListener('click', function() {
         editMode = !editMode;
         if (editMode && !catCache && !catFetching) {
           catFetching = true;
@@ -3379,14 +4071,14 @@
         });
       });
 
-      /* row click → chart (only when not in edit mode) */
-      body.querySelectorAll('.mm-tr[data-series]').forEach(function (tr) {
-        tr.addEventListener('click', function () {
+      /* row click → chart (full table .mm-tr and split view .mm-btr) */
+      body.querySelectorAll('.mm-tr[data-series], .mm-btr[data-series]').forEach(function(tr) {
+        tr.addEventListener('click', function() {
           if (editMode) return;
           if (!window.createGenericPopout) return;
           var series = tr.dataset.series;
           var name   = tr.dataset.name;
-          window.createGenericPopout(name + ' · CHART', '▦', function (popBody) {
+          window.createGenericPopout(name + ' · CHART', '▦', function(popBody) {
             renderPriceChart(popBody, series, name);
           }, { w: 500, h: 340 });
         });
@@ -3432,8 +4124,23 @@
 
   /* ── SECTOR HEATMAP ─────────────────────────────────────────── */
   function renderSectorHeatmap(id, body) {
-    body.style.cssText = 'display:flex;flex-direction:column;overflow:hidden;background:#0a0a0a;';
+    body.style.cssText = 'display:flex;flex-direction:column;overflow:hidden;background:#000;';
     var lastRows = null;
+
+    /* Top 5 holdings for each SPDR sector ETF — hardcoded (holdings change infrequently) */
+    var SECTOR_HOLDINGS = {
+      XLK: ['AAPL · Apple 22.6%','MSFT · Microsoft 21.8%','NVDA · Nvidia 7.2%','AVGO · Broadcom 4.5%','ORCL · Oracle 2.1%'],
+      XLF: ['BRK.B · Berkshire 13.8%','JPM · JPMorgan 11.2%','V · Visa 8.4%','MA · Mastercard 6.1%','BAC · Bank of America 3.9%'],
+      XLV: ['LLY · Eli Lilly 12.4%','UNH · UnitedHealth 8.9%','JNJ · J&J 7.1%','ABBV · AbbVie 6.8%','MRK · Merck 5.6%'],
+      XLE: ['XOM · ExxonMobil 23.1%','CVX · Chevron 15.8%','COP · ConocoPhillips 6.7%','EOG · EOG Resources 4.4%','SLB · Schlumberger 3.2%'],
+      XLY: ['AMZN · Amazon 24.3%','TSLA · Tesla 16.8%','HD · Home Depot 9.7%','MCD · McDonald\'s 4.9%','NKE · Nike 2.8%'],
+      XLC: ['META · Meta 22.6%','GOOGL · Alphabet A 10.4%','GOOG · Alphabet C 9.3%','NFLX · Netflix 5.3%','TMUS · T-Mobile 4.9%'],
+      XLI: ['GE · GE Aerospace 5.7%','RTX · RTX Corp 5.1%','CAT · Caterpillar 4.8%','HON · Honeywell 4.7%','UPS · United Parcel 3.3%'],
+      XLP: ['PG · Procter & Gamble 14.6%','COST · Costco 10.3%','KO · Coca-Cola 10.1%','PEP · PepsiCo 8.4%','WMT · Walmart 7.9%'],
+      XLU: ['NEE · NextEra Energy 14.9%','SO · Southern Co 6.9%','DUK · Duke Energy 6.7%','CEG · Constellation 5.8%','D · Dominion Energy 4.2%'],
+      XLRE: ['PLD · Prologis 10.4%','AMT · American Tower 7.1%','EQIX · Equinix 6.8%','WELL · Welltower 5.9%','SPG · Simon Property 5.5%'],
+      XLB: ['LIN · Linde 19.3%','APD · Air Products 7.2%','SHW · Sherwin-Williams 6.9%','ECL · Ecolab 5.4%','FCX · Freeport 4.8%'],
+    };
 
     function hmBg(dp) {
       if (dp === null) return '#141414';
@@ -3502,6 +4209,58 @@
       });
     }
 
+    /* Drill-down panel shown when user clicks a tile */
+    function showDrillDown(etf, sectorName, dp) {
+      var holdings = SECTOR_HOLDINGS[etf] || [];
+      var col = dp === null ? 'rgba(255,255,255,0.5)' : dp >= 0 ? '#3DAA6A' : '#D14040';
+      var pct = dp !== null ? (dp >= 0 ? '+' : '') + parseFloat(dp).toFixed(2) + '%' : '—';
+      /* Remove any existing drill-down */
+      var existing = body.querySelector('.sh-drill');
+      if (existing) { existing.remove(); return; }
+      var panel = document.createElement('div');
+      panel.className = 'sh-drill';
+      panel.style.cssText = 'position:absolute;bottom:28px;left:0;right:0;background:#050505;border-top:1px solid #1a1a1a;padding:12px 14px;z-index:10;';
+      panel.innerHTML =
+        '<div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:8px;">' +
+          '<span style="font-size:11px;letter-spacing:.08em;color:#fff;font-weight:700;">' + escH(sectorName) + '</span>' +
+          '<span style="font-size:11px;font-weight:700;color:' + col + ';">' + pct + '</span>' +
+          '<button style="background:none;border:none;color:rgba(255,255,255,0.4);cursor:pointer;font-size:11px;padding:0 0 0 12px;" class="sh-drill-close">✕</button>' +
+        '</div>' +
+        '<div style="font-size:7px;letter-spacing:.16em;color:rgba(255,255,255,0.3);margin-bottom:6px;">TOP HOLDINGS · ' + escH(etf) + ' · SPDR</div>' +
+        (holdings.length ?
+          holdings.map(function(h) {
+            var parts = h.split(' · ');
+            return '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #0f0f0f;font-size:9px;">' +
+              '<span style="color:rgba(255,255,255,0.5);letter-spacing:.06em;min-width:52px;">' + escH(parts[0]) + '</span>' +
+              '<span style="color:#fff;flex:1;padding:0 6px;">' + escH(parts[1] || '') + '</span>' +
+              '<span style="color:rgba(255,255,255,0.4);">' + escH(parts[2] || '') + '</span>' +
+            '</div>';
+          }).join('') :
+          '<div style="font-size:9px;color:rgba(255,255,255,0.3);">Holdings data not available</div>'
+        );
+      panel.querySelector('.sh-drill-close').addEventListener('click', function(e) {
+        e.stopPropagation(); panel.remove();
+      });
+      /* Make parent relative so absolute positioning works */
+      var wrap = body.querySelector('.sh-heatmap');
+      if (wrap && wrap.parentElement) {
+        wrap.parentElement.style.position = 'relative';
+        wrap.parentElement.appendChild(panel);
+      } else { body.appendChild(panel); }
+    }
+
+    function wireTileClicks() {
+      body.querySelectorAll('.sh-tile').forEach(function(tile) {
+        tile.style.cursor = 'pointer';
+        tile.addEventListener('click', function() {
+          var etf = tile.dataset.etf;
+          var sectorName = (tile.querySelector('.sh-sector') || {}).textContent || etf;
+          var row = (lastRows || []).find(function(r){ return r.etf === etf; });
+          showDrillDown(etf, sectorName, row ? row.dp : null);
+        });
+      });
+    }
+
     function fetch_sectors(isRefresh) {
       if (!isRefresh) body.innerHTML = '<div class="tbw-loading">LOADING SECTORS…</div>';
       fetch('/.netlify/functions/macro-data?type=sectors')
@@ -3513,6 +4272,7 @@
             updateTiles(rows);
           } else {
             body.innerHTML = buildGrid(rows);
+            wireTileClicks();
           }
         })
         .catch(function(){ if (!isRefresh) body.innerHTML = '<div class="tbw-loading">UNAVAILABLE</div>'; });
@@ -3528,34 +4288,81 @@
 
   /* ── WATCHLIST ───────────────────────────────────────────────── */
   function renderWatchlist(id, body) {
-    body.style.cssText = 'display:flex;flex-direction:column;overflow:hidden;';
+    body.style.cssText = 'display:flex;flex-direction:column;overflow:hidden;background:#000;';
     var STORE = 'tbt-watchlist-v1';
     var tickers = JSON.parse(localStorage.getItem(STORE) || '[]');
     function save() { localStorage.setItem(STORE, JSON.stringify(tickers)); }
 
-    var refreshTimer = null;
+    /* Pre-built category groups */
+    var WL_PRESETS = {
+      'GOLD': ['GLD','IAU','GC=F','GDX','GDXJ','SGOL'],
+      'INDICES': ['^GSPC','^FTSE','^IXIC','^DJI','^VIX','EWU'],
+      'MACRO': ['TLT','DX-Y.NYB','BIL','^TNX','TIP','UUP'],
+      'COMMODITIES': ['GC=F','SI=F','CL=F','BZ=F','HG=F','NG=F'],
+      'FX': ['GBPUSD=X','EURUSD=X','USDJPY=X','USDCHF=X','AUDUSD=X','USDCNH=X'],
+      'SPIRITS': ['DEO','BF.B','RIO','PRNDY','ABTXF','MGPI']
+    };
+
+    /* Friendly name map */
+    var WL_NAMES = {
+      'GLD':'Gold ETF (GLD)','IAU':'iShares Gold','GC=F':'Gold Futures','GDX':'Gold Miners','GDXJ':'Jr Gold Miners','SGOL':'Aberdeen Gold',
+      '^GSPC':'S&P 500','^FTSE':'FTSE 100','^IXIC':'Nasdaq','^DJI':'Dow Jones','^VIX':'VIX Fear','EWU':'UK Stocks ETF',
+      'TLT':'20Y T-Bond ETF','DX-Y.NYB':'US Dollar (DXY)','BIL':'T-Bill ETF','^TNX':'10Y Treasury','TIP':'TIPS ETF','UUP':'Dollar Bull ETF',
+      'GC=F':'Gold Futures','SI=F':'Silver Futures','CL=F':'WTI Crude','BZ=F':'Brent Crude','HG=F':'Copper','NG=F':'Nat Gas',
+      'GBPUSD=X':'GBP/USD','EURUSD=X':'EUR/USD','USDJPY=X':'USD/JPY','USDCHF=X':'USD/CHF','AUDUSD=X':'AUD/USD','USDCNH=X':'USD/CNH',
+      'DEO':'Diageo','BF.B':'Brown-Forman','RIO':'Rio Tinto','PRNDY':'Pernod Ricard','ABTXF':'Amber Beverage','MGPI':'MGP Ingredients'
+    };
 
     function draw(quotes) {
       var listHtml = quotes.length ? quotes.map(function(q) {
-        var price = q.c ? '$' + q.c.toFixed(2) : '—';
+        var name = WL_NAMES[q.sym] || q.sym;
+        var price = q.c ? (q.c < 10 ? q.c.toFixed(4) : q.c < 100 ? q.c.toFixed(3) : q.c.toFixed(2)) : '—';
         var chg = q.dp !== null ? (q.dp >= 0 ? '+' : '') + q.dp.toFixed(2) + '%' : '—';
         var cls = q.dp === null ? '' : q.dp >= 0 ? 'wl-pos' : 'wl-neg';
         return '<div class="wl-row">' +
-          '<span class="wl-sym">' + escH(q.sym) + '</span>' +
+          '<div style="flex:1;min-width:0;">' +
+            '<div class="wl-sym">' + escH(q.sym) + '</div>' +
+            '<div style="font-size:7px;letter-spacing:.06em;color:rgba(255,255,255,0.35);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escH(name) + '</div>' +
+          '</div>' +
           '<span class="wl-price">' + price + '</span>' +
           '<span class="wl-chg ' + cls + '">' + chg + '</span>' +
           '<button class="wl-del" data-sym="' + escH(q.sym) + '">✕</button>' +
           '</div>';
-      }).join('') : '<div class="wl-empty">NO TICKERS YET<br>TYPE A SYMBOL ABOVE &amp; PRESS ENTER</div>';
+      }).join('') : '';
+
+      /* Quick-add presets — always visible */
+      var presetHtml = '<div style="padding:8px 10px 4px;border-bottom:1px solid #111;flex-shrink:0;">' +
+        '<div style="font-size:7px;letter-spacing:.18em;color:rgba(255,255,255,0.3);margin-bottom:6px;">QUICK ADD</div>' +
+        '<div style="display:flex;gap:4px;flex-wrap:wrap;">' +
+        Object.keys(WL_PRESETS).map(function(cat) {
+          return '<button class="wl-preset-btn" data-cat="' + cat + '" style="background:#000;border:1px solid #1e1e1e;color:rgba(255,255,255,0.55);font-family:var(--font);font-size:7px;letter-spacing:.12em;padding:3px 8px;cursor:pointer;">' + cat + '</button>';
+        }).join('') +
+        '</div></div>';
+
+      var emptyHint = !quotes.length ?
+        '<div class="wl-empty">NO TICKERS YET<br><span style="font-size:7px;color:rgba(255,255,255,0.2);">USE QUICK ADD OR TYPE A SYMBOL ABOVE</span></div>' : '';
 
       var ts = new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
       body.innerHTML =
         '<div class="wl-add-bar">' +
-          '<input class="wl-input" id="' + id + '-inp" placeholder="ADD TICKER  e.g. AAPL" maxlength="12"/>' +
+          '<input class="wl-input" id="' + id + '-inp" placeholder="ADD TICKER  e.g. AAPL  ^GSPC  GC=F" maxlength="14"/>' +
           '<button class="wl-add-btn" id="' + id + '-add">＋</button>' +
         '</div>' +
-        '<div class="wl-list">' + listHtml + '</div>' +
-        '<div class="wl-footer">LIVE PRICES · FINNHUB · ' + ts + '</div>';
+        presetHtml +
+        '<div class="wl-list">' + (listHtml || emptyHint) + '</div>' +
+        '<div class="wl-footer">LIVE PRICES · YAHOO FINANCE · ' + ts + '</div>';
+
+      /* Preset button clicks — add whole group */
+      body.querySelectorAll('.wl-preset-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var group = WL_PRESETS[btn.dataset.cat] || [];
+          var added = false;
+          group.forEach(function(sym) {
+            if (tickers.indexOf(sym) === -1) { tickers.push(sym); added = true; }
+          });
+          if (added) { save(); fetchAndRender(); }
+        });
+      });
 
       body.querySelectorAll('.wl-del').forEach(function(btn) {
         btn.addEventListener('click', function() {
@@ -3572,7 +4379,7 @@
       var addBtn = document.getElementById(id + '-add');
       if (!inp || !addBtn) return;
       function tryAdd() {
-        var sym = (inp.value || '').trim().toUpperCase().replace(/[^A-Z0-9.\-]/g,'');
+        var sym = (inp.value || '').trim().toUpperCase().replace(/[^A-Z0-9.=\-\^]/g,'');
         if (!sym || tickers.indexOf(sym) !== -1) { inp.value = ''; return; }
         inp.disabled = addBtn.disabled = true;
         fetch('/.netlify/functions/macro-data?type=quote&symbols=' + encodeURIComponent(sym))
@@ -3605,9 +4412,61 @@
     }, 60000));
   }
 
+  /* ── LIVE TV WIDGET ─────────────────────────────────────────── */
+  function renderLiveTVWidget(id, body) {
+    var TV_CHANNELS = [
+      { key:'france24',  label:'FRANCE 24',   cid:'UCQfwfsi5VrQ8yKZ-UWmAEFg', tag:'INT\'L',   sub:'English · 24/7 live' },
+      { key:'euronews',  label:'EURONEWS',    cid:'UCW5DxBMHwDkWBxVv3MhO27A', tag:'EUROPE',   sub:'English · 24/7 live' },
+      { key:'wion',      label:'WION',        cid:'UCw0PBPuKMmEYxORQ5sPiQEA', tag:'GLOBAL',   sub:'English · 24/7 live' },
+      { key:'dw',        label:'DW NEWS',     cid:'UCknLrEdhRCp1aegoMqRaCZg', tag:'EUROPE',   sub:'English · 24/7 live' },
+      { key:'cnbc',      label:'CNBC',        cid:'UCvJJ_dzjViJCoLf5uKUTwoA', tag:'MARKETS',  sub:'English · business live' },
+      { key:'bloomberg', label:'BLOOMBERG TV',cid:'UCIALMKvObZNtJ6AmdCLP7Lg', tag:'MARKETS',  sub:'May require subscription' },
+    ];
+    var _ch = 'france24';
+
+    function render() {
+      var ch = TV_CHANNELS.find(function(c){ return c.key === _ch; }) || TV_CHANNELS[0];
+      var A = '#E97132';
+      var embedSrc = 'https://www.youtube.com/embed/live_stream?channel=' + ch.cid + '&autoplay=1&mute=1&rel=0&modestbranding=1&controls=0&showinfo=0&iv_load_policy=3&disablekb=1';
+      body.innerHTML =
+        '<div style="display:flex;flex-direction:column;height:100%;overflow:hidden;background:#000;">' +
+          '<div style="display:flex;gap:0;flex-shrink:0;border-bottom:1px solid #1a1a1a;background:#000;overflow-x:auto;scrollbar-width:none;">' +
+            TV_CHANNELS.map(function(c) {
+              var act = c.key === _ch;
+              return '<button id="tv-ch-' + c.key + '-' + id + '" style="' +
+                'flex-shrink:0;padding:7px 12px;font-size:8px;letter-spacing:.1em;font-family:Consolas,monospace;' +
+                'border:none;border-bottom:2px solid ' + (act ? A : 'transparent') + ';' +
+                'background:transparent;color:' + (act ? A : '#ffffff') + ';' +
+                'cursor:pointer;white-space:nowrap;">' +
+                c.label +
+                '<span style="font-size:6.5px;color:' + (act ? A : 'rgba(255,255,255,0.45)') + ';margin-left:6px;">' + c.tag + '</span>' +
+              '</button>';
+            }).join('') +
+          '</div>' +
+          '<div style="flex:1;position:relative;background:#000;min-height:0;overflow:hidden;">' +
+            '<iframe src="' + embedSrc + '" ' +
+              'style="width:100%;height:100%;border:none;display:block;" ' +
+              'allow="autoplay;encrypted-media;picture-in-picture" allowfullscreen></iframe>' +
+          '</div>' +
+          '<div style="flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:5px 10px;background:#050505;border-top:1px solid #1a1a1a;">' +
+            '<div style="font-size:6px;letter-spacing:.1em;color:' + A + ';">' + ch.label + '  <span style="color:rgba(255,255,255,0.25);">·  ' + ch.sub.toUpperCase() + '</span></div>' +
+            '<div style="display:flex;align-items:center;gap:5px;"><div style="width:5px;height:5px;border-radius:50%;background:' + A + ';animation:blink 1.4s step-start infinite;"></div><div style="font-size:6px;letter-spacing:.12em;color:rgba(255,255,255,0.3);">LIVE</div></div>' +
+          '</div>' +
+        '</div>';
+
+      TV_CHANNELS.forEach(function(c) {
+        var btn = body.querySelector('#tv-ch-' + c.key + '-' + id);
+        if (btn) btn.addEventListener('click', function() { _ch = c.key; render(); });
+      });
+    }
+
+    render();
+  }
+
   /* ── GLOBAL MAP ──────────────────────────────────────────────── */
   function renderGlobalMap(id, body) {
     body.style.cssText = 'display:flex;flex-direction:column;overflow:hidden;position:relative;';
+    var _gmView = 'map'; /* 'map' | 'catalyst' */
     var mode = 'macro', sub = 'realrate';
     var mapData = null, _globe = null, _features = [], _isoMap = new Map();
 
@@ -3652,7 +4511,7 @@
       CA:{lbl:'CANADIAN',  note:'Crown Royal · Forty Creek · Gooderham'},
       TW:{lbl:'TAIWANESE', note:'Kavalan · Nantou'},
       AU:{lbl:'AUSTRALIAN',note:'Archie Rose · Starward · Lark'},
-      ZA:{lbl:'S.AFRICAN', note:"Bain's · Three Ships"},
+      ZA:{lbl:'S.AFRICAN', note:"Bain\'s · Three Ships"},
       FR:{lbl:'FRENCH',    note:'Armorik · Glann ar Mor'},
       NZ:{lbl:'NEW ZEALAND',note:'Thomson · Cardrona'},
       DE:{lbl:'GERMAN',    note:'Slyrs · Fading Hill'},
@@ -3924,12 +4783,138 @@
       wrap.addEventListener('mousedown', function(){ ctrl.autoRotate = false; });
     }
 
+    /* ── Catalyst Watch (self-contained within Global Map) ── */
+    var _catLive = null;
+    var A = '#E97132', GRN = '#3DAA6A', RED = '#D14040', BLU = '#4A90D9', PRP = '#9B6FD4', REC = '#FFD700';
+
+    function miniSparkGM(arr, col, w, h) {
+      if (!arr || arr.length < 2) return '';
+      var mn = Math.min.apply(null, arr), mx = Math.max.apply(null, arr);
+      var rng = mx - mn || 1;
+      var pts = arr.map(function(v, i) {
+        return (i / (arr.length - 1) * w).toFixed(1) + ',' + ((1 - (v - mn) / rng) * h).toFixed(1);
+      }).join(' ');
+      return '<svg width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '" style="overflow:visible;"><polyline points="' + pts + '" fill="none" stroke="' + col + '" stroke-width="1.2"/></svg>';
+    }
+
+    function catRowGM(label, sub, val, chgStr, chgPos, sparkArr, sparkCol, signal) {
+      var sc = signal === 'BULLISH' ? GRN : signal === 'BEARISH' ? RED : signal === 'WATCH' ? PRP : signal === 'ELEVATED' ? A : 'rgba(255,255,255,0.28)';
+      var sb = signal === 'BULLISH' ? 'rgba(61,170,106,.08)' : signal === 'BEARISH' ? 'rgba(209,64,64,.08)' : signal === 'WATCH' ? 'rgba(155,111,212,.08)' : signal === 'ELEVATED' ? 'rgba(233,113,50,.08)' : 'rgba(255,255,255,.04)';
+      return '<div style="display:grid;grid-template-columns:1fr 72px 40px 58px 66px;align-items:center;padding:8px 10px;border-bottom:1px solid #0f0f0f;">' +
+        '<div>' +
+          '<div style="font-size:7.5px;letter-spacing:.08em;color:#fff;">' + label + '</div>' +
+          (sub ? '<div style="font-size:5.5px;color:rgba(255,255,255,0.26);margin-top:1.5px;letter-spacing:.04em;">' + sub + '</div>' : '') +
+        '</div>' +
+        '<div style="font-size:8px;font-weight:600;color:#fff;text-align:right;font-variant-numeric:tabular-nums;">' + val + '</div>' +
+        '<div style="font-size:6.5px;font-weight:600;color:' + (chgPos ? GRN : RED) + ';text-align:right;">' + chgStr + '</div>' +
+        '<div style="text-align:center;padding:0 4px;">' + miniSparkGM(sparkArr, sparkCol, 50, 14) + '</div>' +
+        '<div style="text-align:right;"><span style="font-size:5.5px;letter-spacing:.12em;color:' + sc + ';background:' + sb + ';border:1px solid ' + sc + ';padding:2px 6px;display:inline-block;">' + signal + '</span></div>' +
+      '</div>';
+    }
+
+    function renderGMCatalyst(panel) {
+      if (!_catLive) {
+        _catLive = 'loading';
+        fetch('/.netlify/functions/catalyst-watch')
+          .then(function(r){ return r.json(); })
+          .then(function(d){ _catLive = d; renderGMCatalyst(panel); })
+          .catch(function(){ _catLive = 'error'; });
+      }
+      var live = (_catLive && _catLive !== 'loading' && _catLive !== 'error') ? _catLive : null;
+      var dxy  = (live && live.dxy)    ? live.dxy    : { value:98.4, chgPct:-0.4, spark:[101.2,100.8,100.4,100.0,99.7,99.4,99.1,98.9,98.7,98.5,98.4,98.3,98.4,98.4,98.4] };
+      var tips = (live && live.tips10) ? live.tips10 : { value:1.84, chg:-0.03,   spark:[2.10,2.06,2.03,2.00,1.97,1.94,1.92,1.90,1.88,1.87,1.86,1.85,1.85,1.84,1.84] };
+      var bdi  = (live && live.bdi)    ? live.bdi    : { value:1847, chgPct:2.3,  spark:[1320,1360,1280,1350,1420,1480,1540,1590,1640,1700,1750,1790,1820,1840,1847] };
+      var dxyS = (dxy.chgPct < 0 && dxy.value < 100) ? 'BULLISH' : (dxy.value > 102 ? 'BEARISH' : 'NEUTRAL');
+      var tipS = (tips.value < 2.0 && tips.chg <= 0) ? 'BULLISH' : (tips.value > 2.5 ? 'BEARISH' : 'ELEVATED');
+      var bdiS = bdi.value < 1200 ? 'WATCH' : 'NEUTRAL';
+      var html = '<div style="padding:12px 14px 16px;overflow-y:auto;height:100%;box-sizing:border-box;background:#000;">';
+      html += '<div style="font-size:7px;letter-spacing:.2em;color:' + A + ';margin-bottom:12px;border-bottom:1px solid #1a1a1a;padding-bottom:8px;">CATALYST WATCH  ·  ' +
+        (live ? '<span style="color:' + GRN + ';">LIVE DATA</span>' : (_catLive === 'loading' ? '<span style="color:' + A + ';">FETCHING…</span>' : 'ESTIMATES')) + '</div>';
+      html += '<div style="font-size:6.5px;letter-spacing:.14em;color:rgba(255,255,255,0.4);margin-bottom:6px;padding-left:2px;">GOLD PRICE DRIVERS</div>';
+      html += '<div style="border:1px solid #1a1a1a;margin-bottom:12px;">';
+      html += catRowGM('DXY US DOLLAR INDEX', 'Inverse — weaker dollar = higher gold',
+        dxy.value.toFixed(1), (dxy.chgPct >= 0 ? '+' : '') + dxy.chgPct.toFixed(2) + '%', dxy.chgPct < 0, dxy.spark, BLU, dxyS);
+      html += catRowGM('10YR REAL YIELD · TIPS', 'Below 2% broadly supportive for gold',
+        tips.value.toFixed(2) + '%', (tips.chg >= 0 ? '+' : '') + tips.chg.toFixed(2) + 'pp', tips.chg < 0, tips.spark, PRP, tipS);
+      html += catRowGM('CENTRAL BANK BUYING', 'WGC · H1 2026 — 3rd consecutive record-pace year',
+        '345t', 'H1 YTD', true, [220,240,255,270,285,295,310,320,330,338,342,345,345,345,345], GRN, 'BULLISH');
+      html += catRowGM('ETF FLOW MOMENTUM', 'WGC · institutional re-accumulation phase',
+        '+292t YoY', '↑ YoY', true, [10,15,20,28,35,42,38,45,52,58,62,68,70,72,74], GRN, 'BULLISH');
+      html += catRowGM('GEOPOLITICAL RISK', 'Active conflicts + EM de-dollarisation',
+        'ELEVATED', '↑ Active', true, [62,65,68,70,72,74,76,74,77,79,81,80,83,82,84], RED, 'WATCH');
+      html += '</div>';
+      html += '<div style="font-size:6.5px;letter-spacing:.14em;color:rgba(255,255,255,0.4);margin-bottom:6px;padding-left:2px;">SHIPPING INTELLIGENCE</div>';
+      html += '<div style="border:1px solid #1a1a1a;margin-bottom:12px;">';
+      html += catRowGM('BALTIC DRY INDEX · BDI', 'Dry bulk — falling BDI → demand slowdown → gold bullish',
+        bdi.value.toLocaleString(), (bdi.chgPct >= 0 ? '+' : '') + bdi.chgPct.toFixed(1) + '%', bdi.chgPct < 0, bdi.spark, BLU, bdiS);
+      html += catRowGM('CAPESIZE 5TC · $/DAY', 'Iron ore & coal — China demand proxy',
+        '$21,400', '+4.1%', true, [15200,15800,16400,17200,18000,18800,19400,20100,20600,21000,21200,21300,21350,21400,21400], BLU, 'ELEVATED');
+      html += catRowGM('VLCC TD3C · $/DAY', 'Crude supertanker — Middle East→Asia',
+        '$48,200', '+6.8%', true, [38000,36000,34000,35000,38000,40000,43000,44500,46000,47000,48000,47500,48200,48000,48200], A, 'ELEVATED');
+      html += '</div>';
+      html += '<div style="padding:10px 12px;background:#060606;border:1px solid #1a1a1a;border-left:3px solid ' + GRN + ';font-size:7px;line-height:1.8;color:rgba(255,255,255,0.55);">' +
+        'All six macro drivers simultaneously aligned for gold: weakening dollar, declining real yields, structural CB accumulation, accelerating ETF inflows, elevated geopolitical risk, and freight disruption. This configuration has occurred in fewer than 12% of months since 1971.' +
+      '</div>';
+      html += '</div>';
+      panel.innerHTML = html;
+    }
+
+    /* ── Tab bar switcher ── */
+    function buildGMTabBar() {
+      var bar = document.createElement('div');
+      bar.id = 'gm-tabbar-' + id;
+      bar.style.cssText = 'display:flex;border-bottom:1px solid #1e1e1e;flex-shrink:0;background:#000;';
+      function makeTab(label, view) {
+        var act = _gmView === view;
+        var btn = document.createElement('button');
+        btn.style.cssText = 'padding:7px 12px;font-size:6.5px;letter-spacing:.14em;font-family:Consolas,monospace;border:none;border-bottom:2px solid ' + (act ? A : 'transparent') + ';background:transparent;color:' + (act ? A : 'rgba(255,255,255,0.38)') + ';cursor:pointer;';
+        btn.textContent = label;
+        btn.addEventListener('click', function() {
+          _gmView = view;
+          var mapWrap  = document.getElementById('gm-globe-wrap-' + id);
+          var catPanel = document.getElementById('gm-cat-panel-' + id);
+          if (mapWrap)  mapWrap.style.display  = view === 'map'      ? 'contents' : 'none';
+          if (catPanel) {
+            catPanel.style.display = view === 'catalyst' ? 'flex' : 'none';
+            if (view === 'catalyst') renderGMCatalyst(catPanel);
+          }
+          /* update tab highlight */
+          var allBtns = bar.querySelectorAll('button');
+          allBtns.forEach(function(b) {
+            var isAct = b === btn;
+            b.style.borderBottomColor = isAct ? A : 'transparent';
+            b.style.color = isAct ? A : 'rgba(255,255,255,0.38)';
+          });
+        });
+        return btn;
+      }
+      bar.appendChild(makeTab('GLOBAL MAP', 'map'));
+      bar.appendChild(makeTab('CATALYST WATCH', 'catalyst'));
+      return bar;
+    }
+
     function init() {
-      body.innerHTML = '<div class="gm-loading">LOADING 3D GLOBE…</div>';
+      /* Render tab bar immediately */
+      body.innerHTML = '';
+      body.appendChild(buildGMTabBar());
+
+      /* Map wrapper (holds modes/subs/globe) */
+      var mapWrap = document.createElement('div');
+      mapWrap.id = 'gm-globe-wrap-' + id;
+      mapWrap.style.cssText = 'display:contents;';
+      mapWrap.innerHTML = '<div class="gm-loading" style="flex:1;display:flex;align-items:center;justify-content:center;">LOADING 3D GLOBE…</div>';
+      body.appendChild(mapWrap);
+
+      /* Catalyst panel (hidden initially) */
+      var catPanel = document.createElement('div');
+      catPanel.id = 'gm-cat-panel-' + id;
+      catPanel.style.cssText = 'flex:1;overflow:hidden;display:none;flex-direction:column;';
+      body.appendChild(catPanel);
+
       loadScript('https://unpkg.com/globe.gl/dist/globe.gl.min.js', function(err) {
-        if(err){ body.innerHTML='<div class="gm-loading">GLOBE ENGINE FAILED</div>'; return; }
+        if(err){ mapWrap.innerHTML='<div class="gm-loading">GLOBE ENGINE FAILED</div>'; return; }
         loadScript('https://unpkg.com/topojson-client@3/dist/topojson-client.min.js', function(err2) {
-          if(err2){ body.innerHTML='<div class="gm-loading">TOPO ENGINE FAILED</div>'; return; }
+          if(err2){ mapWrap.innerHTML='<div class="gm-loading">TOPO ENGINE FAILED</div>'; return; }
           Promise.all([
             fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json').then(function(r){ return r.json(); }),
             fetch('/.netlify/functions/macro-data?type=global-macro').then(function(r){ return r.ok?r.json():null; }).catch(function(){ return null; })
@@ -3941,14 +4926,14 @@
               var iso = NUM2ISO[String(f.id)];
               if(iso) _isoMap.set(f, iso);
             });
-            body.innerHTML =
+            mapWrap.innerHTML =
               '<div id="gm-modes-'+id+'" class="gm-controls"></div>'+
               '<div id="gm-subs-'+id+'" class="gm-sub-bar"></div>'+
               '<div id="gm-wrap-'+id+'" class="gm-svg-wrap" style="flex:1;overflow:hidden;background:#00010a;position:relative;"></div>'+
               '<div class="gm-bottom"><span id="gm-foot-'+id+'" class="gm-footer"></span></div>';
             rebuildControls();
             buildGlobe(document.getElementById('gm-wrap-'+id));
-          }).catch(function(){ body.innerHTML='<div class="gm-loading">GLOBE DATA UNAVAILABLE</div>'; });
+          }).catch(function(){ mapWrap.innerHTML='<div class="gm-loading">GLOBE DATA UNAVAILABLE</div>'; });
         });
       });
     }
@@ -3964,7 +4949,7 @@
         lbl: 'AGGREGATE',
         icon: '◈',
         what: 'Total UK card spending across all categories — the headline number.',
-        why: "Confirms whether the overall consumer environment is expanding or contracting. A broker's first sanity check before pitching any discretionary asset.",
+        why: "Confirms whether the overall consumer environment is expanding or contracting. A broker\'s first sanity check before pitching any discretionary asset.",
         gold: 'Weak aggregate spend → financial stress → flight to gold as a safe store of value.',
         whisky: 'Weak aggregate spend narrows the audience for premium cask investment. Focus on clients with liquid net worth, not income-dependent buyers.'
       },
@@ -4679,157 +5664,6 @@
     loadPrimary(render);
   }
 
-  /* ── ASSET COMPARISON CHART WIDGET ───────────────────────────── */
-  function renderMacroChart(id, body) {
-    body.innerHTML = '<div class="tbw-loading">LOADING…</div>';
-    fetch('/.netlify/functions/macro-data?type=history&years=10')
-      .then(function (r) { return r.json(); })
-      .then(function (raw) {
-        body._mcData = raw;
-        drawMacroChart(body, raw, 10);
-
-        /* Period buttons */
-        body.querySelectorAll('.mc-period').forEach(function (btn) {
-          btn.addEventListener('click', function () {
-            body.querySelectorAll('.mc-period').forEach(function (b) { b.classList.remove('active'); });
-            btn.classList.add('active');
-            drawMacroChart(body, body._mcData, parseInt(btn.dataset.y));
-          });
-        });
-      })
-      .catch(function () { body.innerHTML = '<div class="tbw-loading">UNAVAILABLE</div>'; });
-  }
-
-  function drawMacroChart(body, raw, years) {
-    /* Slice each series to selected period */
-    var cutoff = new Date();
-    cutoff.setFullYear(cutoff.getFullYear() - years);
-    var cutTs = cutoff.getTime();
-
-    function slice(arr) {
-      return (arr || []).filter(function (p) { return new Date(p.d).getTime() >= cutTs; });
-    }
-    function rebase(arr) {
-      if (!arr.length) return [];
-      var base = arr[0].v;
-      return arr.map(function (p) { return { d: p.d, v: (p.v / base - 1) * 100 }; });
-    }
-
-    var series = [
-      { key:'gold',  lbl:'Gold (GBP)',    col:'#E97132', data: rebase(slice(raw.gold))  },
-      { key:'sp500', lbl:'S&P 500 (USD)', col:'#4a9eed', data: rebase(slice(raw.sp500)) },
-      { key:'ukcpi', lbl:'UK CPI',        col:'#4caf7d', data: rebase(slice(raw.ukcpi)) },
-    ].filter(function (s) { return s.data.length > 1; });
-
-    if (!series.length) {
-      body.innerHTML = '<div class="tbw-loading">NO DATA</div>';
-      return;
-    }
-
-    /* SVG dimensions */
-    var W = 460, H = 200, pl = 44, pr = 12, pt = 14, pb = 24;
-    var cW = W - pl - pr, cH = H - pt - pb;
-
-    /* Value range across all series */
-    var allV = [];
-    series.forEach(function (s) { s.data.forEach(function (p) { allV.push(p.v); }); });
-    var minV = Math.floor(Math.min.apply(null, allV) / 10) * 10;
-    var maxV = Math.ceil(Math.max.apply(null, allV) / 10) * 10;
-    if (minV === maxV) { minV -= 10; maxV += 10; }
-
-    /* Time range */
-    var allT = [];
-    series.forEach(function (s) { s.data.forEach(function (p) { allT.push(new Date(p.d).getTime()); }); });
-    var minT = Math.min.apply(null, allT);
-    var maxT = Math.max.apply(null, allT);
-
-    function xp(d) { return pl + (new Date(d).getTime() - minT) / (maxT - minT) * cW; }
-    function yp(v) { return pt + cH - (v - minV) / (maxV - minV) * cH; }
-
-    /* Y-axis grid lines */
-    var yTicks = [];
-    var step = Math.round((maxV - minV) / 4 / 10) * 10 || 10;
-    for (var y = Math.ceil(minV / step) * step; y <= maxV; y += step) yTicks.push(y);
-
-    /* X-axis ticks — one per year */
-    var xTicks = [];
-    var yr0 = new Date(minT).getFullYear();
-    var yr1 = new Date(maxT).getFullYear();
-    for (var y2 = yr0 + 1; y2 <= yr1; y2++) {
-      var t = new Date(y2 + '-01-01').getTime();
-      if (t >= minT && t <= maxT) xTicks.push({ t: t, lbl: String(y2).slice(2) });
-    }
-
-    /* Build SVG */
-    var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">';
-
-    /* Grid lines */
-    yTicks.forEach(function (v) {
-      var ry = yp(v).toFixed(1);
-      svg += '<line x1="' + pl + '" x2="' + (W - pr) + '" y1="' + ry + '" y2="' + ry + '" stroke="#1a1a1a" stroke-width="1"/>';
-      var lbl = (v > 0 ? '+' : '') + v + '%';
-      svg += '<text x="' + (pl - 3) + '" y="' + (parseFloat(ry) + 3.5) + '" text-anchor="end" font-size="7.5" font-family="Consolas,Menlo,monospace" fill="#555">' + lbl + '</text>';
-    });
-
-    /* Zero line */
-    var zy = yp(0).toFixed(1);
-    svg += '<line x1="' + pl + '" x2="' + (W - pr) + '" y1="' + zy + '" y2="' + zy + '" stroke="#333" stroke-width="1" stroke-dasharray="3,2"/>';
-
-    /* X ticks */
-    xTicks.forEach(function (t) {
-      var rx = xp(t.t).toFixed(1);
-      svg += '<text x="' + rx + '" y="' + (H - pb + 10) + '" text-anchor="middle" font-size="7" font-family="Consolas,Menlo,monospace" fill="#444">' + t.lbl + '</text>';
-    });
-
-    /* Series paths */
-    series.forEach(function (s) {
-      var d = s.data.map(function (p, i) {
-        return (i === 0 ? 'M' : 'L') + xp(p.d).toFixed(1) + ',' + yp(p.v).toFixed(1);
-      }).join(' ');
-      svg += '<path d="' + d + '" fill="none" stroke="' + s.col + '" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>';
-
-      /* End-point dot + value label */
-      var last = s.data[s.data.length - 1];
-      if (last) {
-        var ex = xp(last.d), ey = yp(last.v);
-        svg += '<circle cx="' + ex.toFixed(1) + '" cy="' + ey.toFixed(1) + '" r="2.5" fill="' + s.col + '"/>';
-      }
-    });
-
-    svg += '</svg>';
-
-    /* Legend */
-    var legend = '<div class="mc-legend">' + series.map(function (s) {
-      var last = s.data[s.data.length - 1];
-      var pct  = last ? (last.v > 0 ? '+' : '') + last.v.toFixed(1) + '%' : '';
-      return '<span class="mc-leg-item"><span class="mc-leg-dot" style="background:' + s.col + '"></span>' + s.lbl + '<span class="mc-leg-val" style="color:' + s.col + '">' + pct + '</span></span>';
-    }).join('') + '</div>';
-
-    /* Period buttons */
-    var periods = [1, 3, 5, 10];
-    var btnHtml = '<div class="mc-periods">' + periods.map(function (y) {
-      return '<button class="mc-period' + (y === years ? ' active' : '') + '" data-y="' + y + '">' + y + 'Y</button>';
-    }).join('') + '</div>';
-
-    /* Preserve scroll, rebuild inner content */
-    var inner = body.querySelector('.mc-inner');
-    if (!inner) {
-      body.innerHTML = '<div class="mc-inner"></div>';
-      inner = body.querySelector('.mc-inner');
-    }
-    inner.innerHTML = btnHtml + '<div class="mc-svg-wrap">' + svg + '</div>' + legend +
-      '<div class="mp-ts">GOLD (LBMA·GBP) · S&P 500 · UK CPI — SOURCE: FRED</div>';
-
-    /* Re-attach period button listeners */
-    inner.querySelectorAll('.mc-period').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        inner.querySelectorAll('.mc-period').forEach(function (b) { b.classList.remove('active'); });
-        btn.classList.add('active');
-        drawMacroChart(body, body._mcData, parseInt(btn.dataset.y));
-      });
-    });
-  }
-
   /* ── MACRO INTELLIGENCE WIDGET ─────────────────────────────────── */
   function renderMacroIntel(id, body) {
     body.innerHTML = '<div class="tbw-loading">LOADING INTELLIGENCE…</div>';
@@ -5039,7 +5873,7 @@
       var yRng=yMax-yMin||1;
       function yP(v){return P.t+ch-((v-yMin)/yRng)*ch;}
       function lbl(v){if(v==null)return '';return v>=1000?(v/1000).toFixed(v>=10000?0:1)+'k':Math.round(v).toString();}
-      ctx.fillStyle='#080808'; ctx.fillRect(0,0,W,H);
+      ctx.fillStyle='#000'; ctx.fillRect(0,0,W,H);
       ctx.font='9px monospace';
       for(var gi=0;gi<=4;gi++){
         var gv=yMin+(gi/4)*yRng,gy=yP(gv);
@@ -5240,47 +6074,47 @@
     body.style.cssText = 'display:flex;flex-direction:column;height:100%;overflow:hidden;background:#090909;font-family:var(--font,monospace);';
 
     function ddSel(items, key, placeholderIndex) {
-      return '<select class="wl-flt" data-flt="'+key+'" style="background:#111;border:1px solid #252525;color:#fff;font-family:var(--font);font-size:10px;letter-spacing:.08em;padding:5px 6px;cursor:pointer;max-width:110px;">' +
+      return '<select class="wl-flt" data-flt="'+key+'" style="background:#000;border:1px solid #1e1e1e;color:#fff;font-family:var(--font);font-size:10px;letter-spacing:.08em;padding:5px 6px;cursor:pointer;max-width:110px;">' +
         items.map(function(v,i){ return '<option value="'+(i===0?'':v)+'">'+(i===0?v:v)+'</option>'; }).join('') +
       '</select>';
     }
 
     body.innerHTML =
       /* ── Filter bar ── */
-      '<div style="display:flex;gap:5px;align-items:center;padding:7px 10px;border-bottom:1px solid #181818;flex-shrink:0;flex-wrap:wrap;">' +
+      '<div style="display:flex;gap:5px;align-items:center;padding:7px 10px;border-bottom:1px solid #141414;flex-shrink:0;flex-wrap:wrap;background:#000;">' +
         '<span style="font-size:10px;letter-spacing:.14em;color:#fff;opacity:.45;margin-right:3px;">FILTER</span>' +
         ddSel(REGIONS, 'region') +
         ddSel(AGES,    'age') +
         ddSel(CASKS,   'cask') +
-        '<input id="wl-dis-'+id+'" type="text" placeholder="DISTILLERY..." style="background:#111;border:1px solid #252525;color:#fff;font-family:var(--font);font-size:10px;letter-spacing:.08em;padding:5px 8px;outline:none;width:110px;" />' +
+        '<input id="wl-dis-'+id+'" type="text" placeholder="DISTILLERY..." style="background:#000;border:1px solid #1e1e1e;color:#fff;font-family:var(--font);font-size:10px;letter-spacing:.08em;padding:5px 8px;outline:none;width:110px;" />' +
         '<div style="flex:1;"></div>' +
-        '<select id="wl-cur-'+id+'" style="background:#111;border:1px solid #252525;color:#fff;font-family:var(--font);font-size:10px;padding:5px 5px;letter-spacing:.08em;cursor:pointer;">' +
+        '<select id="wl-cur-'+id+'" style="background:#000;border:1px solid #1e1e1e;color:#fff;font-family:var(--font);font-size:10px;padding:5px 5px;letter-spacing:.08em;cursor:pointer;">' +
           CURRENCIES.map(function(c){ return '<option value="'+c+'"'+(c==='GBP'?' selected':'')+'>'+c+'</option>'; }).join('') +
         '</select>' +
       '</div>' +
       /* ── Search bar + INDICES button ── */
-      '<div style="display:flex;gap:5px;padding:7px 10px;border-bottom:1px solid #181818;flex-shrink:0;">' +
+      '<div style="display:flex;gap:5px;padding:7px 10px;border-bottom:1px solid #141414;flex-shrink:0;background:#000;">' +
         '<input id="wl-q-'+id+'" type="text" placeholder="▸  Search distillery, bottling, vintage..." '+
-          'style="flex:1;background:#111;border:1px solid #252525;color:#fff;font-family:var(--font);font-size:11px;letter-spacing:.08em;padding:7px 10px;outline:none;" />' +
-        '<button id="wl-idx-'+id+'" style="background:transparent;border:1px solid #252525;color:#fff;font-family:var(--font);font-size:9px;letter-spacing:.12em;padding:7px 12px;cursor:pointer;white-space:nowrap;">INDICES</button>' +
-        '<button id="wl-mon-'+id+'" style="background:transparent;border:1px solid #252525;color:#fff;font-family:var(--font);font-size:9px;letter-spacing:.12em;padding:7px 12px;cursor:pointer;white-space:nowrap;">MONITOR</button>' +
+          'style="flex:1;background:#000;border:1px solid #1e1e1e;color:#fff;font-family:var(--font);font-size:11px;letter-spacing:.08em;padding:7px 10px;outline:none;" />' +
+        '<button id="wl-idx-'+id+'" style="background:#000;border:1px solid #1e1e1e;color:#fff;font-family:var(--font);font-size:9px;letter-spacing:.12em;padding:7px 12px;cursor:pointer;white-space:nowrap;">INDICES</button>' +
+        '<button id="wl-mon-'+id+'" style="background:#000;border:1px solid #1e1e1e;color:#fff;font-family:var(--font);font-size:9px;letter-spacing:.12em;padding:7px 12px;cursor:pointer;white-space:nowrap;">MONITOR</button>' +
       '</div>' +
       /* ── Split body ── */
-      '<div style="flex:1;display:flex;overflow:hidden;">' +
+      '<div style="flex:1;display:flex;overflow:hidden;background:#000;">' +
         /* Left: results list */
-        '<div id="wl-list-'+id+'" style="width:260px;flex-shrink:0;overflow-y:auto;border-right:1px solid #181818;display:flex;flex-direction:column;">' +
+        '<div id="wl-list-'+id+'" style="width:260px;flex-shrink:0;overflow-y:auto;border-right:1px solid #141414;display:flex;flex-direction:column;background:#000;">' +
           /* Onboarding */
           '<div id="wl-guide-'+id+'" style="padding:14px 12px;">' +
             '<div style="font-size:10px;letter-spacing:.16em;color:#fff;margin-bottom:10px;">TRY THESE</div>' +
             '<div style="display:flex;flex-direction:column;gap:5px;">' +
               SUGGESTED.map(function(s){
-                return '<button class="wl-sug" data-q="'+s.q+'" style="background:#111;border:1px solid #1e1e1e;color:#fff;font-family:var(--font);font-size:10px;letter-spacing:.08em;padding:7px 10px;cursor:pointer;text-align:left;">'+s.label+'</button>';
+                return '<button class="wl-sug" data-q="'+s.q+'" style="background:#000;border:1px solid #1a1a1a;color:#fff;font-family:var(--font);font-size:10px;letter-spacing:.08em;padding:7px 10px;cursor:pointer;text-align:left;">'+s.label+'</button>';
               }).join('') +
             '</div>' +
           '</div>' +
         '</div>' +
         /* Right: detail panel */
-        '<div id="wl-detail-'+id+'" style="flex:1;overflow-y:auto;">' +
+        '<div id="wl-detail-'+id+'" style="flex:1;overflow-y:auto;background:#000;">' +
           '<div style="padding:28px 16px;text-align:center;">' +
             '<div style="font-size:8px;letter-spacing:.2em;color:#fff;opacity:.3;">SELECT A WHISKY</div>' +
             '<div style="font-size:7px;letter-spacing:.14em;color:#fff;opacity:.2;margin-top:6px;">USE FILTERS OR SEARCH TO FIND A BOTTLE</div>' +
@@ -5288,7 +6122,7 @@
         '</div>' +
       '</div>' +
       /* ── Footer ── */
-      '<div style="padding:4px 10px;font-size:9px;letter-spacing:.12em;color:#fff;opacity:.4;border-top:1px solid #141414;flex-shrink:0;display:flex;justify-content:space-between;">' +
+      '<div style="padding:4px 10px;font-size:9px;letter-spacing:.12em;color:#fff;opacity:.4;border-top:1px solid #141414;flex-shrink:0;display:flex;justify-content:space-between;background:#000;">' +
         '<span>DATA BY WHISKYSTATS · WHISKYBASE</span>' +
         '<span id="wl-cr-'+id+'"></span>' +
       '</div>';
@@ -5356,7 +6190,7 @@
       var P = {t:12, r:10, b:22, l:54};
       var cw = W - P.l - P.r, ch = H - P.t - P.b;
 
-      ctx.fillStyle = '#090909'; ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
 
       /* Sort pts by date */
       pts.sort(function(a,b){ return new Date(a.date||a.price_date||a.d||0) - new Date(b.date||b.price_date||b.d||0); });
@@ -5434,7 +6268,7 @@
       var yRng = yMax - yMin || 1;
       function yP(v){ return P.t + ch - ((v - yMin) / yRng) * ch; }
 
-      ctx.fillStyle = '#090909'; ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
 
       /* Grid + Y labels */
       ctx.font = '8px monospace'; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
@@ -5706,7 +6540,7 @@
 
       var cached = cacheGet(hKey, 7 * 24 * 60 * 60 * 1000);
       if (cached && !cached._tbt_empty) { renderWithHistory(cached); return; }
-      if (cached && cached._tbt_empty) return; /* endpoint failed previously, don't retry */
+      if (cached && cached._tbt_empty) return; /* endpoint failed previously, don\'t retry */
       fetch('/.netlify/functions/whisky-data?type=history&id=' + encodeURIComponent(bgId) + '&currency=' + _cur)
         .then(function(r){ return r.json(); })
         .then(function(d){ cacheSet(hKey, d); if (!d._tbt_empty) renderWithHistory(d); })
@@ -6184,7 +7018,7 @@
       function yOf(v){return P.t+ch-((v-vMin)/vRng)*ch;}
       function lbl(v){return v>=1000?(v/1000).toFixed(1)+'k':Math.round(v).toString();}
 
-      ctx.fillStyle='#080808'; ctx.fillRect(0,0,W,H);
+      ctx.fillStyle='#000'; ctx.fillRect(0,0,W,H);
 
       /* Grid */
       for(var gi=0;gi<=4;gi++){
@@ -7023,8 +7857,8 @@
           cats:[{n:'Single Malt',p:66},{n:'Blended',p:25},{n:'Grain',p:9}],
           tariff:'Japan–Australia EPA (JAEPA), in force January 2015. Spirits tariff phased to zero by 2022 under the EPA staging schedule.',
           tariffStatus:'ZERO', tariffCol:'#44cc64',
-          drivers:["Strong Japanese cultural affinity in Australia","Langton's auction house expanding Japanese whisky catalogue","Geographic proximity and significant Japanese tourism flow","HNWI collector demand growing sharply","Craft bar culture in Sydney and Melbourne embracing Japanese expressions"],
-          note:"Source: Japan Ministry of Finance customs statistics (HS 220830), converted GBP. 2024 estimated; 2025 editorial. Australia is a growing market for Japanese whisky, helped by cultural ties and the JAEPA phasing tariffs to zero by 2022. The market doubled between 2019 and 2023. Langton's auction house increasingly catalogues Japanese lots. Values remain modest in absolute terms — this is an emerging market with strong growth trajectory.",
+          drivers:["Strong Japanese cultural affinity in Australia","Langton\'s auction house expanding Japanese whisky catalogue","Geographic proximity and significant Japanese tourism flow","HNWI collector demand growing sharply","Craft bar culture in Sydney and Melbourne embracing Japanese expressions"],
+          note:"Source: Japan Ministry of Finance customs statistics (HS 220830), converted GBP. 2024 estimated; 2025 editorial. Australia is a growing market for Japanese whisky, helped by cultural ties and the JAEPA phasing tariffs to zero by 2022. The market doubled between 2019 and 2023. Langton\'s auction house increasingly catalogues Japanese lots. Values remain modest in absolute terms — this is an emerging market with strong growth trajectory.",
         },
         'UK': {
           hist:[{yr:2019,v:8},{yr:2020,v:8},{yr:2021,v:10},{yr:2022,v:9},{yr:2023,v:6},{yr:2024,v:5},{yr:2025,v:6}],
@@ -7033,8 +7867,8 @@
           cats:[{n:'Single Malt',p:70},{n:'Blended',p:22},{n:'Grain',p:8}],
           tariff:'UK–Japan Comprehensive Economic Partnership Agreement (CEPA), in force January 2021. Zero duty on spirits. Rolled over from EU–Japan EPA with continuity provisions.',
           tariffStatus:'ZERO', tariffCol:'#44cc64',
-          drivers:["The Whisky Exchange and Master of Malt — world's largest online specialists","London auction market (Bonhams, Christie's, Whisky Auctioneer)","Whisky Show and UK festival circuit driving education","Sophisticated bar culture adopting Japanese expressions","UK food & drink media creating collector demand"],
-          note:"Source: Japan Ministry of Finance customs statistics (HS 220830), converted GBP. 2019–2021 estimated (not individually reported). The UK market peaked in 2021 and has contracted — UK consumers have access to Japanese whisky through EU grey-market routes and parallel imports, which don't appear in Japan export figures. The Whisky Exchange, Master of Malt, and the auction ecosystem (Bonhams, Christie's) remain the UK's primary Japanese whisky channels.",
+          drivers:["The Whisky Exchange and Master of Malt — world\'s largest online specialists","London auction market (Bonhams, Christie\'s, Whisky Auctioneer)","Whisky Show and UK festival circuit driving education","Sophisticated bar culture adopting Japanese expressions","UK food & drink media creating collector demand"],
+          note:"Source: Japan Ministry of Finance customs statistics (HS 220830), converted GBP. 2019–2021 estimated (not individually reported). The UK market peaked in 2021 and has contracted — UK consumers have access to Japanese whisky through EU grey-market routes and parallel imports, which don\'t appear in Japan export figures. The Whisky Exchange, Master of Malt, and the auction ecosystem (Bonhams, Christie\'s) remain the UK\'s primary Japanese whisky channels.",
         },
       },
       usa: {
@@ -7106,7 +7940,7 @@
           tariff:'UAE applies a 5% customs duty on spirits imports under its standard import schedule. Duty-free sales at Dubai Duty Free — one of the world\'s top 5 spirits retailers — are exempt from this duty.',
           tariffStatus:'5% DUTY', tariffCol:'#44cc64',
           drivers:['Dubai Duty Free — top 5 global spirits retailer by value','International HNWI and expat community in Dubai and Abu Dhabi','Jack Daniel\'s dominant brand recognition across Gulf region','Luxury hotel and rooftop bar on-trade (DIFC, Downtown Dubai)','Re-export gateway to Gulf and South Asian markets'],
-          note:"The UAE is American whiskey's fastest-growing Gulf market, centred on Dubai Duty Free and the luxury hotel on-trade. Jack Daniel's dominates by volume. The ultra-premium segment — Buffalo Trace Antique Collection, Pappy Van Winkle — moves through specialist retailers in DIFC and the Four Seasons hotel network.",
+          note:"The UAE is American whiskey\'s fastest-growing Gulf market, centred on Dubai Duty Free and the luxury hotel on-trade. Jack Daniel\'s dominates by volume. The ultra-premium segment — Buffalo Trace Antique Collection, Pappy Van Winkle — moves through specialist retailers in DIFC and the Four Seasons hotel network.",
         },
       },
       ireland: {
@@ -7138,7 +7972,7 @@
           tariff:'Zero tariff. Irish whiskey accesses the UK market under the Windsor Framework and UK–EU Trade and Cooperation Agreement, maintaining frictionless island-of-Ireland trade arrangements post-Brexit.',
           tariffStatus:'ZERO', tariffCol:'#44cc64',
           drivers:['Jameson dominant in UK pub and bar on-trade','Growing craft Irish whiskey in specialist retail — Redbreast, Green Spot, Dingle','Irish diaspora and deep cultural affinity','Windsor Framework maintaining frictionless Irish–UK trade','Celtic identity and tourism driving brand loyalty'],
-          note:"The UK is Ireland's third-largest export market and one of its most consistent. Irish whiskey is Scotch's primary competitor in UK on-trade, with Jameson particularly strong in city-centre bars. The Windsor Framework resolved post-Brexit trade complexity, preserving seamless access.",
+          note:"The UK is Ireland\'s third-largest export market and one of its most consistent. Irish whiskey is Scotch\'s primary competitor in UK on-trade, with Jameson particularly strong in city-centre bars. The Windsor Framework resolved post-Brexit trade complexity, preserving seamless access.",
         },
         'Germany': {
           hist:[{yr:2019,v:28},{yr:2020,v:22},{yr:2021,v:28},{yr:2022,v:35},{yr:2023,v:40},{yr:2024,v:44},{yr:2025,v:48}],
@@ -7148,7 +7982,7 @@
           tariff:'Zero tariff. Ireland and Germany are both EU members — fully frictionless intra-EU Single Market trade. No tariff, no customs checks.',
           tariffStatus:'ZERO', tariffCol:'#44cc64',
           drivers:['EU Single Market — zero barriers','Jameson brand investment in German on-trade marketing','Irish pub culture in Berlin, Hamburg, Munich, Frankfurt','Growing interest in premium Irish single pot still among German collectors','Teeling and Waterford building direct German distribution channels'],
-          note:"Germany is Ireland's largest continental European market. The EU Single Market eliminates all trade friction. Jameson dominates by volume, but the premium segment — Redbreast, Green Spot, Midleton — is growing rapidly among Germany's sizeable whisky collector community.",
+          note:"Germany is Ireland\'s largest continental European market. The EU Single Market eliminates all trade friction. Jameson dominates by volume, but the premium segment — Redbreast, Green Spot, Midleton — is growing rapidly among Germany\'s sizeable whisky collector community.",
         },
         'Canada': {
           hist:[{yr:2019,v:20},{yr:2020,v:18},{yr:2021,v:22},{yr:2022,v:26},{yr:2023,v:30},{yr:2024,v:33},{yr:2025,v:36}],
@@ -7158,7 +7992,7 @@
           tariff:'Reduced tariff under CETA (EU–Canada Comprehensive Economic and Trade Agreement), in force provisionally since 2017. Irish whiskey benefits as an EU product — spirits tariff reduced significantly below Canada\'s WTO MFN rate.',
           tariffStatus:'CETA — LOW', tariffCol:'#44cc64',
           drivers:['Irish diaspora — 4.5m Canadians claim Irish heritage','St Patrick\'s Day volume peak','Jameson dominant in Ontario LCBO and BC Liquor government retail','CETA preferential market access for EU spirits','Growing premium Irish category awareness beyond Jameson'],
-          note:"Canada's large Irish diaspora (over 4 million) creates natural structural demand for Irish whiskey. CETA provides preferential access through Canada's provincial liquor board retail monopolies. Jameson dominates, but Redbreast and single pot still expressions are gaining ground in specialist channels.",
+          note:"Canada\'s large Irish diaspora (over 4 million) creates natural structural demand for Irish whiskey. CETA provides preferential access through Canada\'s provincial liquor board retail monopolies. Jameson dominates, but Redbreast and single pot still expressions are gaining ground in specialist channels.",
         },
         'Australia': {
           hist:[{yr:2019,v:16},{yr:2020,v:14},{yr:2021,v:18},{yr:2022,v:22},{yr:2023,v:25},{yr:2024,v:28},{yr:2025,v:31}],
@@ -7178,7 +8012,7 @@
           tariff:'Zero tariff. Both Ireland and Spain are EU member states — fully frictionless intra-EU Single Market trade.',
           tariffStatus:'ZERO', tariffCol:'#44cc64',
           drivers:['EU Single Market zero barriers','Jameson & tonic format popular in Spanish bars — standard cocktail offering','Tourism reverse flow — Spanish visitors to Ireland building brand familiarity','Jameson on-trade investment in Spanish hospitality sector','Growing whiskey curiosity among Spanish consumers transitioning from gin and vermouth'],
-          note:"Spain is a growing market driven by Jameson's penetration of the Spanish on-trade cocktail scene. The 'Jameson & tonic' format has become a standard bar offering alongside the traditional gin & tonic. EU membership provides completely frictionless trade from Ireland.",
+          note:"Spain is a growing market driven by Jameson\'s penetration of the Spanish on-trade cocktail scene. The 'Jameson & tonic' format has become a standard bar offering alongside the traditional gin & tonic. EU membership provides completely frictionless trade from Ireland.",
         },
       },
     };
@@ -7194,7 +8028,7 @@
     var _drillM49 = null; /* M49 partner code for the currently drilled destination */
 
     /* Static M49 fallback for common FLOWS destinations — used when live export
-       data hasn't loaded yet so the drilldown can still fetch route history. */
+       data hasn\'t loaded yet so the drilldown can still fetch route history. */
     var DEST_M49_FALLBACK = {
       'USA': 842, 'France': 250, 'Germany': 276, 'India': 356,
       'Singapore': 702, 'Japan': 392, 'Taiwan': 158, 'Australia': 36,
@@ -7884,7 +8718,7 @@
         content = '<div style="flex:1;overflow:auto;">'+buildMarketData()+'</div>';
       }
 
-      /* Set styles individually to preserve zoom applied by the widget's +/- buttons */
+      /* Set styles individually to preserve zoom applied by the widget\'s +/- buttons */
       body.style.display = 'flex';
       body.style.flexDirection = 'column';
       body.style.height = '100%';
@@ -9146,9 +9980,130 @@
         return opts;
       }
 
+      var PITCH_BY_LENS = {
+        tax: {
+          /* CYCLE */
+          'CFNAI':'CFNAI approaching -0.70 marks deteriorating business conditions — and the environment where EIS and VCT wrappers earn their keep. The 30% income tax relief is realised regardless of market direction, structurally reducing your client\'s effective entry cost by nearly a third before a single company grows. Recession vintages have historically delivered the strongest EIS and VCT fund returns: distressed valuations, reduced competition, and motivated management teams are the ingredients of outsized returns for patient, tax-efficient capital.',
+          'USALOLITONOSTSAM':'The OECD CLI rolling below 100 gives your client a 6-9 month lead on consensus — the difference between a peak-cycle and a trough-cycle EIS vintage. Businesses backed when the CLI is turning down are typically acquired at lower valuations, with management teams incentivised by adversity, and exits timed into the subsequent recovery. The tax relief makes the already-compelling risk/return profile of downturn vintages structurally superior to anything available on public markets.',
+          'INDPRO':'Industrial production contraction hits the early-stage manufacturing and technology sectors where EIS-qualifying companies concentrate — and where the deepest value in downturn vintages is created. When INDPRO turns negative, experienced EIS managers deploy into companies building the next cycle\'s infrastructure at recession valuations. The 30% tax relief and loss relief provisions mean your client\'s effective downside is structurally capped while the upside follows the eventual industrial recovery.',
+          'T10Y2YM':'Yield curve inversion is the market\'s signal that rates will fall and growth will slow — the environment in which tax-efficient compounding becomes most powerful. Offshore bond structures benefit from gross roll-up during the high-rate phase, with the option to time encashment into the anticipated lower-rate, lower-income future. For VCT and EIS investors, inversion signals the vintage window: deploy now, before the rate pivot inflates early-stage valuations, and realise the 30% tax relief at today\'s higher income tax rates.',
+          'UNRATE':'Rising unemployment triggers the monetary easing cycle — and EIS and VCT allocations are specifically designed for this phase of the business cycle. The UK government created these structures to direct private capital into early-stage UK businesses during economic stress. Your client who allocates when unemployment is rising captures the 30% tax relief at full value, backs companies at cycle-low valuations, and positions for exits timed into the recovery. The fiscal incentive and the economic cycle are pointing in the same direction.',
+          'A191RL1Q225SBEA':'Negative GDP is the recession confirmation that unlocks the best EIS and VCT vintage timing. Companies backed in negative-GDP quarters are acquired cheapest, incentivised hardest, and managed most carefully — producing the strongest 5-7 year realised returns in the asset class. The 30% income tax relief provides structural downside protection. For a client allocating into a certified HMRC-approved fund during a GDP contraction, the effective entry cost is reduced by nearly a third before performance is even considered.',
+          /* INFLATION */
+          'CPIAUCSL':'CPI above 3% erodes the real value of cash, fixed-income coupon payments, and taxable savings interest simultaneously. Offshore bonds compound gross of UK income tax, protecting the real return from the tax drag that compounds with every year of elevated inflation. VCT dividends are explicitly tax-free — delivering inflation-adjusted income that does not erode through the tax mechanism that destroys cash savers. The inflation environment is precisely the argument for sheltering returns inside a tax-efficient wrapper.',
+          'CPILFESL':'Sticky core CPI keeps the Bank of England in restrictive mode — and that environment directly amplifies the advantage of gross roll-up in offshore bond structures. Every year your client\'s bond portfolio compounds without an income tax deduction is a year where the compounding base grows relative to the post-tax alternative. Core CPI above 3% is not just an argument for inflation protection — it is an argument for restructuring how returns are taxed as they accumulate.',
+          'PCEPI':'PCE above 2% is the Fed\'s signal to remain restrictive — sustaining the high-rate environment in which tax-efficient wrappers deliver their most significant structural advantage. An offshore bond at 5% gross compounded over a decade produces materially more than the same return taxed annually at 40% or 45%. While the Fed holds rates elevated, the gross roll-up advantage inside the bond structure accumulates with every year of inaction on encashment.',
+          'PCEPILFE':'Core PCE above 2% is the Federal Reserve\'s scorecard for sustained inflation. While it remains elevated, interest rates stay higher-for-longer — and high rates sustained over time are the compounding advantage inside gross roll-up structures. Every 0.1% that core PCE holds above target is another period in which an offshore bond or onshore investment bond compounds without income tax deduction. Your client\'s adviser should be structuring to own the compounding period, not taxing it away.',
+          'CUSR0000SAH1':'Shelter inflation above 4% suppresses property transaction volumes and traps homeowners in mortgages they cannot afford to move. Capital that cannot access property seeks alternative stores of value in tax-efficient wrappers. EIS-qualifying property technology companies, VCTs investing in PropTech and homebuilding innovation, and offshore bonds invested in diversified real assets all offer exposures that the traditional property market cannot deliver in a rate-locked environment.',
+          'WPSFD49207':'PPI falling before CPI signals that producer margins are recovering before consumer prices follow — the early stages of the disinflationary transition. For EIS-backed manufacturing and consumer-facing businesses, margin recovery in this window drives the valuation uplift that makes EIS returns. Your client\'s EIS portfolio captures this margin recovery without any income tax, CGT, or inheritance tax liability if structured correctly from the outset.',
+          /* LIQUIDITY */
+          'M2SL':'M2 expansion creates a monetary environment where conventional assets inflate in nominal terms — but the tax on those nominal gains erodes real returns. Offshore bonds and VCTs compound or distribute without annual income tax deduction, allowing your client to own the nominal appreciation without the tax friction that undermines gross-to-net returns. M2 growth is the signal to prioritise structures where compounding runs untaxed.',
+          'WALCL':'QE balance sheet expansion creates the broadest monetary expansion environment — and the most compelling backdrop for gross roll-up tax structures. Every asset price that rises in a QE environment produces a taxable gain or taxable income for the investor who holds through conventional vehicles. Offshore bonds defer that tax until encashment, allowing the client to compound the full QE-driven appreciation before the tax event is triggered.',
+          'WRESBAL':'When bank reserves fall and credit tightens, EIS and VCT portfolios are illiquid by design — clients cannot exit, which means they cannot panic-sell at the worst moment. The illiquidity premium, combined with the 30% tax relief and loss relief provisions, creates a structurally superior outcome in exactly the environments where liquid portfolios suffer most from client behaviour risk. The structure prevents the behaviour that destroys returns.',
+          'RRPONTSYD':'The RRP balance draining marks the transition from liquidity abundance to discrimination — where manager quality separates performance. For EIS and VCT managers, this is when the ability to select companies that can grow without cheap credit matters most. The advisers who positioned clients in tax-efficient structures before liquidity tightens are the ones delivering the conversations that matter when the market tests portfolio resilience.',
+          'BOGMBASE':'Monetary base expansion is the primordial act of currency creation — and every unit of new base money dilutes the real value of existing savings and bonds. Tax-efficient wrappers do not create returns from nothing, but they structurally improve the net return your client keeps from whatever return is achieved. In a debasement environment, structuring returns to minimise tax friction is the marginal difference between preserving and losing real wealth.',
+          'TOTLL':'Bank credit contraction means traditional business finance dries up — and EIS and VCT capital becomes the marginal provider of growth capital to UK early-stage businesses. This structural shortage of credit is the environment where patient, tax-advantaged private capital earns its premium. Your client deploying EIS capital during credit contraction is providing growth capital when banks retreat, at valuations that reflect the credit premium, sheltered by 30% tax relief.',
+          /* RATES */
+          'GS10':'The 10-year Treasury yield peak is when locking in gross yields inside offshore bonds and onshore investment bonds becomes most valuable. An offshore bond charging a 5%+ gross yield held through the rate decline and encashed at a future lower income tax rate delivers a triple advantage: high gross accumulation, tax deferral, and a lower tax rate at exit. The peak is the moment to act — delay means compounding at sequentially lower rates without the full deferral benefit.',
+          'GS2':'The 2-year yield is the Fed\'s rate forecast priced by institutional money. When it prices in aggressive cuts, the window for locking in high gross yields inside offshore and onshore investment bonds is closing. Your client who acts before the 2-year fully prices in the cut cycle captures the full accumulation period at the elevated rate — and defers the tax event until a lower-rate, lower-income future.',
+          'FEDFUNDS':'The Fed Funds Rate peak is the best timing signal for offshore bond and onshore bond structuring. High gross yields compound best when the rate environment is elevated — and deferring tax throughout the accumulation means the full gain is realised before any UK income tax event occurs. Clients who structure fixed income exposure inside gross roll-up bonds at or near the rate peak capture the full cycle.',
+          'T10YIEM':'Breakeven inflation above 2.5% is the market\'s insurance premium on inflation continuing. VCT dividends are tax-free and not subject to the purchasing power erosion that compounds through income tax on savings interest. Offshore bonds compound gross of tax, giving the inflation-adjusted return a better chance of being real in net terms. Your client holding taxable bonds with inflation eroding both the real return and the after-tax coupon is suffering a structural double drag that wrappers resolve.',
+          'DTWEXBGS':'Dollar weakness creates currency drag on USD-denominated assets — an additional layer of return erosion that compounds on top of UK income tax. Offshore bond structures invested in sterling or multi-currency portfolios eliminate both the currency friction and the tax drag simultaneously. Weakening dollar environments are the moment to review currency exposure and tax structure in the same conversation.',
+          'BAMLH0A0HYM2':'High-yield spread widening signals credit stress. EIS-backed businesses are typically early-stage and growth-oriented — they do not carry the default risk of leveraged HY issuers and are not marked to market when spreads blow out. Your client\'s EIS portfolio holds no mark-to-market risk: it is unaffected by the credit volatility that dominates HY spreads and is protected by 30% tax relief and loss relief that HY bond investors never receive.',
+          /* LABOUR */
+          'PAYEMS':'Non-farm payrolls falling signals economic deceleration — and the beginning of the fiscal response that EIS and VCT structures are designed to capture. When job creation slows, the Treasury\'s incentive to direct private capital into early-stage UK employment-creating businesses intensifies. Your client\'s allocation is economically purposeful and fiscally rewarded — the 30% tax relief is the government\'s co-investment in the businesses your client is backing through the cycle.',
+          'JTSJOL':'JOLTS openings falling is the 12-18 month early warning before unemployment headlines arrive. For EIS and VCT timing, this lead indicator is the signal to begin structuring new allocations — not to wait. Deployment into qualifying companies before the recession is confirmed captures the best valuations, the highest 30% tax relief utilisation, and the longest compounding period before the recovery generates the realised gains.',
+          'CES0500000003':'Wage growth above 4% is the stickiest form of inflationary pressure — and the environment where gross roll-up tax deferral compounds most powerfully. Every year of elevated wage inflation is a year in which nominal returns on offshore bonds are higher in absolute terms but taxed away at the margin unless sheltered inside a wrapper. Your client\'s tax adviser and financial adviser should be having this conversation in the same room.',
+          'CIVPART':'Structurally low labour force participation sustains wage pressure and keeps the Bank of England cautious — prolonging the high-rate environment that makes gross roll-up accumulation most valuable. When the BoE eventually cuts, your client\'s offshore bond portfolio will have accumulated at the elevated gross rate for the full tightening cycle. The longer rates stay high, the greater the compounding advantage the wrapper structure captures.',
+          'ICSA':'Initial jobless claims rising is the earliest labour market signal — arriving weeks before payrolls and months before unemployment headlines. For VCT and EIS advisers, this is the signal to begin client conversations about timing. EIS qualification requires investment before exit — the window to deploy while early-stage valuations are still reasonable is typically 3-6 months ahead of the mainstream recession narrative. Initial claims is the indicator that opens that window.',
+          /* HOUSING */
+          'HOUST':'Housing starts falling signals a construction sector contraction that creates the EIS vintage opportunity in property technology, construction innovation, and housing finance. Companies funded at cycle-low valuations, serving the structural housing shortage that persists regardless of rate cycle, exit into the rebuilding demand surge. The 30% tax relief reduces effective entry cost, and the EIS time horizon maps precisely onto the housing cycle recovery window.',
+          'PERMIT':'Building permits below trend confirm that housing supply is structurally constrained. EIS and VCT funds investing in estate technology, lettings platforms, modular construction, and building services operate in a structurally demand-rich environment regardless of the interest rate cycle. Your client\'s EIS allocation in this space carries government-backed tax relief into a structurally undersupplied market where the problem is the opportunity.',
+          'CSUSHPISA':'Case-Shiller falling means property\'s traditional role as a wealth store is failing. Capital displaced from property seeks alternative wealth preservation in tax-efficient wrappers. VCTs and EIS funds investing in property-related technology — platforms serving the lettings market, bridging the affordability gap, helping buyers navigate constrained supply — carry the 30% tax relief that BTL investment never offered, with none of the stamp duty drag.',
+          'MORTGAGE30US':'Mortgage rates above 7% lock millions of homeowners into existing properties, suppressing transaction volumes and household mobility. EIS funds investing in the ecosystem around this constrained market — data platforms, lettings technology, mortgage comparison, home improvement finance — are backed by a structural problem that does not resolve when rates fall slightly. Your client\'s EIS exposure is a play on the structural problem created by high mortgage rates, not on the rates themselves.',
+          'EXHOSLUSM495S':'Existing home sales at depressed levels confirm the housing market is locked. EIS-backed businesses serving this constrained market — data platforms, lettings technology, home improvement finance — grow regardless of whether transaction volumes recover, because the problem they solve is independent of cycle timing. The structure provides the business model resilience; the tax relief provides the structural return floor.',
+          /* CONSUMER */
+          'UMCSENT':'Falling consumer sentiment is the leading indicator of retail spending weakness — and the environment where discretionary luxury investment conversations become easier. Your client who is seeing their portfolio mark-to-market against a deteriorating sentiment backdrop benefits from EIS exposure: illiquid, tax-efficient, not marked to market, and generating 30% income tax relief regardless of where sentiment prints.',
+          'RSAFS':'Retail sales slowing signals consumer fatigue — and the environment where affluent clients begin rotating from consumption to capital preservation. VCT and EIS allocations offer tax-efficient capital deployment at a moment when the client\'s risk appetite for passive equity is declining. The 30% tax relief on VCTs, combined with tax-free dividends, means the effective return threshold is materially lower than any equivalent conventional allocation.',
+          'DSPIC96':'Real disposable income falling means purchasing power is eroding faster than wages are rising — financial repression in its most tangible form. Offshore bonds invested in assets that generate real returns avoid both the direct inflation erosion and the income tax deduction that would otherwise apply to the nominal return. Your client who allows inflation-adjusted income to accumulate inside a gross roll-up structure protects both the real return and the nominal return simultaneously.',
+          'PCE':'Personal consumption declining is the precursor to the rate cut cycle that benefits tax-efficient wrappers in two directions: VCT and EIS-backed companies see valuations recover as growth expectations improve, and offshore bonds that were accumulating at the high-rate cycle peak now benefit from the broader asset price re-rating that follows easing. The tax-efficient wrapper captures both the income accumulation and the capital appreciation without an interim tax event.',
+          'PSAVERT':'A falling savings rate signals that consumers are spending beyond their income — a pattern that ends in correction. For affluent clients watching this unfold, ring-fencing capital inside a tax-efficient, illiquid structure is intuitive: EIS and VCT allocations are unreachable by the panic redemption decisions that destroy conventional portfolio returns during corrections. The structure prevents the behaviour that destroys returns.',
+          'CSCICP03USM665S':'Conference Board CI dropping sharply signals a consumer-led growth scare. For EIS and VCT managers, this is the vintage window they build their selection models around: companies funded in confidence-crisis periods have consistently outperformed in subsequent recovery phases. The 30% tax relief provides structural downside protection for your client backing the businesses that build through the bottom.',
+          /* UK MACRO */
+          'NAEXKP01GBQ657S':'UK GDP contraction is the confirmation that the BoE\'s rate medicine has worked — and that the easing cycle is imminent. For EIS and VCT investors, UK GDP contraction is the classic vintage entry signal: HMRC-approved structures deploying into UK growth businesses at cycle-low valuations, backed by the 30% income tax relief and the government\'s explicit desire to keep capital flowing into UK enterprise through economic stress.',
+          'CPALTT01GBM659N':'UK CPI above the 2% target keeps the BoE restrictive and sustains the high-rate environment that makes offshore bond gross roll-up structurally powerful. Every year sterling-based savings are taxed on nominal returns that are not real returns is a year that the offshore bond structure wins by deferral. UK inflation above target is the argument for reviewing how your client\'s UK portfolio is taxed, not just what it owns.',
+          'CPGRLE01GBM659N':'UK core CPI above 3% signals that the BoE cannot cut aggressively — and that the elevated rate environment compounds the advantage of gross roll-up structures. The higher UK rates remain, the larger the annual tax saving from compounding inside an offshore bond rather than outside it. Core inflation is sticky, the advantage compounds annually, and the exit can be timed into a lower marginal tax rate year.',
+          'LRHUTTTTGBM156S':'UK unemployment rising signals the beginning of the BoE\'s rate-cutting cycle — and the classic EIS vintage window. Early-stage UK businesses backed as unemployment rises are acquired cheapest, managed most carefully by founders motivated by adversity, and exited into the recovery that BoE easing supports. The 30% EIS tax relief is the government\'s explicit co-investment alongside your client\'s capital, in support of the UK businesses generating the employment that the recovery depends on.',
+          'IRLTLT01GBM156N':'UK gilt yields above 5% confirm that the fiscal risk premium on sterling assets is elevated. Offshore bonds held outside the sterling-dominated liability framework benefit from the currency diversification and gross roll-up that UK gilts cannot provide. Your client who holds gilts as a \'safe\' allocation is holding an asset whose issuer — the UK government — is paying the highest borrowing premium in 30 years. The offshore structure is the exit from that counterparty risk.',
+          'IRSTCI01GBM156N':'The BoE base rate peak is the timing signal for locking in gross roll-up returns inside offshore and onshore investment bonds. The highest UK base rate since 1988 creates the most favourable accumulation period in a generation for gross roll-up structures. Clients who structure during the rate peak compound at the highest achievable gross yield before encashing at a lower income tax rate in retirement or drawdown. The BoE rate chart is the offshore bond adviser\'s timing framework.',
+        },
+        equity: {
+          /* CYCLE */
+          'CFNAI':'CFNAI approaching -0.70 is when investment trust discounts reach their widest — and closed-end fund structures are immune to redemption pressure. Unlike open-ended funds, trusts cannot be forced to sell portfolio assets at depressed prices to meet client withdrawals. Your client who buys quality infrastructure, renewable energy, or private equity trusts at 20-30% discounts during CFNAI contraction enters the business cycle recovery with embedded outperformance: the discount itself is return waiting to be realised.',
+          'USALOLITONOSTSAM':'The OECD CLI rolling below 100 is the institutional signal to rotate from growth into defensive investment trusts: infrastructure, healthcare, essential services, and real assets. Closed-end structures allow trust managers to hold through the downturn without being forced sellers — the structural advantage that lets them generate long-term returns unavailable to open-ended managers running liquidity buffers to meet redemptions.',
+          'INDPRO':'Industrial production contraction signals that cyclical sectors are de-rating — and that listed private equity and industrial trust sectors are approaching entry territory. PE trusts that deploy during the industrial contraction phase capture the vintage return that cycles are built on: buying into operational businesses at their most discounted, and exiting into the demand recovery that follows each trough. The J-curve for trusts deployed during industrial contraction consistently demonstrates the strongest eventual returns.',
+          'T10Y2YM':'Yield curve inversion has preceded every significant investment trust discount widening cycle of the last 30 years — and every subsequent narrowing. Your client who buys infrastructure or renewable energy trusts during inversion, at maximum discount, owns the full discount-to-NAV compression when the curve uninverts and long rates fall. The discount the market applies during inversion is the embedded return on the inevitable normalisation.',
+          'UNRATE':'Rising unemployment accelerates rate cuts — and rate cuts are the single most powerful catalyst for investment trust discount compression. The mechanism is direct: lower discount rates increase the present value of contracted infrastructure cash flows, reduce the equity risk premium applied to trust valuations, and drive institutional reallocation from cash to yield-producing listed vehicles. Rising unemployment is your signal that the trust re-rating cycle is approaching, not that it is over.',
+          'A191RL1Q225SBEA':'Negative GDP is when investment trust discounts reach maximum width and listed PE trusts offer the deepest discount to underlying NAV. Buying quality UK investment trusts — infrastructure, specialist lending, private equity — at 20-25% discounts to professionally assessed NAV during a GDP contraction is buying the economic recovery at a material valuation discount. The trust structure cannot suffer redemptions: the portfolio holds through the trough while the passive equity manager is forced to sell.',
+          /* INFLATION */
+          'CPIAUCSL':'CPI above 3% reprices specific investment trust sectors upward in real terms: infrastructure trusts with CPI-linked revenue contracts — toll roads, regulated utilities, renewables with indexed tariffs — deliver inflation pass-through that the general equity market cannot replicate. Your client holding an infrastructure trust in an inflationary environment owns contracted revenue streams that rise automatically with the index — the structural inflation hedge that bond portfolios fail to deliver.',
+          'CPILFESL':'Core CPI above 3% means rate cuts are delayed and the higher-for-longer environment persists. Investment trusts with contracted, inflation-linked revenues — infrastructure, renewable energy, specialist property — continue to generate real returns even as conventional equity multiples compress under rate pressure. The trusts that own pricing-power assets are the sector allocation that inflation validates, not punishes.',
+          'PCEPI':'PCE above the Fed\'s 2% target sustains the environment where trusts with contracted inflation-linked revenues outperform on a total return basis. Infrastructure, energy, and essential services trusts have revenues indexed to inflation — they pass through the CPI that erodes the returns on conventional equity. Your client in an investment trust with a CPI pass-through mechanism is structurally long the thing that is destroying the rest of their portfolio\'s real returns.',
+          'PCEPILFE':'Core PCE remaining elevated means rate normalisation is delayed — and that the discount to NAV on infrastructure and renewable energy trusts persists longer than consensus expects. This is the patience trade: trusts with contracted real asset revenues, trading at discount, in an environment where the rate compression that closes that discount is delayed but inevitable. Patient capital in the right trust at the right discount wins the longer horizon.',
+          'CUSR0000SAH1':'Shelter inflation above 4% makes property investment trusts structurally attractive: rising rents flow directly through to NAV and distributions, outpacing the inflationary erosion that is destroying fixed-income real returns. Your client who holds a property investment trust in a high-shelter-inflation environment is long the CPI component driving the most persistent part of the inflation problem — which is the CPI component that reprices their trust upward.',
+          'WPSFD49207':'PPI falling before CPI is the margin recovery signal for listed private equity trusts and industrial specialist funds. As input costs fall, portfolio companies recover operating margins before the stock market prices the improvement — and the trust manager\'s ability to actively work portfolio companies through the recovery is the alpha over passive equity exposure to the same sectors.',
+          /* LIQUIDITY */
+          'M2SL':'M2 growth above GDP growth is the liquidity expansion that historically drives investment trust discount narrowing. As institutional capital searches for real yield in a monetary-expansion environment, listed investment vehicles with wide discounts to assessed NAV become targets for systematic re-rating. Infrastructure and PE trusts at wide discounts attract the incremental capital that M2 expansion creates — and discount compression converts into return for the early buyer.',
+          'WALCL':'QE is the most powerful investment trust discount compression force in the modern era. The 2009 QE cycle closed infrastructure trust discounts from 20% to premium. The 2020 cycle compressed renewable energy trust discounts to near-zero. Each QE period provides the clear directional trade: buy quality trusts at wide discounts when the balance sheet is expanding, and own the compression. Your client\'s trust position is long the re-rating that QE historically delivers.',
+          'WRESBAL':'Bank reserve declines signal tightening liquidity — but investment trusts hold assets, not derivatives, and their portfolios do not carry the counterparty risk that triggers credit market cascades. An infrastructure trust holding 30-year contracted road concessions is not exposed to repo market stress. This structural disconnection from bank-reserve plumbing is part of the trust\'s value proposition in periods of financial system instability.',
+          'RRPONTSYD':'The RRP draining toward zero signals the end of the excess liquidity phase — the final period before financial conditions tighten materially. Investment trust discounts typically widen as liquidity leaves the system, presenting the entry point. Trusts that traded at discounts during liquidity tightening cycles rerated most sharply in the subsequent easing phase. The RRP chart is the backstory for why trust discounts exist — and why they eventually close.',
+          'BOGMBASE':'Monetary base expansion historically precedes asset price re-rating across all investment trust sectors, most directly in infrastructure, real assets, and diversified PE trusts. The channel is simple: more base money seeks yield, trusts with contracted cash flows are one of the few available sources of genuine yield, and the capital inflow drives discount compression from wide to narrow to premium. Own the trusts before the capital inflow confirms it.',
+          'TOTLL':'Bank credit contraction is the most direct headwind for listed PE trusts whose portfolio companies rely on leverage to drive returns. Managers who operate portfolio companies without the need for regular refinancing — owner-operated businesses, recurring-revenue platforms, asset-light services — are the trusts to own when credit contracts. Manager selection, not sector selection, is the alpha source in a credit crunch: it is the difference between a trust that is insulated and one that is exposed.',
+          /* RATES */
+          'GS10':'The 10-year yield peak is the single most important timing signal for investment trust positioning. Every basis point decline in the 10-year yield increases the NPV of infrastructure trust cash flows, reduces the equity risk premium applied to trust NAVs, and narrows the discount at which trusts trade. The investor who owns quality infrastructure trusts at the rate peak captures the full re-rating from maximum discount to narrower discount, typically within 12-18 months of the peak.',
+          'GS2':'The 2-year yield is the bond market\'s explicit rate forecast — and for investment trust investors, it is the forward guide for when trust discount compression begins. When the 2-year prices in 100+ basis points of cuts, the re-rating cycle for infrastructure, renewable energy, and specialty finance trusts has typically already started. The trust investor who waits for confirmation has given up 15-20% of the total discount compression return.',
+          'FEDFUNDS':'The Fed Funds Rate peak marks the transition from trust discount widening to trust discount compression. Lower rates reduce the discount rate applied to trust NAV cash flows, improve the relative yield of trust distributions versus cash, and attract institutional capital back into listed investment vehicles. Every prior rate peak has been followed by infrastructure and renewable energy trust outperformance. The rate chart is the trust manager\'s timing framework.',
+          'T10YIEM':'Breakeven inflation above 2.5% validates the case for inflation-linked investment trusts: infrastructure, renewable energy with CPI-linked PPAs, and social housing trusts with rent indexation. These trusts hold contracts that explicitly reference inflation — their revenue streams rise as breakevens confirm what the market already suspects. The investor holding inflation-linked trusts is not speculating on inflation: they are holding the asset whose contractual value rises when the market\'s inflation expectations prove correct.',
+          'DTWEXBGS':'Dollar weakness boosts the sterling-reported NAV of investment trusts with global portfolios: global infrastructure trusts, internationally diversified PE trusts, and global specialist funds report GBP NAVs that rise when USD falls against sterling — and this NAV uplift flows directly through to closing the discount. Your client\'s globally diversified trust is also a currency position: dollar weakness creates the dual opportunity of underlying asset appreciation and currency-driven NAV re-rating.',
+          'BAMLH0A0HYM2':'HY spread widening is a systematic signal for specialist lending investment trusts — the vehicles that intermediate between HY borrowers and institutional capital. When spreads blow out, trust managers who can hold through the volatility — closed-end structure, no redemptions — capture the spread compression on the other side. Specialist credit and direct lending trusts have demonstrated consistent returns through credit cycles precisely because they cannot be forced to sell at the widest spreads.',
+          /* LABOUR */
+          'PAYEMS':'Payrolls declining confirms the labour cycle is turning — and historically this is when income-focused investment trusts attract institutional capital rotating from growth to income. The trust manager\'s ability to maintain distributions through an employment cycle is the quality signal that separates durable income vehicles from momentum plays that cut dividends when the cycle turns. The payrolls chart is the screen for trust quality, not a reason to exit the sector.',
+          'JTSJOL':'JOLTS openings falling gives PE trust managers 12-18 months of advance visibility on labour cost normalisation — the input cost that most directly affects portfolio company profitability. As openings fall, margin recovery benefits operational improvement-focused PE trusts most directly. Trust managers who build positions in labour-intensive businesses ahead of the wage peak and hold through the normalisation capture the operational leverage most passive equity investors miss.',
+          'CES0500000003':'Hourly earnings above 4% keep services inflation sticky — sustaining the rate environment where income-generating investment trusts maintain their relative yield advantage over cash and conventional bonds. Infrastructure and renewable energy vehicles delivering 5-7% distribution yields become increasingly attractive versus a savings rate the market is already pricing to fall. The trust distribution advantage is most valuable when the market believes rates will normalise.',
+          'CIVPART':'Low labour force participation with tight unemployment signals persistent wage pressure — and a rate environment where the BoE cannot cut aggressively. Infrastructure and renewable trusts with long-dated fixed-fee contracts deliver distributions that are independent of wage pressures and rate sensitivity. In a sticky-rate environment driven by structural labour tightness, these trusts represent the income that the macro environment cannot erode.',
+          'ICSA':'Initial claims rising is the first labour market signal that the economic cycle is turning — and the earliest opportunity to rotate into defensive investment trusts before the broad equity market prices in the deterioration. Infrastructure trusts, healthcare investment vehicles, and specialist lending funds perform defensively in the early deterioration phase: their contracted, non-cyclical revenues diverge from the GDP-sensitive earnings that drive broad equity weakness.',
+          /* HOUSING */
+          'HOUST':'Housing starts falling signals a construction sector contraction that affects investment trusts in residential development, housebuilder debt, and property finance. Managers who pivot to the operational side of constrained supply — build-to-rent platforms, affordable housing trusts, planning-adjacent investments — navigate housing cycles rather than being exposed to them. Trust selection in the housing downturn is about manager flexibility, not sector avoidance.',
+          'PERMIT':'Building permits below trend confirm that housing supply is structurally constrained. Trusts investing in social housing, registered providers, and affordable rented accommodation are the structural beneficiaries: government-backed rental contracts, inflation-indexed revenues, and a demand pool that expands as private market affordability deteriorates. The structural housing shortage is the investment case for specialist property trusts that conventional REIT analysis misses.',
+          'CSUSHPISA':'Case-Shiller weakness triggers the repricing of residential REIT and property trust NAVs — creating the discount-to-fair-value entry point for specialist property investors. Trusts with professional asset managers, active valuation processes, and diversified portfolios across geography and type outperform direct ownership in down markets. The trust structure provides the liquidity — secondary market access — that direct property cannot, while NAV valuations eventually reflect the recovery.',
+          'MORTGAGE30US':'Mortgage rates above 7% suppress housing transaction volumes and concentrate demand in the rental sector. Residential rental trusts, build-to-rent platforms, and student accommodation REITs benefit structurally from the lock-in effect: high mortgage rates drive renters into long-term tenancy and away from ownership. Your client in a build-to-rent trust is long the very dynamic that is crippling the mortgage market — their tenant cannot afford to become a buyer.',
+          'EXHOSLUSM495S':'Transaction volume collapse in existing home sales confirms the lock-in effect that sustains rental demand. Trusts with residential rental and student housing portfolios hold assets whose tenancy demand is counter-cyclically sustained by the very conditions that depress transaction volumes. Low volumes create captive tenants — and captive tenants create recurring revenue for specialist property trusts with the operating platform to manage them efficiently.',
+          /* CONSUMER */
+          'UMCSENT':'Consumer sentiment falling drives the sector rotation that investment trust managers with sector selection capability exploit: away from consumer discretionary, retail, and leisure exposure toward infrastructure, healthcare, and essential services. The closed-end trust structure allows sector rotation without forced selling — managers rebalance from a position of strength. Your client in a diversified equity trust managed through the cycle outperforms the market scrambling to reprice the sentiment data.',
+          'RSAFS':'Retail sales slowing triggers earnings estimate cuts in consumer-facing sectors and drives institutional rotation into defensive investment trusts. Infrastructure trusts, healthcare investment vehicles, and essential services trusts have revenues that are contractually independent of retail spending. The trust investor who rotates before the consensus confirms the slowdown captures the re-rating of defensive trust discounts before the consumer data confirms what the trust manager has already positioned for.',
+          'DSPIC96':'Real disposable income falling is the consumer stress signal that drives demand for resilient investment vehicles. Investment trusts with contracted revenues, low economic sensitivity, and active portfolio management outperform during real income contractions: their revenues do not depend on the consumer spending that real income growth sustains. Infrastructure, healthcare, and specialist lending trusts hold through real income squeezes that erode passive equity portfolio returns.',
+          'PCE':'Personal consumption slowing predicts the rate cut cycle that drives investment trust discount compression. The transmission mechanism is clear: PCE weakens, the Fed cuts, long rates fall, infrastructure trust NAVs reprice upward, trust discounts narrow. The investor who buys quality infrastructure and renewable energy trusts on PCE deceleration is positioning for the re-rating before the cut cycle confirms it — the return comes from timing the discount entry, not reacting to the policy.',
+          'PSAVERT':'Rising savings rates signal consumer caution and capital accumulation — creating the pool of investable capital that flows into yield-producing listed investment vehicles. Investment trusts offering real distributions above the risk-free rate attract the incremental capital that a rising savings rate creates, particularly when conventional equity returns are uncertain. Your client\'s trust allocation is the yield-seeking capital that the savings rate chart confirms is building.',
+          'CSCICP03USM665S':'Conference Board CI dropping sharply is the consumer recession alarm that triggers institutional re-allocation from equities into defensive investment trusts. Managers of income-focused trusts — dividend heroes, infrastructure funds, essential services vehicles — manage through confidence crises by holding contracted revenues that do not correlate to consumer confidence. The trust board\'s commitment to the dividend level is the institutional anchor that passive equity exposure does not provide.',
+          /* UK MACRO */
+          'NAEXKP01GBQ657S':'UK GDP contraction is when listed UK investment trusts — infrastructure, specialist lending, UK private equity — offer their widest discounts to NAV, and their most compelling entry points. The Bank of England\'s response to a UK recession is rate cuts and potential QE, which directly drives the trust discount compression cycle. Your client who buys quality UK trusts during GDP contraction buys the economic recovery at a valuation that reflects the current pessimism, not the eventual reality.',
+          'CPALTT01GBM659N':'UK CPI above the 2% target reprices UK infrastructure trusts with RPI-linked revenues upward in real terms: regulated utilities, PFI contracts, and social housing trusts with rent indexation all benefit from inflation pass-through that gilt investors cannot access. UK inflation above target is not just an argument for inflation protection — it is an argument for specifically holding the UK trust sectors whose contractual revenues reference the index that is running hot.',
+          'CPGRLE01GBM659N':'UK core CPI above 3% signals that the BoE will hold rates higher for longer — the environment in which UK income-generating investment trusts maintain their yield advantage over cash. Trusts with contracted, non-cyclical revenues deliver distributions that compound at higher real yields while the market waits for the BoE to cut. The trust investor who owns the distribution, not the capital gains, is the one who benefits from the prolonged restrictive environment.',
+          'LRHUTTTTGBM156S':'UK unemployment rising signals that the BoE is approaching the rate-cutting phase — and that investment trust discount compression is approaching. The mechanism follows directly: rising unemployment softens the BoE\'s inflation concern, accelerates rate cuts, lowers gilt yields, and reduces the discount rate applied to trust NAVs. Infrastructure and renewable energy trusts that are currently trading at wide discounts are the vehicles that capture this re-rating.',
+          'IRLTLT01GBM156N':'UK gilt yields above 5% have historically been associated with maximum investment trust discount widening — because gilt yields are the discount rate applied to trust cash flows. The wider the gilt yield, the wider the trust discount. When gilt yields normalise — as they inevitably do — the discount narrows and the trust outperforms. UK gilt yield at elevated levels is the trust investor\'s entry signal, not the exit.',
+          'IRSTCI01GBM156N':'The BoE base rate peak is the investment trust investor\'s most important timing signal. Every BoE rate-cutting cycle since 2000 has been associated with significant investment trust discount compression — infrastructure, property, and specialist finance trusts rerate from wide discount to narrow discount or premium. Your client who builds positions in quality UK trusts at the BoE rate peak owns the full re-rating as the cutting cycle proceeds.',
+        }
+      };
+
       var defText = cfg.def || cfg.desc || '';
       var sigText = cfg.signal || '';
-      var pitchText = cfg.pitch || '';
+      var _lensKey = (window._assetLens && window._assetLens.key) || 'universal';
+      var _taxLenses = ['eis','vct','offshore'];
+      var _equityLenses = ['pe','trusts'];
+      var _pitchMap = _taxLenses.indexOf(_lensKey) !== -1 ? PITCH_BY_LENS.tax
+                    : _equityLenses.indexOf(_lensKey) !== -1 ? PITCH_BY_LENS.equity
+                    : null;
+      var pitchText = (_pitchMap && _pitchMap[cfg.id]) || cfg.pitch || '';
 
       modal.innerHTML =
         '<div style="padding:10px 14px 8px;border-bottom:1px solid #1a1a1a;display:flex;align-items:center;gap:12px;flex-shrink:0;">' +
@@ -9350,11 +10305,22 @@
       }
 
       function syncDepthBtns() {
+        var hasDeep = !!DEEP_DATA[cfg.id];
         var modes = {b:'brief', f:'full', d:'deep'};
         Object.keys(modes).forEach(function(k) {
           var btn = modal.querySelector('#bc-dep-' + k);
           if (!btn) return;
           var active = _depthMode === modes[k];
+          if (k === 'd' && !hasDeep) {
+            btn.style.background = 'transparent';
+            btn.style.color = '#333';
+            btn.style.borderColor = '#1a1a1a';
+            btn.style.cursor = 'default';
+            btn.title = 'No deep analysis available for this indicator';
+            return;
+          }
+          btn.style.cursor = '';
+          btn.title = '';
           btn.style.background = active ? ACCENT : 'transparent';
           btn.style.color = active ? '#fff' : '#666';
           btn.style.borderColor = active ? ACCENT : '#2a2a2a';
@@ -9366,7 +10332,8 @@
       var _depDeep  = modal.querySelector('#bc-dep-d');
       if (_depBrief) _depBrief.addEventListener('click', function(){ _depthMode='brief'; refreshDepthPanel(); syncDepthBtns(); });
       if (_depFull)  _depFull.addEventListener('click',  function(){ _depthMode='full';  refreshDepthPanel(); syncDepthBtns(); });
-      if (_depDeep)  _depDeep.addEventListener('click',  function(){ _depthMode='deep';  refreshDepthPanel(); syncDepthBtns(); });
+      if (_depDeep)  _depDeep.addEventListener('click',  function(){ if (!DEEP_DATA[cfg.id]) return; _depthMode='deep';  refreshDepthPanel(); syncDepthBtns(); });
+      syncDepthBtns(); /* apply correct DEEP enabled/disabled state immediately on open */
 
 
       var modalCanvas = document.getElementById('fred-modal-canvas');
