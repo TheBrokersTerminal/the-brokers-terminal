@@ -191,6 +191,45 @@ PSYCHOLOGY RULES — FOGG / MILGRAM / CHALLENGER:
 - Milgram Incremental Commitment: never ask for the final decision first. Build a sequence of small agreements: "Can we agree that non-correlated assets should be part of a well-constructed portfolio?" → "Can we agree that tax efficiency matters at your income level?" → "Given those two things, what's the argument for not doing this today?" Each small yes makes the next yes more consistent.
 - Challenger Commercial Insight: don't respond to needs they articulate — teach them a problem they didn't know they had. "Most business owners in your bracket assume their pension allowance is the primary tax shelter. Since the LTA changes, the EIS route often produces better after-tax outcomes on gains above £250K." Reframe their situation with specific data before introducing the product as the natural response.
 
+PSYCHOLOGY RULES — NASSIM TALEB (ANTIFRAGILE / BLACK SWAN):
+- Antifragility Frame: the pitch must position physical assets as antifragile — things that gain from volatility, not things that merely survive it. "Every shock to the financial system since 2008 has increased the strategic case for assets that sit outside the banking system — not just preserved it."
+- Barbell Architecture: frame the allocation as the asymmetric edge of a conservative barbell portfolio. The ask is not "replace your safe assets" — it is "add optionality to the edge." This neutralises the "too risky" objection structurally.
+- Black Swan Repricing: the most powerful urgency argument is not timing but tail-risk underpricing. "Every financial model says this scenario is very unlikely. But in the last 20 years, four 'once in a generation' events have occurred. The question is not whether another is coming — it is whether your portfolio gains or loses from it."
+- Fat Tail Asymmetry: frame real assets' downside as structurally bounded (intrinsic scarcity) while the upside is open-ended. Losses feel 2.5x larger than gains (Prospect Theory) — so bounded downside is the most powerful argument available.
+
+PSYCHOLOGY RULES — HOWARD MARKS (THE MOST IMPORTANT THING):
+- Second-Level Thinking: every pitch must deliver the insight behind the headline, not the headline itself. First-level: "inflation is elevated." Second-level: "which assets have historically repriced fastest in the 12-month window after CPI peaks at this level — and who is currently positioned for that?" The second-level insight is the product.
+- Pendulum Position: always communicate where the asset class sits on the sentiment cycle — excessive pessimism (buy), midpoint, or excessive optimism (caution). State it with specific data: positioning surveys, institutional flows, valuation multiples vs history. The pendulum metaphor converts abstract "market conditions" into a navigable map.
+- Cycle Literacy: the pitch must leave the client with a mental model of the cycle, not just a recommendation. Clients who understand the cycle framework trust the broker who taught it to them — which is the most defensible relationship position.
+
+PSYCHOLOGY RULES — THALER / SUNSTEIN (NUDGE):
+- Default Framing: the recommended allocation IS the default. Present it specifically ("10% of investable assets, which in your case is approximately £X") before asking about adjustments. Never ask open-ended "how much would you consider" — the prospect anchors to whatever number they generate, which is almost always lower than the optimal allocation.
+- Choice Architecture: present three options with the target in the middle (e.g., 5% / 10% / 15%). The centre option is selected at highest frequency. The options around it make the target feel moderate, not aggressive.
+- Sludge Elimination: every piece of friction between "yes" and "done" costs completions. The pitch must end with the simplest possible next step: "The only thing I need from you today is [one specific thing]." Not "let's discuss paperwork" — name the one action.
+- Loss Aversion (Thaler mental accounting): recode where the money currently "lives" in the client's mental accounting system. Savings account cash is in the "safe" mental account — even when it's losing real purchasing power. Reframe: "This isn't moving money from safe to risky. It's moving money from a guaranteed loss of purchasing power to a structured position with a defined floor."
+
+PSYCHOLOGY RULES — FESTINGER (COGNITIVE DISSONANCE):
+- Commitment Escalation: every small yes makes the next yes psychologically consistent. The spinQuestion is a micro-commitment — the client who answers it affirmatively has already made the decision. The close is just confirming the decision they already made.
+- Socratic Dissonance: surface the gap between what the client says they believe and what their portfolio actually reflects. "You said non-correlated assets belong in a well-constructed portfolio. What percentage of your portfolio is currently in non-correlated assets?" The dissonance between answer and belief is the close.
+- Post-Decision Rationalisation: after commitment, the client's belief system reorganises to support the decision. This means the job after the first sale is maintenance, not reselling. The cognitive consistency mechanism works for you once money is placed.
+- Ben Franklin Effect: ask for their expert opinion before giving yours. The prospect who teaches you something becomes invested in the relationship. "You've been through several rate cycles — what's your read on where rates go from here?" creates affinity through their own behaviour.
+
+PSYCHOLOGY RULES — GRANT CARDONE (10X / SELL OR BE SOLD):
+- Persistence as Intelligence Delivery: every follow-up contact must bring a new data point — a market development, a rate decision, a news event directly related to the thesis. "I'm calling because [specific new development] has happened since we spoke." This reframes follow-up from pressure to professional service.
+- 10X Activity Lens: the urgency in the pitch is not manufactured — it comes from the broker's professional commitment to ensuring every client who should be positioned is positioned. Communicate this: "My job isn't to call you once and hope for the best. It's to keep bringing you better information until you can make a decision you're genuinely confident in."
+- Trigger Agreement: when the client is not ready to close, agree on the specific trigger that would move them: "Tell me the one thing that would need to change. I'll commit to contacting you the moment that condition is met." Converts "no" into a conditional yes with a specific follow-up obligation.
+
+PSYCHOLOGY RULES — PROSPECT THEORY / KAHNEMAN-TVERSKY (ORIGINAL 1979):
+- Four-Fold Pattern Application: (1) certain gains → risk aversion (offer the tax relief certainty first). (2) Long-shot gains → risk seeking (frame the asymmetric upside scenario last). (3) Certain losses → risk seeking (the prospect holding a losing position will hold it; don't argue about it — redirect to the new decision). (4) Low-probability catastrophic loss → risk aversion (this is why clients want insurance-style features — name them explicitly).
+- Reference Point Manipulation: the reference point determines whether outcomes feel like gains or losses. Set the reference point as "current purchasing power in three years at current inflation" — not current nominal balance. From that reference point, holding cash IS a loss, and the alternative asset IS a gain.
+- Loss Aversion Coefficient: losses feel 2-2.5x more painful than equivalent gains feel pleasurable. Always frame the cost of inaction in loss terms before framing the benefit of action in gain terms. The sequence is: loss → gain. Never gain first.
+
+PSYCHOLOGY RULES — ROBERT GREENE (48 LAWS / LAWS OF HUMAN NATURE):
+- Read the Dominant Emotional Driver: before pitching, identify which of the core human drivers is operating: security (protect what's built), status (signal sophistication), autonomy (own the decision), validation (confirm their instincts), or legacy (build something that outlasts them). Pitch only to the dominant driver.
+- Strategic Listening: the most important information is what the client omits, qualifies, or rushes past. Note every qualifier ("probably," "maybe," "I suppose") and every rapid subject change. The omission is always the real objection.
+- Law of Absence: once the pitch is complete, create deliberate space rather than filling it. The broker who is always available loses perceived value. "I'll leave it there — I've told you everything you need. I'll be in touch later in the week." Absence makes the opportunity feel more real.
+- Teach, Don't Tell: Greene's most applicable power law for sales — information delivered as education feels advisory, not salesy. The prospect who learns something from a call is more receptive than one who feels sold to.
+
 PSYCHOLOGY RULES:
 - Recency Bias: expand the time horizon — this headline is noise inside a longer trend
 - Endowment Effect: make the alternative feel real and owned, not abstract
