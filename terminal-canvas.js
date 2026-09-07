@@ -835,7 +835,7 @@
 
     if (!url) { body.innerHTML = '<div class="tbw-loading">NO REPORT URL</div>'; return; }
     body.style.overflow = 'hidden';
-    body.innerHTML = '<div class="tbw-loading" style="background:#080808;height:100%;display:flex;align-items:center;justify-content:center;">LOADING REPORT…</div>';
+    body.innerHTML = '<div class="tbw-loading" style="background:#0a0a0a;height:100%;display:flex;align-items:center;justify-content:center;">LOADING REPORT…</div>';
 
     fetch(url)
       .then(function (r) { return r.ok ? r.text() : Promise.reject('HTTP ' + r.status); })
@@ -1402,15 +1402,15 @@
       /* price range */
       var rangeHtml =
         '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px;">' +
-          '<div style="text-align:center;padding:8px;background:#080808;border:1px solid #1a1a1a;">' +
+          '<div style="text-align:center;padding:8px;background:#111;border:1px solid #1a1a1a;">' +
             '<div style="font-size:7px;letter-spacing:.15em;color:#ffffff;margin-bottom:4px;">BEAR CASE</div>' +
             '<div style="font-size:9px;color:#ffffff;font-weight:600;">' + range.lo + '</div>' +
           '</div>' +
-          '<div style="text-align:center;padding:8px;background:#080808;border:1px solid ' + A + ';">' +
+          '<div style="text-align:center;padding:8px;background:#111;border:1px solid ' + A + ';">' +
             '<div style="font-size:7px;letter-spacing:.15em;color:' + A + ';margin-bottom:4px;">BASE CASE</div>' +
             '<div style="font-size:10px;color:#ffffff;font-weight:700;">' + range.base + '</div>' +
           '</div>' +
-          '<div style="text-align:center;padding:8px;background:#080808;border:1px solid #1a1a1a;">' +
+          '<div style="text-align:center;padding:8px;background:#111;border:1px solid #1a1a1a;">' +
             '<div style="font-size:7px;letter-spacing:.15em;color:#ffffff;margin-bottom:4px;">BULL CASE</div>' +
             '<div style="font-size:9px;color:#ffffff;font-weight:600;">' + range.hi + '</div>' +
           '</div>' +
@@ -1418,11 +1418,11 @@
 
       /* preset note */
       var noteHtml = (preset !== 'CUSTOM' && PRESETS[preset].note) ?
-        '<div style="font-size:9px;color:#ffffff;line-height:1.65;margin-bottom:12px;border-left:3px solid ' + A + ';padding:6px 12px;background:#070707;">' + PRESETS[preset].note + '</div>' : '';
+        '<div style="font-size:9px;color:#ffffff;line-height:1.65;margin-bottom:12px;border-left:3px solid ' + A + ';padding:6px 12px;background:#111;">' + PRESETS[preset].note + '</div>' : '';
 
       /* output */
       var outputHtml =
-        '<div style="padding:12px 14px;background:#050505;border-top:1px solid #111;flex-shrink:0;">' +
+        '<div style="padding:12px 14px;background:#0a0a0a;border-top:1px solid #111;flex-shrink:0;">' +
           /* signal */
           '<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">' +
             '<div style="font-size:22px;color:' + sig.col + ';line-height:1;">' + sig.sym + '</div>' +
@@ -1452,9 +1452,9 @@
       body.innerHTML =
         '<style>.sm-opt:hover,.sm-pre:hover{border-color:' + A + '!important;}</style>' +
         /* preset row */
-        '<div style="padding:10px 12px 8px;background:#050505;border-bottom:1px solid #111;display:flex;flex-wrap:wrap;gap:4px;">' + presetHtml + '</div>' +
+        '<div style="padding:10px 12px 8px;background:#0a0a0a;border-bottom:1px solid #111;display:flex;flex-wrap:wrap;gap:4px;">' + presetHtml + '</div>' +
         /* params */
-        '<div style="padding:12px 14px;background:#050505;border-bottom:1px solid #111;overflow-y:auto;flex:1;">' + paramsHtml + '</div>' +
+        '<div style="padding:12px 14px;background:#0a0a0a;border-bottom:1px solid #111;overflow-y:auto;flex:1;">' + paramsHtml + '</div>' +
         /* output */
         '<div style="overflow-y:auto;max-height:340px;">' + outputHtml + '</div>';
 
@@ -1481,7 +1481,7 @@
     body.style.display        = 'flex';
     body.style.flexDirection  = 'column';
     body.style.overflow       = 'hidden';
-    body.style.background     = '#050505';
+    body.style.background     = '#0a0a0a';
     render();
   }
 
@@ -4235,23 +4235,23 @@
           if (_libType === 'ANALOGIES') {
             expanded = '<div style="padding:0 14px 14px;animation:fadeIn .15s;">' +
               '<div style="font-size:8px;letter-spacing:.2em;color:' + col + ';margin-bottom:6px;">FULL ANALOGY</div>' +
-              '<div style="font-size:11px;color:#ffffff;line-height:1.75;font-style:italic;border-left:3px solid ' + col + ';padding:8px 14px;margin-bottom:12px;background:#0a0a0a;">"' + escH(a.analogy) + '"</div>' +
+              '<div style="font-size:11px;color:#ffffff;line-height:1.75;font-style:italic;border-left:3px solid ' + col + ';padding:8px 14px;margin-bottom:12px;background:#111;">"' + escH(a.analogy) + '"</div>' +
               '<div style="font-size:8px;letter-spacing:.2em;color:' + col + ';margin-bottom:6px;">WHY IT WORKS</div>' +
               '<div style="font-size:10px;color:#ffffff;line-height:1.65;">' + escH(a.why) + '</div>' + copyBtn +
             '</div>';
           } else if (_libType === 'SPINS') {
             expanded = '<div style="padding:0 14px 14px;animation:fadeIn .15s;">' +
               '<div style="font-size:8px;letter-spacing:.2em;color:' + col + ';margin-bottom:6px;">THE REFRAME</div>' +
-              '<div style="font-size:10px;color:#ffffff;line-height:1.7;border-left:3px solid ' + col + ';padding:8px 14px;margin-bottom:12px;background:#0a0a0a;">' + escH(a.spin) + '</div>' +
+              '<div style="font-size:10px;color:#ffffff;line-height:1.7;border-left:3px solid ' + col + ';padding:8px 14px;margin-bottom:12px;background:#111;">' + escH(a.spin) + '</div>' +
               '<div style="font-size:8px;letter-spacing:.2em;color:' + col + ';margin-bottom:6px;">WHY IT WORKS</div>' +
               '<div style="font-size:10px;color:#ffffff;line-height:1.65;">' + escH(a.why) + '</div>' + copyBtn +
             '</div>';
           } else if (_libType === 'PSYCHOLOGY' || _libType === 'NLP' || _libType === 'CLOSES') {
             expanded = '<div style="padding:0 14px 14px;animation:fadeIn .15s;">' +
               '<div style="font-size:8px;letter-spacing:.2em;color:' + col + ';margin-bottom:6px;">TECHNIQUE</div>' +
-              '<div style="font-size:10px;color:#ffffff;line-height:1.7;border-left:3px solid ' + col + ';padding:8px 14px;margin-bottom:12px;background:#0a0a0a;">' + escH(a.technique) + '</div>' +
+              '<div style="font-size:10px;color:#ffffff;line-height:1.7;border-left:3px solid ' + col + ';padding:8px 14px;margin-bottom:12px;background:#111;">' + escH(a.technique) + '</div>' +
               (a.script ? '<div style="font-size:8px;letter-spacing:.2em;color:' + col + ';margin-bottom:6px;">EXAMPLE SCRIPT</div>' +
-              '<div style="font-size:10px;color:#ffffff;line-height:1.7;font-style:italic;border-left:3px solid #333;padding:8px 14px;margin-bottom:12px;background:#080808;">' + escH(a.script) + '</div>' : '') +
+              '<div style="font-size:10px;color:#ffffff;line-height:1.7;font-style:italic;border-left:3px solid #333;padding:8px 14px;margin-bottom:12px;background:#111;">' + escH(a.script) + '</div>' : '') +
               '<div style="font-size:8px;letter-spacing:.2em;color:' + col + ';margin-bottom:6px;">WHY IT WORKS</div>' +
               '<div style="font-size:10px;color:#ffffff;line-height:1.65;">' + escH(a.why) + '</div>' + copyBtn +
             '</div>';
@@ -4259,7 +4259,7 @@
             expanded = '<div style="padding:0 14px 14px;animation:fadeIn .15s;">' +
               (a.technique ? '<div style="display:inline-block;font-size:7px;letter-spacing:.12em;color:' + col + ';padding:2px 8px;border:1px solid ' + col + ';margin-bottom:10px;opacity:.85;">▶ ' + escH(a.technique) + '</div><br>' : '') +
               '<div style="font-size:8px;letter-spacing:.2em;color:' + col + ';margin-bottom:6px;">FULL REBUTTAL</div>' +
-              '<div style="font-size:10px;color:#ffffff;line-height:1.7;border-left:3px solid ' + col + ';padding:8px 14px;margin-bottom:12px;background:#0a0a0a;">' + escH(a.rebuttal || a.rebutral || '') + '</div>' +
+              '<div style="font-size:10px;color:#ffffff;line-height:1.7;border-left:3px solid ' + col + ';padding:8px 14px;margin-bottom:12px;background:#111;">' + escH(a.rebuttal || a.rebutral || '') + '</div>' +
               '<div style="font-size:8px;letter-spacing:.2em;color:' + col + ';margin-bottom:6px;">WHY IT WORKS</div>' +
               '<div style="font-size:10px;color:#ffffff;line-height:1.65;">' + escH(a.why) + '</div>' + copyBtn +
             '</div>';
@@ -4288,9 +4288,9 @@
           '.al-type:hover,.al-cat:hover,.al-asset:hover{color:' + A + '!important;border-color:' + A + '!important;}' +
         '</style>' +
         /* type tabs */
-        '<div style="display:flex;border-bottom:1px solid #181818;background:#030303;">' + typeTabs + '</div>' +
+        '<div style="display:flex;border-bottom:1px solid #181818;background:#0a0a0a;">' + typeTabs + '</div>' +
         /* toolbar */
-        '<div style="padding:8px 12px 0;background:#050505;border-bottom:1px solid #111;">' +
+        '<div style="padding:8px 12px 0;background:#0a0a0a;border-bottom:1px solid #111;">' +
           (assetBtns ? '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:7px;">' + assetBtns + '</div>' : '') +
           '<input id="al-search" placeholder="Search library…" value="' + escH(_search) + '" style="width:100%;box-sizing:border-box;background:#0a0a0a;border:1px solid #1a1a1a;padding:6px 10px;color:#fff;font-size:10px;font-family:Consolas,monospace;outline:none;margin-bottom:7px;">' +
           '<div style="display:flex;gap:4px;overflow-x:auto;padding-bottom:8px;scrollbar-width:none;">' + catPills + '</div>' +
@@ -4300,7 +4300,7 @@
         /* list */
         '<div style="overflow-y:auto;flex:1;">' + cards + '</div>' +
         /* notes panel — always visible */
-        '<div id="oh-notes-panel-' + id + '" style="flex-shrink:0;border-top:1px solid #1a1a1a;padding:8px 12px;background:#050505;">' +
+        '<div id="oh-notes-panel-' + id + '" style="flex-shrink:0;border-top:1px solid #1a1a1a;padding:8px 12px;background:#0a0a0a;">' +
           '<div style="font-size:7px;letter-spacing:.2em;color:#ffffff;margin-bottom:5px;">REBUTTAL NOTES</div>' +
           '<textarea id="oh-note-' + id + '" placeholder="Note the objection, client name, or rebuttal you used…" style="width:100%;box-sizing:border-box;background:#0a0a0a;border:1px solid #1c1c1c;color:#ffffff;font-family:Consolas,monospace;font-size:8.5px;line-height:1.5;padding:6px 8px;resize:none;height:44px;outline:none;"></textarea>' +
           '<div style="display:flex;gap:6px;margin-top:5px;">' +
@@ -4427,7 +4427,7 @@
     body.style.display = 'flex';
     body.style.flexDirection = 'column';
     body.style.overflow = 'hidden';
-    body.style.background = '#050505';
+    body.style.background = '#0a0a0a';
     render();
   }
 
@@ -5049,7 +5049,7 @@
     }
 
     function insightBox(label, text, col) {
-      return '<div style="border-left:2px solid ' + (col||A) + ';padding:9px 12px;margin-top:12px;background:#080808;">' +
+      return '<div style="border-left:2px solid ' + (col||A) + ';padding:9px 12px;margin-top:12px;background:#111;">' +
                '<div style="font-size:6.5px;letter-spacing:.22em;color:' + (col||A) + ';margin-bottom:5px;font-weight:600;">' + label + '</div>' +
                '<div style="font-size:9px;color:rgba(255,255,255,0.78);line-height:1.7;">' + text + '</div>' +
              '</div>';
@@ -6611,7 +6611,7 @@
     }
 
     function buildAddPanel() {
-      return '<div style="border-top:2px solid #181818;background:#080808;">' +
+      return '<div style="border-top:2px solid #181818;background:#0a0a0a;">' +
         '<div style="display:flex;align-items:center;gap:10px;padding:7px 10px;border-bottom:1px solid #141414;">' +
           '<span style="font-family:Consolas,monospace;font-size:8px;letter-spacing:.22em;color:#E97132;font-weight:700;">+ ADD SERIES</span>' +
           '<input class="mm-search" id="mm-add-search-' + id + '" placeholder="SEARCH 30 SERIES…" style="flex:1;max-width:200px;">' +
@@ -7783,7 +7783,7 @@
     var CLIP_TAGS = ['ALL','REUTERS','BLOOMBERG','CNBC','FT','YAHOO FINANCE','SKY BUSINESS'];
 
     function buildLaunchCard(ch) {
-      return '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:30px;box-sizing:border-box;background:linear-gradient(160deg,#080808 0%,#0d0d0d 100%);">' +
+      return '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:30px;box-sizing:border-box;background:linear-gradient(160deg,#0a0a0a 0%,#131313 100%);">' +
         /* grid lines decorative */
         '<div style="position:absolute;inset:0;background-image:linear-gradient(rgba(233,113,50,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(233,113,50,0.04) 1px,transparent 1px);background-size:32px 32px;pointer-events:none;"></div>' +
         '<div style="position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:18px;max-width:340px;text-align:center;">' +
@@ -7819,7 +7819,7 @@
       /* full-widget YouTube embed for a specific video ID */
       body.innerHTML =
         '<div style="display:flex;flex-direction:column;height:100%;background:#000;">' +
-          '<div style="flex-shrink:0;display:flex;align-items:center;gap:8px;padding:6px 10px;background:#050505;border-bottom:1px solid #1a1a1a;">' +
+          '<div style="flex-shrink:0;display:flex;align-items:center;gap:8px;padding:6px 10px;background:#0a0a0a;border-bottom:1px solid #1a1a1a;">' +
             '<button id="tv-back-' + id + '" style="background:none;border:none;color:' + A + ';font-size:8px;letter-spacing:.1em;font-family:Consolas,monospace;cursor:pointer;padding:0;">← BACK</button>' +
             '<span style="font-size:7.5px;color:rgba(255,255,255,0.4);font-family:Consolas,monospace;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' +
               (vid.tag ? '[' + vid.tag + ']  ' : '') + (vid.title || '') +
@@ -7866,7 +7866,7 @@
             'cursor:pointer;background:#0c0c0c;border:1px solid #1a1a1a;border-radius:2px;overflow:hidden;' +
             'display:flex;flex-direction:column;transition:border-color .15s;" ' +
             'onmouseover="this.style.borderColor=\'' + A + '\'" onmouseout="this.style.borderColor=\'#1a1a1a\'">' +
-            '<div style="position:relative;aspect-ratio:16/9;overflow:hidden;background:#050505;">' +
+            '<div style="position:relative;aspect-ratio:16/9;overflow:hidden;background:#0a0a0a;">' +
               '<img src="' + v.thumb + '" style="width:100%;height:100%;object-fit:cover;display:block;" loading="lazy" onerror="this.style.display=\'none\'">' +
               '<div style="position:absolute;top:4px;left:4px;background:rgba(0,0,0,0.7);border:1px solid rgba(233,113,50,0.4);padding:2px 5px;font-size:6px;letter-spacing:.1em;color:' + A + ';font-family:Consolas,monospace;">' + (v.tag||'') + '</div>' +
               '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;background:rgba(0,0,0,0.4);transition:opacity .15s;" class="tv-play-overlay-' + id + '">'+
@@ -7979,7 +7979,7 @@
       var contentArea = buildChannelContent(ch);
 
       var statusBar =
-        '<div style="flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:5px 10px;background:#050505;border-top:1px solid #1a1a1a;">' +
+        '<div style="flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:5px 10px;background:#0a0a0a;border-top:1px solid #1a1a1a;">' +
           '<div style="font-size:6px;letter-spacing:.1em;color:' + A + ';">' + ch.label + '  <span style="color:rgba(255,255,255,0.22);">·  ' + ch.sub.toUpperCase() + '</span></div>' +
           '<div style="display:flex;align-items:center;gap:5px;">' +
             '<div style="width:5px;height:5px;border-radius:50%;background:' + A + ';animation:blink 1.4s step-start infinite;"></div>' +
@@ -12233,7 +12233,7 @@
           : tile.val === 'MEDIUM' ? '#E97132'
           : (tile.val === 'STRONG' || tile.val === 'ZERO' || tile.val === 'PAUSED' || tile.val.charAt(0) === '+') ? '#44cc64'
           : '#E97132';
-        statHtml += '<div style="flex:0 0 auto;min-width:140px;padding:9px 14px;border-right:1px solid #111;background:#080808;">' +
+        statHtml += '<div style="flex:0 0 auto;min-width:140px;padding:9px 14px;border-right:1px solid #111;background:#111;">' +
           '<div style="'+F+'font-size:6.5px;letter-spacing:.22em;color:#ffffff;text-transform:uppercase;margin-bottom:5px;white-space:nowrap;">'+tile.lbl+'</div>' +
           '<div style="'+F+'font-size:18px;color:'+vc+';font-weight:700;letter-spacing:.04em;line-height:1;white-space:nowrap;">'+tile.val+'</div>' +
           '<div style="'+F+'font-size:7px;color:#ffffff;margin-top:4px;white-space:nowrap;">'+tile.sub+'</div>' +
@@ -13846,7 +13846,7 @@
           '<canvas id="fred-modal-canvas" style="width:100%;height:100%;display:block;"></canvas>' +
         '</div>' +
         (defText || sigText || pitchText ?
-          '<div id="bc-depth-panel" style="padding:14px 18px;background:#080808;border-top:1px solid #1a1a1a;display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;flex-shrink:0;">' +
+          '<div id="bc-depth-panel" style="padding:14px 18px;background:#111;border-top:1px solid #1a1a1a;display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;flex-shrink:0;">' +
             (defText ? '<div><div style="font-size:8px;letter-spacing:.2em;color:' + ACCENT + ';margin-bottom:6px;">WHAT IT MEASURES</div><div style="font-size:11px;color:#ffffff;line-height:1.7;">' + defText + '</div></div>' : '<div></div>') +
             (sigText ? '<div><div style="font-size:8px;letter-spacing:.2em;color:' + ACCENT + ';margin-bottom:6px;">HOW TO READ THE SIGNAL</div><div style="font-size:11px;color:#ffffff;line-height:1.7;">' + sigText + '</div></div>' : '<div></div>') +
             (pitchText ? '<div><div style="font-size:8px;letter-spacing:.2em;color:' + ACCENT + ';margin-bottom:6px;">SALES ANGLE</div><div style="font-size:11px;color:#ffffff;line-height:1.7;">' + pitchText + '</div></div>' : '<div></div>') +
