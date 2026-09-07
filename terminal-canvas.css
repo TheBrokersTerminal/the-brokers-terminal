@@ -1194,6 +1194,32 @@
 .sh-drill-intel,.sh-drill-chart { background:none;border:1px solid rgba(233,113,50,0.35);color:#E97132;font-family:'Consolas','Menlo',monospace;font-size:7px;letter-spacing:.1em;padding:2px 6px;cursor:pointer;transition:border-color .15s,color .15s;white-space:nowrap; }
 .sh-drill-intel:hover,.sh-drill-chart:hover { border-color:#E97132;color:#fff; }
 
+/* ── SECTOR HEATMAP ENHANCED CONTROLS ── */
+.sh-ctrl { display:flex;align-items:center;gap:4px;padding:5px 8px;background:#060606;border-bottom:1px solid #111;flex-shrink:0;flex-wrap:wrap; }
+.sh-ctrl-group { display:flex;gap:2px; }
+.sh-ctrl-sep { width:1px;background:#1a1a1a;align-self:stretch;margin:0 2px; }
+.sh-ctrl-btn { background:#0a0a0a;border:1px solid #1c1c1c;color:#555;font:700 6.5px/1 'Consolas','Menlo',monospace;letter-spacing:.12em;padding:4px 8px;cursor:pointer;transition:all .12s;white-space:nowrap; }
+.sh-ctrl-btn:hover { color:#aaa;border-color:#333; }
+.sh-ctrl-mkt.active { background:#0d1a2a;border-color:#3a7abf;color:#5aa3e8; }
+.sh-ctrl-per.active { background:#0d1a2a;border-color:#5a4abf;color:#9a80e8; }
+.sh-ctrl-view.active { background:#1a2a1a;border-color:#3a8a5a;color:#4db87a; }
+.sh-ctrl-ref:hover { color:#fff;border-color:#555; }
+.sh-content { flex:1;overflow:hidden;position:relative; }
+
+/* ── DONUT VIEW ── */
+.sh-donut-wrap { width:100%;height:100%;display:flex;align-items:center;justify-content:center;gap:16px;padding:8px;box-sizing:border-box;overflow:hidden; }
+.sh-donut-canvas { flex-shrink:0;cursor:pointer; }
+.sh-donut-legend { display:flex;flex-direction:column;gap:3px;overflow-y:auto;max-height:100%;min-width:160px; }
+.sh-donut-item { display:flex;align-items:center;gap:6px;cursor:pointer;padding:3px 5px;border:1px solid transparent;transition:border-color .1s; }
+.sh-donut-item:hover { border-color:#222; }
+.sh-donut-swatch { width:8px;height:8px;border-radius:50%;flex-shrink:0; }
+.sh-donut-lbl { font:600 7px/1 'Consolas','Menlo',monospace;letter-spacing:.08em;color:#bbb;flex:1;white-space:nowrap; }
+.sh-donut-pct { font:700 8px/1 'Consolas','Menlo',monospace;white-space:nowrap; }
+
+/* ── MAP / TREEMAP VIEW ── */
+.sh-map-stock:hover { filter:brightness(1.35) !important; }
+.sh-map-stk-sym { font:700 7px/1.1 'Consolas','Menlo',monospace;color:rgba(255,255,255,.9);overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+
 /* ══ WATCHLIST ═══════════════════════════════════════════════════ */
 .wl-add-bar { display:flex;gap:6px;padding:8px 10px;border-bottom:1px solid #1a1a1a;flex-shrink:0; }
 .wl-input { flex:1;background:#000;border:1px solid #1e1e1e;color:#fff;font-family:'Consolas','Menlo',monospace;font-size:9px;letter-spacing:.06em;padding:6px 10px;outline:none;transition:border-color .15s; }
