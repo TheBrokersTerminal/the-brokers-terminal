@@ -627,6 +627,75 @@ exports.handler = async function (event) {
       return { statusCode:200, headers:Object.assign({},hdrs,{'Cache-Control':'public,max-age=60'}), body:JSON.stringify(sRows) };
     }
 
+    /* ── MULTI-MARKET SECTOR HEATMAP ── */
+    if (type === 'market-sectors') {
+      var mkt = (p.market || 'US').toUpperCase();
+      var per = (p.period || '1D').toUpperCase();
+      var yhH2 = { 'User-Agent': 'Mozilla/5.0 (compatible)', 'Accept': 'application/json' };
+
+      /* Proxy ticker per sector-key for each market */
+      var MKT_PROXIES = {
+        US:  { XLK:'XLK', XLF:'XLF', XLV:'XLV', XLE:'XLE', XLY:'XLY', XLC:'XLC', XLI:'XLI', XLP:'XLP', XLU:'XLU', XLRE:'XLRE', XLB:'XLB' },
+        UK:  { UK_FIN:'HSBA.L', UK_MIN:'GLEN.L', UK_CON:'ULVR.L', UK_ENE:'SHEL.L', UK_HLT:'AZN.L', UK_IND:'RR.L', UK_TEC:'SAGE.L', UK_UTL:'NG.L', UK_REI:'SGRO.L', UK_TEL:'VOD.L' },
+        EU:  { EU_FIN:'AXA.PA', EU_IND:'SIE.DE', EU_HLT:'NVO', EU_CON:'MC.PA', EU_ENE:'TTE.PA', EU_TEC:'ASML.AS', EU_UTL:'IBE.MC', EU_MAT:'BAS.DE' }
+      };
+      var proxies = MKT_PROXIES[mkt] || MKT_PROXIES.US;
+      var etfKeys = Object.keys(proxies);
+      var tickers2 = etfKeys.map(function(k){ return proxies[k]; });
+
+      if (per === '1D') {
+        var bUrl = 'https://query1.finance.yahoo.com/v7/finance/quote?symbols=' + encodeURIComponent(tickers2.join(','));
+        var bData = await fetchJsonWith(bUrl, yhH2).catch(function(){ return null; });
+        var qMap = {};
+        (((bData || {}).quoteResponse || {}).result || []).forEach(function(q) {
+          qMap[q.symbol] = { c: q.regularMarketPrice || null, dp: q.regularMarketChangePercent != null ? parseFloat(q.regularMarketChangePercent.toFixed(2)) : null };
+        });
+        var msR1 = etfKeys.map(function(k) {
+          var d = qMap[proxies[k]] || {};
+          return { etf: k, c: d.c || null, dp: d.dp != null ? d.dp : null };
+        });
+        return { statusCode:200, headers:Object.assign({},hdrs,{'Cache-Control':'public,max-age=60'}), body:JSON.stringify(msR1) };
+      } else {
+        var now3 = Date.now();
+        var pStart;
+        if      (per === '1W')  pStart = now3 - 7*86400000;
+        else if (per === '1M')  pStart = now3 - 30*86400000;
+        else if (per === '3M')  pStart = now3 - 91*86400000;
+        else if (per === 'YTD') { var yd = new Date(); yd.setMonth(0,1); pStart = yd.getTime(); }
+        else                    pStart = now3 - 365*86400000;
+        var p1ts = Math.floor(pStart/1000), p2ts = Math.floor(now3/1000);
+
+        var chRes = await Promise.allSettled(tickers2.map(function(tick) {
+          return fetchJsonWith('https://query1.finance.yahoo.com/v8/finance/chart/' + encodeURIComponent(tick) + '?interval=1d&period1=' + p1ts + '&period2=' + p2ts, yhH2);
+        }));
+        var msR2 = etfKeys.map(function(k, i) {
+          var r = chRes[i];
+          if (r.status !== 'fulfilled' || !r.value) return { etf:k, c:null, dp:null };
+          var res0 = (((r.value.chart || {}).result) || [])[0];
+          if (!res0) return { etf:k, c:null, dp:null };
+          var cls = ((((res0.indicators || {}).quote || [{}])[0]).close || []).filter(function(v){ return v != null; });
+          if (cls.length < 2) return { etf:k, c:null, dp:null };
+          var f = cls[0], l = cls[cls.length-1];
+          return { etf:k, c:parseFloat(l.toFixed(2)), dp:parseFloat(((l-f)/f*100).toFixed(2)) };
+        });
+        return { statusCode:200, headers:Object.assign({},hdrs,{'Cache-Control':'public,max-age=300'}), body:JSON.stringify(msR2) };
+      }
+    }
+
+    /* ── YAHOO FINANCE BATCH QUOTE (any exchange) ── */
+    if (type === 'yh-quote') {
+      var yhqSyms = (p.symbols||'').split(',').map(function(s){return s.trim();}).filter(Boolean).slice(0,30);
+      if (!yhqSyms.length) return { statusCode:400, headers:hdrs, body:JSON.stringify({error:'No symbols'}) };
+      var yhqH = { 'User-Agent': 'Mozilla/5.0 (compatible)', 'Accept': 'application/json' };
+      var yhqR = await fetchJsonWith('https://query1.finance.yahoo.com/v7/finance/quote?symbols=' + encodeURIComponent(yhqSyms.join(',')), yhqH).catch(function(){ return null; });
+      var yhqMap = {};
+      (((yhqR || {}).quoteResponse || {}).result || []).forEach(function(q) {
+        yhqMap[q.symbol] = { sym:q.symbol, c:q.regularMarketPrice||null, dp:q.regularMarketChangePercent!=null?parseFloat(q.regularMarketChangePercent.toFixed(2)):null };
+      });
+      var yhqRows = yhqSyms.map(function(s) { return yhqMap[s] || { sym:s, c:null, dp:null }; });
+      return { statusCode:200, headers:Object.assign({},hdrs,{'Cache-Control':'public,max-age=60'}), body:JSON.stringify(yhqRows) };
+    }
+
     /* ── WATCHLIST BATCH QUOTES ── */
     if (type === 'quote') {
       var qSyms = (p.symbols||'').split(',').map(function(s){return s.trim().toUpperCase();}).filter(Boolean).slice(0,20);

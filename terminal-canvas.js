@@ -6885,208 +6885,397 @@
   /* ── SECTOR HEATMAP ─────────────────────────────────────────── */
   function renderSectorHeatmap(id, body) {
     body.style.cssText = 'display:flex;flex-direction:column;overflow:hidden;background:#000;position:relative;';
-    var lastRows = null;
 
-    /* Extended holdings: top 8 per sector with ticker for live price fetching */
-    var SECTOR_HOLDINGS = {
-      XLK:  [{t:'AAPL',n:'Apple',w:'22.6%'},{t:'MSFT',n:'Microsoft',w:'21.8%'},{t:'NVDA',n:'Nvidia',w:'7.2%'},{t:'AVGO',n:'Broadcom',w:'4.5%'},{t:'ORCL',n:'Oracle',w:'2.1%'},{t:'CRM',n:'Salesforce',w:'2.0%'},{t:'CSCO',n:'Cisco',w:'1.9%'},{t:'ADBE',n:'Adobe',w:'1.7%'}],
-      XLF:  [{t:'BRK.B',n:'Berkshire',w:'13.8%'},{t:'JPM',n:'JPMorgan',w:'11.2%'},{t:'V',n:'Visa',w:'8.4%'},{t:'MA',n:'Mastercard',w:'6.1%'},{t:'BAC',n:'Bank of America',w:'3.9%'},{t:'WFC',n:'Wells Fargo',w:'3.6%'},{t:'SPGI',n:'S&P Global',w:'3.1%'},{t:'GS',n:'Goldman Sachs',w:'2.9%'}],
-      XLV:  [{t:'LLY',n:'Eli Lilly',w:'12.4%'},{t:'UNH',n:'UnitedHealth',w:'8.9%'},{t:'JNJ',n:'J&J',w:'7.1%'},{t:'ABBV',n:'AbbVie',w:'6.8%'},{t:'MRK',n:'Merck',w:'5.6%'},{t:'TMO',n:'Thermo Fisher',w:'4.2%'},{t:'ABT',n:'Abbott',w:'3.8%'},{t:'DHR',n:'Danaher',w:'3.1%'}],
-      XLE:  [{t:'XOM',n:'ExxonMobil',w:'23.1%'},{t:'CVX',n:'Chevron',w:'15.8%'},{t:'COP',n:'ConocoPhillips',w:'6.7%'},{t:'EOG',n:'EOG Resources',w:'4.4%'},{t:'SLB',n:'Schlumberger',w:'3.2%'},{t:'MPC',n:'Marathon Petroleum',w:'3.0%'},{t:'PSX',n:'Phillips 66',w:'2.8%'},{t:'OXY',n:'Occidental',w:'2.5%'}],
-      XLY:  [{t:'AMZN',n:'Amazon',w:'24.3%'},{t:'TSLA',n:'Tesla',w:'16.8%'},{t:'HD',n:'Home Depot',w:'9.7%'},{t:'MCD',n:'McDonald\'s',w:'4.9%'},{t:'NKE',n:'Nike',w:'2.8%'},{t:'LOW',n:'Lowe\'s',w:'2.7%'},{t:'BKNG',n:'Booking Holdings',w:'2.4%'},{t:'TJX',n:'TJX Companies',w:'2.1%'}],
-      XLC:  [{t:'META',n:'Meta',w:'22.6%'},{t:'GOOGL',n:'Alphabet A',w:'10.4%'},{t:'GOOG',n:'Alphabet C',w:'9.3%'},{t:'NFLX',n:'Netflix',w:'5.3%'},{t:'TMUS',n:'T-Mobile',w:'4.9%'},{t:'VZ',n:'Verizon',w:'4.1%'},{t:'T',n:'AT&T',w:'3.8%'},{t:'DIS',n:'Disney',w:'3.2%'}],
-      XLI:  [{t:'GE',n:'GE Aerospace',w:'5.7%'},{t:'RTX',n:'RTX Corp',w:'5.1%'},{t:'CAT',n:'Caterpillar',w:'4.8%'},{t:'HON',n:'Honeywell',w:'4.7%'},{t:'UPS',n:'United Parcel',w:'3.3%'},{t:'BA',n:'Boeing',w:'3.1%'},{t:'DE',n:'Deere',w:'2.9%'},{t:'LMT',n:'Lockheed Martin',w:'2.7%'}],
-      XLP:  [{t:'PG',n:'Procter & Gamble',w:'14.6%'},{t:'COST',n:'Costco',w:'10.3%'},{t:'KO',n:'Coca-Cola',w:'10.1%'},{t:'PEP',n:'PepsiCo',w:'8.4%'},{t:'WMT',n:'Walmart',w:'7.9%'},{t:'PM',n:'Philip Morris',w:'5.2%'},{t:'MDLZ',n:'Mondelez',w:'3.8%'},{t:'CL',n:'Colgate-Palmolive',w:'3.3%'}],
-      XLU:  [{t:'NEE',n:'NextEra Energy',w:'14.9%'},{t:'SO',n:'Southern Co',w:'6.9%'},{t:'DUK',n:'Duke Energy',w:'6.7%'},{t:'CEG',n:'Constellation',w:'5.8%'},{t:'D',n:'Dominion Energy',w:'4.2%'},{t:'SRE',n:'Sempra',w:'3.9%'},{t:'AEP',n:'American Electric',w:'3.7%'},{t:'EXC',n:'Exelon',w:'3.4%'}],
-      XLRE: [{t:'PLD',n:'Prologis',w:'10.4%'},{t:'AMT',n:'American Tower',w:'7.1%'},{t:'EQIX',n:'Equinix',w:'6.8%'},{t:'WELL',n:'Welltower',w:'5.9%'},{t:'SPG',n:'Simon Property',w:'5.5%'},{t:'VICI',n:'VICI Properties',w:'4.8%'},{t:'O',n:'Realty Income',w:'4.3%'},{t:'AVB',n:'AvalonBay',w:'3.7%'}],
-      XLB:  [{t:'LIN',n:'Linde',w:'19.3%'},{t:'APD',n:'Air Products',w:'7.2%'},{t:'SHW',n:'Sherwin-Williams',w:'6.9%'},{t:'ECL',n:'Ecolab',w:'5.4%'},{t:'FCX',n:'Freeport',w:'4.8%'},{t:'NEM',n:'Newmont',w:'4.2%'},{t:'NUE',n:'Nucor',w:'3.6%'},{t:'IP',n:'International Paper',w:'3.1%'}],
+    var currentMarket = 'US';
+    var currentPeriod = '1D';
+    var currentView   = 'GRID';
+    var lastSectors   = null;
+
+    /* ── Market / sector definitions ── */
+    var MARKETS = {
+      US: { label:'S&P 500', currency:'$', sectors: [
+        {etf:'XLK',  name:'TECHNOLOGY',    w:29, stocks:[{t:'AAPL',n:'Apple',mw:22.6},{t:'MSFT',n:'Microsoft',mw:21.8},{t:'NVDA',n:'Nvidia',mw:7.2},{t:'AVGO',n:'Broadcom',mw:4.5},{t:'ORCL',n:'Oracle',mw:2.1},{t:'CRM',n:'Salesforce',mw:2.0},{t:'CSCO',n:'Cisco',mw:1.9},{t:'ADBE',n:'Adobe',mw:1.7}]},
+        {etf:'XLV',  name:'HEALTHCARE',    w:13, stocks:[{t:'LLY',n:'Eli Lilly',mw:12.4},{t:'UNH',n:'UnitedHealth',mw:8.9},{t:'JNJ',n:'J&J',mw:7.1},{t:'ABBV',n:'AbbVie',mw:6.8},{t:'MRK',n:'Merck',mw:5.6},{t:'TMO',n:'Thermo Fisher',mw:4.2},{t:'ABT',n:'Abbott',mw:3.8},{t:'DHR',n:'Danaher',mw:3.1}]},
+        {etf:'XLF',  name:'FINANCIALS',    w:13, stocks:[{t:'BRK.B',n:'Berkshire',mw:13.8},{t:'JPM',n:'JPMorgan',mw:11.2},{t:'V',n:'Visa',mw:8.4},{t:'MA',n:'Mastercard',mw:6.1},{t:'BAC',n:'Bank America',mw:3.9},{t:'WFC',n:'Wells Fargo',mw:3.6},{t:'SPGI',n:'S&P Global',mw:3.1},{t:'GS',n:'Goldman Sachs',mw:2.9}]},
+        {etf:'XLY',  name:'DISCRETIONARY', w:11, stocks:[{t:'AMZN',n:'Amazon',mw:24.3},{t:'TSLA',n:'Tesla',mw:16.8},{t:'HD',n:'Home Depot',mw:9.7},{t:'MCD',n:"McDonald's",mw:4.9},{t:'NKE',n:'Nike',mw:2.8},{t:'LOW',n:"Lowe's",mw:2.7},{t:'BKNG',n:'Booking',mw:2.4},{t:'TJX',n:'TJX',mw:2.1}]},
+        {etf:'XLC',  name:'COMM SERVICES', w:9,  stocks:[{t:'META',n:'Meta',mw:22.6},{t:'GOOGL',n:'Alphabet A',mw:10.4},{t:'GOOG',n:'Alphabet C',mw:9.3},{t:'NFLX',n:'Netflix',mw:5.3},{t:'TMUS',n:'T-Mobile',mw:4.9},{t:'VZ',n:'Verizon',mw:4.1},{t:'T',n:'AT&T',mw:3.8},{t:'DIS',n:'Disney',mw:3.2}]},
+        {etf:'XLI',  name:'INDUSTRIALS',   w:9,  stocks:[{t:'GE',n:'GE Aerospace',mw:5.7},{t:'RTX',n:'RTX Corp',mw:5.1},{t:'CAT',n:'Caterpillar',mw:4.8},{t:'HON',n:'Honeywell',mw:4.7},{t:'UPS',n:'UPS',mw:3.3},{t:'BA',n:'Boeing',mw:3.1},{t:'DE',n:'Deere',mw:2.9},{t:'LMT',n:'Lockheed',mw:2.7}]},
+        {etf:'XLP',  name:'STAPLES',       w:6,  stocks:[{t:'PG',n:'P&G',mw:14.6},{t:'COST',n:'Costco',mw:10.3},{t:'KO',n:'Coca-Cola',mw:10.1},{t:'PEP',n:'PepsiCo',mw:8.4},{t:'WMT',n:'Walmart',mw:7.9},{t:'PM',n:'Philip Morris',mw:5.2},{t:'MDLZ',n:'Mondelez',mw:3.8},{t:'CL',n:'Colgate',mw:3.3}]},
+        {etf:'XLE',  name:'ENERGY',        w:4,  stocks:[{t:'XOM',n:'ExxonMobil',mw:23.1},{t:'CVX',n:'Chevron',mw:15.8},{t:'COP',n:'ConocoPhillips',mw:6.7},{t:'EOG',n:'EOG Resources',mw:4.4},{t:'SLB',n:'Schlumberger',mw:3.2},{t:'MPC',n:'Marathon Pet.',mw:3.0},{t:'PSX',n:'Phillips 66',mw:2.8},{t:'OXY',n:'Occidental',mw:2.5}]},
+        {etf:'XLRE', name:'REAL ESTATE',   w:4,  stocks:[{t:'PLD',n:'Prologis',mw:10.4},{t:'AMT',n:'Amer. Tower',mw:7.1},{t:'EQIX',n:'Equinix',mw:6.8},{t:'WELL',n:'Welltower',mw:5.9},{t:'SPG',n:'Simon Property',mw:5.5},{t:'VICI',n:'VICI Prop.',mw:4.8},{t:'O',n:'Realty Income',mw:4.3},{t:'AVB',n:'AvalonBay',mw:3.7}]},
+        {etf:'XLU',  name:'UTILITIES',     w:3,  stocks:[{t:'NEE',n:'NextEra',mw:14.9},{t:'SO',n:'Southern Co',mw:6.9},{t:'DUK',n:'Duke Energy',mw:6.7},{t:'CEG',n:'Constellation',mw:5.8},{t:'D',n:'Dominion',mw:4.2},{t:'SRE',n:'Sempra',mw:3.9},{t:'AEP',n:'Am. Electric',mw:3.7},{t:'EXC',n:'Exelon',mw:3.4}]},
+        {etf:'XLB',  name:'MATERIALS',     w:2,  stocks:[{t:'LIN',n:'Linde',mw:19.3},{t:'APD',n:'Air Products',mw:7.2},{t:'SHW',n:'Sherwin-Williams',mw:6.9},{t:'ECL',n:'Ecolab',mw:5.4},{t:'FCX',n:'Freeport',mw:4.8},{t:'NEM',n:'Newmont',mw:4.2},{t:'NUE',n:'Nucor',mw:3.6},{t:'IP',n:'Intl Paper',mw:3.1}]},
+      ]},
+      UK: { label:'FTSE 100', currency:'p', sectors: [
+        {etf:'UK_FIN', name:'FINANCIALS',  w:18, stocks:[{t:'HSBA.L',n:'HSBC',mw:28},{t:'LLOY.L',n:'Lloyds',mw:12},{t:'BARC.L',n:'Barclays',mw:10},{t:'NWG.L',n:'NatWest',mw:9},{t:'STAN.L',n:'St. Chartered',mw:7},{t:'AV.L',n:'Aviva',mw:6},{t:'PRU.L',n:'Prudential',mw:5},{t:'LGEN.L',n:'Legal & General',mw:5}]},
+        {etf:'UK_MIN', name:'MINING',      w:14, stocks:[{t:'GLEN.L',n:'Glencore',mw:25},{t:'RIO.L',n:'Rio Tinto',mw:22},{t:'AAL.L',n:'Anglo American',mw:15},{t:'BHP.L',n:'BHP Group',mw:13},{t:'ANTO.L',n:'Antofagasta',mw:8},{t:'HOC.L',n:'Hochschild',mw:4}]},
+        {etf:'UK_CON', name:'CONSUMER',    w:12, stocks:[{t:'ULVR.L',n:'Unilever',mw:35},{t:'DGE.L',n:'Diageo',mw:25},{t:'BATS.L',n:'BAT',mw:20},{t:'IMB.L',n:'Imperial Brands',mw:10},{t:'REL.L',n:'RELX',mw:8},{t:'EXPN.L',n:'Experian',mw:7}]},
+        {etf:'UK_ENE', name:'OIL & GAS',   w:12, stocks:[{t:'SHEL.L',n:'Shell',mw:55},{t:'BP.L',n:'BP',mw:38},{t:'HBR.L',n:'Harbour Energy',mw:4},{t:'TLW.L',n:'Tullow Oil',mw:3}]},
+        {etf:'UK_HLT', name:'HEALTHCARE',  w:10, stocks:[{t:'AZN.L',n:'AstraZeneca',mw:55},{t:'GSK.L',n:'GSK',mw:30},{t:'HLN.L',n:'Haleon',mw:10},{t:'AHT.L',n:'Ashtead',mw:5}]},
+        {etf:'UK_IND', name:'INDUSTRIALS', w:10, stocks:[{t:'RR.L',n:'Rolls-Royce',mw:18},{t:'BAE.L',n:'BAE Systems',mw:16},{t:'FERG.L',n:'Ferguson',mw:12},{t:'IMI.L',n:'IMI plc',mw:7},{t:'WEIR.L',n:'Weir Group',mw:7},{t:'SMT.L',n:'Scottish Mortgage',mw:6}]},
+        {etf:'UK_TEC', name:'TECHNOLOGY',  w:8,  stocks:[{t:'SAGE.L',n:'Sage Group',mw:30},{t:'AUTO.L',n:'Auto Trader',mw:22},{t:'INF.L',n:'Informa',mw:15},{t:'RTO.L',n:'Rentokil',mw:12},{t:'MONY.L',n:'MoneySuperMkt',mw:8}]},
+        {etf:'UK_UTL', name:'UTILITIES',   w:8,  stocks:[{t:'NG.L',n:'National Grid',mw:35},{t:'SSE.L',n:'SSE',mw:28},{t:'SVT.L',n:'Severn Trent',mw:15},{t:'UU.L',n:'United Utilities',mw:13},{t:'CNA.L',n:'Centrica',mw:9}]},
+        {etf:'UK_REI', name:'REAL ESTATE', w:4,  stocks:[{t:'SGRO.L',n:'Segro',mw:30},{t:'LNG.L',n:'Land Securities',mw:22},{t:'BLND.L',n:'British Land',mw:20},{t:'GPE.L',n:'Great Portland',mw:12}]},
+        {etf:'UK_TEL', name:'TELECOMS',    w:4,  stocks:[{t:'VOD.L',n:'Vodafone',mw:40},{t:'BT-A.L',n:'BT Group',mw:35},{t:'AIRTEL.L',n:'Airtel Africa',mw:15}]},
+      ]},
+      EU: { label:'EURO STOXX', currency:'€', sectors: [
+        {etf:'EU_FIN', name:'FINANCIALS',  w:18, stocks:[{t:'SAN.MC',n:'Santander',mw:18},{t:'BNP.PA',n:'BNP Paribas',mw:15},{t:'AXA.PA',n:'AXA',mw:13},{t:'ALV.DE',n:'Allianz',mw:13},{t:'ING.AS',n:'ING Group',mw:9},{t:'DBK.DE',n:'Deutsche Bank',mw:7},{t:'GLE.PA',n:'Soc. Générale',mw:7},{t:'UCG.MI',n:'UniCredit',mw:10}]},
+        {etf:'EU_IND', name:'INDUSTRIALS', w:16, stocks:[{t:'SIE.DE',n:'Siemens',mw:22},{t:'AIR.PA',n:'Airbus',mw:18},{t:'DHL.DE',n:'DHL Group',mw:12},{t:'VOW3.DE',n:'Volkswagen',mw:8},{t:'BMW.DE',n:'BMW',mw:8},{t:'RWE.DE',n:'RWE',mw:6}]},
+        {etf:'EU_HLT', name:'HEALTHCARE',  w:14, stocks:[{t:'NVO',n:'Novo Nordisk',mw:30},{t:'ROG.SW',n:'Roche',mw:20},{t:'NVS',n:'Novartis',mw:15},{t:'SAN.PA',n:'Sanofi',mw:14},{t:'BAYN.DE',n:'Bayer',mw:8},{t:'MRK.DE',n:'Merck KGaA',mw:7}]},
+        {etf:'EU_CON', name:'LUXURY/CONS', w:14, stocks:[{t:'MC.PA',n:'LVMH',mw:30},{t:'OR.PA',n:"L'Oreal",mw:18},{t:'NESN.SW',n:'Nestlé',mw:15},{t:'RMS.PA',n:'Hermès',mw:12},{t:'ADS.DE',n:'Adidas',mw:7},{t:'KER.PA',n:'Kering',mw:6}]},
+        {etf:'EU_TEC', name:'TECHNOLOGY',  w:12, stocks:[{t:'ASML.AS',n:'ASML',mw:35},{t:'SAP.DE',n:'SAP',mw:30},{t:'CAP.PA',n:'Capgemini',mw:10},{t:'STM.MI',n:'STMicro',mw:10},{t:'DSY.PA',n:'Dassault',mw:8}]},
+        {etf:'EU_ENE', name:'ENERGY',      w:10, stocks:[{t:'TTE.PA',n:'TotalEnergies',mw:50},{t:'ENI.MI',n:'ENI',mw:25},{t:'REP.MC',n:'Repsol',mw:15},{t:'ENEL.MI',n:'Enel',mw:10}]},
+        {etf:'EU_UTL', name:'UTILITIES',   w:8,  stocks:[{t:'IBE.MC',n:'Iberdrola',mw:30},{t:'ENGI.PA',n:'Engie',mw:25},{t:'EDP.LS',n:'EDP',mw:18},{t:'VIE.PA',n:'Veolia',mw:15}]},
+        {etf:'EU_MAT', name:'MATERIALS',   w:8,  stocks:[{t:'BAS.DE',n:'BASF',mw:30},{t:'AI.PA',n:'Air Liquide',mw:25},{t:'LIN.DE',n:'Linde EU',mw:22},{t:'MT.AS',n:'ArcelorMittal',mw:10}]},
+      ]}
     };
 
+    /* ── Helpers ── */
     function hmBg(dp) {
       if (dp === null) return '#141414';
-      var v = Math.max(-5, Math.min(5, dp));
-      var abs = Math.abs(v), t = abs / 5;
-      if (v > 0) {
-        var r = Math.round(0   + (0   - 0)   * t);
-        var g = Math.round(90  + (180 - 90)  * t);
-        var b = Math.round(45  + (90  - 45)  * t);
-        return 'rgb(' + r + ',' + g + ',' + b + ')';
-      } else if (v < 0) {
-        var r2 = Math.round(120 + (220 - 120) * t);
-        var g2 = Math.round(15  + (20  - 15)  * t);
-        var b2 = Math.round(15  + (20  - 15)  * t);
-        return 'rgb(' + r2 + ',' + g2 + ',' + b2 + ')';
-      }
+      var v = Math.max(-5, Math.min(5, dp)), t = Math.abs(v) / 5;
+      if (v > 0) return 'rgb(0,' + Math.round(90 + 90*t) + ',' + Math.round(45 + 45*t) + ')';
+      if (v < 0) return 'rgb(' + Math.round(120 + 100*t) + ',' + Math.round(15 + 5*t) + ',' + Math.round(15 + 5*t) + ')';
       return '#141414';
     }
+    function fmtDp(dp) {
+      if (dp === null) return '—';
+      return (dp >= 0 ? '+' : '') + parseFloat(dp).toFixed(2) + '%';
+    }
+    function dpCol(dp) { return dp === null ? '#555' : dp > 0 ? '#3DAA6A' : '#D14040'; }
+    function hashN(s) { var h=0; for(var i=0;i<s.length;i++) h=(h*31+s.charCodeAt(i))&0xffffff; return h; }
 
-    function buildGrid(rows) {
-      var ts = new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
-      var stops = [-4,-2,-1,0,1,2,4];
-      var legend = stops.map(function(v) {
-        return '<span class="sh-leg-cell" style="background:' + hmBg(v) + ';flex:1">' + (v > 0 ? '+' : '') + v + '%</span>';
-      }).join('');
-      return '<div class="sh-heatmap">' +
-          rows.map(function(s) {
-            var price = s.c ? '$' + parseFloat(s.c).toFixed(2) : '—';
-            var chg   = s.dp !== null ? (s.dp >= 0 ? '+' : '') + parseFloat(s.dp).toFixed(2) + '%' : '—';
-            var spanCls = 'sh-span-' + (s.span || 1);
-            var isPos = s.dp !== null && s.dp > 0;
-            var isNeg = s.dp !== null && s.dp < 0;
-            return '<div class="sh-tile ' + spanCls + '" data-etf="' + escH(s.etf) + '" style="background:' + hmBg(s.dp) + ';">' +
-              '<div class="sh-tile-gloss"></div>' +
-              '<div class="sh-sector">' + escH(s.name) + '</div>' +
-              '<div class="sh-etf-lbl">' + escH(s.etf) + '</div>' +
-              '<div class="sh-pct ' + (isPos ? 'sh-pos' : isNeg ? 'sh-neg' : '') + '">' + chg + '</div>' +
-              '<div class="sh-price-lbl">' + price + '</div>' +
-              '<div class="sh-click-hint">CLICK FOR HOLDINGS ›</div>' +
-              '</div>';
-          }).join('') +
+    /* ── Control bar ── */
+    function buildCtrl() {
+      return '<div class="sh-ctrl">' +
+        '<div class="sh-ctrl-group">' +
+          ['US','UK','EU'].map(function(m){ return '<button class="sh-ctrl-btn sh-ctrl-mkt' + (m===currentMarket?' active':'') + '" data-mkt="'+m+'">' + MARKETS[m].label + '</button>'; }).join('') +
+        '</div><div class="sh-ctrl-sep"></div>' +
+        '<div class="sh-ctrl-group">' +
+          ['1D','1W','1M','3M','YTD','1Y'].map(function(p){ return '<button class="sh-ctrl-btn sh-ctrl-per' + (p===currentPeriod?' active':'') + '" data-per="'+p+'">'+p+'</button>'; }).join('') +
+        '</div><div class="sh-ctrl-sep"></div>' +
+        '<div class="sh-ctrl-group">' +
+          ['GRID','DONUT','MAP'].map(function(v){ return '<button class="sh-ctrl-btn sh-ctrl-view' + (v===currentView?' active':'') + '" data-view="'+v+'">'+v+'</button>'; }).join('') +
         '</div>' +
-        '<div class="sh-legend">' + legend + '</div>' +
-        '<div class="sh-footer">SPDR SECTOR ETFs · LIVE DATA · ' + ts + '  ·  CLICK A SECTOR FOR HOLDINGS</div>';
+        '<button class="sh-ctrl-btn sh-ctrl-ref" style="margin-left:auto">↺</button>' +
+      '</div><div class="sh-content"></div>';
     }
 
-    function updateTiles(rows) {
-      rows.forEach(function(s) {
-        var tile = body.querySelector('[data-etf="' + s.etf + '"]');
-        if (!tile) return;
-        tile.style.background = hmBg(s.dp);
-        var pct = tile.querySelector('.sh-pct');
-        if (pct) {
-          pct.textContent = s.dp !== null ? (s.dp >= 0 ? '+' : '') + parseFloat(s.dp).toFixed(2) + '%' : '—';
-          pct.className = 'sh-pct' + (s.dp > 0 ? ' sh-pos' : s.dp < 0 ? ' sh-neg' : '');
-        }
-        var priceLbl = tile.querySelector('.sh-price-lbl');
-        if (priceLbl) priceLbl.textContent = s.c ? '$' + parseFloat(s.c).toFixed(2) : '—';
-        var ft = body.querySelector('.sh-footer');
-        if (ft) ft.textContent = 'SPDR SECTOR ETFs · LIVE DATA · ' + new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) + '  ·  CLICK A SECTOR FOR HOLDINGS';
+    function mergeSectors(sectors, apiData) {
+      var map = {}; (apiData||[]).forEach(function(d){ map[d.etf]=d; });
+      return sectors.map(function(s){ var d=map[s.etf]||{}; return Object.assign({},s,{dp:d.dp!=null?d.dp:null,c:d.c||null}); });
+    }
+
+    /* ── GRID VIEW ── */
+    function renderGrid(sectors) {
+      var mkt = MARKETS[currentMarket];
+      var ts = new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+      var stops = [-4,-2,-1,0,1,2,4];
+      var legend = stops.map(function(v){ return '<span class="sh-leg-cell" style="background:'+hmBg(v)+';flex:1">'+(v>0?'+':'')+v+'%</span>'; }).join('');
+      contentEl.innerHTML = '<div class="sh-heatmap">' +
+        sectors.map(function(s) {
+          var span = s.w >= 20 ? 4 : s.w >= 10 ? 3 : s.w >= 5 ? 2 : 1;
+          var price = s.c ? mkt.currency + parseFloat(s.c).toFixed(2) : '—';
+          var isPos = s.dp !== null && s.dp > 0, isNeg = s.dp !== null && s.dp < 0;
+          return '<div class="sh-tile sh-span-'+span+'" data-etf="'+escH(s.etf)+'" style="background:'+hmBg(s.dp)+';">' +
+            '<div class="sh-tile-gloss"></div>' +
+            '<div class="sh-sector">'+escH(s.name)+'</div>' +
+            '<div class="sh-etf-lbl">'+escH(s.etf)+'</div>' +
+            '<div class="sh-pct'+(isPos?' sh-pos':isNeg?' sh-neg':'')+'">'+fmtDp(s.dp)+'</div>' +
+            '<div class="sh-price-lbl">'+price+'</div>' +
+            '<div class="sh-click-hint">CLICK FOR HOLDINGS ›</div>' +
+          '</div>';
+        }).join('') +
+      '</div>' +
+      '<div class="sh-legend">'+legend+'</div>' +
+      '<div class="sh-footer">'+mkt.label+' · '+currentPeriod+' · '+ts+' · CLICK A SECTOR</div>';
+      contentEl.querySelectorAll('.sh-tile').forEach(function(tile) {
+        tile.addEventListener('click', function() {
+          var s = sectors.find(function(x){ return x.etf===tile.dataset.etf; });
+          if (s) showDrillDown(s);
+        });
       });
     }
 
-    /* Enhanced drill-down with live prices for holdings */
-    function showDrillDown(etf, sectorName, dp) {
+    /* ── DONUT VIEW ── */
+    function renderDonut(sectors) {
+      contentEl.innerHTML = '';
+      var wrap = document.createElement('div');
+      wrap.className = 'sh-donut-wrap';
+      contentEl.appendChild(wrap);
+
+      var size = Math.min(contentEl.clientHeight - 24, Math.floor(contentEl.clientWidth * 0.45), 260);
+      if (size < 80) size = 80;
+      var canvas = document.createElement('canvas');
+      canvas.className = 'sh-donut-canvas';
+      canvas.width = size; canvas.height = size;
+      wrap.appendChild(canvas);
+
+      var leg = document.createElement('div');
+      leg.className = 'sh-donut-legend';
+      wrap.appendChild(leg);
+
+      var ctx = canvas.getContext('2d');
+      var cx = size/2, cy = size/2, outerR = size*0.44, innerR = size*0.25;
+      var totalWt = sectors.reduce(function(a,s){ return a+s.w; },0);
+      var angle = -Math.PI/2;
+      var wedges = [];
+
+      sectors.forEach(function(s) {
+        var span = (s.w/totalWt)*2*Math.PI;
+        var endA = angle + span;
+        wedges.push({ s:s, start:angle, span:span });
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.arc(cx, cy, outerR, angle, endA);
+        ctx.closePath();
+        ctx.fillStyle = hmBg(s.dp);
+        ctx.fill();
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+        angle = endA;
+      });
+
+      /* hollow centre */
+      ctx.beginPath(); ctx.arc(cx,cy,innerR,0,Math.PI*2);
+      ctx.fillStyle='#000'; ctx.fill();
+
+      /* centre label */
+      ctx.fillStyle='#fff';
+      ctx.font='bold '+Math.round(size*0.055)+'px Space Mono,monospace';
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(MARKETS[currentMarket].label,cx,cy-size*0.04);
+      ctx.fillStyle='#555';
+      ctx.font=Math.round(size*0.038)+'px Space Mono,monospace';
+      ctx.fillText(currentPeriod,cx,cy+size*0.07);
+
+      /* click detection */
+      canvas.addEventListener('click', function(e) {
+        var rect = canvas.getBoundingClientRect();
+        var mx = e.clientX-rect.left-cx, my = e.clientY-rect.top-cy;
+        var dist = Math.sqrt(mx*mx+my*my);
+        if (dist<innerR||dist>outerR) return;
+        var rawA = Math.atan2(my,mx);
+        var normA = rawA - (-Math.PI/2);
+        if (normA<0) normA+=2*Math.PI;
+        var cum=0;
+        for (var i=0;i<wedges.length;i++) {
+          if (normA>=cum && normA<cum+wedges[i].span) { showDrillDown(wedges[i].s); break; }
+          cum+=wedges[i].span;
+        }
+      });
+
+      /* legend */
+      sectors.forEach(function(s) {
+        var item = document.createElement('div');
+        item.className='sh-donut-item';
+        var sw = document.createElement('div');
+        sw.className='sh-donut-swatch'; sw.style.background=hmBg(s.dp);
+        var lb = document.createElement('span');
+        lb.className='sh-donut-lbl'; lb.textContent=s.name;
+        var pc = document.createElement('span');
+        pc.className='sh-donut-pct'; pc.style.color=dpCol(s.dp); pc.textContent=fmtDp(s.dp);
+        item.appendChild(sw); item.appendChild(lb); item.appendChild(pc);
+        leg.appendChild(item);
+        item.addEventListener('click', function(){ showDrillDown(s); });
+      });
+    }
+
+    /* ── MAP VIEW (2-row proportional treemap) ── */
+    function renderMap(sectors) {
+      contentEl.innerHTML = '';
+      var wrap = document.createElement('div');
+      wrap.style.cssText = 'position:relative;width:100%;height:100%;overflow:hidden;background:#000;';
+      contentEl.appendChild(wrap);
+      var W = wrap.clientWidth || contentEl.clientWidth || 600;
+      var H = wrap.clientHeight || contentEl.clientHeight || 400;
+      var GAP = 2;
+
+      /* Sort by weight, split into 2 rows balanced by total weight */
+      var sorted = sectors.slice().sort(function(a,b){ return b.w-a.w; });
+      var totalWt = sorted.reduce(function(a,s){ return a+s.w; },0);
+      var row1=[],row2=[],r1w=0;
+      sorted.forEach(function(s) {
+        if (r1w < totalWt/2) { row1.push(s); r1w+=s.w; }
+        else row2.push(s);
+      });
+      if (!row2.length) row1=sorted;
+      var h1=Math.round(H*(r1w/totalWt)), h2=H-h1-GAP;
+
+      function placeRow(rowSectors,x0,y0,rowW,rowH,rowTot) {
+        var x=x0;
+        rowSectors.forEach(function(s,i) {
+          var isLast=i===rowSectors.length-1;
+          var sw=isLast?Math.round(x0+rowW-x):Math.round(rowW*(s.w/rowTot))-GAP;
+          if(sw<4||rowH<4) return;
+          drawSector(s,Math.round(x),Math.round(y0),sw,rowH);
+          x+=sw+GAP;
+        });
+      }
+      var r2w=row2.reduce(function(a,s){ return a+s.w; },0)||1;
+      placeRow(row1,0,0,W,h1,r1w);
+      if(row2.length) placeRow(row2,0,h1+GAP,W,h2,r2w);
+
+      function drawSector(s,sx,sy,sw,sh) {
+        var sEl=document.createElement('div');
+        sEl.style.cssText='position:absolute;left:'+sx+'px;top:'+sy+'px;width:'+sw+'px;height:'+sh+'px;overflow:hidden;background:'+hmBg(s.dp)+';cursor:pointer;box-sizing:border-box;';
+        sEl.dataset.etf=s.etf;
+
+        var hdrH=Math.min(20,Math.floor(sh*0.3));
+        var hdr=document.createElement('div');
+        hdr.style.cssText='position:absolute;top:0;left:0;right:0;height:'+hdrH+'px;background:rgba(0,0,0,0.55);display:flex;align-items:center;padding:0 5px;gap:4px;z-index:1;overflow:hidden;';
+        var tEl=document.createElement('span');
+        tEl.style.cssText='font:700 7px/1 "Consolas","Menlo",monospace;letter-spacing:.1em;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;';
+        tEl.textContent=s.name;
+        var pEl=document.createElement('span');
+        pEl.style.cssText='font:700 8px/1 "Consolas","Menlo",monospace;color:'+dpCol(s.dp)+';white-space:nowrap;flex-shrink:0;';
+        pEl.textContent=fmtDp(s.dp);
+        hdr.appendChild(tEl); hdr.appendChild(pEl); sEl.appendChild(hdr);
+
+        var stocksEl=document.createElement('div');
+        stocksEl.style.cssText='position:absolute;top:'+hdrH+'px;left:0;right:0;bottom:0;display:flex;flex-wrap:wrap;gap:1px;padding:1px;box-sizing:border-box;align-content:flex-start;overflow:hidden;';
+        var totMW=s.stocks.reduce(function(a,st){ return a+(st.mw||1); },0)||1;
+        s.stocks.forEach(function(st) {
+          var stEl=document.createElement('div');
+          stEl.dataset.ticker=st.t;
+          var bright=0.75+(hashN(st.t)%30)/100;
+          stEl.style.cssText='flex:'+Math.max(1,st.mw)+';min-width:34px;min-height:22px;background:'+hmBg(s.dp)+';filter:brightness('+bright.toFixed(2)+');padding:3px 4px;overflow:hidden;cursor:pointer;display:flex;flex-direction:column;justify-content:flex-end;box-sizing:border-box;';
+          stEl.className='sh-map-stock';
+          var symEl=document.createElement('div');
+          symEl.className='sh-map-stk-sym';
+          symEl.textContent=st.t;
+          stEl.appendChild(symEl);
+          stEl.addEventListener('click',function(e) {
+            e.stopPropagation();
+            if(window.createGenericPopout) window.createGenericPopout(st.t+' · CHART','▦',function(pb){ renderPriceChart(pb,st.t,st.t); },{w:520,h:360});
+          });
+          stocksEl.appendChild(stEl);
+        });
+        sEl.appendChild(stocksEl);
+        sEl.addEventListener('click',function(e) {
+          if(e.target===sEl||e.target===hdr||e.target===tEl||e.target===pEl) showDrillDown(s);
+        });
+        wrap.appendChild(sEl);
+      }
+    }
+
+    /* ── Drill-down panel ── */
+    function showDrillDown(s) {
       var existing = body.querySelector('.sh-drill');
-      if (existing) { existing.remove(); return; }
-      var holdings = SECTOR_HOLDINGS[etf] || [];
-      var pctLabel = dp !== null ? (dp >= 0 ? '+' : '') + parseFloat(dp).toFixed(2) + '%' : '—';
-      var pctCol = dp === null ? '#888' : dp >= 0 ? '#3DAA6A' : '#D14040';
-      var panel = document.createElement('div');
-      panel.className = 'sh-drill';
-      panel.innerHTML =
+      if (existing && existing.dataset.etf===s.etf) { existing.remove(); return; }
+      if (existing) existing.remove();
+      var pct=fmtDp(s.dp);
+      var pc=dpCol(s.dp);
+      var panel=document.createElement('div');
+      panel.className='sh-drill'; panel.dataset.etf=s.etf;
+      panel.innerHTML=
         '<div class="sh-drill-hdr">' +
-          '<span class="sh-drill-title">' + escH(sectorName) + ' <span style="color:' + pctCol + '">' + pctLabel + '</span></span>' +
-          '<span style="font-size:7px;letter-spacing:.14em;color:rgba(255,255,255,0.3);flex:1;padding-left:8px;">' + escH(etf) + ' · SPDR ETF</span>' +
+          '<span class="sh-drill-title">'+escH(s.name)+' <span style="color:'+pc+'">'+pct+'</span></span>' +
+          '<span style="font-size:7px;letter-spacing:.14em;color:rgba(255,255,255,0.3);flex:1;padding-left:8px;">'+escH(s.etf)+' · '+currentMarket+' · '+currentPeriod+'</span>' +
           '<button class="sh-drill-close">✕</button>' +
         '</div>' +
-        '<div class="sh-drill-label">TOP HOLDINGS — LOADING LIVE PRICES…</div>' +
+        '<div class="sh-drill-label">TOP HOLDINGS — LOADING…</div>' +
         '<div class="sh-drill-rows"></div>';
       body.appendChild(panel);
-
-      panel.querySelector('.sh-drill-close').addEventListener('click', function(e) { e.stopPropagation(); panel.remove(); });
-
-      /* Fetch live prices for all holdings */
-      if (!holdings.length) { panel.querySelector('.sh-drill-label').textContent = 'TOP HOLDINGS · ' + escH(etf); return; }
-      var syms = holdings.map(function(h){ return h.t; }).join(',');
-      fetch('/.netlify/functions/macro-data?type=quote&symbols=' + encodeURIComponent(syms))
-        .then(function(r){ return r.ok ? r.json() : null; })
+      panel.querySelector('.sh-drill-close').addEventListener('click',function(e){ e.stopPropagation(); panel.remove(); });
+      if (!s.stocks||!s.stocks.length) { panel.querySelector('.sh-drill-label').textContent='TOP HOLDINGS'; return; }
+      var syms=s.stocks.map(function(h){ return h.t; }).join(',');
+      /* Use Yahoo Finance for all markets (handles .L, .DE, .PA etc.) */
+      fetch('/.netlify/functions/macro-data?type=yh-quote&symbols='+encodeURIComponent(syms))
+        .then(function(r){ return r.ok?r.json():null; })
         .then(function(quotes) {
-          var label = panel.querySelector('.sh-drill-label');
-          if (label) label.textContent = 'TOP HOLDINGS · ' + escH(etf) + ' · ' + new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
-          var priceMap = {};
-          (quotes || []).forEach(function(q){ priceMap[q.sym] = q; });
-          /* Merge weights + live prices, sort by % change descending */
-          var merged = holdings.map(function(h) {
-            var q = priceMap[h.t] || {};
-            return { t: h.t, n: h.n, w: h.w, c: q.c || null, dp: q.dp != null ? q.dp : null };
-          });
-          merged.sort(function(a, b) {
-            if (a.dp === null && b.dp === null) return 0;
-            if (a.dp === null) return 1;
-            if (b.dp === null) return -1;
-            return b.dp - a.dp;
-          });
-          var rowsEl = panel.querySelector('.sh-drill-rows');
-          if (!rowsEl) return;
-          rowsEl.innerHTML = merged.map(function(h) {
-            var chgStr = h.dp !== null ? (h.dp >= 0 ? '+' : '') + h.dp.toFixed(2) + '%' : '—';
-            var chgCol = h.dp === null ? '#555' : h.dp > 0 ? '#3DAA6A' : '#D14040';
-            var priceStr = h.c ? '$' + parseFloat(h.c).toFixed(2) : '—';
-            return '<div class="sh-drill-row" data-ticker="' + escH(h.t) + '">' +
-              '<span class="sh-drill-sym">' + escH(h.t) + '</span>' +
-              '<span class="sh-drill-name">' + escH(h.n) + '</span>' +
-              '<span class="sh-drill-price">' + priceStr + '</span>' +
-              '<span class="sh-drill-chg" style="color:' + chgCol + '">' + chgStr + '</span>' +
-              '<span class="sh-drill-weight">' + escH(h.w) + '</span>' +
-              '<button class="sh-drill-chart" title="Price chart for ' + escH(h.t) + '">CHART ›</button>' +
-              '<button class="sh-drill-intel" title="INTEL brief for ' + escH(h.t) + '">INTEL ›</button>' +
+          var label=panel.querySelector('.sh-drill-label');
+          if(label) label.textContent='TOP HOLDINGS · '+currentMarket+' · '+new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+          var qMap={}; (quotes||[]).forEach(function(q){ qMap[q.sym]=q; });
+          var merged=s.stocks.map(function(h){ var q=qMap[h.t]||{}; return {t:h.t,n:h.n,mw:h.mw,c:q.c||null,dp:q.dp!=null?q.dp:null}; });
+          merged.sort(function(a,b){ if(a.dp===null&&b.dp===null) return 0; if(a.dp===null) return 1; if(b.dp===null) return -1; return b.dp-a.dp; });
+          var rowsEl=panel.querySelector('.sh-drill-rows');
+          if(!rowsEl) return;
+          var cur=MARKETS[currentMarket].currency;
+          rowsEl.innerHTML=merged.map(function(h) {
+            var cs=fmtDp(h.dp), cc=dpCol(h.dp);
+            var pr=h.c?cur+parseFloat(h.c).toFixed(2):'—';
+            return '<div class="sh-drill-row" data-ticker="'+escH(h.t)+'">' +
+              '<span class="sh-drill-sym">'+escH(h.t)+'</span>' +
+              '<span class="sh-drill-name">'+escH(h.n)+'</span>' +
+              '<span class="sh-drill-price">'+pr+'</span>' +
+              '<span class="sh-drill-chg" style="color:'+cc+'">'+cs+'</span>' +
+              '<span class="sh-drill-weight">'+h.mw+'%</span>' +
+              '<button class="sh-drill-chart">CHART ›</button>' +
+              '<button class="sh-drill-intel">INTEL ›</button>' +
             '</div>';
           }).join('');
           rowsEl.querySelectorAll('.sh-drill-chart').forEach(function(btn) {
-            btn.addEventListener('click', function(e) {
+            btn.addEventListener('click',function(e) {
               e.stopPropagation();
-              var ticker = btn.closest('.sh-drill-row').dataset.ticker;
-              if (!window.createGenericPopout) return;
-              window.createGenericPopout(ticker + ' · CHART', '▦', function(popBody) {
-                renderPriceChart(popBody, ticker, ticker);
-              }, { w: 520, h: 360 });
+              var tk=btn.closest('.sh-drill-row').dataset.ticker;
+              if(window.createGenericPopout) window.createGenericPopout(tk+' · CHART','▦',function(pb){ renderPriceChart(pb,tk,tk); },{w:520,h:360});
             });
           });
           rowsEl.querySelectorAll('.sh-drill-intel').forEach(function(btn) {
-            btn.addEventListener('click', function(e) {
+            btn.addEventListener('click',function(e) {
               e.stopPropagation();
-              var ticker = btn.closest('.sh-drill-row').dataset.ticker;
-              window._intelSearch && window._intelSearch(ticker, 'company', ticker);
+              var tk=btn.closest('.sh-drill-row').dataset.ticker;
+              window._intelSearch&&window._intelSearch(tk,'company',tk);
             });
           });
         })
         .catch(function() {
-          /* Fallback: show static holdings */
-          var label = panel.querySelector('.sh-drill-label');
-          if (label) label.textContent = 'TOP HOLDINGS · ' + escH(etf);
-          var rowsEl = panel.querySelector('.sh-drill-rows');
-          if (rowsEl) rowsEl.innerHTML = holdings.map(function(h) {
-            return '<div class="sh-drill-row" data-ticker="' + escH(h.t) + '">' +
-              '<span class="sh-drill-sym">' + escH(h.t) + '</span>' +
-              '<span class="sh-drill-name">' + escH(h.n) + '</span>' +
-              '<span class="sh-drill-price">—</span>' +
-              '<span class="sh-drill-chg" style="color:#555">—</span>' +
-              '<span class="sh-drill-weight">' + escH(h.w) + '</span>' +
-              '<button class="sh-drill-intel">INTEL ›</button>' +
-            '</div>';
-          }).join('');
+          var lb=panel.querySelector('.sh-drill-label');
+          if(lb) lb.textContent='TOP HOLDINGS · '+s.etf;
         });
     }
 
-    function wireTileClicks() {
-      body.querySelectorAll('.sh-tile').forEach(function(tile) {
-        tile.addEventListener('click', function() {
-          var etf = tile.dataset.etf;
-          var sectorName = (tile.querySelector('.sh-sector') || {}).textContent || etf;
-          var row = (lastRows || []).find(function(r){ return r.etf === etf; });
-          showDrillDown(etf, sectorName, row ? row.dp : null);
-        });
-      });
-    }
-
-    function fetch_sectors(isRefresh) {
-      if (!isRefresh) body.innerHTML = '<div class="tbw-loading">LOADING SECTORS…</div>';
-      fetch('/.netlify/functions/macro-data?type=sectors')
-        .then(function(r){ return r.ok ? r.json() : null; })
-        .then(function(rows){
-          if (!rows) { if (!isRefresh) body.innerHTML = '<div class="tbw-loading">UNAVAILABLE</div>'; return; }
-          lastRows = rows;
-          if (isRefresh && body.querySelector('.sh-heatmap')) { updateTiles(rows); }
-          else { body.innerHTML = buildGrid(rows); wireTileClicks(); }
+    /* ── Fetch & render ── */
+    function fetchAndRender() {
+      contentEl.innerHTML='<div class="tbw-loading">LOADING '+currentMarket+' · '+currentPeriod+'…</div>';
+      fetch('/.netlify/functions/macro-data?type=market-sectors&market='+currentMarket+'&period='+currentPeriod)
+        .then(function(r){ return r.ok?r.json():null; })
+        .then(function(data) {
+          if(!data){ contentEl.innerHTML='<div class="tbw-loading">UNAVAILABLE</div>'; return; }
+          lastSectors=mergeSectors(MARKETS[currentMarket].sectors,data);
+          renderView();
         })
-        .catch(function(){ if (!isRefresh) body.innerHTML = '<div class="tbw-loading">UNAVAILABLE</div>'; });
+        .catch(function(){ contentEl.innerHTML='<div class="tbw-loading">UNAVAILABLE</div>'; });
     }
 
-    fetch_sectors(false);
+    function renderView() {
+      if(!lastSectors) return;
+      var prevDrill=body.querySelector('.sh-drill'), prevEtf=prevDrill?prevDrill.dataset.etf:null;
+      if(currentView==='GRID') renderGrid(lastSectors);
+      else if(currentView==='DONUT') renderDonut(lastSectors);
+      else if(currentView==='MAP') renderMap(lastSectors);
+      if(prevEtf) { var ps=lastSectors.find(function(x){ return x.etf===prevEtf; }); if(ps) showDrillDown(ps); }
+    }
+
+    /* ── Setup ── */
+    body.innerHTML = buildCtrl();
+    var contentEl = body.querySelector('.sh-content');
+
+    body.querySelector('.sh-ctrl').addEventListener('click', function(e) {
+      var btn=e.target.closest('button'); if(!btn) return;
+      if(btn.dataset.mkt) {
+        currentMarket=btn.dataset.mkt;
+        body.querySelectorAll('.sh-ctrl-mkt').forEach(function(b){ b.classList.toggle('active',b.dataset.mkt===currentMarket); });
+        fetchAndRender();
+      } else if(btn.dataset.per) {
+        currentPeriod=btn.dataset.per;
+        body.querySelectorAll('.sh-ctrl-per').forEach(function(b){ b.classList.toggle('active',b.dataset.per===currentPeriod); });
+        fetchAndRender();
+      } else if(btn.dataset.view) {
+        currentView=btn.dataset.view;
+        body.querySelectorAll('.sh-ctrl-view').forEach(function(b){ b.classList.toggle('active',b.dataset.view===currentView); });
+        renderView();
+      } else if(btn.classList.contains('sh-ctrl-ref')) {
+        fetchAndRender();
+      }
+    });
+
+    fetchAndRender();
     clearTimeout(el_refresh_timer(id));
     set_refresh_timer(id, setInterval(function() {
-      if (!body.querySelector('.sh-heatmap') && !body.querySelector('.tbw-loading')) { clearInterval(el_refresh_timer(id)); return; }
-      fetch_sectors(true);
+      if(currentPeriod==='1D') fetchAndRender();
     }, 60000));
   }
 
