@@ -241,8 +241,8 @@
           id: 'w-' + Date.now(),
           type: type,
           x: 40 + offset, y: 40 + offset,
-          w: type === 'notes' ? 280 : type === 'news' ? 400 : type === 'live_tv' ? 520 : type === 'chat' ? 480 : type === 'calendar' || type === 'econ_calendar' ? 480 : type === 'call_signal' ? 380 : type === 'obj_handler' ? 440 : type === 'analogy_lib' ? 480 : type === 'gold_intel' ? 540 : type === 'scenario_mod' ? 520 : type === 'macro_intel' ? 580 : type === 'business_cycle' ? 900 : type === 'macro_monitor' ? 720 : type === 'sector_heatmap' ? 620 : type === 'watchlist' ? 320 : type === 'global_map' ? 760 : type === 'origin_web' ? 920 : type === 'cask_calc' ? 720 : 340,
-          h: type === 'news' || type === 'notes' ? 480 : type === 'live_tv' ? 380 : type === 'chat' ? 440 : type === 'calendar' ? 380 : type === 'econ_calendar' ? 540 : type === 'call_signal' ? 480 : type === 'obj_handler' ? 560 : type === 'analogy_lib' ? 600 : type === 'gold_intel' ? 700 : type === 'scenario_mod' ? 660 : type === 'macro_intel' ? 500 : type === 'business_cycle' ? 720 : type === 'macro_monitor' ? 480 : type === 'sector_heatmap' ? 380 : type === 'watchlist' ? 420 : type === 'global_map' ? 480 : type === 'origin_web' ? 600 : type === 'cask_calc' ? 620 : 240,
+          w: type === 'notes' ? 280 : type === 'news' ? 400 : type === 'live_tv' ? 520 : type === 'chat' ? 480 : type === 'calendar' || type === 'econ_calendar' ? 480 : type === 'call_signal' ? 380 : type === 'obj_handler' ? 440 : type === 'analogy_lib' ? 480 : type === 'gold_intel' ? 540 : type === 'scenario_mod' ? 520 : type === 'macro_intel' ? 580 : type === 'business_cycle' ? 900 : type === 'macro_monitor' ? 720 : type === 'sector_heatmap' ? 720 : type === 'watchlist' ? 420 : type === 'global_map' ? 760 : type === 'origin_web' ? 920 : type === 'cask_calc' ? 720 : 340,
+          h: type === 'news' || type === 'notes' ? 480 : type === 'live_tv' ? 380 : type === 'chat' ? 440 : type === 'calendar' ? 380 : type === 'econ_calendar' ? 540 : type === 'call_signal' ? 480 : type === 'obj_handler' ? 560 : type === 'analogy_lib' ? 600 : type === 'gold_intel' ? 700 : type === 'scenario_mod' ? 660 : type === 'macro_intel' ? 500 : type === 'business_cycle' ? 720 : type === 'macro_monitor' ? 480 : type === 'sector_heatmap' ? 500 : type === 'watchlist' ? 520 : type === 'global_map' ? 480 : type === 'origin_web' ? 600 : type === 'cask_calc' ? 620 : 240,
           data: {},
         };
         spawnWidget(cfg);
@@ -1731,6 +1731,173 @@
       {id:'m8', cat:'MONETARY POLICY', asset:'PE/TRUSTS', concept:'PE Premium in ZIRP Unwind',
        analogy: 'Zero interest rate policy from 2009-2022 allowed mediocre businesses to borrow cheaply and survive. The rate normalisation since 2022 is a business cycle stress test that separates genuinely profitable companies from the living dead. The PE managers who can identify operationally strong businesses through that filter will deploy at 2024-2025 vintages into a landscape cleared of weak competition. The next decade of PE returns may be the best in twenty years — precisely because the last decade of easy money is over.',
        why: 'Sophisticated macro-to-PE linkage. Very effective with clients who have lived through ZIRP and understand why the environment has changed. Positions current vintage as a structural opportunity, not a leap of faith.'},
+      {id:'m9', cat:'MONETARY POLICY', asset:'GOLD', concept:'Trust as the Only Monetary Input',
+       analogy: 'Every currency in existence is a trust transaction. You trust the government. You trust the central bank. You trust the banking system holding your money. You trust the institution that holds the institution. Gold requires none of those trusts. It is the only monetary asset where the counterparty risk is zero — because there is no counterparty.',
+       why: 'Strips the argument back to first principles. Clients who are comfortable with systemic trust rarely question it until asked directly. This analogy surfaces the hidden dependency in their entire financial architecture.'},
+      {id:'m10', cat:'MONETARY POLICY', asset:'BOTH', concept:'The Quiet Consent of Quantitative Easing',
+       analogy: 'In 2008, the Federal Reserve\'s balance sheet was $900 billion. By 2022 it was $9 trillion. No parliament voted for that expansion. No newspaper ran the headline: "Government quietly taxes your savings by expanding the money supply." But that is precisely what happened — and it happened simultaneously across every developed economy on earth, without consent, without announcement, and without a single investor receiving a refund. The assets that survived it are the ones that cannot be printed.',
+       why: 'Long-form and factual. Positions monetary policy not as neutral management but as a covert reallocation of wealth. The "without consent" framing creates moral clarity that precedes the product conversation.'},
+
+      /* ── INTEREST RATES (expanded) ──────────────────────────── */
+      {id:'r6', cat:'INTEREST RATES', asset:'GOLD', concept:'Real Rates and Gold — The Documented Relationship',
+       analogy: 'The inverse relationship between real interest rates and gold is one of the strongest documented correlations in commodity economics. When real rates are negative — when bonds pay you less than inflation — gold costs nothing to hold relative to an alternative that yields negative. The argument against gold ("it pays no interest") is most powerful at 5% real rates. At negative real rates, that argument inverts completely and becomes the strongest case for holding it.',
+       why: 'Expert delivery framing. Converts the most common objection into its own refutation using the prospect\'s implicit logic. Particularly effective with financially literate clients who have already heard the "gold pays no yield" argument.'},
+      {id:'r7', cat:'INTEREST RATES', asset:'WHISKY', concept:'Rate Cuts and the Alternative Asset Wave',
+       analogy: 'When central banks cut rates, institutional capital reallocates toward yield-generating alternatives. The first wave flows to equities. The second wave — as equity valuations stretch — flows to alternative asset classes with non-correlated return profiles. Whisky sits in that second wave. The flow is structural and predictable. By the time the mainstream narrative catches up, the assets have already repriced.',
+       why: 'Positions whisky within a sequenced institutional flow narrative. Gives the broker a macro-credible argument for timing without resorting to speculation. The "second wave" framing explains why now is the positioning window.'},
+      {id:'r8', cat:'INTEREST RATES', asset:'PROPERTY', concept:'The Rate Seesaw and the 12-Month Lag',
+       analogy: 'The relationship between interest rates and property prices is a seesaw with a 12-month delay. When rates rise, property prices fall — but with a lag, because transactions are slow. When rates fall, property prices rise — again with a lag. The investor who understands the lag is always positioned one cycle ahead of the crowd who react to the headlines. The lag is currently working in your favour.',
+       why: 'The seesaw metaphor is immediately visual and mechanical. The "lag" concept is genuine and gives the client a framework for understanding why the opportunity exists before it is obvious.'},
+      {id:'r9', cat:'INTEREST RATES', asset:'GOLD', concept:'The Zero Bound Trap',
+       analogy: 'When rates reach zero — or go below it, as they did across Europe and Japan for most of a decade — the entire theoretical framework for evaluating monetary assets collapses. The opportunity cost of holding gold disappears entirely. The Bank of Japan held negative rates for ten years. Gold, priced in yen, doubled during that period. The argument against gold assumes positive real rates. Remove the assumption and the argument removes itself.',
+       why: 'Uses a real, recent, documented example that most clients are aware of but have never connected to gold. Particularly effective with clients who have holdings in Japan or who follow international monetary policy.'},
+      {id:'r10', cat:'INTEREST RATES', asset:'BOTH', concept:'Rate Normalisation and Ongoing Repression',
+       analogy: 'Rate normalisation since 2022 has done something paradoxical: it has raised the opportunity cost of holding cash in nominal terms while inflation has continued to outpace yields in real terms. Rates have risen. Real returns on bonds remain negative or barely positive. The rate cycle tightened, but financial repression continued underneath it. Physical assets with supply constraints benefit from this environment precisely as they benefit from zero rates — just via a different mechanism.',
+       why: 'Expert counterintuitive argument. Most clients assume rising rates are bad for hard assets and good for cash. This dismantles that assumption with the real-rate data, positioning hard assets as appropriate in both rate environments.'},
+
+      /* ── ECONOMIC CYCLES (expanded) ─────────────────────────── */
+      {id:'e7', cat:'ECONOMIC CYCLES', asset:'GOLD', concept:'ISM Manufacturing as a Pre-Signal',
+       analogy: 'The ISM Manufacturing index below 50 signals contraction and historically precedes central bank easing by six to nine months. When easing arrives, the first assets to reprice are the ones most sensitive to dollar weakness and falling real rates — which is gold. The ISM is the early warning system that allows patient capital to position before the crowd arrives. By the time the Fed cuts, the trade has already moved.',
+       why: 'Gives the broker a specific, verifiable economic indicator to reference. Positions the broker as an intelligence source rather than a salesperson. Bridges macro data directly to gold without requiring the client to make any inferential leap.'},
+      {id:'e8', cat:'ECONOMIC CYCLES', asset:'BOTH', concept:'The Late-Expansion Trap',
+       analogy: 'In every credit cycle, there is a moment — usually late expansion, when leverage is at its peak and risk premiums are at their lowest — when the assets that performed best in the preceding expansion become the most dangerous to hold. The investors who survive the cycle turn are almost always the ones who added non-correlated assets during the euphoric phase, when nobody could imagine why they would need them. They did not predict the downturn. They followed a process. The process rewarded them.',
+       why: 'Long-form and educational. Addresses the cognitive state of clients who are currently satisfied with their portfolio and therefore feel no urgency. Reframes inaction during good times as the structural mistake.'},
+      {id:'e9', cat:'ECONOMIC CYCLES', asset:'WHISKY', concept:'The Blissfully Indifferent Cask',
+       analogy: 'A 15-year Springbank distilled in 2009 has matured through quantitative easing, the European debt crisis, Brexit, COVID-19, and the most aggressive rate-hiking cycle in 40 years — and throughout all of it, it has been quietly getting older, rarer, and more valuable. The cask has no Bloomberg terminal. This is its primary investment virtue.',
+       why: 'Humour with genuine intellectual substance. The comedy of the cask\'s blissful ignorance of macro events reinforces the non-correlation argument in a way that lands memorably. Works particularly well with high-stress, high-information clients who are fatigued by macro news.'},
+      {id:'e10', cat:'ECONOMIC CYCLES', asset:'GOLD', concept:'The Recession Playbook — Every Time',
+       analogy: 'In every recession since 1970, gold has outperformed equities. Not some recessions. Every single one. This is not a theory or a projection — it is the empirical record of how capital behaves when growth disappoints and central banks ease. The recession trade is the gold trade. The only variable is whether you are positioned before or after the contraction is confirmed.',
+       why: 'Short and definitive. The word "every" does significant work here because it is accurate and auditable. Clients who are sceptical of claims about gold will find this one verifiable — and once verified, it tends to close the objection permanently.'},
+
+      /* ── WHISKY FUNDAMENTALS (expanded) ─────────────────────── */
+      {id:'w9', cat:'WHISKY FUNDAMENTALS', asset:'WHISKY', concept:'The India Tariff Shift — Permanent Demand',
+       analogy: 'The UK-India Free Trade Agreement has fundamentally altered the whisky investment thesis. India\'s middle class is one of the world\'s fastest-growing consumer groups with a documented preference for Scotch as a status signal. Tariffs at the border, previously set at 150%, are now on a legislated trajectory toward significantly lower levels. That is a structural and permanent shift in the economics of Indian demand. You cannot accelerate the production of 15-year-old whisky. The supply to meet this demand was distilled years ago — and it cannot be remade.',
+       why: 'Expert, data-grounded framing connecting geopolitics to the supply-demand thesis. The India story is one of the most compelling structural demand arguments available for whisky and clients who follow international trade recognise its significance immediately.'},
+      {id:'w10', cat:'WHISKY FUNDAMENTALS', asset:'WHISKY', concept:'Ownership as Cultural Participation',
+       analogy: 'A whisky cask is one of the very few investments that is simultaneously a financial asset, a cultural artefact, and a piece of Scotland\'s living industrial heritage. The distillers who made these casks were craftspeople following processes unchanged for generations. When you own a cask, you own that craft — a collaboration between Scottish terroir, century-old copper stills, and the slow alchemy of time. The investment case is compelling. But the ownership experience is something else entirely.',
+       why: 'Emotional and honouring. Activates the identity and legacy drivers (Greene) alongside the financial case. Works powerfully with clients for whom ownership has meaning beyond numbers — collectors, entrepreneurs, and clients who think in decades rather than quarters.'},
+
+      /* ── PORTFOLIO THEORY (expanded) ─────────────────────────── */
+      {id:'p7', cat:'PORTFOLIO THEORY', asset:'BOTH', concept:'Volatility Drag — the Hidden Cost of Rough Returns',
+       analogy: 'Two portfolios both average 7% per year over ten years. The first is volatile: up 20%, down 15%, up 18%, down 12%. The second is smooth: up 7% every year. After ten years, the smooth portfolio is worth more. Not because it averaged more — it didn\'t. Because volatility drag is arithmetic reality: negative returns cost more than equivalent positive returns gain. Adding a non-correlated, lower-volatility alternative reduces overall portfolio volatility and increases compounded wealth. This is not intuitive. It is mathematics.',
+       why: 'Expert and analytical. The volatility drag concept is genuinely surprising to most clients and immediately verifiable on a spreadsheet. Positions the alternative not as an exciting return play but as a structural improvement to the entire portfolio architecture.'},
+      {id:'p8', cat:'PORTFOLIO THEORY', asset:'GOLD', concept:'The Sharpe Ratio Argument',
+       analogy: 'Portfolio optimisation is not about maximising return. It is about maximising return per unit of risk — the Sharpe ratio. Forty years of academic research consistently shows that a portfolio with a 5-10% gold allocation produces a materially higher Sharpe ratio than an equivalent portfolio without it. Not because gold has the highest returns — it does not — but because it has negative correlation to equities precisely when equity drawdowns are largest. In a portfolio, the Sharpe ratio is the number that actually matters.',
+       why: 'Professional and quantitative. Appeals directly to sophisticated clients who think in risk-adjusted terms. Repositions gold from "commodity speculation" to "portfolio optimisation tool" — a fundamentally different and more credible category.'},
+      {id:'p9', cat:'PORTFOLIO THEORY', asset:'BOTH', concept:'Correlation Convergence Under Stress',
+       analogy: 'In normal conditions, bonds and equities are uncorrelated. In normal conditions, real estate and equities are modestly correlated. In normal conditions, alternatives are non-correlated to everything. But in a financial crisis, correlations converge — everything falls together as the only thing being traded is liquidity. Everything, that is, except physical assets that cannot be panic-sold because they have no liquid market. The crisis is precisely when non-correlation matters most — and precisely when most diversified portfolios discover they were not.',
+       why: 'Logical and expert. Addresses the most sophisticated form of the diversification argument by pointing out its conditional nature. The crisis convergence insight is academically grounded and empirically confirmed by 2008 and 2022.'},
+      {id:'p10', cat:'PORTFOLIO THEORY', asset:'BOTH', concept:'The Cost of the Status Quo',
+       analogy: 'Every pound sitting in a low-yield cash account is a portfolio construction choice. It has allocated 100% to a position that currently earns less than inflation. The decision not to allocate to alternatives is itself an allocation — to cash, at negative real returns. Most clients think of inaction as neutral. It is not. It is an active choice with measurable, compounding consequences that show up silently on every bank statement as a smaller purchasing power.',
+       why: 'Short, direct, and emotionally resonant. Converts the most common stalling mechanism — doing nothing — into a named, visible cost. The loss framing (I am actively losing purchasing power right now) is more motivating than the gain framing (I might make more).'},
+
+      /* ── PROPERTY (expanded) ─────────────────────────────────── */
+      {id:'pr6', cat:'PROPERTY', asset:'PROPERTY', concept:'The Structural Undersupply Floor',
+       analogy: 'Britain needs approximately 340,000 new homes per year. It builds approximately 200,000. The structural undersupply — roughly 140,000 homes annually — has compounded for two decades. This is not a cyclical imbalance that resolves with a rate cut. It is a permanent structural condition created by planning law, green belt constraints, and the economics of construction. Every rate cycle ends. Every recession recovers. The planning system never changes fast enough to close a 20-year accumulated supply deficit. That gap is the structural floor beneath every property value in the country.',
+       why: 'Expert, long-form, data-grounded. The housing undersupply argument is the most durable structural case for UK property and is rarely presented with this degree of specificity. Positions property as a structural play rather than a market timing play.'},
+      {id:'pr7', cat:'PROPERTY', asset:'PROPERTY', concept:'Institutional Capital as a Signal',
+       analogy: 'The institutional capital moving into UK residential property — pension funds, sovereign wealth, global private equity — is not coming because they believe UK housing is cheap. It is coming because they believe the structural yield premium on long-duration real assets in an undersupplied market is the most reliable income stream available. When the world\'s most sophisticated long-term capital is allocating to UK residential, asking whether now is the right time is asking whether you are smarter than the people managing $100 billion portfolios.',
+       why: 'Authority framing via institutional behaviour. Uses the implied intelligence of major allocators as a social proof and authority signal without requiring any specific return projection.'},
+      {id:'pr8', cat:'PROPERTY', asset:'PROPERTY', concept:'The Generational Asset',
+       analogy: 'There are very few things a successful person leaves their children that compound reliably across generations. A well-selected property in a structurally undersupplied area does. The names above the doors of Britain\'s great property dynasties were not built on perfect market timing. They were built on patience, quality, and the arithmetic of compound returns over decades. A property held for 30 years in a constrained market will outlast the headlines, the rate cycles, and every piece of commentary that made it feel difficult to buy.',
+       why: 'Emotional and honouring. Activates the legacy driver. Works powerfully with clients who are building for their children or who think beyond their own investment horizon. The word "generations" does significant work.'},
+      {id:'pr9', cat:'PROPERTY', asset:'PROPERTY', concept:'Rates Suppress Buyers, Inflate Renters',
+       analogy: 'When rates rise, buyers cannot afford to buy. But they still need to live somewhere. Rising rates simultaneously suppress ownership demand and inflate rental demand — pushing rents higher. The landlord who holds through the rate cycle is collecting inflating rents on an asset that is repricing for the rate cut cycle ahead. The headline says property is under pressure. The headline is describing the buyer\'s market, not the landlord\'s income statement.',
+       why: 'Short, clever, professional. Reframes the rate environment as a net positive for income-generating property investors. Specifically targeted at buy-to-let or portfolio landlord clients who are hearing negative property commentary and feeling uncertain.'},
+      {id:'pr10', cat:'PROPERTY', asset:'PROPERTY', concept:'Stamp Duty as a Fractional Cost',
+       analogy: 'Stamp duty on a £500,000 property is £12,500. Spread over a 10-year holding period, that is £1,250 per year — less than 0.25% of the asset value annually. The number that feels largest on the day of purchase becomes vanishingly small when measured against the holding period it is amortised across. The clients who delay because of stamp duty are paying a ten-year price for a one-day problem.',
+       why: 'Short, logical, slightly humorous. Directly neutralises one of the most common stated objections to property investment with simple arithmetic. Particularly effective when the client has mentioned stamp duty as a reason for hesitation.'},
+
+      /* ── FINE WINE (expanded) ────────────────────────────────── */
+      {id:'fw5', cat:'FINE WINE', asset:'FINE WINE', concept:'Provenance as the Foundation of Price',
+       analogy: 'In fine wine, provenance — the documented chain of custody from château to cellar — is the foundation of value. A bottle of 1961 Pétrus with impeccable provenance trades at three to four times the price of an equivalent bottle with gaps in its history. This is not irrationality. It is the rational pricing of counterparty risk in an asset with no standardised audit trail. The institutional buyers — the major auction houses — are in the business of verifying provenance. A bonded, professionally stored allocation has provenance built into its structure from the moment of purchase.',
+       why: 'Professional, expert. Addresses the verification objection proactively. Positions institutional storage as a structural feature of value, not merely a service.'},
+      {id:'fw6', cat:'FINE WINE', asset:'FINE WINE', concept:'The First Growth Machine',
+       analogy: 'Five estates define the apex of the Bordeaux market. They have done so for over two centuries. They produce the same volume each year — approximately 15,000 to 20,000 cases each. The number of people globally who can afford these wines grows by several million every decade. The supply is fixed by the acreage of the vineyards, last formally assessed in 1855, and it will not change. Every new billionaire in Mumbai, Beijing, or Houston is a marginal buyer competing for a fixed supply that gets consumed and never replaced. The maths runs in one direction.',
+       why: 'Long-form, authoritative, historical. The 1855 classification date anchors the scarcity argument in history rather than projection. The "every new billionaire" framing makes the demand growth concrete and personal.'},
+      {id:'fw7', cat:'FINE WINE', asset:'FINE WINE', concept:'En Primeur — The Off-Plan Principle',
+       analogy: 'En primeur — buying wine before it is bottled, directly from the barrel in the year after harvest — is the fine wine equivalent of buying property off-plan. You access the vintage at its lowest market price, before the global trade catches up with its quality. The finest vintages of the last 25 years — 2000, 2005, 2009, 2010, 2015, 2019 — delivered the greatest returns for the buyers who moved earliest. The risk is vintage quality. The reward, in exceptional years, is permanent entry before institutional demand reprices.',
+       why: 'Logical, professional. The off-plan analogy is instantly recognisable to property-experienced clients. Positions en primeur not as specialist knowledge but as a familiar buying principle applied to a different asset.'},
+      {id:'fw8', cat:'FINE WINE', asset:'FINE WINE', concept:'Two Thousand Years of Consensus',
+       analogy: 'Fine wine is the oldest internationally recognised store of value after gold. Roman senators invested in Falernian. Medieval monasteries built their wealth on vineyards. The great banking families of Renaissance Florence held wine cellars as collateral against loans. Today, every major institution of civilised life — sovereign wealth funds, great museums, private banks — maintains a cellar curated as a financial asset. You are not buying a collectible. You are participating in a 2,000-year-old global consensus about what human civilisation values.',
+       why: 'Emotional and honouring. Deeply historical framing that elevates the purchase decision from financial to civilisational. Particularly resonant with clients who are culturally engaged, historically literate, or motivated by legacy and permanence.'},
+      {id:'fw9', cat:'FINE WINE', asset:'FINE WINE', concept:'The Asian Market Premium — Documented',
+       analogy: 'Between 2005 and 2011, Hong Kong removed its wine duties. Fine wine prices — led by Bordeaux first growths — rose 300% in six years as Chinese collectors entered the market. That wave is still running: mainland China represents one of the fastest-growing segments of the Liv-ex by volume, and South-East Asian auction records break quarterly. The structural demand driver is continental, demographic, and cultural — not cyclical. It does not reverse when the equity market corrects.',
+       why: 'Data-driven and specific. The 300% price move is real and verifiable. The "not cyclical" distinction is important — it establishes wine demand as structural, not speculative, which directly addresses the most intelligent form of the objection.'},
+      {id:'fw10', cat:'FINE WINE', asset:'FINE WINE', concept:'The Dinner Table Exit',
+       analogy: 'There is one asset class where, in extremis, you can liquidate your position over dinner and call it a good evening. A case of premier cru Burgundy is a financial asset for most of its life — but on the right occasion, with the right people, it is also an experience that cannot be unbottled. No other alternative investment offers a liquidity mechanism that involves candlelight and a Michelin-starred menu. This is, of course, an argument for any other exit mechanism — but if you are going to mark a position against a market bottom, you might as well do it beautifully.',
+       why: 'Humour, warm, and genuinely distinctive. The joke earns the right to be there because it accurately describes a real and unique feature of the asset. Works as a rapport-building closer that leaves the client smiling — and remembering the broker.'},
+
+      /* ── MARKET PSYCHOLOGY (expanded) ───────────────────────── */
+      {id:'k6', cat:'MARKET PSYCHOLOGY', asset:'BOTH', concept:'The 18-Month Narrative Lag',
+       analogy: 'The financial press is a trailing indicator. By the time the narrative about any alternative asset reaches mainstream publication, the institutional buying has been underway for 18 to 24 months. The client who reads about gold in the Sunday supplement is reading about what the institutions decided two years ago. The broker who delivers the data before the headline writes itself is the advisor worth paying for.',
+       why: 'Intelligent and slightly flattering to the prospect. Positions early positioning as insider access rather than speculation. The 18-month figure is documented and specific — it reflects real institutional positioning cycles.'},
+      {id:'k7', cat:'MARKET PSYCHOLOGY', asset:'BOTH', concept:'Survivorship Bias in the Portfolio Story',
+       analogy: 'The success stories of conventional investing are real. They are also the survivors. The clients who held through the 2000-2003 tech drawdown and sold at the bottom, or who had a concentrated position in a sector that never recovered, are not published in the testimonials. When a client says their traditional portfolio has "always worked well," they are looking at the evidence that survived to be seen — not the evidence that didn\'t. Survivorship bias is the reason the graveyard is always quiet.',
+       why: 'Analytical and slightly provocative. The "graveyard is always quiet" line is quotable and memorable. Challenges the reference pool the client is using without attacking them personally.'},
+      {id:'k8', cat:'MARKET PSYCHOLOGY', asset:'GOLD', concept:'What the Printers Are Buying',
+       analogy: 'Central banks are buying gold at a 55-year record pace. These are the entities that manage the global reserve system. When they choose to hold more gold and fewer dollars — a documented, published reallocation accelerating through 2022-2024 — they are making a statement about the long-term integrity of fiat currency that they cannot make publicly without destabilising the systems they manage. Their actions speak louder than any commentary they offer. The gold purchase is the policy they cannot announce.',
+       why: 'Authority and intrigue combined. The framing that central banks are signalling something they cannot say publicly activates the prospect\'s curiosity and the authority principle simultaneously. Short enough to land as a punchline.'},
+      {id:'k9', cat:'MARKET PSYCHOLOGY', asset:'BOTH', concept:'The Rational Window',
+       analogy: 'Fear produces panicked sellers. Greed produces oblivious buyers. Neither state produces rational allocators. The correct allocation decision — 5-10% into non-correlated physical assets — gets made in the quiet periods between extremes, when the data is clear and the emotion is absent. This conversation is one of those quiet periods. The data has been clear for some time.',
+       why: 'Short, measured, confident. Positions the current moment as the optimal decision window — neither fear-driven nor greed-driven. Works particularly well as a closing line or a pre-close framing device.'},
+      {id:'k10', cat:'MARKET PSYCHOLOGY', asset:'BOTH', concept:'The Knowing-Doing Gap',
+       analogy: 'There is a consistent gap between what sophisticated investors know about portfolio construction and what they have actually implemented. Most high-net-worth clients can articulate the case for non-correlated assets, real stores of value, and tax-efficient structuring with complete clarity. Very few have implemented it. The gap between knowing and doing is not intelligence — it is inertia, familiarity bias, and the absence of a compelling enough prompt to act. This conversation is intended to be that prompt.',
+       why: 'Honouring and direct. Validates the client\'s intelligence while naming the specific behavioural mechanism preventing action. The final sentence makes the broker\'s role explicit — not pushing, but prompting what the client already knows is right.'},
+
+      /* ── EIS / VCT (expanded) ────────────────────────────────── */
+      {id:'v7', cat:'EIS / VCT', asset:'EIS/VCT', concept:'SEIS — The 50% Floor',
+       analogy: 'SEIS gives 50% upfront income tax relief. On a £100,000 investment, the government immediately returns £50,000. If the company fails entirely, the combined relief position means the maximum real loss on £100,000 committed is approximately £27,500. You are investing in early-stage British innovation with a government co-investment equivalent exceeding 70 pence in every pound at risk. No other asset class available to a UK taxpayer has this structural architecture.',
+       why: 'Expert and numerical. The specific loss calculation (maximum real loss of £27,500 per £100,000) is genuinely surprising to most clients and immediately verifiable. Once understood, it reframes the risk conversation entirely.'},
+      {id:'v8', cat:'EIS / VCT', asset:'EIS/VCT', concept:'CGT Deferral as an Interest-Free Loan from HMRC',
+       analogy: 'An EIS investment can defer an existing capital gains tax liability until disposal — potentially across multiple years. A client with a £200,000 CGT liability has, in effect, an interest-free loan from HMRC for the period they choose to deploy EIS. The capital that would have gone to HMRC is instead working in an investment that also generates 30% upfront income tax relief on the new deployment. The compound effect of deferral plus relief creates a structural advantage that no conventional investment product can replicate.',
+       why: 'Professional, logical, double-benefit framing. The "interest-free loan from HMRC" metaphor reframes the government\'s own tax mechanism as a benefit rather than a relief — a subtly more empowering framing that activates the reciprocity principle.'},
+      {id:'v9', cat:'EIS / VCT', asset:'EIS/VCT', concept:'The Triple-Stack — EIS, BPR, Loss Relief Combined',
+       analogy: 'The client with both an income tax liability and an IHT exposure holds the most powerful use case for EIS available in the UK tax code. The 30% income tax relief reduces the effective cost immediately. The Business Property Relief qualification at two years removes the asset from the estate entirely. And loss relief provides a structural floor. In practice: £500,000 into a qualifying EIS portfolio returns £150,000 in income tax relief immediately, removes up to £200,000 of IHT liability at two years, and has a provable downside limit. This is not aggressive tax planning. It is the HMRC-designed purpose of the scheme, used in full.',
+       why: 'Long-form, strategic, and authoritative. The "triple-stack" framing makes the combined benefit feel like a system rather than three separate products — which is how it actually works. The "HMRC-designed purpose" closing line neutralises any compliance anxiety.'},
+      {id:'v10', cat:'EIS / VCT', asset:'EIS/VCT', concept:'The 5th April Clock',
+       analogy: 'The EIS claim window closes on 5th April every year. Every relief, every deferral, every BPR qualifying period is measured from the date the investment is made. A conversation held in March and acted upon before 5th April is worth years of conversation held in April. The most expensive thing in tax planning is not the advisory fee. It is the missed deadline.',
+       why: 'Short, direct, and professional. The April 5th date is genuinely consequential and real — it creates authentic urgency without manufactured pressure. The final line is quotable.'},
+
+      /* ── PRIVATE EQUITY (expanded) ────────────────────────────── */
+      {id:'pe6', cat:'PRIVATE EQUITY', asset:'PE/TRUSTS', concept:'Co-Investment — The Premium Tier',
+       analogy: 'The most sophisticated PE managers offer co-investment alongside their main fund — direct access to individual portfolio company deals at reduced or zero management fees, deploying capital alongside the fund\'s own money into the GP\'s highest-conviction positions. Co-investment is not a product feature. It is the allocation the institution keeps for its most important relationships. Access to it is the signal that you are in the right conversation.',
+       why: 'Authority and scarcity combined. Positions co-investment access as a relationship signal rather than a product detail. Works powerfully with status-motivated HNW clients who respond to signals of exclusive access.'},
+      {id:'pe7', cat:'PRIVATE EQUITY', asset:'PE/TRUSTS', concept:'The Operational Alpha',
+       analogy: 'The PE return premium over public equities is not primarily a leverage story. The leverage is available to any buyer. The premium comes from operational improvement: installing management, restructuring costs, professionalising reporting, and building the platform for strategic acquisitions in ways that public company shareholders cannot demand and public market participants cannot deliver. The alpha in PE is behavioural and operational. That is why the best managers produce consistent outperformance across multiple cycles — not because conditions favoured them, but because they changed the companies.',
+       why: 'Intelligent and demystifying. Converts PE from "financial engineering" to "operational management" in the client\'s mind — a much more defensible and credible category. Works well with entrepreneurs and business owners who recognise operational improvement as a genuine source of value.'},
+      {id:'pe8', cat:'PRIVATE EQUITY', asset:'PE/TRUSTS', concept:'Investment Trust Board Alignment',
+       analogy: 'A listed investment trust has a board of independent directors whose sole fiduciary obligation is to shareholder interests — not to the manager\'s fee income. Unlike an open-ended fund, the board can require fee renegotiation, mandate structural changes, or pursue a wind-up in shareholders\' interests. The governance structure is more genuinely aligned with investors than any equivalent open-ended product. The discount to NAV that occasionally exists in investment trusts partly prices in a governance premium that most investors have never been asked to consider.',
+       why: 'Expert, structural, and educational. The governance alignment argument is one of the most underappreciated features of the investment trust structure. It gives sophisticated clients a non-obvious reason to prefer the structure — which is the strongest type of reason.'},
+      {id:'pe9', cat:'PRIVATE EQUITY', asset:'PE/TRUSTS', concept:'The Information Asymmetry',
+       analogy: 'Private equity managers have information about their portfolio companies that public market participants will never have. They sit on boards, review management accounts monthly, and approve all significant capital decisions. The information gap between a PE general partner and a public equity fund manager investing in the same sector is structural and enormous. The PE return premium partly reflects the quality of decisions that are made with materially better information — not with more courage or more luck.',
+       why: 'Short, expert, and analytically compelling. Frames the return premium as an information-driven structural advantage rather than a risk premium — a more defensible and more credible explanation that sophisticated clients find more persuasive.'},
+      {id:'pe10', cat:'PRIVATE EQUITY', asset:'PE/TRUSTS', concept:'The 2024-2025 Vintage Thesis',
+       analogy: 'The vintage year of a PE fund deployment determines returns more than almost any other single variable. Funds raised at market peaks — 2006, 2007, 2019 — bought expensive, suffered multiple contraction, and returned mediocre results. Funds raised after corrections — 1993, 2001, 2010 — bought cheap, benefited from recovery, and generated the best decade returns. The 2024-2025 vintage is being deployed into a market that has seen valuation correction, rate normalisation, and the natural exit of weaker businesses that could not survive the cost of capital. The structural setup is similar to the post-GFC period that generated the best PE returns of the modern era.',
+       why: 'Long-form, macro-grounded, historically anchored. The vintage year comparison framework is how sophisticated PE investors actually think — which makes this argument land credibly with clients who have seen multiple PE cycles.'},
+
+      /* ── LAND & ART (expanded) ───────────────────────────────── */
+      {id:'la4', cat:'LAND & ART', asset:'LAND', concept:'Farmland as Essential Infrastructure',
+       analogy: 'Farmland produces the food that every human being on the planet requires to survive. It does not matter what the equity market does, what the central bank decides, or what the geopolitical environment looks like — the demand for agricultural output is constant, inelastic, and growing with population. Farmland is the most essential infrastructure in existence. That is why every major endowment, pension fund, and sovereign wealth manager has been increasing farmland allocation for the last decade. The asset is not cyclical. It is existential.',
+       why: 'Expert and foundational. The "existential" word is deliberate — it positions farmland at the bottom of Maslow\'s hierarchy, where demand cannot be cyclical. Works particularly well with clients motivated by fundamentals over speculation.'},
+      {id:'la5', cat:'LAND & ART', asset:'LAND', concept:'The Renewable Energy Premium',
+       analogy: 'The value of UK farmland now carries a structural premium that did not exist a decade ago: energy. A farmer who leases land for a solar installation or wind turbine earns £10,000 to £20,000 per acre annually — far more than the agricultural rental value alone. The grid decarbonisation programme requires millions of acres of appropriately located land over the next two decades. Farmland that can serve dual agricultural and energy purposes is being priced at a growing premium to land that cannot. The energy transition is a farmland catalyst that had no precedent before 2010.',
+       why: 'Expert and contemporary. The renewable energy premium is a new and compelling structural argument for farmland that most investors have not encountered. Positions farmland as benefiting from two independent demand drivers simultaneously.'},
+      {id:'la6', cat:'LAND & ART', asset:'LAND', concept:'Natural Capital Revenue Stacking',
+       analogy: 'The Woodland Carbon Code — the UK government\'s verified carbon credit standard for forestry — has created a new income stream for land investors: sequestration credits that can be sold to corporate net-zero buyers. A mature mixed woodland on quality land now generates income simultaneously from timber, biodiversity net gain credits, water catchment payments, and carbon sequestration. The natural capital revenue model has created a category of land investment that was not financially viable five years ago and is now one of the most institutionally credible alternative allocations in the UK.',
+       why: 'Expert, forward-looking, and multi-income-stream. The natural capital framing is increasingly mainstream in institutional investment circles. Clients who follow ESG or sustainability themes find this argument immediately compelling.'},
+      {id:'la7', cat:'LAND & ART', asset:'ART', concept:'The Blue-Chip Art Record',
+       analogy: 'The Artprice 100 Index — tracking the 100 most-traded contemporary artists — has returned over 360% since 2000, outperforming major equity indices over the same period. The top decile of that index — what the market calls blue chip: Hirst, Koons, Basquiat, Prince in the modern era — has produced returns that dwarf listed equity exposure with comparable price discovery transparency. The auction data is public. The Artprice index is verifiable. The returns are documented.',
+       why: 'Data-driven and credibility-establishing. Replaces the art-as-speculation narrative with a specific, auditable performance index. Works well with clients who are interested in art but have dismissed it as too opaque or too speculative.'},
+      {id:'la8', cat:'LAND & ART', asset:'ART', concept:'The Fixed-by-Mortality Argument',
+       analogy: 'A Basquiat that sold for $800,000 in 2002 sold at Sotheby\'s in 2017 for $110.5 million. That is not a prediction — it is the historical record of what happens when a defined body of work by a deceased artist intersects with global wealth expansion across a generation. The supply is permanently fixed by the artist\'s mortality. The demand expands with every new billionaire who wants cultural permanence alongside financial capital. The two curves — fixed supply, expanding demand — only diverge in one direction.',
+       why: 'Specific, verifiable, and emotionally powerful. The "fixed by mortality" phrase is stark and memorable. The two-curve framing reduces a complex market to a simple supply/demand axiom that sophisticated clients immediately recognise as correct.'},
+      {id:'la9', cat:'LAND & ART', asset:'LAND', concept:'Strategic Land Optionality',
+       analogy: 'The planning reform debate has created something that did not exist at scale before: speculative premium on land adjacent to green belt boundaries, or within areas identified for potential reclassification. A parcel of agricultural land that receives even outline planning permission can increase in value by 10 to 100 times its agricultural baseline in a single decision. The optionality embedded in well-selected strategic land is the highest-asymmetry single-decision investment available in UK property — because the upside is transformational and the downside is agricultural land value.',
+       why: 'Expert, specific, and asymmetry-framed. The "10 to 100 times" figure is accurate and auditable — it is documented in UK land registry data from areas that received planning reclassification. The asymmetric risk framing activates the prospect\'s desire for convexity.'},
+      {id:'la10', cat:'LAND & ART', asset:'ART', concept:'The Collection That Outlasts Everything',
+       analogy: 'The Rothschild Collection. The Rockefeller Collection. The Saatchi Gallery. Every family of enduring multi-generational wealth has, at its core, a collection of objects curated with intention and held with conviction. These collections did not begin as financial strategies. They began as expressions of taste, curiosity, and the desire to surround a family with beautiful things. Over time, they became the most valuable assets in the estate — and the most personal. Acquiring one great work, authenticated and provenance-verified, is not a portfolio decision. It is the beginning of something that may outlast everything else you build.',
+       why: 'Emotional, honouring, and long-form. Activates the legacy driver at its deepest level. Works powerfully with clients who are thinking beyond their own lives, who have children or grandchildren, and who are motivated by permanence as much as performance.'},
     ];
 
     /* ═══════════════════════════════════════════════════════════
@@ -1811,7 +1978,328 @@
        why: 'Source: Cardone 10X follow-up + Festinger cognitive dissonance. Future-pacing the retrospective version of the decision forces the client to imagine having made it — and the psychology of imagining an outcome makes it feel more real and owned. Festinger: the mind resolves the dissonance between "I should have done this" by doing it now.'},
       {id:'s25', cat:'UNDERSTANDING', scenario:'"I\'d want my IFA to look at this first."',
        spin: 'That\'s a sensible process — and I\'d actively encourage you to involve your IFA. But I want to flag one dynamic. An IFA who charges ongoing management fees on assets under management has a structural incentive to keep assets inside the platform they manage. An IFA who recommends moving 10% into alternative assets outside their platform loses 10% of their fee base. That\'s not a criticism — it\'s a structural reality worth knowing. The question you want to ask your IFA isn\'t "should I do this?" It\'s "what\'s the regulatory and tax analysis of this specific structure?" That\'s where their expertise genuinely adds value. The investment case is a separate question — and that\'s what we\'ve been covering today.',
-       why: 'Source: Challenger Commercial Teaching + Greene strategic framing. Reframes the IFA referral from a stall to a process — and specifically positions it on the IFA\'s genuine area of competence (regulatory analysis) rather than investment selection. This respects the IFA relationship without ceding the sales conversation.'},
+       why: 'Reframes the IFA referral from a stall to a process — and specifically positions it on the IFA\'s genuine area of competence (regulatory analysis) rather than investment selection. This respects the IFA relationship without ceding the sales conversation.'},
+
+      /* ── LIQUIDITY (expanded) ──────────────────────────────────── */
+      {id:'s26', cat:'LIQUIDITY', scenario:'"I can\'t lock my money up for that long."',
+       spin: 'I want to separate two very different things: genuine liquidity need and liquidity comfort. Genuine need means capital required within a specific timeframe for a committed purpose — a business liability, a tax bill, a known expenditure. Liquidity comfort is capital held liquid because it feels reassuring, even though it has no near-term use. The question is not whether your client likes liquidity. It is what percentage of their capital they would actually need within 36 months if forced to identify it. In most portfolios, that number is between 5% and 20%. The rest is comfort-capital earning negative real returns while pretending to be a safety net.',
+       why: 'Diagnostic reframe. Most liquidity objections conflate genuine liquidity need with comfort-holding. Separating them creates two very different conversations — one about structuring, one about psychology.'},
+      {id:'s27', cat:'LIQUIDITY', scenario:'"I prefer to keep things I can sell tomorrow."',
+       spin: 'The assets you can sell tomorrow are also the assets everyone else can panic-sell tomorrow — at 3am, during a market crisis, when sentiment is at its worst. The ability to sell in a panic is the precise mechanism by which liquid assets create permanent capital impairment. The illiquid assets — the cask, the EIS, the property — physically cannot be panic-sold. That limitation, which feels like a cost, is actually the mechanism that protects you from the single most expensive mistake in investing.',
+       why: 'Converts the liquidity objection into its own refutation. The ability to sell quickly is reframed as the specific feature that exposes liquid assets to panic-driven permanent loss.'},
+      {id:'s28', cat:'LIQUIDITY', scenario:'"What if I need the money unexpectedly?"',
+       spin: 'The honest answer is: you need to hold enough liquid capital to cover your genuine emergency scenario. Define that number — three months of expenses, six months, whatever the right floor is for your situation. Hold that number in cash or equivalents. Everything above that floor has a different mandate. The question is not whether to hold any liquidity. It\'s whether the capital above the liquidity floor is working optimally for your 5-10 year position.',
+       why: 'Accepts the concern entirely and immediately operationalises it. The client cannot object to holding a genuine liquidity reserve — the reframe simply asks them to define how much that is, which almost always reveals it is less than their current cash position.'},
+      {id:'s29', cat:'LIQUIDITY', scenario:'"The lock-up period is too long for my comfort."',
+       spin: 'Think about the assets you actually hold for the longest periods. Your pension — you cannot touch it until 57. Your property — the cost of selling is high enough that it is effectively illiquid unless you are forced. Your business equity — entirely illiquid until exit. The investments that have created the most wealth in your life are probably the ones with the longest effective lock-ups. The term on this investment is not unusual. It is the same patience model that has worked for you before.',
+       why: 'Mirrors the client\'s own existing behaviour back at them. Most HNW clients hold extremely illiquid assets already — they just don\'t frame them as such. Pointing this out removes the exceptionalism of the alternative investment\'s term.'},
+      {id:'s30', cat:'LIQUIDITY', scenario:'"I\'d want to know I could get out if I needed to."',
+       spin: 'What exit mechanisms actually exist is a fair question — and the answer is more nuanced than "you can\'t." Most structured alternatives have defined secondary market processes, transfer mechanisms, or early redemption provisions that apply under specific circumstances. The question is not whether an exit path exists — it is whether the cost of that exit path is acceptable as an insurance premium on the position. In almost every structure, the answer is yes. Let me walk you through the exact mechanics.',
+       why: 'Converts the binary "locked up" objection into a factual conversation about specific exit mechanisms. Most clients assume zero exit options and are positively surprised when specific, real mechanisms exist.'},
+      {id:'s31', cat:'LIQUIDITY', scenario:'"I\'ve always kept things liquid — that\'s just how I operate."',
+       spin: 'That approach has served you well in one specific sense: it has protected you from bad decisions in the short term. But there\'s a cost on the other side that\'s less visible — the compounding return you\'ve left on the table by keeping capital idle. The question isn\'t whether you should change your operating principle — it\'s whether a small portion of your capital, say 5-10%, could operate on a different timeframe without compromising the principle at all. Most people find it can.',
+       why: 'Respects the stated operating principle entirely. Frames the alternative as a partial exception to the rule rather than an attack on it. Most clients who frame their behaviour as an operating principle are more receptive to carve-outs than to wholesale changes.'},
+      {id:'s32', cat:'LIQUIDITY', scenario:'"I have a lot of upcoming expenses — it\'s not a good time."',
+       spin: 'That\'s useful context. What\'s the total quantum of those upcoming expenses, and what\'s the timeline? Because if we\'re talking about £50,000 in committed expenses in the next 12 months on a £500,000 portfolio — the remaining £450,000 is not constrained by that. We\'d only ever be discussing the portion of capital that is structurally available for a 3-7 year allocation. The expenses don\'t change the conversation about that portion at all.',
+       why: 'Diagnostic. Forces the client to quantify the actual near-term commitment, which almost always reveals that it is a fraction of the total investable capital. The precise numbers replace a vague sense of constraint with a solvable structuring question.'},
+      {id:'s33', cat:'LIQUIDITY', scenario:'"I\'d want quarterly liquidity at minimum."',
+       spin: 'Quarterly liquidity is available — but it comes with a structural cost. The assets that offer quarterly liquidity are the ones that hold only quarterly-liquid underlying assets, which means you\'re back inside the listed equity and bond universe. The return premium for alternatives exists precisely because they don\'t offer quarterly liquidity — the illiquidity premium is the whole point. The question is how much of your portfolio genuinely requires quarterly liquidity versus how much can work on a different mandate.',
+       why: 'Accepts the liquidity preference for part of the portfolio and reframes the alternative as serving a different mandate. Removes the binary choice and introduces a portfolio construction framing.'},
+      {id:'s34', cat:'LIQUIDITY', scenario:'"Liquidity is my number one priority."',
+       spin: 'I\'d like to challenge one assumption in that statement — not the priority itself, but whether the currently liquid assets are actually serving the priority they\'re supposed to serve. If liquidity is a priority because you need the capital available for something specific, that\'s rational and structurally sound. If liquidity is a priority because it feels safer, we should look at what safe actually costs in real terms right now. Full liquidity at 4% nominal and 4% inflation is not safety — it\'s a slow guaranteed loss.',
+       why: 'Distinguishes between rational liquidity need and comfort-liquidity. Does not attack the priority — reframes what the priority is actually serving and what it costs in practice.'},
+      {id:'s35', cat:'LIQUIDITY', scenario:'"I need to be able to move fast if I see something I want."',
+       spin: 'That\'s a valid operating principle for opportunistic capital. The question is what percentage of your portfolio genuinely needs to operate that way. Most clients find that 10-15% in highly liquid, immediately deployable capital is more than sufficient for opportunistic moves — and that the rest of the portfolio can operate on a longer, higher-returning mandate. Keeping 85% in liquid capital waiting for an opportunity that uses 15% of it is a significant drag on the overall portfolio.',
+       why: 'Validates the opportunistic investing mindset while introducing the concept of mandate segregation. The arithmetic of keeping 85% liquid for a 15% opportunity is immediately compelling when stated directly.'},
+
+      /* ── REGULATION (expanded) ──────────────────────────────── */
+      {id:'s36', cat:'REGULATION', scenario:'"Is this FCA regulated?"',
+       spin: 'EIS, SEIS, and VCT structures are HMRC-approved and FCA-regulated at the fund and platform level. Physical assets — a cask of whisky, farmland, fine art — are not financial products and therefore fall outside FCA regulation in the same way that owning a house or a painting does. Regulation governs financial products; it does not govern ownership of physical assets. The question your client is actually asking is: is this legitimate, is this transparent, and is there recourse if something goes wrong? The answer to all three is yes — and here\'s exactly why.',
+       why: 'Disentangles the regulatory question from the legitimacy question. Addresses the real underlying concern (safety and recourse) without pretending that unregulated physical assets should be treated identically to regulated financial products.'},
+      {id:'s37', cat:'REGULATION', scenario:'"Unregulated products feel too risky to me."',
+       spin: 'The word "unregulated" is doing a lot of heavy lifting in that concern — and it\'s doing it without quite meaning what it implies. Your house is unregulated. Your pension, at the underlying asset level, holds unregulated private equity. Your ISA holds listed equities that are regulated at the exchange level but whose underlying value is entirely unregulated by anyone. What regulation actually provides is a dispute resolution mechanism and a disclosure standard — neither of which is the primary determinant of asset quality or return.',
+       why: 'Reframes regulation from quality signal to process mechanism. Useful for clients who are using "unregulated" as a proxy for "risky" — which conflates two different dimensions of assessment.'},
+      {id:'s38', cat:'REGULATION', scenario:'"My last advisor told me to stick to regulated products."',
+       spin: 'That\'s sound general advice — and it comes from a period when the alternatives market was considerably less transparent and institutionally developed than it is today. The structures that exist now — government-approved tax wrappers, bonded warehouse storage, Liv-ex pricing, verified auction records — provide the transparency and accountability that regulation was designed to create, through market infrastructure rather than regulatory requirement. The question isn\'t what your last advisor said. It\'s whether that advice was based on today\'s market or the market of ten years ago.',
+       why: 'Respects the prior advisor while introducing a temporal obsolescence argument. The prior advice is not wrong — it just predates developments that change the analysis.'},
+      {id:'s39', cat:'REGULATION', scenario:'"I\'ve heard of people losing money in unregulated schemes."',
+       spin: 'That experience is real — and it is the most useful filter for identifying what to look for and avoid. The common features of those situations: opaque valuation, no independent audit, promoters with no verifiable track record, and liquidity promises that couldn\'t be honoured. Every single one of those features is absent from what we\'re discussing. Independent storage and valuation exists. The track record is publicly verifiable. The liquidity terms are fully disclosed upfront. The past bad experience is the best guide to what to check — and everything checks out here.',
+       why: 'Converts the negative past experience into a due diligence checklist that the current offering specifically passes. Does not dismiss the concern — weaponises it in favour of the proposal.'},
+      {id:'s40', cat:'REGULATION', scenario:'"I\'d want to see the FCA registration first."',
+       spin: 'Absolutely — and I can provide exactly what applies. The fund and platform are registered. The storage and custody arrangements are independently audited. The HMRC scheme approval numbers are publicly accessible. What I\'d ask in return is that we look at the full picture of what verification is available — not just the FCA number, which confirms a process, but the actual track record, the independent valuations, and the storage audit. Those are the things that determine whether the asset actually performs as expected.',
+       why: 'Agrees to provide what is available, while expanding the verification conversation beyond the regulatory box-tick to include the genuinely informative data. Positions the regulatory check as necessary but not sufficient.'},
+      {id:'s41', cat:'REGULATION', scenario:'"I only invest in products regulated by a recognised authority."',
+       spin: 'Let\'s define what that means in practice, because the vast majority of what you currently hold is regulated in ways that are meaningful at the disclosure level and not at the performance level. No regulator guarantees returns. No regulator prevents losses. What regulation provides is a formal complaint mechanism and a disclosure standard. The question worth asking is: does this investment have an independent audit trail, transparent valuation methodology, and a defined exit process? If yes, it has the substance that regulation is designed to create — regardless of whether the regulatory label is attached.',
+       why: 'Separates substance from label. Sophisticated clients can engage with the argument that regulatory compliance and quality of investment are not the same thing — especially when illustrated by the fact that many regulated products have catastrophically failed.'},
+      {id:'s42', cat:'REGULATION', scenario:'"What happens if something goes wrong — who do I go to?"',
+       spin: 'That\'s the right question — and the answer is specific, not vague. For a physical asset: the dispute is with the custodian (regulated at the storage and insurance level), the dispute resolution process is the existing legal system for property rights, and the asset itself is held in your name independently of the promoter. If the company promoting this ceased to exist tomorrow, your asset is still in a bonded warehouse with your name on the title. That\'s a stronger position than most regulated products, where the asset is co-mingled with other investors\' money in a fund structure.',
+       why: 'Answers the specific question with the specific mechanism. The "bonded warehouse in your name" point is a genuine structural advantage that clients rarely understand they have until it is explained.'},
+      {id:'s43', cat:'REGULATION', scenario:'"The lack of regulation is a red flag for me."',
+       spin: 'I\'d encourage you to examine what the regulation flag is actually flagging. In 2008, every major institution that failed — Bear Stearns, Lehman Brothers, AIG — was regulated. The financial crisis was not a failure of unregulated markets. It was a failure of regulated products inside a framework that was inadequate. Regulation is a signal worth checking; it is not a guarantee worth relying on. The real question is: what is the independent evidence of quality, transparency, and track record? Let me show you exactly what exists here.',
+       why: 'Uses documented historical fact (the 2008 crisis) to demonstrate that the regulatory label is not synonymous with safety. Does not argue against regulation — argues against the conflation of regulated with safe.'},
+      {id:'s44', cat:'REGULATION', scenario:'"My accountant said regulated products only."',
+       spin: 'Your accountant is giving you sound general guidance — and the right question to take back to them is: "Does this specific structure fall outside the regulatory framework you had in mind, and if so, what would change your view?" In most cases, an accountant who says regulated products only means no speculative unverified schemes with opaque promoters. The HMRC-approved structure we\'re discussing — with government-sanctioned tax reliefs and published qualifying criteria — is precisely the kind of structure that passes that test, regardless of whether the FCA registration applies to the underlying asset.',
+       why: 'Frames the follow-up conversation with the accountant around the real substance of the concern rather than the regulatory label. Gives the client the specific question to take back — which is more productive than defending the regulatory category.'},
+      {id:'s45', cat:'REGULATION', scenario:'"I\'d want to understand the regulatory framework more."',
+       spin: 'That\'s exactly the right starting point — and the answer is genuinely quite clear. HMRC governs the tax treatment. The FCA governs the promotion and distribution standards for investment-related activity. The bonded warehouse and custody standards are governed by HMRC\'s Authorised Warehousekeeper regime. Independent valuers operate under market-standard professional codes. The question is not whether a framework exists. It is whether the framework for this specific asset is coherent and verifiable. It is — and I can walk you through each layer in detail.',
+       why: 'Reframes the regulatory landscape positively by naming each layer specifically. Most clients assume "unregulated" means "lawless" — this shows the multiple regulatory layers that do apply, creating a more accurate and positive picture.'},
+
+      /* ── CYCLE POSITIONING (expanded) ──────────────────────── */
+      {id:'s46', cat:'CYCLE POSITIONING', scenario:'"Is now really the right time to be buying?"',
+       spin: 'The honest answer to "is now the right time?" requires knowing where we are in the cycle — and the data is actually clearer on this point than most commentators suggest. When real yields are negative or near-zero, when central banks are in easing mode or approaching it, when alternative assets are unloved by retail, and when institutional flows are quietly moving — that is the setup that historically produces the strongest forward returns. We have all four conditions right now. The question is not whether conditions are ideal. It is whether you have ever seen them more specifically aligned.',
+       why: 'Converts a vague timing objection into a specific multi-factor checklist that the current environment specifically passes. Gives the client a framework for evaluating the question themselves, which is more persuasive than the broker asserting an answer.'},
+      {id:'s47', cat:'CYCLE POSITIONING', scenario:'"We might be heading into a recession — should I wait?"',
+       spin: 'The irony of waiting for a recession to resolve before investing in hard assets is that hard assets are specifically the thing you want positioned before the recession, not after it. Gold, in every recession since 1970, has outperformed equities. Physical assets outside the credit system are structurally positioned to gain as the recession triggers the easing cycle. The concern you\'re describing — a recession is coming — is precisely the argument for acting now, not for waiting.',
+       why: 'Converts the stated reason for waiting into the argument for acting. The recession-as-catalyst argument is both accurate and counterintuitive — which makes it memorable and hard to refute without engaging with the underlying data.'},
+      {id:'s48', cat:'CYCLE POSITIONING', scenario:'"Prices seem high right now — aren\'t we near the top?"',
+       spin: 'The "near the top" instinct deserves interrogation. Near the top of what, specifically? Gold at current prices is not near the top by any historical inflation-adjusted measure — it is near the beginning of what institutional analysis suggests is a multi-year repricing driven by de-dollarisation and central bank reallocation. Whisky casks are not near the top — they are in the middle of a 15-year maturation cycle with fixed supply and expanding demand. "Near the top" is a market timing judgement. The structural arguments are not timing-dependent.',
+       why: 'Asks the client to be specific about what "near the top" means and then addresses the specific implied measure. Converts a vague instinct into a specific, addressable claim.'},
+      {id:'s49', cat:'CYCLE POSITIONING', scenario:'"I\'d want to see how the rest of the year plays out first."',
+       spin: 'By the end of the year, there are three scenarios. One: the macro conditions deteriorated and assets repriced in the favour of early movers. Two: conditions held and prices moved modestly. Three: conditions unexpectedly improved, sentiment shifted, and prices moved substantially upward. In two of those three scenarios, waiting costs you money. In the third, it costs you very little. The expected value of waiting, weighted by probability, almost always favours positioning now over positioning in January.',
+       why: 'Scenario analysis framing. Forces the client to think in expected value terms rather than binary certainty terms. The asymmetry of the scenarios — two out of three favour acting — is immediately logical.'},
+      {id:'s50', cat:'CYCLE POSITIONING', scenario:'"I think there\'s more downside before the market turns."',
+       spin: 'You may be right. And there is a version of that analysis where, if you are right, you are positioned correctly by acting now. Here is why: the assets that matter most in a further downturn are the ones outside the equity market — and those assets benefit precisely from the downturn you are anticipating. If you are right about more downside, the case for non-correlated hard assets is stronger, not weaker. If you are wrong, the case holds regardless. You cannot construct a macro scenario where the structural argument for non-correlated real assets is weaker.',
+       why: 'A rare sales argument that concedes the prospect may be right and uses their scenario against their hesitation. Works powerfully because it demonstrates genuine intellectual engagement rather than dismissal of the concern.'},
+      {id:'s51', cat:'CYCLE POSITIONING', scenario:'"Everything seems uncertain right now."',
+       spin: 'Every investor at every point in history has felt this. In 1993: uncertainty about interest rates. In 2003: uncertainty about a war in Iraq. In 2009: uncertainty about the financial system. In 2016: uncertainty about Brexit. In 2020: uncertainty about a pandemic. The investors who acted through those uncertainties are the ones who built real wealth. The ones who waited for certainty have been waiting since 1993. Uncertainty is not a temporary condition. It is the permanent backdrop against which every investment decision in history has been made.',
+       why: 'Historical list converts "uncertainty right now" from a unique circumstance into a permanent condition — which removes it as a meaningful objection. The list should be adapted to include periods the specific client has lived through.'},
+      {id:'s52', cat:'CYCLE POSITIONING', scenario:'"The macro picture looks negative — I\'d want to see it improve."',
+       spin: 'A negative macro picture is the single most reliable predictor of improved forward returns for non-correlated assets. The mechanism: when the macro picture looks worst, central banks ease, real yields fall, and capital flows into hard assets. Waiting for the macro picture to improve is waiting for the primary catalyst to resolve — by which time the trade has already moved. The clients who position into a negative macro backdrop and hold into the recovery consistently outperform the clients who wait for the all-clear.',
+       why: 'Converts the stated reason for waiting (negative macro) into the structural argument for acting. The causation chain — bad macro → easing → hard asset appreciation — is specific and verifiable.'},
+      {id:'s53', cat:'CYCLE POSITIONING', scenario:'"The political environment makes me nervous about big decisions."',
+       spin: 'Political risk is real — and it is one of the strongest arguments for assets that sit outside the political system rather than inside it. A gold position is not subject to UK political decisions. A whisky cask in a bonded warehouse is not affected by a change of government. EIS investments have explicit legislative protection for existing claims even when the relief structure changes. The political environment that makes you nervous about equities and bonds is precisely the environment in which physical and tax-protected alternative positions are most appropriate.',
+       why: 'Converts political risk from a reason to wait into an argument for the specific assets being discussed. Particularly effective because it uses the client\'s concern as the premise of the case rather than dismissing it.'},
+      {id:'s54', cat:'CYCLE POSITIONING', scenario:'"I\'m waiting for a clear signal before I act."',
+       spin: 'A clear signal is what markets price in before it arrives. By the time the signal is clear — visible in the data, confirmed by multiple indicators, reported in the financial press — the institutional money has been positioned for 12 to 24 months and the entry price reflects the clarity. You are describing the mechanism by which investors consistently buy at the top: waiting for certainty, then acting when certainty costs the most. The structural signals available right now are as clear as they get before the mainstream narrative catches up.',
+       why: 'Identifies the cognitive error in the "wait for a clear signal" approach without being accusatory. The mechanism — institutional money is already positioned by the time signals are clear — is accurate and important.'},
+      {id:'s55', cat:'CYCLE POSITIONING', scenario:'"I feel like I may have already missed the move."',
+       spin: 'That feeling is worth examining specifically. What is the move you feel you\'ve missed — and how does it compare to what structural analysis says the remaining runway looks like? Gold at $3,000 is not the same story as gold at $250. But it is also not the end of the story — because the structural drivers (de-dollarisation, central bank buying, negative real yields, fiscal expansion) are still in place and in many cases are more developed now than when the price was lower. Missing the first act does not mean the second act is over. It means you have less runway, not no runway.',
+       why: 'Takes the regret seriously and converts it into a forward-looking structural analysis. The "first act / second act" framing is vivid and memorable. Avoids false reassurance while making a specific case for continued upside.'},
+
+      /* ── PORTFOLIO CONSTRUCTION (expanded) ─────────────────── */
+      {id:'s56', cat:'PORTFOLIO CONSTRUCTION', scenario:'"My portfolio is already diversified."',
+       spin: 'In 2022, the traditional 60/40 portfolio had its worst year since 1937. Bonds and equities fell simultaneously — because diversification between them assumed an environment where inflation was not simultaneously driving both. Diversification by name is not the same as diversification by driver. A portfolio of equities, bonds, and equity-correlated funds holds assets that all respond to the same variable — credit conditions and monetary policy. Genuine diversification requires assets that respond to different variables entirely. Physical assets with fixed supply respond to scarcity and institutional demand, not to credit conditions.',
+       why: 'Directly uses a recent, documented market event to challenge a belief that most clients hold without having stress-tested it. The 2022 data is irrefutable and memorable.'},
+      {id:'s57', cat:'PORTFOLIO CONSTRUCTION', scenario:'"I don\'t see why I need alternatives alongside what I already have."',
+       spin: 'The question isn\'t whether your current holdings are good. It\'s whether they are all having the same conversation — responding to the same macro variables, moving in the same direction under stress. If they are, then the portfolio is not diversified in the way that matters when diversification is needed most: during a crisis. The point of a non-correlated alternative is not to replace what works. It is to add something that works when everything else doesn\'t.',
+       why: 'Frames alternatives as additive rather than competitive. The "having the same conversation" metaphor is distinctive and intuitive. Avoids attacking the existing portfolio while making the structural gap vivid.'},
+      {id:'s58', cat:'PORTFOLIO CONSTRUCTION', scenario:'"I prefer a simple portfolio — a few funds and cash."',
+       spin: 'Simplicity is a genuine virtue in portfolio management — it reduces decision fatigue, lowers the chance of over-trading, and is easier to communicate to family members. The question is whether the simplicity you have is serving you optimally or just comfortably. A three-fund portfolio plus cash is simple. It is also fully correlated to equity market conditions. The simplest possible addition — a 5-10% allocation to a single physical asset — adds genuine non-correlation without adding complexity. It\'s still a three-fund portfolio plus two things.',
+       why: 'Respects the stated preference entirely. Positions the addition as marginal complexity rather than portfolio transformation. The "three-fund portfolio plus two things" framing makes the change feel minimal.'},
+      {id:'s59', cat:'PORTFOLIO CONSTRUCTION', scenario:'"I\'m already at 100% allocation — I don\'t have anything free."',
+       spin: 'That\'s useful context. The question is whether every current allocation is the most productive deployment of the capital, or whether some portion is holding a position more out of inertia than conviction. The conversation about adding alternatives is often also a conversation about what to replace — and whether the thing being replaced is genuinely earning its space. If the answer is yes, we end the conversation here. If there\'s a position that is underperforming in real terms and not serving a specific purpose, that capital has an opportunity cost.',
+       why: 'Accepts the 100% allocation as a starting point and introduces a portfolio review framing. The "inertia rather than conviction" distinction is a gentle way to surface positions that may be candidates for reallocation.'},
+      {id:'s60', cat:'PORTFOLIO CONSTRUCTION', scenario:'"My wealth manager handles all of that for me."',
+       spin: 'Wealth managers are excellent at managing the assets inside their platform. What they are structurally less positioned to do is recommend allocations to assets outside that platform — because those allocations generate no fee for them and require a referral arrangement they may not have. The question isn\'t whether your wealth manager is good at their job. It\'s whether their platform covers the full universe of appropriate allocation — or whether there are categories that systematically never make it into a wealth manager\'s recommendation because of how their business model works.',
+       why: 'Addresses the authority objection without attacking the wealth manager. Frames the limitation as structural and business-model-driven, not competence-driven — which is more honest and more persuasive.'},
+      {id:'s61', cat:'PORTFOLIO CONSTRUCTION', scenario:'"I don\'t want to over-complicate things at my age."',
+       spin: 'Simplicity at any age is a virtue. And a 5-10% allocation to one additional asset class is not complication — it is a one-time decision with a 5-7 year holding period that requires no monitoring, no rebalancing decisions, and no ongoing management on your part. The complex part is the initial selection. The holding period is the simplest thing in any portfolio: you own it, it matures, you review.',
+       why: 'Validates the age-related concern while reframing the nature of the commitment. The "one-time decision, simple holding" framing specifically addresses what clients mean when they say they don\'t want complexity at their stage of life.'},
+      {id:'s62', cat:'PORTFOLIO CONSTRUCTION', scenario:'"I\'d want to see how my current investments perform first."',
+       spin: 'The performance of your current investments over the next 12 months will tell you a great deal about the equity-bond correlation environment we\'re in — and very little about the structural supply/demand dynamics that drive hard asset returns. These are two different measurements answering two different questions. Waiting for one to answer the other is the equivalent of waiting for your car\'s fuel gauge to tell you whether the weather is good for a drive.',
+       why: 'Uses a simple analogy to make the category error explicit and humorous. Watching correlated assets to decide on uncorrelated ones is a non-sequitur — which is the point. The analogy makes this feel obvious rather than technical.'},
+      {id:'s63', cat:'PORTFOLIO CONSTRUCTION', scenario:'"I prefer to keep my alternative allocation small — maybe 2-3%."',
+       spin: 'A 2-3% allocation has a mathematical problem: at that size, it cannot meaningfully affect the portfolio. If it outperforms by 20%, the portfolio gain is 0.5%. If it underperforms by 20%, the portfolio loss is 0.5%. Neither outcome is worth making a decision about. The academic research on portfolio optimisation consistently shows the minimum meaningful alternative allocation is 5% — below which the non-correlation benefit is statistically insignificant. The benefit of the allocation is real; it just requires a minimum threshold to be visible.',
+       why: 'Uses mathematics to address a common compromise position. The specific numbers make the argument immediately tangible. Does not attack the small allocation instinct — demonstrates why it doesn\'t work at the level the client has proposed.'},
+      {id:'s64', cat:'PORTFOLIO CONSTRUCTION', scenario:'"I want to understand the role this plays in the portfolio first."',
+       spin: 'The role is specific and describable: it is a non-correlated position that holds or increases in value when equity-bond correlation breaks down — specifically during monetary stress, inflationary regimes, and sovereign debt crises. It responds to different variables than the rest of your portfolio. It adds to the Sharpe ratio of the overall portfolio by reducing peak-to-trough drawdown in the periods when drawdown is largest. That is the role. It is not speculative return enhancement. It is structural resilience.',
+       why: 'Answers the question directly, specifically, and technically. Clients who ask about role are often analytically minded and respond well to precise, jargon-appropriate answers. The Sharpe ratio reference is appropriate for sophisticated investors.'},
+      {id:'s65', cat:'PORTFOLIO CONSTRUCTION', scenario:'"I\'d want a second opinion before changing my allocation."',
+       spin: 'Absolutely — and a second opinion is most valuable when the person giving it has no financial relationship with the outcome. Your IFA earns management fees on your current allocation. Your wealth manager earns custody fees on your current holdings. A second opinion from a specialist in the allocation you\'re considering is not neutral either. The most honest thing I can offer you is the specific data, the specific structure, and the specific track record — and suggest you pressure-test every element of it with whoever you trust to be genuinely impartial.',
+       why: 'Unusually transparent and therefore highly credible. By naming the conflict of interest in every potential second-opinion source — including the broker themselves — the broker establishes a standard of honesty that differentiates them from the competition.'},
+
+      /* ── TRUST (expanded) ──────────────────────────────────── */
+      {id:'s66', cat:'TRUST', scenario:'"I don\'t really know your firm — how long have you been operating?"',
+       spin: 'That\'s the most important question you can ask — and the answer should come with verification, not just assertion. Our track record in [specific asset] spans [X] years. Our client retention rate is [Y]. We have placed [Z] clients in this specific structure and the outcomes are verifiable. I would actively encourage you to check those claims independently — speak to existing clients if you want, look at our regulatory filings, review the independent valuations. Trust should be earned from evidence, not built on a pitch.',
+       why: 'Radical transparency in response to a trust question. The invitation to verify independently — genuinely offered — is the most trust-building response possible. Most brokers deflect the question; this one leans into it.'},
+      {id:'s67', cat:'TRUST', scenario:'"I\'ve been let down by previous brokers — why would this be different?"',
+       spin: 'That experience is the most important data point in this conversation — and I don\'t want to minimise it or talk around it. What specifically happened? Was it a performance issue, a communication issue, or was there something fundamentally misrepresented? The reason I ask is that the way you were let down tells me exactly what to design around. A broker who let you down on communication needs a different response than one who let you down on structure or returns. I want to know exactly what went wrong before I ask you to consider trusting anything again.',
+       why: 'Converts a defensive moment into a diagnostic conversation. The question "what specifically happened?" transforms the client from an objector into an informant — and demonstrates genuine interest in their experience rather than a desire to move past it.'},
+      {id:'s68', cat:'TRUST', scenario:'"How do I know the storage and custody is legitimate?"',
+       spin: 'The storage is at [name] — a HMRC Authorised Warehousekeeper operating under the Customs and Excise Management Act. Every cask is individually insured, listed on a publicly verifiable bonded stock register, and can be visited by any owner. The title is registered in your name from the point of purchase. If this company ceased to exist tomorrow, the cask continues to exist in the warehouse with your name on the title deed. The custody infrastructure predates us and will postdate us — it is the infrastructure of a centuries-old industry, not a new arrangement.',
+       why: 'Specific and verifiable. Names the regulatory framework, the visit option, and the survivability of the custody structure. Most trust objections about physical assets collapse when the client understands that the asset is held in their name independently of the promoter.'},
+      {id:'s69', cat:'TRUST', scenario:'"This feels like the kind of thing I\'ve seen go wrong before."',
+       spin: 'That instinct deserves to be taken seriously — and the most useful thing we can do is examine it specifically. What features does this have in common with the situation you\'ve seen go wrong? Opaque valuation? No. Promoters with no verifiable track record? No. Liquidity promises that can\'t be honoured? No — the liquidity terms are exactly what they say they are, upfront and in writing. Matching your concern to the specific features of what went wrong last time is the most productive use of that experience.',
+       why: 'Takes the concern at face value and applies a specific diagnostic framework. Converts an emotional instinct into a checklist — which the broker can then work through methodically, demonstrating transparency rather than defensiveness.'},
+      {id:'s70', cat:'TRUST', scenario:'"I don\'t know anyone who has done this before — can I speak to existing clients?"',
+       spin: 'Yes — and we actively encourage it. We can provide introductions to existing clients who have consented to share their experience. What specific aspects of the investment would you most want to hear about? Performance against expectations? Communication quality? Exit process experience? Defining what you want to learn from the conversation means you get the most useful information rather than just a general testimonial.',
+       why: 'Accepting the request without hesitation is the most trust-building response possible. The follow-up question — what specifically do you want to learn — demonstrates confidence and helps structure a productive third-party conversation.'},
+      {id:'s71', cat:'TRUST', scenario:'"I\'d want to do my own due diligence before committing to anything."',
+       spin: 'That is exactly the right approach — and I can make your due diligence as straightforward as possible. Here is the specific information I would look at if I were you: [list three specific, verifiable data points — auction records, regulatory filings, independent valuations]. I\'d also suggest speaking to [specific independent source — HMRC guidance, institutional custodian, bonded warehouse directly]. The more rigorous your due diligence, the more confident you\'ll be in the decision. Let me know what you find.',
+       why: 'Accelerates the due diligence process by providing a specific checklist of what to check. Demonstrates confidence by suggesting independent verification. The "let me know what you find" closing line is disarmingly confident.'},
+      {id:'s72', cat:'TRUST', scenario:'"Why should I trust you over a bank or a big-name institution?"',
+       spin: 'The banks and big institutions are the right place for some things — mainstream financial products, payment infrastructure, vanilla savings. They are structurally not positioned for the allocation we are discussing, because those products do not fit their business model, their capital adequacy requirements, or their regulatory mandate. You should trust a specialist in an area where specialisation matters. You would not ask your GP to perform surgery. Institutional trust is earned by doing the right thing in the right domain.',
+       why: 'Validates institutional trust generally while establishing domain-specific expertise as the relevant dimension. Avoids attacking the bank — repositions the conversation around fitness for purpose rather than credibility alone.'},
+      {id:'s73', cat:'TRUST', scenario:'"I need to feel completely comfortable before I do anything."',
+       spin: 'Complete comfort before any decision of substance is not achievable — because comfort is the feeling you get after a decision has proved correct, not before it. The best available substitute for complete comfort is complete information: knowing the specific structure, the specific downside scenario, the specific exit mechanism, and the specific historical track record. I can provide all of those. What I cannot provide is the certainty that the future will match the past. No one can. What I can provide is the clearest possible picture of the risk-adjusted case.',
+       why: 'Gently and honestly reframes "complete comfort" as a feeling that follows rather than precedes good decisions. Positions complete information as the honest substitute — which is both true and actionable.'},
+
+      /* ── AUTHORITY (expanded) ───────────────────────────────── */
+      {id:'s74', cat:'AUTHORITY', scenario:'"My bank said this type of investment isn\'t for me."',
+       spin: 'Your bank\'s product recommendation is bounded by their approved product list — which is designed around the products that generate the revenue their business model requires. A cask investment, an EIS structure, or an investment trust at a discount to NAV is not on any retail bank\'s approved list, because the margin model and the distribution infrastructure don\'t support it. The bank\'s "not for you" is a product-list limitation, not an investment quality assessment.',
+       why: 'Distinguishes between a product list limitation and an investment quality assessment. Does not attack the bank — explains a structural reality that is genuinely true and that clients rarely understand until it is named.'},
+      {id:'s75', cat:'AUTHORITY', scenario:'"My financial adviser told me to stick with what I know."',
+       spin: '"Stick with what you know" is sound cognitive advice for managing risk in a casino. In investing, it describes the familiarity bias — the tendency to overweight assets that feel familiar regardless of their actual risk-adjusted return. The FTSE 100 feels familiar. A whisky cask does not. But familiarity is not the same as safety, and unfamiliarity is not the same as risk. The question is not whether this is what you know. It is whether it is what the evidence supports.',
+       why: 'Names the cognitive bias (familiarity) that underlies the "stick with what you know" advice. Does not attack the adviser — provides an intellectual framework that the client can apply independently.'},
+      {id:'s76', cat:'AUTHORITY', scenario:'"I\'m going to follow what the mainstream financial media recommends."',
+       spin: 'The mainstream financial media is optimised for readership and engagement — not for investment advice. The stories that drive clicks are stories about things that have already moved: "gold hits all-time high," "property market surges," "crypto explodes." By the time those headlines exist, the institutional buyers have been positioned for 12-24 months and are beginning to distribute to the retail audience. The financial press is where you find the peak — not the entry point.',
+       why: 'Media critique framing. Positions the financial press explicitly as a trailing indicator. The "distributing to the retail audience" line is accurate and sobering — it describes the mechanism by which retail investors systematically buy at the top.'},
+      {id:'s77', cat:'AUTHORITY', scenario:'"My accountant has seen things like this go wrong."',
+       spin: 'I\'d actively want to know what specifically your accountant has seen — because the details matter enormously. Legitimate schemes gone wrong due to poor management is a different category from fraudulent schemes with fabricated returns. Most of what accountants have seen go wrong in the alternative space involves: no independent valuation, no segregated client assets, and promoters with no track record. I\'d encourage you to go back to your accountant and ask: "Do any of those factors apply to what I\'m looking at now?" The answer will tell us whether the concern is relevant.',
+       why: 'Takes the accountant\'s concern seriously while asking the client to apply it specifically. The specific features of schemes that go wrong — no valuation, no segregation, no track record — are exactly the features a transparent provider can demonstrate absence of.'},
+      {id:'s78', cat:'AUTHORITY', scenario:'"I only work with firms that have been recommended by a professional body."',
+       spin: 'That\'s a sound filtering principle — and the specific question is which professional body recommendation matters for this type of asset. HMRC approval applies to the tax structure. The bonded warehouse is regulated by HMRC\'s Authorised Warehousekeeper scheme. The investment management element would sit under FCA promotion standards. The combination of those approval bodies is more specific and more relevant than a generic industry association membership.',
+       why: 'Maps the relevant regulatory and professional standards to the specific asset rather than arguing against the principle. The client who understands the actual approval bodies has a more accurate picture of the oversight that applies.'},
+      {id:'s79', cat:'AUTHORITY', scenario:'"Institutional investors don\'t own this — why should I?"',
+       spin: 'The premise may not be accurate. Central banks own gold at a 55-year record pace. The largest university endowments hold 20-30% in alternatives including private equity, real assets, and physical commodities. Sovereign wealth funds from Norway to Singapore have been acquiring UK farmland and infrastructure for a decade. The question is not whether institutions own these assets. It is whether your current allocation structure gives you exposure to what they are accumulating — or whether it gives you exposure only to what they are selling.',
+       why: 'Directly refutes the premise with documented institutional behaviour. Converts the authority argument from "institutions don\'t own this" to "institutions are accumulating this while retail investors are missing it."'},
+      {id:'s80', cat:'AUTHORITY', scenario:'"I\'d want to see institutional research supporting this thesis."',
+       spin: 'The institutional research exists — and it comes from the most credible sources: Goldman Sachs, JPMorgan, and BlackRock have all published bullish structural cases for gold and alternative assets within the last 24 months. The central bank research departments of the BIS and the IMF have published extensively on de-dollarisation. These are not fringe opinions. They are the analytical positions of the organisations whose capital movements are driving the price action we can observe.',
+       why: 'Provides specific, nameable institutional sources. The named institutions (Goldman, JPMorgan, BlackRock, BIS, IMF) are unassailable authority references. Most clients have not sought this research and are positively surprised by its existence.'},
+      {id:'s81', cat:'AUTHORITY', scenario:'"I trust my current adviser — I don\'t want to go around them."',
+       spin: 'I respect that relationship — and the right approach is probably not to go around your adviser but to bring this information into the conversation with them. The most productive framing with your adviser is: "I\'ve been introduced to this allocation — can you give me your assessment of how it fits my overall position, and specifically what the tax and regulatory analysis looks like?" That question uses your adviser\'s expertise in exactly the right area and keeps the conversation collaborative rather than competitive.',
+       why: 'Frames the broker as a complement to the adviser rather than a competitor. Provides the client with the specific question to take back — which keeps the conversation alive and positions the broker\'s information as due-diligence input rather than an end-run.'},
+
+      /* ── RETURNS (expanded) ─────────────────────────────────── */
+      {id:'s82', cat:'RETURNS', scenario:'"The returns on this seem lower than what I\'m getting from equities."',
+       spin: 'The comparison you\'re making is nominal return versus nominal return — and that is the least useful comparison available. The relevant comparison is risk-adjusted, tax-adjusted, and correlation-adjusted return. A 15% gross equity return that falls 40% in a downturn, is correlated to everything else in your portfolio, and is taxed at 45% on realisation may substantially underperform a 10% net return from a tax-advantaged alternative that holds its value when equities fall and costs 30p in the pound less to own. Can we run that comparison with your actual numbers?',
+       why: 'Introduces the three adjustments (risk, tax, correlation) that most clients have never applied to a side-by-side comparison. The offer to run the comparison with actual numbers is collaborative and highly credible.'},
+      {id:'s83', cat:'RETURNS', scenario:'"I want double-digit returns — can this deliver that?"',
+       spin: 'The Rare Whisky 101 index returned 12% per annum over the 15 years to 2021. Gold has returned 8% per annum in sterling terms over 20 years. Prime London property has returned 9% per annum since 2000. Whether those figures constitute double-digits depends on the asset and the period. The more relevant question is: what return, in what form, over what period, with what downside scenario, is appropriate for this specific allocation? Those four variables together define whether double-digits is the right target here.',
+       why: 'Provides specific, verifiable return data upfront while reframing the target conversation around a more sophisticated four-variable framework. Works with clients who are return-focused by showing that the numbers can compete while adding analytical depth.'},
+      {id:'s84', cat:'RETURNS', scenario:'"I\'ve heard the returns on alternatives can be inconsistent."',
+       spin: 'All return series are inconsistent — because markets and conditions change. The question is whether the inconsistency is random or structurally explained, and whether the downside is capped or open. A whisky cask that returns 0% in year three because spirit values held flat has not failed — it has held. The return profile is long-dated, with a structural floor provided by the intrinsic value of the liquid, and a structural upside provided by the maturation premium and the scarcity of the supply. Inconsistency in alternatives is usually the expected patience cost, not evidence of structural failure.',
+       why: 'Accepts the observation and explains the mechanism. Reframes inconsistency as a holding cost for the asymmetric payoff structure — which is a more sophisticated frame than simply denying the inconsistency.'},
+      {id:'s85', cat:'RETURNS', scenario:'"The return is good but the fees eat into it."',
+       spin: 'Fees matter — and the comparison to make is total cost versus net return versus risk. A 2% annual fee on a strategy returning 12% gross and uncorrelated to everything else in your portfolio compares favourably to a 1% annual fee on a strategy returning 6% gross with full equity correlation. The fee line is not where the analysis should end. The question is what the fee buys you in terms of net return, risk reduction, and tax efficiency. In most alternative structures, the fee is appropriate to the management complexity — and the net return is the figure that matters.',
+       why: 'Accepts the fee concern and introduces the right denominator (total cost versus net risk-adjusted return). Does not minimise fees — contextualises them within the complete picture.'},
+      {id:'s86', cat:'RETURNS', scenario:'"I can get similar returns from an index fund with no lock-up."',
+       spin: 'The index fund return and the alternative return look similar in a spreadsheet and are structurally very different in practice. The index fund is fully liquid — and therefore fully vulnerable to panic selling at the moment of maximum stress. It is fully correlated to every other equity-market-linked asset in your portfolio. It provides no tax advantage. And its return is determined by market sentiment as much as by fundamental value. The alternative is illiquid, non-correlated, potentially tax-advantaged, and fundamentally valued. "Similar return" with those differences in structure is not the same product.',
+       why: 'Accepts the nominal return comparison and systematically distinguishes the structural differences. Turns "similar returns" from a comparison-winner into a prompt for the more important structural discussion.'},
+      {id:'s87', cat:'RETURNS', scenario:'"I\'d need to see a track record before committing."',
+       spin: 'The track record exists — and the right question is which track record to look at. The specific asset class performance over a 10-15 year period? The specific manager\'s exit history? The secondary market auction data for comparable assets? The independent valuation movement over the past five years? Each of those tells you something different. I can walk you through the most relevant data set for your specific concern — but I\'d want to know which dimension of track record is most important to you before we start.',
+       why: 'Accepts the track record requirement and introduces a diagnostic — which type of track record? — that demonstrates the broker has specific, verifiable answers to each variant. Prevents a vague "show me track record" request from becoming an endless objection loop.'},
+      {id:'s88', cat:'RETURNS', scenario:'"The projected returns seem optimistic."',
+       spin: 'The returns I\'ve described are not projections — they are historical data from verifiable sources. The specific figures: [cite the data]. The conservative case, based on the structural floor of the asset rather than the average historical return, is [lower figure]. The argument I am making is not that this will replicate the best historical return. It is that the structural supply-demand dynamic that produced those returns is still in place — and in many cases more developed than when the historical period began. The sceptical case deserves to be made explicitly, and I\'d rather make it than have you feel you weren\'t told.',
+       why: 'Converts "projected" language into "historical" language where accurate. Proactively presents the conservative case without being asked — which is one of the most credibility-building things a broker can do.'},
+      {id:'s89', cat:'RETURNS', scenario:'"I need income — this doesn\'t generate regular cashflow."',
+       spin: 'You\'re right — and that means this allocation needs to sit alongside income-generating positions, not replace them. The question is what percentage of your portfolio needs to generate income and what percentage can work on a capital appreciation mandate. For most clients at this stage, the income requirement is met by dividend equities, bonds, and cash — and a 10-15% allocation to a capital appreciation asset alongside those is compatible with the income objective. The two mandates don\'t conflict; they occupy different parts of the portfolio.',
+       why: 'Accepts the income requirement as real and legitimate. Proposes a portfolio construction solution rather than arguing against the income need. The mandates framing — income mandate versus capital appreciation mandate — is professional and actionable.'},
+
+      /* ── SIZING (expanded) ───────────────────────────────────── */
+      {id:'s90', cat:'SIZING', scenario:'"The minimum is much higher than I was expecting."',
+       spin: 'The minimum is where it is for a structural reason: below that threshold, the cost of custody, legal structure, and management does not produce an attractive net return. It is not a sales minimum — it is the economic floor at which the structure works. What I\'d ask is: what were you expecting the minimum to be, and what would a position at that level accomplish for you? If the answer is a position too small to meaningfully affect the portfolio, the conversation is not about the minimum. It is about whether this allocation belongs in your portfolio at all.',
+       why: 'Explains the economic rationale for the minimum without apologising for it. The follow-up question — what would a smaller position accomplish? — surfaces whether the minimum objection is genuine or a negotiating position.'},
+      {id:'s91', cat:'SIZING', scenario:'"I\'d want to start with something small and add to it."',
+       spin: 'Starting small and adding is a sound approach to building a position in a liquid asset where the incremental additions are straightforward. In an illiquid alternative with a fixed structure, the calculus is different: each position is a separate investment decision with its own entry costs, legal structure, and holding period. Adding a £5,000 follow-on is not mechanically the same as buying more of an index fund. The economics of the structure require the minimum position — below that, the cost-benefit does not work. The right initial size is not the smallest available. It is the smallest that actually delivers the structural benefit.',
+       why: 'Explains why the "start small" approach that works for equities does not transfer to structured alternatives. Not an attack on the cautious instinct — a factual explanation of why the minimum exists in this context.'},
+      {id:'s92', cat:'SIZING', scenario:'"What if I want to reduce my position later?"',
+       spin: 'The position can be transferred or, in some cases, partially sold through secondary processes. The relevant question is under what circumstances you would want to reduce it — because that helps me understand whether the structure is right for you. If you are anticipating a specific capital need in the next two to three years, we should factor that into the allocation decision now rather than design around it after the fact. If the concern is general optionality, the structure has defined exit mechanisms that I can walk you through specifically.',
+       why: 'Treats the sizing question as a risk management conversation. Converts a vague concern into a specific diagnostic — what would trigger the desire to reduce? — which surfaces both genuine capital needs and comfort-optionality concerns.'},
+      {id:'s93', cat:'SIZING', scenario:'"I\'m not sure the position is large enough to make a difference."',
+       spin: 'That\'s an important question — and the answer is a mathematical one. At 5% of a £500,000 portfolio, a 15% return on the allocation produces a 0.75% improvement in the total portfolio return. That sounds modest. But combine it with a 25% drawdown protection in a year the rest of the portfolio falls 15% — and the effective contribution to the risk-adjusted outcome is significantly larger. The contribution of a non-correlated position is not just its return — it is its return in the context of what the rest of the portfolio is doing at the same time.',
+       why: 'Provides a specific calculation that demonstrates the mechanism of non-correlation contribution. The downside protection contribution is the key insight — it converts a "small position, small impact" framing into a "portfolio architecture, large impact" framing.'},
+      {id:'s94', cat:'SIZING', scenario:'"I don\'t have a lot of free capital at the moment."',
+       spin: 'That context is helpful. The right question is not whether you have capital available — it\'s whether any of the capital you do have is less productively deployed than it could be. Capital in cash at below-inflation rates, in a maturing bond, in an underperforming position — any of those is a candidate. The structure we\'re discussing is not designed for surplus capital that has nowhere to go. It is designed for capital that is currently deployed in a less efficient way and for which a specific better alternative exists.',
+       why: 'Reframes the capital availability question as a reallocation question rather than an addition question. Opens a portfolio review conversation without requiring the client to find new money.'},
+      {id:'s95', cat:'SIZING', scenario:'"This seems like a big commitment for something I\'m not fully certain about."',
+       spin: 'The commitment and the certainty are two separate variables — and the right response to low certainty is more information, not a smaller position. If a smaller position would resolve the uncertainty, I\'d say start there. But if the uncertainty is about whether this is right for you at all — rather than about the amount — a smaller position doesn\'t answer that question. What specific element of the structure generates the uncertainty? That\'s the thing to address before the sizing question has any useful meaning.',
+       why: 'Separates sizing from conviction. Positions more information as the resolution to uncertainty rather than a smaller position. The diagnostic question — what specifically is uncertain — surfaces the real objection.'},
+      {id:'s96', cat:'SIZING', scenario:'"I\'d want to talk to my partner before committing to that amount."',
+       spin: 'That\'s completely right — and the conversation with your partner is probably most productive when they have had the same information you\'ve had today. What I\'d suggest is this: I can prepare a short brief that covers the investment case, the structure, and the downside scenario in plain language — specifically designed to give your partner the same picture in 10 minutes that we\'ve covered today in an hour. That way the conversation between you is informed rather than one-sided. Would that be useful?',
+       why: 'Validates the partner consultation entirely and immediately offers to facilitate it productively. Most partner objections fail because the client cannot accurately represent what they were told. Pre-empting that with a prepared brief solves the problem at its source.'},
+      {id:'s97', cat:'SIZING', scenario:'"I\'d prefer to split it across two or three investments rather than one."',
+       spin: 'The diversification instinct within alternative assets is sound — but it requires enough total allocation to work. Splitting a £30,000 allocation across three positions of £10,000 each means each position is below the minimum threshold for the structural benefit to apply. Diversification within an asset class works when each position is large enough to stand on its own. The right approach is: determine the total alternative allocation, and then — if you want to diversify within it — ensure each sub-allocation is at least at the economic minimum.',
+       why: 'Accepts the diversification instinct while identifying the mathematical problem with implementing it below minimum position sizes. Reframes the conversation around total allocation quantum before discussing sub-allocation structure.'},
+
+      /* ── RISK (expanded) ────────────────────────────────────── */
+      {id:'s98', cat:'RISK', scenario:'"What\'s the worst case scenario?"',
+       spin: 'I\'d rather give you the honest worst case than the reassuring one — because if you go in with accurate expectations, there are no surprises. For this specific structure, the worst case is: [specific verified floor — e.g. for EIS, 38.5p in the pound after all reliefs; for a cask, the current distilled spirit value plus storage cost; for farmland, agricultural use value]. That floor is structural and specific. The worst case for the rest of your portfolio — a leveraged equity position or a long-duration bond — is a percentage drawdown with no floor. Compare the two accurately and the risk profile of the alternative looks different.',
+       why: 'Radical transparency on the worst case. Most brokers avoid stating the worst case explicitly — which destroys trust. Stating it confidently and then immediately providing the comparison case is disarming and credible.'},
+      {id:'s99', cat:'RISK', scenario:'"I can\'t afford to lose any of this money."',
+       spin: 'That\'s the most important constraint you can give me — and it defines the conversation clearly. The question is what loss means in practice. If it means a nominal drawdown of any kind at any point, then this — and most investments — are not appropriate and we should focus on capital preservation instruments. If it means a real capital loss at the end of the holding period, then the structure I\'m describing has a defined floor that is materially above zero — and the comparison with your current capital preservation position is worth examining carefully.',
+       why: 'Takes the constraint seriously and immediately operationalises it. Distinguishes between mark-to-market volatility and genuine end-of-period capital loss — a distinction most clients have never been asked to make but which is critical to the conversation.'},
+      {id:'s100', cat:'RISK', scenario:'"I\'m a conservative investor — this feels aggressive."',
+       spin: 'Conservative means different things depending on whether you\'re measuring volatility, drawdown risk, inflation protection, or counterparty risk. A portfolio of bonds feels conservative on volatility but is actually aggressive on inflation risk — it guarantees a real return below zero in the current environment. A physical asset with a defined floor and no mark-to-market pricing feels aggressive on liquidity but is conservative on counterparty risk, inflation risk, and correlation risk. The question is: conservative against which risk measure? The answer changes what the right portfolio looks like.',
+       why: 'Reframes "conservative" as a multidimensional term rather than a single-axis assessment. Once the client understands that their current "conservative" allocation has significant inflation and real return risk, the alternative looks comparatively less aggressive.'},
+      {id:'s101', cat:'RISK', scenario:'"What if there\'s another 2008-style crisis?"',
+       spin: 'In 2008, gold fell 2% and recovered within weeks while equities fell 40%. Physical assets held outside the banking system performed best in the crisis because they had no counterparty exposure to the credit-market collapse. A 2008-style crisis — driven by financial system counterparty failure — is precisely the scenario that hard assets are most defensively positioned for. The assets that failed in 2008 were the ones inside the credit system. The assets that held were the ones outside it.',
+       why: 'Uses 2008 as specific, verifiable evidence that the stated fear scenario is the one where hard assets historically perform best. Converts the client\'s most vivid fear into evidence for the product.'},
+      {id:'s102', cat:'RISK', scenario:'"I\'d want guaranteed returns before committing."',
+       spin: 'No investment offers guaranteed returns — and any that claims to should be immediately rejected on that basis alone. What can be guaranteed is the structural floor: the minimum value of the asset based on its verifiable physical characteristics or tax relief entitlements. For this specific structure, the guaranteed floor is [specific number based on asset type]. Above that floor, the return depends on market conditions and holding period. That is the honest answer — and it is more useful than a fabricated guarantee.',
+       why: 'Uses the impossibility of guaranteed returns as a credibility signal rather than an objection. The pivot to the structural floor is the honest equivalent of a guarantee — and framing it that way demonstrates intellectual honesty.'},
+      {id:'s103', cat:'RISK', scenario:'"I don\'t know enough to judge the risk."',
+       spin: 'Then the conversation we\'re having right now is exactly the right one — and the right sequence is: understand the structure completely before making any decision. Let me walk you through the specific risk dimensions: what is the worst case scenario and what causes it? What is the probability of that scenario? What is the floor if it occurs? What is the upside if conditions are favourable? Once those four questions have clear answers, you will know enough to judge the risk. We are not at the decision stage. We are at the information stage.',
+       why: 'Validates the knowledge gap as legitimate and immediately offers to fill it. Reframes the conversation from decision to education — which reduces pressure and increases receptivity. The four-question framework gives the client a clear path from "don\'t know" to "know enough."'},
+
+      /* ── UNDERSTANDING (expanded) ────────────────────────────── */
+      {id:'s104', cat:'UNDERSTANDING', scenario:'"This is more complex than I\'m used to."',
+       spin: 'The complexity has two layers: the macro case, and the specific product structure. The macro case — why hard assets, why now, why at this allocation — is actually quite simple and can be made in five sentences. The product structure — the specific custody arrangement, the tax wrapper, the exit mechanism — is more detailed but not more complex than a mortgage or a pension structure. What feels complex is usually unfamiliarity rather than genuine complexity. Which layer feels most opaque right now?',
+       why: 'Distinguishes between perceived complexity (unfamiliarity) and structural complexity (the product itself). The diagnostic question — which layer feels opaque — is the most useful next move, because it directs the rest of the conversation.'},
+      {id:'s105', cat:'UNDERSTANDING', scenario:'"I\'d need to understand every detail before deciding."',
+       spin: 'That\'s a sound principle — and there are approximately six components of this structure that you should fully understand before making a decision. I\'d suggest we cover them systematically: [list the six components]. For each one, I want you to feel completely clear before we move on. If any element is not clear by the end, the decision should wait until it is. I\'d rather take three calls to get you to genuine understanding than one call to get you to a confused yes.',
+       why: 'Validates the principle completely, then operationalises it with a specific list. Most clients who say "I need to understand everything" have not been given a specific enumeration of what "everything" consists of. Providing the list makes the process feel finite and achievable.'},
+      {id:'s106', cat:'UNDERSTANDING', scenario:'"I read something negative about this sector — what\'s your response?"',
+       spin: 'I\'d want to know what specifically you read before responding — because the alternative investment space covers a wide range of structures and the criticism that applies to one does not apply to all. Opaque valuation? That applies to some structures and not to others. Liquidity risk? Real in some structures, managed in others. Promoter risk? Present without HMRC approval; absent with it. Which concern did the article raise specifically? I\'d rather address that directly than defend a category I haven\'t heard an accusation about.',
+       why: 'Requests specificity before defending. The tactic of asking for the specific claim before responding prevents the broker from defending something the article didn\'t say — and positions the broker as a rigorous thinker rather than a defensive salesperson.'},
+      {id:'s107', cat:'UNDERSTANDING', scenario:'"I don\'t really understand how the return is generated."',
+       spin: 'The return has three specific components — and they are each independent of the others. First, the asset matures over time and becomes rarer [applicable to whisky/wine/farmland]. Second, demand for this category has been growing at [X%] per annum driven by [specific factors]. Third, the tax efficiency adds [specific] to the effective return. The combination of those three produces the return profile we\'ve discussed. Which of those three is the one that feels least clear?',
+       why: 'Decomposes the return into its specific constituent parts. Most "I don\'t understand the return" objections resolve when the three mechanisms are separated and explained individually. The diagnostic question at the end directs the remaining conversation efficiently.'},
+      {id:'s108', cat:'UNDERSTANDING', scenario:'"The terminology is confusing — can you simplify it?"',
+       spin: 'Absolutely — and I will, because if the language is creating distance, the most important thing is to close that distance first. In plain terms: this is [one sentence description in plain English with no jargon]. The return comes from [one sentence]. The risk is [one sentence]. The tax advantage is [one sentence]. Every term I used before that you didn\'t recognise — ask me about it specifically and I will give you a plain English version. Jargon exists to compress information, not to obscure it. If it\'s obscuring, it\'s failing its purpose.',
+       why: 'Accepts the simplification request as entirely legitimate. Provides an immediate four-sentence plain English summary. The final point — jargon exists to compress, not obscure — is a memorable and honest statement of the purpose of specialist language.'},
+      {id:'s109', cat:'UNDERSTANDING', scenario:'"I\'d want to do more reading before deciding."',
+       spin: 'That\'s the right instinct — and the reading I would recommend is specific rather than general. The general reading on alternative investments is written for a very broad audience and rarely covers the specific structure we\'re discussing. What I can give you is a curated reading list of three documents: [the specific structure document, the independent valuation methodology, and a verifiable historical performance reference]. Reading those three specifically will give you more decision-relevant information than three hours of general research.',
+       why: 'Validates the research instinct and immediately takes ownership of making it efficient. Providing three specific, curated documents is more helpful than offering generic research resources — and positions the broker as genuinely facilitating the due diligence rather than trying to shortcut it.'},
+
+      /* ── TIMING (expanded to 10) ─────────────────────────── */
+      {id:'s110', cat:'TIMING', scenario:'"The market feels choppy — I\'d rather wait for stability."',
+       spin: 'Stability, in market terms, is the moment that follows a repricing. It arrives after the move has already happened — which means the investors who waited for stability are the investors who bought after the opportunity closed. Choppiness is the name for uncertainty, and uncertainty is where alternative assets earn their structural premium. A cask of whisky does not read Bloomberg. A farmland parcel does not react to rate volatility. Stability in the headline environment typically coincides with reduced return potential in the alternative assets that are insulated from it.',
+       why: 'Converts "choppy market" from a timing reason into an argument for the non-correlated assets that are insulated from the chop. The "cask does not read Bloomberg" line is memorable and disarming.'},
+      {id:'s111', cat:'TIMING', scenario:'"Let me wait until after the election before deciding."',
+       spin: 'Elections produce two types of outcomes: ones that change the structural backdrop for alternative assets, and ones that don\'t. A change in capital gains treatment, IHT policy, or EIS qualifying criteria would be a material structural change worth tracking. A change in headline government rarely produces either. The specific question to ask before waiting is: which specific election outcome would change your view on this investment — and how likely is that outcome? In most cases, the honest answer is that no realistic election result would change the structural case for hard assets.',
+       why: 'Forces the client to specify the causal link between the election outcome and the investment thesis. If they cannot name a specific outcome that would change the analysis, the election objection dissolves under its own scrutiny.'},
+      {id:'s112', cat:'TIMING', scenario:'"Interest rates might move — I want to wait and see."',
+       spin: 'Interest rate direction matters very specifically for different asset classes. For bonds, it is critical. For physical assets with fixed supply, it is secondary — and in the specific case of rate cuts, it is historically a tailwind, not a headwind, because falling rates suppress real returns on cash and fixed income, driving capital toward real assets. If you are waiting for rates to move before deciding on this allocation, you may be waiting for the trigger that makes the entry more competitive, not less.',
+       why: 'Accepts the interest rate concern and traces the specific causal chain from rate movement to alternative asset performance — which almost always runs in favour of the allocation, not against it.'},
+      {id:'s113', cat:'TIMING', scenario:'"I\'m already deployed — I\'ll wait for something to mature before reinvesting."',
+       spin: 'That\'s a structurally sound approach if the capital timeline aligns — and the question is simply when the maturity event occurs and whether the entry conditions for this allocation will still exist at that point. Some entry conditions are time-sensitive: a specific tax year window, a particular HMRC quota, a cask at a specific age profile. Others are structural and will exist in twelve months. Which of those applies here determines whether waiting costs anything.',
+       why: 'Accepts the timing constraint entirely and converts it into a specific question about whether the entry window is time-sensitive. If it is, urgency is created by fact rather than pressure. If it isn\'t, the conversation can park cleanly for the expected timeline.'},
+      {id:'s114', cat:'TIMING', scenario:'"Something feels off about the timing — I can\'t put my finger on it."',
+       spin: 'That instinct is worth taking seriously — not dismissing. The most useful question is: is the feeling about this specific investment, or about your broader position right now? If it\'s about this investment specifically, I\'d want to know what element feels uncertain — the structure, the term, the counterparties, the asset class. If it\'s a broader feeling about taking a decision right now, that\'s different — and sometimes the most useful thing is to name the actual source of hesitation and look at it directly.',
+       why: 'Takes the vague instinct seriously rather than overriding it. Diagnostic framing: is it about the investment or about the decision itself? The willingness to explore the source of hesitation is the most credible and relationship-building response possible.'},
+      {id:'s115', cat:'TIMING', scenario:'"It\'s not a good time of year for me to make this kind of decision."',
+       spin: 'That\'s a fair personal constraint — and it\'s worth naming it precisely so we can structure around it. Is it a cash flow issue tied to a specific time of year, an annual review process that happens at a set date, or a preference for making major decisions in a specific window? If we know the answer, we can either structure this to align with your preferred window — and note whether anything changes between now and then — or we can use this conversation as the due diligence phase so the decision, when you\'re ready, takes minutes rather than months.',
+       why: 'Takes the seasonal constraint at face value and immediately converts it into a structuring conversation. Positions the current conversation as due diligence, not a close — which reduces pressure while keeping the engagement active.'},
+
+      /* ── OBJECTION HANDLING (expanded to 10) ──────────────── */
+      {id:'s116', cat:'OBJECTION HANDLING', scenario:'"I\'ve heard this pitch before and I wasn\'t interested then."',
+       spin: 'What specifically put you off when you heard it before? Because the macro case, the structural supply-demand dynamic, and the entry conditions today are materially different from what they were two or three years ago — and if the conversation you heard before was pitched against a different backdrop, the argument may genuinely be different now. I\'d rather understand what didn\'t land the first time than repeat the version that didn\'t work.',
+       why: 'Takes the prior exposure seriously and immediately seeks to differentiate the current conversation from the one that didn\'t work. Demonstrating awareness that the prior pitch may have been different — and may have been wrong for that time — is intellectually honest and disarming.'},
+      {id:'s117', cat:'OBJECTION HANDLING', scenario:'"My gut says no."',
+       spin: 'Your gut is worth listening to — and I\'d like to understand what it\'s reacting to. Gut instincts in investing are usually one of three things: a genuine pattern recognition response based on prior experience, an emotional risk-aversion response to unfamiliarity, or a specific concern that hasn\'t been surfaced verbally yet. Which of those does this feel like? If it\'s the third one — something specific that you haven\'t said yet — that\'s the most useful conversation we can have.',
+       why: 'Takes the emotional response seriously rather than trying to override it with logic. The three-type taxonomy gives the client language to identify which kind of gut response they\'re having — and the third type is an invitation to surface the real objection.'},
+      {id:'s118', cat:'OBJECTION HANDLING', scenario:'"I have to say no."',
+       spin: '"I have to say no" is almost always different from "I want to say no." The word "have to" suggests an external constraint — someone else\'s opinion, a commitment already made, a rule you\'re operating under. I\'m not trying to change your answer. But if there\'s a constraint that\'s driving it, naming it is useful — because sometimes the constraint is addressable in a way that the person holding it hasn\'t considered.',
+       why: 'The distinction between "have to" and "want to" is one of the most powerful linguistic observations in objection handling. It opens the conversation about the real constraint without pressuring the client to change their answer.'},
+      {id:'s119', cat:'OBJECTION HANDLING', scenario:'"I\'m already overcommitted to alternative assets."',
+       spin: 'That\'s useful context — and it means the relevant conversation is about allocation architecture rather than whether to add alternatives. What percentage of your current alternative allocation is liquid and how much is illiquid? How much is correlated with equity markets through listed trusts and how much is genuinely non-correlated through physical assets? If the allocation is large but structurally concentrated in one type, there may be a genuine case for a small addition that adds a different dimension of non-correlation — without changing the headline alternatives percentage.',
+       why: 'Accepts the overcommitment assertion and converts it into a portfolio architecture conversation. Introduces the quality-of-diversification distinction within the alternatives category — which many clients have never considered.'},
+      {id:'s120', cat:'OBJECTION HANDLING', scenario:'"I only deal with people I\'ve worked with for years."',
+       spin: 'That principle has served you well — relationships built over time are the ones that generate the most trust and the most honest communication. I\'d ask one thing: every relationship you have now with someone you\'ve worked with for years started with a first conversation. What made you give those relationships a chance at the beginning? If the answer was a strong referral, a specific compelling reason to engage, or a credibility signal that stood out — those are the things I\'d want to demonstrate in this conversation, so that two years from now we\'re in the same category.',
+       why: 'Validates the relationship principle and then applies it in a forward-looking way. The observation that every long-term relationship started as a first conversation is self-evidently true and removes the exceptionalism of the trust objection.'},
+      {id:'s121', cat:'OBJECTION HANDLING', scenario:'"I don\'t invest in things I don\'t fully understand."',
+       spin: 'That principle has probably protected you from a lot of bad decisions — and it\'s one I respect. I\'d also suggest that the goal of this conversation is exactly that: full understanding before any decision. What specific elements of this structure would you need to understand fully to feel confident? List them explicitly, and we\'ll go through them one by one until there\'s nothing left that\'s unclear. The decision only makes sense if we\'ve reached that point.',
+       why: 'Converts the principle into an explicit agenda. By asking the client to list the things they don\'t yet understand, the broker creates a structured education path that ends in confidence rather than a vague objection that cannot be addressed.'},
+      {id:'s122', cat:'OBJECTION HANDLING', scenario:'"I\'ve made enough money — I don\'t need this."',
+       spin: 'You may be absolutely right — and if that\'s genuinely the case, the conversation shifts from return generation to wealth preservation. The question isn\'t whether you need more return. It\'s whether the wealth you\'ve built is as protected as it can be from the risks that are most active right now: currency debasement, inflation above the rate of return on cash, and concentrated exposure to equity market conditions. The argument for hard assets is not "make more money." It\'s "don\'t let the money you have quietly erode."',
+       why: 'Accepts the assertion completely and pivots to the preservation argument. The reframe from return generation to wealth preservation is the most appropriate response for high-net-worth clients who are past the wealth accumulation phase.'},
+      {id:'s123', cat:'OBJECTION HANDLING', scenario:'"I don\'t want to be sold to."',
+       spin: 'Then let\'s not do that. I\'m going to give you the specific data, the specific structure, and the specific downside scenario — and you\'re going to make up your own mind. I don\'t need to sell you something that stacks up on its own merits. What I\'d ask is that you hear the case before forming a view — not because I expect you to be persuaded, but because an informed rejection is more useful than an instinctive one. If it\'s not right after that, we end the conversation there.',
+       why: 'Takes the aversion to being sold to at face value and immediately reframes the conversation as information delivery rather than persuasion. Paradoxically, this is the most persuasive response available — because it removes the dynamic the client is resistant to.'},
+      {id:'s124', cat:'OBJECTION HANDLING', scenario:'"This feels like a distraction from what I should be focusing on."',
+       spin: 'What should you be focusing on? I ask because if the answer is an investment opportunity elsewhere, a business decision, or a specific financial event, understanding that context lets me be more precise about whether this is actually a distraction or whether it\'s structurally adjacent to what you\'re focused on. In some cases, the tax efficiency of a structure like this is directly relevant to a sale, an exit, or an inheritance event that is already on the agenda. The distraction may be the opposite of what it feels like.',
+       why: 'Asks the diagnostic question before accepting the framing. "What should you be focusing on?" surfaces the real competing priority — which sometimes turns out to be adjacent to or enhanced by the very structure being dismissed.'},
     ];
 
     /* ═══════════════════════════════════════════════════════════
@@ -2137,7 +2625,7 @@
        script: '"You\'re completely right — the liquidity profile is different from what you\'re used to, and that\'s a completely fair concern. In fact, it\'s worth understanding specifically what that means in practice for this structure, because it\'s not as binary as it sounds for most clients. Can I walk you through what the actual exit mechanisms look like?" [Agreement → reframe → new information → progress.]',
        why: 'Source: Carnegie, How to Win Friends and Influence People (1936). The fundamental rule of objection handling that most sales training gets backwards. Winning the argument loses the client. Conceding the surface of the argument and redirecting wins both.'},
       {id:'py74', cat:'DALE CARNEGIE', principle:'GENUINE INTEREST — THE HIGHEST CONVERSION TECHNIQUE',
-       technique: 'Carnegie: "You can make more friends in two months by becoming interested in other people than you can in two years by trying to get other people interested in you." The same applies exactly to client development. The broker who is genuinely curious about every client\'s story — not as a technique but as a professional habit — builds the most durable book of business. Genuine interest is detected neurologically by the limbic system — it cannot be fully faked at scale. Specific applications: ask one more question than you planned to, listen to the complete answer before formulating your response, reference what they told you in an earlier call or email unprompted. The client who is remembered as an individual — not a prospect — refers.',
+       technique: '"You can make more friends in two months by becoming interested in other people than you can in two years by trying to get other people interested in you." The same applies exactly to client development. The broker who is genuinely curious about every client\'s story — not as a technique but as a professional habit — builds the most durable book of business. Genuine interest is detected neurologically by the limbic system — it cannot be fully faked at scale. Specific applications: ask one more question than you planned to, listen to the complete answer before formulating your response, reference what they told you in an earlier call or email unprompted. The client who is remembered as an individual — not a prospect — refers.',
        script: '"Before I tell you anything about what we do — I want to make sure I understand your situation properly. Not just the financial position, but what you\'re actually working toward. What\'s the outcome you\'re most focused on right now — specifically? Not generally." [Then listen completely, without preparing the next statement. The quality of attention in the first two minutes determines everything that follows.]',
        why: 'Source: Carnegie (1936). The \'genuine interest\' principle is the most foundational and most frequently violated rule in sales. The broker who treats every call as an intelligence-gathering exercise about a specific human being consistently outperforms the broker who treats it as a pitch delivery exercise.'},
       {id:'py75', cat:'IANNARINO', principle:'THE 9 COMMITMENTS — CLOSE THE PREREQUISITES BEFORE THE CLOSE',
@@ -2220,6 +2708,296 @@
       {id:'rb22', cat:'COST', objection:'"The minimum is too high for me right now"',
        rebuttal: 'I hear you. Let me ask you this: is the minimum too high in absolute terms, or relative to how much of your portfolio this would represent? Because if it\'s the percentage that feels uncomfortable, there may be a smaller entry point that still captures the structural benefit. If it\'s the absolute number that\'s the issue, I\'d rather know that now so we\'re not wasting each other\'s time — but I\'d also ask: is that permanent, or is it a timing question?',
        why: 'Surfaces whether the objection is about affordability or positioning in the portfolio. Asks a direct disqualifying question rather than pushing — which builds trust and, if the client is genuinely qualified, usually surfaces a solution.'},
+
+      /* ── DELAY (extended) ── */
+      {id:'rb23', cat:'DELAY', objection:'"I\'m waiting to see how the Budget / election plays out first"',
+       technique: 'Feel/Felt/Found + Historical Pattern',
+       rebuttal: 'I completely understand wanting certainty before committing — and I want to offer you a different frame. In 2010, 2015, 2017, 2019, and 2024, this exact conversation happened. The clients who said "after the election" consistently paid more for the same position than the clients who moved when the fundamental case was sound. The Budget doesn\'t change whether gold protects against monetary debasement or whether a cask matures into value — those drivers predate any government and will outlast this one. The macro case that exists today exists regardless of what the Chancellor does next month.',
+       why: 'Historical pattern makes waiting look like a recurring and expensive mistake. Removing the Budget as a relevant variable is the key reframe — the objection only holds if Budget policy actually affects the supply-demand drivers of the specific asset.'},
+      {id:'rb24', cat:'DELAY', objection:'"Let me sleep on it"',
+       technique: 'Calibrated Question',
+       rebuttal: 'Of course — and I want to make sure the sleep is worth it. The decisions that get clearer overnight are ones where the facts are complete. The question that comes back to you at 2am is usually the one worth addressing now, before you spend a night on an incomplete picture. What\'s the thing most likely to keep you up? Let\'s take it off the table right now.',
+       why: 'Reframes "sleep on it" from postponement into an incomplete-information problem. The 2am question anchors the discomfort of uncertainty and simultaneously surfaces the real objection. Socratic: invites them to name the gap rather than arguing against the delay.'},
+      {id:'rb25', cat:'DELAY', objection:'"Call me back in the New Year"',
+       technique: 'Commitment + Real Urgency',
+       rebuttal: 'Absolutely — and I\'ll put a note in to call you in January. Before I do: I want to flag that the window we\'re discussing may look different then — either the position will have moved, a tax year window will have shifted, or a specific tranche will have closed. If it\'s genuinely about January timing for other reasons, I understand completely. Which specific date in January works best — I\'d rather put something in the diary now than it fall through the gaps.',
+       why: 'Accepts the delay fully while introducing verifiable urgency (real batch/tranche/tax year dates). Asking for a specific January date is a soft close that converts "later" into a real commitment — the commitment principle means a specific date is more likely to be honoured than a vague promise.'},
+      {id:'rb26', cat:'DELAY', objection:'"My accountant / solicitor told me to wait"',
+       technique: 'Validate + Collaborate',
+       rebuttal: 'I have a lot of respect for that — clients who take professional advice are the ones I\'d most want to work with. Can I ask: did they say wait generally, or specifically in relation to this type of asset? Most accountants advise caution on equity-linked products in a volatile environment, which makes complete sense. The assets we\'re discussing operate outside the markets your accountant typically works within. I\'d be happy to prepare a two-page briefing note for them — the specific tax mechanics, structure, and downside case — so they have the right information to give you the right advice quickly.',
+       why: 'Never challenges the professional adviser — validates them and repositions the product as outside their usual frame. The briefing note offer is a soft close: accepting it means the adviser is now involved and the conversation continues. Rejecting it surfaces the real objection behind the accountant\'s advice.'},
+      {id:'rb27', cat:'DELAY', objection:'"I\'m not ready to make a financial decision right now"',
+       technique: 'Calibrated Question + Diagnostic',
+       rebuttal: 'That\'s completely fair — and I don\'t want to push you anywhere you\'re not comfortable. Can I ask what "ready" looks like specifically? Sometimes it means more information, sometimes a change in circumstances, sometimes something else needs to resolve first. Understanding which of those it is helps me work out whether there\'s anything useful I can do — or whether we\'re genuinely talking at the wrong moment. I\'d rather know which it is than follow up in three months when the situation is unchanged.',
+       why: '"What does ready look like?" is a calibrated question — impossible to answer with yes or no, forces articulation of the actual condition for moving forward. The final sentence introduces gentle scarcity without pressure: if nothing changes, the window may not be open in three months.'},
+      {id:'rb28', cat:'DELAY', objection:'"I need to do more research first — I\'ll come back to you"',
+       technique: 'Commercial Teaching',
+       rebuttal: 'Absolutely right — and let me save you the 80% of that research that leads nowhere useful. The three things worth verifying independently: the long-run performance data for the asset class — I\'ll send the primary sources, not our summary of them; the tax mechanics — your accountant can confirm in 20 minutes; and the custodian and regulatory structure. Everything else online is either noise or conflict of interest. What specifically are you going to research? Because if there\'s a gap in the picture, it\'s better to fill it now.',
+       why: 'Accepts the research need and takes ownership of it — dramatically accelerating the timeline and controlling the information environment. The Socratic final question almost always reveals the prospect doesn\'t have a specific gap — only general discomfort, which is a different conversation.'},
+
+      /* ── COST (extended) ── */
+      {id:'rb29', cat:'COST', objection:'"The annual management charge seems too high"',
+       technique: 'Anchoring: Comparison Set',
+       rebuttal: 'I\'d expect you to push on that — and I want to give you the honest comparison. A typical global equity fund: 0.75-1.5% annual management charge. A hedge fund structure: 2% management plus 20% performance. An ISA platform: 0.5-1% plus underlying fund costs. The fee on this is [X%]. What you\'re paying for is specialist custody, independent valuation, and active management of an illiquid asset that genuinely cannot be left on a platform unattended. The cost is real; the comparison set is where it belongs.',
+       why: 'Anchoring to the relevant peer group immediately repositions the fee as fair. Specificity of the comparison (actual percentage ranges) is more credible than a vague statement that "fees are normal in this space." Never apologise for the fee — present it with total confidence.'},
+      {id:'rb30', cat:'COST', objection:'"What\'s your commission on this?"',
+       technique: 'Transparency = Trust',
+       rebuttal: 'A fair question and I\'ll answer it directly: [X% / £X amount]. I\'ll also tell you that if I wasn\'t confident this was the right structure for your situation, I wouldn\'t bring it to you — not because I\'m a saint, but because a client who has a poor experience doesn\'t refer, and referrals are how this business grows. My commercial interest and your outcome are aligned. The fee you\'re paying me is the smallest part of this picture; the larger part is the tax position, the asset performance, and the portfolio construction benefit.',
+       why: 'Direct transparency on commission is both ethical and strategically correct. The Liking principle — a broker who is honest about their own commercial interests is trusted more than one who deflects or minimises. The referral logic makes the alignment of interests explicit without sounding defensive.'},
+      {id:'rb31', cat:'COST', objection:'"I can get the same exposure cheaper through an ETF"',
+       technique: 'NLP: Content Reframe — Asset vs Delivery',
+       rebuttal: 'You can get correlated exposure that tracks a broad index of the asset class — and that\'s genuinely cheaper. What you get here is: physical allocation with direct ownership of a specific asset, no counterparty risk from a fund structure, and uncorrelated behaviour in a systemic event. A gold ETF does not behave identically to allocated gold in a banking system stress scenario — there is a custodian chain and a fund structure between you and the asset. For genuine non-correlation as a portfolio hedge, the delivery mechanism matters as much as the asset itself.',
+       why: 'Accepts that ETFs are cheaper while making the distinction between the asset and the delivery mechanism clear. The key insight — delivery mechanism matters — is genuinely educational and positions the broker as sophisticated rather than defensive. The systemic event example makes the abstract risk concrete.'},
+      {id:'rb32', cat:'COST', objection:'"I\'m worried about hidden charges I\'m not seeing"',
+       technique: 'Accusation Audit + Radical Transparency',
+       rebuttal: 'A very smart concern — and I want to be completely transparent on this. Let me walk you through every single cost right now: the entry fee, the annual storage or custodian fee, the exit mechanism and any associated costs, and the arrangement fee. [List all fees explicitly.] If there\'s anything on that list I can\'t explain in plain English, you\'d be right to call it out. The alternative is not fewer fees — it\'s fees that are harder to find. Would it be useful for me to put the full cost schedule in writing before we go further?',
+       why: 'Radical transparency disarms the hidden fee concern more effectively than any rebuttal. Naming every charge before they can be "discovered" is the accusation audit in action — it builds trust precisely because it is unexpected. The offer to put it in writing is a soft close.'},
+      {id:'rb33', cat:'COST', objection:'"I\'m on a fixed income — I can\'t absorb high fees"',
+       technique: 'Prospect Theory: Net Benefit Calculation',
+       rebuttal: 'Understood — and the question is whether the return net of fees justifies the allocation from your income position. Let\'s run the specific numbers: at [£X] allocation, the fee in year one is [£Y]. The tax benefit in year one — the 30% EIS income tax relief, or the tax-free VCT income — is [£Z]. In year one, the net-of-fee position is either break-even or positive before the underlying performance is factored in. If those numbers don\'t work for your income situation, I\'d rather know that now than have you commit to something uncomfortable. What does the capital position look like outside of income?',
+       why: 'Turns the fee discussion into a net-benefit calculation. The year-one tax alpha often fully offsets management fees for EIS and VCT structures — making the "fee" discussion irrelevant when the tax return is correctly factored in. Honest disqualification builds more trust than pushing a client who genuinely can\'t afford it.'},
+      {id:'rb34', cat:'COST', objection:'"Why am I paying an entry fee AND a management fee?"',
+       technique: 'Empathy + Analogy',
+       rebuttal: 'The entry fee covers the origination and structuring of your specific position. The management fee covers what happens to that position while you hold it — independent annual valuations, storage insurance, regulatory compliance, and the infrastructure that ensures your asset is where it\'s supposed to be when you want to exit. Think of the entry fee as the cost of access and the management fee as the cost of custody. You pay a custodian fee on a pension even when you don\'t touch it for years — this is structurally identical. You\'re paying for the infrastructure that makes the asset accessible, insured, and professionally managed for the holding period.',
+       why: 'The pension custodian analogy is one the client already accepts without question — they are already paying a management fee on a locked asset and don\'t consider it unusual. Mapping the same logic to alternative investment normalises the dual-fee structure immediately.'},
+      {id:'rb35', cat:'COST', objection:'"My bank offers similar products with lower fees"',
+       technique: 'Socratic: Calibrated Question',
+       rebuttal: 'I\'d be interested to see what they\'ve offered — and I\'d ask you to compare three things specifically: the underlying asset and how it\'s held, the tax treatment, and the historical performance data. Most bank-structured products in the alternative space are either capital-at-risk structured notes with embedded derivatives, or they invest in the asset class via a fund with a custodian layer between you and the asset. Neither is the same as direct allocation with individual ownership of a specific asset. What exactly did they show you?',
+       why: '"What did they actually show you?" forces the client to recall the details — and in most cases they realise they didn\'t compare like with like. Never argue the bank is wrong; invite the client to make the comparison themselves using the right framework. Self-generated conclusions are owned more strongly than broker-delivered ones.'},
+      {id:'rb36', cat:'COST', objection:'"Can you reduce the fee for me?"',
+       technique: 'Flinch + Reluctance',
+       rebuttal: '[Deliberate pause.] I want to be straight with you — I don\'t make fee decisions mid-conversation, because I don\'t want to give you a number I can\'t stand behind. What I can tell you is that the fee structure you\'ve seen is the correct fee for this position. If the fee is a genuine barrier, there may be a different structure worth looking at. If you\'re asking whether there\'s flexibility, I\'d rather give you a confident answer now than a qualified one that creates a problem later. Is this a barrier, or a negotiating question?',
+       why: 'the flinch plus reluctance — the pause signals the fee is not arbitrary. Separating "genuine barrier" from "negotiating question" is a sophisticated diagnostic: the first gets a structural solution, the second gets an honest refusal. A broker who negotiates their own fees immediately signals the fee was wrong from the start.'},
+
+      /* ── GOLD (extended) ── */
+      {id:'rb37', cat:'GOLD', objection:'"Gold dropped in 2022 — it\'s not a real safe haven"',
+       technique: 'Anchoring: Correct Comparison Set',
+       rebuttal: 'In 2022, gold fell approximately 2% in USD terms. In the same year, the S&P 500 fell 19%, the NASDAQ fell 33%, and the Bloomberg Global Aggregate Bond Index had its worst year since 1990. Gold outperformed virtually every conventional asset class in the one year when both equities and bonds fell simultaneously. The headline "gold fell in 2022" is technically correct — and deeply misleading without the comparison. In the only year when the traditional 60/40 portfolio failed on both legs, gold was the least-bad asset in most portfolios. That is not the behaviour of something that doesn\'t work as a hedge.',
+       why: 'The 2022 objection is powerful because it\'s factually true but contextually misleading. The response provides the correct comparison — not gold versus itself, but gold versus everything else in the same year. The 60/40 simultaneous failure is the decisive point: gold\'s 2022 behaviour was evidence of its hedge function, not against it.'},
+      {id:'rb38', cat:'GOLD', objection:'"I can buy a gold ETF for less — why pay for physical?"',
+       technique: 'Prospect Theory: Loss Framing — Counterparty Risk',
+       rebuttal: 'A gold ETF is a financial claim on gold — a promise from a fund manager and a custodian chain that the gold exists and is yours. In normal market conditions, that\'s a reasonable approximation. In a systemic stress event — a banking crisis, a custodian failure, a market closure — an ETF and physical allocated gold behave completely differently. In 2013, Cyprus\'s government seized funds from bank accounts. In 2008, Lehman Brothers held gold-linked instruments that became worthless while physical gold rose. The premium for physical is the premium for removing counterparty risk entirely. The question is not whether you want gold exposure — it\'s whether you want gold, or a promise of gold.',
+       why: '"Promise of gold vs gold" is the cleanest articulation of the counterparty risk argument. Historical examples (Cyprus, Lehman) make the abstract risk concrete. Prospect Theory: loss framing ("promise becomes worthless in crisis") is more motivating than the gain framing ("physical is safer").'},
+      {id:'rb39', cat:'GOLD', objection:'"Central banks might sell their gold and crash the price"',
+       technique: 'Commercial Teaching',
+       rebuttal: 'The opposite of what\'s happening. Central banks have been the largest net buyers of gold since 2010 — 2022 and 2023 saw the highest central bank gold purchases in 55 years. China, India, Turkey, Poland, and Russia have all significantly increased gold as a percentage of their reserves. The thesis is not that a marginal hedge fund buyer determines the price — it\'s that the world\'s largest institutional holders of capital are systematically diversifying away from USD-denominated reserves toward gold. That is a structural, multi-decade demand driver. Central bank selling is the tail risk, not the base case.',
+       why: 'The 2022-2023 central bank buying data completely reverses the premise of the objection. The prospect has likely absorbed the selling concern from media coverage — the counterintuitive truth is that the same institutions assumed to be sellers are actually buying at a record pace. Challenger teaching works because the insight is genuinely surprising.'},
+      {id:'rb40', cat:'GOLD', objection:'"Bitcoin is the new gold — that\'s where I\'m allocating"',
+       technique: 'NLP: Context Reframe — Different Portfolio Functions',
+       rebuttal: 'Bitcoin has some of the same supply constraint properties as gold — finite issuance, no central control. It also has a 10-year track record versus gold\'s 5,000-year track record, 60-80% drawdowns in every major cycle, and regulatory risk that physical gold does not carry. For the speculative allocation — the bet on digital store of value — Bitcoin may be appropriate. For the specific portfolio function that gold actually performs — non-correlation in systemic stress, central bank reserve diversification, and real purchasing power protection — the two assets do different things. Most clients who hold both outperform clients who hold only one.',
+       why: 'Never dismisses Bitcoin — validates its claim as a store of value while distinguishing portfolio functions. The 5,000-year versus 10-year comparison makes the data availability point: we can study gold in every economic regime; Bitcoin\'s behaviour in a genuine systemic crisis remains untested.'},
+      {id:'rb41', cat:'GOLD', objection:'"The dollar is strengthening — gold will fall, I\'ll wait"',
+       technique: 'Prospect Theory: Real Rate Driver',
+       rebuttal: 'Gold has an inverse relationship with the dollar in normal conditions — correct. But gold rose 75% from 2020 to 2024 despite multiple periods of dollar strength. The relationship breaks in systemic stress scenarios where both are sought simultaneously, and in environments where the driver is not the dollar exchange rate but real interest rates — specifically negative real rates, which force gold\'s opportunity cost to zero. The dollar-gold relationship is one input in the thesis, not the thesis itself. The more fundamental driver is what\'s happening to real rates and money supply, not the DXY level.',
+       why: 'Accepts the dollar-gold correlation while demonstrating it is neither perfect nor permanent. The real rate driver is the more fundamental mechanism — a client who understands this has a more sophisticated framework for monitoring their own position and is less likely to panic-sell on a dollar move.'},
+      {id:'rb42', cat:'GOLD', objection:'"Gold has no industrial use — it\'s driven purely by sentiment"',
+       technique: 'Reframe Sentiment as Rational Monetary Behaviour',
+       rebuttal: 'Gold has roughly 10% industrial demand — more than most people realise. But the "sentiment" framing misses the mechanism: gold is not valued because people feel optimistic about it. It is valued because it is the one monetary asset that cannot be printed, debased, or defaulted on by any government. The sentiment driving gold demand is the rational conclusion that fiat currency is subject to inflation and government discretion. Every time a government has dramatically expanded its money supply — Weimar Germany, Zimbabwe, Venezuela, and every major economy from 2008 to 2022 — the value of gold versus that currency increased. That is not sentiment. That is a documented monetary relationship spanning centuries.',
+       why: 'The "just sentiment" objection is a disguised claim that gold has no fundamental value. The response reframes the mechanism — not emotion, but rational monetary insurance — and provides historical examples that make the relationship undeniable. The list of inflations is visceral and undeniable.'},
+      {id:'rb43', cat:'GOLD', objection:'"I bought gold before, sold too early, and lost out — I\'m done"',
+       technique: 'Feel/Felt/Found + Position Sizing',
+       rebuttal: 'I feel that — being right about the direction and wrong about the timing stings more than being simply wrong. The question worth asking is: did the fundamental case change when you sold, or did the price movement feel uncomfortable? If the case didn\'t change, the lesson isn\'t "gold is unreliable" — it\'s "the holding period matters as much as the entry point." The clients who\'ve performed best in gold allocations sized it so they didn\'t feel pressure to react to short-term movement. That\'s a structural conversation we can work through before the position is opened.',
+       why: 'Classic Feel/Felt/Found. Validates the experience without agreeing it means gold doesn\'t work. Pivots to the real lesson — position sizing and holding discipline — which turns a past mistake into a structural conversation about how to do it correctly this time.'},
+
+      /* ── WHISKY (extended) ── */
+      {id:'rb44', cat:'WHISKY', objection:'"How do I know the cask actually exists?"',
+       technique: 'Accusation Audit + Verifiable Specifics',
+       rebuttal: 'The right question to ask first — and I\'ll answer it with specifics, not reassurance. Every cask comes with: an independent warehouse receipt confirming physical location, serial number, and fill weight; a Certificate of Authenticity from the distillery; and annual independent reweigh documentation confirming the cask hasn\'t been moved or tampered with. You can visit the bonded warehouse. Your cask is individually identifiable, physically inspectable, and insured as a specific asset. The paperwork trail for cask ownership is more rigorous than the paperwork for most equity investments — there is no synthetic exposure, no fund structure, and no promise. There is a barrel.',
+       why: 'Asset verification must be answered with specifics, not reassurance — specific documents (warehouse receipt, Certificate of Authenticity, reweigh records) pre-empt the "scam" concern without acknowledging it directly. Offering a warehouse visit is the strongest possible credibility signal.'},
+      {id:'rb45', cat:'WHISKY', objection:'"What\'s the exit strategy — how do I actually sell it?"',
+       technique: 'Commercial Teaching',
+       rebuttal: 'Three established routes, and we\'d work with you on timing and fit. First: auction — the major platforms (Scotch Whisky Auctions, Whisky Hammer) run regular sales and bid data is publicly available, so valuations are transparent. Second: direct trade buyer — independent bottlers and distilleries seeking aged stock; we have active buyer relationships for specific cask profiles. Third: bottling — if you hold long enough, the branded bottle market often produces the highest per-litre return. The exit has multiple channels, which is more than most illiquid assets. The liquidity constraint is real; the exit mechanism is not theoretical.',
+       why: 'The objection assumes whisky is completely illiquid — the response demonstrates three credible, active exit channels with named platforms for credibility. Honest acknowledgement of the liquidity constraint followed by the practical solution is more persuasive than claiming the concern doesn\'t exist.'},
+      {id:'rb46', cat:'WHISKY', objection:'"What if the distillery goes bust?"',
+       technique: 'Invert the Scenario',
+       rebuttal: 'A good structural question — and the answer is that distillery solvency is legally irrelevant to your cask ownership. The cask is titled to you as an individual asset, held in a third-party bonded warehouse independent of the distillery. If the distillery enters administration tomorrow, your cask remains in the bonded warehouse, titled to you, fully insured, and accessible. The only thing the distillery\'s closure affects is future production — which, for aged spirit, actually increases the scarcity and value of what was already produced. Closed distillery casks consistently command premiums at auction.',
+       why: 'The distillery failure concern is based on a misunderstanding of the asset structure — the response corrects this without condescension. The secondary point (closed distillery premiums) converts the tail risk scenario from negative to positive, which is genuinely counterintuitive and memorable.'},
+      {id:'rb47', cat:'WHISKY', objection:'"I\'ve read negative articles about cask whisky scams"',
+       technique: 'Accusation Audit — Name the Problem First',
+       rebuttal: 'Those articles exist and some are reporting genuine problems — and the problems they describe are almost always the same: unallocated or synthetic cask arrangements, non-existent warehouses, inflated initial valuations, and companies that hold the "cask" in a fund structure rather than transferring legal title to you. Those are the specific red flags. The test is simple: do you receive a warehouse receipt and a title certificate in your own name within 30 days of purchase? If yes, the cask exists and it\'s yours. If no, walk away. We provide both — and I\'d encourage you to verify them independently.',
+       why: 'Naming the specific problems the articles describe, and demonstrating point-by-point that none apply here, is the accusation audit. Offering independent verification is the strongest possible counter to a fraud concern — only a legitimate operator makes that offer comfortably.'},
+      {id:'rb48', cat:'WHISKY', objection:'"How is the cask valued — it seems arbitrary"',
+       technique: 'Commercial Teaching',
+       rebuttal: 'Cask valuation has three established inputs. First: distillery of origin — primary distilleries command significant premiums over secondary producers. Second: age of spirit — every year in barrel adds maturation premium and reduces fill through evaporation, increasing concentration and value. Third: fill strength and remaining volume — the whisky content at purchase, adjusted for the angel\'s share annually. These inputs are combined by independent brokers using live auction data — the same way a property surveyor uses comparable sales. Rare Whisky 101 publishes an independent index you can verify right now. The valuation is transparent, not set by us.',
+       why: 'The "arbitrary" objection comes from opacity. The three-input explanation gives the framework, and the independent Rare Whisky 101 index provides an external, verifiable benchmark. After this response, the client can research the valuation themselves — which is the outcome you want.'},
+      {id:'rb49', cat:'WHISKY', objection:'"What if nobody wants to buy it in 10 years?"',
+       technique: 'Prospect Theory: Structural Demand Analysis',
+       rebuttal: 'Scotch whisky is the UK\'s largest food and drink export, generating over £6.2 billion annually. The markets creating structural demand growth — India\'s premium spirits market, China\'s affluent middle class, Japan\'s single malt obsession — are demographic stories that don\'t reverse in a decade. Even under a flat demand scenario, the supply constraint means aged stock becomes more valuable: you cannot accelerate maturation, and every year fewer casks of the same vintage exist in the market. The bear case for whisky demand in 10 years requires a simultaneous reversal of Indian premiumisation, Chinese affluence growth, and global single malt adoption. That is not a plausible base case.',
+       why: 'The supply constraint argument is particularly powerful: even flat demand produces positive returns on aged spirit because the supply shrinks every year through consumption. The bear case articulated and dismissed demonstrates intellectual honesty that increases credibility.'},
+      {id:'rb50', cat:'WHISKY', objection:'"Whisky is a fashion trend — these things always reverse"',
+       technique: 'NLP: Context Reframe — 200-Year Track Record',
+       rebuttal: 'Whisky has been traded as a commodity since the 17th century and exported as a premium product since the 19th century. The Scotch Whisky Association has export data going back to 1823. What has happened in the last 15 years is not the birth of a trend — it is the global democratisation of a product that was always premium. A trend traceable over 200 years is a structural characteristic of a product category, not a fashion cycle. Diamonds, fine wine, and watches have all been called fashion assets; all have demonstrated durable long-term demand. The specific driver — aged, scarce, provenance-verified spirit from a regulated geographic origin — is structurally durable.',
+       why: 'The 200-year provenance reframes "trend" as "structural demand". The comparison to diamonds, wine, and watches is useful because the client is likely comfortable with those as investment-grade assets — and the structural drivers for each are analogous. Historical continuity defeats the fashion argument.'},
+
+      /* ── EIS/VCT (extended) ── */
+      {id:'rb51', cat:'EIS/VCT', objection:'"The government could change EIS rules at any point"',
+       technique: 'Social Proof + Historical Continuity',
+       rebuttal: 'EIS has been part of the UK tax code since 1994 — 30 years spanning Labour, Conservative, and Coalition governments. In that time, the rules have been tightened to direct capital toward genuinely growth-oriented companies, but the structure has been consistently maintained because it achieves a government objective: channelling private capital into early-stage UK businesses. The risk of EIS abolition is real in the same way the ISA is at risk of abolition — possible, but politically costly and with no clear replacement mechanism. Additionally, EIS relief already received on a qualifying investment is generally protected even if rules subsequently change.',
+       why: '30 years of continuity across different governments is compelling evidence of structural durability. The ISA analogy is disarming — if the prospect accepts ISA stability, they must apply the same logic to EIS stability. The protection of already-received relief is a fact many clients don\'t know, which immediately reduces their downside perception.'},
+      {id:'rb52', cat:'EIS/VCT', objection:'"I don\'t want my money locked up for 3 years minimum"',
+       technique: 'NLP: Reframe — The Lock IS the Benefit',
+       rebuttal: 'The 3-year minimum is the condition for the income tax relief to be permanent — if you sell within 3 years, the 30% income tax relief is clawed back. Two clarifications: first, the 3 years is a minimum for the relief, not an absolute bar on all exit options. Second — and this is the key point — the 3-year constraint and the 30% immediate income tax return are the same mechanism. You literally cannot have the 30% returned to you in year one without the 3-year hold. The government is paying for the commitment. Most clients who reject the lock are simultaneously asking for the 30% relief — those two things cannot be separated.',
+       why: 'The lock and the benefit being the same mechanism is a reframe that makes the constraint feel rational rather than punitive. Once the client understands that the 30% relief is the price paid BY the government for the lock, the constraint becomes acceptable rather than arbitrary.'},
+      {id:'rb53', cat:'EIS/VCT', objection:'"I\'ve lost money on EIS before"',
+       technique: 'Feel/Felt/Found + Net Position Calculation',
+       rebuttal: 'I\'m sorry to hear that — and I want to understand what happened. Was it a specific company failure, or a broader EIS portfolio underperformance? A single company EIS failure and a diversified EIS portfolio failure have completely different structural causes. The key question: did you calculate the net position including the income tax relief received and the loss relief available? At a 45% tax rate, a total EIS loss costs approximately 38.5p per pound invested — after tax relief. If the net position including all relief mechanisms was still negative, that\'s a genuine track record issue worth discussing. If you haven\'t calculated the net figure, the picture may look different than you remember.',
+       why: 'The 38.5p per pound net cost calculation is the single most important number in EIS — if the client has never seen it, the conversation fundamentally changes. Many clients who believe they "lost money on EIS" actually broke even or made a small net gain once all tax relief is correctly calculated.'},
+      {id:'rb54', cat:'EIS/VCT', objection:'"I\'d rather just put it into my pension — it\'s simpler"',
+       technique: 'Complementary Framing',
+       rebuttal: 'Pension is absolutely the first stop for tax efficiency — if you haven\'t maximised your annual allowance, that conversation comes first and I agree completely. Where EIS becomes relevant is specifically when: the pension allowance is used or approaching the taper threshold; you\'re close to or past the lifetime allowance; or you want to diversify the tax treatment of your total wealth. A pension concentrates all your tax-deferred capital in a structure the government controls and can legislate around. EIS sits completely outside pension regulation. Most high-income clients use both for different portions of their annual tax planning. What does your current pension position look like?',
+       why: 'Never positions EIS as a pension alternative — it is complementary. The question about the current pension position is a diagnostic that also serves as a soft close: if the pension is already at the taper threshold, EIS is the logical next conversation and the client usually knows it.'},
+      {id:'rb55', cat:'EIS/VCT', objection:'"Early-stage companies fail — there\'s no track record"',
+       technique: 'Prospect Theory: Tax-Adjusted Risk Profile',
+       rebuttal: 'Correct — and the EIS structure is designed with that reality built in. The income tax relief (30%), loss relief at the marginal rate (45%), CGT exemption after 3 years, and deferral relief combine to create a risk-adjusted return profile that is substantially more favourable than investing in the same companies outside the EIS wrapper. Additionally, the best EIS fund managers are not backing pre-revenue concepts — they\'re backing companies with proven products, existing revenue, and identified growth pathways that are too small for institutional capital. The "too risky" assessment applies to unstructured single-company EIS. A diversified fund managed by experienced EIS specialists has a materially different risk profile.',
+       why: 'Accepts the speculative premise for single-company EIS while making the structural distinction to diversified managed EIS exposure. The tax mechanics quantify the government\'s subsidy of the risk, which is the most compelling way to present the risk-adjusted return to a client who thinks in after-tax terms.'},
+      {id:'rb56', cat:'EIS/VCT', objection:'"What if I need the capital before the holding period ends?"',
+       technique: 'Honest Calibration + Sizing',
+       rebuttal: 'The honest answer: early exit before 3 years involves clawback of the income tax relief, so the calculus changes significantly. This is exactly why sizing matters — EIS should never be capital you might need. If there\'s any genuine probability of needing it within 3 years, the right answer is to size it smaller, not avoid it entirely. The clients with the best EIS experience ring-fenced genuinely long-term capital — money earmarked for estate planning or long-term portfolio construction, without a specific deployment date. What does your liquidity picture look like outside of this allocation?',
+       why: 'Radical honesty about the early exit mechanics builds trust — only a broker with something to hide glosses over this. The sizing conversation pivots the objection from binary "all or nothing" to "how much is appropriate." The liquidity question is both diagnostic and opens the full planning conversation.'},
+      {id:'rb57', cat:'EIS/VCT', objection:'"EIS feels like tax avoidance — I don\'t want HMRC scrutiny"',
+       technique: 'Authority — HMRC Advance Assurance',
+       rebuttal: 'EIS is tax legislation — it is the government\'s explicit mechanism for directing private capital toward growth companies. HMRC publishes advance assurance for EIS investments, which means HMRC itself confirms the investment qualifies for the relief before you invest. The difference between tax avoidance and tax planning is specifically whether Parliament intended the relief to apply: EIS was designed by Parliament to do exactly what it does. You\'re not exploiting a loophole — you\'re using a government scheme created for precisely this purpose. HMRC\'s own data shows over £23 billion raised under EIS since launch. This is the government working with you, not against you.',
+       why: 'The advance assurance mechanism makes the scrutiny concern structurally impossible once invoked — HMRC cannot meaningfully challenge a relief they pre-approved. The £23 billion figure demonstrates mainstream institutional use, not a fringe scheme. The avoidance-versus-planning distinction is legally correct and practically reassuring.'},
+
+      /* ── PROPERTY (extended) ── */
+      {id:'rb58', cat:'PROPERTY', objection:'"Rents are falling in my area — the yield argument doesn\'t hold"',
+       technique: 'Macro vs Micro Context',
+       rebuttal: 'Local rental markets move for local reasons — and the question is whether we\'re seeing a specific micro-market correction or a structural shift. UK housing supply has not kept pace with household formation for 15 consecutive years. Rental demand from professionals priced out of ownership — which is now a structural feature of the market, not a cyclical dip — continues growing nationally. If yields in one geography have compressed, the correct response is usually diversification across geographies and sectors (commercial, HMO, student accommodation) rather than exiting the asset class. Which specific segment are you seeing the pressure in?',
+       why: 'Local rental compression is a valid data point — the response acknowledges it while challenging whether a single micro-market signal invalidates the asset class thesis. The diagnostic question about the specific segment opens a conversation about portfolio construction rather than a binary in/out decision.'},
+      {id:'rb59', cat:'PROPERTY', objection:'"Section 24 has destroyed buy-to-let for higher-rate taxpayers"',
+       technique: 'Structural Solution vs Asset Class Exit',
+       rebuttal: 'Section 24 changed the tax treatment of personally held buy-to-let significantly — and for a 45% taxpayer holding property in their own name, the numbers often don\'t stack up as they did before 2017. The correct structural response is not to exit residential property but to hold it through a limited company, where mortgage interest remains fully deductible. UK property company formations for buy-to-let purposes have grown every year since Section 24 was introduced. The asset class isn\'t broken; the holding structure for the pre-2017 approach is. The question is whether a limited company structure is appropriate for your situation.',
+       why: 'Section 24 is widely cited as the death of buy-to-let, but the structural solution (limited company) is less widely known outside specialist advisers. Presenting this as a holding structure problem rather than an asset class problem keeps the door open and positions the broker as a genuinely sophisticated adviser.'},
+      {id:'rb60', cat:'PROPERTY', objection:'"Mortgage rates are too high — the numbers don\'t work right now"',
+       technique: 'Timing the Cycle — Entry vs Exit',
+       rebuttal: 'At current rates, leveraged residential property in many markets is tighter on cash yield — you\'re right. Two responses. First: unleveraged or lightly leveraged commercial property has a different yield profile where the numbers hold even at current rates. Second — the rate cycle: rate cuts are underway in most developed markets. Property bought at the peak of the rate cycle with a 5-year fixed rate refinances at materially lower rates in 2027-2028, and entry prices in this environment reflect current rates, not the coming ones. The clients who bought residential in 2009 at distressed prices were refinancing into a multi-decade low-rate environment by 2012. Entry timing matters enormously.',
+       why: 'Accepts the current number limitation while providing two genuine solutions — structural (unleveraged/commercial) and cyclical (rate cycle). The 2009-2012 example makes the contrarian entry point viscerally real rather than abstractly theoretical.'},
+      {id:'rb61', cat:'PROPERTY', objection:'"There\'s a housing crash coming — I\'ll wait for prices to fall"',
+       technique: 'Prospect Theory: Supply Deficit Data',
+       rebuttal: 'The UK housing crash has been called every two to three years for the last 30 years — and while there have been corrections, there has never been a structural collapse because the UK has never built enough homes to balance supply with demand. The ONS puts the housing deficit at approximately 4-5 million units. A structural crash requires either a catastrophic demand collapse (mass unemployment) or a dramatic supply surplus. Neither is the current forecast. A 10-15% correction in specific markets is possible. A structural collapse requires a different macro scenario entirely. The clients waiting for the crash have spent 10-15 years watching prices rise while they waited.',
+       why: 'The supply deficit data is the most powerful counter to the crash narrative because it is structural, verifiable, and not dependent on sentiment. Distinguishing between correction and structural collapse prevents the client from treating a normal cyclical dip as confirmation of their bearish thesis.'},
+      {id:'rb62', cat:'PROPERTY', objection:'"I don\'t want the hassle of managing tenants"',
+       technique: 'Reframe Active to Passive',
+       rebuttal: 'That\'s exactly the right instinct — and it\'s why most clients who have had bad landlord experiences tried to self-manage to save the management fee. Full professional management handles tenant vetting, rent collection, maintenance, compliance, and everything else for typically 10-12% of annual rent. On a property generating £18,000 per year, that\'s £1,800-£2,160 — and you spend approximately zero hours on it. The management fee converts an active investment into a passive income stream. The "hassle of tenants" is a self-managed property problem, not a property investment problem. Is that the main hesitation, or part of a broader picture?',
+       why: 'The specific cost of professional management makes it concrete and quantifiable — most clients overestimate the fee and underestimate how completely it removes the hassle. The distinction between active and passive property ownership reframes the objection from "I don\'t want hassle" to "I want it structured correctly," which is solvable.'},
+      {id:'rb63', cat:'PROPERTY', objection:'"CGT changes make residential property uneconomic on exit"',
+       technique: 'NLP: Context Reframe — Three Structural Responses',
+       rebuttal: 'The CGT position on residential property is real — 24% on gains changes the exit economics. Three responses. First: structuring for hold-to-income rather than hold-to-sell — clients who hold for rental income rather than capital gain are less affected by CGT rate changes. Second: limited company structure, where the CGT treatment on retained gains is different. Third: alternative property exposure through REITs inside ISAs or SIPPs, where CGT doesn\'t apply. The CGT change creates a structuring conversation, not an exit from the asset class. The question is which structure is most tax-efficient for your specific situation.',
+       why: 'Accepts the CGT reality and immediately pivots to three structural responses. Clients raising CGT concerns are often looking for permission to exit — the response provides alternatives that allow them to stay in the asset class with better structure, which is usually the right answer.'},
+      {id:'rb64', cat:'PROPERTY', objection:'"Leasehold issues and service charges can wipe out gains"',
+       technique: 'Selection Risk vs Asset Class Risk',
+       rebuttal: 'Leasehold complications are a property selection issue, not an asset class issue. Our approach for leasehold property identifies remaining lease term, ground rent escalation clauses, and estimated service charges before any purchase is made — the full cost schedule, not just the headline yield. The clients who experience service charge shock are typically those who bought without a full cost schedule — that\'s a due diligence failure, not a property market failure. And leasehold reform is actively progressing through Parliament. We\'d walk through the due diligence in full before any commitment.',
+       why: 'Leasehold issues are a real risk but a selection risk. Demonstrating specific due diligence measures (remaining term, escalation clauses, service charges) repositions the broker as the solution to the very risk the client has raised — which converts the objection into a reason to use this broker specifically.'},
+      {id:'rb65', cat:'PROPERTY', objection:'"Property already makes up too much of my net worth"',
+       technique: 'NLP: Reframe — Diversify Within, Not Away',
+       rebuttal: 'Concentration risk in any single asset class is worth managing — and you\'re right to flag it. The question is the form of the concentration: if your exposure is all residential in one geography, that\'s very different from a mix of residential, commercial, and alternative property structures across different markets. The diversification solution isn\'t to leave the asset class — it\'s to diversify within it and across structures. A small commercial or development position with different income characteristics and a different tax wrapper could reduce correlation within your existing property exposure rather than increasing it. What does the current property breakdown look like?',
+       why: 'The concentration concern is valid but often conflates type-of-property concentration with asset-class concentration. Opening the conversation about diversification within property rather than away from it keeps the engagement and often reveals a broader planning opportunity.'},
+
+      /* ── PROCESS (extended) ── */
+      {id:'rb66', cat:'PROCESS', objection:'"I need to do my own research before I commit to anything"',
+       technique: 'Control the Research Agenda',
+       rebuttal: 'Absolutely — and let me save you the 80% of that research that leads nowhere useful. Three things worth verifying independently: first, the regulatory status of the firm — I\'ll give you the FCA reference number and you can check it at register.fca.org.uk right now. Second, the asset performance data — the primary sources are Rare Whisky 101, the World Gold Council, and HMRC for EIS statistics — I\'ll send direct links, not our interpretation. Third, the custodian structure. Everything else online is either noise or conflict of interest. What specifically are you planning to research?',
+       why: 'Accepting the research need and structuring it removes the open-ended delay. Providing FCA numbers and primary data sources demonstrates confidence and eliminates the concern that the broker is hiding from independent scrutiny. Controlling the research agenda — directing to primary sources — is both genuinely helpful and strategically correct.'},
+      {id:'rb67', cat:'PROCESS', objection:'"I don\'t invest in anything I can\'t completely understand"',
+       technique: 'Complexity as Solvable Problem',
+       rebuttal: 'That\'s the right principle — and complexity should be a solvable problem, not a permanent barrier. Let me test where the gap is: if I explained the structure in the simplest possible terms — 30 minutes, no jargon, structured as if you knew nothing about it — would complete understanding be achievable? If not, that tells me the structure is genuinely too complex for this conversation. If yes, the problem is information, not complexity. Most clients who say "I don\'t understand it" actually mean "no one has explained it in a way that respects my intelligence." I\'d like to try.',
+       why: 'Reframes "too complex" as an explanation quality problem rather than inherent complexity. The offer to explain from scratch is a confidence signal — a broker with something to hide does not make this offer comfortably. It also invokes Challenger commercial teaching: the goal is to teach, not just to reassure.'},
+      {id:'rb68', cat:'PROCESS', objection:'"Who regulates you and the products you sell?"',
+       technique: 'Authority — Verifiable Credentials',
+       rebuttal: 'Directly: [firm name] is authorised and regulated by the Financial Conduct Authority — FCA reference number [X]. You can verify this at register.fca.org.uk right now if you\'d like to. On the products: physical precious metals are held with FCA-regulated custodians. EIS and VCT products are regulated investments under the Financial Services and Markets Act. The regulatory framework for each asset class varies, which is one reason it\'s important to be clear about exactly what you\'re buying in each case. Would you like me to walk through the regulatory status of each product we\'ve discussed?',
+       why: 'Regulatory transparency should be delivered without hesitation and with specific, verifiable details. The FCA register reference is the gold standard — any prospect who checks it becomes significantly more comfortable. Offering to walk through each product\'s regulatory framework demonstrates preparedness, not avoidance.'},
+      {id:'rb69', cat:'PROCESS', objection:'"Send me the track record and I\'ll have a look"',
+       technique: 'Socratic: Surface the Real Question Behind the Request',
+       rebuttal: 'I\'ll send it — and I want to make sure what I send is actually useful rather than just data. The track record looks different depending on the time period and whether you\'re looking at individual positions or the aggregated portfolio return. Are you trying to validate the core investment thesis, or looking for a performance benchmark? If it\'s the thesis, the most useful data is the long-run index data from primary sources. If it\'s performance, I\'ll send the specific portfolio history. And what\'s the specific return benchmark you\'d be comparing against — because the comparison set matters enormously for alternative assets.',
+       why: 'Accepting the track record request and asking what they need from it serves two functions: it surfaces the real concern (thesis vs performance) and controls the framing of what they\'ll see. The comparison set question is critical — a client who compares alternative asset returns to cash draws different conclusions than one who compares to risk-adjusted bonds.'},
+      {id:'rb70', cat:'PROCESS', objection:'"My accountant handles all my investments — speak to them"',
+       technique: 'Collaborate, Don\'t Compete',
+       rebuttal: 'Happy to — and the most useful thing I can do is prepare a concise briefing note to share with them first, so the conversation is productive from the outset. Most accountants deal primarily with income tax, corporation tax, and pension structures — the specific mechanics of EIS relief, VCT tax-free dividends, and non-correlated portfolio construction are specialist areas not every accountant encounters routinely. A two-page note with the specific numbers and HMRC guidance references gives your accountant exactly what they need to give you informed advice quickly, rather than asking them to research something new from scratch. Shall I put that together?',
+       why: 'The "speak to my accountant" deflection often means the client wants permission to delay. The briefing note offer advances the conversation rather than accepting the block. The honest observation that accountants may not specialise in EIS mechanics is not a criticism but a helping framing that most clients immediately recognise as true.'},
+      {id:'rb71', cat:'PROCESS', objection:'"I need independent legal advice before I commit"',
+       technique: 'Commitment + Speed the Process',
+       rebuttal: 'That\'s entirely appropriate for a significant commitment — and it\'s a sign this is being taken seriously. I\'ll give you: the full term sheet, the regulatory disclosure documents, and the key risks section, which is the part a solicitor will focus on. I\'d suggest requesting advice specifically on the title structure, the custody arrangement, and the exit mechanism — those are the three areas where legal scrutiny is most useful. A solicitor familiar with investment structures can typically review those documents in 2-3 hours. Would it be useful for me to flag the relevant sections so they\'re working from the right starting point?',
+       why: 'Never object to legal advice — it is a legitimate step for significant allocations. Practical guidance on which documents to review and how long it takes speeds the process rather than slowing it. The offer to flag relevant sections positions the broker as a collaborator with the legal process, not an obstacle to it.'},
+      {id:'rb72', cat:'PROCESS', objection:'"The onboarding / account opening process looks complicated"',
+       technique: 'NLP: Reframe — FCA Requirements as Protection',
+       rebuttal: 'It can look that way at first glance — and the reason for the documentation is FCA-mandated KYC and AML requirements, not us being difficult. In practice: onboarding takes approximately 45-60 minutes total across two submissions. I can sit with you on a call and complete the documentation step by step, which most clients find takes the friction to near-zero. The alternative — less documentation — means either a non-regulated structure with different risks, or a structure that bypasses regulatory requirements, which would concern you more than the paperwork. Would a 45-minute call specifically to walk through the process together work for you this week?',
+       why: 'Accepts the friction of onboarding and explains its source (FCA requirements) in a way that reframes it as protection. The offer to complete the documentation together on a specific-length call is a soft close — it creates a concrete commitment and removes the friction that was blocking progress.'},
+      {id:'rb73', cat:'PROCESS', objection:'"What happens if your company goes under?"',
+       technique: 'Accusation Audit — Address Counterparty Risk Directly',
+       rebuttal: 'A question every client should ask. The answer depends on the structure. Physical assets — casks, gold — are titled directly to you and held with third-party, independently regulated custodians. If our firm ceased to operate, your assets remain yours and accessible through the custodian. EIS and VCT shares are held by the investee companies, not by us — so our firm\'s financial position doesn\'t affect your shareholding. The only scenario where our continuation matters is in managing your ongoing service — reporting, communication, exit facilitation. We have business continuity provisions for that. For the underlying asset, our continuation is operationally helpful but not legally required.',
+       why: 'The question is really a counterparty risk question — the response reframes it correctly. Physical assets with direct title and third-party custody are the strongest possible protection against intermediary failure. EIS shares are similarly insulated. Honest about what the firm\'s continuation does and doesn\'t affect.'},
+
+      /* ── MARKET (extended) ── */
+      {id:'rb74', cat:'MARKET', objection:'"Interest rates are still high — wait for cuts before buying real assets"',
+       technique: 'Anticipation vs Confirmation Trap',
+       rebuttal: 'Rate cuts are the trigger that moves the mainstream allocation. The clients who wait for the cut are the ones who buy after the move. In the 2001-2003 US rate cut cycle, gold began its decade-long bull market before the first cut. In the post-2008 quantitative easing cycle, gold moved before rates settled. Real assets respond to real rate expectations and money supply dynamics — not to the moment of the cut itself. The entry point that benefits most from rate cuts is taken before the cut, not after. We are in the expectation phase — historically where the risk/reward is most favourable.',
+       why: 'The objection assumes rates need to fall before real assets perform — the historical data shows the anticipation of cuts drives the move, not the cuts themselves. Prospect Theory: the loss of missing the pre-cut move is more motivating than the gain of waiting for confirmation. Being early looks like wisdom in hindsight.'},
+      {id:'rb75', cat:'MARKET', objection:'"A recession is coming — I should keep everything in cash"',
+       technique: 'Prospect Theory: Real vs Nominal Loss',
+       rebuttal: 'Cash protects nominal capital and destroys real capital. At 4% CPI, £1 million in cash loses £40,000 per year in purchasing power — every year, guaranteed. A two-year recession costs £80,000 in purchasing power before the recession\'s impact on other assets is even factored in. The assets we\'re discussing are specifically designed for the recession scenario: gold rises when monetary stimulus is deployed; whisky cask values are independent of GDP; EIS has downside protection built into the tax mechanics. If a recession is your base case, cash is one of the worst responses — it guarantees real loss while offering the emotional comfort of nominal stability.',
+       why: 'Loss framing on cash (£40,000 per year guaranteed real loss) is more compelling than any positive gain argument. Prospect Theory\'s loss aversion drives this. The specific alternative performance in recession scenarios makes the argument constructive rather than simply dismissive of the cash preference.'},
+      {id:'rb76', cat:'MARKET', objection:'"Geopolitical risk is too high right now — I\'m not moving capital"',
+       technique: 'Invert the Risk — Geopolitics IS the Case',
+       rebuttal: 'Geopolitical risk is one of the strongest arguments for the assets we\'re discussing, not against them. Every major geopolitical risk event — Russia-Ukraine, US-China tensions, Middle East instability — increases demand for physical, portable, non-sovereign assets. Central banks in emerging markets are increasing gold reserves specifically because geopolitical risk makes USD-denominated reserves feel less safe. The highest geopolitical risk environments in modern history — the Cold War, the Gulf Wars, the 2008 financial crisis — are exactly when gold and real assets outperformed conventional financial assets. Geopolitical risk is the investment case, not a reason to defer it.',
+       why: 'The conventional assumption is that geopolitical risk means "reduce all exposure." The reframe demonstrates that real assets are the specific response to geopolitical risk — the demand for them increases in exactly the environment the client is worried about. The central bank behaviour in this environment is the decisive evidence.'},
+      {id:'rb77', cat:'MARKET', objection:'"AI and tech are the only places worth being — real assets are old economy"',
+       technique: 'NLP: Temporal Reframe — Full Cycle vs Expansion Phase',
+       rebuttal: 'AI is a transformative technology — and like every transformative technology, the companies that survive and thrive look different in 10 years than they look today. Amazon in 2000, Cisco in 2001 — transformative, genuinely important, and catastrophic investments if you bought at the peak. The real asset allocation is not a bet against technology — it is the non-correlated element that performs when technology corrects. The Nasdaq fell 78% peak to trough in 2000-2002. Gold rose 130% in the same period. These are not alternatives; they are complements in a portfolio designed for the full cycle, not just the expansion phase.',
+       why: 'Never dismisses the AI opportunity — validates it while introducing cycle risk. The Nasdaq 2000-2002 and gold comparison is historically accurate and viscerally memorable. The "complement not alternative" framing avoids a binary choice and positions the allocation as portfolio construction sophistication.'},
+      {id:'rb78', cat:'MARKET', objection:'"Sterling is weak — anything priced in sterling is risky right now"',
+       technique: 'Sterling Weakness IS the Argument',
+       rebuttal: 'Sterling weakness is an argument for hard assets, not against them. Physical gold is priced in USD globally — a weaker pound means the same dollar gold price generates more pounds on exit, which is a currency hedge in the client\'s favour. Scotch whisky is sold internationally and invoiced in dollars and euros — the export premium from sterling weakness increases margins at the distillery level, supporting cask values. The assets most exposed to sterling weakness are those denominated only in sterling and correlated to UK economic performance: UK equities, sterling bonds. The real assets in this conversation are partially or fully denominated internationally.',
+       why: 'Counterintuitive but accurate: sterling weakness is an argument FOR international real assets. This is a genuine insight the client probably hasn\'t considered — and Challenger commercial teaching works precisely because the prospect learns something new that changes their view of their own situation.'},
+      {id:'rb79', cat:'MARKET', objection:'"UK equities are historically cheap — I\'ll just buy the FTSE"',
+       technique: 'Structure of Cheapness',
+       rebuttal: 'The FTSE is cheap relative to its own history — and there are structural reasons for that cheapness. The UK market is dominated by banking, energy, and consumer staples — sectors that have underperformed global tech for 15 years. A FTSE 100 investment is a bet on the re-rating of those sectors, which requires either global recognition of UK undervaluation or a fundamental improvement in UK economic conditions. The real asset allocation is not a substitute for the FTSE — it is the element that performs independently of whether the UK re-rating happens. If the FTSE re-rates, great — the two are not in competition. If it doesn\'t, the alternative allocation provides the return.',
+       why: 'The FTSE cheapness argument is valid but incomplete — the response explains why it is cheap (sector composition) and why cheap doesn\'t automatically correct. The framing that both can coexist removes the false binary and positions the alternative allocation as additive rather than competing.'},
+      {id:'rb80', cat:'MARKET', objection:'"Commodity supercycles always reverse — we\'ve probably peaked"',
+       technique: 'NLP: Context Reframe — Wrong Category',
+       rebuttal: 'The commodity supercycle debate is specifically about bulk industrial commodities — oil, copper, iron ore — which are cyclical and demand-driven by manufacturing. The assets in this conversation don\'t fit the supercycle model. Gold is a monetary asset — it responds to monetary conditions and real rates, not industrial demand. Whisky is a consumer goods category with structural premiumisation drivers that are demographic, not cyclical. EIS and VCT are early-stage company positions uncorrelated to commodity prices. If your concern is that commodity exposure has peaked, the question is whether gold, aged spirits, and early-stage UK companies are "commodities" in the sense you mean — and the answer is that they operate on entirely different drivers.',
+       why: 'The supercycle concept is being applied to the wrong asset class — the response makes this distinction clearly without dismissing the concern. Breaking down each asset\'s independent drivers demonstrates the broker is thinking carefully about individual positions rather than treating "real assets" as a monolithic category.'},
+      {id:'rb81', cat:'MARKET', objection:'"Deflation is coming — hard assets underperform in deflation"',
+       technique: 'Second-Level Thinking — Policy Response',
+       rebuttal: 'In a deflationary spiral, hard assets do underperform initially — correct. But the relevant scenario is not whether deflation is theoretically possible; it\'s what policy response deflation triggers. Every deflationary episode in modern history has been met with aggressive monetary expansion — Japan\'s QE, ECB zero interest rate policy, US quantitative easing. The policy response to deflation is inflation. Governments cannot allow deflation to persist — the debt burden becomes unsustainable in real terms. So the forward-looking question is not "what does gold do in deflation" but "what does gold do in the monetary response to deflation?" — and historically: extremely well.',
+       why: 'Accepts the deflation-gold relationship and immediately pivots to the policy response thesis — which is both historically accurate and intellectually honest. The Japan-ECB-US QE examples make the pattern concrete. This is second-level thinking: not the immediate scenario but what follows it.'},
+
+      /* ── TAX (extended) ── */
+      {id:'rb82', cat:'TAX', objection:'"I\'m a basic rate taxpayer — tax relief doesn\'t move the needle"',
+       technique: 'Reframe the Calculation',
+       rebuttal: 'At 20%, the EIS income tax relief returns £20 for every £100 invested in year one — a material immediate return before any underlying performance. The CGT exemption after 3 years applies at any tax rate. And if you\'re at 20% now but expect income to grow, an EIS made today crystallises the relief at the current rate — there\'s an argument for locking in tax-advantaged positions before moving into higher brackets. The relief is less dramatic at 20% than at 45%, true. Is the reduced magnitude the concern, or is there something else about the structure that isn\'t sitting right?',
+       why: 'Validates the reduced impact honestly while presenting two genuine additional arguments (CGT exemption at any rate + future rate planning). The Socratic question tests whether the tax rate is the real objection or a proxy for something else entirely.'},
+      {id:'rb83', cat:'TAX', objection:'"I\'ve already used my annual allowance this year"',
+       technique: 'EIS Carry-Back — Unknown Mechanism',
+       rebuttal: 'EIS relief can be carried back to the prior tax year — so an investment made today can be treated as if it were made in the previous tax year for income tax relief purposes, utilising a prior year allowance if unused. Additionally, some EIS structures allow carry-forward of CGT deferral relief. And if the annual allowance you\'re referring to is the pension annual allowance, that\'s a separate issue — EIS has its own £1 million annual limit (£2 million for Knowledge Intensive companies), which sits completely outside the pension annual allowance. Which allowance were you referring to specifically?',
+       why: 'Most clients conflate different annual allowances. The EIS carry-back provision is a genuine and often unknown solution that directly addresses the "too late this year" concern. Clarifying which allowance the client means demonstrates expertise and often reveals the objection is based on a misunderstanding of the applicable rules.'},
+      {id:'rb84', cat:'TAX', objection:'"I\'m planning to retire abroad — UK tax treatment won\'t apply to me"',
+       technique: 'Calibrated Question — Timing and Domicile',
+       rebuttal: 'Tax residency at exit is the relevant trigger — and it depends on where you\'re domiciled when you want to sell, not when you invest. If you invest as a UK taxpayer now and leave later, relief already received is generally not clawed back on leaving — but exiting EIS before the minimum period while non-resident has specific treatment worth checking with a cross-border tax specialist. For physical assets — gold, casks — domicile affects custody and insurance considerations but not ownership structure. What\'s the planned timeline for the move? That shapes which conversations are most useful right now.',
+       why: 'The domicile question is genuinely complex — honest acknowledgement of that complexity rather than false certainty builds trust. The distinction between EIS (domicile at exit matters) and physical assets (domicile less relevant to ownership) is accurate. The timing question moves the conversation forward practically.'},
+      {id:'rb85', cat:'TAX', objection:'"I\'ll just maximise my pension first — the relief is the same or better"',
+       technique: 'Complementary, Not Competing',
+       rebuttal: 'Pension is the first stop for tax efficiency — if you\'re not maximising your annual allowance, that conversation comes first and I agree completely. Where EIS becomes relevant: at the annual allowance ceiling (£60,000, and lower for many high earners under the taper), the pension option closes. Additionally, a pension concentrates all your tax-deferred wealth in a single government-controlled structure that can be legislated around — witness the lifetime allowance changes of the last decade. EIS sits completely outside pension regulation. Physical assets sit outside pension regulation. The diversification case is not against the pension — it\'s for treating it as one part of a broader tax-efficient structure rather than the entire answer. What does your current pension position look like?',
+       why: 'Fully validates the pension preference before introducing the structural limits (annual allowance taper) and concentration risk. Most high-income clients know about the taper — this demonstrates the broker understands their specific position. The concentration in a government-controlled structure is a concern many clients have never articulated but immediately recognise.'},
+      {id:'rb86', cat:'TAX', objection:'"CGT is rising anyway — I\'ll be taxed on the exit regardless"',
+       technique: 'CGT Exemption as Legislative Protection',
+       rebuttal: 'CGT inside EIS is permanently exempt after 3 years — not deferred, exempt. The CGT increases that concern most clients apply to assets held outside EIS, outside ISAs, and outside pension wrappers. An EIS-qualifying investment held for 3+ years produces tax-free gains regardless of what the Chancellor does to the headline CGT rate. For conventional assets, the CGT concern is correct and increasing. For EIS-structured assets, the exemption is written into the legislation and has survived every CGT reform since 1994. If CGT exposure on other assets is the concern, EIS is actually one of the cleanest solutions — it moves future gains into a CGT-free structure.',
+       why: 'The CGT concern is often directed at the wrong asset class — the response redirects it. EIS CGT exemption is the specific legislative feature that makes it immune to headline CGT changes. Turning a concern about rising CGT into a positive argument for EIS is the kind of reframe that feels genuinely useful rather than manipulative.'},
+      {id:'rb87', cat:'TAX', objection:'"ISAs are simpler and give effectively the same benefit"',
+       technique: 'Size-Dependent Comparison',
+       rebuttal: 'ISAs are excellent — if you haven\'t used your £20,000 ISA allowance, that\'s worth doing first. The difference: an ISA shelters growth from CGT and income tax on a £20,000 annual contribution. EIS returns 30% of the invested amount as income tax relief immediately, shelters all gains from CGT after 3 years, and provides loss relief at the marginal rate — on up to £1 million per year (£2 million for Knowledge Intensive companies). For a higher-rate taxpayer on a large sum, the net-of-tax return profile is structurally more powerful than an ISA. The ISA is better at smaller sizes and simpler to understand. EIS is the next level above the ISA limit. What size of annual allocation were you considering?',
+       why: 'ISA-versus-EIS is a real comparison and deserves honest treatment. The size of the allocation is the discriminating factor — ISAs dominate for sub-£20,000 annual planning; EIS dominates above that threshold for higher-rate taxpayers. The closing question moves the conversation to sizing, which is the right next step.'},
+      {id:'rb88', cat:'TAX', objection:'"My accountant said to wait until the new tax year"',
+       technique: 'Collaborate with the Adviser',
+       rebuttal: 'If your accountant has looked at your specific tax position and determined relief is better claimed in the new year — that may be exactly right, and I\'d follow their advice. The EIS carry-back provision means an investment made now can be back-dated to the prior year — which may or may not be better depending on your income profile across the two years. The question worth asking your accountant: is the advice to wait because of your income profile in each year, or general caution? If it\'s income-profile-specific, that\'s a concrete and answerable question. Would a brief note from me to your accountant on the carry-back mechanics be useful?',
+       why: 'Never challenges the accountant\'s advice — validates it while adding the carry-back information that may change the recommendation. The offer of a note to the accountant is a soft close: it advances the conversation without pressuring the client. The income-profile question demonstrates genuine knowledge depth.'},
+      {id:'rb89', cat:'TAX', objection:'"I\'m not wealthy enough to need IHT planning"',
+       technique: 'Loss Framing — IHT Affects the Middle Class',
+       rebuttal: 'The IHT threshold is currently £325,000 — or £500,000 with the residential nil-rate band. With property values where they are, a client who owns a home, has a pension, and has saved consistently often sits above this threshold without realising it. HMRC collected a record £7.5 billion in IHT last year. The clients who feel they "aren\'t wealthy enough" to plan are often the ones whose estates pay the most — because their wealth is concentrated in assets they didn\'t plan around. Even a modest EIS or AIM portfolio allocation, held for 2 years under Business Property Relief, can shelter significant value from 40% IHT. Would it be worth running a quick calculation on your current estate position?',
+       why: 'The HMRC IHT collection figures and threshold numbers reframe who IHT actually affects — it is the propertied middle class, not the ultra-wealthy, who are most exposed without planning. The offer of a quick calculation is an immediate, low-stakes next step that moves the conversation forward.'},
+      {id:'rb90', cat:'TAX', objection:'"EIS feels like a tax avoidance scheme — I worry about HMRC attention"',
+       technique: 'Authority — HMRC is the Approver',
+       rebuttal: 'Tax avoidance exploits loopholes Parliament didn\'t intend. EIS is a scheme Parliament created and continues to fund — it is tax mitigation, which is legal and explicitly encouraged. HMRC publishes an advance assurance service specifically for EIS: the company applies to HMRC before the investment is made, and HMRC confirms in writing that the investment qualifies. If HMRC has confirmed the investment qualifies for relief, the scenario you\'re concerned about — HMRC scrutinising your return — is the same HMRC that approved the investment in advance. The scheme has channelled over £23 billion into UK companies with HMRC\'s explicit approval at every step. You are not avoiding tax — you are using a government incentive as it was designed.',
+       why: 'The advance assurance mechanism makes the concern structurally impossible once invoked — HMRC cannot meaningfully challenge a relief they have pre-approved. The distinction between avoidance (Parliament didn\'t intend) and mitigation (Parliament designed) is legally correct. The £23 billion figure demonstrates institutional, mainstream use.'},
     ];
 
     /* ═══════════════════════════════════════════════════════════
@@ -2308,9 +3086,9 @@
        script: '"Imagine looking at your portfolio review in 18 months — you can see the position clearly, you\'re hearing positive feedback about how the market has developed, and there\'s a settled feeling knowing you moved when the data told you to."',
        why: 'Sensory-specific language creates a richer internal representation of the future state. The richer the representation, the more the emotional brain treats it as real — and the more motivating it becomes.'},
       {id:'n21', cat:'TACTICAL EMPATHY', principle:'VOSS — LABELLING (TACTICAL EMPATHY)',
-       technique: 'Chris Voss (Never Split the Difference): name the emotion you observe without judgement. "It seems like this has been a stressful decision for you." "It sounds like you\'ve had a bad experience with something similar before." "It feels like you\'re not fully convinced by the tax mechanics." Labelling validates the emotion before addressing the logic. It demonstrates listening. It drops defensiveness dramatically — because the prospect feels understood, not processed. Never say "I understand how you feel" — that is about you. "It seems like you feel..." is about them.',
+       technique: 'The technique: name the emotion you observe without judgement. "It seems like this has been a stressful decision for you." "It sounds like you\'ve had a bad experience with something similar before." "It feels like you\'re not fully convinced by the tax mechanics." Labelling validates the emotion before addressing the logic. It demonstrates listening. It drops defensiveness dramatically — because the prospect feels understood, not processed. Never say "I understand how you feel" — that is about you. "It seems like you feel..." is about them.',
        script: '"It sounds like you\'ve been through a situation where something was pitched as a sure thing and it didn\'t deliver — and that\'s left you wanting to be more careful. Is that fair?" [pause] "I want to work within that, not around it. So let me show you exactly what the downside looks like before I show you anything else."',
-       why: 'Tactical empathy is the highest-leverage opening in a difficult conversation. Voss used it in hostage negotiation — it works because the human need to feel heard is stronger than the need to be right. Labelling converts a defensive prospect into a collaborative one.'},
+       why: 'Tactical empathy is the highest-leverage opening in a difficult conversation. it was developed in high-stakes negotiation — it works because the human need to feel heard is stronger than the need to be right. Labelling converts a defensive prospect into a collaborative one.'},
       {id:'n22', cat:'TACTICAL EMPATHY', principle:'VOSS — MIRRORING',
        technique: 'Repeat the last 2-3 words a prospect says, with a slightly upward inflection, as a question. They say: "I\'m not sure the timing is right." You say: "Timing isn\'t right?" Then be silent. Mirroring signals that you are listening, creates mild cognitive dissonance (they have to decide what they meant), and almost always causes the prospect to expand. It keeps the conversation going without you saying anything of substance — and what they say in the expansion often contains the real objection.',
        script: 'Prospect: "The returns seem reasonable but I\'m concerned about the liquidity." [Mirror:] "Concerned about the liquidity?" [Silence.] Let them explain. They will almost always give you the specific liquidity scenario they are worried about — which you can then address precisely.',
@@ -2350,23 +3128,23 @@
       {id:'n31', cat:'TACTICAL EMPATHY', principle:'VOSS — BLACK SWANS (UNKNOWN UNKNOWNS)',
        technique: 'Every negotiation contains information the prospect holds that, if you knew it, would completely alter your strategy. Voss calls these Black Swans — pieces of information that seem innocuous but, when revealed, change the entire dynamic. Three types: (a) information that gives you unknown positive leverage, (b) a hidden constraint on their side, (c) a secret desire they haven\'t voiced. Black Swans surface when genuine rapport is established and the prospect stops managing the conversation and starts talking. The tools that surface them: sustained mirroring (they keep talking), dynamic silence, late-meeting questions (people drop their guard near the end), and "how" questions that invite explanation rather than yes/no.',
        script: '"I know you\'ve probably looked at alternatives like this before. What\'s usually gotten in the way?" [Invites disclosure of the actual hidden objection — the one never stated.] // "How has your IFA been handling the inflationary environment?" [If they pause or caveat, you\'ve found the gap.] // "What would need to be true for a tax-efficient structure to make sense for you right now?" [Often reveals an undisclosed capital gains event, inheritance, or pension limit breach.]',
-       why: 'Source: Voss, Never Split the Difference. The biggest deals and the worst losses both turn on information you didn\'t know was there. Hunting Black Swans is not a closing technique — it is a listening discipline that reshapes your entire strategy when the information emerges.'},
+       why: 'The biggest deals and the worst losses both turn on information you didn\'t know was there. Hunting Black Swans is not a closing technique — it is a listening discipline that reshapes your entire strategy when the information emerges.'},
       {id:'n32', cat:'TACTICAL EMPATHY', principle:'VOSS — THE F-BOMB: "FAIR"',
        technique: '"Fair" is the most emotionally loaded word in any negotiation and is almost always deployed as a weapon. Three modes: (1) Destabilising attack — "We just want what\'s fair" — designed to make you defensive; you\'ve now lost rational footing. (2) Post-anchor challenge — "That doesn\'t seem fair" — pure tactical pressure to make you move. (3) Voss\'s inoculation (preferred) — say early: "I want you to feel like you\'re being treated fairly at all times. If at any point you feel I\'m not being straight with you, tell me." This defuses the word before it can be weaponised. Apply Mode 3 as standard opening. When Mode 1 or 2 appears, don\'t defend — respond with: "That\'s fair. What are you comparing it to?" — the word mirrors it back and forces specificity; vague fairness attacks collapse under precision.',
        script: 'Mode 3 inoculation (open every first meeting with): "My only goal today is that you leave feeling the conversation was worth your time. If at any point I say something that doesn\'t feel right — call me on it." // When prospect deploys Mode 1/2: "That\'s fair. What are you comparing it to?" [Never defend; force specificity.]',
-       why: 'Source: Voss, Never Split the Difference. "Fair" activates emotional System 1 instantly — the accused party scrambles to prove they aren\'t being unfair. Pre-empt by owning the word first.'},
+       why: '"Fair" activates emotional System 1 instantly — the accused party scrambles to prove they aren\'t being unfair. Pre-empt by owning the word first.'},
       {id:'n33', cat:'TACTICAL EMPATHY', principle:'VOSS — "THAT\'S RIGHT" vs "YOU\'RE RIGHT"',
        technique: '"You\'re right" is a conversation-stopper that means nothing. The word "you" places agency outside the speaker — they are evaluating you, not internalising a position. It requires no cognitive engagement. "That\'s right" requires the speaker to have internalised a position and verified it against their own worldview — it means: "I have assessed this, and it is accurate." Voss: "If you\'ve gotten \'that\'s right,\' you\'ve gotten buy-in. If you\'ve gotten \'you\'re right,\' you\'ve gotten nothing except the impression they want you to stop talking." Engineer "that\'s right" by summarising their position better than they articulated it themselves — use labelling + paraphrasing in sequence. Never accept "you\'re right" as a signal of progress.',
        script: '"It sounds like you\'ve spent years building something, and the last thing you want is to put it at risk on something you don\'t fully understand yet. Is that right?" [If the summary is emotionally accurate, you get "that\'s right" — genuine buy-in, not polite dismissal.] // Test: "Let me make sure I\'ve explained this correctly — does this feel like it fits where you are right now?" Watch for "that\'s right" vs a nod and silence.',
-       why: 'Source: Voss, Never Split the Difference. Most positive responses in sales conversations are polite brush-offs, not genuine buy-in. "That\'s right" is the only response that indicates true internalisation of the argument.'},
+       why: 'Most positive responses in sales conversations are polite brush-offs, not genuine buy-in. "That\'s right" is the only response that indicates true internalisation of the argument.'},
       {id:'n34', cat:'LANGUAGE PATTERNS', principle:'VOSS — EMAIL MAGIC TECHNIQUE',
        technique: 'Standard follow-up emails optimise for "yes," which requires commitment and triggers resistance. Voss\'s insight: make it easy to say no, and reply rate climbs. Three-component structure: (1) Subject line — no-oriented, e.g. "Have you moved in a different direction?" / "Is this a bad time?" / "Bad idea?" (2) Body — mirror one phrase from their last message + label their likely concern. Keep to 3 sentences. (3) Close — one calibrated "how" or "what" question. Never "let me know your thoughts" — that requires no reply. No-oriented subjects remove threat. The prospect reads "they\'re not chasing me" and becomes more inclined to engage. Apply to dead prospects 3+ weeks silent and to cold HNW outreach.',
        script: 'Dead prospect (3-week silence): Subject: "Have you moved in a different direction?" Body: "You mentioned you were reviewing your tax position before year-end — I imagine things have gotten busy. How would you like to handle this?" // HNW first outreach: Subject: "Bad time to connect?" [Non-desperate, signals confidence — HNW individuals respect this.] // Never end an email with "looking forward to hearing from you" — ends with the question instead.',
-       why: 'Source: Voss, Never Split the Difference. The no-oriented subject line activates autonomy (prospect feels they have the power to say no), which paradoxically increases engagement. The calibrated close forces a specific reply rather than a vague deferral.'},
+       why: 'The no-oriented subject line activates autonomy (prospect feels they have the power to say no), which paradoxically increases engagement. The calibrated close forces a specific reply rather than a vague deferral.'},
       {id:'n35', cat:'REFRAMING', principle:'VOSS / ACKERMAN — THE ACKERMAN ANCHORING MODEL',
        technique: 'Developed by CIA case officer Mike Ackerman. The sequence and size of concessions communicate more than the final number. Concessions that decrease in size signal you are reaching your limit. A concession that holds steady signals you can be squeezed further. The Ackerman model controls this signalling precisely. Five steps: (1) Set your target. (2) Open at 65% of target. (3) First counter: 85% of target. (4) Second counter: 95%. (5) Final: 100% of target — add an odd, non-round number (e.g. £11,840, not £12,000) and a non-monetary add-on. The decreasing increments (20%, 10%, 5%) communicate you are at your limit. The odd final number signals precise analysis — not a round number chosen arbitrarily. The non-monetary add-on (a bespoke report, a priority introduction, an 18-month storage review) creates a feeling of compromise without moving your number.',
        script: 'Fee negotiation: If pushed from 2.5%, move to 2.35%, then 2.2%, then hold at 2.1% with an add-on: "The absolute minimum I can go to is 2.1% — and I\'ll include a bespoke quarterly allocation review at no charge." // Cask minimum: "The floor I can go to is £11,840 — and I can include a complimentary storage review at 18 months." [Precision reads as calculated, not arbitrary.]',
-       why: 'Source: Voss, Never Split the Difference (Ackerman Model chapter). In any fee or minimum negotiation, the pattern of your concessions communicates your floor — before you state it. The Ackerman sequence controls that signal deliberately.'},
+       why: 'In any fee or minimum negotiation, the pattern of your concessions communicates your floor — before you state it. The Ackerman sequence controls that signal deliberately.'},
       {id:'n36', cat:'LANGUAGE PATTERNS', principle:'GREENE — STRATEGIC LISTENING: READ WHAT THEY DON\'T SAY',
        technique: 'Greene (Laws of Human Nature): the most powerful information in any conversation is what the other person omits, qualifies, or rushes past. When a client says "yeah, this all sounds pretty good" and immediately changes subject — the subject they changed TO is the real concern. When they say "I\'d probably need to speak to my wife" — who made the financial decisions in the marriage? When they say "we\'ve done something like this before" with a flat tone — what was the experience? Strategic listening protocol: (1) Note every qualifier ("probably", "maybe", "I suppose"). (2) Note every rapid subject change. (3) Note the one thing they haven\'t mentioned, even though it should logically be relevant. The omission is always the most important information.',
        script: '"You mentioned [X] but I notice you didn\'t say anything about [Y] — is that not a factor for you?" [The direct question about the omission unlocks the real objection that all the qualifying language was signalling.]',
@@ -2424,7 +3202,585 @@
       {id:'n49', cat:'FUTURE PACING', principle:'NLP FUTURE PACING — INSTALL THE OWNERSHIP EXPERIENCE BEFORE THE DECISION',
        technique: 'Future pacing: guide the prospect into a vivid, sensory experience of having made the decision, through specific language. The experience is lived in first-person present tense — not described as something that might happen, but something they are currently experiencing in the imagined future. The more sensory and specific the future pace, the more emotionally real it becomes (Damasio somatic marker). Two future paces should be run in sequence: (1) the future pace of having acted — the positive outcome in vivid detail. (2) the future pace of having NOT acted — the cost of inaction made equally vivid. The contrast between the two creates the emotional pressure that closes. Key: always run the positive first, end on the negative only briefly, then return to positive for the close.',
        script: '"I want you to imagine something for a moment. It\'s two years from now. You\'ve held this position through one volatile quarter — not unusual, and you expected it. But the macro thesis has played out. The allocation is returning [X%]. The IHT clock is ticking in your favour. Your accountant calls and says: \'That was the right call.\' How does that feel?" [Pause.] "Now imagine the alternative — you\'re in that same two years, and the position you considered is doing exactly what we discussed, and you\'re watching it from outside. What does that feel like?" [Brief pause — do not linger.] "Which of those two futures is worth a decision today?"',
-       why: 'Source: Bandler & Grinder (1975); Damasio, Descartes\' Error (1994). Future pacing installs the somatic markers (Damasio) that the brain requires to make a committed decision. It is the neurological mechanism of the SLP future pace — both systems describe the same cognitive event.'},
+       why: 'Future pacing installs the somatic markers that the brain requires to make a committed decision. It is the neurological mechanism of the SLP future pace — both systems describe the same cognitive event.'},
+
+      /* ── FUTURE PACING (to 10) ──────────────────────────────── */
+      {id:'n50', cat:'FUTURE PACING', principle:'THE COST-OF-INACTION FUTURE PACE',
+       technique: 'Run the prospect forward to the precise moment they will regret inaction. Make the pain specific, concrete, and tied to a real number or event. The most effective version connects to something they already care about — estate, family, a specific financial goal — and shows exactly what that looks like if nothing changes. Vivid and specific beats vague and general every time.',
+       script: '"Take a moment. Imagine it\'s five years from now. The inflation environment we\'ve been discussing has continued — not dramatically, just persistently. Your cash savings have lost 3-4% a year in real terms. That\'s roughly £60,000 on £300,000 quietly eroded. Your accountant is running the estate valuation and the IHT liability is £40,000 larger than it would have been if the BPR clock had started today. Nothing dramatic happened. Just five years of doing nothing. How does that sit with you?"',
+       why: 'The cost-of-inaction future pace is more powerful than the upside future pace for risk-averse clients, because loss aversion makes the pain of inaction more motivating than the pleasure of gain. The specificity of numbers (£60,000, five years) makes the imagined loss feel real.'},
+      {id:'n51', cat:'FUTURE PACING', principle:'THE LEGACY FUTURE PACE',
+       technique: 'Guide the prospect to the moment their estate is evaluated by the people they care about most. Not morbid — aspirational. The legacy future pace activates identity and values rather than financial logic. Effective for high-net-worth clients who have already accumulated enough and are now managing for the generation after them.',
+       script: '"I want you to think about something for a moment. You\'re not in this conversation — you\'re not even here. It\'s fifteen years from now, and your children are sitting with an estate agent and a solicitor reviewing what you\'ve left them. What is on that table? Is it the assets you built carefully and structured efficiently — the farmland, the whisky portfolio, the business investments with BPR intact? Or is it a simpler picture — some cash, some ISAs, and an IHT bill that absorbs 40% of what took you forty years to build? Which of those tables do you want to set?"',
+       why: 'The legacy future pace bypasses the rational objection framework entirely and speaks directly to the identity of the client as a parent and wealth-builder. Clients who have resisted every logical argument often respond emotionally to this framing.'},
+      {id:'n52', cat:'FUTURE PACING', principle:'THE MARKET TIMING FUTURE PACE',
+       technique: 'Run the prospect forward to the precise moment the trade has moved and they are watching from outside it. The key is specificity: name the asset, name the price movement, name the catalyst. The prospect must feel the emotional cost of having been right about the thesis but having failed to act. This is ethical — it is the real scenario that plays out when an investor identifies the right thesis and delays action.',
+       script: '"Here\'s something I want you to sit with. It\'s eighteen months from now. The rate cutting cycle has played out. Gold has repriced — let\'s say to $3,800. Not a dramatic call — it\'s the institutional consensus. You\'re reading about it. You actually understood this thesis before it played out. You had the conversation. And you\'re doing the mental arithmetic of what the position would have been worth. Is that a comfortable place to be — or is that the most expensive version of being right?"',
+       why: 'The "most expensive version of being right" framing converts the future pace into a mirror of the prospect\'s existing analytical intelligence. The emotional pain is not about being wrong — it is about being right and failing to act on it, which is uniquely motivating for analytical, confident investors.'},
+      {id:'n53', cat:'FUTURE PACING', principle:'THE REVIEW MEETING FUTURE PACE',
+       technique: 'Place the prospect in a future annual review meeting where they are evaluating the decision in hindsight. Frame the review as a natural, inevitable moment — everyone has one — and make it vivid. Most clients avoid thinking about future reviews because they involve accounting for decisions. This future pace makes the review feel like a positive moment of validation rather than a reckoning.',
+       script: '"Picture your review meeting next year. Your financial picture is on the table. Everything you\'ve done in the past twelve months is visible. The allocation we\'ve discussed is sitting there, performing against expectations. You walk in knowing you made a considered, well-structured decision with the information available. How does that meeting feel? Compare it to walking in with the exact same overall financial picture except this position isn\'t in it — and you\'re asking yourself why you didn\'t act when the case was clear."',
+       why: 'The review meeting future pace is low-drama and highly believable because it is something that will literally happen. The contrast between the "I acted" version and the "I didn\'t act" version of the same meeting is emotionally vivid without being manipulative.'},
+      {id:'n54', cat:'FUTURE PACING', principle:'THE CONVERSATION WITH A PEER FUTURE PACE',
+       technique: 'Place the prospect in a social context — a dinner, a golf club, a professional event — where they are describing their investment decisions to someone whose opinion they respect. The social proof dimension activates identity and status. Nobody wants to be the person who watched the thesis play out and stayed in cash.',
+       script: '"Imagine you\'re at dinner with a few people whose financial judgment you respect. Someone mentions they took a position in [asset class] eighteen months ago and the thesis has played out exactly as expected. They describe the structure, the tax efficiency, the return. Now you\'re in that conversation. Are you the person who says \'yes, I did the same\' — or the person who says \'I was considering it but didn\'t move\'? Which person feels more like you at your best?"',
+       why: 'Social proof is most powerful when it is experienced as peer comparison rather than authority pressure. The dinner conversation future pace makes the social dimension of the decision visible without making it feel coercive.'},
+      {id:'n55', cat:'FUTURE PACING', principle:'THE FAMILY CONVERSATION FUTURE PACE',
+       technique: 'For clients whose primary motivation is their family\'s financial security, place them in the specific moment they are explaining their financial decisions to their children or partner. Family-oriented clients respond most strongly to decision frames that activate their role as a provider and protector. The future pace makes the abstract financial benefit concrete and relational.',
+       script: '"Imagine explaining to your children — ten, fifteen years from now — how you thought about protecting and growing what you\'ve built. What does that conversation sound like? Is it: \'I structured things carefully — the IHT planning, the non-correlated assets, the farmland that\'s appreciated steadily\' — or is it a shorter conversation because you kept it simple and paid more tax than you needed to? What story do you want to be able to tell them?"',
+       why: 'For clients with a strong family identity, the family conversation future pace is the most emotionally resonant close available. It connects the financial decision to the deepest source of motivation — what they are building for and for whom.'},
+      {id:'n56', cat:'FUTURE PACING', principle:'THE EXPERT RECOGNITION FUTURE PACE',
+       technique: 'For analytically confident clients who pride themselves on their investment judgment, place them in the position of being recognised as having made the right call before it was obvious. The expert recognition future pace activates identity as a sophisticated, ahead-of-the-consensus investor. Many HNW clients derive significant identity from being right about markets.',
+       script: '"I want you to think about the investments you\'re most proud of in your life. The ones where you understood the thesis before the crowd, you acted, and it played out. This thesis — de-dollarisation, central bank reallocation, fixed supply and expanding institutional demand — this is one of those moments. The difference between the investor who acts now and the one who acts in two years is whether you want to be ahead of the consensus or part of it."',
+       why: 'The expert recognition future pace is the identity-based complement to the financial future pace. For clients who define themselves as sophisticated investors, the opportunity to be ahead of the consensus is often more motivating than the financial return alone.'},
+
+      /* ── PRESUPPOSITIONS (to 10) ────────────────────────────── */
+      {id:'n57', cat:'PRESUPPOSITIONS', principle:'THE LOGISTICS PRESUPPOSITION',
+       technique: 'Presuppose the decision has been made by asking only about implementation logistics. "When would work best for you to receive the documentation?" presupposes they want the documentation. "Would you prefer the quarterly report to come to this email address?" presupposes they are proceeding. The presupposition must feel natural — not like a trick — so it should be asked at high certainty (8+) only.',
+       script: '"Assuming you\'d like to move forward — and based on what you\'ve said I think the case is clear — the practical question is timing. We have positions available now, and the documentation turnaround is 48 hours. Would it make sense to initiate this week, or would the first of the month work better for your cash flow?"',
+       why: 'The logistics presupposition is the gentlest close in the toolkit because it feels like simple organisation rather than a decision request. It is most effective when the prospect has reached high certainty and simply needs a nudge past the decision paralysis phase.'},
+      {id:'n58', cat:'PRESUPPOSITIONS', principle:'THE SCALE PRESUPPOSITION',
+       technique: 'Presuppose the allocation is happening and ask only about the scale. "The question isn\'t really whether — it\'s how much to start with." This moves the conversation past the go/no-go decision and into a sizing conversation, which feels less high-stakes and more manageable. Effective at 7-8 certainty where the prospect is analytically convinced but emotionally hesitant.',
+       script: '"Based on what you\'ve said, the structural case is clear and the tax position makes this the right vehicle for this part of your allocation. The only remaining question is the starting size. Some clients begin at the minimum and build from there. Others start at the full allocation they intend to hold long-term and benefit from the full compounding immediately. Given your position, which approach makes more sense?"',
+       why: 'Moving the conversation from whether to how much is one of the most effective presuppositional closes in consultative selling. The client engages with the sizing question and has implicitly accepted the investment in doing so.'},
+      {id:'n59', cat:'PRESUPPOSITIONS', principle:'THE PROCESS PRESUPPOSITION',
+       technique: 'Presuppose forward movement by describing the next steps as if they are the natural continuation of the conversation. "What usually happens next is..." or "The way this works is..." presupposes participation without explicitly asking for agreement. The process description makes the path of least resistance forward movement rather than inaction.',
+       script: '"The way this works after today\'s conversation: I send you the full documentation pack, you review it at your own pace — there\'s no clock on that. If you\'re satisfied, the subscription process takes about fifteen minutes and we handle the custody arrangement directly. Most clients say the paperwork is the easiest part. So I\'ll send that over to [email address] this afternoon — is that still the best place?"',
+       why: 'Describing the next steps as a neutral process, not as a request for commitment, lowers the psychological cost of moving forward. The question at the end — "is that still the best place?" — is logistical rather than decisional, which further reduces the sense of stakes.'},
+      {id:'n60', cat:'PRESUPPOSITIONS', principle:'THE REFERRAL PRESUPPOSITION',
+       technique: 'Presuppose satisfaction with the investment by asking about referrals before the decision has been made. "The clients who have done best with this structure tend to mention it to their networks naturally — is there anyone in your circle who thinks about this kind of allocation?" This presupposes ownership and satisfaction before either has occurred.',
+       script: '"One thing I\'ve noticed — clients who get into this structure tend to become the most vocal advocates because the thesis plays out so visibly over time. Is there anyone in your network — a business partner, a family member — who you\'d want me to speak to alongside you? Sometimes the conversation is easier with someone you trust in the room."',
+       why: 'The referral presupposition works on two levels: it presupposes ownership and it activates social identity. The prospect imagines themselves as the satisfied advocate — which means they have already mentally accepted the investment. The referral ask is a secondary benefit.'},
+      {id:'n61', cat:'PRESUPPOSITIONS', principle:'THE TIMELINE PRESUPPOSITION',
+       technique: 'Presuppose investment by asking about the client\'s timeline for the holding period. "How long are you thinking you\'d want to hold this initially?" presupposes they are holding it. The question activates ownership thinking — the client begins planning the investment rather than evaluating whether to make it.',
+       script: '"Before we get into the specifics of the subscription, I want to understand your timeline thinking. Are you looking at this as a 3-5 year position, or do you see this as something you\'d hold through a full maturation cycle — 8-10 years? The answer changes how we structure the initial allocation."',
+       why: 'Timeline planning is ownership-mode thinking. Clients who are answering questions about holding period have already accepted the investment at a subconscious level. The question feels like planning rather than selling.'},
+      {id:'n62', cat:'PRESUPPOSITIONS', principle:'THE TAX YEAR PRESUPPOSITION',
+       technique: 'Reference the tax year deadline as a natural constraint that presupposes action. "Given that we\'re approaching the end of the tax year, the sensible thing is to initiate before the 5th April to maximise the relief window." The tax year is an external constraint, not a pressure from the broker — which makes the urgency feel legitimate rather than manufactured.',
+       script: '"The one thing we haven\'t discussed is timing relative to the tax year. You\'re currently sitting on a CGT liability from the sale in December — £42,000. If we initiate the EIS subscription before 5th April, you can carry back the relief against last year\'s liability and the tax benefit applies immediately. After that date, it applies to next year\'s liability and you\'ve waited twelve months for the same outcome. Given that, does it make sense to initiate before April?"',
+       why: 'Tax year presuppositions are among the most legitimate forms of urgency in financial sales because the deadline is real, the consequence is real, and the client benefits from acting. It is a genuine service to the client to name the deadline, not a manipulation.'},
+      {id:'n63', cat:'PRESUPPOSITIONS', principle:'THE COMPARISON PRESUPPOSITION',
+       technique: 'Presuppose the allocation has been made and compare two versions of how it could be structured. "If you go with the standard allocation versus the phased approach, the difference over five years is approximately [X]. Which of those feels like the better fit?" Both options presuppose the investment is happening; only the structure is in question.',
+       script: '"Let\'s compare the two approaches you could take. Full allocation now: maximum compounding from day one, full IHT clock starts immediately, maximum tax relief in this tax year. Phased approach: two tranches over 6-12 months, slightly lower average cost if conditions shift, but you\'re missing 6-12 months of the BPR clock. Given your estate planning timeline, which of those serves your goals better?"',
+       why: 'Comparison presuppositions are highly effective because they activate analytical thinking — the client\'s attention goes to comparing the two options, not to whether to proceed at all. Analytical clients find the comparison satisfying rather than pressured.'},
+
+      /* ── EMBEDDED COMMANDS (to 10) ─────────────────────────── */
+      {id:'n64', cat:'EMBEDDED COMMANDS', principle:'THE VISUALISATION EMBEDDED COMMAND',
+       technique: 'Embed a visualisation command inside a conversational frame. "It\'s interesting when people really picture having made this decision, how different they feel about it" contains the embedded command "picture having made this decision." The visualisation is triggered inside what sounds like an observation, not a command. The softening frame ("it\'s interesting when people...") makes the embedded command feel like shared observation rather than instruction.',
+       script: '"What I\'ve noticed — and it\'s interesting — is that when people really allow themselves to feel what having this position in their portfolio means, the decision becomes much clearer. It\'s not about the mechanics at that point. It\'s about what it represents."',
+       why: 'The embedded visualisation command bypasses the critical faculty that evaluates explicit instructions. When framed as an observation about what "people" experience, the prospect applies the observation to themselves without being directed to.'},
+      {id:'n65', cat:'EMBEDDED COMMANDS', principle:'THE AGREEMENT EMBEDDED COMMAND',
+       technique: 'Embed the command "agree with me" inside a question about a concept. "Don\'t you find, when you really look at the data, that the supply constraint argument is hard to argue with?" embeds the command to agree while framing it as a genuine question. The "don\'t you find" prefix invites agreement without demanding it.',
+       script: '"And when you really look at the numbers — the production limits, the maturation timeline, the expanding institutional demand — don\'t you find it hard to construct a bearish case that holds up? I\'ve been trying to find one for years."',
+       why: 'The agreement embedded command builds micro-commitments through the conversation. Each small agreement ("yes, the supply case is hard to argue with") builds toward the larger agreement of the investment decision. The personal admission ("I\'ve been trying to find one for years") adds authenticity.'},
+      {id:'n66', cat:'EMBEDDED COMMANDS', principle:'THE DECISION EMBEDDED COMMAND',
+       technique: 'Embed the command to make a decision inside a broader statement about how decisions work. "Most confident investors find that when all the information is on the table, making a clear decision comes naturally" embeds the command "make a clear decision" while attributing it to a characterisation ("confident investors") the prospect will likely want to identify with.',
+       script: '"Something I\'ve observed over many years: the clients who are most at peace with their portfolios are the ones who made clear, well-reasoned decisions with full information. They aren\'t second-guessing constantly — because they were thorough at the front end. Does that resonate with how you prefer to make decisions?"',
+       why: 'The decision embedded command connects the act of deciding to an identity the client wants to hold (thorough, clear, at peace with their decisions). The question at the end invites them to affirm the identity, which makes the embedded command self-fulfilling.'},
+      {id:'n67', cat:'EMBEDDED COMMANDS', principle:'THE OWNERSHIP EMBEDDED COMMAND',
+       technique: 'Use the client\'s name and embed a future ownership reference inside a natural conversational statement. "[Name], when you look back at the portfolio in three years, I think you\'ll see this as the allocation that changed the architecture of what you\'ve built." This embeds ownership at a future point as an assumed fact within a statement that feels like a genuine observation.',
+       script: '"[Client name], I\'ve spoken to a lot of investors about this specific structure. And the ones who came back to me two years later — they\'re not asking about the details they worried about at the time. They\'re asking about adding to the position."',
+       why: 'Using the client\'s name focuses the embedded command at the identity level. The future reference ("when you look back") installs ownership in the prospective memory. The social proof element (other clients asking to add) normalises the investment at high certainty.'},
+      {id:'n68', cat:'EMBEDDED COMMANDS', principle:'THE INVITATION EMBEDDED COMMAND',
+       technique: 'Frame the embedded command as an invitation rather than a directive. "I\'d like to invite you to consider what this would look like in the context of your overall estate strategy" embeds the command to consider the investment while making it feel like a gift (an invitation) rather than a pressure. The word "invite" removes resistance by establishing that the broker is offering rather than pushing.',
+       script: '"What I\'d like to do — if it\'s useful — is invite you to look at this not as a standalone investment decision but as one element of a longer-term estate architecture. When you see it in that context, the decision feels different. Shall we frame it that way for a moment?"',
+       why: 'The invitation embedded command is particularly effective with high-autonomy clients who resist being led. The explicit offer of a frame ("shall we frame it that way?") gives them control over the exercise while still moving the conversation in the desired direction.'},
+      {id:'n69', cat:'EMBEDDED COMMANDS', principle:'THE CURIOSITY EMBEDDED COMMAND',
+       technique: 'Embed the command to explore the investment further inside a curiosity frame. "I wonder what you\'d notice if you really spent ten minutes with the historical return data" embeds the instruction to review the data inside the first-person curiosity of the broker. The client hears a speculation about their experience, not an instruction to look at something.',
+       script: '"I wonder — and you might find this interesting — what you\'d actually think if you looked at the Rare Whisky 101 data from 2010 to 2022 without knowing what the asset was. Just the numbers. I think you\'d have a pretty specific reaction to the volatility profile."',
+       why: 'The curiosity embedded command bypasses the "you\'re trying to sell me something" filter by framing the instruction as the broker\'s own curiosity about the client\'s reaction. The client is drawn into the exploration by the framing rather than pushed into it by instruction.'},
+      {id:'n70', cat:'EMBEDDED COMMANDS', principle:'THE REFLECTION EMBEDDED COMMAND',
+       technique: 'Embed the command to make a decision inside a reflective question about the client\'s own decision-making process. "How do you typically know when you\'ve done enough due diligence to feel confident moving?" embeds the assumption that they will reach a point of confidence and act, while the surface question is about their process.',
+       script: '"Can I ask you something? When you\'ve made your best investment decisions in the past — the ones you\'re genuinely proud of — what was the moment that shifted? Was there a specific piece of information that landed, or was it more of a cumulative thing where the case just became clear? I ask because I want to make sure you have whatever that thing is today."',
+       why: 'The reflection embedded command engages the client\'s positive investment history and implicitly frames the current conversation as the same type of decision. It also provides the broker with diagnostic information about what specific form of certainty the client needs to act.'},
+      {id:'n71', cat:'EMBEDDED COMMANDS', principle:'THE COMPLIMENT EMBEDDED COMMAND',
+       technique: 'Embed the command to act inside a genuine compliment about the client\'s judgment. "Someone with your analytical approach has probably already arrived at the same conclusion the institutional buyers are arriving at" embeds the instruction to act while framing it as a recognition of the client\'s sophistication. The compliment must be genuine — manufactured flattery is immediately detected.',
+       script: '"I\'ll say this — and I mean it — you\'ve asked better questions in this conversation than most people I speak to. You\'ve clearly thought about this seriously. I think you already know the answer here. The question is just whether now is when you act on it."',
+       why: 'The compliment embedded command works because it creates an identity pressure in a positive direction. The client who has been told they have good judgment and sophisticated analytical capacity is less comfortable remaining on the fence — because inaction is inconsistent with the identity that has just been affirmed.'},
+
+      /* ── TAG QUESTIONS (to 10) ──────────────────────────────── */
+      {id:'n72', cat:'TAG QUESTIONS', principle:'THE AGREEMENT LADDER WITH TAG QUESTIONS',
+       technique: 'Build a sequence of statements that the prospect must agree with, each ending in a tag question. Each micro-agreement builds toward the larger agreement of the investment decision. The tag questions must be genuine — things the prospect would naturally agree with — not leading rhetorical traps. The power is in the cumulative momentum of agreement.',
+       script: '"The supply of aged spirits is structurally limited by the maturation timeline — you can\'t accelerate that, can you? And the demand from emerging markets has been growing consistently over ten years — that\'s not really in dispute. So when supply is fixed and demand is growing, the economic outcome is fairly predictable, isn\'t it? Which means the question isn\'t really whether the thesis holds — it\'s whether now is the right time to be in it. And given where we are in the cycle, it would be hard to make a case for waiting, wouldn\'t it?"',
+       why: 'The agreement ladder with tag questions works through commitment and consistency — each small agreement makes the next one easier. By the time the final conclusion is reached, the prospect has been building the case themselves through their own agreements. The tag questions transform the broker\'s argument into the prospect\'s own conclusions.'},
+      {id:'n73', cat:'TAG QUESTIONS', principle:'THE REFLECTIVE TAG QUESTION',
+       technique: 'Use a tag question not to seek agreement but to invite reflection on a statement you\'ve just made. "That\'s actually a fairly significant structural shift, isn\'t it?" is not asking for confirmation — it is inviting the prospect to sit with the weight of the statement. The tag question creates a pause that the prospect fills with their own processing.',
+       script: '"The Bank of International Settlements published data showing central banks bought more gold in 2022 and 2023 than at any point since 1967. That\'s a meaningful statement about where the institutions managing national reserves believe the world is going, isn\'t it?"',
+       why: 'The reflective tag question is more sophisticated than the simple agreement-seeking tag because it creates contemplative space rather than micro-commitment. Analytically minded clients respond better to reflection than to agreement-gathering.'},
+      {id:'n74', cat:'TAG QUESTIONS', principle:'THE EMPATHY TAG QUESTION',
+       technique: 'Follow a statement that acknowledges the client\'s position or concern with a tag question that invites confirmation of your understanding. "I imagine that\'s been a source of concern for some time, hasn\'t it?" creates emotional connection by demonstrating that the broker has understood the emotional weight of the client\'s situation. The tag question asks for confirmation of empathy rather than agreement with an argument.',
+       script: '"When you\'ve built something significant over thirty years, the last thing you want is to feel like the tax system is taking a disproportionate share of it when it passes to your family — that\'s a real concern, isn\'t it? Not just an abstract tax planning question. Actually personal."',
+       why: 'The empathy tag question strengthens trust and rapport rather than advancing a logical argument. It demonstrates that the broker has heard not just the words but the emotional content behind them. This is the most powerful use of tag questions in the early stages of a conversation.'},
+      {id:'n75', cat:'TAG QUESTIONS', principle:'THE CONSEQUENCE TAG QUESTION',
+       technique: 'State a logical consequence and follow it with a tag question that confirms the client has absorbed it. "If the inflation rate stays at 4% and the account is returning 3%, you\'re losing purchasing power every year — that\'s actually happening right now, isn\'t it?" The tag question makes the consequence feel personally relevant rather than abstract.',
+       script: '"At 4% inflation, £500,000 in cash is losing about £20,000 a year in real terms. Over five years, that\'s £100,000 of purchasing power gone — just from holding cash. That\'s the actual cost of the safe option, isn\'t it?"',
+       why: 'The consequence tag question is a gentle form of pain amplification. By asking the client to confirm the consequence, you ensure they have actively registered it rather than passively heard it. The confirmation is a form of ownership — they cannot subsequently deny awareness of the cost.'},
+      {id:'n76', cat:'TAG QUESTIONS', principle:'THE IDENTITY TAG QUESTION',
+       technique: 'State something about the kind of investor the prospect is and follow it with a tag question that invites them to affirm the identity. "You\'re someone who makes decisions based on evidence, not sentiment — that\'s been clear throughout this conversation, hasn\'t it?" The identity tag question activates consistency — the prospect will behave in ways consistent with the identity they have affirmed.',
+       script: '"Based on everything you\'ve asked and the way you\'ve engaged with this — you\'re not someone who makes financial decisions on instinct alone. You want the data to hold up, and you want to understand the structure. That\'s the right approach, isn\'t it? And if I\'m right about that, what I\'m about to show you should be the thing that gives you the confidence you need."',
+       why: 'The identity tag question is the NLP complement to identity language. By affirming the evidence-based identity and then providing evidence, the broker creates an alignment between the client\'s self-image and the act of proceeding. Inconsistency between identity and action is uncomfortable — the tag question establishes the identity against which the action will be measured.'},
+      {id:'n77', cat:'TAG QUESTIONS', principle:'THE PERMISSION TAG QUESTION',
+       technique: 'Ask permission to proceed to the next stage of the conversation using a tag question that presupposes the answer. "It would be useful to look at the specific return data at this point, wouldn\'t it?" is not a genuine request for permission — it presupposes that yes, it would be useful. The tag question makes the request feel collaborative rather than directed.',
+       script: '"It would make sense to walk through the actual structure at this point — specifically the IHT mechanics and the exit process — so you have the complete picture before we talk about next steps. That feels like the right order, doesn\'t it?"',
+       why: 'The permission tag question keeps the conversation collaborative and maintains the client\'s sense of control. It is particularly valuable with high-autonomy clients who push back on feeling led. The tag question gives them a moment to redirect if they want — and when they don\'t, their implicit permission reduces resistance to the content that follows.'},
+      {id:'n78', cat:'TAG QUESTIONS', principle:'THE SUMMARY TAG QUESTION',
+       technique: 'After summarising the key points of the conversation, use a tag question to confirm the summary is accurate before moving to a close. "So what we\'ve established today is: the macro case is clear, the structure is right for your position, and the tax efficiency makes this the sensible allocation for this portion of your capital — that\'s a fair summary, isn\'t it?" The client\'s confirmation of the summary is a powerful implicit agreement with the investment decision.',
+       script: '"Let me make sure I\'ve understood your position correctly. You\'re satisfied with the logical case. The IHT benefit is directly relevant to your estate planning. The minimum is manageable within the available capital. And you said earlier that the supply constraint argument is the most compelling element. Is that a fair summary of where we are?"',
+       why: 'The summary tag question is a powerful close because it requires the client to confirm or correct a summary that implies they are satisfied with the investment case. Correcting the summary surfaces remaining objections; confirming it is a form of pre-commitment to proceeding.'},
+      {id:'n79', cat:'TAG QUESTIONS', principle:'THE RISK REVERSAL TAG QUESTION',
+       technique: 'State the specific downside scenario explicitly and follow with a tag question that confirms the client has assessed and accepted it. "Even in the most conservative scenario — the asset doesn\'t appreciate beyond the current value — you\'ve still preserved capital and used the IHT window. That\'s still a meaningful outcome, isn\'t it?" Acknowledging the worst case and confirming it is acceptable removes the hidden anxiety about risk.',
+       script: '"Let\'s take the most pessimistic case. The market for aged whisky casks goes completely flat for five years — no appreciation at all. You\'ve still held a physical asset, paid no CGT during the holding period, and the IHT clock has been running. In the flat case, you\'re still ahead of the cash alternative in real and tax terms, aren\'t you?"',
+       why: 'The risk reversal tag question is counterintuitive because it explicitly acknowledges the worst case scenario. This is one of the most trust-building things a broker can do — and confirming that even the worst case is acceptable removes the last emotional barrier to proceeding.'},
+      {id:'n80', cat:'TAG QUESTIONS', principle:'THE MOMENTUM TAG QUESTION',
+       technique: 'Use a tag question at the moment of highest certainty to confirm the forward momentum and make the close feel like a natural continuation rather than a jump. "So the natural next step is to initiate the subscription process — that makes sense at this point, doesn\'t it?" The tag question at the close is the lightest possible ask — it makes proceeding feel like simple agreement with an obvious next step.',
+       script: '"Everything we\'ve discussed points in the same direction. The macro case holds. The structure is appropriate for your position. The tax benefit applies directly to your situation. Moving forward now makes sense, doesn\'t it? The documentation will be with you within 24 hours."',
+       why: 'The momentum tag question at the close is the culmination of the agreement ladder. By this point, the client has been agreeing with the broker throughout the conversation. One final, low-stakes tag question makes proceeding feel like the consistent continuation of a pattern — not a new, high-stakes decision.'},
+
+      /* ── PATTERN INTERRUPT (to 10) ──────────────────────────── */
+      {id:'n81', cat:'PATTERN INTERRUPT', principle:'THE COUNTERINTUITIVE FACT INTERRUPT',
+       technique: 'Open with a counterintuitive fact that contradicts the client\'s assumed knowledge about the asset class. The fact must be genuine, verifiable, and specifically surprising. The brain\'s pattern recognition system is disrupted when new, contradictory information arrives — this is the neural mechanism of the pattern interrupt. The fact must land before any sales context is established.',
+       script: '"Before I explain anything about this — I want to tell you one fact and let it sit there for a moment. Central banks globally purchased more gold in 2022 than in any year since 1967. More than the year before Bretton Woods collapsed. The people managing national monetary reserves are doing something they haven\'t done in 55 years. I\'ll come back to why in a moment."',
+       why: 'Leading with a single, genuinely surprising fact is a more powerful pattern interrupt than a question or a challenge. It disrupts the client\'s existing mental model of the market before they have had a chance to engage their defences. The "I\'ll come back to why" delay amplifies curiosity by creating an open loop.'},
+      {id:'n82', cat:'PATTERN INTERRUPT', principle:'THE PERSONAL CHALLENGE INTERRUPT',
+       technique: 'Challenge the client\'s existing position directly but without aggression — in the style of intellectual curiosity. "Can I ask you something that might feel like an unusual question?" followed by a genuinely uncomfortable question about their current portfolio behaviour. The unusual-question preface creates permission for the challenge. The question itself should surface an assumption they have never examined.',
+       script: '"Can I ask you something that might feel like an unusual question? In the past ten years, what percentage of your portfolio return has come from assets that are genuinely uncorrelated to equity markets? Not just different funds — actually different drivers of return. Most people have never calculated that number. Do you have a sense of it?"',
+       why: 'The personal challenge interrupt is most effective when the question is one the client has genuinely not been asked before and cannot answer immediately. The cognitive gap between the question and the absent answer creates the mental space for a new frame.'},
+      {id:'n83', cat:'PATTERN INTERRUPT', principle:'THE ROLE REVERSAL INTERRUPT',
+       technique: 'Reverse the expected dynamic by explicitly stepping out of the sales role. "I want to be honest with you about something — and it\'s not what you\'d expect from someone in my position." This meta-commentary on the conversation disrupts the expected broker-client dynamic and creates genuine curiosity about what comes next. The reversal must be authentic.',
+       script: '"I\'m going to say something you probably don\'t expect to hear in this conversation: not everyone should be in this. There are specific conditions that make this right for a particular investor, and there are situations where the capital is better deployed elsewhere. I\'d rather identify which applies to you before I show you anything else. Can I ask you a few questions?"',
+       why: 'The role reversal interrupt is among the most powerful pattern interrupts because it completely subverts the client\'s expected experience of being pitched to. A broker who openly questions whether the investment is right for the client is operating from a frame of genuine service rather than commission pressure — which is the highest-trust position available.'},
+      {id:'n84', cat:'PATTERN INTERRUPT', principle:'THE SILENCE INTERRUPT',
+       technique: 'After making a powerful statement or presenting a key data point, fall completely silent. Hold the silence beyond the point where it becomes slightly uncomfortable. Most clients fill silence with speech — and what they say when filling a silence is frequently more useful than their response to a direct question. The silence interrupt requires confidence — the temptation to fill it yourself is strong.',
+       script: '"The purchasing power of a pound sterling has declined by 68% since 1980. [Silence — hold for 5-8 seconds.] [Do not break it. Let them speak first.]"',
+       why: 'Silence is the rarest element in most sales conversations — and the most powerful interrupt available. It creates space for the client\'s genuine reaction rather than their reflexive defence. The statement that provokes the silence should be so factual and significant that silence is the natural response.'},
+      {id:'n85', cat:'PATTERN INTERRUPT', principle:'THE SELF-DEPRECATING INTERRUPT',
+       technique: 'Interrupt the expected sales script with a self-deprecating observation that demonstrates genuine awareness of the broker\'s own position. "I know what it sounds like when someone in my position says this" — followed by the acknowledgment of the obvious bias — followed by the turn: "So let me show you the data and you tell me what it tells you." The self-deprecation earns the right to be believed.',
+       script: '"I\'ll acknowledge the obvious thing: I have a financial interest in this conversation going a particular way. So does your pension fund manager, your bank, and the fund platform that charges you 0.5% annually. The question isn\'t whether there\'s a conflict of interest — there always is somewhere. The question is whether the case holds up when you look at it yourself. Can I show you the independent data and get your read on it?"',
+       why: 'Naming the conflict of interest before the client does is one of the most trust-building actions available. It demonstrates intellectual honesty, subverts the defensive mechanism that protects against perceived manipulation, and repositions the broker as a transparent collaborator rather than a hidden-agenda salesperson.'},
+      {id:'n86', cat:'PATTERN INTERRUPT', principle:'THE QUESTION BEFORE THE PITCH INTERRUPT',
+       technique: 'Begin with three qualifying questions before offering any information about the investment. The reversal of the expected sequence — the client expects to be pitched at, not questioned — creates surprise and genuine engagement. The questions must be genuinely diagnostic, not rhetorical setup for the pitch.',
+       script: '"Before I tell you anything about what I do — can I ask you three questions? One: what percentage of your current portfolio is genuinely uncorrelated to equity markets? Two: when was the last time your IHT liability was reviewed against your current estate value? Three: what was the real after-tax return on your highest-returning position in the last five years?" [Pause after each. Let them answer. Don\'t move on until they\'ve engaged.]',
+       why: 'The question-before-pitch interrupt establishes diagnostic intent before promotional intent. Clients who have been asked three thoughtful, genuinely useful questions before hearing a pitch are in a completely different psychological state than clients who have been pitched at from the first sentence. The questions also surface the specific pain points the pitch should address.'},
+      {id:'n87', cat:'PATTERN INTERRUPT', principle:'THE HUMBLE ADMISSION INTERRUPT',
+       technique: 'Admit a limitation or uncertainty about the investment before the client can surface it. "I\'ll tell you the one thing about this I can\'t predict with certainty" — followed by a genuine acknowledgment of the specific unknown — followed by the structural case that holds regardless of that unknown. The admission earns the right to be trusted on everything else.',
+       script: '"Here\'s the one thing I genuinely can\'t tell you with certainty: the exact timeline of the repricing. The structural case is clear. The supply constraint is structural. The institutional demand shift is measurable. But whether the repricing happens in 18 months or 36 months — I can\'t give you that with precision. What I can tell you is that the direction is not in doubt, and the structural floor exists regardless of timing."',
+       why: 'The humble admission interrupt demonstrates intellectual integrity and converts the acknowledged uncertainty into a source of credibility rather than doubt. When a broker says "here is the one thing I cannot predict," the client learns to trust every other assertion.'},
+      {id:'n88', cat:'PATTERN INTERRUPT', principle:'THE REFRAME BEFORE PITCH INTERRUPT',
+       technique: 'Before making any investment-specific argument, reframe the conversation from sales to education. "I\'m going to suggest we set aside any decision for the next twenty minutes and just look at some data — and at the end, if it doesn\'t hold up under scrutiny, we stop there." This reframe converts the conversation from a transactional context to an analytical one, which lowers defences dramatically.',
+       script: '"Here\'s what I\'d like to do — and this might sound strange. Let\'s agree that for the next twenty minutes, you\'re not evaluating whether to invest in anything. You\'re just looking at a set of structural data about what central banks are doing, what institutional capital flows look like, and what the return record of this asset class looks like over fifteen years. At the end, you tell me what it suggests to you. Can we do that?"',
+       why: 'The reframe-before-pitch interrupt removes the evaluation context that triggers defensive thinking. A client examining data is in a more receptive cognitive state than a client being pitched to. When the conclusion they reach from the data matches the investment case, it is their conclusion — not the broker\'s — which makes it much more durable.'},
+      {id:'n89', cat:'PATTERN INTERRUPT', principle:'THE UNEXPECTED AGREEMENT INTERRUPT',
+       technique: 'When the client raises an objection, agree with it more strongly than they expect. "You\'re completely right — and most people in your position should not do this." The unexpected agreement disrupts the defensive dynamic and creates intense curiosity about the caveat that follows. The unexpected agreement must be genuine — it only works if there are situations where the client is actually right.',
+       script: '"You know what — you\'re right to be cautious. Most investors I speak to are not ready for this type of allocation. Their capital isn\'t structured correctly, the tax position doesn\'t make sense, or they simply don\'t have the patience for the holding period. The question I\'d ask about you specifically is whether any of those three applies — because your situation sounds genuinely different from what you\'ve described."',
+       why: 'The unexpected agreement interrupt works by collapsing the objection-handling dynamic entirely. Instead of defending against the objection, the broker validates it and converts the conversation into a qualification exercise. This is also a powerful use of scarcity — implying that not everyone qualifies is more compelling than implying everyone should.'},
+
+      /* ── IDENTITY LANGUAGE (to 10) ─────────────────────────── */
+      {id:'n90', cat:'IDENTITY LANGUAGE', principle:'THE LEGACY BUILDER IDENTITY',
+       technique: 'Frame the investment in terms of the client\'s identity as someone building something that outlasts them. "Investors who think generationally..." or "The families that have preserved and grown wealth across generations..." positions the client within a group defined by long-term, legacy-oriented thinking. This is the most powerful identity for IHT and estate planning conversations.',
+       script: '"The families that have consistently preserved and grown wealth across multiple generations share one characteristic: they invested in things that hold intrinsic value independently of financial market conditions. Land, art, whisky, gold — these are the holdings that appear in estate inventories across centuries. That\'s not an accident. It\'s a philosophy about what holds value over time. Is that a philosophy that resonates with how you think about what you\'re building?"',
+       why: 'The legacy builder identity activates time horizons beyond the client\'s own lifetime, which significantly shifts the psychological frame of the investment decision. Decisions made for the next generation feel different — more serious, more important, less subject to short-term market anxiety.'},
+      {id:'n91', cat:'IDENTITY LANGUAGE', principle:'THE CONTRARIAN SOPHISTICATE IDENTITY',
+       technique: 'Position the client as a member of the minority of investors who understand what the mainstream misses. "Investors who move before the consensus..." or "The clients I work with who have generated the strongest long-term returns have one thing in common: they were comfortable being early." This identity is powerful for analytically confident clients who derive satisfaction from being ahead of the crowd.',
+       script: '"There is a specific type of investor who has consistently outperformed the market over 20-30 year periods. They\'re not the ones who watch CNBC and act on what they see. They\'re the ones who understand structural dynamics before they become obvious — and they\'re comfortable holding a position that the crowd hasn\'t caught up to yet. From our conversation, that sounds like the kind of investor you are."',
+       why: 'The contrarian sophisticate identity activates the desire for distinctiveness. For clients who have spent a career developing investment judgment, being positioned as one of the few who understands something before the mainstream is deeply appealing. The identity also makes following the mainstream cognitively uncomfortable.'},
+      {id:'n92', cat:'IDENTITY LANGUAGE', principle:'THE EVIDENCE-BASED INVESTOR IDENTITY',
+       technique: 'Frame the investment decision as consistent with the client\'s identity as someone who makes decisions based on evidence rather than instinct or media narrative. "The kind of decision you\'re describing — data-driven, structurally sound, not reactive to short-term noise — this is exactly the kind of allocation evidence-based investors have always been drawn to." This identity is particularly effective for clients who push back on emotional arguments.',
+       script: '"One thing that\'s been consistent in this conversation is that you\'re engaging with the data, not with the narrative. That\'s a specific skill — most investors confuse the two. The narrative about gold is mixed right now because the press is always six months behind the capital flows. The data on central bank buying and real yield compression tells a different story. You\'ve been reading the data throughout this conversation. What does it tell you?"',
+       why: 'The evidence-based investor identity converts the broker\'s analytical approach into a mirror of the client\'s own self-image. The client who sees themselves as data-driven is invited to apply their own identity to the analysis — and the analytical conclusion becomes consistent with that identity.'},
+      {id:'n93', cat:'IDENTITY LANGUAGE', principle:'THE PATIENT CAPITAL IDENTITY',
+       technique: 'Position the client as an investor who has the discipline to invest on long-term structural thesis rather than reacting to short-term market noise. "Patient capital investors..." or "The investors who generated the most extraordinary returns over 20-year periods — Buffett, the Yale endowment model, the great family offices — did so by staying out of the short-term noise and in the long-term structure." This identity pairs the client with proven, admired investors through the shared operating principle.',
+       script: '"What distinguishes patient capital investors from the average market participant isn\'t intelligence — it\'s time horizon. The average holding period for a US equity is now under six months. The great returns — the ones people actually retire on — came from holding things for 5, 10, 20 years through the noise. You\'ve described an investing history that sounds like patient capital. Is that how you think about yourself?"',
+       why: 'The patient capital identity is highly effective for clients who feel anxiety about market volatility. By repositioning volatility as "noise that patient capital investors tune out," the identity converts a source of anxiety into evidence of their own sophisticated investor status.'},
+      {id:'n94', cat:'IDENTITY LANGUAGE', principle:'THE TAX-EFFICIENT INVESTOR IDENTITY',
+       technique: 'Position the client as someone who takes their tax position seriously as part of their investment strategy — not as an afterthought. "The most financially sophisticated investors treat tax efficiency as a first-order investment decision, not a secondary consideration." This identity is especially powerful when the client\'s current tax exposure is high and largely unaddressed.',
+       script: '"One of the patterns I\'ve noticed among the investors I work with who have the most efficiently structured estates is that they made tax planning a core part of their investment strategy very early — not something they dealt with retrospectively. They asked: \'What is the most tax-efficient way to hold this capital?\' before \'What is the highest return?\' That sequence changes the outcome dramatically over 10-15 years."',
+       why: 'The tax-efficient investor identity is particularly valuable because it reframes tax planning from defensive (avoiding loss) to offensive (creating advantage). Clients who adopt this identity see EIS, BPR, and alternative structures not as tax avoidance but as the appropriate behaviour of a sophisticated investor.'},
+      {id:'n95', cat:'IDENTITY LANGUAGE', principle:'THE INSTITUTIONAL MINDSET IDENTITY',
+       technique: 'Position the client as someone who thinks about their portfolio the way institutions do — with a mandate-based approach, defined allocation percentages, and a long-term structural view. "The institutional mindset treats each asset class as serving a specific mandate within the overall portfolio..." This identity is powerful for HNW clients who have built significant wealth and want to manage it with professional discipline.',
+       script: '"Let me share how the large family offices and institutional endowments think about portfolio construction — because it\'s quite different from the way most individual investors approach it. They don\'t ask \'should I invest in this?\' They ask \'what mandate does this serve within my overall architecture?\'  They\'ve defined, in advance, what percentage of capital serves each mandate — income, capital preservation, real return, non-correlation. Have you ever built your portfolio with that kind of deliberate mandate structure?"',
+       why: 'The institutional mindset identity elevates the conversation from product to architecture. Clients who adopt it are no longer evaluating a single investment — they are building a portfolio structure. This framing converts a one-off sale into an ongoing portfolio architecture conversation.'},
+      {id:'n96', cat:'IDENTITY LANGUAGE', principle:'THE FIRST MOVER IDENTITY',
+       technique: 'Position the client as someone who has historically made their best decisions by moving before the consensus. "Your best returns have probably come from positions you took when other people weren\'t paying attention yet." The first mover identity activates competitive instinct alongside investment sophistication and is particularly effective for entrepreneurially minded clients.',
+       script: '"The best investment decisions you\'ve ever made — I\'d be willing to bet they shared one characteristic: you understood the thesis before it was widely accepted. You didn\'t wait for the headline. You\'d thought it through independently, the case held up, and you moved. What you\'re looking at now is that same kind of moment — before the institutional narrative has caught up to the capital flows that are already happening."',
+       why: 'The first mover identity is powerful because it activates the client\'s own history of successful early decisions. By connecting the current opportunity to past successes, the identity frame makes the decision feel continuous with their best investing behaviour rather than unfamiliar.'},
+      {id:'n97', cat:'IDENTITY LANGUAGE', principle:'THE ADVISOR TO FAMILY IDENTITY',
+       technique: 'Position the client in their role as the financial steward for their family — the person whose decisions shape the options available to the next generation. "The decisions you make about structuring and allocating your estate now are the decisions your children will either benefit from or have to work around in twenty years." This identity activates the deepest source of motivation for wealth preservation clients.',
+       script: '"The clients I\'ve worked with who felt the most at peace with their financial decisions were the ones who could look at their estate and say: \'I built this deliberately, I structured it efficiently, and the people I care about will benefit from the thought I put into it.\' Is that the kind of financial legacy you\'re building?"',
+       why: 'The advisor-to-family identity is among the most emotionally resonant available because it connects financial decisions to the deepest identity most HNW clients hold — provider, protector, and steward for the people they love.'},
+      {id:'n98', cat:'IDENTITY LANGUAGE', principle:'THE INTELLECTUAL INVESTOR IDENTITY',
+       technique: 'Position the client as someone who finds genuine intellectual satisfaction in understanding the structural dynamics that drive asset prices — not just in reading return figures. "The investors who find this most compelling are typically the ones who have enjoyed understanding systems — how cycles work, how capital flows, how policy and markets interact." This identity is particularly effective for clients from academic, medical, or legal backgrounds.',
+       script: '"What I\'ve noticed about investors who engage most deeply with this type of allocation is that they\'re not primarily motivated by the number. They\'re interested in the system — why gold behaves the way it does in late-cycle environments, what the de-dollarisation trend actually means for currency reserve architecture, how whisky maturation creates a compounding mechanism that equity markets can\'t replicate. Is that how you approach understanding investments — from the mechanism outward rather than the return backward?"',
+       why: 'The intellectual investor identity converts the investment case into an intellectual exploration, which is intrinsically satisfying for analytically minded clients. Clients who are engaged at the intellectual level are also the most likely to hold through volatility — because their conviction is grounded in structural understanding rather than return-chasing.'},
+      {id:'n99', cat:'IDENTITY LANGUAGE', principle:'THE PRUDENT STEWARD IDENTITY',
+       technique: 'Frame the investment decision as consistent with the identity of a prudent, responsible steward of capital — someone who takes their financial obligations seriously and manages carefully. This identity is most effective with conservative, risk-averse clients for whom the "sophisticated investor" or "contrarian" frame would feel uncomfortable.',
+       script: '"The way I think about what you\'re describing is this: you\'re not a speculator and you\'re not looking for excitement. You\'re someone who takes the responsibility of managing what you\'ve built seriously — which is why the tax position matters, why the structure needs to be sound, and why you\'re asking all the right questions before making any decision. That kind of carefulness is exactly why this structure makes sense for you — because the IHT mechanics and the structural floor mean the prudent choice is probably also the correct investment choice."',
+       why: 'The prudent steward identity works by making the investment feel consistent with the client\'s conservative self-image. Rather than challenging their conservatism, it incorporates it — the structure becomes the conservative choice, not the risky one.'},
+
+      /* ── RAPPORT (to 10) ────────────────────────────────────── */
+      {id:'n100', cat:'RAPPORT', principle:'THE CALIBRATED MATCH RAPPORT',
+       technique: 'Match the client\'s communication style, pacing, and vocabulary rather than defaulting to your own. If they speak slowly and analytically, slow down and go deeper on the data. If they speak quickly and intuitively, respond with energy and high-level thesis statements. If they use specific vocabulary ("capital deployment", "risk-adjusted", "mandate"), adopt it. The match should feel natural — visible matching feels like mockery.',
+       script: 'No fixed script — this is a listening and adaptation technique. Identify: Do they open with feelings or facts? Do they respond to stories or data? Are they short-sentence communicators or long-form? Mirror the structure and pace of their communication, not just the content. In the first five minutes of a conversation, listen more than you speak. The calibration happens before the pitch.',
+       why: 'Rapport at the communication style level is more durable than rapport built through surface-level agreement. When a client feels that their natural way of communicating is understood and met, the cognitive friction of the conversation drops significantly. This is the mechanism behind the feeling of talking to someone who "just gets it."'},
+      {id:'n101', cat:'RAPPORT', principle:'THE SHARED REFERENCE RAPPORT',
+       technique: 'Find and use a shared reference point — a period in the market, an event, an industry experience — that establishes common ground without artificially manufacturing it. "You mentioned you were in the business during the 2008 crisis — that would have given you a very specific view of counterparty risk that most people who weren\'t there don\'t fully appreciate." The shared reference acknowledges the client\'s experience as formative and relevant.',
+       script: '"You mentioned you built your business through the 2000-2010 period — that decade includes two of the most significant market dislocations of the past fifty years. Clients who built through that environment tend to have a completely different view of what resilience means in a portfolio. What did those years teach you about how you want to hold your wealth?"',
+       why: 'The shared reference rapport technique creates connection through acknowledgment of formative experience. It treats the client\'s history as valuable data rather than background noise — which is both respectful and strategically useful, because past market experiences shape present decision-making in specific and predictable ways.'},
+      {id:'n102', cat:'RAPPORT', principle:'THE GENUINE CURIOSITY RAPPORT',
+       technique: 'Ask a question about the client\'s professional or personal background that is genuinely interesting to you, and listen to the full answer before responding. Genuine curiosity cannot be faked — and when it is real, it creates instant rapport because most people spend most conversations being talked at. The question should be specific enough to demonstrate that you have been paying attention.',
+       script: '"Before we get into any specifics — I\'m curious about something. You mentioned you built the business from a standing start in the late 1990s. That\'s a specific era: pre-digital, pre-financial crisis, very different capital environment. What did building something in that period teach you about how to manage risk? I ask because it usually shapes how people think about protecting what they\'ve built long-term."',
+       why: 'A genuine question followed by genuine listening is the foundation of rapport in any context. The specific question demonstrates that the broker has been paying attention, not running a standard script. The content of the answer invariably reveals the client\'s most important values and decision-making frameworks.'},
+      {id:'n103', cat:'RAPPORT', principle:'THE HONEST DISAGREEMENT RAPPORT',
+       technique: 'When you genuinely disagree with something the client has said — about a market view, an asset class, or a general principle — say so, respectfully and with a reason. "I\'d actually push back on that slightly — here\'s why..." Most conversations involve polite agreement regardless of the broker\'s actual view. Authentic disagreement, offered respectfully, is one of the most powerful rapport builders available because it demonstrates that you are telling the truth.',
+       script: '"I\'d actually disagree with that slightly — and I think it\'s worth saying. You mentioned that you think gold is a purely emotional asset with no fundamental underpinning. I\'ve heard that view a lot, and I understand why it exists. But the data on central bank buying in the past four years doesn\'t support it — these are not emotional buyers. They\'re sovereign reserve managers who are making a structural statement about the monetary system. I think the emotional narrative is actually the cover story for a structural shift."',
+       why: 'Authentic disagreement builds more trust than consistent agreement because it signals that the broker is not just telling the client what they want to hear. Clients are sophisticated enough to know that not everything can be agreed upon — and when a broker takes a clear, reasoned position that challenges the client\'s view, it establishes intellectual credibility.'},
+      {id:'n104', cat:'RAPPORT', principle:'THE HUMOUR RAPPORT',
+       technique: 'Use specific, earned humour to create lightness at a moment where the conversation could feel heavy or pressured. The humour must be genuine, not performed — and it must be self-directed or about shared absurdities, never at the client\'s expense. A moment of genuine laughter between a broker and a client creates more rapport than thirty minutes of careful technique.',
+       script: 'No fixed script — humour cannot be scripted. The moments for it are: when the client has said something genuinely funny and you respond authentically, not professionally; when you acknowledge the absurdity of the situation ("I\'m aware that \'you should put money in a whisky cask\' is not something you expected to hear today"); when the macro data is so extreme that the only rational response is dark comedy ("The Fed\'s balance sheet went from $900bn to $9tn in fourteen years. I have no idea what\'s happening either — but it does suggest gold is underpriced on a relative basis.").',
+       why: 'Humour that is genuine and well-placed is the single most effective rapport builder available — because it is impossible to fake authentically, and its presence signals that the broker is a real person rather than a sales script. Clients close with people they like. Genuine laughter is the fastest route.'},
+      {id:'n105', cat:'RAPPORT', principle:'THE ACKNOWLEDGMENT RAPPORT',
+       technique: 'Explicitly acknowledge the client\'s expertise, experience, or specific knowledge in a genuine and specific way — not as flattery, but as a statement of observed fact. "What you said about the 2008 counterparty dynamic is exactly right — and it\'s a point most people who weren\'t in the middle of it miss." Acknowledgment is different from flattery: it is specific, earned, and accurate.',
+       script: '"I want to say something — because I mean it. The question you just asked about the secondary market liquidity mechanism is one that most investors never think to ask. It\'s the right question. It gets to the heart of what "liquidity" actually means versus what the marketing materials claim it means. The answer is specific and worth spending time on."',
+       why: 'Specific acknowledgment of intellectual contribution is among the most powerful rapport tools available for analytically minded, high-achieving clients. Unlike flattery, it is tied to something specific they did — which makes it credible and memorable. It also establishes the broker as a peer capable of recognising the quality of a question, rather than a salesperson grateful for any engagement.'},
+      {id:'n106', cat:'RAPPORT', principle:'THE NARRATIVE RAPPORT',
+       technique: 'Share a brief, genuine personal narrative that is directly relevant to the point being made — not as a performance, but as a natural part of the conversation. The narrative should demonstrate that the broker has thought about the subject in a personal way, not just professionally. Personal narrative creates humanness and makes the broker memorable as a person rather than a function.',
+       script: '"I\'ll tell you when this actually clicked for me — not intellectually, but in a way I felt. I was looking at what my grandfather\'s pension actually bought in 1985 versus what it would buy today. The pound figure had barely changed. The purchasing power had collapsed by over 60%. He died believing he\'d left his wife adequately provided for. He had — by the standards of 1985. The currency did the rest. That\'s when the inflation argument stopped being abstract for me."',
+       why: 'A genuine personal narrative, shared briefly and relevantly, creates a moment of connection that technique cannot manufacture. It makes the broker human and demonstrates that the investment case is not purely professional — it has been lived and thought about at a personal level.'},
+      {id:'n107', cat:'RAPPORT', principle:'THE FOLLOW-UP RAPPORT',
+       technique: 'Reference something specific the client said in a previous conversation, or that they mentioned earlier in the current conversation, as evidence that you have been genuinely listening. "You mentioned earlier that your estate planning review is scheduled for March — that\'s actually directly relevant to what I\'m about to show you" demonstrates that the broker is in the conversation, not running a script.',
+       script: '"You mentioned twenty minutes ago that the most important thing for you is that whatever you do is explicable to your accountant without needing a conversation. I wrote that down because I think it\'s the right framework. What I\'m about to describe is specifically designed for that — the structure is simple, the tax treatment is published HMRC guidance, and the documentation is explicit. Let me show you why it passes that test."',
+       why: 'Referencing specific earlier statements is one of the most powerful listening signals available. It demonstrates that the broker has been absorbing and retaining the client\'s specific words and concerns rather than waiting for their turn to pitch. The act of writing something down and then referencing it is particularly powerful — it signals that the client\'s words were worth recording.'},
+      {id:'n108', cat:'RAPPORT', principle:'THE REPAIR RAPPORT',
+       technique: 'When you sense a moment of disconnect — the client has gone cold, their tone has flattened, or they have given a short answer where a longer one would have been natural — address it directly rather than continuing past it. "I want to check in — I notice the energy in this conversation has shifted. Is there something I\'ve said that hasn\'t landed right, or a concern that hasn\'t been addressed?" The willingness to call out a break in rapport is itself a powerful rapport builder.',
+       script: '"Can I be direct for a moment? I sense that something I\'ve said in the last few minutes hasn\'t landed the way I intended. I\'d rather know what it was so I can address it than continue as if everything is fine. Is there a specific point where you started to lose confidence in what I was describing?"',
+       why: 'Calling out a break in rapport is counterintuitive — most salespeople try to power through or redirect. But naming the disconnection demonstrates confidence, honesty, and genuine care about the quality of the conversation. A client who feels that the broker noticed and addressed a moment of disconnection is more likely to trust them than one who was sold through it.'},
+
+      /* ── SCARCITY LANGUAGE (to 10) ──────────────────────────── */
+      {id:'n109', cat:'SCARCITY LANGUAGE', principle:'THE STRUCTURAL SCARCITY STATEMENT',
+       technique: 'Articulate the structural scarcity of the asset in precise language — not as a promotional claim but as a factual description of the supply mechanism. Structural scarcity (fixed by nature, regulation, or physics) is the most credible form of scarcity because it cannot be manufactured by the seller. The language should describe the mechanism, not just assert the shortage.',
+       script: '"Whisky must be produced today to be aged for ten, fifteen, twenty years — you cannot catch up. If demand in 2040 is double demand in 2025, the distilleries have to have filled those casks between 2020 and 2025. That decision has already been made. The supply you can buy in 2040 is the supply being produced right now. There is no other source."',
+       why: 'Structural scarcity language is the most intellectually credible form of urgency because it cannot be questioned — it is a description of physical reality. It converts a sales claim ("this is scarce, buy now") into a factual observation ("the supply mechanism means the quantity is fixed") that the client can verify independently.'},
+      {id:'n110', cat:'SCARCITY LANGUAGE', principle:'THE QUOTA SCARCITY STATEMENT',
+       technique: 'Where a genuine quota or allocation limit exists, state it specifically and factually. "The HMRC advance assurance covers a specific investment quantum per tax year" or "The distillery has allocated a specific number of casks for private investment this release." The quota must be real — manufactured scarcity destroys trust the moment it is investigated.',
+       script: '"I should mention — and this is a factual constraint, not a sales technique — that the HMRC advance assurance for this specific EIS fund covers £3 million of qualifying investment. We\'re currently at £2.1 million subscribed. The remaining £900,000 is available, and the tax year closes on 5th April. Those aren\'t numbers I\'m using to create pressure — they\'re the actual position."',
+       why: 'The quota scarcity statement derives its power from specificity and verifiability. Clients who can check the figure independently and find it accurate become significantly more trusting of everything else said. Manufactured scarcity, by contrast, is almost always eventually detected — and the trust damage is permanent.'},
+      {id:'n111', cat:'SCARCITY LANGUAGE', principle:'THE WINDOW SCARCITY STATEMENT',
+       technique: 'Name a specific, genuine window of opportunity — a tax year deadline, a pricing event, a maturation threshold, a regulatory change — and explain precisely why the window is real. The language should be matter-of-fact: "the window exists because of [specific reason], it closes on [specific date], and here is what changes after that date." Deadline language must be genuine.',
+       script: '"The CGT deferral you\'d achieve by investing before 5th April doesn\'t disappear after that date — it applies to next year\'s liability instead. But if your recent capital gain was realised this tax year, the carry-back relief that allows you to defer against that specific gain expires on 5th April. After that, the relief still exists but the specific gain it could offset has moved into the settled past. The window for this particular application is real and specific."',
+       why: 'Window scarcity is most effective when it is tied to a specific regulatory or tax mechanism rather than a promotional deadline. A genuine tax-year deadline is a service to the client — naming it is helpful, not manipulative. The language should make clear that the broker is informing, not pressuring.'},
+      {id:'n112', cat:'SCARCITY LANGUAGE', principle:'THE VINTAGE SCARCITY STATEMENT',
+       technique: 'For physical assets where the specific vintage, year, or release is a genuine source of scarcity (whisky distillation year, wine vintage, land parcel), name the scarcity of the specific vintage rather than the category. "There were 3,000 casks produced at this distillery in 2012 — we have access to 8 of them" is more compelling than "aged whisky is scarce."',
+       script: '"What makes this specific position different from a general whisky allocation is the distillation year. 2012 at this distillery was a limited production run — 3,200 casks in total. Of those, the majority are held by the distillery for their core range. A portion are held by private investors from the original subscription. We have direct access to six of those casks — that\'s the total available allocation we\'re discussing."',
+       why: 'Vintage-specific scarcity is the most concrete and credible form of scarcity language because it is verifiable, specific, and tied to a physical reality. Clients who understand that 3,200 casks of a specific year is a fixed, finished quantity that cannot be increased are genuinely engaging with a supply constraint, not a sales technique.'},
+      {id:'n113', cat:'SCARCITY LANGUAGE', principle:'THE ACCESS SCARCITY STATEMENT',
+       technique: 'Name the access constraint rather than the supply constraint. "This is available through our specific relationship with the distillery — it is not listed on a public platform" or "This allocation is available to our client base specifically — it has not been offered to the general market." Access scarcity positions the broker as a gatekeeper to exclusive opportunity, which activates the psychological principle of restricted access.',
+       script: '"I want to be transparent about why you\'re hearing about this from me rather than finding it independently. We have a direct institutional relationship with this fund manager that provides our clients first-look access before the general subscription opens. The positions available through our channel are not available through a platform or a public offering — they\'re a function of our specific relationship. That relationship took seven years to build and it\'s not something anyone with a browser can access."',
+       why: 'Access scarcity is powerful because it combines genuine exclusivity with the social proof of a vetted relationship. The broker who has worked for seven years to build access to an opportunity is a different proposition from one who is offering something freely available elsewhere. The access narrative is also a trust signal — it implies the broker has done due diligence that the client benefits from.'},
+      {id:'n114', cat:'SCARCITY LANGUAGE', principle:'THE TIMING SCARCITY STATEMENT',
+       technique: 'Name the specific point in the cycle where the opportunity is most favourably priced — not as a prediction but as a structural observation. "The entry conditions that currently exist are specifically aligned in a way that has historically preceded the strongest returns in this asset class." The timing scarcity is genuine because cycles move and entry conditions change — the current alignment is specific to this moment.',
+       script: '"What I can\'t guarantee is that the macro setup we\'re looking at right now will be available in twelve months. Negative real yields, central banks in easing mode, institutional capital flowing into hard assets, and retail sentiment still underweight — those four conditions don\'t co-exist for long. The cycle is already moving. The window where all four are simultaneously in place is the entry window. That\'s what we\'re in right now."',
+       why: 'Timing scarcity is most effective when it is tied to a specific set of conditions the client can verify independently. By naming the four conditions, the broker converts a vague urgency into a specific analytical framework — which the client can track and evaluate rather than simply accept or reject.'},
+      {id:'n115', cat:'SCARCITY LANGUAGE', principle:'THE SOCIAL PROOF SCARCITY STATEMENT',
+       technique: 'Combine scarcity with social proof by naming the behaviour of other investors in the same position. "The allocation we\'re discussing has had significant interest from clients with similar estate planning profiles — three have confirmed positions in the past week." The social proof amplifies the scarcity signal by demonstrating that others with similar profiles have evaluated and acted.',
+       script: '"I want to be honest with you about the pipeline, because I think it\'s relevant. We\'ve had four clients with very similar IHT positions to yours complete the subscription process in the last month. The motivation in each case was the same: the BPR clock, the tax efficiency, and the structural case holding up under their accountant\'s scrutiny. I mention this not as pressure — but because you asked how other clients in your position have approached it."',
+       why: 'Social proof combined with scarcity is more powerful than either alone. The specific detail ("four clients with similar IHT positions in the last month") makes the social proof concrete and relevant to the specific client\'s situation. Clients are more moved by the behaviour of peers in analogous situations than by general market statistics.'},
+      {id:'n116', cat:'SCARCITY LANGUAGE', principle:'THE HONEST SCARCITY STATEMENT',
+       technique: 'Name what is not scarce alongside what is. "There will always be another EIS fund — what won\'t always be available is this specific combination of qualifying structure, management track record, and the current CGT position." By acknowledging what is available generally, the honest scarcity statement makes the specific scarcity more credible.',
+       script: '"Let me be clear about what\'s scarce and what isn\'t. EIS investments exist in abundance — you\'ll always be able to find a qualifying structure. What\'s specific to now is: your CGT liability from this year\'s sale, the carry-back provision that applies before 5th April, and this specific fund\'s advance assurance and track record. The combination of those three is what makes the timing relevant. Any one of them in isolation is less interesting."',
+       why: 'The honest scarcity statement is among the most credible uses of scarcity language because it explicitly declines to overstate. Acknowledging what is not scarce makes the specific scarcity claim far more believable. It also demonstrates that the broker is trying to help the client see the situation accurately, not manufacture urgency.'},
+      {id:'n117', cat:'SCARCITY LANGUAGE', principle:'THE IRREVERSIBILITY SCARCITY STATEMENT',
+       technique: 'Name the specific future moment at which the current opportunity will no longer exist in the same form — not as a threat, but as a factual description of irreversibility. "The IHT clock starts from the date of investment — every month you wait is a month of BPR qualifying period that you cannot recover." The irreversibility is a genuine feature of the structure, not a manufactured pressure.',
+       script: '"Here\'s the one thing about the IHT planning that I\'d want you to really sit with. The Business Property Relief two-year qualifying period starts from the date of investment. Every month between now and when you invest is a month you cannot recover on the IHT clock. If your estate were to crystallise before the two-year period completes, the relief is not available. The financial risk of waiting on the BPR element specifically is genuinely measurable — and it\'s not recoverable."',
+       why: 'The irreversibility scarcity statement is the most honest form of urgency because it is describing a real structural cost of delay rather than manufacturing artificial pressure. The IHT clock example is particularly powerful because the irreversibility is both real and consequential — and the client cannot mitigate it by waiting.'},
+      {id:'n118', cat:'SCARCITY LANGUAGE', principle:'THE COMPOUNDING SCARCITY STATEMENT',
+       technique: 'Name the compounding cost of delay — not just the point-in-time opportunity, but the compounding effect of every day the capital is not working in the optimal structure. "Each year the IHT clock doesn\'t run is another year of estate exposure. Each year the capital is in a cash account below inflation is another year of real loss. These costs compound." The compounding scarcity statement converts delay from a neutral holding position into an active cost.',
+       script: '"The cost of not moving isn\'t a single figure — it compounds. In year one: the BPR clock hasn\'t started, the CGT deferral opportunity from this year\'s gain is closed, and the capital has lost another 3-4% in real terms to inflation. By year three, those three figures have compounded into a meaningful number. The decision to wait isn\'t a neutral one. It has a specific cost. I can calculate it for your specific position if that would be useful."',
+       why: 'The compounding scarcity statement converts delay from a default (the absence of a decision) into an active financial choice with a measurable cost. Most clients think of waiting as a zero-cost option. Showing the compounding cost of inaction converts the frame — and the offer to calculate it specifically makes the abstract cost concrete and personal.'},
+
+      /* ── SOFTENERS (to 10) ─────────────────────────────────── */
+      {id:'n119', cat:'SOFTENERS', principle:'THE PERMISSION SOFTENER',
+       technique: 'Ask permission before challenging a belief, entering sensitive financial territory, or making a strong statement. "Can I share something that might reframe how you\'re thinking about this?" or "Would it be useful if I pushed back slightly on that?" The permission softener maintains rapport while creating space for challenging content. When the client grants permission, they have implicitly agreed to engage with what follows.',
+       script: '"Can I offer a perspective that\'s slightly different from the way you\'ve framed it? Not to argue — just because I think there\'s an angle that might be worth sitting with." [Wait for permission.] "What you\'re describing as \'safety\' in cash right now is actually a guaranteed small loss every year in real terms. The label changes the emotional feel of it — but the mathematical outcome is the same."',
+       why: 'The permission softener is one of the most powerful ways to introduce challenging content without triggering defensive resistance. When the client grants permission, they have pre-committed to engaging with the challenge rather than deflecting it. The softener also signals that the broker respects the client\'s autonomy — they could refuse the challenge.'},
+      {id:'n120', cat:'SOFTENERS', principle:'THE OBSERVATION SOFTENER',
+       technique: 'Frame a diagnostic observation or challenging statement as something you have "noticed" rather than something you are claiming. "What I\'ve noticed is that..." or "Something I\'ve observed in conversations like this is..." creates the same content through an indirect frame that feels like shared observation rather than assertion. The client hears an honest observation rather than a sales claim.',
+       script: '"Something I\'ve noticed — and it\'s consistent across a lot of conversations I have — is that the investors who feel most certain about the risks of doing something are often much less certain about the risks of doing nothing. The risks of action are vivid and imaginable. The risks of inaction are quiet and invisible. But they\'re just as real."',
+       why: 'Framing a sharp observation as "something I\'ve noticed" creates the same intellectual impact as a direct challenge but without the confrontational quality. The indirect frame also activates a psychological principle: observations that appear to describe a pattern in others prompt clients to apply the observation to themselves.'},
+      {id:'n121', cat:'SOFTENERS', principle:'THE HYPOTHETICAL SOFTENER',
+       technique: 'Introduce a challenging scenario through a hypothetical frame to reduce the stakes of engaging with it. "Suppose, just for a moment, that..." or "Let\'s imagine, hypothetically, that..." creates a low-stakes space for exploring ideas that might trigger resistance if introduced directly. The hypothetical frame is particularly effective for future pacing or worst-case scenario discussions.',
+       script: '"Suppose, just for a moment, that the inflation environment we\'ve been in for the past three years is the new normal rather than a temporary anomaly. What does that mean for the real return on your current cash position over the next decade? I\'m not saying it\'s certain — but it\'s the scenario the most serious macro economists are modelling. If that scenario plays out, what\'s the right portfolio response?"',
+       why: 'The hypothetical softener is particularly valuable for scenario analysis because it makes the engagement non-committal. The client who is asked "what would you do if inflation stays at 4%?" is not being asked to accept that inflation will stay at 4% — they are being invited to reason about a scenario. That reasoning often produces the investment conclusion the broker needs.'},
+      {id:'n122', cat:'SOFTENERS', principle:'THE ACKNOWLEDGMENT BEFORE REFRAME SOFTENER',
+       technique: 'Before reframing or challenging a position, fully acknowledge what is true and reasonable about the client\'s current view. "You\'re absolutely right that..." followed by "the one dimension of that I\'d add is..." delivers the reframe without dismissing the original position. The client feels heard before being redirected.',
+       script: '"You\'re absolutely right that the property market has been the strongest asset class for UK investors over the past thirty years — the data supports that completely. The dimension I\'d add is what\'s changed in the structural picture: mortgage rates, stamp duty stacking, planning restrictions, and the renter market dynamics are all pointing to a different return profile over the next fifteen years than the previous fifteen. The historical returns are accurate; the forward projection may need to be updated."',
+       why: 'The acknowledgment-before-reframe softener is the most respectful form of intellectual challenge because it starts by validating the client\'s existing knowledge. Clients whose existing knowledge is validated are far more receptive to the extension of that knowledge than clients whose position has been dismissed.'},
+      {id:'n123', cat:'SOFTENERS', principle:'THE CURIOSITY SOFTENER',
+       technique: 'Introduce a diagnostic question with a genuine expression of curiosity rather than a direct question. "I\'m curious about something — and it\'s not directly related to what we\'ve been discussing, but I think it might be relevant..." This frame signals that what follows is the broker\'s genuine interest rather than a structured qualifying question. Genuine curiosity is immediately felt.',
+       script: '"I\'m curious about something — and you don\'t have to answer if it feels too personal. When you think about the capital you\'ve built over your working life, what does it represent to you beyond the number? Is it freedom, security, proof of something, something to leave behind? I ask because the answer usually tells me a great deal about how to think about the right structure for the next chapter."',
+       why: 'The curiosity softener opens deeply personal conversations about values and motivation by making the broker\'s interest feel genuine and non-instrumental. The explicit acknowledgment that the client doesn\'t have to answer actually increases the likelihood that they will — because it removes the sense of being questioned.'},
+      {id:'n124', cat:'SOFTENERS', principle:'THE STORY SOFTENER',
+       technique: 'Deliver a challenging insight through a story about a third party rather than through a direct statement. "I had a conversation with a client last year who..." or "There\'s a pattern I\'ve observed in clients who\'ve been through similar situations..." The story creates emotional and psychological distance that allows the client to receive the content without feeling personally targeted.',
+       script: '"I had a conversation with a client about two years ago who was in almost exactly the situation you\'re describing — good equity portfolio, significant cash, an estate that was going to trigger a substantial IHT liability, and a strong instinct that now wasn\'t the right time to do anything. We had three conversations about it over eighteen months. He finally started the BPR qualifying period in January of that year. He died in September. The two-year clock hadn\'t run. The estate paid full IHT on the holding that would have been exempt. The family is still working through it."',
+       why: 'The story softener delivers the most powerful consequence scenarios — including worst cases — through a third-party narrative that makes the content informative rather than threatening. The death example is sobering but honest — and the specific, vivid consequence of the incomplete BPR clock makes the urgency of the timing argument tangible in a way that no abstract description can.'},
+      {id:'n125', cat:'SOFTENERS', principle:'THE CHECK-IN SOFTENER',
+       technique: 'Pause during a complex explanation or challenging section to check in on the client\'s engagement. "Is this landing in a useful way, or would it be more helpful to approach it differently?" The check-in softener demonstrates that the broker is prioritising the client\'s understanding over the delivery of their own content. It also provides genuine diagnostic information about where the client is in their processing.',
+       script: '"I\'ve covered a lot in the last ten minutes — the macro case, the supply mechanics, and the tax structure. Before I go any further, I want to check in. Is this making sense, or is there a specific element that feels murky? I\'d rather slow down and go deeper on one thing than skim across five things that don\'t fully connect."',
+       why: 'The check-in softener is a service signal — it demonstrates that the broker\'s goal is understanding, not delivery. Most clients have experienced conversations where they were not following but did not feel able to say so. The explicit invitation to redirect is both respectful and practically useful — it surfaces confusion before it becomes a hidden objection.'},
+      {id:'n126', cat:'SOFTENERS', principle:'THE NORMALISE SOFTENER',
+       technique: 'Normalise a concern or hesitation before addressing it, by placing it in a broader context of how many thoughtful investors share it. "That\'s actually one of the most common responses I hear from investors who are first engaging with this asset class — and it\'s a completely reasonable one." The normalisation softener removes the stigma of the concern and places the client in a community of thoughtful, careful peers rather than a category of reluctant or uninformed investors.',
+       script: '"The question about liquidity is one I hear constantly — and I\'d be concerned if someone in your position didn\'t ask it. Every serious investor I speak to who is first encountering a physical asset investment asks exactly that question. The fact that you\'re asking it tells me you\'re thinking about this the right way. So let me give you the honest answer rather than the comfortable one."',
+       why: 'The normalise softener serves two purposes simultaneously: it validates the concern (making the client feel understood) and it flatters through peer comparison (placing the client in a group of "serious investors" who share the concern). The promise of "the honest answer rather than the comfortable one" is a powerful trust signal.'},
+      {id:'n127', cat:'SOFTENERS', principle:'THE SUMMARY BEFORE CHALLENGE SOFTENER',
+       technique: 'Before introducing a challenging reframe or a piece of information that contradicts the client\'s current position, briefly summarise their position in accurate, generous terms. The summary demonstrates that you have fully understood their view before you challenge it — which is the condition under which any challenge is most likely to be received rather than deflected.',
+       script: '"Let me make sure I\'ve understood your position correctly before I respond. You\'re holding a significant cash position because you believe the next twelve months are likely to be volatile, you want optionality, and you\'re sceptical of anyone trying to move you out of a position that has felt safe. Is that right?" [Confirm.] "Okay. Here\'s where I\'d push back — and not because I think you\'re wrong about the volatility..."',
+       why: 'Summarising the client\'s position accurately before challenging it is the most respectful form of disagreement available. It demonstrates both comprehension and fairness — which creates the conditions under which the challenge is most likely to be engaged with rather than dismissed.'},
+      {id:'n128', cat:'SOFTENERS', principle:'THE INVITATION SOFTENER',
+       technique: 'Frame a recommendation as an invitation to explore rather than a prescription to follow. "I\'d like to invite you to look at something that might change how you\'re seeing this" or "If you\'re open to it, I\'d like to share a framework that I think adds a layer to this analysis." The invitation softener positions the broker as offering rather than directing, which maintains the client\'s sense of autonomous decision-making.',
+       script: '"What I\'d like to do — if it\'s useful to you — is show you the same data through a slightly different lens. Not to argue with the view you\'ve expressed, but because I think there\'s a dimension of the supply argument that\'s easy to miss the first time you encounter it. If it doesn\'t add anything to your thinking, we can set it aside. Shall we try?"',
+       why: 'The invitation softener is particularly effective with high-autonomy clients who value their independence of judgment. By explicitly offering rather than directing, the broker removes the resistance that comes from feeling pushed. The closing question ("Shall we try?") gives the client genuine control while making the default easy.'},
+
+      /* ── NOMINALISATIONS (to 10) ────────────────────────────── */
+      {id:'n129', cat:'NOMINALISATIONS', principle:'THE SAFETY NOMINALISATION',
+       technique: '"Safety" is a nominalisation — a process noun that hides what is actually happening. When a client says "I\'d prefer something safe," ask: "Safe from what specifically?" The nominalisation "safety" conceals multiple different concerns: safe from volatility, safe from loss of capital, safe from complexity, safe from being wrong. Each of those is a different conversation. Unpacking the nominalisation reveals the actual concern.',
+       script: '"When you say you\'d prefer something safe, can I ask — safe from what specifically? Because \'safe\' means very different things depending on what you\'re protecting against. Safe from mark-to-market volatility is a different thing from safe from permanent capital loss, which is different again from safe from the tax implications of the decision. Which of those is the most important dimension of \'safe\' for you?"',
+       why: 'Nominalisation unpacking is one of the most powerful diagnostic tools available because it converts a vague emotional state into a specific, addressable concern. Most objections based on nominalisations (safety, security, peace of mind) dissolve when unpacked into their components — because the specific components often have specific, credible solutions.'},
+      {id:'n130', cat:'NOMINALISATIONS', principle:'THE SECURITY NOMINALISATION',
+       technique: '"Security" hides a process — the specific feeling of being financially protected — behind a noun. When clients reference security as their primary motivation, the most useful response is to unpack it into its components: security from what? Against what scenario? Over what timeframe? The unpacking is not a challenge to the goal — it is a prerequisite to serving it accurately.',
+       script: '"Financial security is important to you — and that comes through clearly. Can I ask what security looks like specifically? Is it a specific capital figure that, if it were in the bank, would feel like you\'d arrived? Is it a monthly income that covers a specific lifestyle? Or is it more about protecting what you\'ve built from external risks — inflation, taxation, economic events? Different versions of \'security\' lead to very different portfolio decisions."',
+       why: 'Clients who use "security" as a primary motivation often have never been asked to define it specifically. The act of defining it is itself valuable — it helps them understand their own goal more precisely and creates a specific target that the broker can design toward.'},
+      {id:'n131', cat:'NOMINALISATIONS', principle:'THE RISK NOMINALISATION',
+       technique: '"Risk" is one of the most heavily overloaded nominalisations in investing. It can mean volatility, probability of permanent loss, uncertainty, complexity, regulatory exposure, or counterparty failure — among others. When a client objects on the grounds of risk, the first question is always: risk of what, specifically? Each form of risk has a different structural solution.',
+       script: '"When you say this feels risky — can we get specific about what kind of risk you\'re concerned about? Because there are at least five distinct types of financial risk, and they\'re managed very differently. Are you concerned about day-to-day price volatility? The probability of permanent capital loss? The risk that the structure doesn\'t work as described? The regulatory risk of the tax treatment changing? Each of those has a specific answer, and they\'re different conversations."',
+       why: 'Unpacking "risk" into its specific components almost always reveals that the client is primarily concerned about one or two specific types — not all five. Addressing the specific type is far more effective than defending against a vague risk concept. It also demonstrates analytical depth that builds credibility.'},
+      {id:'n132', cat:'NOMINALISATIONS', principle:'THE CONFIDENCE NOMINALISATION',
+       technique: '"I need to feel more confident" hides the process of confidence-building — what would need to happen for confidence to exist? What specific information is missing? What specific concern is unresolved? Asking "what would make you more confident?" is more productive than addressing confidence as a single, unified state.',
+       script: '"What would make you more confident in this specific context? Is it more data — in which case, what data specifically? Is it a third-party validation — an accountant, an independent financial adviser, a specific due diligence document? Is it time — wanting to think about it for a week before deciding? Each of those is something I can help with. What I can\'t help with is a general feeling of not being quite ready, until I know what \'ready\' needs to look like."',
+       why: 'Converting the nominalisation "confidence" into specific requirements is the most productive response to a confidence objection. It demonstrates that the broker is willing to work toward the client\'s specific readiness condition — which is a genuine service rather than a close.'},
+      {id:'n133', cat:'NOMINALISATIONS', principle:'THE UNDERSTANDING NOMINALISATION',
+       technique: '"I need to understand this better" is a nominalisation that hides what specifically is not understood. Rather than explaining everything again, ask: what specifically isn\'t clear? The most productive response to an understanding objection is a diagnostic question, not more explanation.',
+       script: '"What specifically do you feel you don\'t yet understand? Because I\'d rather go deep on the one thing that\'s not clear than cover everything again at the surface level. Is it the legal structure of the ownership? The tax treatment mechanism? The exit process? The valuation methodology? If you can tell me which specific element feels opaque, I can address it directly."',
+       why: 'Re-explaining everything is a common response to "I don\'t fully understand" — and it is almost always the wrong one. The client who doesn\'t understand one specific thing does not need a full re-presentation; they need a precise answer to a precise question. The diagnostic question surfaces what that question is.'},
+      {id:'n134', cat:'NOMINALISATIONS', principle:'THE CLARITY NOMINALISATION',
+       technique: '"I need more clarity" hides the specific kind of clarity required. Clarity about what? The structure, the risk, the return, the process, the people involved? Asking "clarity on what, specifically?" is both diagnostic and subtly challenging — it requires the client to define what they need, which sometimes reveals they already have it.',
+       script: '"You mentioned you need more clarity — and I want to make sure I give you exactly the right thing. Clarity on what, specifically? Is it the mechanics of how the ownership transfer works? The tax treatment in different scenarios? The exit timeline and process? The independent valuation methodology? If I know which element is most important to understand clearly, I can make sure we spend the time on exactly that."',
+       why: 'Like all nominalisation unpacking, the clarity diagnostic converts a general feeling into a specific question — which is answerable. Often, when clients are asked to specify what they need clarity on, they discover they already have it. The act of trying to specify reveals that the objection was more general than specific.'},
+      {id:'n135', cat:'NOMINALISATIONS', principle:'THE TRUST NOMINALISATION',
+       technique: '"I need to trust you more" hides what trust consists of in this client\'s context. Trust built through time? Through verification of specific claims? Through a third-party introduction? Through demonstrated knowledge? The nominalisation conceals a process that, when identified, becomes achievable rather than vague.',
+       script: '"When you say trust — can I ask what would build that for you specifically? For some people, trust is built through time and repeated contact. For others, it\'s a specific verification — being able to check a claim and find it accurate. For others, it\'s a third-party endorsement from someone they already trust. What does trust look like for you in a professional context? If I know that, I know exactly what to focus on."',
+       why: 'Asking "what does trust look like for you?" converts an abstract state into a specific, achievable goal. It also demonstrates that the broker is genuinely trying to earn trust rather than manufacture it — which is itself the most trust-building response available.'},
+      {id:'n136', cat:'NOMINALISATIONS', principle:'THE COMFORT NOMINALISATION',
+       technique: '"I\'m not comfortable with this" hides the specific source of discomfort. Unpacking comfort means asking: what would need to be different for comfort to exist? What specifically is creating the discomfort? Is it the type of asset, the amount, the timing, the counterparty, the exit mechanism? Each has a specific answer.',
+       script: '"When you say you\'re not comfortable — I hear that. And I\'d like to understand it specifically. Is the discomfort about the amount we\'re discussing? The type of asset? The timeframe of the holding period? The fact that it\'s unfamiliar territory? Or is there something about the structure or the counterparties that isn\'t sitting right? The source of the discomfort tells me what to address."',
+       why: 'Discomfort is often the final barrier before action — and it is usually traceable to one specific element rather than a general state. Identifying the specific source is the prerequisite to addressing it. A client who says "I\'m not comfortable" and then identifies the specific source of that discomfort is already halfway to resolving it.'},
+      {id:'n137', cat:'NOMINALISATIONS', principle:'THE PEACE OF MIND NOMINALISATION',
+       technique: '"I want peace of mind" is one of the most common nominalisations in financial sales — and one of the most informative when unpacked. Peace of mind about what? Unpacking reveals the specific scenario the client is protecting against, which is always more specific than the nominalisation suggests.',
+       script: '"Peace of mind is a meaningful goal — and I take it seriously. What I\'d want to understand is: peace of mind from what scenario specifically? Is it peace of mind that you won\'t wake up to a significant capital loss in a market event? Peace of mind that the tax structure won\'t be challenged? Peace of mind that you can access the capital if you need it unexpectedly? Each of those is a different risk — and different versions of this structure address different ones."',
+       why: 'Unpacking "peace of mind" into specific scenarios reveals that most clients are protecting against one or two specific fears, not a general sense of financial anxiety. Once the specific fear is identified, it can be addressed specifically — and the peace of mind that results from a specific solution is far more durable than the vague feeling that "things are probably okay."'},
+
+      /* ── THE DOUBLE BIND (to 10) ─────────────────────────────── */
+      {id:'n138', cat:'THE DOUBLE BIND', principle:'THE TIMING DOUBLE BIND',
+       technique: 'Present two questions that both lead to action, framed around timing. "Would you prefer to begin the subscription process before the end of the month, or does the first week of next month work better for your cash flow position?" Both options presuppose a decision to proceed and ask only about timing. The double bind must feel genuinely helpful — not like a trick.',
+       script: '"Based on where we\'ve landed in this conversation, it makes sense to initiate the process. The practical question is timing: do you want to move this week while we\'re close to the tax deadline, or would the week after next work better given your current commitments?"',
+       why: 'The timing double bind is the most natural and least coercive form because it converts the decision question into a logistics question. At high certainty (8+), clients who are asked "when?" rather than "whether?" almost always engage with the when — which is the implicit decision.'},
+      {id:'n139', cat:'THE DOUBLE BIND', principle:'THE STRUCTURE DOUBLE BIND',
+       technique: 'Present two allocation structures that both involve committing capital, and ask which serves the client\'s needs better. "Given your IHT position, would you want to prioritise the BPR-qualifying physical allocation or the EIS wrapper that gives you CGT deferral on the recent gain? Both are appropriate — but one is more specifically aligned to your current tax year situation." The double bind presupposes investment and asks only about the form.',
+       script: '"Let\'s think about structure for a moment. You have two things going on: a CGT liability from this year\'s sale, and an IHT position that\'s growing with the estate. The EIS addresses the CGT this tax year. The BPR-qualifying physical allocation addresses the IHT long-term but takes two years to fully qualify. If I\'m being honest, both are appropriate for your position. The question is which one you want to address first."',
+       why: 'The structure double bind works particularly well for clients with multiple tax considerations because the choice between the two structures is a genuinely useful decision — the double bind serves the client\'s interests, not just the broker\'s. Clients engage more willingly with a genuine choice than with an implicit close.'},
+      {id:'n140', cat:'THE DOUBLE BIND', principle:'THE INVOLVEMENT DOUBLE BIND',
+       technique: 'Present two options for how to involve the client\'s advisers — both of which presuppose forward movement. "Would you prefer I send the documentation directly to you and you share it with your accountant, or would it be more efficient to have a three-way call where I can answer any technical questions directly?" Both options presuppose a documentation stage that presupposes a decision to proceed.',
+       script: '"Before we schedule the next step, let me ask how you\'d prefer to manage the accountant dimension of this. I can send the complete documentation pack to you and you brief your accountant directly — or I can join a call with both of you and walk through the technical structure in real time. Which of those works better for how you like to operate?"',
+       why: 'The involvement double bind converts the "I need to check with my accountant" stall into a specific, forward-moving process. By offering two options for how to involve the accountant — both of which require forward movement — the broker serves the client\'s expressed need while keeping the engagement active.'},
+      {id:'n141', cat:'THE DOUBLE BIND', principle:'THE QUANTITY DOUBLE BIND',
+       technique: 'Present two allocation amounts — both of which represent meaningful positions — and ask which serves the client\'s mandate better. "Given what you\'ve described, I think the right initial allocation is somewhere between £50,000 and £100,000 — the first fully meets the minimum threshold and the second maximises the first-year tax efficiency. Which of those fits your current position better?" Both options presuppose commitment; only the size is in question.',
+       script: '"The conversation has been clear: the structure works for your position and the timing is right. The remaining question is sizing. The minimum gives you the full structural benefit at the lowest initial commitment. The full allocation maximises the CGT relief and gets the entire position working from day one. Given your current capital position, which of those feels right?"',
+       why: 'The quantity double bind is most effective when both options are genuinely appropriate for the client\'s situation — which ensures it serves the client\'s interests rather than the broker\'s. The choice between two good options is less resistant than the choice between doing something and doing nothing.'},
+      {id:'n142', cat:'THE DOUBLE BIND', principle:'THE PACE DOUBLE BIND',
+       technique: 'Present two different paces of engagement — both of which presuppose continuing the relationship. "Would you prefer to take the full position now in one step, or would a phased approach over two tranches give you more comfort around the entry?" Both options presuppose commitment; only the pace is in question.',
+       script: '"I want to make sure this feels right at every stage. Some clients prefer to commit the full allocation now and benefit from the immediate full exposure. Others prefer a phased approach — two tranches over six months — which gives them a chance to see how the first tranche performs before committing the second. Which approach would you be more comfortable with, given where you are right now?"',
+       why: 'The pace double bind is particularly effective for clients whose hesitation is about commitment size rather than the investment itself. Offering a phased approach alongside a full commitment converts an all-or-nothing decision into a flexible process — and the client who takes the phased option has still committed to the investment.'},
+      {id:'n143', cat:'THE DOUBLE BIND', principle:'THE REVIEW DOUBLE BIND',
+       technique: 'Present two timeframes for a follow-up review — both of which presuppose an ongoing relationship. "Would it make sense to schedule a review call in six months to look at how the position is tracking, or would you prefer quarterly check-ins given the initial stage?" Both options presuppose a continuing relationship and an active position.',
+       script: '"Once the position is in place, how would you like to stay updated? Some clients prefer a brief quarterly review call — we look at the valuation, the macro picture, and whether the allocation still fits the overall portfolio. Others are happy with an annual review alongside their main financial review. Which approach works better for how you like to manage your investments?"',
+       why: 'The review double bind is a closing technique that happens after the investment decision has been made — it presupposes the position is already in place and asks only about the ongoing relationship. It converts the close from a single event into the beginning of a long-term advisory relationship.'},
+      {id:'n144', cat:'THE DOUBLE BIND', principle:'THE INFORMATION DOUBLE BIND',
+       technique: 'Present two forms of additional information — both of which presuppose continued engagement. "Would it be more useful to send you the detailed technical memorandum on the tax structure, or would you prefer the executive summary with the key numbers and timeline?" Both options presuppose a next step; only the form of the information is in question.',
+       script: '"To make sure you have everything you need to feel confident before the next conversation, I want to send you the right information. Would the detailed legal and tax analysis be more useful — your accountant can review it line by line — or would a two-page executive summary of the key terms, returns, and exit process be more appropriate for your own review first?"',
+       why: 'The information double bind converts the common delaying tactic of "send me some information to review" into a specific, active choice about what to receive. The client who makes the choice has committed to reviewing something — which is a meaningful forward step.'},
+      {id:'n145', cat:'THE DOUBLE BIND', principle:'THE ACCOUNTABILITY DOUBLE BIND',
+       technique: 'Present two forms of accountability for the next step — both of which presuppose forward movement. "Should I follow up with you next Tuesday, or would it be better for you to reach out to me once you\'ve had a chance to review the documentation?" Both options presuppose a follow-up; only the mechanics are in question.',
+       script: '"What\'s the most useful way to keep this moving without adding pressure? I can follow up with you on Thursday with any additional information you need — or if you\'d prefer to be in control of the timing, you can reach out to me once you\'ve reviewed the pack and had a chance to think. Which of those works better for you?"',
+       why: 'The accountability double bind is the gentlest close available for high-autonomy clients who resist feeling pushed. By presenting the option to control the follow-up timing themselves, the broker removes the sense of external pressure while maintaining the engagement. Clients who choose to reach out themselves are often more motivated than those who are called.'},
+      {id:'n146', cat:'THE DOUBLE BIND', principle:'THE ALIGNMENT DOUBLE BIND',
+       technique: 'Present two estate or financial goals — both of which the current investment serves — and ask which one the client wants to prioritise in the initial allocation. "Given your position, the IHT planning and the CGT deferral are both directly served by this structure. If you had to choose one as the primary objective for this first allocation, which would it be?" Both options lead to the investment; only the primary rationale is in question.',
+       script: '"You have two things happening simultaneously that this structure addresses. First, the CGT liability from the January sale — the EIS subscription gives you a carry-back option against that this tax year. Second, the IHT exposure on the estate — the BPR clock starts from today. If you\'re thinking about which problem to solve first, which one is more urgent for you right now?"',
+       why: 'The alignment double bind serves the client\'s interests by helping them identify their primary motivation — which also tells the broker which element of the case to emphasise in the close. The client who engages with the question is implicitly evaluating which version of the investment they want most — not whether they want it at all.'},
+
+      /* ── PERSUASION (to 10) ─────────────────────────────────── */
+      {id:'n147', cat:'PERSUASION', principle:'RECIPROCITY — GIVE FIRST, ASK SECOND',
+       technique: 'Deliver a genuinely useful insight, a piece of proprietary research, or a specific analytical observation before making any ask. The insight must be valuable in itself — not just a setup for the pitch. Reciprocity is automatic: when people receive something valuable, they feel a pull toward giving something in return. In a sales context, the "return" is attention, engagement, and ultimately a decision.',
+       script: '"Before I talk about anything we do — let me give you something that might be useful regardless of whether you work with us. The most significant structural driver of gold prices right now is not retail sentiment or speculation. It\'s central bank buying — 1,037 tonnes purchased in 2023 alone, the second-highest year on record. Most investors I speak to haven\'t seen that number. It changes the analysis. Use it whether or not our conversation goes anywhere."',
+       why: 'Leading with a gift of genuine value — information the client can use independently — establishes the broker as a net contributor rather than a net taker from the first minute of contact. The reciprocity mechanism then operates naturally and without manipulation.'},
+      {id:'n148', cat:'PERSUASION', principle:'SOCIAL PROOF — PEERS WHO MATCH THE CLIENT',
+       technique: 'Reference the behaviour of investors who are specifically similar to the client — not generic statistics, but a described profile that the client will recognise as matching their own. "I work with a number of clients who sold businesses in the 2020-2022 window and are managing the post-sale capital allocation — the concern I hear consistently from that group is..." The peer group framing makes the social proof feel personally relevant.',
+       script: '"The clients who have engaged most seriously with this specific allocation over the past two years are predominantly business owners who have sold, or who have recently structured a significant liquidity event. The characteristics they share: estate growth that has outpaced their IHT planning, capital looking for a home that isn\'t more equities, and a time horizon that can accommodate a 5-7 year hold. Does that profile resonate with where you are right now?"',
+       why: 'Social proof is most powerful when it describes a specific, recognisable peer group rather than a general population. The client who recognises themselves in the described profile is more influenced by the group\'s behaviour than they would be by abstract statistics about what investors generally do.'},
+      {id:'n149', cat:'PERSUASION', principle:'AUTHORITY — INSTITUTIONAL VALIDATION',
+       technique: 'Reference the behaviour, research, or allocation decisions of institutions whose authority the client respects. The most credible form of authority is not the broker\'s own expertise but the published, verifiable behaviour of the institutions that manage the largest pools of capital. Central banks, sovereign wealth funds, pension funds, and academic endowments are the most credible authorities.',
+       script: '"The argument I\'m making about hard asset allocation is not an original one — it\'s the same argument being made with capital by sovereign wealth funds managing trillions. The Norway Government Pension Fund has been steadily increasing real asset and alternative allocations for a decade. The Yale endowment has held 20-30% in alternatives for thirty years. The Harvard endowment has been adding gold and commodity exposure. If there\'s a consensus view among the largest, most analytically resourced investors on earth, it\'s that the traditional 60/40 model is structurally incomplete."',
+       why: 'Authority from peer institutions is far more credible than authority from the broker, because the institutions have nothing to gain from their allocation decisions other than the returns they produce. Citing verifiable, published institutional behaviour converts the broker\'s case from a pitch into an observation of what the smartest money is doing.'},
+      {id:'n150', cat:'PERSUASION', principle:'COMMITMENT AND CONSISTENCY — THE MICRO-YES LADDER',
+       technique: 'Build a ladder of micro-commitments throughout the conversation — each small agreement makes the next one easier and the final, larger commitment feel like a natural continuation of a pattern. The micro-yeses should be genuine agreements with things that are factually true, not rhetorical traps.',
+       script: 'The micro-yes ladder is built through the conversation, not delivered as a single script. Examples of genuine micro-commitments: "Does the supply constraint argument make sense?" (yes). "And you agree that institutional buying is a meaningful signal?" (yes). "And the tax efficiency is directly relevant to your estate?" (yes). "So the question is really just about timing and structure?" (yes). Each yes makes the next more natural. The final question — "shall we move forward?" — feels like one more step in an established pattern of agreement.',
+       why: 'Commitment and consistency is one of the most robust psychological principles in decision-making. Each small agreement creates a prior commitment that makes inconsistency (saying no at the end after a series of yeses) psychologically uncomfortable. The ladder must be built on genuine agreements — otherwise the client experiences the technique as manipulation.'},
+      {id:'n151', cat:'PERSUASION', principle:'LIKING — GENUINE CONNECTION',
+       technique: 'People buy from people they like. The most effective form of liking is not charm or performance — it is genuine shared interest, authentic curiosity, and the experience of being understood. Find one genuine point of connection in the first ten minutes of a conversation — not a compliment, but an authentic moment of recognition.',
+       script: 'No fixed script — liking cannot be manufactured. What can be done: find a genuine shared reference (a market period, a professional background, a specific investment that resonates), ask a question that demonstrates you have been paying attention ("you mentioned earlier that you built through the 1990s — what was the most important thing you learned in that decade?"), or acknowledge something about the way they think that you genuinely admire. The moment of connection must be real — performed connection is detected instantly.',
+       why: 'The research on liking as a persuasion principle is robust: people consistently make better decisions about people they like and trust. The operative word is genuine — manufactured liking is both ethically wrong and practically ineffective, because sophisticated clients detect inauthenticity immediately.'},
+      {id:'n152', cat:'PERSUASION', principle:'CONTRAST — THE BEFORE AND AFTER FRAME',
+       technique: 'Present the client\'s current situation and the alternative situation in explicit contrast. The contrast effect makes the gap between the two states feel larger than it is — which motivates movement from the less desirable to the more desirable state. The contrast must be honest and accurate — not manufactured or exaggerated.',
+       script: '"Let me show you two portfolio pictures side by side — not mine, just the data. Portfolio A: 80% in equities and bonds, 20% in cash. Inflation at 4%, equity correlation at 0.85 across the entire portfolio, effective IHT exposure of £480,000. Portfolio B: same base, 10% reallocated to non-correlated physical assets, BPR clock running on the alternative allocation, IHT exposure reduced by £192,000 over 7 years. Same capital, same risk tolerance. Different architecture."',
+       why: 'The contrast frame is most powerful when presented in specific, verifiable numbers rather than abstract descriptions. The side-by-side comparison makes the gap between the current and alternative states immediately visible — which is more motivating than describing either state in isolation.'},
+      {id:'n153', cat:'PERSUASION', principle:'LOSS AVERSION — FRAME THE COST OF INACTION',
+       technique: 'Reframe the decision to act as avoiding a loss rather than achieving a gain. "Not investing in this structure costs you £40,000 in additional IHT exposure over the next five years" is more motivating than "Investing in this structure saves you £40,000 in IHT over five years" — even though they are mathematically identical. Loss aversion is the most reliably documented decision-making bias in the research literature.',
+       script: '"The way I want you to think about this is not as an investment opportunity. Think about it as a loss that is currently happening and can be stopped. Every year this estate sits without the BPR structure in place, the IHT exposure on the qualifying assets grows in line with the estate value. At current growth rates, you\'re accruing approximately £18,000 in additional IHT liability per year on the assets that would qualify. That\'s the cost of not acting — and it\'s compounding."',
+       why: 'Loss framing is more motivating than gain framing because losses are weighted approximately twice as heavily as equivalent gains in human decision-making. Framing inaction as a loss — specifically, a compounding loss — converts the decision to wait from a neutral holding position into an active financial choice with a measurable cost.'},
+      {id:'n154', cat:'PERSUASION', principle:'SCARCITY — GENUINE URGENCY WITHOUT PRESSURE',
+       technique: 'Name genuine structural scarcity — time, quota, vintage, access — in matter-of-fact language that informs rather than pressures. The most powerful scarcity is the kind the client can verify independently. Manufactured scarcity destroys trust; genuine scarcity, named honestly, is a service to the client.',
+       script: '"I want to be factual about one timing element — not to pressure you, but because it\'s relevant. The CGT carry-back provision closes on 5th April. After that date, you can still invest in EIS and receive the relief against next year\'s income, but the specific ability to carry back against the gain you realised in January is gone. That window is real and I\'d be failing you if I didn\'t name it."',
+       why: 'Scarcity framed as information rather than pressure is among the most trust-building things a broker can do. By naming the genuine deadline in matter-of-fact terms and explicitly declining to use it as pressure, the broker demonstrates that they are informing the client rather than manipulating them — which is both ethical and, paradoxically, more persuasive.'},
+      {id:'n155', cat:'PERSUASION', principle:'THE CONCESSION PRINCIPLE — GIVE SOMETHING TO GET SOMETHING',
+       technique: 'Make a genuine, meaningful concession in the conversation — adjust a term, acknowledge a limitation, or offer additional support — before asking for the close. The concession must be real and felt as valuable by the client. In return, the ask feels more reciprocal and the client is more comfortable agreeing. The concession principle is the structured form of reciprocity at the close.',
+       script: '"Given what you\'ve shared about your timeline and your accountant\'s upcoming review, here\'s what I can do. I\'ll hold the allocation at the current pricing for the next three weeks — which takes you past your accountant meeting and gives you the time to review everything properly without the deadline pressure. In return, I\'d ask that we schedule a conversation for the week after your accountant meeting, so I can answer any questions that come out of that review directly. Does that work?"',
+       why: 'The concession principle works because it converts the close from a unilateral ask into a bilateral exchange. The client who receives something specific and valuable before being asked is in a reciprocally motivated position — declining the ask after a genuine concession feels inconsistent. The concession must be genuine and proportionate.'},
+
+      /* ── TACTICAL EMPATHY (to 10) ────────────────────────── */
+      {id:'n156', cat:'TACTICAL EMPATHY', principle:'CALIBRATED QUESTIONS — "WHAT IS IT ABOUT THIS THAT MATTERS MOST TO YOU?"',
+       technique: 'Use open-ended calibrated questions beginning with "what" or "how" to invite the client to articulate their deepest concern, motivation, or objection without feeling interrogated. "What is it about this timing that feels most uncertain?" or "How would you know when the conditions were right?" These questions cannot be answered with yes or no — they require reflection and self-disclosure. The answer invariably reveals more than the stated objection.',
+       script: '"What is it about the lock-up period that concerns you most? Is it a specific anticipated need, or is it more a general preference for optionality?" [Wait for full answer.] "And what would need to be true for that concern to feel addressed?"',
+       why: 'Calibrated questions are the non-confrontational alternative to direct challenge. They achieve the same diagnostic result — surfacing the real concern beneath the stated objection — without creating defensive resistance. The client who answers a calibrated question has implicitly engaged with the conversation rather than terminated it.'},
+      {id:'n157', cat:'TACTICAL EMPATHY', principle:'LATE NIGHT FM DJ VOICE — SLOWING DOWN TO CREATE SAFETY',
+       technique: 'In moments of high tension, objection, or emotional charge, consciously slow the pace of speech, lower the register, and soften the tone. This is not about performing calm — it is about creating the acoustic conditions under which the client feels safe enough to say what they actually mean. The slow, calm delivery signals that there is no urgency and no pressure — which paradoxically reduces urgency and pressure.',
+       script: 'No fixed script — this is a tonal technique, not a verbal one. The moment to apply it: when the client\'s voice tightens, when they ask a sharp question, or when the conversation enters a difficult territory. Consciously take a breath before responding. Lower the pace by approximately 30%. Lower the pitch slightly. Do not match the client\'s elevated energy — invite them down to a calmer register.',
+       why: 'Acoustic mirroring goes both ways. When the broker accelerates or tenses in response to client tension, the tension escalates. When the broker slows and softens, the client\'s nervous system tends to follow — because the slow, calm voice signals safety in the same way it does in therapeutic contexts. The investor who is physiologically calmer makes better decisions.'},
+
+      /* ── REFRAMING (to 10) ──────────────────────────────── */
+      {id:'n158', cat:'REFRAMING', principle:'THE CONTEXT REFRAME — CHANGING THE CONTEXT, NOT THE CONTENT',
+       technique: 'Instead of changing the client\'s opinion about a feature, change the context in which it is evaluated. A feature that appears negative in one context becomes positive in another. "The illiquidity you\'re describing as a problem is actually the mechanism that prevents panic-selling — which is the primary cause of permanent capital loss in most portfolios." The content (illiquidity) hasn\'t changed; the context (protector vs. constraint) has.',
+       script: '"You\'re describing the lock-up period as a limitation. I want to offer a different context: that same lock-up period is what protects you from the single most expensive behaviour in investing — selling at the bottom of a panic. Every liquid investment you hold can be panic-sold at 3am in a crisis. This one cannot. The \'limitation\' is actually a built-in protection against your future self under stress."',
+       why: 'The context reframe is the most elegant form of reframing because it does not argue with the client\'s observation — it agrees with it and relocates it. The client who says "yes, it\'s illiquid" is already correct; the reframe simply changes what that fact means in the context of good decision-making.'},
+      {id:'n159', cat:'REFRAMING', principle:'THE MEANING REFRAME — CHANGING WHAT AN EXPERIENCE MEANS',
+       technique: 'Change the meaning assigned to an experience without changing the experience itself. "You said you\'ve been wrong about market timing before — I\'d actually frame that as evidence that you understand how difficult timing is. That understanding is exactly why process-driven investing makes sense for you." The experience (past timing errors) is unchanged; the meaning (embarrassing failure vs. evidence of genuine sophistication) has shifted.',
+       script: '"You mentioned that you missed the 2009 recovery because you waited too long after the crisis. I\'d reframe that experience: what you learned in 2009 is the single most valuable lesson in cycle investing — that the recovery begins before the all-clear is declared. You paid tuition on that lesson once. The question is whether you apply it now."',
+       why: 'The meaning reframe converts negative past experiences into assets — evidence of learning, wisdom, or the capacity for the current decision. It is particularly powerful because it uses the client\'s own narrative as the raw material for the case for acting now.'},
+
+      /* ── SENSORY LANGUAGE (to 10) ─────────────────────────── */
+      {id:'n160', cat:'SENSORY LANGUAGE', principle:'THE PHYSICAL OWNERSHIP LANGUAGE',
+       technique: 'Use language that activates the physical, tactile experience of ownership for physical assets. "The cask sits in a bonded warehouse — a physical object, in a specific location, with your name on the title." The physicality of the description activates a different form of engagement than financial abstraction. Clients who can physically imagine their ownership engage with it more deeply.',
+       script: '"What I\'d want you to understand about this is not as a financial position — it\'s as a physical asset. A specific cask, in a specific warehouse in Scotland, filled with spirit that is currently ageing. Your name is on the title document. If you drove there, you could see it. It exists as a thing, not a number on a screen. That physicality is part of what makes the value discussion different from an equity."',
+       why: 'Physical assets provide a sensory description opportunity that financial products cannot. The ability to describe the cask, the warehouse, the spirit ageing inside it creates an ownership experience that is both more vivid and more durable than the description of an index fund position.'},
+      {id:'n161', cat:'SENSORY LANGUAGE', principle:'THE WEIGHT OF GOLD LANGUAGE',
+       technique: 'When discussing gold as a physical holding, use the physical properties of the metal to create sensory engagement. Weight, colour, permanence, the specific places in history where it has been held and exchanged. The sensory description of gold connects the client to its 5,000 years of monetary history in a way that financial data cannot.',
+       script: '"A kilo of gold is denser than you\'d expect — about the size of a smartphone but almost four times as heavy. It has looked exactly the same in every century since it was first refined. The Egyptian pharaohs held it. The British Empire traded in it. Every central bank on earth holds it in their vaults right now. The specific object you\'d be holding is the same object humans have used to store value for five thousand years. That continuity is not a romantic notion — it\'s a track record."',
+       why: 'The physical description of gold connects the financial asset to its historical and material reality. Clients who engage with gold as a physical object with specific properties respond differently to the investment case than clients who think of it as a commodity ticker.'},
+      {id:'n162', cat:'SENSORY LANGUAGE', principle:'THE LAND LANGUAGE',
+       technique: 'When discussing farmland or land investment, use language that evokes the physical reality of land — its permanence, its productivity, its limits. "They\'re not making more of it" is the classic formulation, but sensory language goes further: the soil, the seasonal cycle, the food it produces, the fixed nature of the boundary.',
+       script: '"Farmland is the most permanent investment available. It was there before you were born and will be there long after. It has a specific location — a postcode, a set of boundaries that have existed for centuries in some cases. It grows food, which means it has an intrinsic economic purpose that exists independently of financial markets. When you hold farmland, you hold something that someone will always need — because food is not optional."',
+       why: 'The permanence and productivity of land are both sensory and logical arguments. The language that makes them sensory — specific location, food growth, boundary — converts an abstract real estate discussion into a grounded, physical reality that clients can literally imagine standing in.'},
+      {id:'n163', cat:'SENSORY LANGUAGE', principle:'THE CELLAR LANGUAGE',
+       technique: 'When discussing fine wine, use language that evokes the physical experience of the cellar, the bottle, and the wine itself. The smell of a cellar, the weight of a case, the specific provenance of a wine from a specific estate in a specific year. Sensory description of wine investment creates an entirely different kind of engagement than financial performance data.',
+       script: '"A case of first growth Bordeaux from a great vintage is a physical thing — twelve bottles, each produced in a specific corner of a specific estate in a year when the weather cooperated in a specific way. The same bottles will never be produced again. The case you hold is the case — there is no manufacturing a replacement. The cellar that stores it is climate-controlled, insured, and professionally managed. What you own is not a financial position. It\'s a specific, irreplaceable physical object."',
+       why: 'The irreplaceability of a specific vintage in sensory language converts a fine wine investment from a financial discussion into a conversation about owning something genuinely singular. The scarcity and provenance are understood not just intellectually but experientially.'},
+      {id:'n164', cat:'SENSORY LANGUAGE', principle:'THE SOUND OF THE MARKET LANGUAGE',
+       technique: 'Use auditory language to describe market dynamics in a way that is immediately vivid. The "noise" of short-term market movement versus the "signal" of long-term structural trends. The "drumbeat" of central bank buying. The "quiet" of institutional accumulation before a price move. Auditory metaphors create a sense of being inside the market rather than looking at it from outside.',
+       script: '"There\'s a specific sound to a market that is about to move — and it\'s not the loud noise of the headlines. It\'s the quiet, consistent accumulation that happens before the press notices. The central bank buying data for 2022 and 2023 is that sound. It\'s not dramatic. It\'s methodical. It\'s 55-year record buying happening without headlines. By the time the headlines arrive, the quiet accumulation phase is over."',
+       why: 'Auditory metaphors ("the quiet of accumulation", "the drumbeat of central bank buying") create a sense of insider awareness that activates the contrarian investor identity. The client who can "hear" the quiet signal is positioned as someone with access to information the general market is missing.'},
+      {id:'n165', cat:'SENSORY LANGUAGE', principle:'THE TEMPERATURE LANGUAGE',
+       technique: 'Use temperature metaphors to describe market cycle positioning. Markets run "hot" and "cold." Investor sentiment runs "warm" or "ice cold." Entry conditions are "cool" — attractive but not yet obvious to the crowd. The temperature metaphor creates an immediate, intuitive sense of where we are in the cycle.',
+       script: '"The sentiment on gold right now is cool — not frozen, not panicked, just genuinely under-owned by retail investors who have been focused on equities. Cool sentiment is historically the best entry environment. The hot phase — when everyone is talking about it, when the price is on the front of the weekend papers — that\'s when the early buyers are quietly exiting. Right now feels cool. The institutional data says the accumulation is ongoing."',
+       why: 'Temperature language is immediately intuitive for clients who have never thought about market sentiment in structured terms. The hot/cool/cold spectrum creates a simple framework for cycle positioning that maps onto physical experience and is therefore memorable and applicable.'},
+      {id:'n166', cat:'SENSORY LANGUAGE', principle:'THE COLOUR OF MONEY LANGUAGE',
+       technique: 'Use colour language to describe different types of capital and their function. "Green" capital (active, deployed, working). "Grey" capital (idle, losing real value, uninvested). "Black" capital (locked in illiquid positions by inertia). The colour frame creates an immediate visual taxonomy that clients find intuitive and memorable.',
+       script: '"The way I think about portfolio capital, there are roughly three colours. Green capital is fully working — invested, earning a real return above inflation, serving a specific mandate. Grey capital is sitting in cash or near-cash, losing purchasing power every year, not serving a specific purpose. The question I\'d want to ask about your current position is: how much of it is green and how much is grey? Most clients I speak to have more grey than they\'d like to admit."',
+       why: 'Colour language creates an immediately visual and emotionally resonant taxonomy. The "grey capital" frame is particularly powerful because it converts cash-holding from a safe choice into something that looks uninspiring — which is both accurate and motivating without being aggressive.'},
+      {id:'n167', cat:'SENSORY LANGUAGE', principle:'THE TEXTURE OF THE DECISION LANGUAGE',
+       technique: 'Use texture metaphors to describe the quality of different investment decisions. "Rough" decisions — made under stress, with incomplete information, in a volatile environment. "Smooth" decisions — made calmly, with full information, in a structurally clear environment. The current moment for this investment is "smooth" — the case is clear, the environment is stable, the information is complete. The texture metaphor creates a sense of the quality of the decision being made.',
+       script: '"There\'s a specific texture to good investment decisions — and I want to describe it because I think this conversation has it. You\'re not making this decision under duress. The information is complete. The structural case is clear. The tax efficiency is documented. There\'s no external pressure creating urgency. This is the texture of the kind of decision you\'ll look back on as clean — the kind you won\'t second-guess."',
+       why: 'The texture of a decision is a novel sensory frame that positions the current moment as qualitatively superior to decisions made under stress or with incomplete information. It activates the client\'s desire to make a decision they will be proud of — which is a positive version of the "peace of mind" motivation.'},
+      {id:'n168', cat:'SENSORY LANGUAGE', principle:'THE WEIGHT OF THE DECISION LANGUAGE',
+       technique: 'Describe the weight of different types of financial decisions to create appropriate gravitas without pressure. Some decisions are "light" — reversible, low-consequence, easily corrected. Some are "heavy" — consequential, long-term, high-stakes. This decision is "substantial but not heavy" — meaningful, but supported by sufficient information and structural rationale that the weight is well-distributed.',
+       script: '"I want to acknowledge something about the decision you\'re considering. It\'s not trivial — it\'s a meaningful allocation to a structure you\'ve spent the past hour understanding thoroughly. There\'s an appropriate weight to that. At the same time, the weight is well-distributed: the structure is sound, the downside is defined, the tax treatment is clear. A decision with appropriate weight and good supporting structure is the specific kind of decision you can carry comfortably."',
+       why: 'The weight metaphor normalises the significance of the decision while reframing it as manageable. Clients who feel the appropriate gravity of a decision — and feel that the decision has solid structural support — make more confident commitments than clients who feel either that the decision is trivial or that it is oppressively heavy.'},
+      {id:'n169', cat:'SENSORY LANGUAGE', principle:'THE LANDSCAPE OF THE PORTFOLIO',
+       technique: 'Describe the client\'s current portfolio as a landscape — with terrain, balance, and missing features. A portfolio that is all equities and cash is a landscape with no shelter in adverse weather. Adding hard assets is adding terrain variation — shelter, elevation, stable ground. The landscape metaphor makes portfolio construction feel intuitive and spatial rather than numerical.',
+       script: '"Think about your current portfolio as a landscape. Right now, the terrain is almost entirely flat and open — equities and cash, responding to the same weather systems at the same time. In a long stable period, flat and open is fine. But when the weather turns — and in financial terms it always does — flat and open gives you nowhere to go. What we\'re discussing adds some elevated ground. A position that doesn\'t move when the storm comes through. Portfolio resilience is landscape diversification."',
+       why: 'The landscape metaphor makes portfolio diversification spatially intuitive. The client who can visualise "flat and open terrain" understands the vulnerability of a single-correlation portfolio in a way that correlation statistics alone cannot convey. The metaphor also makes the addition of hard assets feel like completing a landscape rather than speculating.'},
+
+      /* ── PACING & LEADING (to 10) ─────────────────────────── */
+      {id:'n170', cat:'PACING & LEADING', principle:'PACE THE MACRO REALITY, LEAD TO THE CONCLUSION',
+       technique: 'Begin by fully, accurately, and generously pacing the client\'s current reality — the market environment, their portfolio position, their specific concerns. Make no argument. Simply describe reality as it is, as the client sees it. Then, without pause or announcement, lead from that accurate description to the structural conclusion that follows from it.',
+       script: '"The past two years have been unusual — equities had a significant drawdown in 2022, then recovered strongly in 2023 and 2024. Bonds delivered negative real returns in an inflationary environment they weren\'t designed for. Cash looked safe but lost purchasing power at 4% annually. You\'ve watched all of that, and you\'re now sitting with a portfolio that has performed reasonably well in nominal terms but is perhaps less differentiated than you\'d like it to be. That\'s the landscape — and it\'s also the specific context that makes a non-correlated, hard asset allocation more relevant now than it was three years ago."',
+       why: 'Pacing before leading is the most respectful form of argument because it starts from the client\'s reality rather than the broker\'s perspective. The client who hears their own situation described accurately before being invited to consider a conclusion is in a receptive rather than defensive state.'},
+      {id:'n171', cat:'PACING & LEADING', principle:'PACE THE CONCERN, LEAD TO THE REFRAME',
+       technique: 'Accept, amplify, and validate the client\'s expressed concern — then lead from the fully paced concern to a reframe that resolves it. "You\'re right to be concerned about the illiquidity — that concern is fully valid [pace]. And that same concern is the mechanism by which the protection is created [lead]." The lead follows naturally from the pace because the reframe is implicit in the concern itself.',
+       script: '"You\'ve said you\'re worried about locking up capital — and that\'s a completely reasonable concern for someone who has spent thirty years building optionality. [Pace.] What I\'d offer is this: the capital you\'re describing as locked up is also the capital that cannot be panic-sold. That\'s not a bug. For a specific portion of your portfolio — the portion with a long mandate — it\'s the feature that makes it work. [Lead.]"',
+       why: 'Pacing the concern before leading to the reframe removes the adversarial quality of a direct challenge. The client who feels their concern has been fully heard is far more receptive to a reframe than one who feels their concern has been dismissed or minimised.'},
+      {id:'n172', cat:'PACING & LEADING', principle:'PACE THE IDENTITY, LEAD TO THE CONSISTENT BEHAVIOUR',
+       technique: 'Pace the client\'s stated identity as an investor — careful, analytical, long-term thinking — and then lead to the conclusion that the decision under discussion is consistent with that identity. The pace validates the identity; the lead makes acting inconsistent with it feel uncomfortable.',
+       script: '"Everything you\'ve described about how you make investment decisions — taking time, looking at the data, not reacting to noise — that\'s a specific investing discipline. [Pace.] The structural case we\'ve been discussing is exactly the kind of thing that discipline leads to: a long-term, supply-constrained, non-correlated position taken before the mainstream narrative catches up. The careful analytical approach and this investment are completely consistent. [Lead.]"',
+       why: 'Pacing the identity before leading to its consistent behaviour creates a psychological commitment to acting that feels internal rather than external. The client is not being pushed toward a decision — they are being shown that their own identity leads there naturally.'},
+      {id:'n173', cat:'PACING & LEADING', principle:'PACE THE HESITATION, LEAD TO THE CLARIFYING QUESTION',
+       technique: 'When a client hesitates without articulating why, pace the hesitation explicitly and lead to a specific diagnostic question that surfaces the underlying concern. "I can hear that something is giving you pause here — and I\'d rather understand what it is than move past it." The pace acknowledges the hesitation; the lead turns it into information.',
+       script: '"I notice the conversation has slowed — and that\'s usually meaningful. Something in what we\'ve been covering hasn\'t fully landed. [Pace.] I\'d rather spend the next five minutes on whatever that is than continue with a question unresolved. What\'s the thing that\'s giving you pause right now?" [Lead — wait for full answer.]',
+       why: 'Naming the hesitation explicitly, rather than ignoring it and continuing the pitch, is one of the most trust-building responses available. It signals that the broker is paying attention to the client\'s experience rather than the delivery of their own content.'},
+      {id:'n174', cat:'PACING & LEADING', principle:'PACE THE OBJECTION AS INTELLIGENT, LEAD TO THE EVIDENCE',
+       technique: 'Before responding to an objection, pace it as the sign of an intelligent investor who is asking the right question. "That\'s exactly the question someone who understands this space would ask — and it deserves a complete answer." The pace positions the objection as evidence of sophistication; the lead positions the evidence that resolves it as the completion of that sophistication.',
+       script: '"The question about exit liquidity is exactly the right one to ask — and the fact that you\'re asking it tells me you\'ve thought about this more seriously than most. [Pace.] Let me give you the complete answer, because it\'s more nuanced than a simple yes or no. The secondary market process, the specific transfer mechanism, and the early redemption provisions all vary by structure — and in this specific case here is how each works..." [Lead — specific, verifiable answer].',
+       why: 'Pacing the objection as intelligent before answering it creates two effects simultaneously: it flatters the client\'s self-image as a sophisticated investor, and it primes them to receive the answer as something worthy of their intelligence — which means they engage more seriously with it.'},
+      {id:'n175', cat:'PACING & LEADING', principle:'PACE THE MARKET ENVIRONMENT, LEAD TO THE POSITIONING',
+       technique: 'Describe the current macro environment in the client\'s own terms — using their vocabulary, their reference points, the things they have mentioned as concerns — and lead directly to the positioning that the environment implies. No argument. Just description of reality followed by the conclusion reality supports.',
+       script: '"You\'ve mentioned inflation, the rate environment, and your concern about what happens to equities if growth slows. All of those are real and legitimate concerns for 2025-2026. [Pace.] The environment you\'ve just described — inflationary residue, rate normalisation, equity uncertainty — is textbook hard asset territory. Gold has outperformed in every late-cycle, inflationary environment in the modern record. The environment you\'ve described is the argument. [Lead.]"',
+       why: 'When the broker uses the client\'s own concerns as the paced reality and leads to the conclusion those concerns support, the case feels derived from the client\'s own analysis rather than from the broker\'s pitch. The client is essentially making the case for the investment themselves.'},
+      {id:'n176', cat:'PACING & LEADING', principle:'PACE THE EXISTING SUCCESS, LEAD TO THE NEXT CHAPTER',
+       technique: 'Acknowledge and pace the client\'s existing investment success — the decisions that have worked, the wealth they have built, the approach that has served them — and lead to the observation that the next chapter requires a different or complementary strategy to the one that produced the current position.',
+       script: '"You\'ve built something significant — and the approach that built it was appropriate to the environment you were building through: equities in a secular bull market, property in a structural demand environment, a business during a period of expansion. [Pace.] The next chapter looks different. Not worse — different. The environment for equities and property is structurally more complex. The tools that built the wealth may not be the optimal tools for preserving and growing it from here. That\'s not a criticism of how you got here. It\'s an observation about what the next chapter probably requires. [Lead.]"',
+       why: 'Pacing the existing success before leading to the next chapter is both respectful and analytically honest. It acknowledges the client\'s achievements while introducing the observation that different environments require different tools — without implying that the past approach was wrong.'},
+      {id:'n177', cat:'PACING & LEADING', principle:'PACE THE DECISION PROCESS, LEAD TO THE NATURAL NEXT STEP',
+       technique: 'Describe the client\'s decision-making process back to them — how they\'ve engaged, what they\'ve asked, what they\'ve acknowledged — and lead naturally to the conclusion that the process has reached its natural next step. "You\'ve done the analytical work. You\'ve asked the right questions. You have the information you need. The natural next step in your process is..." The pace validates the process; the lead makes the next step feel inevitable.',
+       script: '"Let me reflect back what\'s happened in this conversation. You came in with appropriate scepticism. You asked specific, probing questions. You engaged seriously with the data. You\'ve confirmed that the structural case holds, the tax treatment applies to your situation, and the exit mechanism is acceptable. [Pace.] In your own decision-making framework, you\'ve done what you described as your process. The natural next step — by your own process — is to make a decision. [Lead.]"',
+       why: 'Pacing the decision process before leading to the next step is particularly effective because it is entirely non-coercive — the broker is simply describing what the client has done and noting where their own process points. The client who is told that their own process leads to action finds it difficult to argue that they need to do more process first.'},
+
+      /* ── ANCHORING (to 10) ─────────────────────────────────── */
+      {id:'n178', cat:'ANCHORING', principle:'THE HIGH ANCHOR — PREMIUM POSITION FIRST',
+       technique: 'Present a premium, high-end option before the primary recommendation. The high anchor makes the primary recommendation feel more accessible by comparison. "We have clients who allocate £500,000 to this structure — and the tax efficiency at that level is substantial. For most clients, a £50,000 initial allocation is the entry point." The £500,000 is the anchor; the £50,000 feels modest by comparison.',
+       script: '"The serious institutional allocations to this structure are in the £250,000-£500,000 range — at that level the BPR and IHT efficiency is transformative over a 7-year period. For an initial position, most first-time investors in this space start at £50,000-£75,000 — which fully captures the structural benefit at a more manageable initial commitment."',
+       why: 'The high anchor makes the primary recommendation feel not just affordable but disciplined by comparison. The client who might have felt £50,000 was substantial before hearing £500,000 mentioned will now feel that £50,000 is the considered, measured approach.'},
+      {id:'n179', cat:'ANCHORING', principle:'THE HISTORICAL ANCHOR — SETTING THE RETURN EXPECTATION',
+       technique: 'Anchor the client\'s return expectations to verified historical performance before discussing the forward case. The historical return becomes the reference point against which the current opportunity is evaluated. Present the highest credible historical figure first, then frame the forward expectation as conservative relative to it.',
+       script: '"The Rare Whisky 101 index returned an average of 12.3% per annum between 2010 and 2021. That\'s the historical anchor. The forward case I would make — specifically for the current vintage profile we\'re discussing — is more conservative: 8-10% per annum over a 5-7 year hold. That\'s a defensible estimate based on current auction data and distillery output constraints. I\'m not asking you to believe in 12%. I\'m asking you to evaluate 8-10% as a realistic and conservative forward case."',
+       why: 'The historical anchor creates a reference point that makes the forward estimate feel modest and credible. Clients who have seen a 12% historical return evaluate 8-10% as conservative — which is precisely the intended effect. The anchor must be accurate and verifiable.'},
+      {id:'n180', cat:'ANCHORING', principle:'THE LOSS ANCHOR — THE COST OF INACTION AS REFERENCE POINT',
+       technique: 'Anchor the conversation to the specific, calculated cost of inaction before presenting the investment opportunity. The cost of doing nothing becomes the reference point against which the investment is evaluated. A £40,000 IHT exposure growing at current estate value rates is a specific, compelling anchor for the BPR argument.',
+       script: '"Before we discuss what this looks like as an investment, I want to establish one number — because it\'s the relevant reference point. At current estate values and growth rates, the IHT exposure on the qualifying assets we\'ve discussed is approximately £180,000. The BPR structure eliminates that liability after a two-year qualifying period. The question is not whether this investment can deliver a return — it\'s whether £180,000 of unnecessary IHT liability is acceptable when a specific, legal, HMRC-approved mechanism exists to address it."',
+       why: 'The loss anchor is among the most motivating because it converts the investment decision from an opportunity cost into a loss avoidance decision. The specific IHT figure becomes the reference point against which every subsequent discussion of cost, term, and return is evaluated.'},
+      {id:'n181', cat:'ANCHORING', principle:'THE TIME ANCHOR — PLANTING THE COMPARISON POINT IN THE PAST',
+       technique: 'Anchor the current opportunity to a past moment where the same structural conditions existed, and the investors who acted at that point are now in a specific, verifiable position. The past anchor creates a comparison frame: "This is that moment — equivalent to [specific historical reference]." The historical comparison motivates action by connecting the current moment to a recognisable past opportunity.',
+       script: '"Let me give you a historical anchor for this moment. In 2009, gold was trading at $800-$900. The structural conditions were identical to now: negative real yields, central bank easing, fiscal expansion, and institutional accumulation that retail investors hadn\'t noticed. The investors who positioned in 2009 and held through 2011 saw a 150% return. I\'m not predicting that. I\'m saying the conditions that produced that move are the same conditions we\'re looking at now. This is the 2009 moment for this thesis."',
+       why: 'The time anchor connects the abstract structural case to a vivid historical precedent. Clients who have lived through the 2009-2011 gold move — or who know someone who benefited from it — will feel the immediacy of the comparison in a way that structural analysis alone cannot produce.'},
+      {id:'n182', cat:'ANCHORING', principle:'THE EXPERT ANCHOR — POSITIONING BEFORE THE NEGOTIATION',
+       technique: 'Establish a strong anchor in the expert framing before any discussion of terms, conditions, or objections. If the expert position is established first, subsequent modifications feel like concessions from a strong position rather than defaults. The expert anchor is the broker\'s credibility and the investment\'s institutional support — established before any challenge.',
+       script: '"Before we discuss any specific terms, I want to establish one thing about this investment\'s position in the institutional landscape. Goldman Sachs published a price target of $4,000 for gold in their 2024 global commodities outlook. BlackRock has increased alternative asset allocation recommendations across their model portfolios. Central banks purchased over 1,000 tonnes in 2023. The institutional consensus — from the most resourced analytical teams on earth — is that hard assets are structurally undervalued in a post-2020 monetary environment. That\'s the anchor. Our conversation is about how you want to access what those institutions are already positioned in."',
+       why: 'The expert anchor establishes the investment\'s institutional credibility as the reference frame before any objection can shift the frame. Once the institutional consensus is anchored, challenges to the investment thesis must contend with the documented positions of Goldman Sachs, BlackRock, and the world\'s central banks.'},
+      {id:'n183', cat:'ANCHORING', principle:'THE RISK ANCHOR — REFRAMING THE BASELINE RISK',
+       technique: 'Anchor the risk discussion to the client\'s current, often underappreciated risk position — the risks they are already carrying — before discussing the risks of the proposed investment. Cash at below-inflation rates is a risk. Concentrated equity exposure is a risk. Unaddressed IHT liability is a risk. Establishing the baseline risk makes the proposed investment\'s risk profile appear comparatively measured.',
+       script: '"Before we talk about the risks of this investment, I want to anchor to the risks you\'re currently carrying that might not feel like risks because they\'re familiar. Your current cash position is losing approximately 3% per year in real terms — that\'s a guaranteed small loss compounding annually. Your equity exposure is fully correlated to market conditions with no floor — the 2022 drawdown showed what that looks like. Your IHT liability is growing in line with estate value. Those are your current risks. The question is how the proposed investment\'s risks compare to the risks you\'re already accepting."',
+       why: 'The risk anchor converts the familiar (cash, equities) from "safe defaults" into "current risks that have already been accepted." Once the client understands that they are already taking risks — just in the form they\'re comfortable with — the comparison with the proposed investment\'s risks is more accurate and less emotionally loaded.'},
+      {id:'n184', cat:'ANCHORING', principle:'THE PEER ANCHOR — WHAT INVESTORS LIKE YOU ARE DOING',
+       technique: 'Anchor the client\'s decision to the allocation behaviour of a specific, credible peer group. Not general statistics — a described peer profile that the client recognises as matching their own. The peer anchor creates a social reference point that the client evaluates themselves against.',
+       script: '"I want to give you a reference point from my client base — not to pressure you, but because I think it\'s genuinely useful. Clients in similar positions to yours — estate value in the £1.5-3m range, significant recent liquidity event, IHT exposure on the radar — are allocating, on average, 8-12% of investable capital to BPR-qualifying alternatives. Some go higher, some stay at the minimum. But that\'s the range that people with your specific profile have found appropriate after going through the analysis you\'ve done today."',
+       why: 'The peer anchor is more motivating than expert authority because it describes what people in the same position — not just experts with different incentives — have found appropriate. The client who sees their peer group at 8-12% evaluates their own potential allocation against that benchmark rather than against their uninformed prior.'},
+      {id:'n185', cat:'ANCHORING', principle:'THE MINIMUM ANCHOR — MAKING THE MINIMUM FEEL LIKE THE FLOOR',
+       technique: 'Present the minimum investment as the starting point for the discussion of sizing — not as the default option. The minimum is the floor, not the target. "The minimum position for the structure to work effectively is £25,000 — that\'s the economic floor below which the custody and management costs produce an unattractive net return. Most clients in your position start at £50,000-£75,000 to capture the full efficiency." The minimum anchor makes the recommended size feel measured and informed rather than arbitrary.',
+       script: '"The structure has a minimum because below £25,000, the management and custody costs produce a net return below what\'s attractive. That\'s the floor. Most clients engaging with this for the first time in your position — estate in the £2m range, IHT on the radar — find that £50,000-£75,000 captures the full IHT benefit meaningfully without over-concentrating in a single structure. The minimum exists for technical reasons; the right size for you is above it."',
+       why: 'The minimum anchor reframes the sizing conversation around the economic logic of the floor rather than around the broker\'s desire for a larger commission. When the minimum is explained as a technical requirement rather than a sales target, the client evaluates the recommended size on its own merits rather than with suspicion about the broker\'s motivation.'},
     ];
 
     /* ═══════════════════════════════════════════════════════════
@@ -2581,9 +3937,169 @@
        script: '[Prospect: "I\'d consider £25,000 but not more."] [Silent pause.] "You\'ll have to do better than that." [Complete silence — hold it. Do not fill it.] [If they ask "what do you mean?": "I think there\'s a level that works for both of us — what are you thinking?" Return the question.] [If they hold: offer the smallest possible move from your position, preceded by a flinch.]',
        why: 'Source: Dawson, Secrets of Power Negotiating (1987). The Vice works because it is unexpected — no argument was made, so there is nothing to refute — and because it creates an asymmetric discomfort: the person who last named a number now feels the pressure to move it. The silence is where the technique lives.'},
       {id:'c38', cat:'CLOSING TECHNIQUES', principle:'DAWSON — RELUCTANT BUYER / RELUCTANT SELLER TECHNIQUE',
-       technique: 'Dawson: before making any concession, deploy reluctance visibly. A concession given without visible reluctance signals that more room exists. A concession given with clear, deliberate reluctance signals you are at your limit — which produces satisfaction in the person who extracted it. The Reluctant Buyer technique: before agreeing to a client\'s request, pause, exhale, visibly deliberate — THEN agree, and add a condition. "I can work with that — but only if we can confirm the allocation size this week." The visible reluctance increases the perceived value of the concession and simultaneously secures a counter-commitment.',
+       technique: 'before making any concession, deploy reluctance visibly. A concession given without visible reluctance signals that more room exists. A concession given with clear, deliberate reluctance signals you are at your limit — which produces satisfaction in the person who extracted it. The Reluctant Buyer technique: before agreeing to a client\'s request, pause, exhale, visibly deliberate — THEN agree, and add a condition. "I can work with that — but only if we can confirm the allocation size this week." The visible reluctance increases the perceived value of the concession and simultaneously secures a counter-commitment.',
        script: '"[Pause. Slight exhale.] Look — I wouldn\'t normally do this, and I want to be honest that this is as far as I can go. But if I can structure it at [X] — can we agree on the allocation today?" [The visible difficulty of the concession communicates: (a) you are at your limit, and (b) they should feel they\'ve received something of real value.]',
-       why: 'Source: Dawson, Secrets of Power Negotiating (1987). The reluctance technique is the performance component of any negotiation — it frames the concession as a gift rather than a capitulation. A concession delivered flatly costs twice as much as a concession delivered with reluctance, because the flat delivery devalues itself.'},
+       why: 'The reluctance technique is the performance component of any negotiation — it frames the concession as a gift rather than a capitulation. A concession delivered flatly costs twice as much as a concession delivered with reluctance, because the flat delivery devalues itself.'},
+
+      /* ── SLP FRAMEWORK (to 10) ──────────────────────────── */
+      {id:'c39', cat:'SLP FRAMEWORK', principle:'THE STRAIGHT LINE — MAINTAINING CONTROL OF THE CONVERSATION',
+       technique: 'The Straight Line is the path from opening to close. Every conversation drifts — into tangents, digressions, rapport detours, irrelevant objections. The broker\'s job is to keep pulling the conversation back to the line without appearing to do so. The key tool: "That\'s a great point — and it connects back to the core question, which is..." Every detour should terminate with a return to the straight line. The prospect feels heard; the conversation stays on track.',
+       script: '"That\'s a genuinely interesting point about [tangent topic] — and I want to make sure we come back to it. But before we do, let me address the main thing we\'ve been building toward, which is whether this specific structure fits your position. Once we\'ve settled that, we can look at [tangent] in that context."',
+       why: 'Every minute spent off the straight line is a minute in which the certainty level can drift. The prospect who has been thoroughly distracted returns to the close at a lower certainty level than when they left it. Returning to the line after every tangent is the mechanism that maintains the cumulative certainty build.'},
+      {id:'c40', cat:'SLP FRAMEWORK', principle:'THE INNER MONOLOGUE — MANAGING YOUR STATE BEFORE THE CLOSE',
+       technique: 'The broker\'s internal state is communicated tonally, physically, and through micro-signals that prospects detect subconsciously. A broker who is anxious about the close produces an anxious, hesitant close. A broker who believes completely in the product, the process, and the client\'s benefit from it produces a calm, certain close. The inner monologue technique: before asking for the order, run a five-second internal script: "This is right for them. I have built the case. The ask is appropriate. I am asking because it benefits them." The certainty of the ask comes from the certainty of the inner state.',
+       script: 'Internal script only, not spoken. Before the close: [pause, breathe] "I\'ve built the three tens. The logical case is complete. They\'ve demonstrated emotional engagement. The trust is established. Asking is serving them. Here we go." Then ask with calm certainty — no apology, no hedging, no rising inflection at the end of the close.',
+       why: 'Tonality on the close is the single most important element of the delivery. A close delivered with rising inflection (question tone) signals uncertainty. A close delivered with declarative certainty signals that the broker believes the prospect should act. The inner monologue is the preparation tool that generates the right tonal state.'},
+
+      /* ── CERTAINTY BUILDING (to 10) ─────────────────────── */
+      {id:'c41', cat:'CERTAINTY BUILDING', principle:'THE EVIDENCE STACK — LAYERING PROOF BEFORE THE ASK',
+       technique: 'Before asking for the order, stack multiple independent proof points — each from a different type of source — to create a cumulative case that is harder to dismiss than any single argument. Data source (historical returns), authority source (institutional behaviour), social proof source (peer behaviour), logical source (supply-demand mechanism), and personal relevance source (specific tax or estate application). Five independent sources creates a case that feels overwhelming rather than persuasive.',
+       script: '"Let me stack what we\'ve covered. The historical data: 12.3% average annual return, 2010-2021. The institutional signal: central banks buying at 55-year record pace. The peer behaviour: clients with your specific estate profile have allocated 8-12% to this structure. The logical mechanism: fixed supply, expanding institutional demand, that\'s not a prediction, it\'s arithmetic. The personal application: this specific allocation starts the BPR clock on £180,000 of current IHT exposure. All five point the same direction. What\'s your read?"',
+       why: 'The evidence stack works because each proof type appeals to a different decision-making system — analytical, social, authority-based, logical, personal. A prospect who dismisses one source must also dismiss the four others from entirely different categories. The cumulative weight is exponentially greater than any single argument.'},
+      {id:'c42', cat:'CERTAINTY BUILDING', principle:'THE THIRD-PARTY TESTIMONIAL — SOCIAL PROOF AT THE CLOSE',
+       technique: 'At the point of highest certainty, introduce a specific, believable third-party story of a client in an analogous situation who acted and experienced a specific, verifiable outcome. The story must be real and specific — not a generic success story — and must describe a situation the prospect recognises as similar to their own. The third-party testimonial at the close converts abstract certainty into social evidence that the decision is correct.',
+       script: '"I want to share something with you — and I share it specifically because your situation is close to analogous. I worked with a client eighteen months ago who had a similar IHT exposure — estate around £2.2m, substantial cash holding, IHT liability on the radar. He started the BPR qualification process. Eight months after that conversation, his health changed significantly. The two-year clock hadn\'t run. But he had documentation of the intent and the professional advice to make the strongest possible case to HMRC. The outcome was significantly better than it would have been without that step. He told me later that the most important decision he made in that period wasn\'t the investment choice — it was starting the clock."',
+       why: 'A specific, believable third-party story at the close activates both social proof and loss aversion simultaneously. The prospect hears what happened to someone like them who acted — and imagines what might happen to someone like them who didn\'t. The emotional weight is proportionate to the specificity of the story.'},
+      {id:'c43', cat:'CERTAINTY BUILDING', principle:'THE VISUAL CLOSE — SHOW, DON\'T TELL',
+       technique: 'Use a visual representation — a simple diagram, a timeline, a two-column comparison — to make the investment decision visually obvious before asking for it verbally. The visual close works because it engages a different processing mode than verbal argument. A prospect who has seen a two-column comparison of "current structure" versus "proposed structure" has already processed the decision visually before being asked to make it verbally.',
+       script: 'On paper, draw two columns. Left: "CURRENT" — cash at 3.5% nominal, 4% inflation, real return -0.5%, IHT exposure £180,000 growing, BPR clock not running. Right: "PROPOSED" — 8-10% target return, IHT clock running from today, BPR qualifying period active, correlated returns now separated into non-correlated mandate. [Put the pen down. Say nothing for 5 seconds.] "What does that picture tell you?"',
+       why: 'The visual close is particularly effective because the prospect draws their own conclusion from the diagram rather than from the broker\'s argument. A conclusion drawn from one\'s own observation is held with more certainty and less resistance than a conclusion argued at them. The silence after the diagram gives the prospect time to process before speaking.'},
+      {id:'c44', cat:'CERTAINTY BUILDING', principle:'THE PRE-MORTEM CLOSE — ADDRESS THE FAILURE SCENARIO FIRST',
+       technique: 'Before asking for the close, explicitly describe the scenario in which the investment underperforms expectations — and demonstrate that even in that scenario, the client is better positioned than in the current alternative. "Let\'s take the pessimistic case first..." The pre-mortem close removes the hidden anxiety about downside by naming it explicitly and showing its limits. Clients who have been shown the worst case and found it acceptable are in a higher-certainty state than those whose worst-case anxiety is unexamined.',
+       script: '"Before I ask you anything, I want to walk through the pessimistic scenario. The asset performs flat — no appreciation, just holds its value over a 5-year period. In that case: the IHT clock has been running for 5 years — that\'s the full BPR qualification period, the IHT liability on the qualifying assets is eliminated. You\'ve preserved capital. You\'ve avoided IHT on £180,000 of exposure. In the flat case, the tax outcome alone represents a meaningful net benefit. That\'s the pessimistic scenario. Are you comfortable with the worst case?"',
+       why: 'The pre-mortem close is counterintuitive because it leads with the failure case — which most brokers avoid. But explicitly naming and showing the limits of the worst case converts it from a hidden anxiety into a known, manageable outcome. Clients who are comfortable with the worst case are free to be optimistic about the upside.'},
+
+      /* ── OBJECTION CLOSES ────────────────────────────────── */
+      {id:'c45', cat:'OBJECTION CLOSES', principle:'THE ISOLATE AND CLOSE — "IS THAT THE ONLY THING?"',
+       technique: 'When a prospect raises an objection, address it, then immediately isolate it: "If I could show you that [objection] isn\'t actually an issue here, would you be ready to move forward?" The isolation tests whether the stated objection is the real one or whether there are additional hidden objections. If yes — it\'s the only thing — address it and close. If no — more objections surface — you\'ve discovered what you actually need to address.',
+       script: '"You\'ve raised the question about the exit liquidity mechanism — and it\'s a valid one. Let me answer it specifically. [Answer.] Now let me ask you directly: if the exit mechanism is satisfactory, is that the only remaining question for you? Or is there something else that needs to be addressed before you\'re in a position to decide?"',
+       why: 'The isolation technique is the most efficient diagnostic in the closing sequence. It converts a potentially endless chain of sequential objections into a discrete, exhaustive list. Once the prospect has confirmed "that\'s the only thing," addressing it creates a direct path to the close.'},
+      {id:'c46', cat:'OBJECTION CLOSES', principle:'THE FEEL-FELT-FOUND CLOSE',
+       technique: 'A three-step empathy-reframe-resolution framework for objections. Step 1 — "I understand how you feel" (acknowledge the emotional reality). Step 2 — "Others in your position have felt the same way" (social proof of the concern). Step 3 — "What they found was..." (the resolution through third-party experience). The sequence moves from empathy to evidence without argument or pressure.',
+       script: '"I completely understand how you feel about the lock-up period — it\'s a genuine constraint and it\'s right to name it. You\'re not alone in that concern — most of the clients I work with who are first engaging with physical alternatives feel exactly the same way. What they consistently found, once they\'d held the position through the first year, is that the psychological discomfort of illiquidity was front-loaded — and that having capital that couldn\'t be panic-sold was actually a source of calm rather than anxiety as conditions shifted."',
+       why: 'The feel-felt-found structure is effective because it separates empathy from the resolution — the client is not being told their concern is wrong, they are being shown that it is shared and that it resolves. The third-party "what they found" is social proof that functions without the broker making a direct argument.'},
+      {id:'c47', cat:'OBJECTION CLOSES', principle:'THE REVERSE OBJECTION CLOSE',
+       technique: 'Convert the prospect\'s objection into the argument for acting. If the objection is about timing (market uncertainty), the reverse close shows that the uncertainty is the argument for non-correlated assets. If the objection is about illiquidity, the reverse close shows that illiquidity is the protection mechanism. The close is made not despite the objection but because of it.',
+       script: '"You\'ve said the macro environment feels uncertain and that\'s making you hesitant. I want to offer a different frame: the macro uncertainty you\'re describing is precisely the condition under which non-correlated, hard assets have historically outperformed. The uncertainty isn\'t the argument against acting. It\'s the argument for acting. What you\'re experiencing as a reason to wait is actually the structural setup that makes this the right moment."',
+       why: 'The reverse objection close is intellectually elegant because it uses the client\'s own stated concern as the evidence for the recommendation. Clients who experience this technique feel that their objection has been taken seriously and used correctly — rather than dismissed or overcome.'},
+      {id:'c48', cat:'OBJECTION CLOSES', principle:'THE "WHAT WOULD IT TAKE" CLOSE',
+       technique: 'When a prospect remains resistant after multiple loops, ask directly: "What would it take for you to be comfortable moving forward?" The answer reveals either a specific, addressable condition or a fundamental objection that cannot be overcome. Either outcome is more useful than continuing to loop without direction.',
+       script: '"I want to ask you something directly — and I\'d like an honest answer. We\'ve covered the structural case, the tax mechanics, the exit process, and the return data. Is there a specific thing — something concrete — that, if I could demonstrate it, would make you comfortable moving forward? Or is there a fundamental concern I haven\'t addressed?" [Wait. Do not fill the silence.]',
+       why: 'The "what would it take" close is the most honest diagnostic available. It requires the prospect to either surface their real objection or acknowledge that no specific condition remains — at which point the hesitation is revealed as general resistance rather than specific concern. Either answer gives the broker the information needed to proceed.'},
+      {id:'c49', cat:'OBJECTION CLOSES', principle:'THE CONCEDE AND PIVOT CLOSE',
+       technique: 'Fully concede the validity of the objection, agree with it completely, and then pivot to why the case holds regardless. "You\'re right — and here\'s why that doesn\'t change the conclusion." The complete concession disarms the defensive dynamic; the pivot demonstrates that the structural argument is robust enough to survive the acknowledged challenge.',
+       script: '"You\'re absolutely right that we can\'t predict with certainty when the gold repricing happens. That\'s true. I\'m not going to argue with it. What I\'d point to is that the structural case — fixed supply, expanding institutional demand, negative real yields — doesn\'t depend on the timing prediction being correct. If the repricing takes three years instead of eighteen months, you\'ve held an asset that held its value and started the IHT clock. The timing uncertainty doesn\'t undermine the structural case. It just changes the patience cost."',
+       why: 'The concede-and-pivot close is among the most credible closing moves available because it demonstrates that the broker is willing to acknowledge where they are genuinely uncertain. Clients who hear "you\'re right about that" are more receptive to the pivot than clients whose concern has been dismissed.'},
+      {id:'c50', cat:'OBJECTION CLOSES', principle:'THE FUTURE REGRET CLOSE',
+       technique: 'Invite the prospect to imagine a specific future moment where they have not acted and the thesis has played out. The future regret close is not about guilt — it is about honest forward projection. "Here\'s what I want to make sure doesn\'t happen..." followed by a specific, vivid description of the cost of inaction. Then ask: "Which of the two futures — acting now or looking back from outside — do you want to be in?"',
+       script: '"Here\'s the scenario I want to make sure you\'ve considered. Eighteen months from now, the rate cutting cycle has played out, gold has repriced, the press is writing about it. You understood the thesis. You had this conversation. You didn\'t act. You\'re doing the arithmetic. That\'s a specific, preventable future. Is it worth preventing?"',
+       why: 'The future regret close activates anticipatory regret — the emotional cost of a future mistake that hasn\'t happened yet but can be vividly imagined. Anticipatory regret is among the most powerful motivators of action because it converts a hypothetical loss into a felt experience before the decision is made.'},
+      {id:'c51', cat:'OBJECTION CLOSES', principle:'THE SILENT CLOSE',
+       technique: 'After asking for the order, say nothing. Hold the silence completely. The first person to speak after the ask is at a disadvantage. If the broker speaks first — to fill the silence, to reassure, to soften the ask — they have effectively withdrawn the question. The silent close requires the discipline to hold the pause until the prospect speaks. Most prospects will fill silence within 8-12 seconds.',
+       script: '"Based on everything we\'ve covered — and the case is clear — the right next step is to initiate the subscription process. [Ask specific question about next step — "Shall I send the documentation to this email address?"] [Silence. Do not speak. Count to fifteen internally if necessary. Wait.]"',
+       why: 'The silent close is the most psychologically demanding element of the closing sequence because it requires the broker to resist their own anxiety. The temptation to fill silence is acute — but the broker who speaks first has effectively re-opened the negotiation. The prospect who fills the silence is engaging with the close — which is the objective.'},
+      {id:'c52', cat:'OBJECTION CLOSES', principle:'THE DIRECT ASK CLOSE',
+       technique: 'After all objections have been addressed and certainty is at 8+, ask directly for the order with no softening, no hedge, no conditional language. "Based on everything we\'ve covered, I\'d like to ask for your commitment today. Are you ready to move forward?" The direct ask is the rarest close because most brokers soften it — which signals uncertainty. A direct, unhedged ask at high certainty is the most powerful close available.',
+       script: '"I want to be direct with you, because I think you appreciate directness. We\'ve covered the case comprehensively. The structural argument holds. The tax treatment applies directly to your situation. The downside scenario is manageable. I\'m going to ask you directly: are you ready to move forward with this today?"',
+       why: 'The direct ask is only appropriate at certainty 8+ — and at that level, it is more effective than any softer version. The directness communicates that the broker believes the prospect should act — which is itself a form of social proof. A broker who hedges the ask signals that they are uncertain about whether the prospect should act; a broker who asks directly signals that they believe in the decision.'},
+
+      /* ── EMOTIONAL CLOSES ─────────────────────────────────── */
+      {id:'c53', cat:'EMOTIONAL CLOSES', principle:'THE LEGACY CLOSE — WHAT ARE YOU BUILDING?',
+       technique: 'Connect the investment decision to the client\'s deepest motivation: what they are building and for whom. The legacy close converts a financial transaction into a defining act of stewardship. Most effective for clients with strong family orientation, estate planning concerns, or a sense of responsibility for wealth built over a lifetime.',
+       script: '"I want to come back to something you said earlier — that this is about what you leave behind, not just what you earn. The decision we\'ve been discussing is directly about that. The BPR structure reduces the IHT liability by £180,000. The non-correlated allocation protects what you\'ve built from the next market dislocation. These aren\'t investment decisions — they\'re estate decisions. They\'re the difference between leaving your family what you built and leaving them what\'s left after the tax bill. Which one is consistent with what you said you\'re trying to do?"',
+       why: 'The legacy close works because it elevates the decision from the financial to the personal and generational. Clients who are motivated by legacy rather than return do not experience this close as a sales move — they experience it as alignment between the decision and their deepest intention.'},
+      {id:'c54', cat:'EMOTIONAL CLOSES', principle:'THE PRIDE CLOSE — THE INVESTOR YOU WANT TO BE',
+       technique: 'Connect the investment decision to the client\'s identity as the kind of investor they are proud to be. The pride close asks them to make a decision consistent with their best investing self — the version of them that acts on evidence, thinks long-term, and doesn\'t let short-term noise override structural conviction.',
+       script: '"You\'ve described, throughout this conversation, how you make your best investment decisions: analytically, patiently, on the basis of structural evidence rather than market noise. Everything about this moment fits that description. The evidence is in front of you. The structural case holds. The only question is whether you make the decision that\'s consistent with the investor you\'ve described — or let a general hesitation override the specific conclusion the evidence points to."',
+       why: 'The pride close activates the identity consistency principle — the desire to behave in ways consistent with the self-image one has just articulated. A client who has described their best investing self in specific terms will experience inconsistency with that description as uncomfortable. The pride close makes acting consistent with the highest version of their investing identity.'},
+      {id:'c55', cat:'EMOTIONAL CLOSES', principle:'THE PROTECTION CLOSE — WHAT ARE YOU PROTECTING?',
+       technique: 'For clients motivated primarily by protection — of wealth, family, or lifestyle — frame the investment decision as an act of protection rather than an act of investment. The protection close converts the risk of acting into the risk of failing to act. "The question is not whether you\'re taking a risk by doing this — it\'s whether you\'re taking a bigger risk by not."',
+       script: '"You\'ve been very clear that protection is the primary motivation here — not return, not speculation, but making sure what you\'ve built survives. The position we\'ve discussed protects against three specific risks you\'ve named: inflation eroding the cash position, equity correlation hitting the portfolio simultaneously, and IHT taking a significant portion of the estate. Doing nothing doesn\'t protect against any of those. This does. Protection is the case for acting — not against it."',
+       why: 'The protection close is the most appropriate emotional close for risk-averse, wealth-preservation-oriented clients. It validates their motivation entirely and uses it as the argument for action rather than inaction. For clients for whom safety is the primary frame, showing that the safer choice is to act — not to wait — is the most powerful possible reframe.'},
+      {id:'c56', cat:'EMOTIONAL CLOSES', principle:'THE HONOUR CLOSE — RESPECTING WHAT YOU\'VE BUILT',
+       technique: 'Frame the investment decision as an act of honouring the work, discipline, and sacrifice that created the wealth being managed. "What you\'ve built deserves to be managed with the same seriousness that built it." The honour close activates the client\'s sense of responsibility toward their own past effort — and makes inadequate stewardship feel like a failure to honour what was earned.',
+       script: '"The capital you\'re managing didn\'t arrive by accident. It came from decades of building, taking risk, making good decisions, and exercising discipline. What I\'d ask is: does the way you\'re currently managing it reflect the same seriousness you applied to building it? The question isn\'t whether you\'ve been careless — it\'s whether the structure is as deliberately designed as the effort that created it."',
+       why: 'The honour close connects financial management to personal integrity. For clients who have worked hard to build their wealth, the suggestion that their management of it may not match the seriousness of its creation is motivating rather than judgmental — because it reflects their own standards back at them.'},
+      {id:'c57', cat:'EMOTIONAL CLOSES', principle:'THE RELIEF CLOSE — TAKING THIS OFF THE TABLE',
+       technique: 'Frame the investment decision as creating a specific, named relief — from the ongoing anxiety of the unaddressed IHT liability, the inflation erosion, or the unresolved tax position. The relief close activates the prospect\'s desire to resolve a tension they have been living with. "Once this is in place, you won\'t be looking at this as a pending problem anymore."',
+       script: '"One thing I\'ve noticed about clients who complete the BPR structure after we\'ve had this conversation: they consistently describe a specific relief. The IHT liability has moved from \'problem I\'m aware of but haven\'t addressed\' to \'problem with a specific solution in motion.\' That shift — from unresolved to in process — is worth something independent of the return. Does that resonate with where you are right now — a problem you know exists but haven\'t fully addressed?"',
+       why: 'The relief close works by naming the psychological tension that already exists — the unresolved problem — and showing that the investment decision resolves it. The emotional benefit of resolution is independent of the financial return, which makes it a powerful additional motivation for clients who are already experiencing the discomfort of the unaddressed problem.'},
+      {id:'c58', cat:'EMOTIONAL CLOSES', principle:'THE COURAGE CLOSE — THE GAP BETWEEN KNOWING AND DOING',
+       technique: 'Name the gap between intellectual conviction and action directly and honestly. "You\'ve done the analytical work. The case is clear to you. The only thing between where you are and where you want to be is the decision to act. What is it that makes that step feel difficult right now?" The courage close is the rarest because it requires the broker to acknowledge the emotional content of the decision without minimising it.',
+       script: '"I want to say something, and I want you to hear it as genuine rather than as pressure. You\'ve engaged with this case as seriously as anyone I\'ve spoken to. You understand the thesis. You\'ve acknowledged the tax logic applies to your situation. You can see the structural case holds. At that point, the gap between knowing and deciding is emotional, not analytical — and the only person who can close that gap is you. What would make it easier to take the step?"',
+       why: 'The courage close is effective with analytically oriented clients who have already reached intellectual certainty but are experiencing a form of decision paralysis. By naming the gap between knowing and acting honestly and without judgment, the broker creates the space for the client to identify and address the emotional barrier rather than dressing it up as an analytical concern.'},
+
+      /* ── NEGOTIATION CLOSES ──────────────────────────────── */
+      {id:'c59', cat:'NEGOTIATION CLOSES', principle:'THE CONDITIONAL CLOSE — "IF I CAN, WILL YOU?"',
+       technique: 'Before making any concession, test whether the concession will produce the desired outcome. "If I can arrange [specific concession], will you be ready to move forward today?" This creates a conditional commitment from the prospect before the concession is made. If they say yes, the concession produces the close. If they say no, the concession has not been wasted.',
+       script: '"Let me ask you something before I take this back to the team. If I can structure the subscription to begin in the first week of the next tax year — so your accountant has had a chance to review it — would that resolve the timing concern, and would you be in a position to commit today?"',
+       why: 'The conditional close is the most efficient close in situations where a concession is on the table. By testing the outcome before making the concession, the broker avoids the common error of conceding something that doesn\'t produce the close — which simultaneously reduces profitability and fails to advance the negotiation.'},
+      {id:'c60', cat:'NEGOTIATION CLOSES', principle:'THE TAKE-AWAY CLOSE — REINTRODUCE SCARCITY',
+       technique: 'When a prospect is persistently hesitant, signal that the opportunity may not remain available. This is not a threat — it is a genuine observation about the constraints of the allocation. "I want to be transparent: if we\'re not in a position to confirm by [date], I may not be able to hold this allocation. The positions are limited and there is genuine interest from other clients in your position." The take-away activates loss aversion and tests whether hesitation is genuine or habitual.',
+       script: '"I want to be fair to you about one thing. I\'ve been working with a handful of clients on this specific allocation, and I\'ve made a commitment about the timeline for confirming positions. If we can\'t reach a decision in the next few days, I may need to offer this to someone else who has been waiting. I\'m not saying that to pressure you — I\'m saying it because I\'d rather you know the constraint than feel I\'d withheld it."',
+       why: 'The take-away close tests the depth of the prospect\'s interest. Genuine interest responds to the take-away with increased engagement; superficial interest responds with indifference. The take-away also activates loss aversion — the prospect who was ambivalent about the opportunity suddenly experiences the emotional weight of potentially losing access to it.'},
+      {id:'c61', cat:'NEGOTIATION CLOSES', principle:'THE SPLIT THE DIFFERENCE CLOSE',
+       technique: 'When a sizing or pricing negotiation has reached an impasse, offer to meet exactly in the middle between the two stated positions. The split-the-difference principle produces an outcome that both parties can frame as a win. It should be deployed after two or three rounds of negotiation — not as the opening offer — and should be presented as a genuine compromise rather than a calculated strategy.',
+       script: '"Here\'s where I think we are: you\'ve said you\'re comfortable at £40,000 and I\'ve said the structure works best at £60,000. Neither of those is exactly right on its own. What if we structure the initial allocation at £50,000 — that gives you a meaningful first position that fully captures the tax benefit, and you have the option to add to it in the next tax year if the first tranche performs as expected?"',
+       why: 'The split-the-difference close works because both parties receive the psychological satisfaction of having negotiated a genuine compromise. The final number is not the broker\'s preferred number or the client\'s preferred number — it is a number they reached together, which creates shared ownership of the outcome.'},
+      {id:'c62', cat:'NEGOTIATION CLOSES', principle:'THE HIGHER AUTHORITY CLOSE',
+       technique: 'Introduce a genuine external authority that must approve a specific term or concession. "I\'d need to check with [compliance/my director/the investment committee] whether I can do that" creates legitimate delay that prevents the prospect from using the same tactic against the broker. It also frames any concession that is subsequently approved as something the broker genuinely worked to obtain.',
+       script: '"The timeline adjustment you\'re asking about — moving the subscription start date by 30 days — is something I\'d need to check with the investment team on. I don\'t want to commit to something and then come back to you if it can\'t be arranged. Give me until end of tomorrow and I\'ll come back to you with a definitive answer. In the meantime, if the timeline flexibility is confirmed, are you comfortable with the rest of the structure?"',
+       why: 'The higher authority close serves two functions: it creates a genuine pause that prevents hasty concessions, and it frames subsequent concessions as earned — the broker went to bat for the client. The parallel test ("if the timeline flexibility is confirmed, are you comfortable with the rest?") also advances the conditional commitment while the authority check is in progress.'},
+      {id:'c63', cat:'NEGOTIATION CLOSES', principle:'THE GOOD COP BAD COP CLOSE (INTERNAL)',
+       technique: 'Position an internal constraint — compliance, minimum investment policy, fund allocation rules — as the "bad cop" while positioning yourself as the "good cop" working within those constraints on the client\'s behalf. The dynamic creates a genuine advocate relationship without manufacturing artificial opposition.',
+       script: '"I want to be transparent about something. The compliance team has a strict view on how I can structure the initial documentation — the standard pack is non-negotiable in terms of its form. What I can do, because this is an important relationship, is provide a plain-language summary alongside it that walks you through every element in language your accountant can use directly. That\'s something I do specifically for clients in your position, not something that\'s standard. Let me make sure the documentation is as clear as it can be before we schedule the next conversation."',
+       why: 'The internal bad cop close is among the most credible structural closes because it uses genuine organisational constraints as the limiting factor — not the broker\'s preference. It also creates a "going beyond standard service" dynamic that strengthens the relationship and differentiates the broker from competitors.'},
+      {id:'c64', cat:'NEGOTIATION CLOSES', principle:'THE STRATEGIC PAUSE CLOSE',
+       technique: 'At the moment of maximum certainty, deliberately pause before asking for the order. Collect your thoughts visibly. Then ask with deliberate, measured confidence. The strategic pause creates gravitas and communicates that the close is considered — not rushed. It also gives the prospect a moment to process before the ask arrives, which means they are less likely to respond reflexively.',
+       script: '"[Look at notes. Pause deliberately for 3-5 seconds. Look back up.] Let me be clear about where I think we are. The case is complete. The structure is right for your position. The timing is specific. [Pause again.] Based on everything we\'ve covered, I\'d like to ask you for your commitment to move forward today. What\'s your answer?"',
+       why: 'The deliberate pause before the close changes the tone of the ask from transactional to consequential. It signals that the broker is asking for something important — not rattling off a memorised pitch. The prospect receives a considered close as a more serious request than a fluent, continuous one.'},
+      {id:'c65', cat:'NEGOTIATION CLOSES', principle:'THE INVESTMENT COMMITTEE CLOSE',
+       technique: 'Frame the client\'s decision-making process as analogous to an investment committee — and position yourself as a presenter to that committee. "I want to make sure I\'ve given you everything your investment committee — whether that\'s just you, or you and your accountant and your wife — needs to make this decision with full confidence." The investment committee framing elevates the decision and positions the broker\'s role as serving the committee\'s needs.',
+       script: '"Think of the people who matter in this decision as your investment committee. Based on what you\'ve said, that\'s you, your accountant, and potentially your partner. I want to make sure each member of that committee has what they need. For you, we\'ve covered the structural case. For your accountant, I can prepare the technical summary of the tax treatment. For your partner, I can provide a plain-language overview of what the investment represents and what the downside looks like. What does the committee need from me to reach a decision?"',
+       why: 'The investment committee close serves two purposes: it respects the multiple stakeholders in the decision and frames the broker as a professional presenter to those stakeholders. It also converts the open-ended "I need to check with people" into a specific list of people whose needs can be identified and met — which is far more productive than waiting for an unstructured consultation.'},
+      {id:'c66', cat:'NEGOTIATION CLOSES', principle:'THE FUTURE PRICE CLOSE',
+       technique: 'Anchor the current price or entry conditions to a higher likely future price, making the current moment the attractive reference point. "The same position in twelve months, if the thesis plays out, will be available at a higher entry price — or not available at all. The question is whether today\'s price and today\'s conditions are the ones you want." The future price close creates urgency through logic rather than through artificial pressure.',
+       script: '"The entry conditions we\'re discussing today are a function of the current market environment: real yields near zero, institutional accumulation still quiet, and retail sentiment underweight. All three of those conditions compress the entry price relative to where the asset will likely trade when the thesis is broadly recognised. In 12-18 months, two of those three conditions will probably have resolved — and the entry will be proportionately less attractive. Today\'s conditions are the argument for today\'s timing."',
+       why: 'The future price close is a logical urgency argument rather than an emotional one, which makes it particularly effective with analytically oriented clients. The reasoning is sound and verifiable — entry conditions today are demonstrably different from entry conditions after a thesis becomes consensus — which makes the urgency feel like genuine investment logic rather than sales pressure.'},
+      {id:'c67', cat:'NEGOTIATION CLOSES', principle:'THE THIRD OPTION CLOSE',
+       technique: 'When negotiation appears stuck between two positions, introduce a third option that neither party has previously considered. The third option breaks the binary and creates new space for movement. "What if we approached it differently — neither the full allocation now nor the small initial position you\'ve described, but a structured commitment to the first tranche now with the second tranche triggered by a specific condition you choose?" The third option gives the prospect a sense of agency in creating the solution.',
+       script: '"Here\'s an idea I haven\'t floated yet. Rather than deciding between all-now or wait-and-see, what if we structure a formal first tranche — say £30,000 — with a documented option to add the second tranche at the same pricing within 90 days? You\'re in the market from today. The IHT clock starts. You have 90 days to complete the position at the same terms without re-negotiating. Does that structure solve the tension between wanting to start and not wanting to over-commit before you\'re fully confident?"',
+       why: 'The third option close is among the most creative closing techniques because it breaks the binary frame that most negotiations get stuck inside. By introducing a structure that neither party had proposed, the broker demonstrates flexibility and problem-solving that strengthens the relationship while advancing the close.'},
+
+      /* ── EMOTIONAL CLOSES (to 10) ─────────────────────────── */
+      {id:'c68', cat:'EMOTIONAL CLOSES', principle:'THE GRATITUDE CLOSE — APPRECIATE THE RELATIONSHIP FIRST',
+       technique: 'Before the final ask, genuinely acknowledge the quality of the conversation and the client\'s engagement. The gratitude close is not flattery — it is a genuine statement of appreciation that humanises the relationship before the commercial transaction. "I want to say something before I ask you anything — this has been one of the more substantive conversations I\'ve had this year. The questions you\'ve asked have been genuinely good." Then ask.',
+       script: '"Before I say anything else, I want to acknowledge something. You\'ve engaged with this more seriously and more intelligently than most people I have this conversation with. You\'ve asked the right questions, you\'ve pushed back where pushing back was appropriate, and you\'ve been honest about your concerns throughout. That makes it much easier for me to be equally honest with you. So here it is: I think this is right for you, and I\'d like to ask for your commitment today."',
+       why: 'The gratitude close works because it converts the close from a transactional moment into the natural conclusion of a substantive human exchange. Clients who feel genuinely respected and appreciated are more comfortable making a commitment to the person who has respected them — because the relationship feels mutual rather than one-directional.'},
+      {id:'c69', cat:'EMOTIONAL CLOSES', principle:'THE VULNERABILITY CLOSE — HONEST ADMISSION BEFORE THE ASK',
+       technique: 'Before the final ask, make a brief, genuine admission that acknowledges the broker\'s own stake in the outcome — and then sets it aside explicitly. "I want to name the obvious: I have an interest in this going a particular way. I\'ve named it so I can set it aside. What I\'m about to say is what I genuinely believe, regardless of that interest." The vulnerability close disarms the suspicion that everything the broker has said has been strategic.',
+       script: '"I want to be completely honest with you before I ask for anything. I have a commercial interest in this conversation. I\'ve named it so you don\'t have to wonder about it — and so that what I say next is clear of that shadow. I genuinely believe this allocation is right for your position. Not because I want the transaction — because the case holds up. The IHT logic is airtight. The structural case is sound. The tax treatment applies directly. I\'m asking you to move forward because I believe you should, not only because I benefit from it."',
+       why: 'The vulnerability close is among the rarest and most effective closes because it explicitly names the conflict of interest most clients are thinking about but not saying. By naming it first, the broker removes it as a silent objection and repositions the subsequent ask as an honest recommendation rather than a commercial strategy.'},
+      {id:'c70', cat:'EMOTIONAL CLOSES', principle:'THE CURIOSITY CLOSE — WHAT WOULD YOU NEED TO KNOW?',
+       technique: 'Ask the prospect what specific piece of information, if they had it, would make the decision clear. "If you knew one more thing about this — what would it be?" The curiosity close both surfaces remaining hidden objections and positions the broker as genuinely committed to providing whatever information the client needs rather than pushing past their concerns.',
+       script: '"Before we conclude this conversation — one question. If there was one more piece of information you could have about this investment — one thing you don\'t currently know — what would it be? Whatever that is, let me either answer it now or tell you honestly whether it\'s something I can find for you."',
+       why: 'The curiosity close surfaces the hidden objection that all the standard objection handling has not reached. By framing it as "what would you want to know?" rather than "what\'s stopping you?", the broker activates genuine curiosity about their own decision process — which often produces the one remaining barrier that, once addressed, completes the close.'},
+      {id:'c71', cat:'EMOTIONAL CLOSES', principle:'THE HONEST PROJECTION CLOSE — THIS IS WHAT I THINK HAPPENS',
+       technique: 'Give the client your genuine, honest projection of what happens if they act and if they don\'t — framed not as a prediction but as your professional assessment based on the evidence. "Here\'s what I genuinely think happens in both scenarios..." The honest projection close positions the broker as a trusted advisor giving their real opinion rather than a salesperson making a pitch.',
+       script: '"I want to give you my honest assessment — not the sales version, the real one. If you move forward with this today: the IHT clock starts, the BPR qualification runs, the non-correlated position is in place before the next phase of the macro cycle. In three years, I think you\'ll look back on this as a well-timed, well-structured decision. If you don\'t: you\'ll revisit this analysis at some point — probably when the conditions are less favourable. The IHT liability will be larger. The entry will be less attractive. That\'s my honest read. What\'s yours?"',
+       why: 'The honest projection close is effective because it explicitly distinguishes the broker\'s genuine opinion from their commercial interest — and the genuine opinion carries the weight of the professional relationship that has been built throughout the conversation. Clients who trust the broker respond to an honest professional assessment as they would to the advice of any trusted expert.'},
+
+      /* ── NEGOTIATION CLOSES (to 10) ─────────────────────── */
+      {id:'c72', cat:'NEGOTIATION CLOSES', principle:'THE DEADLINE LEGITIMISATION CLOSE',
+       technique: 'When a genuine external deadline exists — tax year end, fund close, pricing window — present it with the specific mechanism that makes it real, so the client can verify it independently. The legitimised deadline is more effective than an asserted one because it converts urgency from the broker\'s preference into a structural fact. "Here\'s the specific reason the deadline is real, not just me saying so."',
+       script: '"I want to be specific about the 5th April deadline because I don\'t want it to feel like a sales technique — it isn\'t. The carry-back provision in the EIS legislation specifically allows relief to be carried back to the prior tax year only if the subscription is completed before 6th April. That\'s HMRC\'s rule, not mine. Your accountant can verify it in EIS4 form guidance or the HMRC manual at VCAS7500. The deadline is real and the mechanism is public. I\'m naming it because it\'s relevant to your position, not to create pressure."',
+       why: 'The deadline legitimisation close converts the most commonly dismissed urgency technique — the artificial deadline — into a credible, verifiable fact. By providing the specific legal reference, the broker demonstrates transparency and makes the urgency verifiable, which is more motivating than any amount of asserted pressure.'},
+
+      /* ── OBJECTION CLOSES (to 10) ─────────────────────────── */
+      {id:'c73', cat:'OBJECTION CLOSES', principle:'THE REFRAME THE RISK CLOSE',
+       technique: 'When the prospect\'s objection is about the risk of acting, explicitly reframe the analysis to show the risk of not acting. "The question isn\'t whether there is risk in doing this — there is. The question is whether there is more risk in not doing it." Frame both options as carrying risk and invite a comparative assessment rather than a binary safe/unsafe evaluation.',
+       script: '"You\'ve described the risks of making this investment — and they\'re real and named correctly. What I\'d ask you to do is apply the same analysis to the alternative. The alternative is: cash at below-inflation returns, an IHT liability growing unchecked, full equity correlation with no non-correlated position. Those are also risks — they\'re just quieter ones. The comparison you\'re making isn\'t between doing something risky and doing something safe. It\'s between two risk profiles. Which of the two is actually more dangerous for your specific position?"',
+       why: 'The reframe-the-risk close is most effective because it refuses to accept the binary of "risky action versus safe inaction." By naming the specific risks of the current position, the broker creates a genuinely comparative risk analysis — and in most cases, the risks of inaction are objectively greater for the client than the risks of the proposed investment.'},
+      {id:'c74', cat:'OBJECTION CLOSES', principle:'THE PATIENCE CLOSE — WAITING COSTS EXACTLY THIS MUCH',
+       technique: 'For clients who say they want to wait, calculate the specific cost of waiting — in IHT exposure growth, real return loss, or missed BPR qualification time — and present it as a monthly figure. "Waiting costs approximately £X per month in this specific dimension." The patience close converts an abstract delay into a concrete, ongoing expenditure.',
+       script: '"Let me make the cost of waiting specific, because I think it matters. Your IHT exposure on the qualifying assets is growing in line with the estate — at current values, roughly £1,500 per month in additional IHT liability. The cash position is losing approximately £1,000 per month in real purchasing power at current inflation. Between those two figures, waiting costs you approximately £2,500 per month in measurable financial terms. I\'m not saying that to pressure you. I\'m saying it because you asked about timing — and the cost of timing is that specific."',
+       why: 'The patience close converts the abstract concept of "the cost of delay" into a specific monthly figure that feels immediately tangible. £2,500 per month is a number a client can relate to — it has a reference frame. The abstraction of "losing money by waiting" becomes concrete when expressed as a specific monthly cost.'},
     ];
 
     /* ── STATE ────────────────────────────────────────────── */
@@ -2741,6 +4257,7 @@
             '</div>';
           } else {
             expanded = '<div style="padding:0 14px 14px;animation:fadeIn .15s;">' +
+              (a.technique ? '<div style="display:inline-block;font-size:7px;letter-spacing:.12em;color:' + col + ';padding:2px 8px;border:1px solid ' + col + ';margin-bottom:10px;opacity:.85;">▶ ' + escH(a.technique) + '</div><br>' : '') +
               '<div style="font-size:8px;letter-spacing:.2em;color:' + col + ';margin-bottom:6px;">FULL REBUTTAL</div>' +
               '<div style="font-size:10px;color:#ffffff;line-height:1.7;border-left:3px solid ' + col + ';padding:8px 14px;margin-bottom:12px;background:#0a0a0a;">' + escH(a.rebuttal || a.rebutral || '') + '</div>' +
               '<div style="font-size:8px;letter-spacing:.2em;color:' + col + ';margin-bottom:6px;">WHY IT WORKS</div>' +
@@ -2781,7 +4298,17 @@
         /* count */
         '<div style="padding:4px 14px;font-size:8px;letter-spacing:.15em;color:#ffffff;border-bottom:1px solid #0d0d0d;">' + list.length + ' ' + _libType + '</div>' +
         /* list */
-        '<div style="overflow-y:auto;flex:1;">' + cards + '</div>';
+        '<div style="overflow-y:auto;flex:1;">' + cards + '</div>' +
+        /* notes panel — always visible */
+        '<div id="oh-notes-panel-' + id + '" style="flex-shrink:0;border-top:1px solid #1a1a1a;padding:8px 12px;background:#050505;">' +
+          '<div style="font-size:7px;letter-spacing:.2em;color:#ffffff;margin-bottom:5px;">REBUTTAL NOTES</div>' +
+          '<textarea id="oh-note-' + id + '" placeholder="Note the objection, client name, or rebuttal you used…" style="width:100%;box-sizing:border-box;background:#0a0a0a;border:1px solid #1c1c1c;color:#ffffff;font-family:Consolas,monospace;font-size:8.5px;line-height:1.5;padding:6px 8px;resize:none;height:44px;outline:none;"></textarea>' +
+          '<div style="display:flex;gap:6px;margin-top:5px;">' +
+            '<button id="oh-save-' + id + '" style="flex:1;background:#1a1a1a;border:1px solid #333;color:#ffffff;font-family:Consolas,monospace;font-size:7.5px;letter-spacing:.15em;padding:5px 0;cursor:pointer;">SAVE NOTE</button>' +
+            '<button id="oh-send-' + id + '" style="flex:1;background:#b06bff;border:none;color:#000;font-family:Consolas,monospace;font-size:7.5px;font-weight:700;letter-spacing:.15em;padding:5px 0;cursor:pointer;">SEND TO FIRM CHAT</button>' +
+          '</div>' +
+          '<div id="oh-msg-' + id + '" style="font-size:7.5px;color:#4caf50;margin-top:4px;min-height:14px;"></div>' +
+        '</div>';
 
       /* wire events */
       body.querySelectorAll('.al-type').forEach(function(btn) {
@@ -2822,6 +4349,67 @@
           }).catch(function(){});
         });
       });
+
+      /* ── NOTES PANEL WIRING ── */
+      var ohNoteEl  = body.querySelector('#oh-note-' + id);
+      var ohSaveBtn = body.querySelector('#oh-save-' + id);
+      var ohSendBtn = body.querySelector('#oh-send-' + id);
+      var ohMsgEl   = body.querySelector('#oh-msg-' + id);
+
+      /* restore any saved note text */
+      if (ohNoteEl) {
+        try {
+          var _stored = JSON.parse(localStorage.getItem('tbt-objection-notes') || '[]');
+          var _today = new Date().toDateString();
+          var _entry = _stored.filter(function(n){ return n.date === _today; }).pop();
+          if (_entry) ohNoteEl.value = _entry.note;
+        } catch(e){}
+      }
+
+      function _ohFlash(txt, col) {
+        if (!ohMsgEl) return;
+        ohMsgEl.style.color = col || '#4caf50';
+        ohMsgEl.textContent = txt;
+        setTimeout(function(){ ohMsgEl.textContent = ''; }, 3000);
+      }
+
+      function _ohSave() {
+        if (!ohNoteEl) return;
+        var txt = (ohNoteEl.value || '').trim();
+        if (!txt) { _ohFlash('Nothing to save.', '#e05050'); return; }
+        try {
+          var stored = JSON.parse(localStorage.getItem('tbt-objection-notes') || '[]');
+          var today = new Date().toDateString();
+          stored = stored.filter(function(n){ return n.date !== today; });
+          stored.push({ date: today, note: txt, ts: Date.now() });
+          if (stored.length > 90) stored = stored.slice(-90);
+          localStorage.setItem('tbt-objection-notes', JSON.stringify(stored));
+          _ohFlash('Note saved.');
+        } catch(e) { _ohFlash('Save failed.', '#e05050'); }
+      }
+
+      function _ohSend() {
+        if (!ohNoteEl) return;
+        var txt = (ohNoteEl.value || '').trim();
+        var msg = 'OBJECTION HANDLER NOTE' + (txt ? '\n\n' + txt : ' (no note)');
+        if (!_sb) { _ohFlash('Supabase not ready.', '#e05050'); return; }
+        if (ohSendBtn) ohSendBtn.disabled = true;
+        _sb.from('messages').insert({
+          firm_id: _firmId,
+          sender_id: _uid,
+          sender_name: _userName,
+          recipient_id: null,
+          content: msg
+        }).then(function(res) {
+          if (ohSendBtn) ohSendBtn.disabled = false;
+          if (res && res.error) { _ohFlash('Send failed.', '#e05050'); return; }
+          if (txt) _ohSave();
+          _ohFlash('Sent to Firm Chat.');
+        }).catch(function(){ if (ohSendBtn) ohSendBtn.disabled = false; _ohFlash('Send failed.', '#e05050'); });
+      }
+
+      if (ohSaveBtn) ohSaveBtn.addEventListener('click', _ohSave);
+      if (ohSendBtn) ohSendBtn.addEventListener('click', _ohSend);
     }
 
     /* lens change listener */
@@ -4360,6 +5948,8 @@
     body.style.padding = '0';
 
     var _allData = null;
+    var _sigLevel = '';
+    var _score = 0;
 
     function lat(sid, data) {
       var s = data[sid];
@@ -4373,6 +5963,42 @@
     }
     function fmt(v, d) { return v == null ? '--' : v.toFixed(d != null ? d : 1); }
 
+    /* Rotate content daily so the signal never shows identical text */
+    var _dayIdx = Math.floor(Date.now() / (1000 * 60 * 60 * 24));
+
+    var HIGH_PSY = [
+      'Lead with loss framing — the cost of inaction today is greater than the cost of the position. Open with: "What\'s the one thing you\'ve built financially that you most want to protect?" before anything else. Then earn three small agreements before the close.',
+      'Use reciprocity first — deliver an unexpected insight that genuinely helps them before asking for anything. A broker who gives first earns the right to ask. Anchor with the best possible outcome before presenting the actual position.',
+      'Mirror their exact language back first. If they say "security", you say "security". If they say "protect", you say "protect". Then use contrast: "Most people in your position have three options — the two we\'re not discussing, and this one." Contrast elevates without pressure.'
+    ];
+    var HIGH_CYC = [
+      'Excessive pessimism in any cycle historically coincides with the highest forward returns. The discomfort your client feels right now is structurally the buy signal. The crowd selling into fear is what creates the entry.',
+      'Second-level thinking: the crowd sees risk in the headline. Your insight is what happens after the headline resolves — where does capital flow next? Position ahead of that move, not into it.',
+      'The best investments feel uncomfortable at entry. That\'s what creates the return — the gap between perceived risk and actual risk. When conditions feel worst, the structural upside is usually largest.'
+    ];
+    var MOD_PSY = [
+      'Teach the problem they don\'t see yet — deliver an insight that reframes their current position before any product conversation. The advisor who challenges conventional thinking earns attention. Diagnose whether the missing element is motivation, the right information, or a specific prompt to act.',
+      'Use a pattern interrupt — state something genuinely surprising about the macro environment that their usual sources haven\'t covered. Curiosity opens the door that a pitch shuts. Then qualify: not every client is right for this, which creates desire to be one of the ones who is.',
+      'The commitment ladder: start with the smallest possible yes. "Can I send you a one-pager on this?" builds micro-commitment that makes the larger commitment feel natural. Each contact should advance the relationship by one step, not attempt the full close.'
+    ];
+    var MOD_CYC = [
+      'Pipeline built in the moderate phase generates outsized returns in the high phase. By the time the signal is obvious, the best positions are taken. Position clients ahead of the narrative, not into it.',
+      'Everyone sees the same headlines. Your edge is the interpretation — what the data implies about where we are in the cycle, not just what happened. Deliver the insight behind the headline.',
+      'The cycle never telegraphs its turns clearly. The moderate signal is the window before the turn becomes obvious. Clients who act now will look prescient when the high signal arrives — position them to tell that story.'
+    ];
+    var LOW_PSY = [
+      'The relationship phase is strategic, not passive. Ask for their opinion before offering yours — this creates a dynamic where they feel understood, not sold to. Map the emotional driver beneath each client\'s financial position — the real "why" behind what they say they want.',
+      'Listen more than you speak. Three questions that surface what a client actually cares about are worth more than ten product presentations. When they say "That\'s exactly right", you\'ve found the opening — that\'s when you move.',
+      'Run your review meetings as intelligence briefings — bring something they didn\'t know and didn\'t ask for. This positions you as their primary information source, not just a broker. Default allocation conversations work better here than closes.'
+    ];
+    var LOW_CYC = [
+      'Cycle literacy gets built in quiet periods. Clients who trust your read when things are calm are ready to act fast when conditions shift. Use this window to teach the framework — not sell a product.',
+      'Plant seeds now that bloom when conditions shift. The clients who act fastest in the high-signal phase are always the ones who were educated in the low-signal phase. Your job right now is building the intellectual case.',
+      'A 5-10% allocation conversation feels low-stakes in a quiet market — default it into every review as normal, not exceptional. When the signal escalates, the foundation is already there and the conversation takes minutes, not months.'
+    ];
+
+    function pickVariant(arr) { return arr[_dayIdx % arr.length]; }
+
     function refresh(data) {
       _allData = data;
       var cpi    = lat('CPIAUCSL', data);
@@ -4383,32 +6009,32 @@
       var cfnai  = lat('CFNAI', data);
       var m2     = lat('M2SL', data);
 
-      var score = 0;
-      if (cpi   != null && cpi   > 2.5)  score++;
-      if (cpi   != null && cpi   > 3.5)  score++;
-      if (curve != null && curve < 0.5)  score++;
-      if (curve != null && curve < -0.2) score++;
-      if (ff    != null && ff    > 4.0)  score++;
-      if (unrate != null && unPrv != null && unrate > unPrv) score++;
-      if (cfnai != null && cfnai < 0)    score++;
-      if (m2    != null && m2    < 2)    score++;
+      _score = 0;
+      if (cpi   != null && cpi   > 2.5)  _score++;
+      if (cpi   != null && cpi   > 3.5)  _score++;
+      if (curve != null && curve < 0.5)  _score++;
+      if (curve != null && curve < -0.2) _score++;
+      if (ff    != null && ff    > 4.0)  _score++;
+      if (unrate != null && unPrv != null && unrate > unPrv) _score++;
+      if (cfnai != null && cfnai < 0)    _score++;
+      if (m2    != null && m2    < 2)    _score++;
 
-      var sigLevel, sigCol, sigIcon, sigDesc, psychNote, marksNote;
-      if (score >= 5) {
-        sigLevel = 'HIGH CALL PROBABILITY'; sigCol = '#4caf50'; sigIcon = '▲';
-        sigDesc = 'Multiple structural signals align. The pendulum (Marks) has swung toward pessimism — historically the highest-return entry point. Antifragile positioning (Taleb) favoured. Prime conditions for outreach across all real asset classes.';
-        psychNote = 'PSYCHOLOGY: Lead with LOSS FRAME (Prospect Theory) — cost of inaction today, not gains tomorrow. Use Pre-Suasion prime: "What\'s the thing you most want to protect about what you\'ve built?" before the ask. Milgram sequence: three small agreements before the close.';
-        marksNote = 'CYCLE POSITION: Excessive pessimism → highest expected returns. Deploy Marks Pendulum Close (CLOSES tab). Second-level insight: the discomfort clients feel NOW is the historical buy signal.';
-      } else if (score >= 3) {
-        sigLevel = 'MODERATE — BUILD PIPELINE'; sigCol = '#E97132'; sigIcon = '●';
+      var sigCol, sigIcon, sigDesc, psychNote, cycleNote;
+      if (_score >= 5) {
+        _sigLevel = 'HIGH CALL PROBABILITY'; sigCol = '#4caf50'; sigIcon = '▲';
+        sigDesc = 'Multiple structural signals align. Sentiment has swung toward excessive pessimism — historically the highest-return entry point. Prime conditions for outreach across all real asset classes. Act before the headline catches up.';
+        psychNote = pickVariant(HIGH_PSY);
+        cycleNote = pickVariant(HIGH_CYC);
+      } else if (_score >= 3) {
+        _sigLevel = 'MODERATE — BUILD PIPELINE'; sigCol = '#E97132'; sigIcon = '●';
         sigDesc = 'Conditions are building. One or two signals elevated. Position clients ahead of the mainstream narrative — by the time the headline confirms it, the trade has moved.';
-        psychNote = 'PSYCHOLOGY: Challenger reframe (SPIN s19) — teach the problem they don\'t know they have. Fogg B=MAP: diagnose whether the missing element is motivation, ability, or prompt. Cardone follow-up cadence: every contact brings a new data point.';
-        marksNote = 'CYCLE POSITION: Midpoint to building pessimism. Use Marks second-level thinking (NLP n40): deliver the insight behind the headline, not the headline itself.';
+        psychNote = pickVariant(MOD_PSY);
+        cycleNote = pickVariant(MOD_CYC);
       } else {
-        sigLevel = 'LOW URGENCY — RELATIONSHIP CALLS'; sigCol = '#555'; sigIcon = '▼';
-        sigDesc = 'Macro background is quiet. This is the relationship-building phase — plant seeds, deliver intelligence, run the Cardone follow-up sequence. The next signal upgrade rewards the pipeline built now.';
-        psychNote = 'PSYCHOLOGY: Ben Franklin Effect (PSYCH py49) — ask for their opinion before giving yours. Greene strategic listening (NLP n36): map the emotional driver beneath each client\'s position. Build the "That\'s Right" moment (Voss n33).';
-        marksNote = 'CYCLE POSITION: Optimism or normalcy. Establish cycle literacy with clients now so they trust your read when pessimism arrives. Thaler nudge: default 10% allocation conversation, not a close.';
+        _sigLevel = 'LOW URGENCY — RELATIONSHIP CALLS'; sigCol = '#555'; sigIcon = '▼';
+        sigDesc = 'Macro background is quiet. This is the relationship-building phase — plant seeds, deliver intelligence, build pipeline. The next signal upgrade rewards the relationships built now.';
+        psychNote = pickVariant(LOW_PSY);
+        cycleNote = pickVariant(LOW_CYC);
       }
 
       var cpiStr   = fmt(cpi, 1) + '%';
@@ -4418,42 +6044,113 @@
 
       var openers = (window._assetLens && window._assetLens.openers) ? window._assetLens.openers : [];
 
+      /* Load saved note for today */
+      var savedNote = '';
+      try {
+        var stored = JSON.parse(localStorage.getItem('tbt-signal-notes') || '[]');
+        var today = new Date().toDateString();
+        var todayEntry = stored.filter(function(n){ return n.date === today; }).pop();
+        if (todayEntry) savedNote = todayEntry.note;
+      } catch(e){}
+
       body.innerHTML =
         '<div style="display:flex;flex-direction:column;height:100%;font-family:Consolas,monospace;">' +
+        /* Fixed header */
         '<div style="padding:10px 14px;border-bottom:1px solid #2a2a2a;flex-shrink:0;">' +
           '<div style="font-size:8px;letter-spacing:0.3em;color:#ffffff;margin-bottom:6px;">TODAY\'S CALL SIGNAL — ' + (window._assetLens ? window._assetLens.label.toUpperCase() : 'ALTERNATIVE ASSETS') + '</div>' +
           '<div style="display:flex;align-items:center;gap:10px;">' +
             '<span style="font-size:16px;color:' + sigCol + ';">' + sigIcon + '</span>' +
-            '<span style="font-size:11px;font-weight:700;color:' + sigCol + ';letter-spacing:0.08em;">' + sigLevel + '</span>' +
+            '<span style="font-size:11px;font-weight:700;color:' + sigCol + ';letter-spacing:0.08em;">' + _sigLevel + '</span>' +
           '</div>' +
           '<div style="font-size:9px;color:#ffffff;margin-top:5px;line-height:1.5;">' + sigDesc + '</div>' +
           '<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">' +
-            (cpi    != null ? '<span style="font-size:8px;padding:2px 6px;border:1px solid ' + (cpi > 2.5 ? '#c0392b' : '#2a2a2a') + ';color:' + (cpi > 2.5 ? '#e05050' : '#555') + ';">CPI ' + cpiStr + '</span>' : '') +
-            (curve  != null ? '<span style="font-size:8px;padding:2px 6px;border:1px solid ' + (curve < 0 ? '#c07030' : '#2a2a2a') + ';color:' + (curve < 0 ? '#E97132' : '#555') + ';">CURVE ' + curveStr + '</span>' : '') +
-            (ff     != null ? '<span style="font-size:8px;padding:2px 6px;border:1px solid ' + (ff > 4 ? '#c07030' : '#2a2a2a') + ';color:' + (ff > 4 ? '#E97132' : '#555') + ';">FFR ' + ffStr + '</span>' : '') +
-            (unrate != null ? '<span style="font-size:8px;padding:2px 6px;border:1px solid ' + (unPrv != null && unrate > unPrv ? '#c0392b' : '#2a2a2a') + ';color:' + (unPrv != null && unrate > unPrv ? '#e05050' : '#555') + ';">UNRATE ' + urStr + '</span>' : '') +
+            (cpi    != null ? '<span style="font-size:8px;padding:2px 6px;border:1px solid ' + (cpi > 2.5 ? '#c0392b' : '#2a2a2a') + ';color:' + (cpi > 2.5 ? '#e05050' : '#555') + ';">CPI ' + cpiStr + '</span>' : '') +
+            (curve  != null ? '<span style="font-size:8px;padding:2px 6px;border:1px solid ' + (curve < 0 ? '#c07030' : '#2a2a2a') + ';color:' + (curve < 0 ? '#E97132' : '#555') + ';">CURVE ' + curveStr + '</span>' : '') +
+            (ff     != null ? '<span style="font-size:8px;padding:2px 6px;border:1px solid ' + (ff > 4 ? '#c07030' : '#2a2a2a') + ';color:' + (ff > 4 ? '#E97132' : '#555') + ';">FFR ' + ffStr + '</span>' : '') +
+            (unrate != null ? '<span style="font-size:8px;padding:2px 6px;border:1px solid ' + (unPrv != null && unrate > unPrv ? '#c0392b' : '#2a2a2a') + ';color:' + (unPrv != null && unrate > unPrv ? '#e05050' : '#555') + ';">UNRATE ' + urStr + '</span>' : '') +
           '</div>' +
         '</div>' +
-        /* Psychology coaching panels */
-        '<div style="margin:8px 14px 0;padding:8px 10px;background:#0a0a0a;border:1px solid #1e1e1e;border-left:3px solid #E97132;flex-shrink:0;">' +
-          '<div style="font-size:7px;letter-spacing:.2em;color:#E97132;margin-bottom:4px;">PSYCHOLOGY FRAMEWORK</div>' +
-          '<div style="font-size:8.5px;color:#fff;line-height:1.6;">' + psychNote + '</div>' +
-        '</div>' +
-        '<div style="margin:6px 14px 8px;padding:8px 10px;background:#0a0a0a;border:1px solid #1a1a1a;border-left:3px solid #555;flex-shrink:0;">' +
-          '<div style="font-size:7px;letter-spacing:.2em;color:#888;margin-bottom:4px;">MARKS CYCLE INTELLIGENCE</div>' +
-          '<div style="font-size:8.5px;color:#ccc;line-height:1.6;">' + marksNote + '</div>' +
-        '</div>' +
-        '<div style="font-size:8px;letter-spacing:0.25em;color:#ffffff;padding:4px 14px 4px;flex-shrink:0;">CONVERSATION OPENERS</div>' +
-        '<div style="flex:1;overflow-y:auto;padding:0 14px 14px;">' +
-          openers.map(function(op, i) {
-            return '<div style="margin-bottom:10px;padding:10px 12px;border:1px solid #1e1e1e;border-left:3px solid #E97132;">' +
-              '<div style="font-size:8px;color:#E97132;letter-spacing:0.2em;margin-bottom:5px;">OPENER ' + (i+1) + '</div>' +
-              '<div style="font-size:9.5px;color:#fff;line-height:1.65;">' + op + '</div>' +
-            '</div>';
-          }).join('') +
+        /* Scrollable body — everything below the header scrolls together */
+        '<div style="flex:1;overflow-y:auto;padding:0 0 8px;">' +
+          /* Behavioural intelligence panel */
+          '<div style="margin:8px 14px 0;padding:8px 10px;background:#0a0a0a;border:1px solid #1e1e1e;border-left:3px solid #E97132;">' +
+            '<div style="font-size:7px;letter-spacing:.2em;color:#E97132;margin-bottom:4px;">BEHAVIOURAL INTELLIGENCE</div>' +
+            '<div style="font-size:8.5px;color:#ffffff;line-height:1.6;">' + psychNote + '</div>' +
+          '</div>' +
+          /* Cycle intelligence panel */
+          '<div style="margin:6px 14px 8px;padding:8px 10px;background:#0a0a0a;border:1px solid #1a1a1a;border-left:3px solid #E97132;">' +
+            '<div style="font-size:7px;letter-spacing:.2em;color:#E97132;margin-bottom:4px;">CYCLE INTELLIGENCE</div>' +
+            '<div style="font-size:8.5px;color:#ffffff;line-height:1.6;">' + cycleNote + '</div>' +
+          '</div>' +
+          '<div style="font-size:8px;letter-spacing:0.25em;color:#ffffff;padding:4px 14px 6px;">CONVERSATION OPENERS</div>' +
+          '<div style="padding:0 14px;">' +
+            openers.map(function(op, i) {
+              return '<div style="margin-bottom:10px;padding:10px 12px;border:1px solid #1e1e1e;border-left:3px solid #E97132;">' +
+                '<div style="font-size:8px;color:#E97132;letter-spacing:0.2em;margin-bottom:5px;">OPENER ' + (i+1) + '</div>' +
+                '<div style="font-size:9.5px;color:#ffffff;line-height:1.65;">' + op + '</div>' +
+              '</div>';
+            }).join('') +
+          '</div>' +
+          /* Notes section */
+          '<div style="margin:4px 14px 0;padding:8px 10px;background:#0a0a0a;border:1px solid #1e1e1e;">' +
+            '<div style="font-size:7px;letter-spacing:.2em;color:#ffffff;margin-bottom:6px;">SIGNAL NOTES</div>' +
+            '<textarea id="cs-note-' + id + '" placeholder="Add a note about this signal..." style="width:100%;box-sizing:border-box;background:#111;border:1px solid #2a2a2a;color:#ffffff;font-family:Consolas,monospace;font-size:8.5px;line-height:1.5;padding:6px 8px;resize:vertical;min-height:52px;outline:none;">' + savedNote + '</textarea>' +
+            '<div style="display:flex;gap:6px;margin-top:6px;">' +
+              '<button id="cs-save-' + id + '" style="flex:1;background:#1a1a1a;border:1px solid #333;color:#ffffff;font-family:Consolas,monospace;font-size:7.5px;letter-spacing:.15em;padding:5px 0;cursor:pointer;">SAVE NOTE</button>' +
+              '<button id="cs-send-' + id + '" style="flex:1;background:#E97132;border:none;color:#000;font-family:Consolas,monospace;font-size:7.5px;font-weight:700;letter-spacing:.15em;padding:5px 0;cursor:pointer;">SEND TO FIRM CHAT</button>' +
+            '</div>' +
+            '<div id="cs-msg-' + id + '" style="font-size:7.5px;color:#4caf50;margin-top:4px;min-height:14px;"></div>' +
+          '</div>' +
         '</div>' +
         '</div>';
 
+      /* Wire notes buttons */
+      var noteEl  = document.getElementById('cs-note-' + id);
+      var saveBtn = document.getElementById('cs-save-' + id);
+      var sendBtn = document.getElementById('cs-send-' + id);
+      var msgEl   = document.getElementById('cs-msg-' + id);
+
+      function flashMsg(txt, col) {
+        msgEl.style.color = col || '#4caf50';
+        msgEl.textContent = txt;
+        setTimeout(function(){ msgEl.textContent = ''; }, 3000);
+      }
+
+      function saveNote() {
+        var txt = (noteEl.value || '').trim();
+        if (!txt) { flashMsg('Nothing to save.', '#e05050'); return; }
+        try {
+          var stored = JSON.parse(localStorage.getItem('tbt-signal-notes') || '[]');
+          var today = new Date().toDateString();
+          stored = stored.filter(function(n){ return n.date !== today; });
+          stored.push({ date: today, level: _sigLevel, score: _score, note: txt, ts: Date.now() });
+          if (stored.length > 90) stored = stored.slice(-90);
+          localStorage.setItem('tbt-signal-notes', JSON.stringify(stored));
+          flashMsg('Note saved.');
+        } catch(e) { flashMsg('Save failed.', '#e05050'); }
+      }
+
+      function sendToChat() {
+        var txt = (noteEl.value || '').trim();
+        var signalSummary = 'CALL SIGNAL — ' + _sigLevel + ' [score ' + _score + '/8]\n' + sigDesc + (txt ? '\n\nNote: ' + txt : '');
+        if (!_sb) { flashMsg('Supabase not ready.', '#e05050'); return; }
+        sendBtn.disabled = true;
+        _sb.from('messages').insert({
+          firm_id: _firmId,
+          sender_id: _uid,
+          sender_name: _userName,
+          recipient_id: null,
+          content: signalSummary
+        }).then(function(res) {
+          sendBtn.disabled = false;
+          if (res && res.error) { flashMsg('Send failed.', '#e05050'); return; }
+          if (txt) saveNote();
+          flashMsg('Sent to Firm Chat.');
+        }).catch(function(){ sendBtn.disabled = false; flashMsg('Send failed.', '#e05050'); });
+      }
+
+      if (saveBtn) saveBtn.addEventListener('click', saveNote);
+      if (sendBtn) sendBtn.addEventListener('click', sendToChat);
     }
 
     window.addEventListener('lens:change', function () { if (_allData) refresh(_allData); });
@@ -5187,35 +6884,35 @@
 
   /* ── SECTOR HEATMAP ─────────────────────────────────────────── */
   function renderSectorHeatmap(id, body) {
-    body.style.cssText = 'display:flex;flex-direction:column;overflow:hidden;background:#000;';
+    body.style.cssText = 'display:flex;flex-direction:column;overflow:hidden;background:#000;position:relative;';
     var lastRows = null;
 
-    /* Top 5 holdings for each SPDR sector ETF — hardcoded (holdings change infrequently) */
+    /* Extended holdings: top 8 per sector with ticker for live price fetching */
     var SECTOR_HOLDINGS = {
-      XLK: ['AAPL · Apple 22.6%','MSFT · Microsoft 21.8%','NVDA · Nvidia 7.2%','AVGO · Broadcom 4.5%','ORCL · Oracle 2.1%'],
-      XLF: ['BRK.B · Berkshire 13.8%','JPM · JPMorgan 11.2%','V · Visa 8.4%','MA · Mastercard 6.1%','BAC · Bank of America 3.9%'],
-      XLV: ['LLY · Eli Lilly 12.4%','UNH · UnitedHealth 8.9%','JNJ · J&J 7.1%','ABBV · AbbVie 6.8%','MRK · Merck 5.6%'],
-      XLE: ['XOM · ExxonMobil 23.1%','CVX · Chevron 15.8%','COP · ConocoPhillips 6.7%','EOG · EOG Resources 4.4%','SLB · Schlumberger 3.2%'],
-      XLY: ['AMZN · Amazon 24.3%','TSLA · Tesla 16.8%','HD · Home Depot 9.7%','MCD · McDonald\'s 4.9%','NKE · Nike 2.8%'],
-      XLC: ['META · Meta 22.6%','GOOGL · Alphabet A 10.4%','GOOG · Alphabet C 9.3%','NFLX · Netflix 5.3%','TMUS · T-Mobile 4.9%'],
-      XLI: ['GE · GE Aerospace 5.7%','RTX · RTX Corp 5.1%','CAT · Caterpillar 4.8%','HON · Honeywell 4.7%','UPS · United Parcel 3.3%'],
-      XLP: ['PG · Procter & Gamble 14.6%','COST · Costco 10.3%','KO · Coca-Cola 10.1%','PEP · PepsiCo 8.4%','WMT · Walmart 7.9%'],
-      XLU: ['NEE · NextEra Energy 14.9%','SO · Southern Co 6.9%','DUK · Duke Energy 6.7%','CEG · Constellation 5.8%','D · Dominion Energy 4.2%'],
-      XLRE: ['PLD · Prologis 10.4%','AMT · American Tower 7.1%','EQIX · Equinix 6.8%','WELL · Welltower 5.9%','SPG · Simon Property 5.5%'],
-      XLB: ['LIN · Linde 19.3%','APD · Air Products 7.2%','SHW · Sherwin-Williams 6.9%','ECL · Ecolab 5.4%','FCX · Freeport 4.8%'],
+      XLK:  [{t:'AAPL',n:'Apple',w:'22.6%'},{t:'MSFT',n:'Microsoft',w:'21.8%'},{t:'NVDA',n:'Nvidia',w:'7.2%'},{t:'AVGO',n:'Broadcom',w:'4.5%'},{t:'ORCL',n:'Oracle',w:'2.1%'},{t:'CRM',n:'Salesforce',w:'2.0%'},{t:'CSCO',n:'Cisco',w:'1.9%'},{t:'ADBE',n:'Adobe',w:'1.7%'}],
+      XLF:  [{t:'BRK.B',n:'Berkshire',w:'13.8%'},{t:'JPM',n:'JPMorgan',w:'11.2%'},{t:'V',n:'Visa',w:'8.4%'},{t:'MA',n:'Mastercard',w:'6.1%'},{t:'BAC',n:'Bank of America',w:'3.9%'},{t:'WFC',n:'Wells Fargo',w:'3.6%'},{t:'SPGI',n:'S&P Global',w:'3.1%'},{t:'GS',n:'Goldman Sachs',w:'2.9%'}],
+      XLV:  [{t:'LLY',n:'Eli Lilly',w:'12.4%'},{t:'UNH',n:'UnitedHealth',w:'8.9%'},{t:'JNJ',n:'J&J',w:'7.1%'},{t:'ABBV',n:'AbbVie',w:'6.8%'},{t:'MRK',n:'Merck',w:'5.6%'},{t:'TMO',n:'Thermo Fisher',w:'4.2%'},{t:'ABT',n:'Abbott',w:'3.8%'},{t:'DHR',n:'Danaher',w:'3.1%'}],
+      XLE:  [{t:'XOM',n:'ExxonMobil',w:'23.1%'},{t:'CVX',n:'Chevron',w:'15.8%'},{t:'COP',n:'ConocoPhillips',w:'6.7%'},{t:'EOG',n:'EOG Resources',w:'4.4%'},{t:'SLB',n:'Schlumberger',w:'3.2%'},{t:'MPC',n:'Marathon Petroleum',w:'3.0%'},{t:'PSX',n:'Phillips 66',w:'2.8%'},{t:'OXY',n:'Occidental',w:'2.5%'}],
+      XLY:  [{t:'AMZN',n:'Amazon',w:'24.3%'},{t:'TSLA',n:'Tesla',w:'16.8%'},{t:'HD',n:'Home Depot',w:'9.7%'},{t:'MCD',n:'McDonald\'s',w:'4.9%'},{t:'NKE',n:'Nike',w:'2.8%'},{t:'LOW',n:'Lowe\'s',w:'2.7%'},{t:'BKNG',n:'Booking Holdings',w:'2.4%'},{t:'TJX',n:'TJX Companies',w:'2.1%'}],
+      XLC:  [{t:'META',n:'Meta',w:'22.6%'},{t:'GOOGL',n:'Alphabet A',w:'10.4%'},{t:'GOOG',n:'Alphabet C',w:'9.3%'},{t:'NFLX',n:'Netflix',w:'5.3%'},{t:'TMUS',n:'T-Mobile',w:'4.9%'},{t:'VZ',n:'Verizon',w:'4.1%'},{t:'T',n:'AT&T',w:'3.8%'},{t:'DIS',n:'Disney',w:'3.2%'}],
+      XLI:  [{t:'GE',n:'GE Aerospace',w:'5.7%'},{t:'RTX',n:'RTX Corp',w:'5.1%'},{t:'CAT',n:'Caterpillar',w:'4.8%'},{t:'HON',n:'Honeywell',w:'4.7%'},{t:'UPS',n:'United Parcel',w:'3.3%'},{t:'BA',n:'Boeing',w:'3.1%'},{t:'DE',n:'Deere',w:'2.9%'},{t:'LMT',n:'Lockheed Martin',w:'2.7%'}],
+      XLP:  [{t:'PG',n:'Procter & Gamble',w:'14.6%'},{t:'COST',n:'Costco',w:'10.3%'},{t:'KO',n:'Coca-Cola',w:'10.1%'},{t:'PEP',n:'PepsiCo',w:'8.4%'},{t:'WMT',n:'Walmart',w:'7.9%'},{t:'PM',n:'Philip Morris',w:'5.2%'},{t:'MDLZ',n:'Mondelez',w:'3.8%'},{t:'CL',n:'Colgate-Palmolive',w:'3.3%'}],
+      XLU:  [{t:'NEE',n:'NextEra Energy',w:'14.9%'},{t:'SO',n:'Southern Co',w:'6.9%'},{t:'DUK',n:'Duke Energy',w:'6.7%'},{t:'CEG',n:'Constellation',w:'5.8%'},{t:'D',n:'Dominion Energy',w:'4.2%'},{t:'SRE',n:'Sempra',w:'3.9%'},{t:'AEP',n:'American Electric',w:'3.7%'},{t:'EXC',n:'Exelon',w:'3.4%'}],
+      XLRE: [{t:'PLD',n:'Prologis',w:'10.4%'},{t:'AMT',n:'American Tower',w:'7.1%'},{t:'EQIX',n:'Equinix',w:'6.8%'},{t:'WELL',n:'Welltower',w:'5.9%'},{t:'SPG',n:'Simon Property',w:'5.5%'},{t:'VICI',n:'VICI Properties',w:'4.8%'},{t:'O',n:'Realty Income',w:'4.3%'},{t:'AVB',n:'AvalonBay',w:'3.7%'}],
+      XLB:  [{t:'LIN',n:'Linde',w:'19.3%'},{t:'APD',n:'Air Products',w:'7.2%'},{t:'SHW',n:'Sherwin-Williams',w:'6.9%'},{t:'ECL',n:'Ecolab',w:'5.4%'},{t:'FCX',n:'Freeport',w:'4.8%'},{t:'NEM',n:'Newmont',w:'4.2%'},{t:'NUE',n:'Nucor',w:'3.6%'},{t:'IP',n:'International Paper',w:'3.1%'}],
     };
 
     function hmBg(dp) {
       if (dp === null) return '#141414';
-      var v = Math.max(-4, Math.min(4, dp));
-      var abs = Math.abs(v), t = abs / 4;
+      var v = Math.max(-5, Math.min(5, dp));
+      var abs = Math.abs(v), t = abs / 5;
       if (v > 0) {
         var r = Math.round(0   + (0   - 0)   * t);
-        var g = Math.round(80  + (170 - 80)  * t);
-        var b = Math.round(40  + (85  - 40)  * t);
+        var g = Math.round(90  + (180 - 90)  * t);
+        var b = Math.round(45  + (90  - 45)  * t);
         return 'rgb(' + r + ',' + g + ',' + b + ')';
       } else if (v < 0) {
-        var r2 = Math.round(100 + (210 - 100) * t);
+        var r2 = Math.round(120 + (220 - 120) * t);
         var g2 = Math.round(15  + (20  - 15)  * t);
         var b2 = Math.round(15  + (20  - 15)  * t);
         return 'rgb(' + r2 + ',' + g2 + ',' + b2 + ')';
@@ -5223,15 +6920,9 @@
       return '#141414';
     }
 
-    function textColor(dp) {
-      if (dp === null) return '#888';
-      return Math.abs(dp) > 0.5 ? '#fff' : '#ccc';
-    }
-
     function buildGrid(rows) {
       var ts = new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
-      /* Color scale legend stops */
-      var stops = [-4,-3,-2,-1,0,1,2,3,4];
+      var stops = [-4,-2,-1,0,1,2,4];
       var legend = stops.map(function(v) {
         return '<span class="sh-leg-cell" style="background:' + hmBg(v) + ';flex:1">' + (v > 0 ? '+' : '') + v + '%</span>';
       }).join('');
@@ -5239,19 +6930,21 @@
           rows.map(function(s) {
             var price = s.c ? '$' + parseFloat(s.c).toFixed(2) : '—';
             var chg   = s.dp !== null ? (s.dp >= 0 ? '+' : '') + parseFloat(s.dp).toFixed(2) + '%' : '—';
-            var hl    = (s.h && s.l) ? 'H ' + parseFloat(s.h).toFixed(2) + '  L ' + parseFloat(s.l).toFixed(2) : '';
             var spanCls = 'sh-span-' + (s.span || 1);
-            return '<div class="sh-tile ' + spanCls + '" data-etf="' + escH(s.etf) + '" style="background:' + hmBg(s.dp) + ';color:' + textColor(s.dp) + '">' +
+            var isPos = s.dp !== null && s.dp > 0;
+            var isNeg = s.dp !== null && s.dp < 0;
+            return '<div class="sh-tile ' + spanCls + '" data-etf="' + escH(s.etf) + '" style="background:' + hmBg(s.dp) + ';">' +
+              '<div class="sh-tile-gloss"></div>' +
               '<div class="sh-sector">' + escH(s.name) + '</div>' +
               '<div class="sh-etf-lbl">' + escH(s.etf) + '</div>' +
-              '<div class="sh-pct ' + (s.dp === null ? '' : s.dp >= 0 ? 'sh-pos' : 'sh-neg') + '">' + chg + '</div>' +
+              '<div class="sh-pct ' + (isPos ? 'sh-pos' : isNeg ? 'sh-neg' : '') + '">' + chg + '</div>' +
               '<div class="sh-price-lbl">' + price + '</div>' +
-              (hl ? '<div class="sh-hl">' + hl + '</div>' : '') +
+              '<div class="sh-click-hint">CLICK FOR HOLDINGS ›</div>' +
               '</div>';
           }).join('') +
         '</div>' +
         '<div class="sh-legend">' + legend + '</div>' +
-        '<div class="sh-footer">SPDR SECTOR ETFs · YAHOO FINANCE · ' + ts + '</div>';
+        '<div class="sh-footer">SPDR SECTOR ETFs · LIVE DATA · ' + ts + '  ·  CLICK A SECTOR FOR HOLDINGS</div>';
     }
 
     function updateTiles(rows) {
@@ -5259,62 +6952,103 @@
         var tile = body.querySelector('[data-etf="' + s.etf + '"]');
         if (!tile) return;
         tile.style.background = hmBg(s.dp);
-        tile.style.color = textColor(s.dp);
         var pct = tile.querySelector('.sh-pct');
-        if (pct) pct.textContent = s.dp !== null ? (s.dp >= 0 ? '+' : '') + parseFloat(s.dp).toFixed(2) + '%' : '—';
+        if (pct) {
+          pct.textContent = s.dp !== null ? (s.dp >= 0 ? '+' : '') + parseFloat(s.dp).toFixed(2) + '%' : '—';
+          pct.className = 'sh-pct' + (s.dp > 0 ? ' sh-pos' : s.dp < 0 ? ' sh-neg' : '');
+        }
         var priceLbl = tile.querySelector('.sh-price-lbl');
         if (priceLbl) priceLbl.textContent = s.c ? '$' + parseFloat(s.c).toFixed(2) : '—';
-        var hl = tile.querySelector('.sh-hl');
-        if (hl && s.h && s.l) hl.textContent = 'H ' + parseFloat(s.h).toFixed(2) + '  L ' + parseFloat(s.l).toFixed(2);
-        /* update footer timestamp */
         var ft = body.querySelector('.sh-footer');
-        if (ft) ft.textContent = 'SPDR SECTOR ETFs · YAHOO FINANCE · ' + new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+        if (ft) ft.textContent = 'SPDR SECTOR ETFs · LIVE DATA · ' + new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) + '  ·  CLICK A SECTOR FOR HOLDINGS';
       });
     }
 
-    /* Drill-down panel shown when user clicks a tile */
+    /* Enhanced drill-down with live prices for holdings */
     function showDrillDown(etf, sectorName, dp) {
-      var holdings = SECTOR_HOLDINGS[etf] || [];
-      var col = dp === null ? 'rgba(255,255,255,0.5)' : dp >= 0 ? '#3DAA6A' : '#D14040';
-      var pct = dp !== null ? (dp >= 0 ? '+' : '') + parseFloat(dp).toFixed(2) + '%' : '—';
-      /* Remove any existing drill-down */
       var existing = body.querySelector('.sh-drill');
       if (existing) { existing.remove(); return; }
+      var holdings = SECTOR_HOLDINGS[etf] || [];
+      var pctLabel = dp !== null ? (dp >= 0 ? '+' : '') + parseFloat(dp).toFixed(2) + '%' : '—';
+      var pctCol = dp === null ? '#888' : dp >= 0 ? '#3DAA6A' : '#D14040';
       var panel = document.createElement('div');
       panel.className = 'sh-drill';
-      panel.style.cssText = 'position:absolute;bottom:28px;left:0;right:0;background:#050505;border-top:1px solid #1a1a1a;padding:12px 14px;z-index:10;';
       panel.innerHTML =
-        '<div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:8px;">' +
-          '<span style="font-size:11px;letter-spacing:.08em;color:#fff;font-weight:700;">' + escH(sectorName) + '</span>' +
-          '<span style="font-size:11px;font-weight:700;color:' + col + ';">' + pct + '</span>' +
-          '<button style="background:none;border:none;color:rgba(255,255,255,0.4);cursor:pointer;font-size:11px;padding:0 0 0 12px;" class="sh-drill-close">✕</button>' +
+        '<div class="sh-drill-hdr">' +
+          '<span class="sh-drill-title">' + escH(sectorName) + ' <span style="color:' + pctCol + '">' + pctLabel + '</span></span>' +
+          '<span style="font-size:7px;letter-spacing:.14em;color:rgba(255,255,255,0.3);flex:1;padding-left:8px;">' + escH(etf) + ' · SPDR ETF</span>' +
+          '<button class="sh-drill-close">✕</button>' +
         '</div>' +
-        '<div style="font-size:7px;letter-spacing:.16em;color:rgba(255,255,255,0.3);margin-bottom:6px;">TOP HOLDINGS · ' + escH(etf) + ' · SPDR</div>' +
-        (holdings.length ?
-          holdings.map(function(h) {
-            var parts = h.split(' · ');
-            return '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #0f0f0f;font-size:9px;">' +
-              '<span style="color:rgba(255,255,255,0.5);letter-spacing:.06em;min-width:52px;">' + escH(parts[0]) + '</span>' +
-              '<span style="color:#fff;flex:1;padding:0 6px;">' + escH(parts[1] || '') + '</span>' +
-              '<span style="color:rgba(255,255,255,0.4);">' + escH(parts[2] || '') + '</span>' +
+        '<div class="sh-drill-label">TOP HOLDINGS — LOADING LIVE PRICES…</div>' +
+        '<div class="sh-drill-rows"></div>';
+      body.appendChild(panel);
+
+      panel.querySelector('.sh-drill-close').addEventListener('click', function(e) { e.stopPropagation(); panel.remove(); });
+
+      /* Fetch live prices for all holdings */
+      if (!holdings.length) { panel.querySelector('.sh-drill-label').textContent = 'TOP HOLDINGS · ' + escH(etf); return; }
+      var syms = holdings.map(function(h){ return h.t; }).join(',');
+      fetch('/.netlify/functions/macro-data?type=quote&symbols=' + encodeURIComponent(syms))
+        .then(function(r){ return r.ok ? r.json() : null; })
+        .then(function(quotes) {
+          var label = panel.querySelector('.sh-drill-label');
+          if (label) label.textContent = 'TOP HOLDINGS · ' + escH(etf) + ' · ' + new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+          var priceMap = {};
+          (quotes || []).forEach(function(q){ priceMap[q.sym] = q; });
+          /* Merge weights + live prices, sort by % change descending */
+          var merged = holdings.map(function(h) {
+            var q = priceMap[h.t] || {};
+            return { t: h.t, n: h.n, w: h.w, c: q.c || null, dp: q.dp != null ? q.dp : null };
+          });
+          merged.sort(function(a, b) {
+            if (a.dp === null && b.dp === null) return 0;
+            if (a.dp === null) return 1;
+            if (b.dp === null) return -1;
+            return b.dp - a.dp;
+          });
+          var rowsEl = panel.querySelector('.sh-drill-rows');
+          if (!rowsEl) return;
+          rowsEl.innerHTML = merged.map(function(h) {
+            var chgStr = h.dp !== null ? (h.dp >= 0 ? '+' : '') + h.dp.toFixed(2) + '%' : '—';
+            var chgCol = h.dp === null ? '#555' : h.dp > 0 ? '#3DAA6A' : '#D14040';
+            var priceStr = h.c ? '$' + parseFloat(h.c).toFixed(2) : '—';
+            return '<div class="sh-drill-row" data-ticker="' + escH(h.t) + '">' +
+              '<span class="sh-drill-sym">' + escH(h.t) + '</span>' +
+              '<span class="sh-drill-name">' + escH(h.n) + '</span>' +
+              '<span class="sh-drill-price">' + priceStr + '</span>' +
+              '<span class="sh-drill-chg" style="color:' + chgCol + '">' + chgStr + '</span>' +
+              '<span class="sh-drill-weight">' + escH(h.w) + '</span>' +
+              '<button class="sh-drill-intel" title="INTEL brief for ' + escH(h.t) + '">INTEL ›</button>' +
             '</div>';
-          }).join('') :
-          '<div style="font-size:9px;color:rgba(255,255,255,0.3);">Holdings data not available</div>'
-        );
-      panel.querySelector('.sh-drill-close').addEventListener('click', function(e) {
-        e.stopPropagation(); panel.remove();
-      });
-      /* Make parent relative so absolute positioning works */
-      var wrap = body.querySelector('.sh-heatmap');
-      if (wrap && wrap.parentElement) {
-        wrap.parentElement.style.position = 'relative';
-        wrap.parentElement.appendChild(panel);
-      } else { body.appendChild(panel); }
+          }).join('');
+          rowsEl.querySelectorAll('.sh-drill-intel').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+              e.stopPropagation();
+              var ticker = btn.closest('.sh-drill-row').dataset.ticker;
+              window._intelSearch && window._intelSearch(ticker, 'company', ticker);
+            });
+          });
+        })
+        .catch(function() {
+          /* Fallback: show static holdings */
+          var label = panel.querySelector('.sh-drill-label');
+          if (label) label.textContent = 'TOP HOLDINGS · ' + escH(etf);
+          var rowsEl = panel.querySelector('.sh-drill-rows');
+          if (rowsEl) rowsEl.innerHTML = holdings.map(function(h) {
+            return '<div class="sh-drill-row" data-ticker="' + escH(h.t) + '">' +
+              '<span class="sh-drill-sym">' + escH(h.t) + '</span>' +
+              '<span class="sh-drill-name">' + escH(h.n) + '</span>' +
+              '<span class="sh-drill-price">—</span>' +
+              '<span class="sh-drill-chg" style="color:#555">—</span>' +
+              '<span class="sh-drill-weight">' + escH(h.w) + '</span>' +
+              '<button class="sh-drill-intel">INTEL ›</button>' +
+            '</div>';
+          }).join('');
+        });
     }
 
     function wireTileClicks() {
       body.querySelectorAll('.sh-tile').forEach(function(tile) {
-        tile.style.cursor = 'pointer';
         tile.addEventListener('click', function() {
           var etf = tile.dataset.etf;
           var sectorName = (tile.querySelector('.sh-sector') || {}).textContent || etf;
@@ -5331,12 +7065,8 @@
         .then(function(rows){
           if (!rows) { if (!isRefresh) body.innerHTML = '<div class="tbw-loading">UNAVAILABLE</div>'; return; }
           lastRows = rows;
-          if (isRefresh && body.querySelector('.sh-heatmap')) {
-            updateTiles(rows);
-          } else {
-            body.innerHTML = buildGrid(rows);
-            wireTileClicks();
-          }
+          if (isRefresh && body.querySelector('.sh-heatmap')) { updateTiles(rows); }
+          else { body.innerHTML = buildGrid(rows); wireTileClicks(); }
         })
         .catch(function(){ if (!isRefresh) body.innerHTML = '<div class="tbw-loading">UNAVAILABLE</div>'; });
     }
@@ -5351,112 +7081,395 @@
 
   /* ── WATCHLIST ───────────────────────────────────────────────── */
   function renderWatchlist(id, body) {
-    body.style.cssText = 'display:flex;flex-direction:column;overflow:hidden;background:#000;';
-    var STORE = 'tbt-watchlist-v1';
+    body.style.cssText = 'display:flex;flex-direction:column;overflow:hidden;background:#000;position:relative;';
+    var STORE = 'tbt-watchlist-v2';
     var tickers = JSON.parse(localStorage.getItem(STORE) || '[]');
     function save() { localStorage.setItem(STORE, JSON.stringify(tickers)); }
 
-    /* Pre-built category groups */
-    var WL_PRESETS = {
-      'GOLD': ['GLD','IAU','GC=F','GDX','GDXJ','SGOL'],
-      'INDICES': ['^GSPC','^FTSE','^IXIC','^DJI','^VIX','EWU'],
-      'MACRO': ['TLT','DX-Y.NYB','BIL','^TNX','TIP','UUP'],
-      'COMMODITIES': ['GC=F','SI=F','CL=F','BZ=F','HG=F','NG=F'],
-      'FX': ['GBPUSD=X','EURUSD=X','USDJPY=X','USDCHF=X','AUDUSD=X','USDCNH=X'],
-      'SPIRITS': ['DEO','BF.B','RIO','PRNDY','ABTXF','MGPI']
+    /* ── Index browser data ── */
+    var INDEX_DATA = {
+      'S&P 500': [
+        {t:'MSFT',n:'Microsoft'},{t:'AAPL',n:'Apple'},{t:'NVDA',n:'Nvidia'},{t:'AMZN',n:'Amazon'},
+        {t:'META',n:'Meta Platforms'},{t:'GOOGL',n:'Alphabet'},{t:'BRK.B',n:'Berkshire Hathaway'},
+        {t:'AVGO',n:'Broadcom'},{t:'TSLA',n:'Tesla'},{t:'WMT',n:'Walmart'},
+        {t:'JPM',n:'JPMorgan Chase'},{t:'LLY',n:'Eli Lilly'},{t:'V',n:'Visa'},
+        {t:'UNH',n:'UnitedHealth'},{t:'XOM',n:'ExxonMobil'},{t:'MA',n:'Mastercard'},
+        {t:'COST',n:'Costco'},{t:'ORCL',n:'Oracle'},{t:'NFLX',n:'Netflix'},{t:'HD',n:'Home Depot'},
+        {t:'JNJ',n:'Johnson & Johnson'},{t:'PG',n:'Procter & Gamble'},{t:'BAC',n:'Bank of America'},
+        {t:'ABBV',n:'AbbVie'},{t:'CRM',n:'Salesforce'},{t:'MRK',n:'Merck'},{t:'CVX',n:'Chevron'},
+        {t:'KO',n:'Coca-Cola'},{t:'AMD',n:'Advanced Micro Devices'},{t:'PEP',n:'PepsiCo'},
+        {t:'CSCO',n:'Cisco'},{t:'TMO',n:'Thermo Fisher'},{t:'ACN',n:'Accenture'},{t:'MCD',n:'McDonald\'s'},
+        {t:'ABT',n:'Abbott'},{t:'NOW',n:'ServiceNow'},{t:'ADBE',n:'Adobe'},{t:'TXN',n:'Texas Instruments'},
+        {t:'PM',n:'Philip Morris'},{t:'GE',n:'GE Aerospace'},{t:'CAT',n:'Caterpillar'},
+        {t:'SPGI',n:'S&P Global'},{t:'QCOM',n:'Qualcomm'},{t:'MS',n:'Morgan Stanley'},
+        {t:'DHR',n:'Danaher'},{t:'NEE',n:'NextEra Energy'},{t:'ISRG',n:'Intuitive Surgical'},
+        {t:'IBM',n:'IBM'},{t:'INTU',n:'Intuit'},{t:'GS',n:'Goldman Sachs'}
+      ],
+      'NASDAQ 100': [
+        {t:'MSFT',n:'Microsoft'},{t:'AAPL',n:'Apple'},{t:'NVDA',n:'Nvidia'},{t:'AMZN',n:'Amazon'},
+        {t:'META',n:'Meta Platforms'},{t:'GOOGL',n:'Alphabet A'},{t:'AVGO',n:'Broadcom'},
+        {t:'TSLA',n:'Tesla'},{t:'COST',n:'Costco'},{t:'NFLX',n:'Netflix'},
+        {t:'ADBE',n:'Adobe'},{t:'AMD',n:'AMD'},{t:'QCOM',n:'Qualcomm'},{t:'CSCO',n:'Cisco'},
+        {t:'INTC',n:'Intel'},{t:'AMAT',n:'Applied Materials'},{t:'MU',n:'Micron Technology'},
+        {t:'KLAC',n:'KLA Corporation'},{t:'LRCX',n:'Lam Research'},{t:'MRVL',n:'Marvell Technology'},
+        {t:'CDNS',n:'Cadence Design'},{t:'SNPS',n:'Synopsys'},{t:'FTNT',n:'Fortinet'},
+        {t:'PCAR',n:'PACCAR'},{t:'REGN',n:'Regeneron'},{t:'VRTX',n:'Vertex Pharmaceuticals'},
+        {t:'GILD',n:'Gilead Sciences'},{t:'ADP',n:'Automatic Data Processing'},
+        {t:'MNST',n:'Monster Beverage'},{t:'PYPL',n:'PayPal'},{t:'SBUX',n:'Starbucks'},
+        {t:'MELI',n:'MercadoLibre'},{t:'PANW',n:'Palo Alto Networks'},{t:'ASML',n:'ASML Holding'}
+      ],
+      'FTSE 100': [
+        {t:'SHEL.L',n:'Shell'},{t:'AZN.L',n:'AstraZeneca'},{t:'HSBA.L',n:'HSBC'},
+        {t:'ULVR.L',n:'Unilever'},{t:'RIO.L',n:'Rio Tinto'},{t:'BP.L',n:'BP'},
+        {t:'GSK.L',n:'GSK'},{t:'DGE.L',n:'Diageo'},{t:'BATS.L',n:'BAT'},
+        {t:'LSEG.L',n:'London Stock Exchange'},{t:'REL.L',n:'RELX'},{t:'LLOY.L',n:'Lloyds Banking'},
+        {t:'NG.L',n:'National Grid'},{t:'VOD.L',n:'Vodafone'},{t:'BT-A.L',n:'BT Group'},
+        {t:'BARC.L',n:'Barclays'},{t:'NWG.L',n:'NatWest Group'},{t:'IMB.L',n:'Imperial Brands'},
+        {t:'PRU.L',n:'Prudential'},{t:'AAL.L',n:'Anglo American'},
+        {t:'RKT.L',n:'Reckitt Benckiser'},{t:'EXPN.L',n:'Experian'},{t:'STAN.L',n:'Standard Chartered'},
+        {t:'ABF.L',n:'Associated British Foods'},{t:'CRH.L',n:'CRH'},{t:'FERG.L',n:'Ferguson'},
+        {t:'SGRO.L',n:'Segro'},{t:'AUTO.L',n:'Auto Trader'},{t:'WPP.L',n:'WPP'},
+        {t:'CPG.L',n:'Compass Group'},{t:'LAND.L',n:'Land Securities'},
+        {t:'MNG.L',n:'M&G'},{t:'INF.L',n:'Informa'},{t:'SPX.L',n:'Spirax Group'},
+        {t:'CCH.L',n:'Coca-Cola HBC'},{t:'GLEN.L',n:'Glencore'},{t:'OCDO.L',n:'Ocado'},
+        {t:'PSH.L',n:'Pershing Square'},{t:'HIK.L',n:'Hikma Pharmaceuticals'},{t:'SDR.L',n:'Schroders'}
+      ],
+      'FTSE 250': [
+        {t:'MKS.L',n:'Marks & Spencer'},{t:'JD.L',n:'JD Sports'},{t:'DCC.L',n:'DCC'},
+        {t:'WEIR.L',n:'Weir Group'},{t:'MONY.L',n:'Moneysupermarket'},{t:'HSV.L',n:'HomeServe'},
+        {t:'PAGE.L',n:'Pagegroup'},{t:'GNC.L',n:'Greencore'},{t:'MCB.L',n:'McBride'},
+        {t:'JET2.L',n:'Jet2'},{t:'ITV.L',n:'ITV'},{t:'COB.L',n:'Cobham'},
+        {t:'CPI.L',n:'Capita'},{t:'BWY.L',n:'Bellway'},{t:'MNDI.L',n:'Mondi'},
+        {t:'SKG.L',n:'Smurfit Kappa'},{t:'TW.L',n:'Taylor Wimpey'},{t:'PSN.L',n:'Persimmon'},
+        {t:'BCG.L',n:'Burberry Group'},{t:'HRGV.L',n:'Hargreaves Lansdown'}
+      ],
+      'CRYPTO': [
+        {t:'BTC-USD',n:'Bitcoin'},{t:'ETH-USD',n:'Ethereum'},{t:'BNB-USD',n:'BNB'},
+        {t:'SOL-USD',n:'Solana'},{t:'XRP-USD',n:'XRP'},{t:'ADA-USD',n:'Cardano'},
+        {t:'DOGE-USD',n:'Dogecoin'},{t:'DOT-USD',n:'Polkadot'},{t:'AVAX-USD',n:'Avalanche'},
+        {t:'LINK-USD',n:'Chainlink'},{t:'MATIC-USD',n:'Polygon'},{t:'LTC-USD',n:'Litecoin'}
+      ],
+      'COMMODITIES': [
+        {t:'GC=F',n:'Gold Futures'},{t:'SI=F',n:'Silver Futures'},{t:'PL=F',n:'Platinum'},
+        {t:'PA=F',n:'Palladium'},{t:'CL=F',n:'WTI Crude Oil'},{t:'BZ=F',n:'Brent Crude'},
+        {t:'NG=F',n:'Natural Gas'},{t:'HG=F',n:'Copper'},{t:'ZW=F',n:'Wheat'},
+        {t:'ZC=F',n:'Corn'},{t:'ZS=F',n:'Soybeans'},{t:'CT=F',n:'Cotton'}
+      ],
+      'GOLD': [
+        {t:'GLD',n:'SPDR Gold ETF'},{t:'IAU',n:'iShares Gold Trust'},{t:'GC=F',n:'Gold Futures'},
+        {t:'GDX',n:'Gold Miners ETF'},{t:'GDXJ',n:'Jr Gold Miners ETF'},{t:'SGOL',n:'Aberdeen Gold ETF'},
+        {t:'PHAU.L',n:'WisdomTree Physical Gold'},{t:'AAAU',n:'Goldman Gold ETF'}
+      ],
+      'INDICES': [
+        {t:'^GSPC',n:'S&P 500'},{t:'^FTSE',n:'FTSE 100'},{t:'^IXIC',n:'Nasdaq Composite'},
+        {t:'^DJI',n:'Dow Jones'},{t:'^VIX',n:'VIX Volatility'},{t:'^RUT',n:'Russell 2000'},
+        {t:'^STOXX50E',n:'Euro Stoxx 50'},{t:'^N225',n:'Nikkei 225'},{t:'^HSI',n:'Hang Seng'},
+        {t:'EWU',n:'UK Stocks ETF'},{t:'^GDAXI',n:'DAX 40'},{t:'^FCHI',n:'CAC 40'}
+      ],
+      'MACRO': [
+        {t:'TLT',n:'20Y T-Bond ETF'},{t:'DX-Y.NYB',n:'US Dollar (DXY)'},{t:'BIL',n:'T-Bill ETF'},
+        {t:'^TNX',n:'10Y Treasury Yield'},{t:'TIP',n:'TIPS ETF'},{t:'UUP',n:'Dollar Bull ETF'},
+        {t:'GBP=X',n:'GBP/USD'},{t:'HYG',n:'High Yield Bond ETF'},{t:'LQD',n:'IG Bond ETF'}
+      ],
+      'FX': [
+        {t:'GBPUSD=X',n:'GBP/USD'},{t:'EURUSD=X',n:'EUR/USD'},{t:'USDJPY=X',n:'USD/JPY'},
+        {t:'USDCHF=X',n:'USD/CHF'},{t:'AUDUSD=X',n:'AUD/USD'},{t:'USDCNH=X',n:'USD/CNH'},
+        {t:'USDCAD=X',n:'USD/CAD'},{t:'NZDUSD=X',n:'NZD/USD'},{t:'EURGBP=X',n:'EUR/GBP'}
+      ],
+      'SPIRITS': [
+        {t:'DEO',n:'Diageo'},{t:'BF.B',n:'Brown-Forman'},{t:'PRNDY',n:'Pernod Ricard'},
+        {t:'MGPI',n:'MGP Ingredients'},{t:'FIZZ',n:'National Beverage'},{t:'SAM',n:'Boston Beer'}
+      ]
     };
 
-    /* Friendly name map */
-    var WL_NAMES = {
-      'GLD':'Gold ETF (GLD)','IAU':'iShares Gold','GC=F':'Gold Futures','GDX':'Gold Miners','GDXJ':'Jr Gold Miners','SGOL':'Aberdeen Gold',
-      '^GSPC':'S&P 500','^FTSE':'FTSE 100','^IXIC':'Nasdaq','^DJI':'Dow Jones','^VIX':'VIX Fear','EWU':'UK Stocks ETF',
-      'TLT':'20Y T-Bond ETF','DX-Y.NYB':'US Dollar (DXY)','BIL':'T-Bill ETF','^TNX':'10Y Treasury','TIP':'TIPS ETF','UUP':'Dollar Bull ETF',
-      'GC=F':'Gold Futures','SI=F':'Silver Futures','CL=F':'WTI Crude','BZ=F':'Brent Crude','HG=F':'Copper','NG=F':'Nat Gas',
-      'GBPUSD=X':'GBP/USD','EURUSD=X':'EUR/USD','USDJPY=X':'USD/JPY','USDCHF=X':'USD/CHF','AUDUSD=X':'AUD/USD','USDCNH=X':'USD/CNH',
-      'DEO':'Diageo','BF.B':'Brown-Forman','RIO':'Rio Tinto','PRNDY':'Pernod Ricard','ABTXF':'Amber Beverage','MGPI':'MGP Ingredients'
-    };
+    /* Friendly name map (built from INDEX_DATA + extras) */
+    var WL_NAMES = {};
+    Object.keys(INDEX_DATA).forEach(function(cat) {
+      INDEX_DATA[cat].forEach(function(item) { WL_NAMES[item.t] = item.n; });
+    });
+
+    var _activeBrowser = null; /* currently open index browser category */
+    var _activeInfoTicker = null; /* ticker whose info panel is showing */
+    var _acDropdown = null; /* autocomplete dropdown element */
+    var _acTimer = null;
+
+    /* ── Autocomplete dropdown (appended to document.body like INTEL search) ── */
+    function removeAcDropdown() {
+      if (_acDropdown) { _acDropdown.remove(); _acDropdown = null; }
+    }
+
+    function showAcDropdown(inp, items) {
+      removeAcDropdown();
+      if (!items || !items.length) return;
+      var r = inp.getBoundingClientRect();
+      var dd = document.createElement('div');
+      dd.className = 'wl-ac-dropdown';
+      dd.style.cssText = 'position:fixed;left:' + r.left + 'px;top:' + (r.bottom + 2) + 'px;width:' + Math.max(r.width, 280) + 'px;background:#0a0a0a;border:1px solid #2a2a2a;z-index:99999;max-height:220px;overflow-y:auto;';
+      var companies = items.filter(function(i){ return i.type === 'company'; });
+      if (!companies.length) { removeAcDropdown(); return; }
+      dd.innerHTML = companies.map(function(c) {
+        return '<div class="wl-ac-item" data-ticker="' + escH(c.ticker || '') + '" data-label="' + escH(c.label || '') + '">' +
+          '<span class="wl-ac-ticker">' + escH(c.ticker || '') + '</span>' +
+          '<span class="wl-ac-label">' + escH(c.label || '') + '</span>' +
+        '</div>';
+      }).join('');
+      _acDropdown = dd;
+      document.body.appendChild(dd);
+      dd.querySelectorAll('.wl-ac-item').forEach(function(row) {
+        row.addEventListener('mousedown', function(e) {
+          e.preventDefault();
+          var ticker = row.dataset.ticker;
+          var label = row.dataset.label;
+          if (ticker) {
+            if (label) WL_NAMES[ticker] = label;
+            inp.value = '';
+            removeAcDropdown();
+            addTicker(ticker);
+          }
+        });
+      });
+      /* Close on outside click */
+      setTimeout(function() {
+        document.addEventListener('mousedown', function onOut(e) {
+          if (!dd.contains(e.target) && e.target !== inp) { removeAcDropdown(); document.removeEventListener('mousedown', onOut); }
+        });
+      }, 0);
+    }
+
+    function wireAutoComplete(inp) {
+      inp.removeAttribute('readonly');
+      inp.addEventListener('input', function() {
+        clearTimeout(_acTimer);
+        var q = inp.value.trim();
+        if (q.length < 2) { removeAcDropdown(); return; }
+        _acTimer = setTimeout(function() {
+          fetch('/.netlify/functions/search?q=' + encodeURIComponent(q))
+            .then(function(r){ return r.ok ? r.json() : []; })
+            .then(function(items){ showAcDropdown(inp, items); })
+            .catch(function(){ removeAcDropdown(); });
+        }, 320);
+      });
+      inp.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') { removeAcDropdown(); inp.value = ''; }
+        if (e.key === 'Enter') {
+          removeAcDropdown();
+          var sym = inp.value.trim().toUpperCase().replace(/[^A-Z0-9.=\-\^]/g,'');
+          if (sym) { inp.value = ''; addTicker(sym); }
+        }
+      });
+    }
+
+    function addTicker(sym) {
+      if (!sym || tickers.indexOf(sym) !== -1) return;
+      tickers.push(sym); save(); fetchAndRender();
+    }
+
+    /* ── Company info panel ── */
+    function showInfoPanel(sym, name) {
+      if (_activeInfoTicker === sym) { _activeInfoTicker = null; draw(_lastQuotes); return; }
+      _activeInfoTicker = sym;
+      /* Replace list with info view */
+      var list = body.querySelector('.wl-list');
+      if (!list) return;
+      list.innerHTML =
+        '<div style="padding:10px 12px;border-bottom:1px solid #111;display:flex;align-items:center;gap:8px;">' +
+          '<button class="wl-info-back">← BACK</button>' +
+          '<span style="font-size:10px;color:#fff;font-weight:700;letter-spacing:.08em;">' + escH(sym) + '</span>' +
+          '<span style="font-size:9px;color:rgba(255,255,255,0.4);">' + escH(name) + '</span>' +
+        '</div>' +
+        '<div class="wl-info-body"><div class="tbw-loading" style="font-size:8px;padding:16px 12px;">LOADING INTEL…</div></div>';
+      list.querySelector('.wl-info-back').addEventListener('click', function() {
+        _activeInfoTicker = null; draw(_lastQuotes);
+      });
+      fetch('/.netlify/functions/search', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({query: sym, type: 'company', ticker: sym, section: 'overview'}),
+      })
+        .then(function(r){ return r.ok ? r.json() : null; })
+        .then(function(d) {
+          var infoBody = body.querySelector('.wl-info-body');
+          if (!infoBody || !d) return;
+          infoBody.innerHTML =
+            (d.tagline ? '<div style="font-size:10px;color:#E97132;font-style:italic;padding:8px 12px 4px;line-height:1.5;">' + escH(d.tagline) + '</div>' : '') +
+            (d.overview ? '<div style="font-size:9px;color:#c0c0c0;line-height:1.7;padding:6px 12px;border-bottom:1px solid #0f0f0f;">' + escH(d.overview) + '</div>' : '') +
+            (d.keyFacts && d.keyFacts.length ? '<div style="padding:8px 12px 0;">' +
+              '<div style="font-size:7px;letter-spacing:.2em;color:#E97132;margin-bottom:6px;">KEY FACTS</div>' +
+              d.keyFacts.map(function(f){ return '<div style="font-size:9px;color:#aaa;padding:4px 0;border-bottom:1px solid #0d0d0d;display:flex;gap:6px;"><span style="color:#E97132;flex-shrink:0;">▪</span>' + escH(f) + '</div>'; }).join('') +
+            '</div>' : '') +
+            (d.brokerNote ? '<div style="padding:8px 12px;">' +
+              '<div style="font-size:7px;letter-spacing:.2em;color:#E97132;margin-bottom:5px;">BROKER NOTE</div>' +
+              '<div style="background:#0a0a0a;border-left:2px solid #E97132;padding:8px 10px;font-size:9px;color:#e0e0e0;line-height:1.7;font-style:italic;">' + escH(d.brokerNote) + '</div>' +
+            '</div>' : '') +
+            '<div style="padding:8px 12px;">' +
+              '<button class="wl-intel-open" data-sym="' + escH(sym) + '" style="background:none;border:1px solid #E97132;color:#E97132;font-family:var(--font);font-size:7px;letter-spacing:.14em;padding:4px 12px;cursor:pointer;">OPEN FULL INTEL ›</button>' +
+            '</div>';
+          var openBtn = body.querySelector('.wl-intel-open');
+          if (openBtn) {
+            openBtn.addEventListener('click', function() {
+              window._intelSearch && window._intelSearch(openBtn.dataset.sym, 'company', openBtn.dataset.sym);
+            });
+          }
+        })
+        .catch(function() {
+          var infoBody = body.querySelector('.wl-info-body');
+          if (infoBody) infoBody.innerHTML = '<div class="tbw-loading" style="font-size:8px;padding:16px 12px;">INTEL UNAVAILABLE</div>';
+        });
+    }
+
+    /* ── Index browser panel ── */
+    function toggleBrowser(cat) {
+      if (_activeBrowser === cat) { _activeBrowser = null; draw(_lastQuotes); return; }
+      _activeBrowser = cat;
+      var items = INDEX_DATA[cat] || [];
+      var existing = body.querySelector('.wl-browser');
+      if (existing) existing.remove();
+      var panel = document.createElement('div');
+      panel.className = 'wl-browser';
+      panel.innerHTML =
+        '<div class="wl-browser-hdr">' +
+          '<span class="wl-browser-title">' + escH(cat) + '</span>' +
+          '<span style="flex:1"></span>' +
+          '<button class="wl-browser-close">✕</button>' +
+        '</div>' +
+        '<div class="wl-browser-list">' +
+          items.map(function(item) {
+            var already = tickers.indexOf(item.t) !== -1;
+            return '<div class="wl-browser-row">' +
+              '<span class="wl-browser-sym">' + escH(item.t) + '</span>' +
+              '<span class="wl-browser-name">' + escH(item.n) + '</span>' +
+              (already ?
+                '<span style="font-size:7px;letter-spacing:.1em;color:#2ca050;">✓ ADDED</span>' :
+                '<button class="wl-browser-add" data-t="' + escH(item.t) + '" data-n="' + escH(item.n) + '">＋</button>') +
+            '</div>';
+          }).join('') +
+        '</div>';
+      body.appendChild(panel);
+      panel.querySelector('.wl-browser-close').addEventListener('click', function() {
+        _activeBrowser = null; panel.remove();
+      });
+      panel.querySelectorAll('.wl-browser-add').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          WL_NAMES[btn.dataset.t] = btn.dataset.n;
+          addTicker(btn.dataset.t);
+          btn.textContent = '✓';
+          btn.style.color = '#2ca050';
+          btn.style.border = 'none';
+          btn.disabled = true;
+        });
+      });
+    }
+
+    var _lastQuotes = [];
 
     function draw(quotes) {
+      _lastQuotes = quotes || [];
+      var ts = new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+
       var listHtml = quotes.length ? quotes.map(function(q) {
         var name = WL_NAMES[q.sym] || q.sym;
-        var price = q.c ? (q.c < 10 ? q.c.toFixed(4) : q.c < 100 ? q.c.toFixed(3) : q.c.toFixed(2)) : '—';
+        var pVal = q.c;
+        var price = pVal ? (pVal < 0.1 ? pVal.toFixed(6) : pVal < 10 ? pVal.toFixed(4) : pVal < 100 ? pVal.toFixed(3) : pVal.toFixed(2)) : '—';
         var chg = q.dp !== null ? (q.dp >= 0 ? '+' : '') + q.dp.toFixed(2) + '%' : '—';
-        var cls = q.dp === null ? '' : q.dp >= 0 ? 'wl-pos' : 'wl-neg';
-        return '<div class="wl-row">' +
-          '<div style="flex:1;min-width:0;">' +
+        var chgAbs = (q.d !== undefined && q.d !== null) ? (q.d >= 0 ? '+' : '') + parseFloat(q.d).toFixed(2) : '';
+        var cls = q.dp === null ? 'wl-chg-flat' : q.dp >= 0 ? 'wl-pos' : 'wl-neg';
+        var barW = q.dp !== null ? Math.min(Math.abs(q.dp) / 5 * 100, 100) + '%' : '0%';
+        var barCol = q.dp >= 0 ? '#1a4a2a' : '#3a1010';
+        return '<div class="wl-row" data-sym="' + escH(q.sym) + '">' +
+          '<div class="wl-bar" style="width:' + barW + ';background:' + barCol + ';"></div>' +
+          '<div class="wl-row-left">' +
             '<div class="wl-sym">' + escH(q.sym) + '</div>' +
-            '<div style="font-size:7px;letter-spacing:.06em;color:rgba(255,255,255,0.35);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escH(name) + '</div>' +
+            '<div class="wl-name">' + escH(name) + '</div>' +
           '</div>' +
-          '<span class="wl-price">' + price + '</span>' +
-          '<span class="wl-chg ' + cls + '">' + chg + '</span>' +
-          '<button class="wl-del" data-sym="' + escH(q.sym) + '">✕</button>' +
+          '<div class="wl-row-right">' +
+            '<div class="wl-price">' + price + '</div>' +
+            '<div class="wl-chg ' + cls + '">' + chg + (chgAbs ? ' <span class="wl-chg-abs">(' + chgAbs + ')</span>' : '') + '</div>' +
+          '</div>' +
+          '<div class="wl-row-actions">' +
+            '<button class="wl-info-btn" data-sym="' + escH(q.sym) + '" data-name="' + escH(name) + '" title="Company info">ℹ</button>' +
+            '<button class="wl-intel-btn" data-sym="' + escH(q.sym) + '" title="INTEL brief">›</button>' +
+            '<button class="wl-del" data-sym="' + escH(q.sym) + '" title="Remove">✕</button>' +
+          '</div>' +
           '</div>';
       }).join('') : '';
 
-      /* Quick-add presets — always visible */
-      var presetHtml = '<div style="padding:8px 10px 4px;border-bottom:1px solid #111;flex-shrink:0;">' +
-        '<div style="font-size:7px;letter-spacing:.18em;color:rgba(255,255,255,0.3);margin-bottom:6px;">QUICK ADD</div>' +
-        '<div style="display:flex;gap:4px;flex-wrap:wrap;">' +
-        Object.keys(WL_PRESETS).map(function(cat) {
-          return '<button class="wl-preset-btn" data-cat="' + cat + '" style="background:#000;border:1px solid #1e1e1e;color:rgba(255,255,255,0.55);font-family:var(--font);font-size:7px;letter-spacing:.12em;padding:3px 8px;cursor:pointer;">' + cat + '</button>';
+      /* Quick-add header */
+      var qaHtml = '<div class="wl-qa-wrap">' +
+        '<div class="wl-qa-label">QUICK ADD</div>' +
+        '<div class="wl-qa-btns">' +
+        Object.keys(INDEX_DATA).map(function(cat) {
+          return '<button class="wl-preset-btn" data-cat="' + escH(cat) + '">' + cat + '</button>';
         }).join('') +
         '</div></div>';
 
       var emptyHint = !quotes.length ?
-        '<div class="wl-empty">NO TICKERS YET<br><span style="font-size:7px;color:rgba(255,255,255,0.2);">USE QUICK ADD OR TYPE A SYMBOL ABOVE</span></div>' : '';
+        '<div class="wl-empty">NO INSTRUMENTS YET<br><span>Search by name or ticker above · Browse indexes via Quick Add</span></div>' : '';
 
-      var ts = new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
       body.innerHTML =
         '<div class="wl-add-bar">' +
-          '<input class="wl-input" id="' + id + '-inp" placeholder="ADD TICKER  e.g. AAPL  ^GSPC  GC=F" maxlength="14"/>' +
+          '<input class="wl-input" id="' + id + '-inp" placeholder="Search company name or ticker…" maxlength="40" autocomplete="off"/>' +
           '<button class="wl-add-btn" id="' + id + '-add">＋</button>' +
         '</div>' +
-        presetHtml +
+        qaHtml +
         '<div class="wl-list">' + (listHtml || emptyHint) + '</div>' +
-        '<div class="wl-footer">LIVE PRICES · YAHOO FINANCE · ' + ts + '</div>';
+        '<div class="wl-footer">LIVE PRICES · ' + ts + '  ·  CLICK ROW FOR INFO  ·  ℹ FOR COMPANY BRIEF</div>';
 
-      /* Preset button clicks — add whole group */
+      /* Preset buttons — open index browser */
       body.querySelectorAll('.wl-preset-btn').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-          var group = WL_PRESETS[btn.dataset.cat] || [];
-          var added = false;
-          group.forEach(function(sym) {
-            if (tickers.indexOf(sym) === -1) { tickers.push(sym); added = true; }
-          });
-          if (added) { save(); fetchAndRender(); }
+        btn.addEventListener('click', function() { toggleBrowser(btn.dataset.cat); });
+      });
+
+      /* Row click → company info (click the row background, not buttons) */
+      body.querySelectorAll('.wl-row').forEach(function(row) {
+        row.addEventListener('click', function(e) {
+          if (e.target.closest('button')) return;
+          var sym = row.dataset.sym;
+          showInfoPanel(sym, WL_NAMES[sym] || sym);
         });
       });
 
+      /* ℹ info button */
+      body.querySelectorAll('.wl-info-btn').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          showInfoPanel(btn.dataset.sym, btn.dataset.name);
+        });
+      });
+
+      /* › INTEL button */
+      body.querySelectorAll('.wl-intel-btn').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          var sym = btn.dataset.sym;
+          window._intelSearch && window._intelSearch(sym, 'company', sym);
+        });
+      });
+
+      /* Delete */
       body.querySelectorAll('.wl-del').forEach(function(btn) {
-        btn.addEventListener('click', function() {
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation();
           tickers = tickers.filter(function(t){ return t !== btn.dataset.sym; });
           save();
-          if (tickers.length) fetchAndRender(); else { draw([]); wireInput(); }
+          if (tickers.length) fetchAndRender(); else { draw([]); }
         });
       });
-      wireInput();
-    }
 
-    function wireInput() {
+      /* Wire autocomplete on the input */
       var inp = document.getElementById(id + '-inp');
+      if (inp) wireAutoComplete(inp);
+
+      /* Add button fallback for exact-ticker entry */
       var addBtn = document.getElementById(id + '-add');
-      if (!inp || !addBtn) return;
-      function tryAdd() {
-        var sym = (inp.value || '').trim().toUpperCase().replace(/[^A-Z0-9.=\-\^]/g,'');
-        if (!sym || tickers.indexOf(sym) !== -1) { inp.value = ''; return; }
-        inp.disabled = addBtn.disabled = true;
-        fetch('/.netlify/functions/macro-data?type=quote&symbols=' + encodeURIComponent(sym))
-          .then(function(r){ return r.ok ? r.json() : null; })
-          .then(function(data){
-            inp.disabled = addBtn.disabled = false;
-            if (data && data[0] && data[0].c) {
-              tickers.push(sym); save(); inp.value = ''; fetchAndRender();
-            } else { inp.classList.add('wl-err'); setTimeout(function(){ inp.classList.remove('wl-err'); inp.value = ''; }, 1500); }
-          })
-          .catch(function(){ inp.disabled = addBtn.disabled = false; });
+      if (addBtn) {
+        addBtn.addEventListener('click', function() {
+          var inp2 = document.getElementById(id + '-inp');
+          if (!inp2) return;
+          var sym = inp2.value.trim().toUpperCase().replace(/[^A-Z0-9.=\-\^]/g,'');
+          if (sym) { inp2.value = ''; removeAcDropdown(); addTicker(sym); }
+        });
       }
-      inp.addEventListener('keydown', function(e){ if (e.key === 'Enter') tryAdd(); });
-      addBtn.addEventListener('click', tryAdd);
     }
 
     function fetchAndRender() {
@@ -5471,8 +7484,10 @@
     clearTimeout(el_refresh_timer(id));
     set_refresh_timer(id, setInterval(function(){
       if (!body.querySelector('.wl-add-bar')) { clearInterval(el_refresh_timer(id)); return; }
+      /* Only refresh price rows — don't redraw if info/browser panel is open */
+      if (_activeInfoTicker || _activeBrowser) return;
       fetchAndRender();
-    }, 60000));
+    }, 30000));
   }
 
   /* ── LIVE TV WIDGET ─────────────────────────────────────────── */
