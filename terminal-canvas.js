@@ -7018,9 +7018,20 @@
               '<span class="sh-drill-price">' + priceStr + '</span>' +
               '<span class="sh-drill-chg" style="color:' + chgCol + '">' + chgStr + '</span>' +
               '<span class="sh-drill-weight">' + escH(h.w) + '</span>' +
+              '<button class="sh-drill-chart" title="Price chart for ' + escH(h.t) + '">CHART ›</button>' +
               '<button class="sh-drill-intel" title="INTEL brief for ' + escH(h.t) + '">INTEL ›</button>' +
             '</div>';
           }).join('');
+          rowsEl.querySelectorAll('.sh-drill-chart').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+              e.stopPropagation();
+              var ticker = btn.closest('.sh-drill-row').dataset.ticker;
+              if (!window.createGenericPopout) return;
+              window.createGenericPopout(ticker + ' · CHART', '▦', function(popBody) {
+                renderPriceChart(popBody, ticker, ticker);
+              }, { w: 520, h: 360 });
+            });
+          });
           rowsEl.querySelectorAll('.sh-drill-intel').forEach(function(btn) {
             btn.addEventListener('click', function(e) {
               e.stopPropagation();
@@ -7387,6 +7398,7 @@
             '<div class="wl-chg ' + cls + '">' + chg + (chgAbs ? ' <span class="wl-chg-abs">(' + chgAbs + ')</span>' : '') + '</div>' +
           '</div>' +
           '<div class="wl-row-actions">' +
+            '<button class="wl-chart-btn" data-sym="' + escH(q.sym) + '" data-name="' + escH(name) + '" title="Price chart">▦</button>' +
             '<button class="wl-info-btn" data-sym="' + escH(q.sym) + '" data-name="' + escH(name) + '" title="Company info">ℹ</button>' +
             '<button class="wl-intel-btn" data-sym="' + escH(q.sym) + '" title="INTEL brief">›</button>' +
             '<button class="wl-del" data-sym="' + escH(q.sym) + '" title="Remove">✕</button>' +
@@ -7426,6 +7438,19 @@
           if (e.target.closest('button')) return;
           var sym = row.dataset.sym;
           showInfoPanel(sym, WL_NAMES[sym] || sym);
+        });
+      });
+
+      /* ▦ chart button */
+      body.querySelectorAll('.wl-chart-btn').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          var sym  = btn.dataset.sym;
+          var name = btn.dataset.name || sym;
+          if (!window.createGenericPopout) return;
+          window.createGenericPopout(sym + ' · CHART', '▦', function(popBody) {
+            renderPriceChart(popBody, sym, name);
+          }, { w: 520, h: 360 });
         });
       });
 
@@ -8537,7 +8562,10 @@
     ];
 
     function cUrl(s, y) {
-      return '/.netlify/functions/macro-data?type=chart&series=' + encodeURIComponent(s) + '&years=' + y;
+      /* Stock tickers: uppercase letters only (1-6 chars, no digits) → Yahoo Finance route */
+      var isStock = /^[A-Z]{1,6}$/.test(s) && !/^(EURGBP|CFNAI|PAYEMS|WALCL|BOGMBASE|CIVPART|ICSA|INDPRO|UNRATE|GS|SP)$/.test(s);
+      var base = '/.netlify/functions/macro-data?type=chart&series=' + encodeURIComponent(s) + '&years=' + y;
+      return isStock ? base + '&source=stock' : base;
     }
 
     function loadPrimary(onDone) {

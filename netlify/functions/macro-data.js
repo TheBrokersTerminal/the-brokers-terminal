@@ -456,12 +456,38 @@ exports.handler = async function (event) {
 
     /* ── SINGLE-SERIES PRICE CHART ── */
     if (type === 'chart') {
-      var seriesId = ((p.series || '')).toUpperCase().replace(/[^A-Z0-9]/g, '');
+      var seriesId = ((p.series || '')).toUpperCase().replace(/[^A-Z0-9.]/g, '');
       if (!seriesId) return { statusCode: 400, headers: hdrs, body: JSON.stringify({ error: 'series required' }) };
 
       var cyRaw = parseInt(p.years || '2');
       var useMax = cyRaw <= 0;
       var cy   = useMax ? 0 : Math.min(50, Math.max(1, cyRaw));
+
+      /* ── STOCK TICKER (Yahoo Finance) ── */
+      if (p.source === 'stock') {
+        var yhRange = cy >= 5 ? '10y' : cy >= 2 ? '5y' : '2y';
+        var yhHdrs  = { 'User-Agent': 'Mozilla/5.0 (compatible)', 'Accept': 'application/json' };
+        var yhRaw   = await fetchJsonWith(
+          'https://query1.finance.yahoo.com/v8/finance/chart/' + encodeURIComponent(seriesId) + '?interval=1wk&range=' + yhRange,
+          yhHdrs
+        ).catch(function () { return null; });
+        var yhData = [];
+        var yhCurrency = '';
+        try {
+          var yhResult = ((yhRaw || {}).chart || {}).result || [];
+          if (yhResult[0]) {
+            yhCurrency = (yhResult[0].meta || {}).currency || '';
+            var yhTs    = yhResult[0].timestamp || [];
+            var yhClose = (((yhResult[0].indicators || {}).quote || [{}])[0].close || []);
+            yhTs.forEach(function (ts, idx) {
+              var v = yhClose[idx];
+              if (v != null && !isNaN(v)) yhData.push({ d: new Date(ts * 1000).toISOString().split('T')[0], v: parseFloat(v.toFixed(2)) });
+            });
+          }
+        } catch (e) {}
+        return { statusCode: 200, headers: hdrs, body: JSON.stringify({ label: seriesId, unit: yhCurrency || 'Price', data: yhData }) };
+      }
+
       var FB_BASE = 'https://api.stlouisfed.org/fred/series/observations?file_type=json&api_key=' + FRED;
       var FB = FB_BASE + (useMax ? '' : ('&observation_start=' + (function(){ var d=new Date(); d.setFullYear(d.getFullYear()-cy); return d.toISOString().split('T')[0]; })())) + '&series_id=';
 
