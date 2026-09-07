@@ -28,6 +28,62 @@
     return Object.values(_registry);
   };
 
+  /* ── TYPEWRITER CASCADE ─────────────────────────────────────────────────────
+     After renderCompany/renderConcept sets innerHTML, call cascadeType(body) to
+     animate each text block in sequentially — mimics the "writing" feel.
+     Speed: ~6ms per character for key fields, instant fade for structural elements.
+  ──────────────────────────────────────────────────────────────────────────── */
+  function typeInto(el, text, speed, onDone) {
+    el.textContent = '';
+    var i = 0;
+    var t = setInterval(function () {
+      if (i >= text.length) { clearInterval(t); if (onDone) onDone(); return; }
+      /* Append one char at a time; respect natural word breaks */
+      el.textContent = text.slice(0, i + 1);
+      i++;
+    }, speed || 6);
+    return t;
+  }
+
+  function cascadeType(body) {
+    /* Selectors ordered by visual position — type top to bottom */
+    var selectors = [
+      '.sp-tagline',
+      '.sp-text',
+      '.sp-tl-evt',
+      '.sp-pitch-quote',
+      '.sp-pitch-body',
+      '.sp-pitch-row .sp-pitch-body',
+    ];
+    var queue = [];
+    selectors.forEach(function (sel) {
+      body.querySelectorAll(sel).forEach(function (el) {
+        var txt = el.textContent;
+        if (txt && txt.trim()) queue.push({ el: el, txt: txt });
+      });
+    });
+    /* De-duplicate (an element can match multiple selectors) */
+    var seen = [];
+    queue = queue.filter(function (item) {
+      if (seen.indexOf(item.el) !== -1) return false;
+      seen.push(item.el); return true;
+    });
+
+    /* Animate each element after the previous finishes, with a small gap */
+    var GAP = 120; /* ms pause between elements */
+    function runNext(idx) {
+      if (idx >= queue.length) return;
+      var item = queue[idx];
+      /* Cap typing time per element so long texts don't drag */
+      var chars = item.txt.length;
+      var speed = chars > 300 ? 2 : chars > 150 ? 4 : 6;
+      typeInto(item.el, item.txt, speed, function () {
+        setTimeout(function () { runNext(idx + 1); }, GAP);
+      });
+    }
+    runNext(0);
+  }
+
   /* Called by terminal-canvas on login to restore saved popouts */
   window._restoreIntelPopouts = function (saved) {
     (saved || []).forEach(function (p) {
@@ -816,8 +872,17 @@
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ query: query, type: type, ticker: ticker, lensKey: lensKey, lensContext: lensContext }),
     })
-      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (r) {
+        if (!r.ok) {
+          var body = win.querySelector('.intel-popwin-body');
+          if (win._loadingTimer) { clearInterval(win._loadingTimer); win._loadingTimer = null; }
+          if (body) body.innerHTML = '<div class="sp-loading" style="color:#e05050;">INTEL ERROR · HTTP ' + r.status + '<br><span style="font-size:8px;color:#666;margin-top:6px;display:block;">Check Netlify function logs</span></div>';
+          return null;
+        }
+        return r.json();
+      })
       .then(function (d) {
+        if (!d) return; /* already handled above */
         if (d && !d.error) {
           _cache[cacheKey] = d;
           if (win._popId && _registry[win._popId] && d.ticker) {
@@ -1225,6 +1290,7 @@
       '<div class="sp-section" style="border-top:1px solid #111;padding-top:10px;">' +
         '<button class="sp-note-btn">✎ ADD NOTE</button>' +
       '</div>';
+    cascadeType(body);
   }
 
   function renderConcept(d, body) {
@@ -1284,6 +1350,7 @@
       '<div class="sp-section" style="border-top:1px solid #111;padding-top:10px;">' +
         '<button class="sp-note-btn">✎ ADD NOTE</button>' +
       '</div>';
+    cascadeType(body);
   }
 
   /* ── DISTILLERY PANEL ── */

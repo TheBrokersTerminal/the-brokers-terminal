@@ -670,7 +670,7 @@ exports.handler = async (event) => {
         },
         body: JSON.stringify({
           model: 'claude-haiku-4-5-20251001',
-          max_tokens: isScenario ? 3000 : 2000,
+          max_tokens: isScenario ? 2500 : 1600,
           system: SEARCH_SYSTEM,
           messages: [{ role: 'user', content: userMsg }],
         }),
