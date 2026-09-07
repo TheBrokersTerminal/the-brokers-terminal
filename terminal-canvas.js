@@ -4597,7 +4597,7 @@
 
       /* Bloomberg-style column headers — sticky */
       var COLS = 'grid-template-columns:36px 22px 10px 1fr 34px 50px 54px 44px 40px';
-      var hdr = '<div style="display:grid;' + COLS + ';padding:4px 8px;border-bottom:1px solid #222;background:#000;position:sticky;top:0;z-index:2;">' +
+      var hdr = '<div style="display:grid;' + COLS + ';padding:4px 8px;border-bottom:1px solid #222;background:#0a0a0a;position:sticky;top:0;z-index:2;">' +
         '<div style="font-size:6.5px;color:rgba(255,255,255,0.35);letter-spacing:.1em;">TIME</div>' +
         '<div style="font-size:6.5px;color:rgba(255,255,255,0.35);letter-spacing:.1em;">C</div>' +
         '<div></div>' +
@@ -5269,22 +5269,22 @@
       var html = '<div style="display:flex;flex-direction:column;height:100%;overflow:hidden;">';
 
       /* Channel selector bar */
-      html += '<div style="display:flex;gap:0;flex-shrink:0;border-bottom:1px solid #1a1a1a;background:#090909;overflow-x:auto;scrollbar-width:none;">';
+      html += '<div style="display:flex;gap:0;flex-shrink:0;border-bottom:1px solid #1a1a1a;background:#0a0a0a;overflow-x:auto;scrollbar-width:none;">';
       NEWS_CHANNELS.forEach(function(c) {
         var act = c.key === _newsChannel;
         html += '<button id="gi-nc-' + c.key + '-' + id + '" style="' +
           'flex-shrink:0;padding:7px 11px;font-size:6.5px;letter-spacing:.14em;' +
           'border:none;border-bottom:2px solid ' + (act ? A : 'transparent') + ';' +
-          'background:transparent;color:' + (act ? A : 'rgba(255,255,255,0.38)') + ';' +
+          'background:transparent;color:' + (act ? A : '#ffffff') + ';' +
           'cursor:pointer;font-family:Consolas,monospace;white-space:nowrap;">' +
           c.label +
-          '<span style="font-size:5px;color:' + (act ? A : 'rgba(255,255,255,0.2)') + ';margin-left:5px;">' + c.tag + '</span>' +
+          '<span style="font-size:5px;color:' + (act ? A : '#ffffff') + ';margin-left:5px;">' + c.tag + '</span>' +
         '</button>';
       });
       html += '</div>';
 
       /* Stream iframe */
-      html += '<div style="flex:1;position:relative;background:#000;min-height:0;overflow:hidden;">';
+      html += '<div style="flex:1;position:relative;background:#0a0a0a;min-height:0;overflow:hidden;">';
       html += '<iframe id="gi-news-frame-' + id + '" src="' + embedSrc + '" ' +
         'style="width:100%;height:100%;border:none;display:block;" ' +
         'allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="no-referrer" allowfullscreen></iframe>';
@@ -5904,8 +5904,8 @@
         function render() {
       body.innerHTML =
         '<style>@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}</style>' +
-        '<div style="display:flex;flex-direction:column;height:100%;font-family:Consolas,monospace;overflow:hidden;background:#000;">' +
-          '<div style="display:flex;border-bottom:1px solid #1e1e1e;flex-shrink:0;background:#000;overflow-x:auto;scrollbar-width:none;">' +
+        '<div style="display:flex;flex-direction:column;height:100%;font-family:Consolas,monospace;overflow:hidden;background:#0a0a0a;">' +
+          '<div style="display:flex;border-bottom:1px solid #1e1e1e;flex-shrink:0;background:#0a0a0a;overflow-x:auto;scrollbar-width:none;">' +
             tabBtn('cb',       'CENTRAL BANKS') +
             tabBtn('holdings', 'CB HOLDINGS') +
             tabBtn('cot',      'COT REPORT') +
@@ -6884,7 +6884,7 @@
 
   /* ── SECTOR HEATMAP ─────────────────────────────────────────── */
   function renderSectorHeatmap(id, body) {
-    body.style.cssText = 'display:flex;flex-direction:column;overflow:hidden;background:#000;position:relative;';
+    body.style.cssText = 'display:flex;flex-direction:column;overflow:hidden;background:#0a0a0a;position:relative;';
 
     var currentMarket = 'US';
     var currentPeriod = '1D';
@@ -7281,7 +7281,7 @@
 
   /* ── WATCHLIST ───────────────────────────────────────────────── */
   function renderWatchlist(id, body) {
-    body.style.cssText = 'display:flex;flex-direction:column;overflow:hidden;background:#000;position:relative;';
+    body.style.cssText = 'display:flex;flex-direction:column;overflow:hidden;background:#0a0a0a;position:relative;';
     var STORE = 'tbt-watchlist-v2';
     var tickers = JSON.parse(localStorage.getItem(STORE) || '[]');
     function save() { localStorage.setItem(STORE, JSON.stringify(tickers)); }
@@ -7818,7 +7818,7 @@
     function renderPlayer(vid) {
       /* full-widget YouTube embed for a specific video ID */
       body.innerHTML =
-        '<div style="display:flex;flex-direction:column;height:100%;background:#000;">' +
+        '<div style="display:flex;flex-direction:column;height:100%;background:#0a0a0a;">' +
           '<div style="flex-shrink:0;display:flex;align-items:center;gap:8px;padding:6px 10px;background:#0a0a0a;border-bottom:1px solid #1a1a1a;">' +
             '<button id="tv-back-' + id + '" style="background:none;border:none;color:' + A + ';font-size:8px;letter-spacing:.1em;font-family:Consolas,monospace;cursor:pointer;padding:0;">← BACK</button>' +
             '<span style="font-size:7.5px;color:rgba(255,255,255,0.4);font-family:Consolas,monospace;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' +
@@ -7838,7 +7838,7 @@
       var visible = _ctag === 'ALL' ? _clips : _clips.filter(function(c){ return c.tag === _ctag; });
 
       var tagBar =
-        '<div style="display:flex;gap:0;flex-shrink:0;border-bottom:1px solid #1a1a1a;background:#000;overflow-x:auto;scrollbar-width:none;">' +
+        '<div style="display:flex;gap:0;flex-shrink:0;border-bottom:1px solid #1a1a1a;background:#0a0a0a;overflow-x:auto;scrollbar-width:none;">' +
           CLIP_TAGS.map(function(t) {
             var act = t === _ctag;
             return '<button id="tv-ctag-' + t.replace(/\s/g,'') + '-' + id + '" style="' +
@@ -7887,7 +7887,7 @@
       }
 
       body.innerHTML =
-        '<div style="display:flex;flex-direction:column;height:100%;overflow:hidden;background:#000;">' +
+        '<div style="display:flex;flex-direction:column;height:100%;overflow:hidden;background:#0a0a0a;">' +
           buildModeBar() + tagBar + gridHtml +
         '</div>';
 
@@ -7912,7 +7912,7 @@
     }
 
     function buildModeBar() {
-      return '<div style="display:flex;gap:0;flex-shrink:0;border-bottom:1px solid #222;background:#000;">' +
+      return '<div style="display:flex;gap:0;flex-shrink:0;border-bottom:1px solid #222;background:#0a0a0a;">' +
         ['LIVE TV','VIDEO CLIPS'].map(function(m) {
           var key = m === 'LIVE TV' ? 'live' : 'clips';
           var act = _mode === key;
@@ -7929,7 +7929,7 @@
     function buildChannelContent(ch) {
       /* official iframe embed */
       if (ch.embed) {
-        return '<div style="flex:1;position:relative;background:#000;min-height:0;overflow:hidden;">' +
+        return '<div style="flex:1;position:relative;background:#0a0a0a;min-height:0;overflow:hidden;">' +
           '<iframe src="' + ch.embed + '" style="width:100%;height:100%;border:none;display:block;" allow="autoplay;fullscreen" allowfullscreen referrerpolicy="no-referrer"></iframe>' +
         '</div>';
       }
@@ -7937,7 +7937,7 @@
       if (ch.yt) {
         var vid = _liveIds[ch.key];
         if (_liveLoading && !vid) {
-          return '<div style="flex:1;display:flex;align-items:center;justify-content:center;background:#000;">' +
+          return '<div style="flex:1;display:flex;align-items:center;justify-content:center;background:#0a0a0a;">' +
             '<div style="text-align:center;">' +
               '<div style="width:5px;height:5px;border-radius:50%;background:' + A + ';animation:blink 1.4s step-start infinite;margin:0 auto 10px;"></div>' +
               '<div style="font-size:8px;letter-spacing:.1em;color:rgba(255,255,255,0.35);font-family:Consolas,monospace;">CONNECTING TO LIVE FEED…</div>' +
@@ -7945,7 +7945,7 @@
           '</div>';
         }
         if (vid) {
-          return '<div style="flex:1;position:relative;background:#000;min-height:0;overflow:hidden;">' +
+          return '<div style="flex:1;position:relative;background:#0a0a0a;min-height:0;overflow:hidden;">' +
             '<iframe src="https://www.youtube-nocookie.com/embed/' + vid + '?autoplay=1&rel=0&modestbranding=1&iv_load_policy=3" ' +
               'style="width:100%;height:100%;border:none;display:block;" allow="autoplay;fullscreen" allowfullscreen></iframe>' +
           '</div>';
@@ -7963,7 +7963,7 @@
       var ch = TV_CHANNELS.find(function(c){ return c.key === _ch; }) || TV_CHANNELS[0];
 
       var channelBar =
-        '<div style="display:flex;gap:0;flex-shrink:0;border-bottom:1px solid #1a1a1a;background:#000;overflow-x:auto;scrollbar-width:none;">' +
+        '<div style="display:flex;gap:0;flex-shrink:0;border-bottom:1px solid #1a1a1a;background:#0a0a0a;overflow-x:auto;scrollbar-width:none;">' +
           TV_CHANNELS.map(function(c) {
             var act = c.key === _ch;
             return '<button id="tv-ch-' + c.key + '-' + id + '" style="' +
@@ -7988,7 +7988,7 @@
         '</div>';
 
       body.innerHTML =
-        '<div style="display:flex;flex-direction:column;height:100%;overflow:hidden;background:#000;">' +
+        '<div style="display:flex;flex-direction:column;height:100%;overflow:hidden;background:#0a0a0a;">' +
           buildModeBar() + channelBar + contentArea + statusBar +
         '</div>';
 
@@ -8412,7 +8412,7 @@
       var dxyS = (dxy.chgPct < 0 && dxy.value < 100) ? 'BULLISH' : (dxy.value > 102 ? 'BEARISH' : 'NEUTRAL');
       var tipS = (tips.value < 2.0 && tips.chg <= 0) ? 'BULLISH' : (tips.value > 2.5 ? 'BEARISH' : 'ELEVATED');
       var bdiS = bdi.value < 1200 ? 'WATCH' : 'NEUTRAL';
-      var html = '<div style="padding:12px 14px 16px;overflow-y:auto;height:100%;box-sizing:border-box;background:#000;">';
+      var html = '<div style="padding:12px 14px 16px;overflow-y:auto;height:100%;box-sizing:border-box;background:#0a0a0a;">';
       html += '<div style="font-size:7px;letter-spacing:.2em;color:' + A + ';margin-bottom:12px;border-bottom:1px solid #1a1a1a;padding-bottom:8px;">CATALYST WATCH  ·  ' +
         (live ? '<span style="color:' + GRN + ';">LIVE DATA</span>' : (_catLive === 'loading' ? '<span style="color:' + A + ';">FETCHING…</span>' : 'ESTIMATES')) + '</div>';
       html += '<div style="font-size:6.5px;letter-spacing:.14em;color:rgba(255,255,255,0.4);margin-bottom:6px;padding-left:2px;">GOLD PRICE DRIVERS</div>';
@@ -8448,7 +8448,7 @@
     function buildGMTabBar() {
       var bar = document.createElement('div');
       bar.id = 'gm-tabbar-' + id;
-      bar.style.cssText = 'display:flex;border-bottom:1px solid #1e1e1e;flex-shrink:0;background:#000;';
+      bar.style.cssText = 'display:flex;border-bottom:1px solid #1e1e1e;flex-shrink:0;background:#0a0a0a;';
       function makeTab(label, view) {
         var act = _gmView === view;
         var btn = document.createElement('button');
@@ -9659,58 +9659,58 @@
     }
 
     /* ── Layout ── */
-    body.style.cssText = 'display:flex;flex-direction:column;height:100%;overflow:hidden;background:#090909;font-family:var(--font,monospace);';
+    body.style.cssText = 'display:flex;flex-direction:column;height:100%;overflow:hidden;background:#0a0a0a;font-family:var(--font,monospace);';
 
     function ddSel(items, key, placeholderIndex) {
-      return '<select class="wl-flt" data-flt="'+key+'" style="background:#000;border:1px solid #1e1e1e;color:#fff;font-family:var(--font);font-size:10px;letter-spacing:.08em;padding:5px 6px;cursor:pointer;max-width:110px;">' +
+      return '<select class="wl-flt" data-flt="'+key+'" style="background:#0d0d0d;border:1px solid #1e1e1e;color:#fff;font-family:var(--font);font-size:10px;letter-spacing:.08em;padding:5px 6px;cursor:pointer;max-width:110px;">' +
         items.map(function(v,i){ return '<option value="'+(i===0?'':v)+'">'+(i===0?v:v)+'</option>'; }).join('') +
       '</select>';
     }
 
     body.innerHTML =
       /* ── Filter bar ── */
-      '<div style="display:flex;gap:5px;align-items:center;padding:7px 10px;border-bottom:1px solid #141414;flex-shrink:0;flex-wrap:wrap;background:#000;">' +
-        '<span style="font-size:10px;letter-spacing:.14em;color:#fff;opacity:.45;margin-right:3px;">FILTER</span>' +
+      '<div style="display:flex;gap:5px;align-items:center;padding:7px 10px;border-bottom:1px solid #141414;flex-shrink:0;flex-wrap:wrap;background:#0a0a0a;">' +
+        '<span style="font-size:10px;letter-spacing:.14em;color:#fff;margin-right:3px;">FILTER</span>' +
         ddSel(REGIONS, 'region') +
         ddSel(AGES,    'age') +
         ddSel(CASKS,   'cask') +
-        '<input id="wl-dis-'+id+'" type="text" placeholder="DISTILLERY..." style="background:#000;border:1px solid #1e1e1e;color:#fff;font-family:var(--font);font-size:10px;letter-spacing:.08em;padding:5px 8px;outline:none;width:110px;" />' +
+        '<input id="wl-dis-'+id+'" type="text" placeholder="DISTILLERY..." style="background:#0d0d0d;border:1px solid #1e1e1e;color:#fff;font-family:var(--font);font-size:10px;letter-spacing:.08em;padding:5px 8px;outline:none;width:110px;" />' +
         '<div style="flex:1;"></div>' +
-        '<select id="wl-cur-'+id+'" style="background:#000;border:1px solid #1e1e1e;color:#fff;font-family:var(--font);font-size:10px;padding:5px 5px;letter-spacing:.08em;cursor:pointer;">' +
+        '<select id="wl-cur-'+id+'" style="background:#0d0d0d;border:1px solid #1e1e1e;color:#fff;font-family:var(--font);font-size:10px;padding:5px 5px;letter-spacing:.08em;cursor:pointer;">' +
           CURRENCIES.map(function(c){ return '<option value="'+c+'"'+(c==='GBP'?' selected':'')+'>'+c+'</option>'; }).join('') +
         '</select>' +
       '</div>' +
       /* ── Search bar + INDICES button ── */
-      '<div style="display:flex;gap:5px;padding:7px 10px;border-bottom:1px solid #141414;flex-shrink:0;background:#000;">' +
+      '<div style="display:flex;gap:5px;padding:7px 10px;border-bottom:1px solid #141414;flex-shrink:0;background:#0a0a0a;">' +
         '<input id="wl-q-'+id+'" type="text" placeholder="▸  Search distillery, bottling, vintage..." '+
-          'style="flex:1;background:#000;border:1px solid #1e1e1e;color:#fff;font-family:var(--font);font-size:11px;letter-spacing:.08em;padding:7px 10px;outline:none;" />' +
-        '<button id="wl-idx-'+id+'" style="background:#000;border:1px solid #1e1e1e;color:#fff;font-family:var(--font);font-size:9px;letter-spacing:.12em;padding:7px 12px;cursor:pointer;white-space:nowrap;">INDICES</button>' +
-        '<button id="wl-mon-'+id+'" style="background:#000;border:1px solid #1e1e1e;color:#fff;font-family:var(--font);font-size:9px;letter-spacing:.12em;padding:7px 12px;cursor:pointer;white-space:nowrap;">MONITOR</button>' +
+          'style="flex:1;background:#0d0d0d;border:1px solid #1e1e1e;color:#fff;font-family:var(--font);font-size:11px;letter-spacing:.08em;padding:7px 10px;outline:none;" />' +
+        '<button id="wl-idx-'+id+'" style="background:#0d0d0d;border:1px solid #1e1e1e;color:#fff;font-family:var(--font);font-size:9px;letter-spacing:.12em;padding:7px 12px;cursor:pointer;white-space:nowrap;">INDICES</button>' +
+        '<button id="wl-mon-'+id+'" style="background:#0d0d0d;border:1px solid #1e1e1e;color:#fff;font-family:var(--font);font-size:9px;letter-spacing:.12em;padding:7px 12px;cursor:pointer;white-space:nowrap;">MONITOR</button>' +
       '</div>' +
       /* ── Split body ── */
-      '<div style="flex:1;display:flex;overflow:hidden;background:#000;">' +
+      '<div style="flex:1;display:flex;overflow:hidden;background:#0a0a0a;">' +
         /* Left: results list */
-        '<div id="wl-list-'+id+'" style="width:260px;flex-shrink:0;overflow-y:auto;border-right:1px solid #141414;display:flex;flex-direction:column;background:#000;">' +
+        '<div id="wl-list-'+id+'" style="width:260px;flex-shrink:0;overflow-y:auto;border-right:1px solid #141414;display:flex;flex-direction:column;background:#0a0a0a;">' +
           /* Onboarding */
           '<div id="wl-guide-'+id+'" style="padding:14px 12px;">' +
             '<div style="font-size:10px;letter-spacing:.16em;color:#fff;margin-bottom:10px;">TRY THESE</div>' +
             '<div style="display:flex;flex-direction:column;gap:5px;">' +
               SUGGESTED.map(function(s){
-                return '<button class="wl-sug" data-q="'+s.q+'" style="background:#000;border:1px solid #1a1a1a;color:#fff;font-family:var(--font);font-size:10px;letter-spacing:.08em;padding:7px 10px;cursor:pointer;text-align:left;">'+s.label+'</button>';
+                return '<button class="wl-sug" data-q="'+s.q+'" style="background:#0d0d0d;border:1px solid #1a1a1a;color:#fff;font-family:var(--font);font-size:10px;letter-spacing:.08em;padding:7px 10px;cursor:pointer;text-align:left;">'+s.label+'</button>';
               }).join('') +
             '</div>' +
           '</div>' +
         '</div>' +
         /* Right: detail panel */
-        '<div id="wl-detail-'+id+'" style="flex:1;overflow-y:auto;background:#000;">' +
+        '<div id="wl-detail-'+id+'" style="flex:1;overflow-y:auto;background:#0a0a0a;">' +
           '<div style="padding:28px 16px;text-align:center;">' +
-            '<div style="font-size:8px;letter-spacing:.2em;color:#fff;opacity:.3;">SELECT A WHISKY</div>' +
-            '<div style="font-size:7px;letter-spacing:.14em;color:#fff;opacity:.2;margin-top:6px;">USE FILTERS OR SEARCH TO FIND A BOTTLE</div>' +
+            '<div style="font-size:8px;letter-spacing:.2em;color:#fff;">SELECT A WHISKY</div>' +
+            '<div style="font-size:7px;letter-spacing:.14em;color:#fff;margin-top:6px;">USE FILTERS OR SEARCH TO FIND A BOTTLE</div>' +
           '</div>' +
         '</div>' +
       '</div>' +
       /* ── Footer ── */
-      '<div style="padding:4px 10px;font-size:9px;letter-spacing:.12em;color:#fff;opacity:.4;border-top:1px solid #141414;flex-shrink:0;display:flex;justify-content:space-between;background:#000;">' +
+      '<div style="padding:4px 10px;font-size:9px;letter-spacing:.12em;color:#fff;border-top:1px solid #141414;flex-shrink:0;display:flex;justify-content:space-between;background:#0a0a0a;">' +
         '<span>DATA BY WHISKYSTATS · WHISKYBASE</span>' +
         '<span id="wl-cr-'+id+'"></span>' +
       '</div>';
@@ -14265,7 +14265,7 @@
     var container = body;
     if (!container) return;
     container.innerHTML = '';
-    container.style.cssText = 'font-family:Consolas,monospace;background:#000;color:#fff;height:100%;overflow-y:auto;display:flex;flex-direction:column;';
+    container.style.cssText = 'font-family:Consolas,monospace;background:#0a0a0a;color:#fff;height:100%;overflow-y:auto;display:flex;flex-direction:column;';
 
     var header = document.createElement('div');
     header.style.cssText = 'padding:12px 18px 0;flex-shrink:0;';
