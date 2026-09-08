@@ -69,14 +69,17 @@
       seen.push(item.el); return true;
     });
 
+    /* Clear every element upfront so the panel starts blank — no flash of full content */
+    queue.forEach(function (item) { item.el.textContent = ''; });
+
     /* Animate each element after the previous finishes, with a small gap */
-    var GAP = 120; /* ms pause between elements */
+    var GAP = 80; /* ms pause between elements */
     function runNext(idx) {
       if (idx >= queue.length) return;
       var item = queue[idx];
       /* Cap typing time per element so long texts don't drag */
       var chars = item.txt.length;
-      var speed = chars > 300 ? 2 : chars > 150 ? 4 : 6;
+      var speed = chars > 300 ? 2 : chars > 120 ? 3 : 5;
       typeInto(item.el, item.txt, speed, function () {
         setTimeout(function () { runNext(idx + 1); }, GAP);
       });
@@ -974,6 +977,7 @@
       renderPitchOnly(d, body);
     }
     wireNoteBtn(d, body);
+    cascadeType(body);
   }
 
   function renderOverview(d, body) {
