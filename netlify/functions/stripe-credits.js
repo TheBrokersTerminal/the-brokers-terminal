@@ -18,9 +18,9 @@ const CORS = {
 
 const PACKAGES = {
   '500':   { credits: 500,   amount: 500,  name: '500 INTEL Credits' },
-  '2000':  { credits: 2000,  amount: 1500, name: '2,000 INTEL Credits' },
-  '5000':  { credits: 5000,  amount: 3000, name: '5,000 INTEL Credits' },
-  '10000': { credits: 10000, amount: 5000, name: '10,000 INTEL Credits' },
+  '2000':  { credits: 2000,  amount: 2000, name: '2,000 INTEL Credits' },
+  '5000':  { credits: 5000,  amount: 5000, name: '5,000 INTEL Credits' },
+  '10000': { credits: 10000, amount: 10000, name: '10,000 INTEL Credits' },
 };
 
 function ok(data) {
