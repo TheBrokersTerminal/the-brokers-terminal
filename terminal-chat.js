@@ -1,5 +1,6 @@
 /* ── BROKERS TERMINAL — CHAT + CALENDAR ENGINE ────────────────────
-   Chat: Supabase Realtime firm-scoped messaging (DMs + broadcast)
+   Chat: Bloomberg-style messenger with directory, connect requests,
+         user profiles (firm + position), and accept/decline flow
    Calendar: monthly grid, personal events, economic calendar
    ─────────────────────────────────────────────────────────────── */
 (function () {
@@ -7,53 +8,229 @@
 
   var FINNHUB_KEY = 'da6p77hr01qqqkkgl7b0da6p77hr01qqqkkgl7bg';
 
+  var AVATAR_COLORS = ['#4A90D9','#3DAA6A','#C9A84C','#E97132','#9B59B6','#1ABC9C','#c0392b','#2980B9'];
+  /* per-widget contact lookup — avoids inline JSON in onclick attrs */
+  var _contactMap = {};
+  function avColor(name) { var c = (name||'U').charCodeAt(0); return AVATAR_COLORS[c % AVATAR_COLORS.length]; }
+  function avLetter(name) { return ((name||'U')[0]).toUpperCase(); }
+  function avHtml(name, size) {
+    var sz = size || 28;
+    return '<div class="tch-av" style="width:' + sz + 'px;height:' + sz + 'px;min-width:' + sz + 'px;font-size:' + Math.round(sz*0.39) + 'px;background:' + avColor(name) + ';">' + avLetter(name) + '</div>';
+  }
+
+  /* ── Inject chat widget styles once ── */
+  function injectChatStyles() {
+    if (document.getElementById('tbt-chat-v2-styles')) return;
+    var s = document.createElement('style');
+    s.id = 'tbt-chat-v2-styles';
+    s.textContent = [
+      '.tchat-wrap{display:flex;height:100%;min-height:0;overflow:hidden;}',
+      '.tchat-sidebar{width:190px;min-width:150px;border-right:1px solid #1a1a1a;display:flex;flex-direction:column;overflow:hidden;flex-shrink:0;}',
+      '.tchat-main{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden;}',
+      /* tabs */
+      '.tch-tabs{display:flex;border-bottom:1px solid #1a1a1a;flex-shrink:0;}',
+      '.tch-tab{flex:1;padding:8px 0;text-align:center;font-size:7px;letter-spacing:.15em;color:rgba(255,255,255,.35);cursor:pointer;transition:color .15s;border-bottom:2px solid transparent;margin-bottom:-1px;position:relative;font-family:inherit;}',
+      '.tch-tab.active{color:#fff;border-bottom-color:#E97132;}',
+      '.tch-tab:hover{color:rgba(255,255,255,.7);}',
+      '.tch-tab-badge{position:absolute;top:4px;right:8px;min-width:14px;height:14px;border-radius:7px;background:#D14040;color:#fff;font-size:6.5px;display:flex;align-items:center;justify-content:center;padding:0 3px;letter-spacing:0;}',
+      /* sidebar scroll */
+      '.tch-sidebar-body{flex:1;overflow-y:auto;overflow-x:hidden;}',
+      '.tch-sidebar-body::-webkit-scrollbar{width:3px;}',
+      '.tch-sidebar-body::-webkit-scrollbar-thumb{background:#222;border-radius:2px;}',
+      /* section label */
+      '.tch-section-lbl{padding:9px 10px 4px;font-size:6px;letter-spacing:.22em;color:rgba(255,255,255,.22);}',
+      /* MSG tab contact card */
+      '.tch-card{display:flex;align-items:center;gap:8px;padding:8px 10px;cursor:pointer;transition:background .12s;border-bottom:1px solid rgba(255,255,255,.03);position:relative;}',
+      '.tch-card:hover{background:rgba(255,255,255,.04);}',
+      '.tch-card.active{background:rgba(233,113,50,.09);border-right:2px solid #E97132;}',
+      /* avatar */
+      '.tch-av{border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;letter-spacing:0;color:#fff;flex-shrink:0;}',
+      /* card text */
+      '.tch-card-info{flex:1;min-width:0;}',
+      '.tch-card-name{font-size:8.5px;font-weight:600;letter-spacing:.09em;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}',
+      '.tch-card-meta{font-size:7px;letter-spacing:.05em;color:rgba(255,255,255,.38);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px;line-height:1.4;}',
+      /* unread badge */
+      '.tch-unread{min-width:16px;height:16px;border-radius:8px;background:#E97132;color:#fff;font-size:6.5px;display:flex;align-items:center;justify-content:center;padding:0 4px;letter-spacing:0;flex-shrink:0;}',
+      /* directory card — richer */
+      '.tch-dir-card{padding:11px 10px 10px;border-bottom:1px solid rgba(255,255,255,.04);cursor:default;}',
+      '.tch-dir-card:hover{background:rgba(255,255,255,.03);}',
+      '.tch-dir-header{display:flex;align-items:center;gap:9px;margin-bottom:6px;}',
+      '.tch-dir-name{font-size:9px;font-weight:700;letter-spacing:.1em;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}',
+      '.tch-dir-position{font-size:7.5px;letter-spacing:.1em;color:#E97132;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}',
+      '.tch-dir-company{font-size:7px;letter-spacing:.07em;color:rgba(255,255,255,.42);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}',
+      '.tch-dir-actions{display:flex;gap:5px;margin-top:8px;}',
+      /* buttons */
+      '.tch-connect-btn{font-size:7px;letter-spacing:.1em;padding:3px 8px;border:1px solid rgba(255,255,255,.2);background:none;color:rgba(255,255,255,.6);cursor:pointer;font-family:inherit;transition:all .15s;}',
+      '.tch-connect-btn:hover:not([disabled]){border-color:#E97132;color:#E97132;}',
+      '.tch-connect-btn.connected{color:#3DAA6A;border-color:rgba(61,170,106,.35);cursor:default;}',
+      '.tch-connect-btn.pending{color:rgba(255,255,255,.25);border-color:rgba(255,255,255,.1);cursor:default;}',
+      '.tch-msg-btn{font-size:7px;letter-spacing:.1em;padding:3px 8px;border:1px solid rgba(61,170,106,.38);background:rgba(61,170,106,.06);color:#3DAA6A;cursor:pointer;font-family:inherit;transition:all .15s;}',
+      '.tch-msg-btn:hover{background:rgba(61,170,106,.16);border-color:rgba(61,170,106,.6);}',
+      /* accept / decline */
+      '.tch-req-actions{display:flex;gap:5px;margin-top:6px;}',
+      '.tch-accept-btn{font-size:7px;letter-spacing:.1em;padding:3px 8px;border:1px solid rgba(61,170,106,.5);background:rgba(61,170,106,.08);color:#3DAA6A;cursor:pointer;font-family:inherit;transition:all .15s;}',
+      '.tch-accept-btn:hover{background:rgba(61,170,106,.2);}',
+      '.tch-decline-btn{font-size:7px;letter-spacing:.1em;padding:3px 8px;border:1px solid rgba(209,64,64,.3);background:none;color:rgba(209,64,64,.65);cursor:pointer;font-family:inherit;transition:all .15s;}',
+      '.tch-decline-btn:hover{color:#D14040;background:rgba(209,64,64,.08);}',
+      /* directory search */
+      '.tch-search-wrap{padding:8px 10px;border-bottom:1px solid #1a1a1a;flex-shrink:0;}',
+      '.tch-search-input{width:100%;background:#111;border:1px solid #222;color:#fff;font-size:8px;font-family:inherit;letter-spacing:.07em;padding:5px 8px;outline:none;box-sizing:border-box;}',
+      '.tch-search-input::placeholder{color:rgba(255,255,255,.2);}',
+      '.tch-search-input:focus{border-color:#2e2e2e;}',
+      /* thread header */
+      '.tchat-thread-hdr{padding:7px 12px;border-bottom:1px solid #1a1a1a;display:flex;align-items:center;gap:9px;flex-shrink:0;min-height:36px;}',
+      '.tch-hdr-info{min-width:0;}',
+      '.tch-hdr-name{font-size:8.5px;letter-spacing:.14em;color:#fff;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}',
+      '.tch-hdr-sub{font-size:7px;letter-spacing:.08em;color:rgba(255,255,255,.38);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}',
+      /* messages area */
+      '.tchat-messages{flex:1;overflow-y:auto;padding:8px 0 4px;min-height:0;}',
+      '.tchat-messages::-webkit-scrollbar{width:3px;}',
+      '.tchat-messages::-webkit-scrollbar-thumb{background:#1e1e1e;}',
+      '.tchat-empty{padding:28px 16px;text-align:center;font-size:8px;letter-spacing:.14em;color:rgba(255,255,255,.16);}',
+      /* date divider */
+      '.tchat-date-divider{display:flex;align-items:center;gap:8px;padding:10px 14px 6px;}',
+      '.tchat-date-divider::before,.tchat-date-divider::after{content:"";flex:1;height:1px;background:rgba(255,255,255,.07);}',
+      '.tchat-date-divider span{font-size:7px;letter-spacing:.18em;color:rgba(255,255,255,.2);white-space:nowrap;}',
+      /* message ROW — bubble layout */
+      '.tchat-msg-row{display:flex;align-items:flex-end;gap:7px;padding:2px 12px;}',
+      '.tchat-msg-row.mine{flex-direction:row-reverse;}',
+      '.tchat-msg-row.grouped{padding-top:1px;}',
+      '.tch-av-spacer{width:26px;min-width:26px;flex-shrink:0;}',
+      '.tchat-bubble-col{display:flex;flex-direction:column;max-width:73%;min-width:0;}',
+      '.tchat-msg-row.mine .tchat-bubble-col{align-items:flex-end;}',
+      /* sender name + time above bubble (first in group) */
+      '.tchat-bubble-meta{display:flex;align-items:baseline;gap:6px;margin-bottom:3px;padding:0 2px;}',
+      '.tchat-bubble-sender{font-size:7.5px;letter-spacing:.12em;color:#E97132;font-weight:700;}',
+      '.tchat-bubble-time{font-size:6.5px;letter-spacing:.04em;color:rgba(255,255,255,.25);}',
+      '.tchat-msg-row.mine .tchat-bubble-meta{justify-content:flex-end;}',
+      '.tchat-msg-row.mine .tchat-bubble-sender{color:#4A90D9;}',
+      /* bubble */
+      '.tchat-bubble{background:#161616;border:1px solid #242424;color:rgba(255,255,255,.88);font-size:9px;letter-spacing:.04em;line-height:1.5;padding:6px 10px;word-break:break-word;position:relative;}',
+      '.tchat-bubble.mine{background:#0f2640;border-color:#1a3a5c;color:#ddeeff;}',
+      /* delete on hover */
+      '.tchat-bubble-del{display:none;position:absolute;top:3px;right:4px;background:none;border:none;color:rgba(255,255,255,.25);cursor:pointer;font-size:8px;padding:0 1px;line-height:1;}',
+      '.tchat-bubble:hover .tchat-bubble-del{display:block;}',
+      '.tchat-bubble-del:hover{color:#D14040;}',
+      /* locked */
+      '.tch-locked{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:10px;}',
+      '.tch-locked-lbl{font-size:8px;letter-spacing:.14em;color:rgba(255,255,255,.22);text-align:center;padding:0 24px;line-height:1.7;}',
+      /* input area */
+      '.tchat-input-wrap{border-top:1px solid #1a1a1a;padding:8px;flex-shrink:0;display:flex;gap:0;}',
+      '.tchat-input{flex:1;background:#0d0d0d;border:1px solid #222;border-right:none;color:#fff;font-family:inherit;font-size:9px;letter-spacing:.05em;padding:7px 10px;resize:none;outline:none;min-height:32px;max-height:80px;}',
+      '.tchat-input:focus{border-color:#2a2a2a;}',
+      '.tchat-send{background:#E97132;border:none;color:#fff;padding:0 14px;font-size:12px;cursor:pointer;transition:background .15s;flex-shrink:0;}',
+      '.tchat-send:hover{background:#d0652a;}',
+      /* flash animation */
+      '@keyframes chatFlash{0%,100%{background:transparent}50%{background:rgba(233,113,50,.13)}}',
+      '.tchat-flash{animation:chatFlash .4s ease;}',
+    ].join('');
+    document.head.appendChild(s);
+  }
+
   /* ══════════════════════════════════════════════════════════════
      CHAT WIDGET
   ══════════════════════════════════════════════════════════════ */
 
   window.renderChatWidget = function (widgetId, body, sb, user) {
-    /* user = {id, firmId, name} */
+    injectChatStyles();
+
     body.style.padding = '0';
     body.style.overflow = 'hidden';
     body.style.display = 'flex';
     body.style.flexDirection = 'column';
     body.style.minHeight = '0';
-    body.innerHTML = '<div class="tchat-wrap" id="' + widgetId + '-chat">' +
-      '<div class="tchat-sidebar">' +
-        '<div class="tchat-sidebar-hdr">CHANNELS</div>' +
-        '<div id="' + widgetId + '-contacts"><div style="padding:10px;font-size:8px;color:#333;letter-spacing:.14em;">LOADING…</div></div>' +
-      '</div>' +
-      '<div class="tchat-main">' +
-        '<div class="tchat-thread-hdr" id="' + widgetId + '-thread-hdr">SELECT A CHANNEL</div>' +
-        '<div class="tchat-messages" id="' + widgetId + '-messages"><div class="tchat-empty">SELECT A CHANNEL OR CONTACT</div></div>' +
-        '<div class="tchat-input-wrap">' +
-          '<textarea class="tchat-input" id="' + widgetId + '-input" placeholder="Type a message…" rows="1"></textarea>' +
-          '<button class="tchat-send" id="' + widgetId + '-send">↵</button>' +
-        '</div>' +
-      '</div>' +
-    '</div>';
 
+    body.innerHTML =
+      '<div class="tchat-wrap" id="' + widgetId + '-chat">' +
+        '<div class="tchat-sidebar">' +
+          '<div class="tch-tabs">' +
+            '<div class="tch-tab active" id="' + widgetId + '-tab-messages" onclick="chatTab(\'' + widgetId + '\',\'messages\')">MSG</div>' +
+            '<div class="tch-tab" id="' + widgetId + '-tab-directory" onclick="chatTab(\'' + widgetId + '\',\'directory\')">DIR</div>' +
+            '<div class="tch-tab" id="' + widgetId + '-tab-requests" onclick="chatTab(\'' + widgetId + '\',\'requests\')">' +
+              'REQ<span class="tch-tab-badge" id="' + widgetId + '-req-badge" style="display:none;"></span>' +
+            '</div>' +
+          '</div>' +
+          '<div class="tch-sidebar-body" id="' + widgetId + '-sidebar-body"></div>' +
+        '</div>' +
+        '<div class="tchat-main">' +
+          '<div class="tchat-thread-hdr" id="' + widgetId + '-thread-hdr">' +
+            '<div class="tch-hdr-info"><div class="tch-hdr-name">SELECT A CHANNEL</div></div>' +
+          '</div>' +
+          '<div class="tchat-messages" id="' + widgetId + '-messages"><div class="tchat-empty">SELECT A CHANNEL OR CONTACT</div></div>' +
+          '<div class="tchat-input-wrap">' +
+            '<textarea class="tchat-input" id="' + widgetId + '-input" placeholder="Type a message…" rows="1"></textarea>' +
+            '<button class="tchat-send" id="' + widgetId + '-send">↵</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+
+    window._uid = user.id;
     var state = {
-      activeRecipient: null, /* null = broadcast */
+      mode: 'messages',
+      activeRecipient: null,
       activeName: 'BROADCAST',
+      activeContact: null,
       messages: [],
-      contacts: [],
+      allUsers: [],
+      connections: {},
+      outgoingReqs: {},
+      incomingReqs: [],
       unread: {},
+      myProfile: null,
       realtimeSub: null,
+      reqSub: null,
     };
 
-    /* ── Load contacts ── */
-    loadContacts(sb, user.firmId, function (contacts) {
-      state.contacts = contacts;
-      renderContacts(widgetId, contacts, state, sb, user);
-    });
+    sb.from('users').select('firm_name, position').eq('id', user.id).single()
+      .then(function (res) { if (res.data) state.myProfile = res.data; })
+      .catch(function () {});
 
-    /* ── Request notification permission silently on load ── */
-    if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
-      Notification.requestPermission();
+    function fullReload(cb) {
+      Promise.all([
+        sb.from('users').select('id, full_name, first_name, last_name, firm_name, position').then(function(r){ return r.data || []; }).catch(function(){ return []; }),
+        sb.from('chat_requests').select('*').or('from_user.eq.' + user.id + ',to_user.eq.' + user.id).then(function(r){ return r.data || []; }).catch(function(){ return []; }),
+      ]).then(function (results) {
+        var users = results[0];
+        var reqs  = results[1];
+
+        state.allUsers = users.filter(function(u){ return u.id !== user.id; }).map(function(u){
+          var contact = {
+            id: u.id,
+            name: (u.full_name || ((u.first_name||'') + ' ' + (u.last_name||''))).trim().toUpperCase() || 'UNKNOWN',
+            firm_name: (u.firm_name || '').toUpperCase(),
+            position: (u.position || '').toUpperCase(),
+          };
+          _contactMap[u.id] = contact;
+          return contact;
+        });
+
+        state.connections = {};
+        state.outgoingReqs = {};
+        state.incomingReqs = [];
+        reqs.forEach(function(r) {
+          if (r.status === 'accepted') {
+            var other = r.from_user === user.id ? r.to_user : r.from_user;
+            state.connections[other] = true;
+          } else if (r.status === 'pending') {
+            if (r.from_user === user.id) {
+              state.outgoingReqs[r.to_user] = true;
+            } else {
+              state.incomingReqs.push(r);
+            }
+          }
+        });
+
+        updateReqBadge(widgetId, state);
+        renderSidebar(widgetId, state, sb, user);
+        if (cb) cb();
+      });
     }
 
-    /* ── Shared handler for incoming messages ── */
+    fullReload(function() {
+      chatSelectContact(widgetId, null, 'BROADCAST · ALL MEMBERS', null);
+    });
+
+    /* ── Incoming message handler ── */
     var _seenIds = {};
     function handleIncoming(msg) {
       if (!msg || !msg.id) return;
@@ -78,16 +255,11 @@
           updateBadges(widgetId, state);
         }
         var contactEl = document.getElementById(widgetId + '-c-' + key);
-        if (contactEl) {
-          contactEl.classList.remove('tchat-flash');
-          void contactEl.offsetWidth;
-          contactEl.classList.add('tchat-flash');
-        }
+        if (contactEl) { contactEl.classList.remove('tchat-flash'); void contactEl.offsetWidth; contactEl.classList.add('tchat-flash'); }
         var titleEl = document.getElementById(widgetId + '-title');
         if (titleEl && !titleEl.textContent.includes('●')) titleEl.textContent = '● FIRM CHAT';
         if (typeof Notification !== 'undefined' && Notification.permission === 'granted' && !document.hasFocus()) {
-          var senderName = msg.sender_name || 'Someone';
-          new Notification(msg.recipient_id ? senderName + ' sent you a message' : senderName + ' (broadcast)', {
+          new Notification(msg.sender_name || 'Someone', {
             body: (msg.content || '').slice(0, 100),
             icon: '/favicon.ico',
             tag: 'tbt-chat-' + (msg.recipient_id || 'broadcast'),
@@ -96,24 +268,26 @@
       }
     }
 
-    /* ── Realtime subscription ── */
     state.realtimeSub = sb.channel('firm-messages-' + user.firmId)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, function (payload) {
-        handleIncoming(payload.new);
-      })
+      .on('postgres_changes', {event:'INSERT', schema:'public', table:'messages'}, function(p){ handleIncoming(p.new); })
       .subscribe();
 
-    /* ── Polling fallback — catches messages if realtime misses them ── */
+    try {
+      state.reqSub = sb.channel('chat-requests-' + user.id)
+        .on('postgres_changes', {event:'*', schema:'public', table:'chat_requests'}, function() { fullReload(); })
+        .subscribe();
+    } catch(e) {}
+
     var _pollSince = new Date().toISOString();
     var _pollTimer = setInterval(function () {
       if (!document.getElementById(widgetId + '-messages')) { clearInterval(_pollTimer); return; }
       sb.from('messages').select('*')
         .eq('firm_id', user.firmId)
         .gt('created_at', _pollSince)
-        .order('created_at', { ascending: true })
+        .order('created_at', {ascending:true})
         .then(function (res) {
           if (!res.data || !res.data.length) return;
-          _pollSince = res.data[res.data.length - 1].created_at;
+          _pollSince = res.data[res.data.length-1].created_at;
           res.data.forEach(handleIncoming);
         });
     }, 4000);
@@ -125,6 +299,7 @@
     function doSend() {
       var text = (inputEl.value || '').trim();
       if (!text) return;
+      if (state.activeRecipient && !state.connections[state.activeRecipient]) return;
       inputEl.value = '';
       inputEl.style.height = 'auto';
       sb.from('messages').insert({
@@ -135,172 +310,419 @@
         content: text,
       }).select().then(function (res) {
         if (res.error) return;
-        var msg = (res.data && res.data[0]) || {sender_id: user.id, sender_name: user.name, content: text, created_at: new Date().toISOString(), recipient_id: state.activeRecipient};
-        if (msg.id) _seenIds[msg.id] = true; /* prevent polling from duplicating */
+        var msg = (res.data && res.data[0]) || {sender_id:user.id, sender_name:user.name, content:text, created_at:new Date().toISOString(), recipient_id:state.activeRecipient};
+        if (msg.id) _seenIds[msg.id] = true;
         appendMessage(widgetId, msg, user.id, sb);
         scrollBottom(widgetId);
       });
     }
 
     sendBtn.addEventListener('click', doSend);
-    inputEl.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); doSend(); }
-    });
-    inputEl.addEventListener('input', function () {
-      inputEl.style.height = 'auto';
-      inputEl.style.height = Math.min(inputEl.scrollHeight, 80) + 'px';
-    });
+    inputEl.addEventListener('keydown', function(e){ if (e.key==='Enter' && !e.shiftKey){e.preventDefault();doSend();} });
+    inputEl.addEventListener('input', function(){ inputEl.style.height='auto'; inputEl.style.height=Math.min(inputEl.scrollHeight,80)+'px'; });
 
-    /* ── Select channel helper (exposed for contact clicks) ── */
-    window['_chatSelect_' + widgetId] = function (recipientId, name, contacts) {
+    /* ── Select channel ── */
+    window['_chatSelect_' + widgetId] = function (recipientId, name, contact) {
       state.activeRecipient = recipientId;
       state.activeName = name;
+      state.activeContact = contact;
       var key = recipientId || 'broadcast';
       delete state.unread[key];
-      /* explicitly hide the badge for this contact */
-      var b = document.getElementById(widgetId + '-badge-' + key);
-      if (b) b.style.display = 'none';
       updateBadges(widgetId, state);
-      /* clear widget title badge */
-      var total = Object.values(state.unread).reduce(function(a,b){return a+b;}, 0);
+      var total = Object.values(state.unread).reduce(function(a,b){return a+b;},0);
       var titleEl = document.getElementById(widgetId + '-title');
-      if (titleEl && total === 0) titleEl.textContent = 'FIRM CHAT';
-      document.getElementById(widgetId + '-thread-hdr').textContent = name;
+      if (titleEl && total===0) titleEl.textContent = 'FIRM CHAT';
+
+      /* thread header */
+      var hdr = document.getElementById(widgetId + '-thread-hdr');
+      if (hdr) {
+        if (contact) {
+          var parts = [];
+          if (contact.position)  parts.push(escH(contact.position));
+          if (contact.firm_name) parts.push(escH(contact.firm_name));
+          hdr.innerHTML =
+            avHtml(contact.name, 26) +
+            '<div class="tch-hdr-info">' +
+              '<div class="tch-hdr-name">' + escH(name) + '</div>' +
+              (parts.length ? '<div class="tch-hdr-sub">' + parts.join(' · ') + '</div>' : '') +
+            '</div>';
+        } else {
+          hdr.innerHTML =
+            '<div class="tch-av" style="width:26px;height:26px;min-width:26px;font-size:13px;background:#1a1a1a;">📡</div>' +
+            '<div class="tch-hdr-info">' +
+              '<div class="tch-hdr-name">BROADCAST</div>' +
+              '<div class="tch-hdr-sub">ALL MEMBERS</div>' +
+            '</div>';
+        }
+      }
+
       var msgEl = document.getElementById(widgetId + '-messages');
       msgEl.innerHTML = '<div class="tchat-empty">LOADING…</div>';
+
+      if (recipientId && !state.connections[recipientId]) {
+        msgEl.innerHTML = '<div class="tch-locked"><div class="tch-locked-lbl">CONNECT WITH THIS CONTACT TO START A DIRECT MESSAGE</div></div>';
+        return;
+      }
+
       loadMessages(sb, user.firmId, user.id, recipientId, function (msgs) {
         state.messages = msgs;
         renderMessages(widgetId, msgs, user.id, sb);
         scrollBottom(widgetId);
       });
-      /* update active state on contacts */
-      document.querySelectorAll('#' + widgetId + '-contacts .tchat-contact').forEach(function (el) {
-        el.classList.remove('active');
-      });
+
+      document.querySelectorAll('#' + widgetId + '-sidebar-body .tch-card').forEach(function(el){ el.classList.remove('active'); });
+      var activeEl = document.getElementById(widgetId + '-c-' + key);
+      if (activeEl) activeEl.classList.add('active');
     };
   };
 
-  function loadContacts(sb, firmId, cb) {
-    sb.from('users').select('id, full_name, first_name, last_name').eq('firm_id', firmId)
-      .then(function (res) {
-        var contacts = (res.data || []).map(function (u) {
-          return {id: u.id, name: (u.full_name || ((u.first_name||'') + ' ' + (u.last_name||''))).trim().toUpperCase() || 'UNKNOWN'};
-        });
-        cb(contacts);
-      }).catch(function () { cb([]); });
-  }
-
-  function renderContacts(widgetId, contacts, state, sb, user) {
-    var el = document.getElementById(widgetId + '-contacts');
-    if (!el) return;
-    var html = '<div class="tchat-contact tchat-broadcast" id="' + widgetId + '-c-broadcast" onclick="chatSelectContact(\'' + widgetId + '\',null,\'BROADCAST\')">' +
-      '<div class="tchat-contact-name">BROADCAST</div>' +
-      '<div class="tchat-contact-sub">ALL MEMBERS</div>' +
-      '<span class="tchat-contact-badge" id="' + widgetId + '-badge-broadcast" style="display:none;"></span>' +
-    '</div>';
-    contacts.forEach(function (c) {
-      if (c.id === user.id) return;
-      html += '<div class="tchat-contact" id="' + widgetId + '-c-' + c.id + '" onclick="chatSelectContact(\'' + widgetId + '\',\'' + c.id + '\',\'' + escQ(c.name) + '\')">' +
-        '<div class="tchat-contact-name">' + escH(c.name.split(' ')[0]) + '</div>' +
-        '<div class="tchat-contact-sub">DM</div>' +
-        '<span class="tchat-contact-badge" id="' + widgetId + '-badge-' + c.id + '" style="display:none;"></span>' +
-      '</div>';
+  /* ── Tab switching ── */
+  window.chatTab = function(widgetId, mode) {
+    var w = document.getElementById(widgetId + '-chat');
+    if (!w) return;
+    var state = window['_chatState_' + widgetId];
+    if (!state) return;
+    state.mode = mode;
+    ['messages','directory','requests'].forEach(function(m) {
+      var t = document.getElementById(widgetId + '-tab-' + m);
+      if (t) t.classList.toggle('active', m === mode);
     });
-    el.innerHTML = html;
-
-    /* auto-select broadcast */
-    chatSelectContact(widgetId, null, 'BROADCAST · ALL MEMBERS');
-  }
-
-  window.chatSelectContact = function (widgetId, recipientId, name) {
-    var fn = window['_chatSelect_' + widgetId];
-    if (fn) fn(recipientId, name);
-    var activeId = recipientId || 'broadcast';
-    document.querySelectorAll('#' + widgetId + '-contacts .tchat-contact').forEach(function (el) {
-      el.classList.remove('active');
-    });
-    var activeEl = document.getElementById(widgetId + '-c-' + activeId);
-    if (activeEl) activeEl.classList.add('active');
+    var sb = window._sbClient;
+    var user = window['_chatUser_' + widgetId];
+    if (sb && user) renderSidebar(widgetId, state, sb, user);
   };
+
+  function renderSidebar(widgetId, state, sb, user) {
+    window['_chatState_' + widgetId] = state;
+    window['_chatUser_' + widgetId]  = user;
+    var el = document.getElementById(widgetId + '-sidebar-body');
+    if (!el) return;
+    if (state.mode === 'messages')  renderMessagesTab(widgetId, state, sb, user, el);
+    if (state.mode === 'directory') renderDirectoryTab(widgetId, state, sb, user, el);
+    if (state.mode === 'requests')  renderRequestsTab(widgetId, state, sb, user, el);
+  }
+
+  /* ── MSG tab ── */
+  function renderMessagesTab(widgetId, state, sb, user, el) {
+    var html = '';
+
+    html += '<div class="tch-section-lbl">CHANNELS</div>';
+    html += '<div class="tch-card" id="' + widgetId + '-c-broadcast" onclick="chatSelectContact(\'' + widgetId + '\',null,\'BROADCAST\',null)">' +
+      '<div class="tch-av" style="width:28px;height:28px;min-width:28px;font-size:13px;background:#1a1a1a;">📡</div>' +
+      '<div class="tch-card-info">' +
+        '<div class="tch-card-name">BROADCAST</div>' +
+        '<div class="tch-card-meta">ALL MEMBERS</div>' +
+      '</div>' +
+      '<span class="tch-unread" id="' + widgetId + '-badge-broadcast" style="display:none;"></span>' +
+    '</div>';
+
+    var connectedUsers = state.allUsers.filter(function(u){ return state.connections[u.id]; });
+    if (connectedUsers.length) {
+      html += '<div class="tch-section-lbl">DIRECT MESSAGES</div>';
+      connectedUsers.forEach(function(c) {
+        var metaParts = [];
+        if (c.position)  metaParts.push(c.position);
+        if (c.firm_name) metaParts.push(c.firm_name);
+        html += '<div class="tch-card" id="' + widgetId + '-c-' + c.id + '" onclick="chatSelectContact(\'' + widgetId + '\',\'' + c.id + '\',\'' + escQ(c.name) + '\',_contactMap[\'' + c.id + '\'])">' +
+          avHtml(c.name) +
+          '<div class="tch-card-info">' +
+            '<div class="tch-card-name">' + escH(c.name) + '</div>' +
+            '<div class="tch-card-meta">' + escH(metaParts.join(' · ') || 'DIRECT MESSAGE') + '</div>' +
+          '</div>' +
+          '<span class="tch-unread" id="' + widgetId + '-badge-' + c.id + '" style="display:none;"></span>' +
+        '</div>';
+      });
+    } else {
+      html += '<div style="padding:14px 10px;font-size:7.5px;letter-spacing:.1em;color:rgba(255,255,255,.18);line-height:1.7;">CONNECT WITH COLLEAGUES IN THE DIRECTORY TO START DIRECT MESSAGES</div>';
+    }
+
+    el.innerHTML = html;
+    updateBadges(widgetId, state);
+    var activeKey = state.activeRecipient || 'broadcast';
+    var activeEl = document.getElementById(widgetId + '-c-' + activeKey);
+    if (activeEl) activeEl.classList.add('active');
+  }
+
+  /* ── DIR tab — rich cards ── */
+  function renderDirectoryTab(widgetId, state, sb, user, el) {
+    var searchId = widgetId + '-dir-search';
+    el.innerHTML =
+      '<div class="tch-search-wrap"><input class="tch-search-input" id="' + searchId + '" placeholder="SEARCH BY NAME, ROLE OR FIRM…" autocomplete="off"></div>' +
+      '<div id="' + widgetId + '-dir-list"></div>';
+
+    var searchEl = document.getElementById(searchId);
+    var listEl   = document.getElementById(widgetId + '-dir-list');
+
+    function renderList(filter) {
+      var lower = (filter||'').toLowerCase();
+      var users = state.allUsers.filter(function(u) {
+        if (!lower) return true;
+        return (u.name + ' ' + u.firm_name + ' ' + u.position).toLowerCase().indexOf(lower) !== -1;
+      });
+
+      if (!users.length) {
+        listEl.innerHTML = '<div style="padding:18px 10px;font-size:7.5px;letter-spacing:.12em;color:rgba(255,255,255,.18);text-align:center;">NO RESULTS</div>';
+        return;
+      }
+
+      var html = '';
+      users.forEach(function(u) {
+        var isConn = !!state.connections[u.id];
+        var isPend = !!state.outgoingReqs[u.id];
+        html += '<div class="tch-dir-card">' +
+          '<div class="tch-dir-header">' +
+            avHtml(u.name, 32) +
+            '<div style="min-width:0;flex:1;">' +
+              '<div class="tch-dir-name">' + escH(u.name) + '</div>' +
+              (u.position  ? '<div class="tch-dir-position">' + escH(u.position) + '</div>' : '') +
+              (u.firm_name ? '<div class="tch-dir-company">' + escH(u.firm_name) + '</div>' : '') +
+            '</div>' +
+          '</div>' +
+          '<div class="tch-dir-actions">';
+
+        if (isConn) {
+          html +=
+            '<button class="tch-msg-btn" onclick="chatGoMsg(\'' + widgetId + '\',\'' + u.id + '\',\'' + escQ(u.name) + '\',_contactMap[\'' + u.id + '\'])">↗ MESSAGE</button>' +
+            '<button class="tch-connect-btn connected" disabled>CONNECTED ✓</button>';
+        } else if (isPend) {
+          html += '<button class="tch-connect-btn pending" disabled>REQUEST SENT…</button>';
+        } else {
+          html += '<button class="tch-connect-btn" onclick="chatConnect(\'' + widgetId + '\',\'' + u.id + '\')">+ CONNECT</button>';
+        }
+
+        html += '</div></div>';
+      });
+      listEl.innerHTML = html;
+    }
+
+    renderList('');
+    if (searchEl) {
+      searchEl.addEventListener('input', function(){ renderList(searchEl.value); });
+      searchEl.addEventListener('click', function(e){ e.stopPropagation(); });
+    }
+  }
+
+  /* ── REQ tab ── */
+  function renderRequestsTab(widgetId, state, sb, user, el) {
+    var reqs = state.incomingReqs;
+    var html = '';
+    if (!reqs.length) {
+      html = '<div style="padding:24px 10px;font-size:7.5px;letter-spacing:.12em;color:rgba(255,255,255,.18);text-align:center;">NO PENDING REQUESTS</div>';
+    } else {
+      html += '<div class="tch-section-lbl">PENDING (' + reqs.length + ')</div>';
+      reqs.forEach(function(r) {
+        var name = (r.from_name||'UNKNOWN').toUpperCase();
+        var firm = (r.from_firm||'').toUpperCase();
+        var pos  = (r.from_pos||'').toUpperCase();
+        html += '<div class="tch-dir-card">' +
+          '<div class="tch-dir-header">' +
+            avHtml(name, 32) +
+            '<div style="min-width:0;flex:1;">' +
+              '<div class="tch-dir-name">' + escH(name) + '</div>' +
+              (pos  ? '<div class="tch-dir-position">' + escH(pos) + '</div>' : '') +
+              (firm ? '<div class="tch-dir-company">' + escH(firm) + '</div>' : '') +
+            '</div>' +
+          '</div>' +
+          '<div class="tch-req-actions">' +
+            '<button class="tch-accept-btn" onclick="chatAccept(\'' + widgetId + '\',\'' + r.id + '\',\'' + r.from_user + '\')">ACCEPT</button>' +
+            '<button class="tch-decline-btn" onclick="chatDecline(\'' + widgetId + '\',\'' + r.id + '\')">DECLINE</button>' +
+          '</div>' +
+        '</div>';
+      });
+    }
+    el.innerHTML = html;
+  }
+
+  /* ── Global callbacks ── */
+
+  window.chatSelectContact = function (widgetId, recipientId, name, contact) {
+    var fn = window['_chatSelect_' + widgetId];
+    if (fn) fn(recipientId, name, contact);
+  };
+
+  /* Go to MSG tab and open DM — called from DIR tab MESSAGE button */
+  window.chatGoMsg = function (widgetId, userId, name, contact) {
+    chatTab(widgetId, 'messages');
+    setTimeout(function() {
+      chatSelectContact(widgetId, userId, name, contact);
+    }, 0);
+  };
+
+  window.chatConnect = function (widgetId, toUserId) {
+    var state = window['_chatState_' + widgetId];
+    var user  = window['_chatUser_' + widgetId];
+    var sb    = window._sbClient;
+    if (!state || !user || !sb) return;
+    if (state.connections[toUserId] || state.outgoingReqs[toUserId]) return;
+    var mp = state.myProfile || {};
+    sb.from('chat_requests').insert({
+      from_user: user.id,
+      to_user:   toUserId,
+      from_name: user.name,
+      from_firm: mp.firm_name || null,
+      from_pos:  mp.position  || null,
+      status:    'pending',
+    }).then(function(res) {
+      if (res.error) return;
+      state.outgoingReqs[toUserId] = true;
+      var el = document.getElementById(widgetId + '-sidebar-body');
+      if (el) renderDirectoryTab(widgetId, state, sb, user, el);
+    });
+  };
+
+  window.chatAccept = function (widgetId, reqId, fromUserId) {
+    var sb = window._sbClient;
+    if (!sb) return;
+    sb.from('chat_requests').update({status:'accepted'}).eq('id', reqId).then(function(res) {
+      if (res.error) return;
+      var state = window['_chatState_' + widgetId];
+      var user  = window['_chatUser_' + widgetId];
+      if (!state) return;
+      state.connections[fromUserId] = true;
+      state.incomingReqs = state.incomingReqs.filter(function(r){ return r.id !== reqId; });
+      delete state.outgoingReqs[fromUserId];
+      updateReqBadge(widgetId, state);
+      var el = document.getElementById(widgetId + '-sidebar-body');
+      if (el) renderRequestsTab(widgetId, state, sb, user, el);
+    });
+  };
+
+  window.chatDecline = function (widgetId, reqId) {
+    var sb = window._sbClient;
+    if (!sb) return;
+    sb.from('chat_requests').update({status:'declined'}).eq('id', reqId).then(function(res) {
+      if (res.error) return;
+      var state = window['_chatState_' + widgetId];
+      var user  = window['_chatUser_' + widgetId];
+      if (!state) return;
+      state.incomingReqs = state.incomingReqs.filter(function(r){ return r.id !== reqId; });
+      updateReqBadge(widgetId, state);
+      var el = document.getElementById(widgetId + '-sidebar-body');
+      if (el) renderRequestsTab(widgetId, state, sb, user, el);
+    });
+  };
+
+  function updateReqBadge(widgetId, state) {
+    var badge = document.getElementById(widgetId + '-req-badge');
+    if (!badge) return;
+    var count = state.incomingReqs.length;
+    badge.style.display = count ? 'flex' : 'none';
+    badge.textContent = count > 9 ? '9+' : count;
+  }
 
   function updateBadges(widgetId, state) {
     Object.keys(state.unread).forEach(function (key) {
-      var badgeEl = document.getElementById(widgetId + '-badge-' + key);
-      if (!badgeEl) return;
-      var count = state.unread[key] || 0;
-      badgeEl.style.display = count ? 'flex' : 'none';
-      badgeEl.textContent = count > 9 ? '9+' : count;
+      var b = document.getElementById(widgetId + '-badge-' + key);
+      if (!b) return;
+      var n = state.unread[key] || 0;
+      b.style.display = n ? 'flex' : 'none';
+      b.textContent = n > 9 ? '9+' : n;
     });
   }
 
   function loadMessages(sb, firmId, userId, recipientId, cb) {
-    var query = sb.from('messages').select('*').eq('firm_id', firmId).order('created_at', {ascending: true}).limit(80);
+    var query = sb.from('messages').select('*').eq('firm_id', firmId).order('created_at', {ascending:true}).limit(80);
     if (recipientId === null) {
       query = query.is('recipient_id', null);
     } else {
       query = query.or('and(sender_id.eq.' + userId + ',recipient_id.eq.' + recipientId + '),and(sender_id.eq.' + recipientId + ',recipient_id.eq.' + userId + ')');
     }
-    query.then(function (res) { cb(res.data || []); }).catch(function () { cb([]); });
+    query.then(function(res){ cb(res.data||[]); }).catch(function(){ cb([]); });
   }
 
-  function msgBubble(m, myId, sb) {
-    var d = new Date(m.created_at);
+  /* ── Bubble message element ── */
+  function msgBubble(m, myId, prevMsg) {
     var mine = m.sender_id === myId;
-    var div = document.createElement('div');
-    div.className = 'tchat-msg';
-    div.dataset.msgId = m.id;
-    var deleteBtn = mine
-      ? '<button class="tchat-msg-del" title="Delete message" onclick="window._chatDeleteMsg(\'' + m.id + '\',this)">✕</button>'
+    var d = new Date(m.created_at);
+    var timeStr = d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+
+    /* Group if same sender within 4 minutes of previous */
+    var grouped = prevMsg &&
+      prevMsg.sender_id === m.sender_id &&
+      (d - new Date(prevMsg.created_at)) < 4 * 60 * 1000;
+
+    var row = document.createElement('div');
+    row.className = 'tchat-msg-row' + (mine ? ' mine' : '') + (grouped ? ' grouped' : '');
+    row.dataset.msgId = m.id;
+
+    var delBtn = mine
+      ? '<button class="tchat-bubble-del" title="Delete" onclick="window._chatDeleteMsg(\'' + m.id + '\',this)">✕</button>'
       : '';
-    div.innerHTML =
-      '<div class="tchat-msg-meta">' +
-        '<span class="tchat-msg-name' + (mine ? ' mine' : '') + '">' + escH(m.sender_name || 'UNKNOWN') + '</span>' +
-        '<span class="tchat-msg-time">' + d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) + '</span>' +
-        deleteBtn +
-      '</div>' +
-      '<div class="tchat-msg-body">' + escH(m.content) + '</div>';
-    return div;
+
+    var meta = !grouped
+      ? '<div class="tchat-bubble-meta">' +
+          (!mine ? '<span class="tchat-bubble-sender">' + escH(m.sender_name||'UNKNOWN') + '</span>' : '') +
+          '<span class="tchat-bubble-time">' + timeStr + '</span>' +
+        '</div>'
+      : '';
+
+    var avatarHtml = !mine
+      ? (grouped ? '<div class="tch-av-spacer"></div>' : avHtml(m.sender_name||'?', 26))
+      : '';
+
+    row.innerHTML =
+      avatarHtml +
+      '<div class="tchat-bubble-col">' +
+        meta +
+        '<div class="tchat-bubble' + (mine ? ' mine' : '') + '">' +
+          escH(m.content) +
+          delBtn +
+        '</div>' +
+      '</div>';
+
+    return row;
   }
 
-  /* Global delete handler — called by inline onclick */
   window._chatDeleteMsg = function (msgId, btn) {
     if (!window._sbClient) return;
     if (!confirm('Delete this message?')) return;
     btn.disabled = true;
     window._sbClient.from('messages').delete().eq('id', msgId).eq('sender_id', window._uid)
-      .then(function (res) {
-        if (res.error) { btn.disabled = false; return; }
-        var row = document.querySelector('.tchat-msg[data-msg-id="' + msgId + '"]');
+      .then(function(res) {
+        if (res.error) { btn.disabled=false; return; }
+        var row = document.querySelector('.tchat-msg-row[data-msg-id="' + msgId + '"]');
         if (row) row.remove();
       });
   };
 
-  function renderMessages(widgetId, msgs, myId, sb) {
+  function renderMessages(widgetId, msgs, myId) {
     var el = document.getElementById(widgetId + '-messages');
     if (!el) return;
     if (!msgs.length) { el.innerHTML = '<div class="tchat-empty">NO MESSAGES YET — SAY HELLO</div>'; return; }
     el.innerHTML = '';
     var lastDate = '';
-    msgs.forEach(function (m) {
+    var prevMsg = null;
+    msgs.forEach(function(m) {
       var d = new Date(m.created_at);
-      var dateStr = d.toLocaleDateString('en-GB', {weekday:'short', day:'numeric', month:'short'});
+      var dateStr = d.toLocaleDateString('en-GB', {weekday:'short', day:'numeric', month:'short'}).toUpperCase();
       if (dateStr !== lastDate) {
         var sep = document.createElement('div');
         sep.className = 'tchat-date-divider';
-        sep.textContent = dateStr;
+        sep.innerHTML = '<span>' + dateStr + '</span>';
         el.appendChild(sep);
         lastDate = dateStr;
+        prevMsg = null; /* reset grouping on date break */
       }
-      el.appendChild(msgBubble(m, myId, sb));
+      el.appendChild(msgBubble(m, myId, prevMsg));
+      prevMsg = m;
     });
   }
 
-  function appendMessage(widgetId, msg, myId, sb) {
+  function appendMessage(widgetId, msg, myId) {
     var el = document.getElementById(widgetId + '-messages');
     if (!el) return;
-    var empty = el.querySelector('.tchat-empty');
+    var empty = el.querySelector('.tchat-empty, .tch-locked');
     if (empty) empty.remove();
-    el.appendChild(msgBubble(msg, myId, sb));
+    /* Find prev msg for grouping */
+    var rows = el.querySelectorAll('.tchat-msg-row');
+    var prevMsg = null;
+    if (rows.length) {
+      var lastId = rows[rows.length-1].dataset.msgId;
+      /* Approximate: check by sender, good enough */
+      var lastSenderId = rows[rows.length-1].classList.contains('mine') ? myId : 'other';
+      /* We pass null prev to skip grouping on append — simpler */
+    }
+    el.appendChild(msgBubble(msg, myId, null));
   }
 
   function scrollBottom(widgetId) {
@@ -325,12 +747,10 @@
       renderCalendar(widgetId, body, state, sb, userId, today);
     }
 
-    /* Load personal events */
     sb.from('calendar_events').select('*').eq('user_id', userId)
       .then(function (res) { state.personalEvts = res.data || []; rebuild(); })
       .catch(function () { rebuild(); });
 
-    /* Load economic calendar from Finnhub */
     loadEconCalendar(function (evts) { state.econEvts = evts; rebuild(); });
 
     rebuild();
@@ -350,10 +770,9 @@
     var year = state.year, month = state.month;
     var first = new Date(year, month, 1);
     var last  = new Date(year, month + 1, 0);
-    var startDow = (first.getDay() + 6) % 7; /* Mon=0 */
+    var startDow = (first.getDay() + 6) % 7;
     var monthName = first.toLocaleDateString('en-GB', {month:'long', year:'numeric'}).toUpperCase();
 
-    /* Build event map */
     var evtMap = {};
     state.personalEvts.forEach(function (e) {
       var k = e.event_date.slice(0,10);
@@ -369,7 +788,6 @@
 
     var dows = ['M','T','W','T','F','S','S'].map(function(d){ return '<div class="tcal-dow">' + d + '</div>'; }).join('');
 
-    /* Days grid */
     var days = '';
     var totalCells = Math.ceil((startDow + last.getDate()) / 7) * 7;
     for (var i = 0; i < totalCells; i++) {
@@ -387,7 +805,6 @@
       '</div>';
     }
 
-    /* Event panel for selected day */
     var evtPanel = '';
     if (state.selected && evtMap[state.selected]) {
       var selEvts = evtMap[state.selected];
@@ -430,13 +847,11 @@
       '<div class="tcal-grid" id="' + widgetId + '-cal-grid">' + dows + days + '</div>' +
       evtPanel;
 
-    /* Store state on body for callbacks */
     body._calState = state;
     body._calSb    = sb;
     body._calUid   = userId;
   }
 
-  /* ── Calendar callbacks (global for onclick) ── */
   window.calNav = function (widgetId, dir) {
     var body = document.getElementById(widgetId + '-body');
     if (!body || !body._calState) return;
@@ -461,8 +876,8 @@
   };
 
   window.calSaveEvent = function (widgetId) {
-    var body   = document.getElementById(widgetId + '-body');
-    var input  = document.getElementById(widgetId + '-add-input');
+    var body  = document.getElementById(widgetId + '-body');
+    var input = document.getElementById(widgetId + '-add-input');
     if (!body || !body._calState || !input || !input.value.trim()) return;
     var s = body._calState;
     body._calSb.from('calendar_events').insert({

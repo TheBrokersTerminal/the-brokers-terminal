@@ -125,8 +125,45 @@ serve(async (req) => {
     }
 
     if (event.type === "invoice.payment_succeeded") {
-      const subId = event.data.object.subscription;
+      const invoice = event.data.object;
+      const subId = invoice.subscription;
       if (subId) await supabase.from("firms").update({ status: "active", updated_at: new Date().toISOString() }).eq("stripe_subscription_id", subId);
+
+      /* ── AUTO-ALLOCATE CREDITS on subscription billing ── */
+      const billingReason = invoice.billing_reason || '';
+      if (subId && (billingReason === 'subscription_create' || billingReason === 'subscription_cycle')) {
+        const invoiceId = invoice.id;
+        const customerId = invoice.customer;
+        const descTag = `auto-alloc:${invoiceId}`;
+
+        /* Idempotency: check this invoice hasn't already been credited */
+        const { data: existing } = await supabase
+          .from("credit_transactions")
+          .select("id")
+          .like("description", `${descTag}%`)
+          .limit(1);
+        if (!existing || existing.length === 0) {
+          /* Determine tier from subscription */
+          const { tier } = await getProductFromSubscription(subId);
+          const creditAmount = tier === "corporate" ? 5000 : 1000;
+
+          /* Get customer email → auth user UUID */
+          const email = await getCustomerEmail(customerId);
+          if (email) {
+            const { data: { users } } = await supabase.auth.admin.listUsers();
+            const authUser = users?.find((u: any) => u.email === email);
+            if (authUser) {
+              /* Call add_credits RPC (upsert — creates account if first time) */
+              await supabase.rpc("add_credits", {
+                p_user_id: authUser.id,
+                p_amount: creditAmount,
+                p_type: "allocation",
+                p_description: `${descTag}:${tier}:${billingReason}`,
+              });
+            }
+          }
+        }
+      }
     }
 
   } catch (err) {
