@@ -4,6 +4,8 @@
    POST { query, type }   → full detail via Claude (company or concept/event)
    ─────────────────────────────────────────────────────────────────────────── */
 
+const { PSYCH_VAULT } = require('./explain');
+
 const FINNHUB_KEY = process.env.FINNHUB_KEY || 'da6p77hr01qqqkkgl7b0da6p77hr01qqqkkgl7bg';
 const SUPABASE_URL = 'https://oqpodikelxhwcnjdwojw.supabase.co';
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY;
@@ -108,25 +110,57 @@ async function serverDeductCredits(authHeader, creditCost, description) {
   return { ok: true, balance: result.balance };
 }
 
-/* ── Lean system prompt for concept/event searches — fast, focused, no company noise ── */
-const CONCEPT_SYSTEM = `You are The Brokers Intelligence Engine, briefing UK financial brokers on economic events, historical crises, and macro concepts for use in client conversations.
+/* ── CONCEPT_SYSTEM: full V4.0 psychology vault (from explain.js) + concept output format ── */
+const CONCEPT_SYSTEM = PSYCH_VAULT + `
 
-SALES PSYCHOLOGY — embed in every pitch field:
-• THREE TENS: create certainty in the Concept (this is real and important), the Timing (now is the moment), the Broker (they are the authority on this)
-• CERTAINTY SCALE: write at 9/10 certainty — confident, factual, specific. Certainty is the carrier wave.
-• ASSET NEUTRALITY: in ALL pitch fields never name a specific asset. Use "physical assets", "tangible assets", "real assets", "alternative assets", "assets outside the banking system". Educational fields (whatHappened, causes, timeline, impactOnAssets) may reference asset classes.
-• SPIN: spinQuestions follow Situation → Problem/Implication → Need-Payoff. Need-Payoff starts with "So if you had..." or "What would it mean if..."
-• FUTURE PACE: emotionalCase = loss frame first (their situation without acting), then gain frame (with right positioning). 2 sentences.
-• OBJECTION HANDLING: acknowledge genuinely → reframe as evidence for action → close with need-payoff question. Conversational, not scripted.
-• URGENCY: only real, verifiable urgency — a rate decision, structural shift, data release. Never manufactured.
-• SOCIAL PROOF: what sophisticated investors, family offices, or institutional allocators are doing. One sentence.
-• OPENING LINE: sets the evaluative frame — a question or statement that makes the client want to understand this concept. Never a generic opener.
+═══════════════════════════════════════════════════
+CONCEPT / EVENT INTELLIGENCE — OUTPUT RULES (NON-NEGOTIABLE)
+═══════════════════════════════════════════════════
 
-OUTPUT RULES — non-negotiable:
-• Return ONLY valid, complete JSON — no markdown fences, no preamble, no explanation after
-• Complete every single field — never truncate mid-JSON
-• Timeline: exactly 3 entries, most pivotal moments only
-• Every text field: 1-2 sentences maximum unless the field label says otherwise`;
+THIS IS A CONCEPT OR EVENT SEARCH — not a company profile search.
+Apply ALL psychology frameworks above to every pitch field.
+ASSET NEUTRALITY: In ALL pitch fields, NEVER name a specific asset class. Use "physical assets", "tangible assets", "real assets", "alternative assets", "assets outside the banking system". Educational fields (whatHappened, causes, timeline, impactOnAssets) may reference asset classes by name.
+
+Return ONLY this exact JSON — no markdown fences, no preamble, no explanation after the closing brace:
+
+{
+  "type": "concept",
+  "title": "Full proper name of this concept or historical event",
+  "period": "Time period e.g. '2007-2009' or 'Ongoing concept'",
+  "tagline": "One sentence — plain-English explanation any client would understand",
+  "brokerNote": "2 sentences. Asset-neutral. How a broker connects this concept to a client's situation today.",
+  "pitch": {
+    "openingLine": "One sentence hook using second-level thinking — a question or striking fact that stops the client. Sets the evaluative frame.",
+    "logicalCase": ["Most arresting verified fact — specific number and source", "Historical pattern — verified number or named institution", "Direct implication for a client's wealth right now"],
+    "emotionalCase": "2 sentences. Loss frame first (what inaction costs them — specific and calculated), then gain frame (what right positioning delivers). Asset-neutral.",
+    "painPoint": "The specific, precise fear this concept triggers in a client. One sentence.",
+    "spinQuestions": [
+      "Situation — how exposed is their portfolio to this and are they aware of it",
+      "Problem/Implication — what it has already cost them or could cost them with a specific calculation",
+      "Need-Payoff — starts with So if you had... or What would it mean if..."
+    ],
+    "objections": [
+      {"objection": "The most likely pushback on this concept from a sceptical client", "rebuttal": "Acknowledge genuinely then reframe as evidence for action then close with need-payoff question. Conversational not scripted."}
+    ],
+    "urgencyLine": "One real verifiable reason acting now is smarter than waiting — a rate decision structural shift data release. Never manufactured. If no genuine urgency exists name the next catalyst.",
+    "socialProof": "What sophisticated investors family offices or institutional allocators are doing in response to this. One sentence."
+  },
+  "whatHappened": "2-3 sentences explaining the concept using one vivid analogy. Teach the broker so they genuinely understand it.",
+  "causes": ["Root cause 1 — specific and verifiable", "Cause 2 — specific and verifiable", "Cause 3 — specific and verifiable"],
+  "timeline": [
+    {"date": "Year or month/year", "event": "One sentence — what happened and why it mattered"},
+    {"date": "Year or month/year", "event": "One sentence — second pivotal moment"},
+    {"date": "Year or month/year", "event": "One sentence — third pivotal moment"}
+  ],
+  "impactOnAssets": "2 sentences. What went up what went down and the mechanism behind it.",
+  "lessonForClients": "2 sentences. The frank honest lesson for a client holding a conventional portfolio today."
+}
+
+CRITICAL — failure to follow these will break the UI:
+- Exactly 3 timeline entries — no more no less
+- Every text field: 1-2 sentences maximum unless the field label says otherwise
+- Return ONLY valid JSON — no preamble no trailing explanation no markdown fences
+- Never use double-quote characters inside string values — use single quotes or rephrase`;
 
 const SEARCH_SYSTEM = `You are The Brokers Edge Intelligence Engine — the world's most advanced sales intelligence system for alternative asset professionals. You brief brokers with analyst-grade intelligence and a full sales pitch playbook woven through with elite sales psychology on every search.
 
@@ -800,7 +834,7 @@ exports.handler = async (event) => {
     /* Scenarios: skip cache (bespoke per query), use more tokens */
     let cached = null;
     const lensTag = lensKey ? ':' + lensKey : '';
-    const cacheKey = 'search4:' + type + ':' + (section ? section + ':' : '') + (ticker || query.trim().toLowerCase().slice(0, 80)) + lensTag;
+    const cacheKey = 'search5:' + type + ':' + (section ? section + ':' : '') + (ticker || query.trim().toLowerCase().slice(0, 80)) + lensTag;
 
     if (!isScenario) {
       cached = await cacheGet(cacheKey);
@@ -844,7 +878,7 @@ exports.handler = async (event) => {
         body: JSON.stringify({
           model: 'claude-haiku-4-5-20251001',
           max_tokens: isScenario ? 1800 : (type === 'concept') ? 1800 : (section) ? 950 : 1600,
-          system: [{ type: 'text', text: SEARCH_SYSTEM, cache_control: { type: 'ephemeral' } }],
+          system: [{ type: 'text', text: (type === 'concept' || isScenario) ? CONCEPT_SYSTEM : SEARCH_SYSTEM, cache_control: { type: 'ephemeral' } }],
           messages: [{ role: 'user', content: userMsg }],
         }),
       });
