@@ -67,20 +67,22 @@ const CORS = {
 const ADMIN_EMAIL = 'admin@thebrokersterminal.com';
 
 async function serverDeductCredits(authHeader, creditCost, description) {
-  if (!SUPABASE_KEY) return { ok: true }; /* Supabase not configured — allow */
+  if (!SUPABASE_KEY) { console.error('[credits] SUPABASE_SERVICE_KEY not set'); return { ok: true }; }
   const jwt = authHeader && authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
-  if (!jwt) return { ok: false, status: 401, error: 'missing_token' };
+  if (!jwt) { console.log('[credits] no JWT in request'); return { ok: false, status: 401, error: 'missing_token' }; }
 
   /* Verify user */
   const userResp = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
     headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${jwt}` },
   });
-  if (!userResp.ok) return { ok: false, status: 401, error: 'invalid_token' };
+  if (!userResp.ok) { console.log('[credits] JWT verify failed', userResp.status); return { ok: false, status: 401, error: 'invalid_token' }; }
   const user = await userResp.json();
   if (!user || !user.id) return { ok: false, status: 401, error: 'invalid_token' };
 
   /* Admin bypasses credit check */
-  if (user.email === ADMIN_EMAIL) return { ok: true };
+  if (user.email === ADMIN_EMAIL) { console.log('[credits] admin bypass for', user.email); return { ok: true }; }
+
+  console.log('[credits] deducting', creditCost, 'for', user.email, user.id);
 
   /* Deduct credits atomically */
   const deductResp = await fetch(`${SUPABASE_URL}/rest/v1/rpc/deduct_credits`, {
@@ -88,13 +90,43 @@ async function serverDeductCredits(authHeader, creditCost, description) {
     headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({ p_user_id: user.id, p_amount: creditCost, p_description: description }),
   });
-  if (!deductResp.ok) return { ok: true }; /* RPC error — allow through rather than block user */
-  const result = await deductResp.json();
-  if (!result.ok && (result.error === 'insufficient' || result.error === 'no_account')) {
-    return { ok: false, status: 402, error: result.error, balance: result.balance || 0 };
+
+  if (!deductResp.ok) {
+    const errText = await deductResp.text().catch(() => '');
+    console.error('[credits] deduct_credits RPC HTTP error', deductResp.status, errText);
+    return { ok: true }; /* Allow through on RPC error to avoid blocking users */
+  }
+
+  const rawResult = await deductResp.json();
+  /* Supabase may wrap single-row function results in an array */
+  const result = Array.isArray(rawResult) ? rawResult[0] : rawResult;
+  console.log('[credits] deduct result:', JSON.stringify(result));
+
+  if (!result || (!result.ok && (result.error === 'insufficient' || result.error === 'no_account'))) {
+    return { ok: false, status: 402, error: (result && result.error) || 'insufficient_credits', balance: (result && result.balance) || 0 };
   }
   return { ok: true, balance: result.balance };
 }
+
+/* ── Lean system prompt for concept/event searches — fast, focused, no company noise ── */
+const CONCEPT_SYSTEM = `You are The Brokers Intelligence Engine, briefing UK financial brokers on economic events, historical crises, and macro concepts for use in client conversations.
+
+SALES PSYCHOLOGY — embed in every pitch field:
+• THREE TENS: create certainty in the Concept (this is real and important), the Timing (now is the moment), the Broker (they are the authority on this)
+• CERTAINTY SCALE: write at 9/10 certainty — confident, factual, specific. Certainty is the carrier wave.
+• ASSET NEUTRALITY: in ALL pitch fields never name a specific asset. Use "physical assets", "tangible assets", "real assets", "alternative assets", "assets outside the banking system". Educational fields (whatHappened, causes, timeline, impactOnAssets) may reference asset classes.
+• SPIN: spinQuestions follow Situation → Problem/Implication → Need-Payoff. Need-Payoff starts with "So if you had..." or "What would it mean if..."
+• FUTURE PACE: emotionalCase = loss frame first (their situation without acting), then gain frame (with right positioning). 2 sentences.
+• OBJECTION HANDLING: acknowledge genuinely → reframe as evidence for action → close with need-payoff question. Conversational, not scripted.
+• URGENCY: only real, verifiable urgency — a rate decision, structural shift, data release. Never manufactured.
+• SOCIAL PROOF: what sophisticated investors, family offices, or institutional allocators are doing. One sentence.
+• OPENING LINE: sets the evaluative frame — a question or statement that makes the client want to understand this concept. Never a generic opener.
+
+OUTPUT RULES — non-negotiable:
+• Return ONLY valid, complete JSON — no markdown fences, no preamble, no explanation after
+• Complete every single field — never truncate mid-JSON
+• Timeline: exactly 3 entries, most pivotal moments only
+• Every text field: 1-2 sentences maximum unless the field label says otherwise`;
 
 const SEARCH_SYSTEM = `You are The Brokers Edge Intelligence Engine — the world's most advanced sales intelligence system for alternative asset professionals. You brief brokers with analyst-grade intelligence and a full sales pitch playbook woven through with elite sales psychology on every search.
 
@@ -532,6 +564,46 @@ Generate a full company intelligence briefing AND sales pitch playbook. Return t
   }
 }`;
 
+/* ── CONCEPT — overview + pitch in one call ── */
+const CONCEPT_OVERVIEW_PROMPT = (query) => `Research request: "${query}"
+
+THIS IS A CONCEPT/EVENT SEARCH — not a company search. Apply ALL sales psychology frameworks from your instructions, but return ONLY the CONCEPT JSON format below. Do not use the company format.
+
+Generate a financial concept or historical market event briefing WITH a full sales pitch playbook. Return this exact JSON — pitch section first, then overview:
+{
+  "type": "concept",
+  "title": "Proper full name of the concept or event",
+  "period": "Time period (e.g. '2007–2009') or 'Ongoing concept'",
+  "tagline": "One sentence — plain-English explanation of what this is",
+  "brokerNote": "2 sentences. Asset-neutral. How to connect this concept to the client's situation today.",
+  "pitch": {
+    "openingLine": "One sentence hook — a question or statement that stops the client.",
+    "logicalCase": ["Clearest fact proving this is real and relevant", "Historical pattern — verified number or outcome", "What it means for client wealth right now"],
+    "emotionalCase": "2 sentences. Future pace: without right positioning, then with it. Asset-neutral.",
+    "painPoint": "The specific fear this concept triggers in a client. One sentence.",
+    "spinQuestions": [
+      "Situation — how aware are they and how does it affect them",
+      "Problem — what it has cost them or could cost them",
+      "Need-Payoff — what correct positioning would mean for them"
+    ],
+    "objections": [
+      {"objection": "Most likely pushback", "rebuttal": "Acknowledge → reframe → need-payoff question. Conversational."}
+    ],
+    "urgencyLine": "One real reason acting now beats waiting.",
+    "socialProof": "What informed investors are doing in response. One sentence."
+  },
+  "whatHappened": "2-3 sentences explaining the concept using one vivid subject-specific analogy.",
+  "causes": ["Root cause 1 — specific", "Cause 2", "Cause 3"],
+  "timeline": [
+    {"date": "Year or month", "event": "One sentence — what happened and why it mattered"},
+    {"date": "Year or month", "event": "One sentence — second pivotal moment"},
+    {"date": "Year or month", "event": "One sentence — third pivotal moment"}
+  ],
+  "impactOnAssets": "2 sentences. What went up, what went down, and why.",
+  "lessonForClients": "2 sentences. The frank honest lesson for a client today."
+}
+Exactly 3 timeline entries. Every text field: 1-2 sentences maximum.`;
+
 const CONCEPT_PROMPT = (query) => `Research request: "${query}"
 
 IMPORTANT: First decide what this query is. Then return the correct format.
@@ -573,7 +645,7 @@ COMPANY FORMAT:
 }
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-CONCEPT FORMAT:
+CONCEPT FORMAT — STRICT OUTPUT LIMIT: keep total JSON under 1,400 tokens. Timeline: exactly 3 entries, most pivotal moments only. All text fields: 1-2 sentences maximum.
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 {
   "type": "concept",
@@ -582,26 +654,25 @@ CONCEPT FORMAT:
   "tagline": "One sentence — the plain-English version of what this is",
   "whatHappened": "3-4 sentences explaining the event or concept using one vivid, subject-specific analogy. Never reuse a standard finance analogy.",
   "causes": ["Root cause 1 — specific", "Cause 2", "Cause 3"],
-  "timeline": [{"date": "Year or month", "event": "One sentence — what happened and why it mattered"}],
-  "impactOnAssets": "2-3 sentences. What went up, what went down, why. Asset-neutral in the implication.",
-  "lessonForClients": "2-3 sentences. The frank, honest lesson. What a well-advised client would have done differently.",
-  "brokerNote": "One paragraph. Asset-neutral. What the broker says to connect this concept to their client's situation today.",
+  "timeline": [{"date": "Year/month", "event": "One sentence"}],
+  "impactOnAssets": "2 sentences. What went up, what went down, why.",
+  "lessonForClients": "2 sentences. The frank lesson. What a well-advised client would have done differently.",
+  "brokerNote": "2-3 sentences. Asset-neutral. How the broker connects this to the client's situation today.",
   "pitch": {
-    "openingLine": "The hook. One sentence — a question or statement that stops the client in their tracks and makes them want to understand this concept.",
-    "logicalCase": ["The single clearest fact that proves this concept is real and relevant", "What it has done historically — a verified number or pattern", "What it means for a client's wealth right now, today"],
-    "emotionalCase": "Future pace in 2 sentences. If this concept plays out — or is already playing out — what does their financial picture look like without the right positioning? Then the alternative: what does it look like with it? Asset-neutral.",
-    "painPoint": "The specific fear or frustration this concept triggers in a typical client. One precise sentence.",
+    "openingLine": "One sentence hook — a question or statement that stops the client and makes them want to understand this.",
+    "logicalCase": ["Clearest fact proving this concept is real and relevant", "What it has done historically — a verified number or pattern", "What it means for their wealth right now"],
+    "emotionalCase": "2 sentences. Future pace — without the right positioning, then with it. Asset-neutral.",
+    "painPoint": "The specific fear this concept triggers in a typical client. One sentence.",
     "spinQuestions": [
       "Situation — how aware are they of this concept and how it affects them",
-      "Problem/Implication — what has it already cost them or might cost them",
-      "Need-Payoff — what would it mean to be positioned correctly for what this concept is doing"
+      "Problem — what it has already cost them or might cost them",
+      "Need-Payoff — what would it mean to be correctly positioned"
     ],
     "objections": [
-      {"objection": "Most likely first pushback on this concept", "rebuttal": "Acknowledge → reframe → need-payoff. Conversational."},
-      {"objection": "Second pushback", "rebuttal": "Same three-part structure. Different angle."}
+      {"objection": "Most likely pushback on this concept", "rebuttal": "Acknowledge → reframe → need-payoff question. Conversational."}
     ],
-    "urgencyLine": "One real, current reason this concept makes acting now smarter than waiting. Honest.",
-    "socialProof": "What informed, sophisticated investors are doing in response to this concept. One sentence."
+    "urgencyLine": "One real reason acting now beats waiting. Honest.",
+    "socialProof": "What informed investors are doing in response. One sentence."
   }
 }`;
 
@@ -729,7 +800,7 @@ exports.handler = async (event) => {
     /* Scenarios: skip cache (bespoke per query), use more tokens */
     let cached = null;
     const lensTag = lensKey ? ':' + lensKey : '';
-    const cacheKey = 'search2:' + type + ':' + (section ? section + ':' : '') + (ticker || query.trim().toLowerCase().slice(0, 80)) + lensTag;
+    const cacheKey = 'search4:' + type + ':' + (section ? section + ':' : '') + (ticker || query.trim().toLowerCase().slice(0, 80)) + lensTag;
 
     if (!isScenario) {
       cached = await cacheGet(cacheKey);
@@ -751,12 +822,14 @@ exports.handler = async (event) => {
     let userMsg;
     if (isScenario) {
       userMsg = SCENARIO_PROMPT(query);
+    } else if (type === 'concept') {
+      userMsg = CONCEPT_OVERVIEW_PROMPT(query) + lensAppend;
     } else if (section === 'overview') {
       userMsg = OVERVIEW_PROMPT(query, null) + lensAppend;
     } else if (section === 'pitch') {
       userMsg = PITCH_PROMPT(query) + lensAppend;
     } else {
-      userMsg = (type === 'concept' ? CONCEPT_PROMPT(query) : COMPANY_PROMPT(query, null)) + lensAppend;
+      userMsg = COMPANY_PROMPT(query, null) + lensAppend;
     }
 
     try {
@@ -770,14 +843,16 @@ exports.handler = async (event) => {
         },
         body: JSON.stringify({
           model: 'claude-haiku-4-5-20251001',
-          max_tokens: isScenario ? 2500 : 1600,
+          max_tokens: isScenario ? 1800 : (type === 'concept') ? 1800 : (section) ? 950 : 1600,
           system: [{ type: 'text', text: SEARCH_SYSTEM, cache_control: { type: 'ephemeral' } }],
           messages: [{ role: 'user', content: userMsg }],
         }),
       });
 
       if (!claudeResp.ok) {
-        return { statusCode: 502, headers: CORS, body: JSON.stringify({ error: 'Anthropic error' }) };
+        const errBody = await claudeResp.text().catch(() => '');
+        console.error('[search] Anthropic API error', claudeResp.status, errBody.slice(0, 300));
+        return { statusCode: 502, headers: CORS, body: JSON.stringify({ error: 'Anthropic error', status: claudeResp.status }) };
       }
 
       const data = await claudeResp.json();
@@ -839,6 +914,7 @@ exports.handler = async (event) => {
         body: JSON.stringify(parsed),
       };
     } catch (e) {
+      console.error('[search] parse/runtime error', e.message);
       return { statusCode: 502, headers: CORS, body: JSON.stringify({ error: e.message }) };
     }
   }
