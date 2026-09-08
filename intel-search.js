@@ -1627,13 +1627,15 @@
         var bgId2 = btn.dataset.bg;
         var canvasId = btn.dataset.canvas;
         var mktId = btn.dataset.mkt;
-        btn.textContent = 'LOADING…';
-        btn.disabled = true;
-        /* Check localStorage first — market/history are expensive (15 credits) */
+        /* Check localStorage first — market/history are expensive (15 WS credits = 40 TBT) */
         var mLsKey = 'm_' + bgId2;
         var hLsKey = 'h_' + bgId2;
         var mCached = lsGet(mLsKey), hCached = lsGet(hLsKey);
-        Promise.all([
+        var needsFetch = !mCached || !hCached;
+        function _doLoadPrices() {
+          btn.textContent = 'LOADING…';
+          btn.disabled = true;
+          Promise.all([
           mCached ? Promise.resolve(mCached) : fetch('/.netlify/functions/whisky-data?type=market&id='  + encodeURIComponent(bgId2) + '&currency=GBP').then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }),
           hCached ? Promise.resolve(hCached) : fetch('/.netlify/functions/whisky-data?type=history&id=' + encodeURIComponent(bgId2) + '&currency=GBP').then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }),
         ]).then(function (res) {
@@ -1695,10 +1697,12 @@
               lb.addEventListener('click', function () {
                 var ltype = lb.dataset.listtype;
                 var isAuction = ltype === 'auction_listings';
-                lb.textContent = 'LOADING…';
-                lb.disabled = true;
-                var url = '/.netlify/functions/whisky-data?type=' + ltype + '&id=' + encodeURIComponent(bgId2) + (isAuction ? '' : '&currency=GBP');
-                fetch(url).then(function (r) { return r.ok ? r.json() : null; }).then(function (data) {
+                /* Gate: 20 TBT credits per listing fetch (7 WS credits = ~5.9p) */
+                function _doListFetch() {
+                  lb.textContent = 'LOADING…';
+                  lb.disabled = true;
+                  var url = '/.netlify/functions/whisky-data?type=' + ltype + '&id=' + encodeURIComponent(bgId2) + (isAuction ? '' : '&currency=GBP');
+                  fetch(url).then(function (r) { return r.ok ? r.json() : null; }).then(function (data) {
                   var lots = (data && Array.isArray(data.listings)) ? data.listings : [];
                   lb.remove();
                   if (!lots.length) {
@@ -1726,6 +1730,18 @@
                   el.innerHTML = html;
                   mktEl.appendChild(el);
                 }).catch(function () { lb.textContent = isAuction ? '▸ LIVE LOTS' : '▸ RETAIL SHOPS'; lb.disabled = false; });
+                } /* end _doListFetch */
+                if (window._deductCredits) {
+                  window._deductCredits(20, 'WS ' + ltype + ': ' + bgId2).then(function (result) {
+                    if (!result.ok && result.status === 402) {
+                      window._showNoCredits && window._showNoCredits(result.balance || 0);
+                      return;
+                    }
+                    _doListFetch();
+                  });
+                } else {
+                  _doListFetch();
+                }
               });
             });
           }
@@ -1746,6 +1762,20 @@
             }
           }
         });
+        } /* end _doLoadPrices */
+
+        /* Gate: 40 TBT credits when data not cached (15 WS credits = ~12.6p) */
+        if (needsFetch && window._deductCredits) {
+          window._deductCredits(40, 'WS prices+chart: ' + bgId2).then(function (result) {
+            if (!result.ok && result.status === 402) {
+              window._showNoCredits && window._showNoCredits(result.balance || 0);
+              return;
+            }
+            _doLoadPrices();
+          });
+        } else {
+          _doLoadPrices();
+        }
       });
     }
   }
