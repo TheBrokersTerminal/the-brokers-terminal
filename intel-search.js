@@ -1018,6 +1018,7 @@
           if (win._popId && _registry[win._popId] && d.ticker) {
             _registry[win._popId].ticker = d.ticker;
           }
+          window._loadCreditBalance && window._loadCreditBalance();
         }
         /* Distillery: fetch WhiskyStats expressions (page 1 only — 1 credit) */
         if (d && d.type === 'company' && d.category === 'distillery') {
@@ -1094,7 +1095,10 @@
         return r.ok ? r.json() : null;
       })
       .then(function (d) {
-        if (d && !d.error) { _cache[cacheKey] = d; }
+        if (d && !d.error) {
+          _cache[cacheKey] = d;
+          window._loadCreditBalance && window._loadCreditBalance();
+        }
         renderSection(d, section, win);
       })
       .catch(function () {
@@ -1757,25 +1761,28 @@
       _exprSidebar = null;
     });
 
-    /* Fetch browse (details + rating) — 3 credits; localStorage-cached for 7 days */
+    /* Fetch browse (details + rating) — 3 TBT tokens; free if already cached */
     var sBody = sidebar.querySelector('.dist-sidebar-body');
     var bLsKey = 'b_' + whiskyId;
     var bCached = lsGet(bLsKey) || _cache['browse:' + whiskyId];
     if (bCached) {
       renderExpressionDetail(bCached, sBody, whiskyId);
     } else {
-      fetch('/.netlify/functions/whisky-data?type=browse&id=' + encodeURIComponent(whiskyId))
-        .then(function (r) { return r.ok ? r.json() : null; })
-        .then(function (data) {
-          if (!data || data.error) {
-            sBody.innerHTML = '<div class="sp-loading">' + (data && data.error ? 'API ERROR: ' + escH(data.error) : 'DATA UNAVAILABLE') + '</div>';
-            return;
-          }
-          _cache['browse:' + whiskyId] = data;
-          lsSet(bLsKey, data);
-          renderExpressionDetail(data, sBody, whiskyId);
-        })
-        .catch(function () { sBody.innerHTML = '<div class="sp-loading">DATA UNAVAILABLE</div>'; });
+      _gateCredits(3, 'WS browse: ' + whiskyName, function () {
+        fetch('/.netlify/functions/whisky-data?type=browse&id=' + encodeURIComponent(whiskyId))
+          .then(function (r) { return r.ok ? r.json() : null; })
+          .then(function (data) {
+            if (!data || data.error) {
+              sBody.innerHTML = '<div class="sp-loading">' + (data && data.error ? 'API ERROR: ' + escH(data.error) : 'DATA UNAVAILABLE') + '</div>';
+              return;
+            }
+            _cache['browse:' + whiskyId] = data;
+            lsSet(bLsKey, data);
+            window._loadCreditBalance && window._loadCreditBalance();
+            renderExpressionDetail(data, sBody, whiskyId);
+          })
+          .catch(function () { sBody.innerHTML = '<div class="sp-loading">DATA UNAVAILABLE</div>'; });
+      });
     }
   }
 

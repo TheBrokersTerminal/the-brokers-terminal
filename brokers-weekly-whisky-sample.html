@@ -238,6 +238,14 @@
   .sidebar-num { color: #E97132; font-size: 6.5pt; letter-spacing: 0.08em; flex-shrink: 0; padding-top: 1px; opacity: 0.8; }
   .sidebar-label { color: #555555; font-size: 7pt; letter-spacing: 0.08em; text-transform: uppercase; line-height: 1.35; transition: color 0.2s ease; }
   .sidebar-nav a:hover .sidebar-label, .sidebar-nav a.active .sidebar-label { color: #E97132; }
+  @media (max-width: 900px) {
+    body { padding-left: 0; }
+    .sidebar { display: none; }
+  }
+  @media (max-width: 600px) {
+    .page { padding: 20px 16px 28px !important; }
+    html, body { font-size: 10pt; }
+  }
 </style>
 </head>
 <body>
