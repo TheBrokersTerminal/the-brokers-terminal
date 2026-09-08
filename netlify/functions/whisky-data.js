@@ -85,10 +85,37 @@ exports.handler = async function (event) {
       var cur = (p.currency || 'GBP').replace(/[^A-Z]/g, '').slice(0, 3);
       if (!id) return { statusCode: 400, headers: baseHdrs(type), body: JSON.stringify({ error: 'id required' }) };
       var [auction, retail] = await Promise.all([
-        wsGet('/v01/whisky/auction_pricing?whisky_id=' + id + '&currency_code=' + cur),
-        wsGet('/v01/whisky/retail_pricing?whisky_id='  + id + '&currency_code=' + cur),
+        wsGet('/v01/whisky/auction_pricing?whisky_id=' + id + '&currency_code=' + cur + '&bottle_group_fallback=true'),
+        wsGet('/v01/whisky/retail_pricing?whisky_id='  + id + '&currency_code=' + cur + '&bottle_group_fallback=true'),
       ]);
       return { statusCode: 200, headers: baseHdrs(type), body: JSON.stringify({ auction, retail, currency: cur }) };
+    }
+
+    /* ── AUCTION LISTINGS — live lots (7 credits) ── */
+    if (type === 'auction_listings') {
+      var id = (p.id || '').replace(/[^A-Za-z0-9]/g, '');
+      if (!id) return { statusCode: 400, headers: baseHdrs(type), body: JSON.stringify({ error: 'id required' }) };
+      try {
+        var res = await wsGet('/v01/whisky/auction_listings?whisky_id=' + id + '&bottle_group_fallback=true');
+        if (res && res.status === 404) return { statusCode: 200, headers: baseHdrs(type), body: JSON.stringify({ listings: [] }) };
+        return { statusCode: 200, headers: baseHdrs(type), body: JSON.stringify(res) };
+      } catch (e) {
+        return { statusCode: 200, headers: baseHdrs(type), body: JSON.stringify({ listings: [] }) };
+      }
+    }
+
+    /* ── RETAIL LISTINGS — shop offers (7 credits) ── */
+    if (type === 'retail_listings') {
+      var id  = (p.id || '').replace(/[^A-Za-z0-9]/g, '');
+      var cur = (p.currency || 'GBP').replace(/[^A-Z]/g, '').slice(0, 3);
+      if (!id) return { statusCode: 400, headers: baseHdrs(type), body: JSON.stringify({ error: 'id required' }) };
+      try {
+        var res = await wsGet('/v01/whisky/retail_listings?whisky_id=' + id + '&currency_code=' + cur + '&bottle_group_fallback=true');
+        if (res && res.status === 404) return { statusCode: 200, headers: baseHdrs(type), body: JSON.stringify({ listings: [] }) };
+        return { statusCode: 200, headers: baseHdrs(type), body: JSON.stringify(res) };
+      } catch (e) {
+        return { statusCode: 200, headers: baseHdrs(type), body: JSON.stringify({ listings: [] }) };
+      }
     }
 
     /* ── FULL (legacy — details + pricing + rating) ── */
@@ -99,9 +126,9 @@ exports.handler = async function (event) {
       var details = await wsGet('/v01/whisky/bottle_details?whisky_id=' + id);
       var bgId    = (details.parent_bottle_group_id || id).replace(/[^A-Za-z0-9]/g, '');
       var [auction, retail, rating] = await Promise.all([
-        wsGet('/v01/whisky/auction_pricing?whisky_id='  + bgId + '&currency_code=' + cur),
-        wsGet('/v01/whisky/retail_pricing?whisky_id='   + bgId + '&currency_code=' + cur),
-        wsGet('/v01/whisky/whiskybase_rating?whisky_id=' + id),
+        wsGet('/v01/whisky/auction_pricing?whisky_id='  + bgId + '&currency_code=' + cur + '&bottle_group_fallback=true'),
+        wsGet('/v01/whisky/retail_pricing?whisky_id='   + bgId + '&currency_code=' + cur + '&bottle_group_fallback=true'),
+        wsGet('/v01/whisky/whiskybase_rating?whisky_id=' + id + '&bottle_group_fallback=true'),
       ]);
       return { statusCode: 200, headers: baseHdrs(type), body: JSON.stringify({ details, auction, retail, rating, currency: cur, bg_id: bgId }) };
     }
