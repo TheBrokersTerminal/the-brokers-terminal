@@ -1781,8 +1781,8 @@
         });
         } /* end _doLoadPrices */
 
-        /* Gate: 40 TBT credits when data not cached (15 WS credits = ~12.6p) */
-        if (needsFetch && window._deductCredits) {
+        /* Always charge 40 TBT credits — cache only protects OUR WS API credits, not the user */
+        if (window._deductCredits) {
           window._deductCredits(40, 'WS prices+chart: ' + bgId2).then(function (result) {
             if (!result.ok && result.status === 402) {
               window._showNoCredits && window._showNoCredits(result.balance || 0);
