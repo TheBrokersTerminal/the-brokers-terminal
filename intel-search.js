@@ -463,12 +463,24 @@
     });
   }
 
+  function _sessionCacheKey(type, ticker, query) {
+    var lensKey = (window._assetLens && window._assetLens.key) || 'universal';
+    return type + ':' + lensKey + ':' + (ticker || query);
+  }
+
   window._intelSearch = function (query, type, ticker) {
     var dropdown = document.getElementById('intel-dropdown');
     var input = document.getElementById('intel-search-input');
     if (dropdown) dropdown.style.display = 'none';
     if (input) input.value = '';
 
+    /* Free if already in session cache — Claude won't be called */
+    var cached = !!_cache[_sessionCacheKey(type, ticker, query)];
+    if (cached) {
+      var win = createPopout(query, type);
+      fetchDetail(query, type, ticker || '', win);
+      return;
+    }
     _gateCredits(10, type + ': ' + query, function () {
       var win = createPopout(query, type);
       fetchDetail(query, type, ticker || '', win);
@@ -481,7 +493,16 @@
     if (dropdown) dropdown.style.display = 'none';
     if (input) input.value = '';
 
-    /* Company open = 25 credits (covers all tabs); other sections = 10 */
+    /* Free if already in session cache — same company, any tab, same session */
+    var cached = !!_cache[_sessionCacheKey(type, ticker, query)];
+    if (cached) {
+      var suffix = section === 'overview' ? ' — PROFILE' : section === 'pitch' ? ' — PITCH' : '';
+      var win = createPopout(query + suffix, type);
+      fetchDetailSection(query, type, ticker || '', section, win);
+      return;
+    }
+
+    /* Company open = 25 credits (covers all tabs for this session); other = 10 */
     var cost = (type === 'company') ? 25 : 10;
     _gateCredits(cost, type + ':' + section + ': ' + query, function () {
       var suffix = section === 'overview' ? ' — PROFILE' : section === 'pitch' ? ' — PITCH' : '';
