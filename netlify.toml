@@ -2,10 +2,10 @@
   directory = "netlify/functions"
 
 [functions."search"]
-  timeout_seconds = 25
+  timeout_seconds = 26
 
 [functions."explain"]
-  timeout_seconds = 25
+  timeout_seconds = 26
 
 [functions."purge-old-messages"]
   schedule = "0 3 1 * *"
