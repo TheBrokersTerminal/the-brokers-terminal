@@ -72,13 +72,27 @@
     if (!bar) return;
 
     if (window._isOwner) {
-      /* Owner: full terminal access */
+      /* Owner: full terminal access — on mobile default to VAULT (TERMINAL too complex) */
+      var isMobile = window.innerWidth <= 768;
       bar.innerHTML =
-        '<button class="tbc-tab active" data-tab="terminal">▌ TERMINAL</button>' +
+        '<button class="tbc-tab' + (isMobile ? '' : ' active') + '" data-tab="terminal">▌ TERMINAL</button>' +
         '<div class="tbc-tab-sep"></div>' +
-        '<button class="tbc-tab" data-tab="vault">VAULT</button>' +
+        '<button class="tbc-tab' + (isMobile ? ' active' : '') + '" data-tab="vault">VAULT</button>' +
         '<button class="tbc-tab" data-tab="news">NEWS FEED</button>' +
         '<button class="tbc-tab-add" id="tbc-add-btn">＋ ADD WIDGET</button>';
+      if (isMobile) {
+        _currentTab = 'vault';
+        var vaultMob = document.getElementById('vault-section');
+        if (vaultMob) vaultMob.style.display = 'block';
+        var canvasMob = document.getElementById('tbc-canvas-wrap');
+        if (canvasMob) canvasMob.style.display = 'none';
+        var intelMob = document.getElementById('intel-search-container');
+        if (intelMob) intelMob.style.display = 'none';
+        var lensMob = document.getElementById('ttb-lens-selector');
+        if (lensMob) lensMob.style.display = 'none';
+        var tickerMob = document.getElementById('content-ticker');
+        if (tickerMob) { tickerMob.style.display = 'none'; document.body.classList.remove('ticker-on'); }
+      }
     } else {
       /* SANDBOX MODE — Vault only for all other users */
       bar.innerHTML =
@@ -10116,17 +10130,28 @@
       try { localStorage.setItem(key, JSON.stringify({data:data, ts:Date.now()})); } catch(e){}
     }
 
-    /* ── Stage 1: browse — details + rating only (3 credits) ── */
+    /* ── Stage 1: browse — details + rating only (3 TBT tokens; free if cached) ── */
     function loadBottle(item) {
       _selectedId = item.whisky_id;
       var brKey = 'tbt_br_'+item.whisky_id;
       var cached = cacheGet(brKey, 86400000);
       if (cached) { renderBrowse(cached, item); return; }
-      detailEl.innerHTML = '<div style="padding:16px;font-size:8px;letter-spacing:.18em;color:#fff;opacity:.4;">LOADING<span class="ld"></span></div>';
-      fetch('/.netlify/functions/whisky-data?type=browse&id='+encodeURIComponent(item.whisky_id))
-        .then(function(r){ return r.json(); })
-        .then(function(d){ cacheSet(brKey, d); renderBrowse(d, item); })
-        .catch(function(){ detailEl.innerHTML='<div style="padding:16px;font-size:8px;letter-spacing:.14em;color:#fff;opacity:.4;">DATA UNAVAILABLE</div>'; });
+      /* Deduct 3 TBT tokens before hitting WhiskyStats API */
+      function _doBrowse() {
+        detailEl.innerHTML = '<div style="padding:16px;font-size:8px;letter-spacing:.18em;color:#fff;opacity:.4;">LOADING<span class="ld"></span></div>';
+        fetch('/.netlify/functions/whisky-data?type=browse&id='+encodeURIComponent(item.whisky_id))
+          .then(function(r){ return r.json(); })
+          .then(function(d){ cacheSet(brKey, d); window._loadCreditBalance && window._loadCreditBalance(); renderBrowse(d, item); })
+          .catch(function(){ detailEl.innerHTML='<div style="padding:16px;font-size:8px;letter-spacing:.14em;color:#fff;opacity:.4;">DATA UNAVAILABLE</div>'; });
+      }
+      if (window._deductCredits) {
+        window._deductCredits(3, 'WS browse: '+(item.whisky_name||item.whisky_id)).then(function(result){
+          if (!result.ok && result.status === 402) { window._showNoCredits && window._showNoCredits(result.balance||0); return; }
+          _doBrowse();
+        });
+      } else {
+        _doBrowse();
+      }
     }
 
     function renderBrowse(d, item) {
@@ -10584,10 +10609,20 @@
       var brKey = 'tbt_br_' + wid;
       var cached = cacheGet(brKey, 86400000);
       if (cached) { renderBrowse(cached, { whisky_id: wid, name: name }); return; }
-      fetch('/.netlify/functions/whisky-data?type=browse&id=' + encodeURIComponent(wid))
-        .then(function(r) { return r.json(); })
-        .then(function(d) { cacheSet(brKey, d); renderBrowse(d, { whisky_id: wid, name: name }); })
-        .catch(function() { detailEl.innerHTML = '<div style="padding:20px;font-size:9px;color:#e05050;letter-spacing:.1em;">FAILED TO LOAD</div>'; });
+      function _doFetch() {
+        fetch('/.netlify/functions/whisky-data?type=browse&id=' + encodeURIComponent(wid))
+          .then(function(r) { return r.json(); })
+          .then(function(d) { cacheSet(brKey, d); window._loadCreditBalance && window._loadCreditBalance(); renderBrowse(d, { whisky_id: wid, name: name }); })
+          .catch(function() { detailEl.innerHTML = '<div style="padding:20px;font-size:9px;color:#e05050;letter-spacing:.1em;">FAILED TO LOAD</div>'; });
+      }
+      if (window._deductCredits) {
+        window._deductCredits(3, 'WS browse: '+(name||wid)).then(function(result){
+          if (!result.ok && result.status === 402) { window._showNoCredits && window._showNoCredits(result.balance||0); return; }
+          _doFetch();
+        });
+      } else {
+        _doFetch();
+      }
     }
 
     /* ── INDICES — region table + history charts ── */

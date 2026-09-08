@@ -895,7 +895,9 @@ exports.handler = async (event) => {
 
     /* ── SERVER-SIDE CREDIT GATE ─────────────────────────────────────── */
     const authHeader = event.headers.authorization || event.headers.Authorization || '';
-    const creditCost = (type === 'company') ? 25 : 10;
+    /* Sections cost 10; detect both explicit section param and query suffix (e.g. "— PITCH") */
+    const isSection = !!section || /—\s*(PITCH|PROFILE|PLAYBOOK)/i.test(query);
+    const creditCost = (type === 'company' && !isSection) ? 25 : 10;
     const creditCheck = await serverDeductCredits(authHeader, creditCost, `intel:${type}${section ? ':' + section : ''}:${ticker || query.slice(0, 60)}`);
     if (!creditCheck.ok) {
       return {

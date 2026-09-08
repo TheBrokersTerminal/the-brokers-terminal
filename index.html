@@ -341,10 +341,29 @@
 
     @media (max-width: 768px) {
       .tbt-hero-h1 { font-size: clamp(22px, 8vw, 40px); }
+      .tbt-hero { padding: 80px 24px 60px; }
       .stat-bar-enhanced { grid-template-columns: repeat(2, 1fr); }
       .markets-grid { grid-template-columns: repeat(2, 1fr); }
       .philosophy-enhanced { padding: 40px 28px; }
       .deliver-grid { grid-template-columns: 1fr !important; }
+
+      /* 3-col deliverables grid → 1-col on mobile */
+      .deliverables-grid { grid-template-columns: 1fr !important; }
+      .deliverables-grid > div { padding: 24px 20px !important; }
+
+      /* 2-col markets+pricing → 1-col on mobile */
+      .markets-pricing-grid { grid-template-columns: 1fr !important; padding: 0 20px 48px !important; gap: 32px !important; }
+
+      /* Section paddings */
+      section > div[style*="padding:56px"] { }
+      .tbt-section-tag + div { word-break: break-word; }
+
+      /* Pitch iframe — reduce height on mobile */
+      #pitchFrame { height: 56vw !important; min-height: 220px !important; }
+
+      /* Inline section headers */
+      div[style*="padding:56px 40px"] { padding: 36px 20px 28px !important; }
+      div[style*="padding: 56px 40px"] { padding: 36px 20px 28px !important; }
     }
     @media (max-width: 900px) {
       .intel-split { grid-template-columns: 1fr !important; }
@@ -504,7 +523,7 @@ window.addEventListener('blur', function() {
     <p style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#444;max-width:500px;margin:0 auto;line-height:1.9;">Nine deliverables. One purpose. Every conversation better than the last.</p>
   </div>
 
-  <div style="position:relative;z-index:1;display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(233,113,50,0.08);">
+  <div class="deliverables-grid" style="position:relative;z-index:1;display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(233,113,50,0.08);">
 
     <div style="background:#080808;padding:36px 32px;border-top:1px solid rgba(233,113,50,0.15);transition:background 0.2s;" onmouseover="this.style.background='rgba(233,113,50,0.08)'" onmouseout="this.style.background='#080808'">
       <div style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:9px;letter-spacing:0.4em;text-transform:uppercase;color:#E97132;margin-bottom:16px;">◈ &nbsp;THE WEEKLY BRIEF</div>
@@ -651,7 +670,7 @@ window.addEventListener('blur', function() {
     <p style="font-family:'Consolas','Menlo','Courier New',monospace;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#444;max-width:500px;margin:0 auto;line-height:1.9;">Every market. Every format. One subscription. Start free.</p>
   </div>
 
-  <div style="position:relative;z-index:1;max-width:1300px;margin:0 auto;padding:0 40px 72px;display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:start;">
+  <div class="markets-pricing-grid" style="position:relative;z-index:1;max-width:1300px;margin:0 auto;padding:0 40px 72px;display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:start;">
 
     <!-- Markets -->
     <div>

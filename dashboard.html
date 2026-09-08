@@ -719,6 +719,25 @@
       .audio-scrub { width: 100%; order: 3; }
       .card-audio-bar { flex-wrap: wrap; }
       .card-audio-bar .audio-scrub { width: 100%; order: 3; }
+
+      /* ── TERMINAL TOPBAR — mobile ── */
+      #tbc-topbar { height: auto; min-height: 44px; flex-wrap: wrap; padding: 0; }
+      .ttb-left { flex: 1; border-right: none; padding: 0 12px; }
+      .ttb-logo { font-size: 9px; letter-spacing: 0.12em; }
+      .ttb-center { display: none !important; } /* hide INTEL search on mobile */
+      #ttb-lens-selector { display: none !important; }
+      .ttb-right { flex: 0; border-left: 1px solid #1a1a1a; }
+      /* TERMINAL tab hidden on mobile — VAULT + NEWS FEED only */
+      .tbc-tab[data-tab="terminal"] { display: none !important; }
+      /* Ticker: hidden on mobile */
+      #content-ticker { display: none !important; }
+      body.ticker-on { padding-top: 44px !important; }
+      /* Credit balance — visible on mobile */
+      #tbt-credit-wrap { padding: 0 8px !important; }
+      /* Vault section full width on mobile */
+      #vault-section { padding-top: 0; }
+      /* News panel full height */
+      #tbc-news-panel iframe { height: calc(100vh - 44px) !important; }
     }
 
     /* ── Asset Lens selector ── */
@@ -1765,8 +1784,8 @@
       try {
         const { data: { session: s } } = await supabase.auth.getSession();
         if (!s) return;
-        const r = await fetch('/.netlify/functions/credits?action=balance', {
-          headers: { 'Authorization': 'Bearer ' + s.access_token },
+        const r = await fetch('/.netlify/functions/credits?action=balance&_=' + Date.now(), {
+          headers: { 'Authorization': 'Bearer ' + s.access_token, 'Cache-Control': 'no-cache' },
         });
         if (r.ok) {
           const data = await r.json();
