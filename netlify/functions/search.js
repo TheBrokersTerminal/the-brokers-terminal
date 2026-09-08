@@ -367,6 +367,61 @@ SOCRATIC DISSONANCE CLOSE (Festinger): "You have just told me you believe non-co
 SUNK COST CLOSE: "The amount you have already lost in that position — can we agree that it is gone? It is not a factor in what the right decision is from this moment forward. The only question is: given everything you know now, would you buy it at today's price? If the answer is no — then holding it is just a slow version of the decision you are avoiding."
 VOSS TACTICAL EMPATHY: Client: "I'm not sure the timing is right." WRONG: "I understand but timing couldn't be better because..." RIGHT: "It sounds like something about the timing doesn't feel settled." [silence — hold it] Client reveals the real objection. Now solve it specifically.
 
+═══════════════════════════════════════════════════
+V4.0 DEPTH LAYER — STUDY DATA, VERBATIM PROTOCOLS, MISSING FRAMEWORKS
+═══════════════════════════════════════════════════
+
+WYSIATI — WHAT YOU SEE IS ALL THERE IS (Kahneman):
+System 1 builds coherent stories from whatever information is immediately available and does not account for what it doesn't have. A client who has only ever held equities and bonds believes this is the investment universe — their WYSIATI is a two-asset world built during a specific 40-year monetary regime of falling rates and dollar dominance. First job: expand WYSIATI — not sell. Once they see a third asset class as legitimate, the sale follows. Script: "How long have you been investing? In that time, how much of your allocation has been outside equities and bonds? [pause] So your experience of investment is built entirely on a specific historical context — not a permanent condition. Let me show you what portfolio construction looks like when you factor in what university endowments have known for thirty years."
+
+FESTINGER — EFFORT JUSTIFICATION (Aronson & Mills, 1959):
+Participants who went through a severe initiation rated a group significantly more positively than those who joined through a mild initiation — despite the group being identical. Effort invested creates post-hoc value. Investment application: onboarding compliance, documentation, qualification requirements are NOT inconveniences to minimise — they are effort investments that increase perceived value of the investment. Frame as the entry standard: "This is not designed to be frictionless. The qualification process reflects the quality of investors we work with and the seriousness of what we are doing." The client who completes robust onboarding values the investment more than one who clicked a button.
+
+VOSS — FAIR CHALLENGE (3 MODES):
+Mode 1 (destabilising attack — "That's not fair."): do not concede or defend. Investigate: "What specifically feels unfair? Let's look at it together."
+Mode 2 (post-anchor — "That price isn't fair."): "That's fair. What are you comparing it to?" Never defend the number. Discover the comparison.
+Mode 3 (inoculation — use proactively, always): "I want you to feel you are being treated fairly at all times. If anything does not feel right, tell me." Pre-emptive use renders the "not fair" attack powerless.
+VOSS — "HOW AM I SUPPOSED TO DO THAT?": when faced with an unreasonable demand, this response — said slowly in FM DJ voice, calm genuine confusion, no aggression — puts the problem back on the prospect without concession. They will often solve it themselves.
+
+BELFORT — PAIN THRESHOLD (future-pacing inaction):
+Before future-pacing the gain of action, future-pace the pain of inaction. Verbatim: "Imagine yourself in three years. The macro shift we have been discussing has played out. Your equity allocation went through another 20% drawdown and recovered. Your cash position has eroded another 12% in real terms. And you are looking at where this asset class is trading now — versus where it was when we spoke. What does that feel like?" The pain of the counterfactual is the most honest urgency argument available. It is not manufactured — it is the natural consequence of inaction.
+BELFORT — STATE TRANSFER: the broker's internal certainty state transfers to the prospect via vocal physiology, pacing, and word choice. A broker who is low-energy, doubtful, or uncertain transmits that state regardless of what they say. Manage physiological state BEFORE the call — not during. Stand up. Control breathing. Articulate certainty before picking up the phone. The call is a state transfer exercise.
+
+HOWARD MARKS — SECOND-LEVEL 5-QUESTION STRUCTURE:
+Every intelligence briefing answers these five questions in order:
+1. What does everyone already know? (Name it — this is the first-level consensus, already priced)
+2. What does the consensus not yet understand? (The second-level thesis — the edge)
+3. Who has yet to act on this information? (Determines the timing window)
+4. What is the catalyst that will cause them to act? (Determines urgency)
+5. What happens to the price when they do? (The return case — and the close)
+MARKS — I DON'T KNOW FRAMEWORK: the most sophisticated investors explicitly acknowledge what they cannot know. "I cannot tell you what the price will be in six months. No one can. What I can tell you is the structural case — and what institutional allocators with 30-year mandates are doing right now. Those are things I know." The broker who admits what they do not know is trusted on what they claim to know. The broker who claims certainty on everything is trusted on nothing.
+MARKS — RISK IS NOT VOLATILITY: "Your portfolio declined 18% in 2022" is a volatility statement. "Your portfolio permanently lost purchasing power because it was structured for a monetary regime that ended in 2021" is a risk statement. Risk = probability of PERMANENT LOSS OF CAPITAL, not temporary price fluctuation. Physical assets with finite supply and genuine demand have low risk by this definition even when short-term price volatility is high.
+
+TALEB — VIA NEGATIVA: addition by subtraction. The most important portfolio decision is not what to ADD — it is what to ELIMINATE. Remove instruments with hidden fragility: synthetic commodity exposure (tracking error + counterparty risk), leveraged ETFs (volatility decay), complex structured products where the seller keeps the embedded optionality. What remains has fewer hidden failure modes.
+TALEB — SKIN IN THE GAME (2018): information from someone with no personal downside exposure should be heavily discounted. A broker who holds the same assets they recommend has skin in the game — this changes the credibility dynamic fundamentally. Where true: say it. "I hold this position myself."
+TALEB — BARBELL SPECIFICS: two ends, no middle. End 1: maximum safety — cash, short-dated government bonds, FSCS-protected deposits. End 2: maximum asymmetry — physical assets with finite supply, early-stage equity, anything with genuine optionality. Eliminate the middle: "balanced" portfolios, "medium risk" blended instruments. These provide the illusion of balance while delivering the worst risk-adjusted outcome under the tail scenarios — inflation and financial stress simultaneously — that are most relevant now.
+
+RACKHAM — EMPIRICAL BASE + FEATURE-OBJECTION LAW:
+35,000 sales calls across 23 countries over 12 years. Key finding: in major complex sales, each unasked-for feature mentioned by the salesperson generates 1.07 objections on average. Pitching six features to someone who asked about two generates approximately four objections that would not otherwise have existed. RULE: only describe features that address an explicitly stated need. For every feature mentioned, tie it directly to a need the prospect named: "You mentioned IHT — the structure qualifies as Business Relief, which drops outside the estate after two years. That addresses exactly what you raised."
+PREVENTING vs HANDLING OBJECTIONS: skilled salespeople in major sales generate fewer objections — not because they handle them better, but because better questions surface needs before pitching features. A Need-Payoff question answered positively means the client has articulated why they want the solution — at that point there is no pitch, therefore no objection.
+
+GREENE — THREE LAWS FOR INTELLIGENCE DELIVERY:
+LAW 6 (COURT ATTENTION): the most catastrophic position in competitive sales is not to be disliked — it is to be unmemorable. Counterintuitive, striking insights are remembered. Balanced, diplomatic analysis is forgotten. Every intelligence brief must contain one insight the broker could not have reached from the headline alone — the second-level thought that makes them feel they are seeing something others are missing.
+LAW 25 (RECREATE YOURSELF): each communication must bring something new. The broker who contacts clients with the same thesis every month becomes background noise. The broker who introduces a new angle, a new data point, or a new implication maintains forward momentum and perceived intelligence value.
+LAW 28 (BOLDNESS): hesitation, excessive qualification, and half-measures are more damaging than wrong moves confidently executed. A clear, confident recommendation — even if adjusted later — is remembered as conviction. A hedged, both-sides analysis is remembered as uncertainty.
+
+THALER — MENTAL ACCOUNTING FULL CATEGORIES:
+People segregate money into psychological accounts with different spending rules and emotional protection levels. Address each category specifically:
+- FOUND MONEY (tax refunds, bonuses, inheritances): highest spending propensity — easiest to redirect. "Is there a bonus or windfall you are holding that has not been allocated yet?"
+- INCOME ACCOUNT: protected for living expenses. Never breach this frame.
+- CURRENT ACCOUNT SAVINGS: lowest emotional attachment. Easiest bridge to investment.
+- RETIREMENT ACCOUNT: strong protection frame. Bridge through IHT and legacy narrative.
+- RAINY DAY ACCOUNT: maximum protection. Bridge: "This IS the rainy day fund — it performs when everything else comes under pressure."
+EIS/VCT MENTAL ACCOUNTING REFRAME: "You are not committing £100,000. The government co-invests alongside you. You are putting in £70,000 in real economic terms. HMRC contributes £30,000 through income tax relief and writes off a further portion in loss relief if the worst happens. You have built £100,000 of exposure using £70,000 of your money, with HMRC as a co-investor who takes your downside but none of your upside."
+
+BECAUSE EFFECT — SPECIFIC DATA (Langer, Blank & Chanowitz, 1978):
+Researcher asked to cut in a photocopier queue: (1) "Can I use the copier?" → 60% compliance. (2) "Can I use the copier because I am in a rush?" → 94% compliance. (3) "Can I use the copier because I need to make some copies?" → 93% compliance. The tautological reason — no genuine justification — produced 93% compliance, nearly identical to the real one. The word "because" activates an automatic compliance heuristic regardless of the quality of the reason that follows. Every request must carry a "because." Every timing claim must carry a "because." "I am reaching out now because [specific data point] has changed the timing calculus in a way we have not seen since [specific comparable period]."
+
 Respond with valid JSON only — no markdown fences, no extra text. CRITICAL: never use double-quote characters inside string values — use single quotes or rephrase instead.`;
 
 /* ── SECTION-SPECIFIC PROMPTS (faster, focused) ── */
@@ -630,7 +685,7 @@ exports.handler = async (event) => {
     /* Scenarios: skip cache (bespoke per query), use more tokens */
     let cached = null;
     const lensTag = lensKey ? ':' + lensKey : '';
-    const cacheKey = 'search:' + type + ':' + (section ? section + ':' : '') + (ticker || query.trim().toLowerCase().slice(0, 80)) + lensTag;
+    const cacheKey = 'search2:' + type + ':' + (section ? section + ':' : '') + (ticker || query.trim().toLowerCase().slice(0, 80)) + lensTag;
 
     if (!isScenario) {
       cached = await cacheGet(cacheKey);
@@ -666,12 +721,13 @@ exports.handler = async (event) => {
         headers: {
           'x-api-key': apiKey,
           'anthropic-version': '2023-06-01',
+          'anthropic-beta': 'prompt-caching-2024-07-31',
           'content-type': 'application/json',
         },
         body: JSON.stringify({
           model: 'claude-haiku-4-5-20251001',
           max_tokens: isScenario ? 2500 : 1600,
-          system: SEARCH_SYSTEM,
+          system: [{ type: 'text', text: SEARCH_SYSTEM, cache_control: { type: 'ephemeral' } }],
           messages: [{ role: 'user', content: userMsg }],
         }),
       });

@@ -545,61 +545,86 @@
           clearInterval(_statusTimer);
           if (!d || d.error) { wrap.innerHTML = '<div class="tnp-intel-err">Intelligence unavailable.</div>'; return; }
 
-          /* ── Cascade-reveal: build panel then add sections one at a time ── */
+          /* ── Typewriter reveal: structure appears immediately, text types in field-by-field ── */
           wrap.innerHTML = '<div class="tnp-intel-panel"></div>';
           var panel = wrap.querySelector('.tnp-intel-panel');
+          var typeQueue = [];
 
-          function fadeIn(el) {
-            el.style.cssText += 'opacity:0;transform:translateY(6px);transition:opacity .28s ease,transform .28s ease;';
-            panel.appendChild(el);
-            requestAnimationFrame(function () { requestAnimationFrame(function () {
-              el.style.opacity = '1'; el.style.transform = 'translateY(0)';
-            }); });
+          function mkSec(lblTxt) {
+            var s = document.createElement('div');
+            s.className = 'tnp-sec';
+            if (lblTxt) s.innerHTML = '<div class="tnp-sec-lbl">' + lblTxt + '</div>';
+            panel.appendChild(s);
+            return s;
           }
 
-          function mkSec(lblTxt, innerHtml) {
-            var d = document.createElement('div');
-            d.className = 'tnp-sec';
-            d.innerHTML = '<div class="tnp-sec-lbl">' + lblTxt + '</div>' + innerHtml;
-            return d;
+          function typeField(parent, cls, rawText) {
+            var el = document.createElement('div');
+            el.className = cls;
+            parent.appendChild(el);
+            if (rawText) typeQueue.push({ el: el, text: rawText });
+            return el;
+          }
+
+          function pitchRow(parent, lbl, cls, rawText) {
+            var row = document.createElement('div');
+            row.className = 'tnp-pitch-row';
+            row.innerHTML = '<div class="tnp-pitch-lbl">' + lbl + '</div>';
+            var el = document.createElement('div');
+            el.className = cls;
+            row.appendChild(el);
+            parent.appendChild(row);
+            if (rawText) typeQueue.push({ el: el, text: rawText });
           }
 
           var riskCls = d.risk === 'RISK ON' ? 'tnp-risk-on' : d.risk === 'RISK OFF' ? 'tnp-risk-off' : 'tnp-risk-neu';
-          var DELAYS = [0, 220, 440, 600];
-          var sections = [];
 
-          if (d.what) sections.push(mkSec('WHAT IT MEANS',
-            '<div class="tnp-text">' + escH(d.what) + '</div>' +
-            (d.analogy ? '<div class="tnp-analogy">&ldquo;' + escH(d.analogy) + '&rdquo;</div>' : '')));
-
-          if (d.risk) sections.push(mkSec('RISK SIGNAL',
-            '<div class="tnp-risk ' + riskCls + '"><span class="tnp-risk-dot"></span>' + escH(d.risk) + '</div>' +
-            (d.riskReason ? '<div class="tnp-risk-reason">' + escH(d.riskReason) + '</div>' : '')));
-
-          var pitchInner = '';
-          if (d.openingLine) pitchInner += '<div class="tnp-pitch-row"><div class="tnp-pitch-lbl">OPEN WITH</div><div class="tnp-quote">&ldquo;' + escH(d.openingLine) + '&rdquo;</div></div>';
-          if (d.pitch)       pitchInner += '<div class="tnp-pitch-row"><div class="tnp-pitch-lbl">THE LOGICAL CASE</div><div class="tnp-pitch-txt">' + escH(d.pitch) + '</div></div>';
-          if (d.futurePace)  pitchInner += '<div class="tnp-pitch-row"><div class="tnp-pitch-lbl">FUTURE PACE</div><div class="tnp-pitch-txt tnp-future">' + escH(d.futurePace) + '</div></div>';
-          if (pitchInner) {
-            var pitchSec = document.createElement('div');
-            pitchSec.className = 'tnp-sec tnp-pitch-block';
-            pitchSec.innerHTML = '<div class="tnp-sec-lbl">HOW TO PITCH IT</div>' + pitchInner;
-            sections.push(pitchSec);
+          if (d.what) {
+            var s1 = mkSec('WHAT IT MEANS');
+            typeField(s1, 'tnp-text', d.what);
+            if (d.analogy) typeField(s1, 'tnp-analogy', '“' + d.analogy + '”');
           }
 
-          var closingInner = '';
-          if (d.spinQuestion) closingInner += '<div class="tnp-pitch-row"><div class="tnp-pitch-lbl">ASK THEM</div><div class="tnp-quote">&ldquo;' + escH(d.spinQuestion) + '&rdquo;</div></div>';
-          if (d.urgency)      closingInner += '<div class="tnp-pitch-row"><div class="tnp-pitch-lbl">TIMING</div><div class="tnp-pitch-txt tnp-urgency">' + escH(d.urgency) + '</div></div>';
-          if (closingInner) {
-            var closingSec = document.createElement('div');
-            closingSec.className = 'tnp-sec';
-            closingSec.innerHTML = closingInner;
-            sections.push(closingSec);
+          if (d.risk) {
+            var s2 = mkSec('RISK SIGNAL');
+            var riskEl = document.createElement('div');
+            riskEl.className = 'tnp-risk ' + riskCls;
+            riskEl.innerHTML = '<span class="tnp-risk-dot"></span>' + escH(d.risk);
+            s2.appendChild(riskEl);
+            if (d.riskReason) typeField(s2, 'tnp-risk-reason', d.riskReason);
           }
 
-          sections.forEach(function (sec, i) {
-            setTimeout(function () { fadeIn(sec); }, DELAYS[i] || (i * 200));
-          });
+          if (d.openingLine || d.pitch || d.futurePace) {
+            var s3 = mkSec('HOW TO PITCH IT');
+            s3.classList.add('tnp-pitch-block');
+            if (d.openingLine) pitchRow(s3, 'OPEN WITH',        'tnp-quote',                    '“' + d.openingLine + '”');
+            if (d.pitch)       pitchRow(s3, 'THE LOGICAL CASE', 'tnp-pitch-txt',                d.pitch);
+            if (d.futurePace)  pitchRow(s3, 'FUTURE PACE',      'tnp-pitch-txt tnp-future',     d.futurePace);
+          }
+
+          if (d.spinQuestion || d.urgency) {
+            var s4 = mkSec('');
+            if (d.spinQuestion) pitchRow(s4, 'ASK THEM', 'tnp-quote',                   '“' + d.spinQuestion + '”');
+            if (d.urgency)      pitchRow(s4, 'TIMING',   'tnp-pitch-txt tnp-urgency',   d.urgency);
+          }
+
+          /* run the type queue: each field types at ~20ms/tick, batch size scales to keep each field ~1.5s */
+          function typeNext(idx) {
+            if (idx >= typeQueue.length) return;
+            var item = typeQueue[idx];
+            var text = item.text;
+            var batch = Math.max(1, Math.ceil(text.length / 75));
+            var pos = 0;
+            var t = setInterval(function () {
+              pos = Math.min(text.length, pos + batch);
+              item.el.textContent = text.slice(0, pos);
+              if (pos >= text.length) {
+                clearInterval(t);
+                setTimeout(function () { typeNext(idx + 1); }, 50);
+              }
+            }, 20);
+          }
+          typeNext(0);
         })
         .catch(function () {
           clearInterval(_statusTimer);
@@ -653,6 +678,28 @@
 
         var activeFilter = 'all';
 
+        /* Build keyword list for the active asset lens (anything not in the three base categories) */
+        var _lensFilter = (function() {
+          var lens = window._assetLens;
+          if (!lens || lens.key === 'universal' || lens.key === 'whisky' || lens.key === 'gold') return null;
+          /* Derive search terms from the label and key */
+          var terms = [lens.key.toLowerCase(), lens.label.toLowerCase()];
+          /* Add common abbreviations / terms by key */
+          var extras = {
+            vct: ['vct','venture capital trust','vcts','venture capital'],
+            eis: ['eis','seis','enterprise investment','seed enterprise'],
+            pe: ['private equity','buyout','pe fund','leveraged buyout'],
+            property: ['property finance','loan note','bridging','development finance','real estate finance'],
+            art: ['art market','collectibles','auction','sotheby','christie','fine art'],
+            land: ['farmland','agricultural land','forestry','carbon credit','woodland','timber'],
+            trusts: ['investment trust','investment trusts','nav discount','closed-end','aic'],
+            offshore: ['offshore bond','investment bond','onshore bond'],
+            wine: ['fine wine','liv-ex','wine investment','bordeaux','burgundy']
+          };
+          if (extras[lens.key]) terms = terms.concat(extras[lens.key]);
+          return terms;
+        })();
+
         function getFiltered(filter) {
           var twoHrsAgo = Math.floor(Date.now()/1000) - 7200;
           function pad(matched) {
@@ -661,10 +708,16 @@
             var seen = {}; matched.forEach(function(s){ seen[s.url]=true; });
             return matched.concat(stories.filter(function(s){ return !seen[s.url]; }).slice(0, 20 - matched.length)).slice(0, 20);
           }
+          if (filter === 'lens' && _lensFilter) {
+            return pad(stories.filter(function(s){
+              var txt = ((s.title||'') + ' ' + (s.source||'')).toLowerCase();
+              return _lensFilter.some(function(k){ return txt.includes(k); });
+            }));
+          }
           if (filter === 'whisky') return pad(stories.filter(function(s){ return _newsRelevant(s,'whisky'); }));
           if (filter === 'gold')   return pad(stories.filter(function(s){ return _newsRelevant(s,'gold'); }));
           if (filter === 'macro')  return pad(stories.filter(function(s){ return _newsRelevant(s,'macro'); }));
-          return pad(stories.filter(function(s){ return _newsRelevant(s,'whisky')||_newsRelevant(s,'gold')||_newsRelevant(s,'macro'); }));
+          return pad(stories.filter(function(s){ return _newsRelevant(s,'whisky')||_newsRelevant(s,'gold')||_newsRelevant(s,'macro')||(_lensFilter && (function(){ var t=((s.title||'')+' '+(s.source||'')).toLowerCase(); return _lensFilter.some(function(k){return t.includes(k);}); })()); }));
         }
 
         function renderList(filter) {
@@ -692,11 +745,17 @@
           });
         }
 
+        var lensTabHtml = '';
+        if (_lensFilter && window._assetLens) {
+          lensTabHtml = '<button class="tbw-filter-tab" data-filter="lens">' + window._assetLens.label.toUpperCase() + '</button>';
+        }
+
         body.style.display = 'flex';
         body.style.flexDirection = 'column';
         body.innerHTML =
           '<div class="tbw-filter-bar">' +
             '<button class="tbw-filter-tab active" data-filter="all">ALL</button>' +
+            lensTabHtml +
             '<button class="tbw-filter-tab" data-filter="whisky">WHISKY</button>' +
             '<button class="tbw-filter-tab" data-filter="gold">GOLD</button>' +
             '<button class="tbw-filter-tab" data-filter="macro">MACRO</button>' +
@@ -712,6 +771,16 @@
         });
 
         renderList('all');
+
+        /* re-render filter bar when asset lens changes — new tab may appear/disappear */
+        var _lensRebuild = function() {
+          /* close any open story popouts — they were pitched under the old lens */
+          document.querySelectorAll('.tnp-popout').forEach(function(p){ p.remove(); });
+          renderNews(id, body);
+        };
+        window.removeEventListener('lens:change', body._lensListener || function(){});
+        body._lensListener = _lensRebuild;
+        window.addEventListener('lens:change', _lensRebuild);
 
         /* auto-refresh every 5 min */
         clearTimeout(el_refresh_timer(id));
@@ -7713,38 +7782,6 @@
        This removes all YouTube dependency and branding. */
     var TV_CHANNELS = [
       {
-        key:'schwab',
-        label:'SCHWAB NETWORK', tag:'MARKETS',
-        sub:'US markets · trading · macro · 24/7',
-        desc:'Professional financial television. Live market commentary, trading analysis, macro intelligence and earnings coverage. Formerly TD Ameritrade Network.',
-        embed: null, yt: true,
-        direct:'https://schwabnetwork.com'
-      },
-      {
-        key:'bloomberg',
-        label:'BLOOMBERG TV', tag:'MARKETS',
-        sub:'Global business & markets live',
-        desc:'Real-time business news, markets data and financial analysis from Bloomberg\'s global newsroom. Coverage of equities, fixed income, FX and commodities.',
-        embed: null, yt: false,
-        direct:'https://www.bloomberg.com/live'
-      },
-      {
-        key:'france24',
-        label:'FRANCE 24', tag:'INT\'L',
-        sub:'English · international · 24/7',
-        desc:'International live news from a global perspective. Breaking news, world events, geopolitics and in-depth analysis broadcast in English around the clock.',
-        embed:'https://www.france24.com/en/live-news-iframe', yt: false,
-        direct:'https://www.france24.com/en/live/'
-      },
-      {
-        key:'aljazeera',
-        label:'AL JAZEERA', tag:'GLOBAL',
-        sub:'English · world news · 24/7',
-        desc:'Award-winning international news coverage from Al Jazeera English. Global affairs, conflict coverage, investigative journalism and economic reporting.',
-        embed: null, yt: true,
-        direct:'https://www.aljazeera.com/live/'
-      },
-      {
         key:'sky',
         label:'SKY NEWS', tag:'UK',
         sub:'UK & world breaking news',
@@ -7753,12 +7790,12 @@
         direct:'https://news.sky.com/watch-sky-news-live'
       },
       {
-        key:'dw',
-        label:'DW NEWS', tag:'EUROPE',
-        sub:'European & global analysis',
-        desc:'Deutsche Welle English: European politics, economics and world news. Independent international broadcasting with strong coverage of EU affairs, global trade and emerging markets.',
+        key:'bbc',
+        label:'BBC WORLD SERVICE', tag:'GLOBAL',
+        sub:'World news · 24/7 international',
+        desc:'BBC World Service: international news, analysis and documentary. Trusted global coverage with correspondents in over 50 countries, around the clock.',
         embed: null, yt: true,
-        direct:'https://www.dw.com/en/live-tv/s-9831'
+        direct:'https://www.bbc.co.uk/sounds/play/live:bbc_world_service'
       },
       {
         key:'cnbc',
@@ -7767,10 +7804,27 @@
         desc:'CNBC live: real-time US market coverage, earnings, economic data and business news from America\'s leading financial news network.',
         embed: null, yt: true,
         direct:'https://www.cnbc.com/live-tv/'
+      },
+      {
+        key:'netflix',
+        label:'NETFLIX', tag:'STREAMING',
+        sub:'Netflix YouTube · trailers & content',
+        desc:'Netflix official YouTube channel: trailers, clips, series previews and original content highlights from the global streaming platform.',
+        embed: null, yt: true,
+        direct:'https://www.youtube.com/@netflix'
+      },
+      {
+        key:'custom',
+        label:'CUSTOM', tag:'YOU',
+        sub:'Paste any YouTube URL',
+        desc:'Watch any YouTube video or live stream. Paste a video URL or video ID below to play it directly inside the terminal.',
+        embed: null, yt: false,
+        direct:''
       }
     ];
 
-    var _ch    = 'schwab';
+    var _ch    = 'sky';
+    var _customUrl = '';
     var _mode  = 'live';      /* 'live' | 'clips' */
     var _ctag  = 'ALL';
     var _playing = null;      /* { id, title } when a clip is open */
@@ -7780,7 +7834,7 @@
     var _liveLoading = false;
     var _liveLoaded  = false;
 
-    var CLIP_TAGS = ['ALL','REUTERS','BLOOMBERG','CNBC','FT','YAHOO FINANCE','SKY BUSINESS'];
+    var CLIP_TAGS = ['ALL','BLOOMBERG','CNBC'];
 
     function buildLaunchCard(ch) {
       return '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:30px;box-sizing:border-box;background:linear-gradient(160deg,#0a0a0a 0%,#131313 100%);">' +
@@ -7891,6 +7945,12 @@
           buildModeBar() + tagBar + gridHtml +
         '</div>';
 
+      /* re-wire mode buttons — renderClips() replaces body.innerHTML so listeners from render() are gone */
+      var liveBtn  = body.querySelector('#tv-mode-live-' + id);
+      var clipsBtn = body.querySelector('#tv-mode-clips-' + id);
+      if (liveBtn)  liveBtn.addEventListener('click', function() { _mode = 'live'; render(); });
+      if (clipsBtn) clipsBtn.addEventListener('click', function() { if (!_clipsLoaded) loadClips(); else renderClips(); });
+
       CLIP_TAGS.forEach(function(t) {
         var btn = body.querySelector('#tv-ctag-' + t.replace(/\s/g,'') + '-' + id);
         if (btn) btn.addEventListener('click', function() { _ctag = t; renderClips(); });
@@ -7927,6 +7987,30 @@
     }
 
     function buildChannelContent(ch) {
+      /* custom user YouTube input */
+      if (ch.key === 'custom') {
+        var embedVid = _customUrl ? extractYtId(_customUrl) : null;
+        if (embedVid) {
+          return '<div style="flex:1;position:relative;background:#0a0a0a;min-height:0;overflow:hidden;">' +
+            '<div style="position:absolute;top:6px;left:6px;z-index:10;display:flex;gap:4px;">' +
+              '<input id="tv-custom-input-' + id + '" type="text" placeholder="Paste YouTube URL…" value="' + escH(_customUrl) + '" ' +
+                'style="background:#111;border:1px solid #333;color:#fff;font-family:Consolas,monospace;font-size:7.5px;letter-spacing:.05em;padding:4px 8px;width:220px;outline:none;border-radius:1px;">' +
+              '<button id="tv-custom-go-' + id + '" style="background:' + A + ';color:#000;border:none;font-family:Consolas,monospace;font-size:7px;font-weight:700;letter-spacing:.1em;padding:4px 8px;cursor:pointer;border-radius:1px;">GO</button>' +
+            '</div>' +
+            '<iframe src="https://www.youtube-nocookie.com/embed/' + embedVid + '?autoplay=1&rel=0&modestbranding=1" ' +
+              'style="width:100%;height:100%;border:none;display:block;" allow="autoplay;fullscreen" allowfullscreen></iframe>' +
+          '</div>';
+        }
+        return '<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:#0a0a0a;padding:30px;box-sizing:border-box;">' +
+          '<div style="font-size:9px;letter-spacing:.2em;color:rgba(255,255,255,0.4);font-family:Consolas,monospace;">PASTE ANY YOUTUBE URL</div>' +
+          '<div style="display:flex;gap:6px;width:100%;max-width:360px;">' +
+            '<input id="tv-custom-input-' + id + '" type="text" placeholder="https://www.youtube.com/watch?v=…" ' +
+              'style="flex:1;background:#111;border:1px solid #333;color:#fff;font-family:Consolas,monospace;font-size:8px;letter-spacing:.04em;padding:8px 12px;outline:none;border-radius:1px;">' +
+            '<button id="tv-custom-go-' + id + '" style="background:' + A + ';color:#000;border:none;font-family:Consolas,monospace;font-size:7.5px;font-weight:700;letter-spacing:.12em;padding:8px 16px;cursor:pointer;border-radius:1px;">PLAY</button>' +
+          '</div>' +
+          '<div style="font-size:7px;color:rgba(255,255,255,0.2);font-family:Consolas,monospace;">Works with any public YouTube video, live stream, or channel</div>' +
+        '</div>';
+      }
       /* official iframe embed */
       if (ch.embed) {
         return '<div style="flex:1;position:relative;background:#0a0a0a;min-height:0;overflow:hidden;">' +
@@ -7953,8 +8037,28 @@
         /* fallback launch card if resolve failed */
         return '<div style="flex:1;position:relative;min-height:0;overflow:hidden;">' + buildLaunchCard(ch) + '</div>';
       }
-      /* channel with no embed (Bloomberg etc) — launch card */
+      /* channel with no embed — launch card */
       return '<div style="flex:1;position:relative;min-height:0;overflow:hidden;">' + buildLaunchCard(ch) + '</div>';
+    }
+
+    function extractYtId(url) {
+      if (!url) return null;
+      url = url.trim();
+      /* plain video ID (11 chars, no slash) */
+      if (/^[a-zA-Z0-9_-]{11}$/.test(url)) return url;
+      /* youtu.be/ID */
+      var m = url.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);
+      if (m) return m[1];
+      /* youtube.com/watch?v=ID */
+      m = url.match(/[?&]v=([a-zA-Z0-9_-]{11})/);
+      if (m) return m[1];
+      /* youtube.com/embed/ID */
+      m = url.match(/\/embed\/([a-zA-Z0-9_-]{11})/);
+      if (m) return m[1];
+      /* youtube.com/shorts/ID */
+      m = url.match(/\/shorts\/([a-zA-Z0-9_-]{11})/);
+      if (m) return m[1];
+      return null;
     }
 
     function render() {
@@ -8006,6 +8110,18 @@
         var btn = body.querySelector('#tv-ch-' + c.key + '-' + id);
         if (btn) btn.addEventListener('click', function() { _ch = c.key; render(); });
       });
+
+      /* custom YouTube input wiring */
+      var goBtn = body.querySelector('#tv-custom-go-' + id);
+      var urlInput = body.querySelector('#tv-custom-input-' + id);
+      if (goBtn && urlInput) {
+        var doPlay = function() {
+          _customUrl = urlInput.value.trim();
+          render();
+        };
+        goBtn.addEventListener('click', doPlay);
+        urlInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') doPlay(); });
+      }
     }
 
     function loadLiveIds() {

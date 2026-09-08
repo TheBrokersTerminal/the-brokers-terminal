@@ -3,12 +3,8 @@
    https://www.youtube.com/feeds/videos.xml?channel_id=CHANNEL_ID */
 
 const CHANNELS = [
-  { tag:'REUTERS',        id:'UCqnMOBVtyFbHvDMR3lU2t8A', name:'Reuters' },
-  { tag:'BLOOMBERG',      id:'UCIALMKvObZNtJ6AmdCLP7Lg', name:'Bloomberg' },
-  { tag:'CNBC',           id:'UCvJJ_dzjViJCoLf5uKUTwoA', name:'CNBC' },
-  { tag:'FT',             id:'UCt8HCRsOHlCO5FkLSXwUiyw', name:'Financial Times' },
-  { tag:'YAHOO FINANCE',  id:'UCEAZeUIeJs-g7bMSzG9LNyg', name:'Yahoo Finance' },
-  { tag:'SKY BUSINESS',   id:'UCD9-QMb8FtidZBMG1lhqQ0A', name:'Sky News' },
+  { tag:'BLOOMBERG', id:'UCIALMKvObZNtJ6AmdCLP7Lg', name:'Bloomberg' },
+  { tag:'CNBC',      id:'UCrp_UI8XtuYfpiqAWD83uTg', name:'CNBC' },
 ];
 
 function parseXml(xml) {

@@ -2,11 +2,10 @@
    Fetches channel/live page server-side to avoid CORS, parses canonical video ID */
 
 const CHANNELS = [
-  { key:'schwab',    id:'UCkRrFSqp7k1qF_ANTbxn_Mw', name:'Schwab Network' },
-  { key:'aljazeera', id:'UCNye-wNBqNL5ZzHSJdrlvxQ',  name:'Al Jazeera' },
-  { key:'sky',       id:'UCoMdktPbSTixAyNGwb-UYkQ',  name:'Sky News' },
-  { key:'dw',        id:'UCknLrEdhRCp1aegoMqRaCZg',  name:'DW News' },
-  { key:'cnbc',      id:'UCvJJ_dzjViJCoLf5uKUTwoA',  name:'CNBC' },
+  { key:'sky',      id:'UCoMdktPbSTixAyNGwb-UYkQ',  name:'Sky News' },
+  { key:'bbc',      id:'UCknLrEdhRCp1aegoMqRaCZg',  name:'BBC World Service' },
+  { key:'netflix',  id:'UCvJJ_dzjViJCoLf5uKUTwoA',  name:'Netflix' },
+  { key:'cnbc',     id:'UCrp_UI8XtuYfpiqAWD83uTg',  name:'CNBC' },
 ];
 
 async function resolveVideoId(channelId) {

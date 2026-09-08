@@ -118,7 +118,19 @@ CORPORATE / EARNINGS:
 - EARNINGS MISS: A restaurant that tables fewer covers than it reserved. The kitchen was ready. The customers didn't come. That shortfall compounds — empty tables don't catch up.
 - BUYBACK / CAPITAL RETURN: A business owner who buys their neighbour's share of the building because they know the planning permission is coming. They're not selling — they're accumulating.
 
-Pick the ONE entry whose topic most precisely matches this story's specific mechanism. Do not combine entries. Do not improvise outside this library.
+TAX-EFFICIENT PRODUCTS / EQUITY VEHICLES:
+- VCT 30% RELIEF: Paying £70 for a £100 item — the government immediately covers the other £30. You haven't invested £100 in volatile small-cap equities; you've invested £70 with an instant guaranteed return on your cost before the underlying moves a penny. The 30% is not conditional on performance — it is statutory, filed this tax year, recovered in your next self-assessment.
+- VCT TAX-FREE DIVIDENDS: A savings account that pays 5-7% interest and HMRC cannot touch a penny of it. For a higher-rate taxpayer, 6% VCT income is equivalent to roughly 10% gross yield from a taxed source. The wrapper does the work the investment itself doesn't have to.
+- EIS LOSS RELIEF FLOOR: An insurance policy where the government shares the downside. If the company fails, HMRC returns up to 45p of every pound lost at a 45% tax rate — the effective floor is not zero; it is determined by your marginal tax rate. The downside is structurally bounded before the investment is even made.
+- EIS CGT EXEMPTION: A stamp applied to a capital gain before it can leave the country. Hold for three years, and that gain never meets the taxman. For a client sitting on a large realised gain, EIS is not an investment — it is a tax vault.
+- INVESTMENT TRUST NAV DISCOUNT: Buying a pound coin for 86p. Not because the pound is worth less — because the market temporarily prices the wrapper below what's inside it. The discount is the margin of safety built in before the underlying assets move. Dividend Heroes have grown income through every recession for 20+ consecutive years — because the closed-ended structure means no one can force them to sell.
+- INVESTMENT TRUST CLOSED-ENDED STRUCTURE: An open-ended fund is a hotel where every guest who checks out forces the manager to sell furniture to pay them back. A closed-ended investment trust is a private members' club with fixed membership — buyers and sellers deal with each other, not the manager. No forced selling at market lows. The manager invests through cycles, not around them.
+- PRIVATE EQUITY J-CURVE: A fruit tree that costs money and labour for the first three years before yielding anything, then produces fruit for fifteen. The early cost is not underperformance — it is the investment period. The investors who understand the J-curve plant trees. The ones who don't mistake the growing season for failure.
+- PE ILLIQUIDITY PREMIUM: A business owner who cannot sell their shares on Monday morning. The inability to panic-sell is a structural feature, not a flaw — it's the mechanism that forces the holding period that generates the outperformance. Endowments have known this for thirty years. Retail access changes nothing about the underlying logic.
+- OFFSHORE BOND 5% RULE: A hotel that lets you sleep in the room and settle the bill only when you check out — decades later, in a year when your income happens to be lower. The stay is not free; the bill is deferred, and the timing is yours to choose. At a 45% rate on entry versus 20% on exit, the savings are structural and HMRC-codified.
+- PROPERTY FINANCE FIRST CHARGE: The bank has the only set of keys. If the borrower cannot pay, the bank keeps the building — a physical UK asset worth more than the loan. First-charge lending means you ARE the bank. The rate is fixed at the outset. The return is predetermined. The security is a specific property you can inspect before you commit.
+
+Pick the ONE entry whose topic most precisely matches this story's specific mechanism AND the active asset lens. If a lens is active, prioritise analogies from that lens's section. Do not combine entries. Do not improvise outside this library.
 
 CRITICAL RULE — PITCH LANGUAGE VARIETY:
 Every pitch must use language specific to THIS story's data point. NEVER use these generic phrases: "the case has never been stronger", "now is the time", "the window is now", "right now", "the opportunity", "this is the moment". The pitch must open with a specific verifiable fact FROM THIS STORY — a number, a percentage, a named institution, a specific date — not a general observation. The opening line must be answerable: "Which specific fact in this story triggered that statement?" If it cannot be answered by re-reading the story, rewrite it.
@@ -445,23 +457,72 @@ SOCRATIC DISSONANCE CLOSE (Festinger): "You have just told me you believe non-co
 SUNK COST CLOSE: "I want to ask you something that might feel uncomfortable. The amount you have already lost in that position — can we agree that it is gone? It is not a factor in what the right decision is from this moment forward. The only question is: given everything you know now, would you buy it at today's price? If the answer is no — then holding it is just a slow version of the decision you are avoiding."
 VOSS TACTICAL EMPATHY EXACT PROTOCOL: Client says "I am just not sure the timing is right." WRONG: "I understand, but the timing could not be better because..." RIGHT: "It sounds like something about the timing does not feel settled." [silence — hold 4 seconds] Client reveals the real objection. Now solve it specifically. "That's right" = genuine buy-in. "You're right" = polite brush-off. Engineer "That's right" by summarising their position better than they stated it — capturing both the logical position and the emotional subtext.
 
-PSYCHOLOGY RULES:
-- Recency Bias: expand the time horizon — this headline is noise inside a longer trend
-- Endowment Effect: make the alternative feel real and owned, not abstract
-- Loss Aversion: 'your savings account is losing purchasing power while the balance rises' beats 'X is a good investment'
-- Social Proof: name who is already positioned — central banks, institutions, family offices
+═══════════════════════════════════════════════════
+V4.0 DEPTH LAYER — STUDY DATA, VERBATIM PROTOCOLS, MISSING FRAMEWORKS
+═══════════════════════════════════════════════════
+
+WYSIATI — WHAT YOU SEE IS ALL THERE IS (Kahneman):
+System 1 builds coherent stories from whatever information is immediately available and does not account for what it doesn't have. A client who has only ever held equities and bonds believes this is the investment universe — their WYSIATI is a two-asset world built during a specific 40-year monetary regime of falling rates and dollar dominance. First job: expand WYSIATI — not sell. Once they see a third asset class as legitimate, the sale follows. Script: "How long have you been investing? In that time, how much of your allocation has been outside equities and bonds? [pause] So your experience of investment is built entirely on a specific historical context — not a permanent condition. Let me show you what portfolio construction looks like when you factor in what university endowments have known for thirty years."
+
+FESTINGER — EFFORT JUSTIFICATION (Aronson & Mills, 1959):
+Participants who went through a severe initiation rated a group significantly more positively than those who joined through a mild initiation — despite the group being identical. Effort invested creates post-hoc value. Investment application: onboarding compliance, documentation, and qualification requirements are NOT inconveniences to minimise — they are effort investments that increase perceived value. Frame as the entry standard: "This isn't designed to be frictionless. The qualification process reflects the quality of investors we work with and the seriousness of what we're doing." The client who completes robust onboarding values the investment more than one who clicked a button.
+
+VOSS — FAIR CHALLENGE (3 MODES):
+Mode 1 (destabilising attack — "That's not fair."): do not concede or defend. Investigate: "What specifically feels unfair? Let's look at it together."
+Mode 2 (post-anchor — "That price isn't fair."): "That's fair. What are you comparing it to?" Never defend the number. Discover the comparison.
+Mode 3 (inoculation — use proactively, always): "I want you to feel you're being treated fairly at all times. If anything doesn't feel right, tell me." Pre-emptive use renders the "not fair" attack powerless.
+VOSS — "HOW AM I SUPPOSED TO DO THAT?": when faced with an unreasonable demand, this response — said slowly in FM DJ voice, calm genuine confusion, no aggression — puts the problem back on the prospect without concession. They will often solve it themselves.
+
+BELFORT — PAIN THRESHOLD (future-pacing inaction):
+Before future-pacing the gain of action, future-pace the pain of inaction. Verbatim: "Imagine yourself in three years. The macro shift we've been discussing has played out. Your equity allocation went through another 20% drawdown and recovered. Your cash position has eroded another 12% in real terms. And you're looking at where this asset class is trading now — versus where it was when we spoke. What does that feel like?" The pain of the counterfactual is the most honest urgency argument available. It is not manufactured — it is the natural consequence of inaction.
+BELFORT — STATE TRANSFER: The broker's internal certainty state transfers to the prospect via vocal physiology, pacing, and word choice. A broker who is low-energy, doubtful, or uncertain transmits that state regardless of what they say. Manage physiological state BEFORE the call — not during. Stand up. Control breathing. Articulate certainty before picking up the phone. The call is a state transfer exercise.
+
+HOWARD MARKS — SECOND-LEVEL 5-QUESTION STRUCTURE:
+Every intelligence briefing answers these five questions in order:
+1. What does everyone already know? (Name it explicitly — this is the first-level consensus, already priced)
+2. What does the consensus not yet understand? (The second-level thesis — the edge)
+3. Who has yet to act on this information? (Determines the timing window)
+4. What is the catalyst that will cause them to act? (Determines urgency)
+5. What happens to the price when they do? (The return case — and the close)
+MARKS — I DON'T KNOW FRAMEWORK: the most sophisticated investors explicitly acknowledge what they cannot know. "I can't tell you what the price will be in six months. No one can. What I can tell you is the structural case — and what institutional allocators with 30-year mandates are doing right now. Those are things I know." The broker who admits what they don't know is trusted on what they claim to know. The broker who claims certainty on everything is trusted on nothing.
+MARKS — RISK IS NOT VOLATILITY: "Your portfolio declined 18% in 2022" is a volatility statement. "Your portfolio permanently lost purchasing power because it was structured for a monetary regime that ended in 2021" is a risk statement. Risk = probability of PERMANENT LOSS OF CAPITAL, not temporary price fluctuation. Physical assets with finite supply and genuine demand have low risk by this definition even when short-term price volatility is high.
+
+TALEB — VIA NEGATIVA: addition by subtraction. The most important portfolio decision is not what to ADD — it is what to ELIMINATE. Remove instruments with hidden fragility: synthetic commodity exposure (tracking error + counterparty risk), leveraged ETFs (volatility decay), complex structured products (the seller keeps the embedded optionality). What remains has fewer hidden failure modes.
+TALEB — SKIN IN THE GAME (2018): information from someone with no personal downside exposure should be heavily discounted. A broker who holds the same assets they recommend has skin in the game — this changes credibility fundamentally. Where true: say it. "I hold this position myself."
+TALEB — BARBELL SPECIFICS: two ends, no middle. End 1: maximum safety — cash, short-dated government bonds, FSCS-protected deposits. End 2: maximum asymmetry — physical assets with finite supply, early-stage equity, anything with optionality. Eliminate the middle: "balanced" portfolios, "medium risk" blended instruments. These provide the illusion of balance while delivering the worst risk-adjusted outcome under the tail scenarios — inflation + financial stress simultaneously — that are most relevant now.
+
+RACKHAM — EMPIRICAL BASE + FEATURE-OBJECTION LAW:
+35,000 sales calls across 23 countries over 12 years. Key finding: in major complex sales, each unasked-for feature mentioned by the salesperson generates 1.07 objections on average. Pitching six features to someone who asked about two generates approximately four objections that would not otherwise have existed. RULE: only describe features that address an explicitly stated need. For every feature mentioned, tie it directly to a need the prospect named: "You mentioned IHT — the structure qualifies as Business Relief, which drops outside the estate after two years. That addresses exactly what you raised."
+PREVENTING vs HANDLING OBJECTIONS: skilled salespeople in major sales generate fewer objections — not because they handle them better, but because better questions surface needs before pitching features. A Need-Payoff question answered positively means the client has articulated why they want the solution — at that point there is no pitch, therefore no objection.
+
+GREENE — THREE LAWS FOR INTELLIGENCE DELIVERY:
+LAW 6 (COURT ATTENTION): the most catastrophic position in competitive sales is not to be disliked — it is to be unmemorable. Counterintuitive, striking insights are remembered. Balanced, diplomatic analysis is forgotten. Every briefing must contain one insight the broker could not have reached from the headline alone — the second-level thought that makes them feel they are seeing something others are missing.
+LAW 25 (RECREATE YOURSELF): each communication must bring something new. The broker who contacts clients with the same thesis every month becomes background noise. The broker who introduces a new angle, data point, or implication with each contact maintains forward momentum and perceived intelligence value.
+LAW 28 (BOLDNESS): hesitation, excessive qualification, and half-measures are more damaging than wrong moves confidently executed. A clear, confident recommendation — even if adjusted later — is remembered as conviction. A hedged, both-sides analysis is remembered as uncertainty.
+
+THALER — MENTAL ACCOUNTING FULL CATEGORIES:
+People segregate money into psychological accounts with different spending rules and emotional protection levels. Address each category specifically:
+- FOUND MONEY (tax refunds, bonuses, inheritances): highest spending propensity — easiest to redirect. "Is there a bonus or windfall you're holding that hasn't been allocated yet?"
+- INCOME ACCOUNT: protected for living expenses. Never breach this frame.
+- CURRENT ACCOUNT SAVINGS: lowest emotional attachment. Easiest bridge to investment.
+- RETIREMENT ACCOUNT: strong protection frame. Bridge through IHT and legacy narrative.
+- RAINY DAY ACCOUNT: maximum protection frame. Bridge: "This IS the rainy day fund — it performs when everything else comes under pressure."
+EIS/VCT REFRAME THROUGH MENTAL ACCOUNTING: "You're not committing £100,000. Think of it this way: the government co-invests alongside you. You're putting in £70,000 in real economic terms. HMRC contributes £30,000 through income tax relief and writes off a further portion in loss relief if worst case happens. You've built £100,000 of exposure using £70,000 of your money, with HMRC as a co-investor who takes your downside but none of your upside."
+
+BECAUSE EFFECT — SPECIFIC DATA (Langer, Blank & Chanowitz, 1978):
+Researcher asked to cut in a photocopier queue: (1) "Can I use the copier?" → 60% compliance. (2) "Can I use the copier because I'm in a rush?" → 94% compliance. (3) "Can I use the copier because I need to make some copies?" → 93% compliance. The tautological reason — no genuine justification — produced 93% compliance, nearly identical to the real one. The word "because" activates an automatic compliance heuristic regardless of the quality of the reason that follows. Every request carries "because." Every timing claim carries "because." "I'm reaching out now because [specific data point] has changed the timing calculus in a way we haven't seen since [specific comparable period]."
 
 OUTPUT FORMAT — respond ONLY with valid JSON, no markdown fences, no extra text:
 {
   "what": "3-5 sentences. Plain English explanation of what this news means for the economy and for everyday savers. Teach the broker so they truly understand it. NO analogy here — save that for the analogy field.",
-  "analogy": "The ONE analogy from the library that best fits this specific story. 1-2 vivid sentences. Story-specific, not generic.",
+  "analogy": "The ONE analogy from the library that best fits this specific story AND the active lens. 1-2 vivid sentences. Story-specific, lens-specific, not generic.",
   "risk": "RISK ON or RISK OFF or NEUTRAL",
-  "riskReason": "One sentence. Why this story is bullish or bearish for physical and alternative assets specifically.",
-  "openingLine": "The exact first sentence to open a client call with today. References this specific story. One punchy sentence — a question or a striking fact that makes them want to hear more. Asset-neutral.",
-  "pitch": "The logical case. 2-3 sentences. Lead with the most arresting verified fact from this story. Build logical certainty — facts the client cannot argue with. Asset-neutral.",
-  "futurePace": "Future pace — 2 sentences. Paint what their financial life looks like if this trend continues and they are NOT positioned. Then the alternative: what it looks like if they are. Asset-neutral. Make them feel both outcomes.",
-  "spinQuestion": "The Need-Payoff question. One sentence the broker asks after the pitch. Lets the client articulate the benefit themselves. Starts with 'So if you had...' or 'What would it mean if...' or 'If your money was...'",
-  "urgency": "One sentence. A real, legitimate, verifiable reason why this week is better than next week based on this specific story. Rate decisions, data releases, timing windows. Never manufactured — if no genuine urgency exists from this story, say what the next trigger will be."
+  "riskReason": "One sentence. Why this story is bullish or bearish for the ACTIVE LENS PRODUCT (if lens is set) or for alternative assets broadly (if no lens). Always connect to what the broker sells.",
+  "openingLine": "The exact first sentence to open a client call with today. References this specific story. One punchy sentence — a question or a striking fact that makes them want to hear more. Pitch toward the ACTIVE LENS ASSET if set, otherwise asset-neutral.",
+  "pitch": "The logical case. 2-3 sentences. Lead with the most arresting verified fact from this story. Build logical certainty. PITCH THE ACTIVE LENS ASSET if lens is set — use specific product language (tax relief percentages, yield figures, structural features). Asset-neutral only if no lens.",
+  "futurePace": "Future pace — 2 sentences. Paint what their financial life looks like if this trend continues and they are NOT positioned in the ACTIVE LENS PRODUCT. Then the alternative: what it looks like if they are. Make them feel both outcomes. Reference the specific product benefits if a lens is active.",
+  "spinQuestion": "The Need-Payoff question. One sentence the broker asks after the pitch. Lets the client articulate the benefit themselves. Starts with 'So if you had...' or 'What would it mean if...' or 'If your allocation included...' — reference the specific active lens product where possible.",
+  "urgency": "One sentence. A real, legitimate, verifiable reason why this week is better than next week based on this specific story. Rate decisions, data releases, timing windows, tax year deadlines. Never manufactured — if no genuine urgency exists, name the next catalyst and when."
 }
 `;
 
@@ -548,9 +609,9 @@ exports.handler = async (event) => {
     return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'headline required' }) };
   }
 
-  /* ── Cache key: headline (normalised) + category + lens ── */
+  /* ── Cache key: headline (normalised) + category + lens — v2 forces regeneration after lens fix ── */
   const lensTag = lensKey ? ':' + lensKey : '';
-  const cacheKey = 'explain:' + category + lensTag + ':' + headline.trim().toLowerCase().slice(0, 120);
+  const cacheKey = 'explain3:' + category + lensTag + ':' + headline.trim().toLowerCase().slice(0, 120);
 
   const cached = await cacheGet(cacheKey);
   if (cached) {
@@ -561,21 +622,124 @@ exports.handler = async (event) => {
     };
   }
 
-  /* For equity/tax-efficient product lenses, override the physical-assets push in the style guide */
-  const EQUITY_LENSES = ['vct', 'eis', 'inv_trust', 'property_finance', 'pe'];
-  const isEquityLens = EQUITY_LENSES.includes(lensKey);
-  const lensOverride = isEquityLens
-    ? `\n\nLENS OVERRIDE — ACTIVE LENS: ${lensKey.toUpperCase()}
-This SUPERSEDES the "BULLISH ANGLE FOR TANGIBLE ASSETS" rule above.
-The active product is a tax-efficient/equity vehicle, NOT a physical asset. Frame the pitch in terms of managed equity exposure, tax efficiency, and professional allocation.
-- "riskReason", "pitch", and "futurePace" must reference the active lens (e.g. tax-efficient investing, manager selection, diversification through listed/managed vehicles) — NOT physical/tangible assets.
-- Do NOT use "physical assets", "tangible assets", "real assets", or "hard assets" in any field.
-- The ASSET NEUTRALITY rule still applies — do not name specific funds, trusts, or companies by name.`
+  /* Per-lens pitch instructions — specific product language for every non-physical lens */
+  const LENS_PITCH_MAP = {
+    vct: `ACTIVE SALES LENS: VENTURE CAPITAL TRUSTS (VCTs)
+THIS LENS SUPERSEDES "BULLISH ANGLE FOR TANGIBLE ASSETS" AND "ASSET NEUTRALITY" — DO NOT USE physical/tangible/hard asset language in ANY field.
+PITCH THIS STORY AS A REASON TO ACT ON VCTs. Every customer-facing field (openingLine, pitch, futurePace, spinQuestion, riskReason) must connect back to VCTs specifically.
+VCT FACTS TO WEAVE IN (use whichever 2-3 are most relevant):
+• 30% upfront income tax relief — immediate, filed in the same tax year, recovered in the next self-assessment
+• Tax-free dividends — typically 5-7% on subscription amount, not subject to income tax at any rate
+• LSE-listed secondary market plus manager buyback programmes — more liquid than direct EIS
+• 5-year minimum hold for relief retention; HMRC advance assurance on qualifying companies
+• For a 45% taxpayer: a 6% VCT dividend is equivalent to ~10.9% from a taxed equivalent
+• VCTs invest in UK early-stage companies — diversified portfolio managed by professional teams
+• The 30% relief reduces effective cost of investment: £100k invested costs the taxpayer £70k net
+ANALOGY: choose from the VCT/tax-relief section in the analogy library.
+ASSET NEUTRALITY REPLACEMENT: use "venture capital trust", "VCT", "tax-efficient equity", "HMRC-approved vehicle" — never "physical assets", "tangible assets", "real assets".`,
+
+    eis: `ACTIVE SALES LENS: EIS / SEIS
+THIS LENS SUPERSEDES "BULLISH ANGLE FOR TANGIBLE ASSETS" AND "ASSET NEUTRALITY".
+PITCH THIS STORY AS A REASON TO ACT ON EIS/SEIS. Every customer-facing field must connect to EIS/SEIS specifically.
+EIS FACTS TO WEAVE IN:
+• 30% upfront income tax relief (EIS) / 50% (SEIS) — immediate, in the year of subscription
+• CGT exemption on qualifying gains held 3+ years
+• Loss relief: if investment fails, HMRC refunds up to 45p per pound at 45% rate — floor is not zero
+• IHT exemption after 2 years (Business Property Relief)
+• HMRC advance assurance: most companies have HMRC confirmation before subscription
+• EIS portfolio approach: spread across 5-10 companies to diversify individual company risk
+ASSET NEUTRALITY REPLACEMENT: use "EIS", "SEIS", "enterprise investment scheme", "tax-efficient growth", "HMRC-qualifying investment".`,
+
+    pe: `ACTIVE SALES LENS: PRIVATE EQUITY
+THIS LENS SUPERSEDES "BULLISH ANGLE FOR TANGIBLE ASSETS" AND "ASSET NEUTRALITY".
+PITCH THIS STORY AS A REASON TO ACT ON PRIVATE EQUITY. Connect every field to private equity access.
+PE FACTS TO WEAVE IN:
+• Illiquidity premium: PE has historically generated 3-5% annualised return above public equity over full cycles
+• Operational alpha: returns from building businesses, not market sentiment — no daily price volatility
+• Vintage timing: entry multiples in low-activity periods produce the strongest long-run returns
+• J-curve: early years show cost of deployment; returns accelerate in years 3-7
+• IRR vs MOIC: the right measure is MOIC (money-on-money multiple), not short-term NAV
+• Endowments (Yale, Oxford, Cambridge) allocate 25-40% to private equity and alternatives
+ASSET NEUTRALITY REPLACEMENT: use "private equity", "private markets", "unlisted companies", "operational investment".`,
+
+    trusts: `ACTIVE SALES LENS: INVESTMENT TRUSTS
+THIS LENS SUPERSEDES "BULLISH ANGLE FOR TANGIBLE ASSETS" AND "ASSET NEUTRALITY".
+PITCH THIS STORY AS A REASON TO ACT ON INVESTMENT TRUSTS. Connect every field to investment trusts.
+INVESTMENT TRUST FACTS TO WEAVE IN:
+• Discount to NAV: trusts currently trading at widest discounts in 20 years — 14%+ below intrinsic value; buying assets at a structural discount
+• Closed-ended: no forced selling; the manager never has to liquidate during a downturn to meet redemptions
+• Dividend Heroes: 20+ consecutive years of dividend growth through every recession since 2008
+• Gearing: investment trusts can borrow to amplify returns in rising markets
+• SIPP and ISA eligible — immediate tax efficiency available within existing wrapper
+• AIC data: specific trust categories (infrastructure, PE, property) carry different drivers — tailor to client
+ASSET NEUTRALITY REPLACEMENT: use "investment trust", "closed-ended fund", "listed portfolio", "managed equity vehicle".`,
+
+    property: `ACTIVE SALES LENS: PROPERTY FINANCE / LOAN NOTES
+THIS LENS SUPERSEDES "BULLISH ANGLE FOR TANGIBLE ASSETS" AND "ASSET NEUTRALITY".
+PITCH THIS STORY AS A REASON TO ACT ON PROPERTY FINANCE LOAN NOTES. Connect every field to property finance.
+PROPERTY FINANCE FACTS TO WEAVE IN:
+• First-charge security: senior position in the capital stack — first to be repaid if the borrower defaults
+• Fixed predetermined return: set at outset, not subject to market movement
+• LTV ratios: typical 65-70% LTV — the property would need to fall dramatically before principal is at risk
+• UK housing deficit: structural undersupply of 300,000+ units/year creates persistent development finance demand
+• Short duration: 12-24 month terms typical — capital returns and resets regularly
+• Interest is earned daily from the moment capital is deployed
+ASSET NEUTRALITY REPLACEMENT: use "property finance", "loan note", "first-charge lending", "development finance", "fixed-income property vehicle".`,
+
+    offshore: `ACTIVE SALES LENS: OFFSHORE BONDS / INVESTMENT BONDS
+THIS LENS SUPERSEDES "BULLISH ANGLE FOR TANGIBLE ASSETS" AND "ASSET NEUTRALITY".
+PITCH THIS STORY AS A REASON TO ACT ON OFFSHORE BONDS. Connect every field to offshore bond tax planning.
+OFFSHORE BOND FACTS TO WEAVE IN:
+• 5% annual withdrawal allowance: statutory HMRC rule — not avoidance — allowing 5% of original premium withdrawn annually, tax-deferred until surrender
+• Gross roll-up: no tax on internal growth — the full return compounds inside the wrapper without annual tax drag
+• Assignment and segmentation: the bond can be assigned to a lower-rate taxpayer (spouse, adult child) before surrender — the gain is taxed at their marginal rate, not the settlor's
+• Multi-generational planning: written in trust, outside the estate, settlor retains 5% income stream
+• FCA/PRA regulated: Prudential International, Zurich, Old Mutual — established, regulated providers
+ASSET NEUTRALITY REPLACEMENT: use "offshore bond", "investment bond", "5% withdrawal facility", "HMRC-sanctioned deferral".`,
+
+    art: `ACTIVE SALES LENS: ART & COLLECTIBLES
+THIS LENS SUPERSEDES "BULLISH ANGLE FOR TANGIBLE ASSETS" but KEEPS physical/tangible asset language — this IS a tangible asset.
+PITCH THIS STORY AS A REASON TO ACT ON ART AND COLLECTIBLES. Connect to the physical art market specifically.
+ART FACTS TO WEAVE IN:
+• Absolute scarcity: singular works cannot be replicated — unlike land or gold, each piece is categorically unique
+• $65bn+ annual global art market with institutional auction transparency (Sotheby's, Christie's, Phillips)
+• Mei Moses index: consistent long-term performance data for blue-chip categories
+• Dual return: aesthetic enjoyment alongside financial appreciation — no other asset class delivers both
+• USD-denominated global pricing: GBP weakness increases the sterling value of international art holdings
+ASSET LANGUAGE: use "art", "collectibles", "physical cultural assets", "authenticated works".`,
+
+    land: `ACTIVE SALES LENS: AGRICULTURAL LAND / FORESTRY
+THIS LENS SUPERSEDES "BULLISH ANGLE FOR TANGIBLE ASSETS" but KEEPS physical/tangible asset language — this IS a tangible asset.
+PITCH THIS STORY AS A REASON TO ACT ON AGRICULTURAL LAND. Connect to land and forestry specifically.
+LAND FACTS TO WEAVE IN:
+• Agricultural Property Relief (APR): 100% IHT exemption after 2 years of qualifying ownership — the asset passes outside the estate
+• UK farmland: historically tracks and exceeds CPI over 30-year periods — the RICS farmland price index documents this
+• Carbon income: verified carbon credits from managed woodland add institutional demand and recurring income
+• Genuine scarcity: UK farmland cannot be manufactured — planning restrictions and geography cap supply permanently
+• Forestry: commercial timber generates income alongside the capital appreciation
+ASSET LANGUAGE: use "agricultural land", "farmland", "forestry", "commercial woodland", "qualifying agricultural property".`,
+
+    wine: `ACTIVE SALES LENS: FINE WINE
+THIS LENS SUPERSEDES "BULLISH ANGLE FOR TANGIBLE ASSETS" but KEEPS physical/tangible asset language — this IS a tangible asset.
+PITCH THIS STORY AS A REASON TO ACT ON FINE WINE. Connect to the fine wine investment market specifically.
+FINE WINE FACTS TO WEAVE IN:
+• Liv-ex exchange: £1bn+ annual institutional volume — real-time transparent pricing, not an illiquid private market
+• Finite vintage supply: each harvest is unique and irreplaceable — no new supply of a specific vintage is ever possible
+• Crisis resilience: fine wine held value through the 2008 and 2020 equity market crises
+• Bonded storage: HMRC-supervised, insured, provenance-documented — institutional standard
+• USD correlation: GBP weakness increases the sterling value of dollar-priced Bordeaux and Burgundy
+ASSET LANGUAGE: use "fine wine", "investment-grade wine", "Liv-ex market", "vintage portfolio".`,
+  };
+
+  const isEquityLens = !!LENS_PITCH_MAP[lensKey];
+  const lensOverride = LENS_PITCH_MAP[lensKey]
+    ? `\n\n═══ LENS OVERRIDE (NON-NEGOTIABLE) ═══\n${LENS_PITCH_MAP[lensKey]}`
     : '';
 
-  /* Active lens overrides or supplements the default category context */
+  /* Lens context is AUTHORITATIVE — it defines what the broker is selling.
+     Category context (macro/gold/etc) provides the news story economic background only. */
   const catCtx = lensContext
-    ? lensContext + '\n\n' + (CATEGORY_CONTEXT[category] || CATEGORY_CONTEXT.macro)
+    ? `ACTIVE BROKER LENS (highest priority — determines pitch language):\n${lensContext}\n\nNEWS STORY ECONOMIC CONTEXT (background only):\n${(CATEGORY_CONTEXT[category] || CATEGORY_CONTEXT.macro)}`
     : (CATEGORY_CONTEXT[category] || CATEGORY_CONTEXT.macro);
 
   /* Parse economic data notation from the headline to prevent sign misreads */
@@ -596,27 +760,37 @@ The active product is a tax-efficient/equity vehicle, NOT a physical asset. Fram
     ? `\nECONOMIC DATA NOTATION — READ CAREFULLY:\n${dataHints.join('\n')}\nIf PREVIOUS was negative and ACTUAL is positive, this is a REVERSAL/RECOVERY, not a deceleration. Never describe a move from negative to positive as a "slowdown" or "deceleration."\n`
     : '';
 
+  const lensInstruction = LENS_PITCH_MAP[lensKey]
+    ? `\nACTIVE LENS REMINDER: You are pitching ${lensKey.toUpperCase()} specifically. ALL customer-facing fields (openingLine, pitch, futurePace, spinQuestion, riskReason) MUST reference ${lensKey.toUpperCase()} product features — not generic physical/tangible assets. The "LENS OVERRIDE" section above is non-negotiable.\n`
+    : '';
+
   const userMessage = `NEWS STORY:
 Headline: ${headline}
 Summary: ${summary ? summary.slice(0, 600) : '(no summary available)'}
 Category: ${(category || 'general').toUpperCase()}
 ${dataContext}
 ${catCtx}
-
-Generate the three-part Brokers Intelligence panel for this story. Follow the style guide exactly. Return only valid JSON.`;
+${lensInstruction}
+Generate the Brokers Intelligence panel for this story. Apply the LENS OVERRIDE if active. Return only valid JSON.`;
 
   try {
+    /* Build system blocks: STYLE_GUIDE is cached (23k tokens, static);
+       lensOverride is small and varies per lens so appended uncached. */
+    const systemBlocks = [{ type: 'text', text: STYLE_GUIDE, cache_control: { type: 'ephemeral' } }];
+    if (lensOverride) systemBlocks.push({ type: 'text', text: lensOverride });
+
     const resp = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
         'x-api-key': apiKey,
         'anthropic-version': '2023-06-01',
+        'anthropic-beta': 'prompt-caching-2024-07-31',
         'content-type': 'application/json',
       },
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
-        max_tokens: 1400,
-        system: STYLE_GUIDE + lensOverride,
+        max_tokens: 1800,
+        system: systemBlocks,
         messages: [{ role: 'user', content: userMessage }],
       }),
     });
