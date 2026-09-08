@@ -194,7 +194,7 @@
         {type:'global_map',       icon:'◉', lbl:'GLOBAL MAP',          sub:'Macro rates, inflation, gold production, whisky regions'},
       ]},
       { cat: 'WHISKY', items: [
-        {type:'whisky_lookup', icon:'▣', lbl:'WHISKY TERMINAL',     sub:'Live auction & retail prices — powered by WhiskyStats'},
+        {type:'whisky_lookup', icon:'▣', lbl:'WHISKY TERMINAL',     sub:'Live auction & retail prices'},
         {type:'cask_calc',     icon:'◫', lbl:'CASK CALCULATOR',     sub:'Cask value, bottle yield, angel\'s share & ROI'},
       ]},
       { cat: 'NEWS & DATA', items: [
@@ -9856,7 +9856,7 @@
       '</div>' +
       /* ── Footer ── */
       '<div style="padding:4px 10px;font-size:9px;letter-spacing:.12em;color:#fff;border-top:1px solid #141414;flex-shrink:0;display:flex;justify-content:space-between;background:#0a0a0a;">' +
-        '<span>DATA BY WHISKYSTATS · WHISKYBASE</span>' +
+        '<span>LIVE MARKET DATA · WHISKYBASE</span>' +
         '<span id="wl-cr-'+id+'"></span>' +
       '</div>';
 
@@ -10578,7 +10578,7 @@
 
     /* ── INDICES — region table + history charts ── */
     var REGION_NAMES = [
-      {key:'', label:'WHISKYSTATS INDEX', sub:'Top 500 most traded'},
+      {key:'', label:'GLOBAL INDEX', sub:'Top 500 most traded'},
       {key:'Scotland', label:'SCOTLAND', sub:'Broad Scotland index'},
       {key:'Speyside', label:'SPEYSIDE', sub:''},
       {key:'Highlands', label:'HIGHLANDS', sub:''},
@@ -10874,7 +10874,7 @@
         '<span class="cc-lbl">' + label + '</span>' +
         '<div class="cc-price-row">' +
           '<input class="cc-inp cc-price-inp" type="number" step="any" id="' + fieldId + '" placeholder="0.00">' +
-          '<button class="cc-lookup-btn" data-field="' + fieldId + '" title="Search WhiskyStats">▌</button>' +
+          '<button class="cc-lookup-btn" data-field="' + fieldId + '" title="Search market data">▌</button>' +
         '</div>' +
         '<div class="cc-lookup-results" id="lkp-' + fieldId + '" style="display:none;"></div>';
       return div;
@@ -10930,7 +10930,7 @@
           '</div>' +
         '</div>' +
 
-        '<div class="cc-sec-hdr">COMPARABLE PRICES <span class="cc-hint-lbl">— from WhiskyStats · click ▌ to search</span></div>' +
+        '<div class="cc-sec-hdr">COMPARABLE PRICES <span class="cc-hint-lbl">— live market data · click ▌ to search</span></div>' +
         '<div id="cc-price-fields" class="cc-grid-3"></div>' +
 
         '<button class="cc-calc-btn" id="cc-calc-btn">▌ CALCULATE CASK VALUE</button>' +
@@ -10979,7 +10979,7 @@
       }
       var q = distillery + (ageHint ? ' ' + ageHint : '');
       resDiv.style.display = 'block';
-      resDiv.innerHTML = '<div class="cc-lkp-msg">Searching WhiskyStats…</div>';
+      resDiv.innerHTML = '<div class="cc-lkp-msg">Searching market data…</div>';
       fetch('/.netlify/functions/whisky-data?type=search&query=' + encodeURIComponent(q) + '&currency=GBP')
         .then(function(r) { return r.json(); })
         .then(function(data) {
@@ -11997,7 +11997,7 @@
           if (isDrill) s += '<text x="'+(rightX+MW-6)+'" y="'+(ny2+NH/2+3)+'" font-family="Consolas,monospace" font-size="9" fill="#E97132" text-anchor="middle" pointer-events="none">›</text>';
         }
       }
-      var distSrc  = (_livePrc[current] && _livePrc[current].distilleries) ? 'WhiskyStats live' : 'est.';
+      var distSrc  = (_livePrc[current] && _livePrc[current].distilleries) ? 'live' : 'est.';
       var expSrc   = (_liveExp[current] && _liveExp[current].period) ? 'UN Comtrade ' + _liveExp[current].period : 'est.';
       var leftSrc  = mode === 'supply' ? '' : ' · prices: ' + distSrc;
       var rightSrc = mode === 'exports' ? ' · ' + expSrc : '';

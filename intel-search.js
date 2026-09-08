@@ -1666,7 +1666,7 @@
           var creditErr = (mkt && mkt.error && /credit/i.test(mkt.error));
           var mktEl = document.getElementById(mktId);
           if (creditErr) {
-            if (mktEl) mktEl.innerHTML = '<div style="font-size:9px;letter-spacing:.12em;color:#E97132;padding:6px 0;">⚠ INSUFFICIENT CREDITS — PLEASE TOP UP WHISKYSTATS</div>';
+            if (mktEl) mktEl.innerHTML = '<div style="font-size:9px;letter-spacing:.12em;color:#E97132;padding:6px 0;">⚠ INSUFFICIENT CREDITS — PLEASE TOP UP</div>';
             return;
           }
           if (mktEl) {
