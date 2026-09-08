@@ -584,7 +584,7 @@ async function cacheSet(key, response) {
 exports.handler = async (event) => {
   const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     'Content-Type': 'application/json',
   };
 
@@ -607,6 +607,38 @@ exports.handler = async (event) => {
   const { headline, summary, category, lensKey, lensContext } = body;
   if (!headline) {
     return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'headline required' }) };
+  }
+
+  /* ── SERVER-SIDE CREDIT GATE (10 credits per news pitch) ────────── */
+  if (SUPABASE_KEY) {
+    const authHeader = event.headers.authorization || event.headers.Authorization || '';
+    const jwt = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+    if (jwt) {
+      const ADMIN_EMAIL = 'admin@thebrokersterminal.com';
+      const userResp = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+        headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${jwt}` },
+      });
+      if (userResp.ok) {
+        const user = await userResp.json();
+        if (user && user.id && user.email !== ADMIN_EMAIL) {
+          const deductResp = await fetch(`${SUPABASE_URL}/rest/v1/rpc/deduct_credits`, {
+            method: 'POST',
+            headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ p_user_id: user.id, p_amount: 10, p_description: `news-pitch:${headline.slice(0, 80)}` }),
+          });
+          if (deductResp.ok) {
+            const dr = await deductResp.json();
+            if (!dr.ok && (dr.error === 'insufficient' || dr.error === 'no_account')) {
+              return { statusCode: 402, headers: corsHeaders, body: JSON.stringify({ error: dr.error, balance: dr.balance || 0 }) };
+            }
+          }
+        }
+      } else {
+        return { statusCode: 401, headers: corsHeaders, body: JSON.stringify({ error: 'invalid_token' }) };
+      }
+    } else {
+      return { statusCode: 401, headers: corsHeaders, body: JSON.stringify({ error: 'missing_token' }) };
+    }
   }
 
   /* ── Cache key: headline (normalised) + category + lens — v2 forces regeneration after lens fix ── */

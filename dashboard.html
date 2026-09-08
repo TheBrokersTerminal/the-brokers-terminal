@@ -771,7 +771,7 @@
     <div id="tbc-tab-bar"></div>
 
     <!-- Credit balance badge -->
-    <div id="tbt-credit-wrap" title="Your INTEL credits" style="display:none;align-items:center;gap:5px;padding:0 10px;border-right:1px solid var(--border-dim);cursor:default;flex-shrink:0;">
+    <div id="tbt-credit-wrap" title="Click to buy more credits" style="display:none;align-items:center;gap:5px;padding:0 10px;border-right:1px solid var(--border-dim);cursor:pointer;flex-shrink:0;" onclick="window._openBuyCredits&&window._openBuyCredits()">
       <span style="font-size:8px;letter-spacing:.18em;color:var(--text-faint);">CREDITS</span>
       <span id="tbt-credit-balance" style="font-size:11px;font-weight:700;color:var(--accent);letter-spacing:.06em;">—</span>
     </div>
@@ -804,9 +804,47 @@
   <div style="background:#0e0e0e;border:1px solid var(--border);padding:32px 36px;min-width:320px;max-width:400px;width:100%;font-family:var(--font);text-align:center;">
     <div style="font-size:10px;letter-spacing:.3em;color:var(--accent);margin-bottom:16px;font-weight:700;">INTEL CREDITS</div>
     <div style="font-size:13px;color:#fff;margin-bottom:10px;font-weight:600;letter-spacing:.06em;">Insufficient Credits</div>
-    <div style="font-size:10px;color:var(--text-faint);line-height:1.7;margin-bottom:24px;letter-spacing:.05em;">You don't have enough credits for this search.<br>Contact your administrator to top up your account.</div>
+    <div style="font-size:10px;color:var(--text-faint);line-height:1.7;margin-bottom:24px;letter-spacing:.05em;">You don't have enough credits for this search.</div>
     <div style="font-size:9px;color:var(--text-faint);letter-spacing:.12em;margin-bottom:20px;">CURRENT BALANCE: <span id="tbt-nocredits-bal" style="color:#fff;font-weight:700;">0</span> CREDITS</div>
-    <button onclick="document.getElementById('tbt-nocredits-modal').style.display='none';" style="background:var(--accent);color:#000;border:none;font-family:var(--font);font-size:9px;font-weight:700;letter-spacing:.2em;padding:10px 28px;cursor:pointer;">CLOSE</button>
+    <div style="display:flex;gap:10px;justify-content:center;">
+      <button onclick="document.getElementById('tbt-nocredits-modal').style.display='none';window._openBuyCredits&&window._openBuyCredits();" style="background:var(--accent);color:#000;border:none;font-family:var(--font);font-size:9px;font-weight:700;letter-spacing:.2em;padding:10px 24px;cursor:pointer;">BUY CREDITS</button>
+      <button onclick="document.getElementById('tbt-nocredits-modal').style.display='none';" style="background:none;border:1px solid var(--border-dim);color:var(--text-faint);font-family:var(--font);font-size:9px;letter-spacing:.12em;padding:10px 18px;cursor:pointer;">CLOSE</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ BUY CREDITS MODAL ══════════════════════════════════════════ -->
+<div id="tbt-buy-credits-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:19999;align-items:center;justify-content:center;">
+  <div style="background:#0e0e0e;border:1px solid var(--border);padding:32px 36px;min-width:360px;max-width:480px;width:100%;font-family:var(--font);">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+      <div style="font-size:10px;letter-spacing:.3em;color:var(--accent);font-weight:700;">BUY INTEL CREDITS</div>
+      <button onclick="document.getElementById('tbt-buy-credits-modal').style.display='none';" style="background:none;border:1px solid var(--border-dim);color:var(--text-faint);font-family:var(--font);font-size:9px;padding:4px 10px;cursor:pointer;letter-spacing:.12em;">CLOSE</button>
+    </div>
+    <div id="tbt-buy-credits-msg" style="display:none;font-size:10px;color:var(--accent);letter-spacing:.1em;margin-bottom:16px;text-align:center;"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;" id="tbt-buy-packages">
+      <div class="tbt-pkg" data-pkg="500" style="border:1px solid var(--border-dim);padding:16px;cursor:pointer;text-align:center;transition:border-color .15s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border-dim)'" onclick="window._buyCredits&&window._buyCredits('500')">
+        <div style="font-size:18px;font-weight:700;color:#fff;letter-spacing:.04em;">500</div>
+        <div style="font-size:8px;color:var(--text-faint);letter-spacing:.15em;margin:4px 0 10px;">CREDITS</div>
+        <div style="font-size:13px;font-weight:700;color:var(--accent);">£5</div>
+      </div>
+      <div class="tbt-pkg" data-pkg="2000" style="border:1px solid var(--border-dim);padding:16px;cursor:pointer;text-align:center;transition:border-color .15s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border-dim)'" onclick="window._buyCredits&&window._buyCredits('2000')">
+        <div style="font-size:18px;font-weight:700;color:#fff;letter-spacing:.04em;">2,000</div>
+        <div style="font-size:8px;color:var(--text-faint);letter-spacing:.15em;margin:4px 0 10px;">CREDITS</div>
+        <div style="font-size:13px;font-weight:700;color:var(--accent);">£15</div>
+      </div>
+      <div class="tbt-pkg" data-pkg="5000" style="border:1px solid var(--accent);padding:16px;cursor:pointer;text-align:center;position:relative;transition:border-color .15s;" onmouseover="this.style.borderColor='#fff'" onmouseout="this.style.borderColor='var(--accent)'" onclick="window._buyCredits&&window._buyCredits('5000')">
+        <div style="position:absolute;top:-8px;left:50%;transform:translateX(-50%);background:var(--accent);color:#000;font-size:7px;font-weight:700;letter-spacing:.15em;padding:2px 8px;">BEST VALUE</div>
+        <div style="font-size:18px;font-weight:700;color:#fff;letter-spacing:.04em;">5,000</div>
+        <div style="font-size:8px;color:var(--text-faint);letter-spacing:.15em;margin:4px 0 10px;">CREDITS</div>
+        <div style="font-size:13px;font-weight:700;color:var(--accent);">£30</div>
+      </div>
+      <div class="tbt-pkg" data-pkg="10000" style="border:1px solid var(--border-dim);padding:16px;cursor:pointer;text-align:center;transition:border-color .15s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border-dim)'" onclick="window._buyCredits&&window._buyCredits('10000')">
+        <div style="font-size:18px;font-weight:700;color:#fff;letter-spacing:.04em;">10,000</div>
+        <div style="font-size:8px;color:var(--text-faint);letter-spacing:.15em;margin:4px 0 10px;">CREDITS</div>
+        <div style="font-size:13px;font-weight:700;color:var(--accent);">£50</div>
+      </div>
+    </div>
+    <div style="font-size:8px;color:var(--text-faint);text-align:center;margin-top:16px;letter-spacing:.08em;">Secure payment via Stripe · Credits added instantly</div>
   </div>
 </div>
 
@@ -1688,6 +1726,12 @@
     window._uid      = session.user.id;
     window._userName = userName;
 
+    // ── Auth token for server-side credit checks ──
+    window._authToken = session.access_token;
+    supabase.auth.onAuthStateChange(function (evt, newSession) {
+      window._authToken = newSession ? newSession.access_token : null;
+    });
+
     // ── CREDIT SYSTEM ────────────────────────────────────────────────────────
 
     /* Deduct credits — returns {ok, balance} or {ok:false, error, status} */
@@ -1737,6 +1781,66 @@
 
     /* Load balance on init */
     window._loadCreditBalance();
+
+    /* Open buy credits modal */
+    window._openBuyCredits = function () {
+      var m = document.getElementById('tbt-buy-credits-modal');
+      var msg = document.getElementById('tbt-buy-credits-msg');
+      if (msg) { msg.style.display = 'none'; msg.textContent = ''; }
+      if (m) m.style.display = 'flex';
+    };
+
+    /* Launch Stripe Checkout for chosen package */
+    window._buyCredits = async function (pkg) {
+      var msg = document.getElementById('tbt-buy-credits-msg');
+      if (msg) { msg.textContent = 'Redirecting to payment…'; msg.style.display = 'block'; }
+      try {
+        const { data: { session: s } } = await supabase.auth.getSession();
+        if (!s) { if (msg) msg.textContent = 'Please sign in first.'; return; }
+        const r = await fetch('/.netlify/functions/stripe-credits?action=create&package=' + pkg, {
+          headers: { 'Authorization': 'Bearer ' + s.access_token },
+        });
+        const data = await r.json();
+        if (data.url) {
+          window.location.href = data.url;
+        } else {
+          if (msg) { msg.textContent = 'Payment setup error. Try again.'; }
+        }
+      } catch (e) {
+        if (msg) { msg.textContent = 'Error: ' + e.message; }
+      }
+    };
+
+    /* Handle ?credits_session= redirect back from Stripe */
+    (async function () {
+      var params = new URLSearchParams(window.location.search);
+      var csId = params.get('credits_session');
+      if (!csId) return;
+      /* Remove param from URL without reload */
+      var cleanUrl = window.location.pathname;
+      window.history.replaceState({}, '', cleanUrl);
+      try {
+        const { data: { session: s } } = await supabase.auth.getSession();
+        if (!s) return;
+        const r = await fetch('/.netlify/functions/stripe-credits?action=verify&session_id=' + csId, {
+          headers: { 'Authorization': 'Bearer ' + s.access_token },
+        });
+        const data = await r.json();
+        if (data.credits_added) {
+          var balEl = document.getElementById('tbt-credit-balance');
+          if (balEl) balEl.textContent = data.balance;
+          /* Show brief success message */
+          var wrap = document.getElementById('tbt-credit-wrap');
+          if (wrap) {
+            var toast = document.createElement('div');
+            toast.textContent = '+' + data.credits_added + ' CREDITS ADDED';
+            toast.style.cssText = 'position:fixed;top:54px;right:16px;background:var(--accent);color:#000;font-family:var(--font);font-size:9px;font-weight:700;letter-spacing:.15em;padding:8px 16px;z-index:20000;';
+            document.body.appendChild(toast);
+            setTimeout(function () { toast.remove(); }, 4000);
+          }
+        }
+      } catch (e) { /* silent — credits still added via webhook */ }
+    })();
 
     /* ── CREDITS ADMIN ─────────────────────────────────────────────────────── */
     if (window._isOwner) {
