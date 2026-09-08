@@ -526,6 +526,10 @@ OUTPUT FORMAT — respond ONLY with valid JSON, no markdown fences, no extra tex
 }
 `;
 
+// Export psychology vault without the news-feed output format — used by search.js for concept searches
+const PSYCH_VAULT = STYLE_GUIDE.slice(0, STYLE_GUIDE.lastIndexOf('\nOUTPUT FORMAT — respond ONLY'));
+exports.PSYCH_VAULT = PSYCH_VAULT;
+
 const CATEGORY_CONTEXT = {
   gold: `ASSET CONTEXT — PRECIOUS METALS / GOLD:
 Educational background for your explanation: The gold thesis rests on three pillars: (1) Central banks have bought 1,000+ tonnes per year for four consecutive years — the same institutions that print currencies are accumulating the one asset that cannot be printed. (2) Real interest rates (after inflation) are the primary mechanical driver — when real rates fall or go negative, cash loses value and physical assets' opportunity cost falls. (3) Currency debasement — the pound has lost ~75% of its real purchasing power since 2000. Risk-off geopolitical events, dollar weakness, and Fed rate cuts are bullish for physical assets broadly. When interpreting this story: does it make real rates more likely to fall, weaken the dollar, or increase institutional demand for assets outside the banking system?`,
@@ -621,19 +625,27 @@ exports.handler = async (event) => {
       if (userResp.ok) {
         const user = await userResp.json();
         if (user && user.id && user.email !== ADMIN_EMAIL) {
+          console.log('[explain-credits] deducting 10 for', user.email, user.id);
           const deductResp = await fetch(`${SUPABASE_URL}/rest/v1/rpc/deduct_credits`, {
             method: 'POST',
             headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' },
             body: JSON.stringify({ p_user_id: user.id, p_amount: 10, p_description: `news-pitch:${headline.slice(0, 80)}` }),
           });
           if (deductResp.ok) {
-            const dr = await deductResp.json();
-            if (!dr.ok && (dr.error === 'insufficient' || dr.error === 'no_account')) {
-              return { statusCode: 402, headers: corsHeaders, body: JSON.stringify({ error: dr.error, balance: dr.balance || 0 }) };
+            const rawDr = await deductResp.json();
+            const dr = Array.isArray(rawDr) ? rawDr[0] : rawDr;
+            console.log('[explain-credits] deduct result:', JSON.stringify(dr));
+            if (!dr || (!dr.ok && (dr.error === 'insufficient' || dr.error === 'no_account'))) {
+              return { statusCode: 402, headers: corsHeaders, body: JSON.stringify({ error: (dr && dr.error) || 'insufficient_credits', balance: (dr && dr.balance) || 0 }) };
             }
+          } else {
+            console.error('[explain-credits] deduct_credits HTTP error', deductResp.status);
           }
+        } else if (user && user.email === ADMIN_EMAIL) {
+          console.log('[explain-credits] admin bypass');
         }
       } else {
+        console.log('[explain-credits] JWT verify failed', userResp.status);
         return { statusCode: 401, headers: corsHeaders, body: JSON.stringify({ error: 'invalid_token' }) };
       }
     } else {
