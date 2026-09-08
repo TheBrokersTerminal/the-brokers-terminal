@@ -34,7 +34,7 @@
     _uid      = userId;
     _firmId   = firmId   || null;
     _userName = userName || 'BROKER';
-    window._isOwner = (userEmail === 'admin@thebrokersterminal.com');
+    window._isOwner = (userEmail === 'admin@thebrokersterminal.com' || userEmail === 'desk@thebrokersterminal.com');
     _canvas = document.getElementById('tbc-canvas');
     if (!_canvas) return;
 
