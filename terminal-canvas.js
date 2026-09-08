@@ -10707,10 +10707,10 @@
         }
       }
 
-      var cached = cacheGet(hKey, 86400000);
-      if (cached) { renderIndex(cached); return; }
-      /* Gate: 5 TBT credits per index load (1 WS credit = ~0.84p) */
+      var iCached = cacheGet(hKey, 86400000);
+      /* Gate: 5 TBT credits every time — cache only protects our WS API credits */
       function _doIndexFetch() {
+        if (iCached) { renderIndex(iCached); return; }
         var url = '/.netlify/functions/whisky-data?type=index_history' +
           (regionKey ? '&region='+encodeURIComponent(regionKey) : '') + '&currency=GBP';
         fetch(url).then(function(r){ return r.json(); })
