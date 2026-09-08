@@ -1627,7 +1627,7 @@
         (det.region      ? sRow('REGION',     det.region)      : '') +
         (det.cask_type   ? sRow('CASK',       det.cask_type)   : '') +
         (det.abv         ? sRow('ABV',        det.abv + '%')   : '') +
-        (rat.whiskybase_rating != null ? sRow('RATING', rat.whiskybase_rating + ' / 100') : '') +
+        (rat.whiskybase_rating != null ? sRow('COMMUNITY SCORE', rat.whiskybase_rating + ' / 100') : '') +
       '</div>' +
       '<div class="sp-sec-lbl" style="margin-top:10px;">PRICE HISTORY</div>' +
       '<canvas id="expr-chart-' + escH(whiskyId) + '" style="width:100%;height:120px;display:block;margin:4px 0;"></canvas>' +

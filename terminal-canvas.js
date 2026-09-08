@@ -9856,7 +9856,7 @@
       '</div>' +
       /* ── Footer ── */
       '<div style="padding:4px 10px;font-size:9px;letter-spacing:.12em;color:#fff;border-top:1px solid #141414;flex-shrink:0;display:flex;justify-content:space-between;background:#0a0a0a;">' +
-        '<span>LIVE MARKET DATA · WHISKYBASE</span>' +
+        '<span>LIVE MARKET DATA</span>' +
         '<span id="wl-cr-'+id+'"></span>' +
       '</div>';
 
@@ -10158,7 +10158,7 @@
             '<div style="text-align:right;flex-shrink:0;">' +
               (rat.whiskybase_rating!=null ?
                 '<div style="font-size:24px;color:#E97132;font-weight:bold;">'+rat.whiskybase_rating.toFixed(1)+'</div>'+
-                '<div style="font-size:10px;letter-spacing:.08em;color:#fff;opacity:.45;">'+rat.whiskybase_rating_count+' RATINGS</div>' : '') +
+                '<div style="font-size:10px;letter-spacing:.08em;color:#fff;opacity:.45;">COMMUNITY SCORE</div>' : '') +
             '</div>' +
           '</div>' +
           '<div style="margin-bottom:12px;">' +
