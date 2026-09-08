@@ -9857,7 +9857,6 @@
       /* ── Footer ── */
       '<div style="padding:4px 10px;font-size:9px;letter-spacing:.12em;color:#fff;border-top:1px solid #141414;flex-shrink:0;display:flex;justify-content:space-between;background:#0a0a0a;">' +
         '<span>LIVE MARKET DATA</span>' +
-        '<span id="wl-cr-'+id+'"></span>' +
       '</div>';
 
     var qEl     = body.querySelector('#wl-q-'+id);
@@ -9866,23 +9865,6 @@
     var listEl  = body.querySelector('#wl-list-'+id);
     var guideEl = body.querySelector('#wl-guide-'+id);
     var detailEl= body.querySelector('#wl-detail-'+id);
-    var crEl    = body.querySelector('#wl-cr-'+id);
-
-    /* Credits — fetch once per hour, cache in localStorage */
-    (function(){
-      var CR_KEY = 'tbt_wl_credits', CR_TTL = 3600000;
-      try {
-        var cached = JSON.parse(localStorage.getItem(CR_KEY)||'null');
-        if (cached && Date.now() - cached.ts < CR_TTL) { crEl.textContent = cached.txt; return; }
-      } catch(e){}
-      fetch('/.netlify/functions/whisky-data?type=credits').then(function(r){ return r.json(); }).then(function(d){
-        if (d.credit_usage != null) {
-          var txt = (d.credit_limit - d.credit_usage) + ' CREDITS';
-          crEl.textContent = txt;
-          try { localStorage.setItem(CR_KEY, JSON.stringify({txt:txt, ts:Date.now()})); } catch(e){}
-        }
-      }).catch(function(){});
-    })();
 
     /* ── Helpers ── */
     function fmt(n, cur) {
