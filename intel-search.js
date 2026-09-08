@@ -474,17 +474,8 @@
     if (dropdown) dropdown.style.display = 'none';
     if (input) input.value = '';
 
-    /* Free if already in session cache — Claude won't be called */
-    var cached = !!_cache[_sessionCacheKey(type, ticker, query)];
-    if (cached) {
-      var win = createPopout(query, type);
-      fetchDetail(query, type, ticker || '', win);
-      return;
-    }
-    _gateCredits(10, type + ': ' + query, function () {
-      var win = createPopout(query, type);
-      fetchDetail(query, type, ticker || '', win);
-    });
+    var win = createPopout(query, type);
+    fetchDetail(query, type, ticker || '', win);
   };
 
   window._intelSearchSection = function (query, type, ticker, section) {
@@ -493,22 +484,9 @@
     if (dropdown) dropdown.style.display = 'none';
     if (input) input.value = '';
 
-    /* Free if already in session cache — same company, any tab, same session */
-    var cached = !!_cache[_sessionCacheKey(type, ticker, query)];
-    if (cached) {
-      var suffix = section === 'overview' ? ' — PROFILE' : section === 'pitch' ? ' — PITCH' : '';
-      var win = createPopout(query + suffix, type);
-      fetchDetailSection(query, type, ticker || '', section, win);
-      return;
-    }
-
-    /* Company open = 25 credits (covers all tabs for this session); other = 10 */
-    var cost = (type === 'company') ? 25 : 10;
-    _gateCredits(cost, type + ':' + section + ': ' + query, function () {
-      var suffix = section === 'overview' ? ' — PROFILE' : section === 'pitch' ? ' — PITCH' : '';
-      var win = createPopout(query + suffix, type);
-      fetchDetailSection(query, type, ticker || '', section, win);
-    });
+    var suffix = section === 'overview' ? ' — PROFILE' : section === 'pitch' ? ' — PITCH' : '';
+    var win = createPopout(query + suffix, type);
+    fetchDetailSection(query, type, ticker || '', section, win);
   };
 
   /* ── TAB GROUP REGISTRY ── */
@@ -909,12 +887,21 @@
       renderPopout(_cache[cacheKey], win);
       return;
     }
+    var fetchHeaders = { 'Content-Type': 'application/json' };
+    if (window._authToken) fetchHeaders['Authorization'] = 'Bearer ' + window._authToken;
     fetch('/.netlify/functions/search', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: fetchHeaders,
       body: JSON.stringify({ query: query, type: type, ticker: ticker, lensKey: lensKey, lensContext: lensContext }),
     })
       .then(function (r) {
+        if (r.status === 402) {
+          win.remove();
+          r.json().then(function (d) {
+            window._showNoCredits && window._showNoCredits(d.balance || 0);
+          });
+          return null;
+        }
         if (!r.ok) {
           var body = win.querySelector('.intel-popwin-body');
           if (win._loadingTimer) { clearInterval(win._loadingTimer); win._loadingTimer = null; }
@@ -983,12 +970,21 @@
       renderSection(_cache[cacheKey], section, win);
       return;
     }
+    var fetchHeadersSec = { 'Content-Type': 'application/json' };
+    if (window._authToken) fetchHeadersSec['Authorization'] = 'Bearer ' + window._authToken;
     fetch('/.netlify/functions/search', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: fetchHeadersSec,
       body: JSON.stringify({ query: query, type: type, ticker: ticker, section: section, lensKey: lensKey, lensContext: lensContext }),
     })
-      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (r) {
+        if (r.status === 402) {
+          win.remove();
+          r.json().then(function (d) { window._showNoCredits && window._showNoCredits(d.balance || 0); });
+          return null;
+        }
+        return r.ok ? r.json() : null;
+      })
       .then(function (d) {
         if (d && !d.error) { _cache[cacheKey] = d; }
         renderSection(d, section, win);

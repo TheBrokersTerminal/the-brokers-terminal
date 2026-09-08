@@ -60,9 +60,41 @@ function logSearch(query, type, lensKey, section, cacheHit, ticker) {
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
   'Content-Type': 'application/json',
 };
+
+const ADMIN_EMAIL = 'admin@thebrokersterminal.com';
+
+async function serverDeductCredits(authHeader, creditCost, description) {
+  if (!SUPABASE_KEY) return { ok: true }; /* Supabase not configured — allow */
+  const jwt = authHeader && authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+  if (!jwt) return { ok: false, status: 401, error: 'missing_token' };
+
+  /* Verify user */
+  const userResp = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+    headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${jwt}` },
+  });
+  if (!userResp.ok) return { ok: false, status: 401, error: 'invalid_token' };
+  const user = await userResp.json();
+  if (!user || !user.id) return { ok: false, status: 401, error: 'invalid_token' };
+
+  /* Admin bypasses credit check */
+  if (user.email === ADMIN_EMAIL) return { ok: true };
+
+  /* Deduct credits atomically */
+  const deductResp = await fetch(`${SUPABASE_URL}/rest/v1/rpc/deduct_credits`, {
+    method: 'POST',
+    headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ p_user_id: user.id, p_amount: creditCost, p_description: description }),
+  });
+  if (!deductResp.ok) return { ok: true }; /* RPC error — allow through rather than block user */
+  const result = await deductResp.json();
+  if (!result.ok && (result.error === 'insufficient' || result.error === 'no_account')) {
+    return { ok: false, status: 402, error: result.error, balance: result.balance || 0 };
+  }
+  return { ok: true, balance: result.balance };
+}
 
 const SEARCH_SYSTEM = `You are The Brokers Edge Intelligence Engine — the world's most advanced sales intelligence system for alternative asset professionals. You brief brokers with analyst-grade intelligence and a full sales pitch playbook woven through with elite sales psychology on every search.
 
@@ -681,6 +713,18 @@ exports.handler = async (event) => {
     if (!query) return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: 'query required' }) };
 
     const isScenario = type === 'scenario';
+
+    /* ── SERVER-SIDE CREDIT GATE ─────────────────────────────────────── */
+    const authHeader = event.headers.authorization || event.headers.Authorization || '';
+    const creditCost = (type === 'company') ? 25 : 10;
+    const creditCheck = await serverDeductCredits(authHeader, creditCost, `intel:${type}${section ? ':' + section : ''}:${ticker || query.slice(0, 60)}`);
+    if (!creditCheck.ok) {
+      return {
+        statusCode: creditCheck.status || 402,
+        headers: CORS,
+        body: JSON.stringify({ error: creditCheck.error || 'insufficient_credits', balance: creditCheck.balance || 0 }),
+      };
+    }
 
     /* Scenarios: skip cache (bespoke per query), use more tokens */
     let cached = null;

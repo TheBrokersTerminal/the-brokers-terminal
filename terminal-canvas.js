@@ -554,12 +554,22 @@
         _statusEl.innerHTML = STATUS[_si] + '<span class="tnp-ld"></span>';
       }, 1600);
 
+      var explainHeaders = { 'Content-Type': 'application/json' };
+      if (window._authToken) explainHeaders['Authorization'] = 'Bearer ' + window._authToken;
       fetch('/.netlify/functions/explain', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: explainHeaders,
         body: JSON.stringify({ headline: hl, summary: summary, category: cat, lensKey: (window._assetLens && window._assetLens.key) || 'universal', lensContext: (window._assetLens && window._assetLens.promptContext) || '' }),
       })
-        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (r) {
+          if (r.status === 402) {
+            clearInterval(_statusTimer);
+            wrap.innerHTML = '';
+            r.json().then(function (d) { window._showNoCredits && window._showNoCredits(d.balance || 0); });
+            return null;
+          }
+          return r.ok ? r.json() : null;
+        })
         .then(function (d) {
           clearInterval(_statusTimer);
           if (!d || d.error) { wrap.innerHTML = '<div class="tnp-intel-err">Intelligence unavailable.</div>'; return; }
