@@ -508,12 +508,31 @@
         '</div>' +
       '</div>';
 
+    pop._tnpHeadline = hl;
+
     document.body.appendChild(pop);
     makeDraggable(pop, pop.querySelector('.tnp-bar'));
     pop.addEventListener('mousedown', function () { _nextZ(); pop.style.zIndex = window._sharedZ; });
     pop.querySelector('.tnp-close').addEventListener('click', function () { pop.remove(); });
 
     pop.querySelector('.tnp-intel-btn').addEventListener('click', function () {
+      /* Gate: 10 credits per news pitch */
+      if (window._deductCredits) {
+        var _hl = pop._tnpHeadline || '';
+        window._deductCredits(10, 'news pitch: ' + _hl.slice(0, 80)).then(function (result) {
+          if (!result.ok && result.status === 402) {
+            window._showNoCredits && window._showNoCredits(result.balance || 0);
+            return;
+          }
+          pop._tnpRunPitch && pop._tnpRunPitch();
+        });
+        return;
+      }
+      pop._tnpRunPitch && pop._tnpRunPitch();
+    });
+
+    /* Extract the pitch logic so it can be called after credit check */
+    pop._tnpRunPitch = function () {
       var wrap = pop.querySelector('.tnp-intel-wrap');
 
       /* ── Cycling status messages while Claude generates ── */
@@ -630,7 +649,7 @@
           clearInterval(_statusTimer);
           wrap.innerHTML = '<div class="tnp-intel-err">Intelligence unavailable.</div>';
         });
-    });
+    };
   }
 
   function renderNews(id, body) {
