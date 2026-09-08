@@ -878,7 +878,7 @@ exports.handler = async (event) => {
         body: JSON.stringify({
           model: 'claude-haiku-4-5-20251001',
           max_tokens: isScenario ? 1800 : (type === 'concept') ? 1800 : (section) ? 950 : 1600,
-          system: [{ type: 'text', text: (type === 'concept' || isScenario) ? CONCEPT_SYSTEM : SEARCH_SYSTEM, cache_control: { type: 'ephemeral' } }],
+          system: [{ type: 'text', text: type === 'concept' ? CONCEPT_SYSTEM : SEARCH_SYSTEM, cache_control: { type: 'ephemeral' } }],
           messages: [{ role: 'user', content: userMsg }],
         }),
       });
