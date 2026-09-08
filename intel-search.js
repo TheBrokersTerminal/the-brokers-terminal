@@ -23,6 +23,95 @@
   }
   var _registry = {}; /* pid → {query, type, ticker, x, y, w, h} */
 
+  /* ── Static concept / event suggestion list — all searchable financial topics ── */
+  var CONCEPT_LIST = [
+    /* ── Historical crises ── */
+    { label: 'Global Financial Crisis (GFC) 2008', query: 'Global Financial Crisis 2008' },
+    { label: 'Subprime Mortgage Crisis 2007', query: 'Subprime Mortgage Crisis 2007 US housing collapse' },
+    { label: 'Black Monday 1987', query: 'Black Monday stock market crash 1987' },
+    { label: 'Dot-com Bubble 2000', query: 'Dot-com bubble 2000 tech crash Nasdaq' },
+    { label: 'Tulip Mania 1637', query: 'Tulip mania 1637 speculative bubble' },
+    { label: 'Asian Financial Crisis 1997', query: 'Asian Financial Crisis 1997 currency contagion' },
+    { label: 'Great Depression 1929', query: 'Great Depression 1929 stock market crash banking collapse' },
+    { label: 'Weimar Hyperinflation 1923', query: 'Weimar Republic hyperinflation 1923 currency collapse' },
+    { label: 'Stagflation 1970s', query: 'Stagflation 1970s oil crisis inflation unemployment' },
+    { label: 'Eurozone Sovereign Debt Crisis', query: 'Eurozone Sovereign Debt Crisis 2010 Greece bailout' },
+    { label: 'COVID Market Crash 2020', query: 'COVID market crash March 2020 pandemic selloff' },
+    { label: 'Silicon Valley Bank Collapse 2023', query: 'Silicon Valley Bank SVB collapse 2023 bank run' },
+    { label: 'LTCM Collapse 1998', query: 'Long-Term Capital Management LTCM collapse 1998 hedge fund bailout' },
+    { label: 'Black Wednesday 1992', query: 'Black Wednesday 1992 UK pound ERM crisis Soros' },
+    { label: 'Northern Rock Bank Run 2007', query: 'Northern Rock bank run 2007 UK mortgage crisis' },
+    { label: 'UK Gilt Crisis 2022', query: 'UK Gilt Crisis 2022 mini-budget LDI pension funds' },
+    { label: 'Nifty Fifty Bubble 1970s', query: 'Nifty Fifty bubble 1970s US growth stock collapse' },
+    { label: 'Savings & Loan Crisis 1980s', query: 'Savings and Loan Crisis 1980s US banking deregulation failure' },
+    { label: 'Russian Default 1998', query: 'Russian Default 1998 rouble collapse sovereign debt' },
+    { label: 'Argentine Default 2001', query: 'Argentine Default 2001 peso crisis IMF' },
+    { label: 'Flash Crash 2010', query: 'Flash Crash May 2010 algorithmic trading market structure' },
+    { label: 'Mexican Peso Crisis 1994', query: 'Mexican Peso Crisis 1994 tequila effect currency devaluation' },
+    { label: 'Japanese Asset Bubble 1989', query: 'Japanese Asset Bubble 1989 Nikkei property collapse lost decade' },
+    { label: 'Enron Collapse 2001', query: 'Enron collapse 2001 corporate fraud accounting scandal' },
+    { label: 'Lehman Brothers Collapse 2008', query: 'Lehman Brothers collapse September 2008 bankruptcy contagion' },
+
+    /* ── Macro & monetary policy ── */
+    { label: 'Quantitative Easing (QE)', query: 'Quantitative Easing monetary policy central bank asset purchases' },
+    { label: 'Quantitative Tightening (QT)', query: 'Quantitative Tightening balance sheet reduction interest rates' },
+    { label: 'Financial Repression', query: 'Financial Repression negative real interest rates government debt' },
+    { label: 'Monetary Debasement', query: 'Monetary Debasement currency devaluation purchasing power erosion' },
+    { label: 'Debt Supercycle', query: 'Debt Supercycle Ray Dalio long-term debt cycle deleveraging' },
+    { label: 'Yield Curve Inversion', query: 'Yield Curve Inversion recession signal inverted 2s10s' },
+    { label: 'De-dollarisation', query: 'De-dollarisation BRICS reserve currency shift petrodollar end' },
+    { label: 'Cantillon Effect', query: 'Cantillon Effect money creation inequality asset price inflation' },
+    { label: 'Currency Wars', query: 'Currency Wars competitive devaluation beggar-thy-neighbour policy' },
+    { label: 'M2 Money Supply', query: 'M2 Money Supply expansion inflation monetary aggregates' },
+    { label: 'Petrodollar System', query: 'Petrodollar System USD oil settlement Bretton Woods dollar hegemony' },
+    { label: 'Bretton Woods System', query: 'Bretton Woods System 1944 gold standard dollar reserve currency' },
+    { label: 'Dollar Milkshake Theory', query: 'Dollar Milkshake Theory Brent Johnson USD strength capital flows' },
+    { label: 'Fiscal Dominance', query: 'Fiscal Dominance government debt monetisation central bank independence' },
+    { label: 'Modern Monetary Theory (MMT)', query: 'Modern Monetary Theory MMT government spending money creation' },
+    { label: 'Phillips Curve', query: 'Phillips Curve inflation unemployment trade-off breakdown' },
+    { label: 'Basel III / Bank Capital Rules', query: 'Basel III bank capital requirements liquidity coverage ratio' },
+    { label: 'Repo Market', query: 'Repo Market repurchase agreements overnight funding liquidity' },
+    { label: 'Shadow Banking System', query: 'Shadow Banking System non-bank financial intermediation systemic risk' },
+    { label: 'Central Bank Digital Currency (CBDC)', query: 'Central Bank Digital Currency CBDC digital pound programmable money' },
+    { label: 'BRICS Currency & Reserve Shift', query: 'BRICS reserve currency alternative dollar replacement geopolitics' },
+
+    /* ── Economic indicators ── */
+    { label: 'Inflation', query: 'Inflation causes effects CPI wealth erosion real returns' },
+    { label: 'Deflation', query: 'Deflation falling prices debt deflation spiral Japan' },
+    { label: 'Stagflation', query: 'Stagflation simultaneous high inflation high unemployment slow growth' },
+    { label: 'Hyperinflation', query: 'Hyperinflation extreme price acceleration currency collapse historical cases' },
+    { label: 'ISM Manufacturing Index', query: 'ISM Manufacturing PMI economic indicator expansion contraction' },
+    { label: 'Purchasing Power Parity (PPP)', query: 'Purchasing Power Parity PPP exchange rate valuation Big Mac index' },
+    { label: 'Velocity of Money', query: 'Velocity of Money MV=PQ monetary equation GDP transmission' },
+    { label: 'Bank Run Mechanics', query: 'Bank Run mechanism fractional reserve banking deposit insurance contagion' },
+    { label: 'Credit Crunch', query: 'Credit Crunch liquidity crisis bank lending freeze economic impact' },
+    { label: 'Carry Trade', query: 'Carry Trade borrow low-rate currency invest high-rate unwinding risk' },
+    { label: 'Correlation Breakdown', query: 'Correlation Breakdown 60/40 portfolio stocks bonds inflation 2022' },
+
+    /* ── Investment concepts ── */
+    { label: 'Illiquidity Premium', query: 'Illiquidity Premium private assets return advantage over public markets' },
+    { label: 'Volatility (VIX)', query: 'VIX Volatility Index fear gauge options market implied volatility' },
+    { label: 'Duration Risk', query: 'Duration Risk bond sensitivity interest rate rises long-dated gilts' },
+    { label: 'Diversification Myth', query: 'Diversification Myth 2022 bonds equities correlate in inflation regime' },
+    { label: 'Gold as a Monetary Metal', query: 'Gold monetary metal safe haven inflation hedge central bank reserves' },
+    { label: 'Gold Bull Market History', query: 'Gold Bull Market 1970s 2000s 2024 price drivers performance' },
+    { label: 'Silver Market', query: 'Silver Market gold-silver ratio industrial demand monetary metal' },
+    { label: 'Fine Wine as an Investment', query: 'Fine Wine investment Liv-ex market returns alternative asset' },
+    { label: 'Whisky as an Investment', query: 'Whisky investment rare cask single malt auction market returns' },
+    { label: 'Agricultural Land & Forestry', query: 'Agricultural Land Forestry investment IHT relief APR farmland returns' },
+    { label: 'Art Market', query: 'Art Market investment Mei Moses index blue-chip Sothebys Christie liquidity' },
+    { label: 'Private Equity Returns', query: 'Private Equity returns illiquidity premium J-curve MOIC IRR endowments' },
+    { label: 'Infrastructure Investment', query: 'Infrastructure Investment investment trusts income inflation-linked returns' },
+
+    /* ── UK tax & planning ── */
+    { label: 'Inheritance Tax (IHT) Planning', query: 'Inheritance Tax IHT planning Business Property Relief agricultural APR' },
+    { label: 'Venture Capital Trusts (VCT)', query: 'Venture Capital Trusts VCT 30% income tax relief dividends LSE-listed' },
+    { label: 'Enterprise Investment Scheme (EIS)', query: 'Enterprise Investment Scheme EIS SEIS 30% 50% income tax relief CGT' },
+    { label: 'Offshore Bonds', query: 'Offshore Bonds investment bonds 5% withdrawal tax deferral gross roll-up' },
+    { label: 'Business Property Relief (BPR)', query: 'Business Property Relief BPR IHT exemption 2-year qualifying hold AIM' },
+    { label: 'Capital Gains Tax (CGT)', query: 'Capital Gains Tax CGT UK rates planning bed and ISA asset disposal' },
+  ];
+
   /* Expose state for terminal-canvas saveLayout */
   window._getIntelPopouts = function () {
     return Object.values(_registry);
@@ -167,16 +256,25 @@
 
   /* ── FETCH SUGGESTIONS ── */
   function fetchSuggestions(q, dropdown) {
+    var ql = q.toLowerCase();
+    /* Client-side concept matches — instant, no network needed */
+    var conceptMatches = CONCEPT_LIST.filter(function (c) {
+      return c.label.toLowerCase().indexOf(ql) !== -1 ||
+             c.query.toLowerCase().indexOf(ql) !== -1;
+    }).slice(0, 4).map(function (c) {
+      return { type: 'concept', label: c.label, query: c.query };
+    });
+
     fetch('/.netlify/functions/search?q=' + encodeURIComponent(q))
       .then(function (r) { return r.ok ? r.json() : []; })
-      .then(function (items) { renderDropdown(items, dropdown); })
+      .then(function (items) {
+        var combined = conceptMatches.concat(items || []);
+        if (!combined.length) combined.push({ type: 'concept', label: 'Search: "' + q + '"', query: q });
+        renderDropdown(combined, dropdown);
+      })
       .catch(function () {
-        dropdown.innerHTML =
-          '<div class="intel-drop-item concept" onclick="window._intelSearch(\'' +
-          escQ(q) + '\',\'concept\')">' +
-          '<span class="intel-drop-badge cx">SEARCH</span>' +
-          '<span class="intel-drop-label">Search: "' + escH(q) + '"</span>' +
-          '</div>';
+        var fallback = conceptMatches.concat([{ type: 'concept', label: 'Search: "' + q + '"', query: q }]);
+        renderDropdown(fallback, dropdown);
       });
   }
 
@@ -905,7 +1003,10 @@
         if (!r.ok) {
           var body = win.querySelector('.intel-popwin-body');
           if (win._loadingTimer) { clearInterval(win._loadingTimer); win._loadingTimer = null; }
-          if (body) body.innerHTML = '<div class="sp-loading" style="color:#e05050;">INTEL ERROR · HTTP ' + r.status + '<br><span style="font-size:8px;color:#666;margin-top:6px;display:block;">Check Netlify function logs</span></div>';
+          r.json().catch(function(){return{};}).then(function(eb){
+            var detail = eb.anthropic_status ? ' (Anthropic ' + eb.anthropic_status + (eb.detail ? ': ' + eb.detail.slice(0,80) : '') + ')' : '';
+            if (body) body.innerHTML = '<div class="sp-loading" style="color:#e05050;">INTEL ERROR · HTTP ' + r.status + detail + '<br><span style="font-size:8px;color:#666;margin-top:6px;display:block;">Check Netlify function logs</span></div>';
+          });
           return null;
         }
         return r.json();
@@ -957,7 +1058,14 @@
       })
       .catch(function () {
         var body = win.querySelector('.intel-popwin-body');
-        if (body) body.innerHTML = '<div class="sp-loading">INTELLIGENCE UNAVAILABLE</div>';
+        if (body) {
+          body.innerHTML = '<div class="sp-loading">INTELLIGENCE UNAVAILABLE<span class="intel-retry-btn">↻ RETRY</span></div>';
+          var btn = body.querySelector('.intel-retry-btn');
+          if (btn) btn.addEventListener('click', function() {
+            body.innerHTML = '<div class="sp-loading">LOADING…</div>';
+            fetchPopout(query, type, ticker, win);
+          });
+        }
       });
   }
 
@@ -991,7 +1099,14 @@
       })
       .catch(function () {
         var body = win.querySelector('.intel-popwin-body');
-        if (body) body.innerHTML = '<div class="sp-loading">INTELLIGENCE UNAVAILABLE</div>';
+        if (body) {
+          body.innerHTML = '<div class="sp-loading">INTELLIGENCE UNAVAILABLE<span class="intel-retry-btn">↻ RETRY</span></div>';
+          var btn = body.querySelector('.intel-retry-btn');
+          if (btn) btn.addEventListener('click', function() {
+            body.innerHTML = '<div class="sp-loading">LOADING…</div>';
+            fetchDetailSection(query, type, ticker, section, win);
+          });
+        }
       });
   }
 
@@ -1177,7 +1292,7 @@
     } else if (d.type === 'company') {
       renderCompany(d, body);
     } else {
-      renderConcept(d, body);
+      renderConcept(d, body, win);
     }
 
     /* Store story content for note-taking, wire ADD NOTE with selection capture */
@@ -1332,7 +1447,7 @@
     cascadeType(body);
   }
 
-  function renderConcept(d, body) {
+  function renderConcept(d, body, win) {
     var timelineHTML = '';
     if (d.timeline && d.timeline.length) {
       timelineHTML =
@@ -1360,36 +1475,91 @@
         '</div>';
     }
 
-    body.innerHTML =
-      '<div class="sp-badge event">' +
-        '● ' + escH(d.period || 'CONCEPT') +
-      '</div>' +
+    var overviewContent =
+      '<div class="sp-badge event">● ' + escH(d.period || 'CONCEPT') + '</div>' +
       '<div class="sp-tagline">' + escH(d.tagline || '') + '</div>' +
-
-      '<div class="sp-section">' +
-        '<div class="sp-sec-lbl">WHAT IS IT?</div>' +
-        '<div class="sp-text">' + escH(d.whatHappened || '') + '</div>' +
-      '</div>' +
-
+      '<div class="sp-section"><div class="sp-sec-lbl">WHAT IS IT?</div>' +
+        '<div class="sp-text">' + escH(d.whatHappened || '') + '</div></div>' +
       causesHTML +
       timelineHTML +
+      '<div class="sp-section"><div class="sp-sec-lbl">IMPACT ON ASSET CLASSES</div>' +
+        '<div class="sp-text">' + escH(d.impactOnAssets || '') + '</div></div>' +
+      '<div class="sp-section"><div class="sp-sec-lbl">THE LESSON FOR CLIENTS</div>' +
+        '<div class="sp-text">' + escH(d.lessonForClients || '') + '</div></div>' +
+      '<div class="sp-section" style="border-top:1px solid #111;padding-top:10px;">' +
+        '<button class="sp-note-btn">✎ ADD NOTE</button></div>';
 
-      '<div class="sp-section">' +
-        '<div class="sp-sec-lbl">IMPACT ON ASSET CLASSES</div>' +
-        '<div class="sp-text">' + escH(d.impactOnAssets || '') + '</div>' +
+    var pitchContent = d.pitch
+      ? buildPitchPlaybook(d.pitch, d.brokerNote) +
+        '<div class="sp-section" style="border-top:1px solid #111;padding-top:10px;"><button class="sp-note-btn">✎ ADD NOTE</button></div>'
+      : '<div class="sp-loading" style="color:#666;font-size:10px;">Pitch not available</div>';
+
+    body.innerHTML =
+      '<div class="dist-tabs">' +
+        '<button class="dist-tab active" data-tab="overview">OVERVIEW</button>' +
+        '<button class="dist-tab" data-tab="pitch">PITCH PLAYBOOK</button>' +
       '</div>' +
+      '<div class="dist-panel" data-panel="overview">' + overviewContent + '</div>' +
+      '<div class="dist-panel" data-panel="pitch" style="display:none;">' + pitchContent + '</div>';
 
-      '<div class="sp-section">' +
-        '<div class="sp-sec-lbl">THE LESSON FOR CLIENTS</div>' +
-        '<div class="sp-text">' + escH(d.lessonForClients || '') + '</div>' +
-      '</div>' +
+    body.querySelectorAll('.dist-tab').forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        body.querySelectorAll('.dist-tab').forEach(function (t) { t.classList.remove('active'); });
+        body.querySelectorAll('.dist-panel').forEach(function (p) { p.style.display = 'none'; });
+        tab.classList.add('active');
+        var panel = body.querySelector('.dist-panel[data-panel="' + tab.dataset.tab + '"]');
+        if (panel) panel.style.display = '';
+      });
+    });
 
+    cascadeType(body);
+  }
+
+  /* ── Lazy-load concept pitch on demand ── */
+  function fetchConceptPitch(conceptTitle, win, pitchPanel) {
+    var lensKey = (window._assetLens && window._assetLens.key) || 'universal';
+    var lensContext = (window._assetLens && window._assetLens.promptContext) || '';
+    var cacheKey = 'concept:' + lensKey + ':pitch:' + conceptTitle.trim().toLowerCase().slice(0, 80);
+    if (_cache[cacheKey]) {
+      renderConceptPitchPanel(_cache[cacheKey], pitchPanel);
+      return;
+    }
+    var fetchHeaders = { 'Content-Type': 'application/json' };
+    if (window._authToken) fetchHeaders['Authorization'] = 'Bearer ' + window._authToken;
+    fetch('/.netlify/functions/search', {
+      method: 'POST',
+      headers: fetchHeaders,
+      body: JSON.stringify({ query: conceptTitle, type: 'concept', section: 'pitch', lensKey: lensKey, lensContext: lensContext }),
+    })
+      .then(function (r) {
+        if (r.status === 402) {
+          r.json().then(function (d) { window._showNoCredits && window._showNoCredits(d.balance || 0); });
+          pitchPanel.innerHTML = '<div class="sp-loading" style="color:#E97132;letter-spacing:.1em;">INSUFFICIENT CREDITS</div>';
+          return null;
+        }
+        if (!r.ok) {
+          pitchPanel.innerHTML = '<div class="sp-loading" style="color:#e05050;">PITCH ERROR · HTTP ' + r.status + '</div>';
+          return null;
+        }
+        return r.json();
+      })
+      .then(function (d) {
+        if (!d) return;
+        _cache[cacheKey] = d;
+        renderConceptPitchPanel(d, pitchPanel);
+      })
+      .catch(function () {
+        pitchPanel.innerHTML = '<div class="sp-loading">PITCH UNAVAILABLE</div>';
+      });
+  }
+
+  function renderConceptPitchPanel(d, panel) {
+    panel.innerHTML =
       buildPitchPlaybook(d.pitch, d.brokerNote) +
-
       '<div class="sp-section" style="border-top:1px solid #111;padding-top:10px;">' +
         '<button class="sp-note-btn">✎ ADD NOTE</button>' +
       '</div>';
-    cascadeType(body);
+    cascadeType(panel);
   }
 
   /* ── DISTILLERY PANEL ── */

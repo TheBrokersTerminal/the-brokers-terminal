@@ -608,26 +608,33 @@ Generate a company overview briefing ONLY — no pitch playbook. Return this exa
   "brokerNote": "One paragraph. What the broker says if this subject comes up naturally. Asset-neutral, plain English, confident."
 }`;
 
-const PITCH_PROMPT = (query) => `Generate ONLY the sales pitch playbook for "${query}". Return this exact JSON:
+const PITCH_PROMPT = (query) => `The broker has searched "${query}" as a CONVERSATION HOOK — not as an investment to sell.
+
+CRITICAL FRAMING: This company is intelligence and context. Alternative asset brokers use company news, fundamentals, and data as a bridge to open conversations about physical assets, real assets, and alternative investments outside the conventional system. Do NOT pitch ${query.replace(/"/g, "'")} equity, stock, or shares. Use ${query.replace(/"/g, "'")} as the starting point; physical/alternative assets as the destination of every pitch field.
+
+When an ACTIVE BROKER LENS is appended below: every pitch field must bridge from this company's situation to the lens asset as the investment destination.
+Without a lens: every pitch field bridges from this company's situation to "physical assets / tangible assets / real assets outside the banking system."
+
+Return this exact JSON:
 {
   "type": "company",
   "title": "${query.replace(/"/g, "'")}",
   "pitch": {
-    "openingLine": "The exact first sentence to open with a client. One punchy attention-grabbing line. A question or provocative statement — not a pitch. Asset-neutral.",
-    "logicalCase": ["Most compelling fact — specific, verified, simple", "Second pillar — different angle", "Logical conclusion for their wealth"],
-    "emotionalCase": "Future pace in 2 sentences. Their worry gone. The outcome they want, achieved. Asset-neutral.",
-    "painPoint": "The one precise fear this client has right now. One sentence. Be specific.",
+    "openingLine": "One punchy sentence using a striking ${query.replace(/"/g, "'")} data point or insight to open the conversation — then pivots immediately to why physical assets matter right now. A question or provocative statement that makes the client lean in. Asset-neutral.",
+    "logicalCase": ["Use this company's data to build logical argument 1 for alternative assets — specific, verifiable", "Argument 2 using a different angle from this company's situation or the macro forces it represents", "Logical conclusion: what this company's reality means for the client's allocation to physical assets"],
+    "emotionalCase": "Future pace in 2 sentences using this company's situation as context. Loss frame first (staying conventional while this macro plays out). Gain frame second (with physical assets providing protection). Asset-neutral.",
+    "painPoint": "The specific fear a client has about their conventional portfolio given what this company represents or signals. One precise sentence.",
     "spinQuestions": [
-      "Situation — where is their money now and how do they feel about it",
-      "Problem/Implication — the cost of doing nothing",
-      "Need-Payoff — lets them articulate the benefit themselves. Starts with 'So if you had...' or 'What would it mean if...'"
+      "Situation — how exposed is their portfolio to the macro forces this company represents",
+      "Problem/Implication — what has that exposure cost them or could cost — specific and real",
+      "Need-Payoff — starts with 'So if you had...' or 'What would it mean if...'"
     ],
     "objections": [
-      {"objection": "Most common first objection", "rebuttal": "Acknowledge genuinely, reframe as evidence for action, close with need-payoff question. Conversational, not scripted."},
+      {"objection": "Most likely pushback when bridging from this company discussion toward physical assets", "rebuttal": "Acknowledge genuinely, reframe using this company's own data as evidence for physical assets, close with need-payoff question. Conversational."},
       {"objection": "Second objection", "rebuttal": "Same three-part structure. Different angle. Asset-neutral."}
     ],
-    "urgencyLine": "One real, verifiable reason why acting now is smarter than waiting. Never manufactured.",
-    "socialProof": "One sentence. What sophisticated or institutional money is doing relative to this subject."
+    "urgencyLine": "One real verifiable reason acting now is smarter than waiting — connected to this company's situation or the macro forces it represents. Never manufactured.",
+    "socialProof": "What sophisticated investors, family offices, or institutional allocators are doing in response to the macro forces this company represents. One sentence."
   }
 }`;
 
@@ -901,7 +908,7 @@ exports.handler = async (event) => {
     /* Scenarios: skip cache (bespoke per query), use more tokens */
     let cached = null;
     const lensTag = lensKey ? ':' + lensKey : '';
-    const cacheKey = 'search5:' + type + ':' + (section ? section + ':' : '') + (ticker || query.trim().toLowerCase().slice(0, 80)) + lensTag;
+    const cacheKey = 'search9:' + type + ':' + (section ? section + ':' : '') + (ticker || query.trim().toLowerCase().slice(0, 80)) + lensTag;
 
     if (!isScenario) {
       cached = await cacheGet(cacheKey);
@@ -917,7 +924,9 @@ exports.handler = async (event) => {
 
     /* Lens context appended to non-scenario prompts */
     const lensAppend = (!isScenario && lensContext)
-      ? `\n\nACTIVE BROKER LENS — tailor ALL pitch content (relevance, brokerNote, pitch playbook) specifically to this asset class context:\n${lensContext}`
+      ? (section === 'pitch'
+        ? `\n\nACTIVE BROKER LENS — CRITICAL OVERRIDE: The investment destination is the physical asset described below — NOT the company equity. Every single pitch field must use this company's data as the conversation HOOK and explicitly BRIDGE toward this asset as the close. The company is the opener; the asset below is what the client buys:\n${lensContext}`
+        : `\n\nACTIVE BROKER LENS — tailor ALL pitch content (relevance, brokerNote, pitch playbook) specifically to this asset class context:\n${lensContext}`)
       : '';
 
     let userMsg;
@@ -933,81 +942,112 @@ exports.handler = async (event) => {
       userMsg = COMPANY_PROMPT(query, null) + lensAppend;
     }
 
-    try {
-      const claudeResp = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'x-api-key': apiKey,
-          'anthropic-version': '2023-06-01',
-          'anthropic-beta': 'prompt-caching-2024-07-31',
-          'content-type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'claude-haiku-4-5-20251001',
-          max_tokens: isScenario ? 1800 : (type === 'concept') ? 1800 : (section === 'pitch') ? 1400 : (section) ? 950 : 1600,
-          system: [{ type: 'text', text: type === 'concept' ? CONCEPT_SYSTEM : SEARCH_SYSTEM, cache_control: { type: 'ephemeral' } }],
-          messages: [{ role: 'user', content: userMsg }],
-        }),
+    /* Helper: call Anthropic with automatic retry on transient errors (429/500/529) */
+    async function callAnthropic(sysPrompt, userContent, tokens) {
+      const body = JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: tokens,
+        system: [{ type: 'text', text: sysPrompt, cache_control: { type: 'ephemeral' } }],
+        messages: [{ role: 'user', content: userContent }],
       });
+      const hdrs = {
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-beta': 'prompt-caching-2024-07-31',
+        'content-type': 'application/json',
+      };
+      let resp = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: hdrs, body });
+      if (!resp.ok && [429, 500, 529].includes(resp.status)) {
+        console.warn('[search] Anthropic transient error', resp.status, '— retrying in 2s');
+        await new Promise(r => setTimeout(r, 2000));
+        resp = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: hdrs, body });
+      }
+      return resp;
+    }
+
+    /* Helper: state-machine JSON repair for unescaped quotes / control chars */
+    function repairJson(raw) {
+      let fixed = '';
+      let inString = false;
+      let escape = false;
+      for (let i = 0; i < raw.length; i++) {
+        const ch = raw[i];
+        const code = raw.charCodeAt(i);
+        if (escape) { fixed += ch; escape = false; continue; }
+        if (ch === '\\') { fixed += ch; escape = true; continue; }
+        if (!inString) {
+          if (ch === '"') inString = true;
+          fixed += ch;
+          continue;
+        }
+        if (code < 0x20) {
+          if (ch === '\n') fixed += '\\n';
+          else if (ch === '\r') fixed += '\\r';
+          else if (ch === '\t') fixed += '\\t';
+          continue;
+        }
+        if (ch === '"') {
+          let j = i + 1;
+          while (j < raw.length && (raw[j] === ' ' || raw[j] === '\n' || raw[j] === '\r' || raw[j] === '\t')) j++;
+          const next = raw[j];
+          if (next === ':' || next === ',' || next === '}' || next === ']' || j >= raw.length) {
+            inString = false; fixed += ch;
+          } else {
+            fixed += '\\"';
+          }
+          continue;
+        }
+        fixed += ch;
+      }
+      return fixed;
+    }
+
+    try {
+      const claudeResp = await callAnthropic(
+        type === 'concept' ? CONCEPT_SYSTEM : SEARCH_SYSTEM,
+        userMsg,
+        1800
+      );
 
       if (!claudeResp.ok) {
         const errBody = await claudeResp.text().catch(() => '');
         console.error('[search] Anthropic API error', claudeResp.status, errBody.slice(0, 300));
-        return { statusCode: 502, headers: CORS, body: JSON.stringify({ error: 'Anthropic error', status: claudeResp.status }) };
+        return { statusCode: 502, headers: CORS, body: JSON.stringify({ error: 'Anthropic error', anthropic_status: claudeResp.status, detail: errBody.slice(0, 200) }) };
       }
 
       const data = await claudeResp.json();
       const text = data.content?.[0]?.text || '';
-      /* Strip markdown code fences Claude sometimes adds despite instructions */
       const stripped = text.replace(/^```(?:json)?\s*/m, '').replace(/```\s*$/m, '').trim();
       const match = stripped.match(/\{[\s\S]*\}/);
       const raw = match ? match[0] : stripped;
       let parsed;
       try {
         parsed = JSON.parse(raw);
-      } catch (_e) {
-        /* Claude sometimes embeds unescaped double-quotes or bare control chars
-           inside JSON string values. Fix with a state machine. */
-        let fixed = '';
-        let inString = false;
-        let escape = false;
-        for (let i = 0; i < raw.length; i++) {
-          const ch = raw[i];
-          const code = raw.charCodeAt(i);
-          if (escape) { fixed += ch; escape = false; continue; }
-          if (ch === '\\') { fixed += ch; escape = true; continue; }
-          if (!inString) {
-            if (ch === '"') { inString = true; }
-            fixed += ch;
-            continue;
+      } catch (_e1) {
+        try {
+          parsed = JSON.parse(repairJson(raw));
+        } catch (_e2) {
+          /* Last resort: ask Claude to repair the broken JSON */
+          console.warn('[search] JSON parse failed after repair, attempting Claude fix for:', query);
+          const fixPrompt = 'The following is invalid JSON. Return ONLY valid JSON with no commentary, correcting any syntax errors. Do not change the meaning or omit fields:\n\n' + raw.slice(0, 6000);
+          const fixResp = await callAnthropic(
+            type === 'concept' ? CONCEPT_SYSTEM : SEARCH_SYSTEM,
+            fixPrompt,
+            1800
+          );
+          if (fixResp.ok) {
+            const fixData = await fixResp.json();
+            const fixText = (fixData.content?.[0]?.text || '').replace(/^```(?:json)?\s*/m, '').replace(/```\s*$/m, '').trim();
+            const fixMatch = fixText.match(/\{[\s\S]*\}/);
+            parsed = JSON.parse(fixMatch ? fixMatch[0] : fixText);
+          } else {
+            throw new Error('Claude repair also failed: ' + claudeResp.status);
           }
-          /* Inside a string — escape bare control characters */
-          if (code < 0x20) {
-            if (ch === '\n') fixed += '\\n';
-            else if (ch === '\r') fixed += '\\r';
-            else if (ch === '\t') fixed += '\\t';
-            /* strip other control chars */
-            continue;
-          }
-          /* Embedded unescaped double-quote — peek at what follows */
-          if (ch === '"') {
-            let j = i + 1;
-            while (j < raw.length && (raw[j] === ' ' || raw[j] === '\n' || raw[j] === '\r' || raw[j] === '\t')) j++;
-            const next = raw[j];
-            if (next === ':' || next === ',' || next === '}' || next === ']' || j >= raw.length) {
-              inString = false; fixed += ch;
-            } else {
-              fixed += '\\"';
-            }
-            continue;
-          }
-          fixed += ch;
         }
-        parsed = JSON.parse(fixed);
       }
 
-      if (!isScenario) cacheSet(cacheKey, parsed); /* fire-and-forget; scenarios not cached */
-      logSearch(query, type, lensKey, section, false, ticker); /* fire-and-forget */
+      if (!isScenario) cacheSet(cacheKey, parsed);
+      logSearch(query, type, lensKey, section, false, ticker);
 
       return {
         statusCode: 200,

@@ -564,15 +564,21 @@
         .then(function (r) {
           if (r.status === 402) {
             clearInterval(_statusTimer);
-            wrap.innerHTML = '';
+            wrap.innerHTML = '<div class="tnp-intel-err" style="color:#E97132;letter-spacing:.08em;">INSUFFICIENT CREDITS — <span style="cursor:pointer;text-decoration:underline;" onclick="window._openBuyCredits&&window._openBuyCredits()">TOP UP</span></div>';
             r.json().then(function (d) { window._showNoCredits && window._showNoCredits(d.balance || 0); });
-            return null;
+            throw new Error('credits');
           }
-          return r.ok ? r.json() : null;
+          if (r.status === 401) { clearInterval(_statusTimer); wrap.innerHTML = '<div class="tnp-intel-err">Session expired — please refresh.</div>'; throw new Error('auth'); }
+          return r.json().catch(function() { return { error: 'bad_response', status: r.status }; });
         })
         .then(function (d) {
           clearInterval(_statusTimer);
-          if (!d || d.error) { wrap.innerHTML = '<div class="tnp-intel-err">Intelligence unavailable.</div>'; return; }
+          if (!d || d.error) {
+            var errMsg = d && d.error ? d.error + (d.detail ? ': ' + String(d.detail).slice(0,120) : '') + (d.raw ? ' | raw: ' + String(d.raw).slice(0,150) : '') : 'null_response';
+            console.error('[explain] failed:', errMsg, d);
+            wrap.innerHTML = '<div class="tnp-intel-err">Intelligence unavailable. [' + errMsg.slice(0,80) + ']</div>';
+            return;
+          }
 
           /* ── Typewriter reveal: structure appears immediately, text types in field-by-field ── */
           wrap.innerHTML = '<div class="tnp-intel-panel"></div>';
@@ -655,7 +661,8 @@
           }
           typeNext(0);
         })
-        .catch(function () {
+        .catch(function (err) {
+          if (err && (err.message === 'credits' || err.message === 'auth')) return;
           clearInterval(_statusTimer);
           wrap.innerHTML = '<div class="tnp-intel-err">Intelligence unavailable.</div>';
         });
@@ -9829,7 +9836,7 @@
       '<div style="display:flex;gap:5px;padding:7px 10px;border-bottom:1px solid #141414;flex-shrink:0;background:#0a0a0a;">' +
         '<input id="wl-q-'+id+'" type="text" placeholder="▸  Search distillery, bottling, vintage..." '+
           'style="flex:1;background:#0d0d0d;border:1px solid #1e1e1e;color:#fff;font-family:var(--font);font-size:11px;letter-spacing:.08em;padding:7px 10px;outline:none;" />' +
-        '<button id="wl-idx-'+id+'" style="background:#0d0d0d;border:1px solid #1e1e1e;color:#fff;font-family:var(--font);font-size:9px;letter-spacing:.12em;padding:7px 12px;cursor:pointer;white-space:nowrap;">INDICES</button>' +
+        '' +
         '<button id="wl-mon-'+id+'" style="background:#0d0d0d;border:1px solid #1e1e1e;color:#fff;font-family:var(--font);font-size:9px;letter-spacing:.12em;padding:7px 12px;cursor:pointer;white-space:nowrap;">MONITOR</button>' +
       '</div>' +
       /* ── Split body ── */
@@ -10162,14 +10169,25 @@
         '</div>';
 
       var loadBtn = detailEl.querySelector('#wl-loadmkt-'+id);
-      if (loadBtn) loadBtn.addEventListener('click', function(){ loadMarket(bgId, item, det, rat); });
+      if (loadBtn) loadBtn.addEventListener('click', function(){
+        var ctaEl = detailEl.querySelector('#wl-mktcta-'+id);
+        if (window._deductCredits) {
+          window._deductCredits(40, 'WS market: '+bgId).then(function(result) {
+            if (!result.ok && result.status === 402) {
+              if (ctaEl) ctaEl.innerHTML = '<div style="font-size:9px;letter-spacing:.14em;color:#E97132;padding:10px 0;">INSUFFICIENT CREDITS — <span style="cursor:pointer;text-decoration:underline;" onclick="window._openBuyCredits&&window._openBuyCredits()">TOP UP</span></div>';
+              window._showNoCredits && window._showNoCredits(result.balance || 0);
+              return;
+            }
+            loadMarket(bgId, item, det, rat);
+          });
+        } else {
+          loadMarket(bgId, item, det, rat);
+        }
+      });
       var starBtn = detailEl.querySelector('#wl-star-'+id);
       if (starBtn) starBtn.addEventListener('click', function(){
         toggleWl({whisky_id:item.whisky_id, bg_id:bgId, name:(det.bottler_serie||'')+' '+(det.name||''), currency:_cur}, starBtn);
       });
-      /* Auto-load market if already cached (free) */
-      var mktKey = 'tbt_mkt_'+bgId+'_'+_cur;
-      if (cacheGet(mktKey, 86400000)) loadMarket(bgId, item, det, rat);
     }
 
     /* ── Stage 2b: history — individual auction sales (cached 7d) ── */
@@ -10438,15 +10456,29 @@
       return parts.join(' ').trim();
     }
 
-    /* ── Search ── */
+    /* ── Search — 2 credits per search ── */
     function doSearch() {
       var q = buildQuery();
       if (!q || q.length < 2) return;
       listEl.innerHTML = '<div style="padding:10px;font-size:8px;letter-spacing:.16em;color:#fff;opacity:.4;">SEARCHING<span class="ld"></span></div>';
-      fetch('/.netlify/functions/whisky-data?type=search&query='+encodeURIComponent(q)+'&page=1')
-        .then(function(r){ return r.json(); })
-        .then(renderList)
-        .catch(function(){ listEl.innerHTML='<div style="padding:10px;font-size:8px;letter-spacing:.14em;color:#fff;opacity:.4;">ERROR</div>'; });
+      function _runSearch() {
+        fetch('/.netlify/functions/whisky-data?type=search&query='+encodeURIComponent(q)+'&page=1')
+          .then(function(r){ return r.json(); })
+          .then(renderList)
+          .catch(function(){ listEl.innerHTML='<div style="padding:10px;font-size:8px;letter-spacing:.14em;color:#fff;opacity:.4;">ERROR</div>'; });
+      }
+      if (window._deductCredits) {
+        window._deductCredits(2, 'WS search: ' + q).then(function(result) {
+          if (!result.ok && result.status === 402) {
+            listEl.innerHTML = '<div style="padding:10px;font-size:8px;letter-spacing:.14em;color:#E97132;">INSUFFICIENT CREDITS</div>';
+            window._showNoCredits && window._showNoCredits(result.balance || 0);
+            return;
+          }
+          _runSearch();
+        });
+      } else {
+        _runSearch();
+      }
     }
 
     /* Search on type */

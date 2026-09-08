@@ -199,6 +199,8 @@
 .sp-badge.private { background: rgba(233,113,50,.08); border: 1px solid rgba(233,113,50,.25); color: #E97132; }
 .sp-badge.event { background: rgba(68,144,204,.08); border: 1px solid rgba(68,144,204,.25); color: #48a0e8; }
 .sp-loading { padding: 20px; text-align: center; font-size: 9px; letter-spacing: .2em; color: #fff; text-transform: uppercase; }
+.intel-retry-btn { display: block; margin: 10px auto 0; cursor: pointer; color: #7ec8e3; font-size: 9px; letter-spacing: .15em; border: 1px solid rgba(126,200,227,.3); padding: 4px 12px; border-radius: 2px; background: transparent; }
+.intel-retry-btn:hover { color: #fff; border-color: rgba(126,200,227,.7); background: rgba(126,200,227,.08); }
 .sp-intel-load { padding: 20px; text-align: center; font-size: 9px; letter-spacing: .2em; color: #E97132; text-transform: uppercase; display: flex; align-items: center; justify-content: center; gap: 6px; }
 .sp-intel-ld::after { content: ''; display: inline-block; width: 12px; animation: sp-ld-dots 1.2s steps(4, end) infinite; }
 @keyframes sp-ld-dots { 0%{content:''} 25%{content:'.'} 50%{content:'..'} 75%{content:'...'} 100%{content:''} }

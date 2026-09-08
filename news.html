@@ -830,6 +830,7 @@ function renderArticle(story) {
     _intelPanel.addEventListener('click', function(e) {
       var btn = e.target.closest('.intel-load-btn');
       if (!btn) return;
+      if (!window._isOwner) return;
       var el = this;
       if (!el.classList.contains('intel-panel--idle')) return;
       el.classList.remove('intel-panel--idle');
@@ -868,9 +869,11 @@ async function fetchIntelligence(story, elId, directEl) {
   })();
   function _clearTimer(){ if(el._lTimer){ clearInterval(el._lTimer); el._lTimer=null; } }
   try {
+    var authHdr={'Content-Type':'application/json'};
+    if(window._authToken) authHdr['Authorization']='Bearer '+window._authToken;
     var res=await fetch('/.netlify/functions/explain',{
       method:'POST',
-      headers:{'Content-Type':'application/json'},
+      headers:authHdr,
       body:JSON.stringify({
         headline:    story.headline,
         summary:     story.summary,
@@ -1491,7 +1494,7 @@ function spawnPopout(story, dropX, dropY) {
   if(chartCfg) drawChart(art.id,chartCfg);
   fetchQuotesInto(cat, win.querySelector('.popwin-body'));
   if(story.url) extendArticleInto(story, art.id);
-  fetchIntelligence(story, 'art-intel-'+art.id);
+  if (window._isOwner) fetchIntelligence(story, 'art-intel-'+art.id);
 }
 
 /* fetchQuotes into a specific container (for popouts) */
@@ -1603,6 +1606,23 @@ var supabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 (async function(){
   var sess=await supabase.auth.getSession();
   if(!sess.data.session){window.location.href='login.html';return;}
+  window._authToken = sess.data.session.access_token;
+  supabase.auth.onAuthStateChange(function(event, s){ window._authToken = s ? s.access_token : null; });
+
+  /* Keep lens in sync with parent — fires when dashboard.html changes localStorage */
+  window.addEventListener('storage', function(e) {
+    if (e.key === 'tbt_asset_lens' && e.newValue && window.ASSET_PROFILES && window.ASSET_PROFILES[e.newValue]) {
+      window._assetLens = window.ASSET_PROFILES[e.newValue];
+    }
+  });
+  var _ue = sess.data.session.user.email || '';
+  window._isOwner = (_ue === 'admin@thebrokersterminal.com' || _ue === 'desk@thebrokersterminal.com');
+  if (!window._isOwner) {
+    /* Hide BROKERS INTELLIGENCE panels for all non-owner accounts */
+    var style = document.createElement('style');
+    style.textContent = '.intel-panel { display: none !important; }';
+    document.head.appendChild(style);
+  }
   document.getElementById('nav-logout-btn').addEventListener('click',function(e){e.preventDefault();supabase.auth.signOut().then(function(){window.location.href='login.html';});});
 
   /* Auto-select category based on firm's asset access */

@@ -642,7 +642,7 @@ exports.handler = async (event) => {
             console.error('[explain-credits] deduct_credits HTTP error', deductResp.status);
           }
         } else if (user && user.email === ADMIN_EMAIL) {
-          console.log('[explain-credits] admin bypass');
+          console.log('[explain-credits] admin bypass for', user.email);
         }
       } else {
         console.log('[explain-credits] JWT verify failed', userResp.status);
@@ -655,7 +655,7 @@ exports.handler = async (event) => {
 
   /* ── Cache key: headline (normalised) + category + lens — v2 forces regeneration after lens fix ── */
   const lensTag = lensKey ? ':' + lensKey : '';
-  const cacheKey = 'explain3:' + category + lensTag + ':' + headline.trim().toLowerCase().slice(0, 120);
+  const cacheKey = 'explain4:' + category + lensTag + ':' + headline.trim().toLowerCase().slice(0, 120);
 
   const cached = await cacheGet(cacheKey);
   if (cached) {
@@ -773,6 +773,30 @@ FINE WINE FACTS TO WEAVE IN:
 • Bonded storage: HMRC-supervised, insured, provenance-documented — institutional standard
 • USD correlation: GBP weakness increases the sterling value of dollar-priced Bordeaux and Burgundy
 ASSET LANGUAGE: use "fine wine", "investment-grade wine", "Liv-ex market", "vintage portfolio".`,
+
+    whisky: `ACTIVE SALES LENS: RARE WHISKY CASKS
+THIS LENS SUPERSEDES "BULLISH ANGLE FOR TANGIBLE ASSETS" but KEEPS physical/tangible asset language — this IS a tangible asset.
+PITCH THIS STORY AS A REASON TO ACT ON RARE WHISKY CASKS. Use this news story as the bridge — show the client why this macro development makes rare cask ownership more compelling right now.
+RARE CASK FACTS TO WEAVE IN (use whichever 2-3 are most relevant to this story):
+• Finite supply: closed distilleries cannot produce more; total supply of premium-aged casks decreases every year as bottles are opened — scarcity is mechanical, not narrative
+• Maturation premium: whisky legally must age in oak casks; time adds verifiable, intrinsic value independent of market sentiment
+• Non-correlation: cask returns have shown near-zero correlation to equity markets through 2008, 2020, and 2022 — the asset that didn't move when everything else did
+• Physical ownership: HMRC bonded storage, title deed in the client's name, auction-market price transparency — not a fund, not a derivative
+• Asian collector demand: Asian buyers represent growing institutional appetite for premium aged Scotch — a structural demand driver that is macro-independent
+• IHT efficiency: casks held for 2+ years may qualify for Business Property Relief — 100% outside the estate
+ASSET LANGUAGE: use "rare casks", "whisky casks", "bonded storage", "title deed", "HMRC bonded warehouse", "auction market", "premium aged stock". Never name a specific distillery unless verified.`,
+
+    gold: `ACTIVE SALES LENS: PHYSICAL GOLD / PRECIOUS METALS
+THIS LENS SUPERSEDES "BULLISH ANGLE FOR TANGIBLE ASSETS" but KEEPS physical/tangible asset language — this IS a tangible asset.
+PITCH THIS STORY AS A REASON TO ACT ON PHYSICAL GOLD. Use this news story as the bridge — show the client why this development directly supports gold as the positioning.
+GOLD FACTS TO WEAVE IN (use whichever 2-3 are most relevant):
+• Central bank buying: central banks purchased 1,000+ tonnes of gold per year for four consecutive years — the institutions that print currencies are accumulating the one asset that cannot be printed
+• Real rate driver: when real interest rates (after inflation) fall or go negative, gold's opportunity cost falls — this story is relevant to whether real rates move
+• Currency debasement: the pound has lost ~75% of its real purchasing power since 2000 — gold has preserved that purchasing power across centuries
+• Non-sovereign: gold has no counterparty, no balance sheet, no government dependency — it performs when financial systems come under stress
+• Physical vs paper: physical allocated gold (stored in your name, insured, audited) is structurally different from gold ETFs (counterparty risk, tracking error, no physical claim)
+• Dollar inverse: gold prices move inversely to real dollar strength — this news story's impact on the dollar is the key transmission mechanism
+ASSET LANGUAGE: use "physical gold", "allocated gold", "precious metals", "real assets", "non-sovereign store of value".`,
   };
 
   const isEquityLens = !!LENS_PITCH_MAP[lensKey];
@@ -815,7 +839,8 @@ Category: ${(category || 'general').toUpperCase()}
 ${dataContext}
 ${catCtx}
 ${lensInstruction}
-Generate the Brokers Intelligence panel for this story. Apply the LENS OVERRIDE if active. Return only valid JSON.`;
+Generate the Brokers Intelligence panel for this story. Apply the LENS OVERRIDE if active.
+CRITICAL: Respond ONLY with the JSON object. Start your response with { and end with }. No preamble, no markdown, no code fences, no explanation.`;
 
   try {
     /* Build system blocks: STYLE_GUIDE is cached (23k tokens, static);
@@ -841,7 +866,8 @@ Generate the Brokers Intelligence panel for this story. Apply the LENS OVERRIDE 
 
     if (!resp.ok) {
       const err = await resp.text();
-      return { statusCode: 502, headers: corsHeaders, body: JSON.stringify({ error: 'Anthropic API error', detail: err }) };
+      console.error('[explain] Anthropic error', resp.status, err.slice(0, 300));
+      return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({ error: 'anthropic_error', detail: err.slice(0, 200), status: resp.status }) };
     }
 
     const data = await resp.json();
