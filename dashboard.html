@@ -766,9 +766,16 @@
     <div id="intel-search-container"></div>
   </div>
 
-  <!-- Right: tab bar (built by JS) + user menu -->
+  <!-- Right: tab bar (built by JS) + credit balance + user menu -->
   <div class="ttb-right">
     <div id="tbc-tab-bar"></div>
+
+    <!-- Credit balance badge -->
+    <div id="tbt-credit-wrap" title="Your INTEL credits" style="display:none;align-items:center;gap:5px;padding:0 10px;border-right:1px solid var(--border-dim);cursor:default;flex-shrink:0;">
+      <span style="font-size:8px;letter-spacing:.18em;color:var(--text-faint);">CREDITS</span>
+      <span id="tbt-credit-balance" style="font-size:11px;font-weight:700;color:var(--accent);letter-spacing:.06em;">—</span>
+    </div>
+
     <div class="ttb-user-menu">
       <button class="ttb-user-btn" id="ttb-user-toggle" title="Account">
         <span class="ttb-user-icon">◎</span>
@@ -781,6 +788,8 @@
         <span id="manage-subscription-sep" style="display:none;"></span>
         <a href="#" id="manage-team-btn" style="display:none;" class="ttb-dd-item">MANAGE TEAM</a>
         <span id="manage-team-sep" style="display:none;"></span>
+        <a href="#" id="credits-admin-btn" style="display:none;" class="ttb-dd-item">CREDITS ADMIN</a>
+        <span id="credits-admin-sep" style="display:none;"></span>
         <div class="ttb-dd-sep"></div>
         <a href="#" id="logout-btn" class="ttb-dd-item ttb-dd-logout">LOG OUT</a>
         <a href="#" id="nav-logout-btn" style="display:none;"></a>
@@ -788,6 +797,42 @@
     </div>
   </div>
 
+</div>
+
+<!-- ══ INSUFFICIENT CREDITS MODAL ════════════════════════════════ -->
+<div id="tbt-nocredits-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.82);z-index:19999;align-items:center;justify-content:center;">
+  <div style="background:#0e0e0e;border:1px solid var(--border);padding:32px 36px;min-width:320px;max-width:400px;width:100%;font-family:var(--font);text-align:center;">
+    <div style="font-size:10px;letter-spacing:.3em;color:var(--accent);margin-bottom:16px;font-weight:700;">INTEL CREDITS</div>
+    <div style="font-size:13px;color:#fff;margin-bottom:10px;font-weight:600;letter-spacing:.06em;">Insufficient Credits</div>
+    <div style="font-size:10px;color:var(--text-faint);line-height:1.7;margin-bottom:24px;letter-spacing:.05em;">You don't have enough credits for this search.<br>Contact your administrator to top up your account.</div>
+    <div style="font-size:9px;color:var(--text-faint);letter-spacing:.12em;margin-bottom:20px;">CURRENT BALANCE: <span id="tbt-nocredits-bal" style="color:#fff;font-weight:700;">0</span> CREDITS</div>
+    <button onclick="document.getElementById('tbt-nocredits-modal').style.display='none';" style="background:var(--accent);color:#000;border:none;font-family:var(--font);font-size:9px;font-weight:700;letter-spacing:.2em;padding:10px 28px;cursor:pointer;">CLOSE</button>
+  </div>
+</div>
+
+<!-- ══ CREDITS ADMIN MODAL ════════════════════════════════════════ -->
+<div id="tbt-credits-admin-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.82);z-index:19999;align-items:center;justify-content:center;">
+  <div style="background:#0e0e0e;border:1px solid var(--border);padding:28px 32px;min-width:480px;max-width:600px;width:100%;font-family:var(--font);max-height:80vh;overflow-y:auto;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+      <div style="font-size:10px;letter-spacing:.3em;color:var(--accent);font-weight:700;">CREDITS ADMIN</div>
+      <button onclick="document.getElementById('tbt-credits-admin-modal').style.display='none';" style="background:none;border:1px solid var(--border-dim);color:var(--text-faint);font-family:var(--font);font-size:9px;padding:4px 10px;cursor:pointer;letter-spacing:.12em;">CLOSE</button>
+    </div>
+
+    <!-- Allocate credits form -->
+    <div style="background:#111;border:1px solid var(--border-dim);padding:16px;margin-bottom:16px;">
+      <div style="font-size:9px;letter-spacing:.2em;color:var(--text-faint);margin-bottom:12px;">ALLOCATE CREDITS TO USER</div>
+      <div style="display:flex;gap:8px;margin-bottom:8px;">
+        <input id="ca-email-input" placeholder="search by email..." style="flex:1;background:var(--bg-deep);border:1px solid var(--border-dim);color:var(--text);font-family:var(--font);font-size:10px;padding:7px 10px;letter-spacing:.05em;" oninput="window._caFilterUsers(this.value)">
+        <input id="ca-amount-input" type="number" min="1" placeholder="credits" style="width:80px;background:var(--bg-deep);border:1px solid var(--border-dim);color:var(--text);font-family:var(--font);font-size:10px;padding:7px 10px;text-align:center;">
+        <button onclick="window._caAllocate()" style="background:var(--accent);color:#000;border:none;font-family:var(--font);font-size:9px;font-weight:700;letter-spacing:.16em;padding:7px 14px;cursor:pointer;white-space:nowrap;">ADD</button>
+      </div>
+      <div id="ca-selected" style="font-size:9px;color:var(--text-faint);letter-spacing:.08em;min-height:16px;"></div>
+    </div>
+
+    <!-- User list -->
+    <div style="font-size:9px;letter-spacing:.18em;color:var(--text-faint);margin-bottom:8px;">ALL USERS</div>
+    <div id="ca-user-list" style="font-size:9px;color:var(--text-faint);letter-spacing:.05em;">Loading...</div>
+  </div>
 </div>
 
 <!-- ══ EDIT PROFILE MODAL ═════════════════════════════════════════ -->
@@ -1642,6 +1687,156 @@
     window._sbClient = supabase;
     window._uid      = session.user.id;
     window._userName = userName;
+
+    // ── CREDIT SYSTEM ────────────────────────────────────────────────────────
+
+    /* Deduct credits — returns {ok, balance} or {ok:false, error, status} */
+    window._deductCredits = async function (amount, description) {
+      try {
+        const { data: { session: s } } = await supabase.auth.getSession();
+        if (!s) return { ok: false, error: 'not_authenticated' };
+        const r = await fetch('/.netlify/functions/credits', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + s.access_token },
+          body: JSON.stringify({ action: 'deduct', amount, description }),
+        });
+        const data = await r.json();
+        if (!r.ok) return { ok: false, error: data.error, status: r.status };
+        /* Update displayed balance */
+        var balEl = document.getElementById('tbt-credit-balance');
+        if (balEl) balEl.textContent = data.balance;
+        return { ok: true, balance: data.balance };
+      } catch (e) { return { ok: false, error: e.message }; }
+    };
+
+    /* Show insufficient credits modal */
+    window._showNoCredits = function (balance) {
+      var m = document.getElementById('tbt-nocredits-modal');
+      var b = document.getElementById('tbt-nocredits-bal');
+      if (b) b.textContent = balance !== undefined ? balance : '0';
+      if (m) { m.style.display = 'flex'; }
+    };
+
+    /* Load and display current balance */
+    window._loadCreditBalance = async function () {
+      try {
+        const { data: { session: s } } = await supabase.auth.getSession();
+        if (!s) return;
+        const r = await fetch('/.netlify/functions/credits?action=balance', {
+          headers: { 'Authorization': 'Bearer ' + s.access_token },
+        });
+        if (r.ok) {
+          const data = await r.json();
+          var balEl = document.getElementById('tbt-credit-balance');
+          var wrap  = document.getElementById('tbt-credit-wrap');
+          if (balEl) balEl.textContent = data.balance;
+          if (wrap)  wrap.style.display = 'flex';
+        }
+      } catch {}
+    };
+
+    /* Load balance on init */
+    window._loadCreditBalance();
+
+    /* ── CREDITS ADMIN ─────────────────────────────────────────────────────── */
+    if (window._isOwner) {
+      var cadBtn = document.getElementById('credits-admin-btn');
+      var cadSep = document.getElementById('credits-admin-sep');
+      if (cadBtn) cadBtn.style.display = '';
+      if (cadSep) cadSep.style.display = '';
+
+      var _caUsers = [];
+      var _caSelected = null;
+
+      window._caOpenAdmin = async function () {
+        var modal = document.getElementById('tbt-credits-admin-modal');
+        if (!modal) return;
+        modal.style.display = 'flex';
+        /* Load user list */
+        var listEl = document.getElementById('ca-user-list');
+        if (listEl) listEl.textContent = 'Loading...';
+        try {
+          const { data: { session: s } } = await supabase.auth.getSession();
+          const r = await fetch('/.netlify/functions/credits?action=users', {
+            headers: { 'Authorization': 'Bearer ' + s.access_token },
+          });
+          if (r.ok) {
+            const data = await r.json();
+            _caUsers = data.users || [];
+            window._caRenderUsers(_caUsers);
+          }
+        } catch (e) { if (listEl) listEl.textContent = 'Error loading users.'; }
+      };
+
+      window._caRenderUsers = function (users) {
+        var listEl = document.getElementById('ca-user-list');
+        if (!listEl) return;
+        if (!users.length) { listEl.textContent = 'No users found.'; return; }
+        listEl.innerHTML = '';
+        users.forEach(function (u) {
+          var row = document.createElement('div');
+          row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border-bottom:1px solid #1a1a1a;cursor:pointer;';
+          row.innerHTML =
+            '<span style="flex:1;color:#ccc;font-size:9px;letter-spacing:.05em;">' + u.email + '</span>' +
+            '<span style="color:var(--accent);font-weight:700;font-size:10px;min-width:50px;text-align:right;">' + u.balance + '</span>';
+          row.addEventListener('click', function () {
+            _caSelected = u;
+            document.querySelectorAll('#ca-user-list div').forEach(function (r2) { r2.style.background = ''; });
+            row.style.background = '#1a1a1a';
+            var selEl = document.getElementById('ca-selected');
+            if (selEl) selEl.textContent = 'SELECTED: ' + u.email + ' · CURRENT BALANCE: ' + u.balance;
+          });
+          listEl.appendChild(row);
+        });
+      };
+
+      window._caFilterUsers = function (q) {
+        var filtered = q ? _caUsers.filter(function (u) { return u.email.toLowerCase().indexOf(q.toLowerCase()) !== -1; }) : _caUsers;
+        window._caRenderUsers(filtered);
+        _caSelected = null;
+        var selEl = document.getElementById('ca-selected');
+        if (selEl) selEl.textContent = '';
+      };
+
+      window._caAllocate = async function () {
+        if (!_caSelected) { alert('Select a user first.'); return; }
+        var amtEl = document.getElementById('ca-amount-input');
+        var amt = parseInt(amtEl ? amtEl.value : '0', 10);
+        if (!amt || amt <= 0) { alert('Enter a valid credit amount.'); return; }
+        try {
+          const { data: { session: s } } = await supabase.auth.getSession();
+          const r = await fetch('/.netlify/functions/credits', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + s.access_token },
+            body: JSON.stringify({ action: 'add', target_user_id: _caSelected.id, amount: amt, description: 'Admin allocation' }),
+          });
+          const data = await r.json();
+          if (r.ok) {
+            _caSelected.balance = data.balance;
+            var selEl = document.getElementById('ca-selected');
+            if (selEl) selEl.textContent = 'ALLOCATED ' + amt + ' CREDITS. NEW BALANCE: ' + data.balance;
+            if (amtEl) amtEl.value = '';
+            /* Refresh list */
+            _caUsers = _caUsers.map(function (u) { return u.id === _caSelected.id ? Object.assign({}, u, { balance: data.balance }) : u; });
+            window._caRenderUsers(_caUsers);
+          } else {
+            alert('Error: ' + (data.error || 'unknown'));
+          }
+        } catch (e) { alert('Error: ' + e.message); }
+      };
+
+      /* Wire admin button in dropdown */
+      if (cadBtn) {
+        cadBtn.addEventListener('click', function (e) {
+          e.preventDefault();
+          var dd = document.getElementById('ttb-user-dropdown');
+          if (dd) dd.style.display = 'none';
+          window._caOpenAdmin();
+        });
+      }
+    }
+
+    // ── END CREDIT SYSTEM ────────────────────────────────────────────────────
 
     // ── Init terminal canvas (firmId now resolved) ──
     if (window.terminalCanvasInit) terminalCanvasInit(supabase, session.user.id, window._canonicalFirmId, userName, userEmail);

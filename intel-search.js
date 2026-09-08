@@ -451,14 +451,28 @@
   }
 
   /* ── HANDLE SELECTION → POP-OUT ── */
+  function _gateCredits(amount, description, proceed) {
+    if (!window._deductCredits) { proceed(); return; }
+    window._deductCredits(amount, description).then(function (result) {
+      if (!result.ok && result.status === 402) {
+        window._showNoCredits && window._showNoCredits(result.balance || 0);
+        return;
+      }
+      /* On non-402 errors (network, not authenticated) — allow through */
+      proceed();
+    });
+  }
+
   window._intelSearch = function (query, type, ticker) {
     var dropdown = document.getElementById('intel-dropdown');
     var input = document.getElementById('intel-search-input');
     if (dropdown) dropdown.style.display = 'none';
     if (input) input.value = '';
 
-    var win = createPopout(query, type);
-    fetchDetail(query, type, ticker || '', win);
+    _gateCredits(10, type + ': ' + query, function () {
+      var win = createPopout(query, type);
+      fetchDetail(query, type, ticker || '', win);
+    });
   };
 
   window._intelSearchSection = function (query, type, ticker, section) {
@@ -467,9 +481,13 @@
     if (dropdown) dropdown.style.display = 'none';
     if (input) input.value = '';
 
-    var suffix = section === 'overview' ? ' — PROFILE' : section === 'pitch' ? ' — PITCH' : '';
-    var win = createPopout(query + suffix, type);
-    fetchDetailSection(query, type, ticker || '', section, win);
+    /* Company open = 25 credits (covers all tabs); other sections = 10 */
+    var cost = (type === 'company') ? 25 : 10;
+    _gateCredits(cost, type + ':' + section + ': ' + query, function () {
+      var suffix = section === 'overview' ? ' — PROFILE' : section === 'pitch' ? ' — PITCH' : '';
+      var win = createPopout(query + suffix, type);
+      fetchDetailSection(query, type, ticker || '', section, win);
+    });
   };
 
   /* ── TAB GROUP REGISTRY ── */
@@ -1664,6 +1682,52 @@
                 (allMax  != null ? sRow('ALL-TIME HIGH','£' + Math.round(allMax).toLocaleString('en-GB') + (atMax.price_date ? '  ' + atMax.price_date.slice(0,7) : '')) : '') +
                 (retAvg  != null ? sRow('RETAIL',     '£' + Math.round(retAvg).toLocaleString('en-GB') + (retMin !== retMax ? '  (' + Math.round(retMin).toLocaleString('en-GB') + '–' + Math.round(retMax).toLocaleString('en-GB') + ')' : '')) : '') +
               '</div>';
+
+            /* ── On-demand listing buttons ── */
+            var listBtnWrap = document.createElement('div');
+            listBtnWrap.style.cssText = 'display:flex;gap:6px;margin-top:10px;';
+            listBtnWrap.innerHTML =
+              '<button class="dist-list-btn" data-listtype="auction_listings" style="flex:1;font-size:8px;letter-spacing:.1em;padding:5px 4px;background:#111;border:1px solid #222;color:#E97132;cursor:pointer;">▸ LIVE LOTS</button>' +
+              '<button class="dist-list-btn" data-listtype="retail_listings"  style="flex:1;font-size:8px;letter-spacing:.1em;padding:5px 4px;background:#111;border:1px solid #222;color:#4caf50;cursor:pointer;">▸ RETAIL SHOPS</button>';
+            mktEl.appendChild(listBtnWrap);
+
+            listBtnWrap.querySelectorAll('.dist-list-btn').forEach(function (lb) {
+              lb.addEventListener('click', function () {
+                var ltype = lb.dataset.listtype;
+                var isAuction = ltype === 'auction_listings';
+                lb.textContent = 'LOADING…';
+                lb.disabled = true;
+                var url = '/.netlify/functions/whisky-data?type=' + ltype + '&id=' + encodeURIComponent(bgId2) + (isAuction ? '' : '&currency=GBP');
+                fetch(url).then(function (r) { return r.ok ? r.json() : null; }).then(function (data) {
+                  var lots = (data && Array.isArray(data.listings)) ? data.listings : [];
+                  lb.remove();
+                  if (!lots.length) {
+                    var none = document.createElement('div');
+                    none.style.cssText = 'font-size:8px;color:#555;padding:4px 0;letter-spacing:.08em;';
+                    none.textContent = isAuction ? 'NO LIVE AUCTION LOTS' : 'NO RETAIL LISTINGS';
+                    mktEl.appendChild(none);
+                    return;
+                  }
+                  var html = '<div class="sp-sec-lbl" style="margin-top:8px;">' + (isAuction ? 'LIVE AUCTION LOTS <span style="color:#E97132;font-size:7px;">' + lots.length + ' ACTIVE</span>' : 'RETAIL SHOPS <span style="color:#4caf50;font-size:7px;">' + lots.length + ' LISTINGS</span>') + '</div>';
+                  (isAuction ? lots.slice(0, 6) : lots.slice(0, 5)).forEach(function (lot) {
+                    if (isAuction) {
+                      var ends = lot.end_date ? lot.end_date.slice(0, 10) : '';
+                      html += '<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #111;font-size:9px;">' +
+                        '<span style="color:rgba(255,255,255,0.85);">' + escH(lot.auction_name || lot.auction_house || '') + '</span>' +
+                        '<span style="color:#E97132;">' + (ends ? 'ENDS ' + ends : '') + '</span></div>';
+                    } else {
+                      var price = lot.price != null ? '£' + Math.round(lot.price).toLocaleString('en-GB') : '';
+                      html += '<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #111;font-size:9px;">' +
+                        '<span style="color:rgba(255,255,255,0.85);">' + escH(lot.shop_name || '') + '</span>' +
+                        '<span style="color:#4caf50;">' + escH(price) + '</span></div>';
+                    }
+                  });
+                  var el = document.createElement('div');
+                  el.innerHTML = html;
+                  mktEl.appendChild(el);
+                }).catch(function () { lb.textContent = isAuction ? '▸ LIVE LOTS' : '▸ RETAIL SHOPS'; lb.disabled = false; });
+              });
+            });
           }
           var canvas = document.getElementById(canvasId);
           if (canvas) {
