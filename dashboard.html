@@ -7,7 +7,7 @@
   <title>THE BROKERS TERMINAL — Subscriber Desk</title>
   <link rel="stylesheet" href="site.css">
   <link rel="stylesheet" href="intel-search.css">
-  <link rel="stylesheet" href="terminal-canvas.css">
+  <link rel="stylesheet" href="terminal-canvas.css?v=20260905c">
   <link rel="stylesheet" href="terminal-chat.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.0"></script>
   <style>
@@ -19,7 +19,7 @@
       display: flex;
       align-items: center;
       height: 34px;
-      overflow: hidden;
+      overflow: visible;
     }
     .ticker-label {
       color: var(--accent);
@@ -34,6 +34,7 @@
       height: 100%;
       display: flex;
       align-items: center;
+      position: relative;
     }
     .ticker-track-wrap { flex: 1; overflow: hidden; position: relative; }
     .ticker-track {
@@ -55,7 +56,7 @@
       border-right: 1px solid var(--border-dim);
     }
     .ticker-item.is-flash { color: var(--accent); font-weight: 700; }
-    .ticker-item.is-new   { color: var(--text-muted); }
+    .ticker-item.is-new   { color: #fff; }
     .ticker-dot-flash { color: var(--accent); font-size: 8px; }
     .ticker-dot-new   { color: var(--text-faint); font-size: 8px; }
 
@@ -291,7 +292,7 @@
       top: 0;
       left: 0;
       right: 0;
-      z-index: 200;
+      z-index: 10000;
       background: #050505;
       border-bottom: 2px solid #1a1a1a;
       display: flex;
@@ -423,7 +424,7 @@
       top: 44px;
       left: 0;
       right: 0;
-      z-index: 199;
+      z-index: 9999;
       border-top: none;
     }
 
@@ -437,22 +438,42 @@
       padding: 0 6px;
       height: 100%;
     }
-    .tk-filter {
-      font-family: 'Consolas', 'Menlo', monospace;
-      font-size: 8px;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      background: none;
-      border: none;
-      color: #555;
+    .tk-dd-trigger {
       cursor: pointer;
-      padding: 0 7px;
-      height: 100%;
-      transition: color 0.15s;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+      position: relative;
+    }
+    .tk-dd-trigger:hover { color: var(--accent) !important; }
+    .tk-dd-caret { font-size: 7px; opacity: 0.7; }
+    .tk-dropdown {
+      position: absolute;
+      top: calc(100% + 2px);
+      left: 0;
+      background: #0d0d0d;
+      border: 1px solid #2a2a2a;
+      border-bottom: 2px solid var(--accent);
+      z-index: 9999;
+      min-width: 160px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.8);
+    }
+    .tk-dd-item {
+      font-family: 'Consolas', 'Menlo', monospace;
+      font-size: 9px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: #ffffff;
+      padding: 9px 14px;
+      cursor: pointer;
+      border-bottom: 1px solid #1a1a1a;
       white-space: nowrap;
     }
-    .tk-filter:hover { color: #aaa; }
-    .tk-filter.active { color: var(--accent); }
+    .tk-dd-item:last-child { border-bottom: none; }
+    .tk-dd-item:hover { background: #1a1a1a; color: var(--accent); }
+    .tk-dd-item.active { color: var(--accent); }
     .tk-sep { width: 1px; background: #222; height: 14px; margin: 0 4px; }
     .tk-hide {
       font-family: 'Consolas', 'Menlo', monospace;
@@ -488,6 +509,28 @@
     /* Canvas top-padding when ticker visible */
     body.ticker-on #tbc-canvas-wrap,
     body.ticker-on #tbc-news-panel { margin-top: 34px; }
+
+    /* Widget canvas overlay — widgets float above vault/news panels */
+    #tbc-canvas-wrap.canvas-overlay {
+      position: fixed;
+      top: 44px;
+      left: 0; right: 0; bottom: 0;
+      pointer-events: none;
+      z-index: 500;
+      margin-top: 0 !important;
+    }
+    body.ticker-on #tbc-canvas-wrap.canvas-overlay { top: 78px; }
+    #tbc-canvas-wrap.canvas-overlay .tbc-canvas {
+      background: transparent !important;
+      background-image: none !important;
+      min-height: 100%;
+      overflow: visible;
+    }
+    #tbc-canvas-wrap.canvas-overlay .tbc-canvas-empty { display: none; }
+    /* Widgets and dock remain interactive in overlay mode */
+    #tbc-canvas-wrap.canvas-overlay .tbc-widget,
+    #tbc-canvas-wrap.canvas-overlay #tbc-dock,
+    #tbc-canvas-wrap.canvas-overlay #tbc-dock > * { pointer-events: all; }
 
     /* Offset body content below fixed topbar (44px) + ticker (34px when shown) */
     body { padding-top: 44px; }
@@ -678,6 +721,23 @@
       .card-audio-bar .audio-scrub { width: 100%; order: 3; }
     }
 
+    /* ── Asset Lens selector ── */
+    .ttb-lens { position:relative; display:none; align-items:center; flex-shrink:0; margin:0 8px; }
+    .ttb-lens.visible { display:flex; }
+    .ttb-lens-btn { display:flex; align-items:center; gap:6px; background:transparent; border:1px solid #2a2a2a; padding:5px 12px; cursor:pointer; font-family:Consolas,monospace; font-size:11px; letter-spacing:0.12em; color:#ffffff; white-space:nowrap; }
+    .ttb-lens-btn:hover { border-color:#E97132; }
+    .ttb-lens-icon { color:#E97132; font-size:10px; }
+    .ttb-lens-caret { color:#E97132; font-size:9px; margin-left:2px; }
+    .ttb-lens-dropdown { display:none; position:absolute; top:calc(100% + 6px); left:0; background:#000; border:1px solid #1a1a1a; min-width:240px; z-index:9999; box-shadow:0 8px 32px rgba(0,0,0,0.9); }
+    .ttb-lens.open .ttb-lens-dropdown { display:block; }
+    .ttb-lens-group-hdr { padding:7px 14px 5px; font-family:Consolas,monospace; font-size:6.5px; letter-spacing:.22em; color:#E97132; background:#050505; border-bottom:1px solid #111; text-transform:uppercase; }
+    .ttb-lens-item { display:flex; align-items:center; gap:10px; padding:9px 14px; cursor:pointer; font-family:Consolas,monospace; font-size:10px; letter-spacing:0.1em; color:#ffffff; border-bottom:1px solid #111; }
+    .ttb-lens-item:last-child { border-bottom:none; }
+    .ttb-lens-item:hover { background:#111; color:#E97132; }
+    .ttb-lens-item.active { color:#E97132; }
+    .ttb-lens-item .li-icon { color:#E97132; font-size:9px; flex-shrink:0; }
+    .ttb-lens-item .li-sub { font-size:7px; color:#ffffff; opacity:0.55; margin-left:auto; letter-spacing:0.04em; white-space:nowrap; }
+
   </style>
 </head>
 <body>
@@ -691,14 +751,31 @@
     <button class="ttb-ticker-restore" id="ttb-ticker-restore" title="Show news ticker" style="display:none;">▸ NEWS</button>
   </div>
 
-  <!-- Center: intel search -->
-  <div class="ttb-center">
-    <div id="intel-search-container" style="display:none;"></div>
+  <!-- Asset Lens selector -->
+  <div class="ttb-lens" id="ttb-lens-selector">
+    <button class="ttb-lens-btn" id="ttb-lens-btn">
+      <span class="ttb-lens-icon" id="ttb-lens-icon">◆</span>
+      <span class="ttb-lens-label" id="ttb-lens-label">WHISKY</span>
+      <span class="ttb-lens-caret">▾</span>
+    </button>
+    <div class="ttb-lens-dropdown" id="ttb-lens-dropdown"></div>
   </div>
 
-  <!-- Right: tab bar (built by JS) + user menu -->
+  <!-- Center: intel search -->
+  <div class="ttb-center">
+    <div id="intel-search-container"></div>
+  </div>
+
+  <!-- Right: tab bar (built by JS) + credit balance + user menu -->
   <div class="ttb-right">
     <div id="tbc-tab-bar"></div>
+
+    <!-- Credit balance badge -->
+    <div id="tbt-credit-wrap" title="Click to buy more credits" style="display:none;align-items:center;gap:5px;padding:0 10px;border-right:1px solid var(--border-dim);cursor:pointer;flex-shrink:0;" onclick="window._openBuyCredits&&window._openBuyCredits()">
+      <span style="font-size:8px;letter-spacing:.18em;color:var(--text-faint);">CREDITS</span>
+      <span id="tbt-credit-balance" style="font-size:11px;font-weight:700;color:var(--accent);letter-spacing:.06em;">—</span>
+    </div>
+
     <div class="ttb-user-menu">
       <button class="ttb-user-btn" id="ttb-user-toggle" title="Account">
         <span class="ttb-user-icon">◎</span>
@@ -711,7 +788,8 @@
         <span id="manage-subscription-sep" style="display:none;"></span>
         <a href="#" id="manage-team-btn" style="display:none;" class="ttb-dd-item">MANAGE TEAM</a>
         <span id="manage-team-sep" style="display:none;"></span>
-        <a href="#" id="fullscreen-news-btn" class="ttb-dd-item" style="display:none;">FULL SCREEN NEWS</a>
+        <a href="#" id="credits-admin-btn" style="display:none;" class="ttb-dd-item">CREDITS ADMIN</a>
+        <span id="credits-admin-sep" style="display:none;"></span>
         <div class="ttb-dd-sep"></div>
         <a href="#" id="logout-btn" class="ttb-dd-item ttb-dd-logout">LOG OUT</a>
         <a href="#" id="nav-logout-btn" style="display:none;"></a>
@@ -719,6 +797,79 @@
     </div>
   </div>
 
+</div>
+
+<!-- ══ INSUFFICIENT CREDITS MODAL ════════════════════════════════ -->
+<div id="tbt-nocredits-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.82);z-index:19999;align-items:center;justify-content:center;">
+  <div style="background:#0e0e0e;border:1px solid var(--border);padding:32px 36px;min-width:320px;max-width:400px;width:100%;font-family:var(--font);text-align:center;">
+    <div style="font-size:10px;letter-spacing:.3em;color:var(--accent);margin-bottom:16px;font-weight:700;">INTEL CREDITS</div>
+    <div style="font-size:13px;color:#fff;margin-bottom:10px;font-weight:600;letter-spacing:.06em;">Insufficient Credits</div>
+    <div style="font-size:10px;color:var(--text-faint);line-height:1.7;margin-bottom:24px;letter-spacing:.05em;">You don't have enough credits for this search.</div>
+    <div style="font-size:9px;color:var(--text-faint);letter-spacing:.12em;margin-bottom:20px;">CURRENT BALANCE: <span id="tbt-nocredits-bal" style="color:#fff;font-weight:700;">0</span> CREDITS</div>
+    <div style="display:flex;gap:10px;justify-content:center;">
+      <button onclick="document.getElementById('tbt-nocredits-modal').style.display='none';window._openBuyCredits&&window._openBuyCredits();" style="background:var(--accent);color:#000;border:none;font-family:var(--font);font-size:9px;font-weight:700;letter-spacing:.2em;padding:10px 24px;cursor:pointer;">BUY CREDITS</button>
+      <button onclick="document.getElementById('tbt-nocredits-modal').style.display='none';" style="background:none;border:1px solid var(--border-dim);color:var(--text-faint);font-family:var(--font);font-size:9px;letter-spacing:.12em;padding:10px 18px;cursor:pointer;">CLOSE</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ BUY CREDITS MODAL ══════════════════════════════════════════ -->
+<div id="tbt-buy-credits-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:19999;align-items:center;justify-content:center;">
+  <div style="background:#0e0e0e;border:1px solid var(--border);padding:32px 36px;min-width:360px;max-width:480px;width:100%;font-family:var(--font);">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+      <div style="font-size:10px;letter-spacing:.3em;color:var(--accent);font-weight:700;">BUY INTEL CREDITS</div>
+      <button onclick="document.getElementById('tbt-buy-credits-modal').style.display='none';" style="background:none;border:1px solid var(--border-dim);color:var(--text-faint);font-family:var(--font);font-size:9px;padding:4px 10px;cursor:pointer;letter-spacing:.12em;">CLOSE</button>
+    </div>
+    <div id="tbt-buy-credits-msg" style="display:none;font-size:10px;color:var(--accent);letter-spacing:.1em;margin-bottom:16px;text-align:center;"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;" id="tbt-buy-packages">
+      <div class="tbt-pkg" data-pkg="500" style="border:1px solid var(--border-dim);padding:16px;cursor:pointer;text-align:center;transition:border-color .15s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border-dim)'" onclick="window._buyCredits&&window._buyCredits('500')">
+        <div style="font-size:18px;font-weight:700;color:#fff;letter-spacing:.04em;">500</div>
+        <div style="font-size:8px;color:var(--text-faint);letter-spacing:.15em;margin:4px 0 10px;">CREDITS</div>
+        <div style="font-size:13px;font-weight:700;color:var(--accent);">£5</div>
+      </div>
+      <div class="tbt-pkg" data-pkg="2000" style="border:1px solid var(--border-dim);padding:16px;cursor:pointer;text-align:center;transition:border-color .15s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border-dim)'" onclick="window._buyCredits&&window._buyCredits('2000')">
+        <div style="font-size:18px;font-weight:700;color:#fff;letter-spacing:.04em;">2,000</div>
+        <div style="font-size:8px;color:var(--text-faint);letter-spacing:.15em;margin:4px 0 10px;">CREDITS</div>
+        <div style="font-size:13px;font-weight:700;color:var(--accent);">£20</div>
+      </div>
+      <div class="tbt-pkg" data-pkg="5000" style="border:1px solid var(--border-dim);padding:16px;cursor:pointer;text-align:center;transition:border-color .15s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border-dim)'" onclick="window._buyCredits&&window._buyCredits('5000')">
+        <div style="font-size:18px;font-weight:700;color:#fff;letter-spacing:.04em;">5,000</div>
+        <div style="font-size:8px;color:var(--text-faint);letter-spacing:.15em;margin:4px 0 10px;">CREDITS</div>
+        <div style="font-size:13px;font-weight:700;color:var(--accent);">£50</div>
+      </div>
+      <div class="tbt-pkg" data-pkg="10000" style="border:1px solid var(--border-dim);padding:16px;cursor:pointer;text-align:center;transition:border-color .15s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border-dim)'" onclick="window._buyCredits&&window._buyCredits('10000')">
+        <div style="font-size:18px;font-weight:700;color:#fff;letter-spacing:.04em;">10,000</div>
+        <div style="font-size:8px;color:var(--text-faint);letter-spacing:.15em;margin:4px 0 10px;">CREDITS</div>
+        <div style="font-size:13px;font-weight:700;color:var(--accent);">£100</div>
+      </div>
+    </div>
+    <div style="font-size:8px;color:var(--text-faint);text-align:center;margin-top:16px;letter-spacing:.08em;">Secure payment via Stripe · Credits added instantly</div>
+  </div>
+</div>
+
+<!-- ══ CREDITS ADMIN MODAL ════════════════════════════════════════ -->
+<div id="tbt-credits-admin-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.82);z-index:19999;align-items:center;justify-content:center;">
+  <div style="background:#0e0e0e;border:1px solid var(--border);padding:28px 32px;min-width:480px;max-width:600px;width:100%;font-family:var(--font);max-height:80vh;overflow-y:auto;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+      <div style="font-size:10px;letter-spacing:.3em;color:var(--accent);font-weight:700;">CREDITS ADMIN</div>
+      <button onclick="document.getElementById('tbt-credits-admin-modal').style.display='none';" style="background:none;border:1px solid var(--border-dim);color:var(--text-faint);font-family:var(--font);font-size:9px;padding:4px 10px;cursor:pointer;letter-spacing:.12em;">CLOSE</button>
+    </div>
+
+    <!-- Allocate credits form -->
+    <div style="background:#111;border:1px solid var(--border-dim);padding:16px;margin-bottom:16px;">
+      <div style="font-size:9px;letter-spacing:.2em;color:var(--text-faint);margin-bottom:12px;">ALLOCATE CREDITS TO USER</div>
+      <div style="display:flex;gap:8px;margin-bottom:8px;">
+        <input id="ca-email-input" placeholder="search by email..." style="flex:1;background:var(--bg-deep);border:1px solid var(--border-dim);color:var(--text);font-family:var(--font);font-size:10px;padding:7px 10px;letter-spacing:.05em;" oninput="window._caFilterUsers(this.value)">
+        <input id="ca-amount-input" type="number" min="1" placeholder="credits" style="width:80px;background:var(--bg-deep);border:1px solid var(--border-dim);color:var(--text);font-family:var(--font);font-size:10px;padding:7px 10px;text-align:center;">
+        <button onclick="window._caAllocate()" style="background:var(--accent);color:#000;border:none;font-family:var(--font);font-size:9px;font-weight:700;letter-spacing:.16em;padding:7px 14px;cursor:pointer;white-space:nowrap;">ADD</button>
+      </div>
+      <div id="ca-selected" style="font-size:9px;color:var(--text-faint);letter-spacing:.08em;min-height:16px;"></div>
+    </div>
+
+    <!-- User list -->
+    <div style="font-size:9px;letter-spacing:.18em;color:var(--text-faint);margin-bottom:8px;">ALL USERS</div>
+    <div id="ca-user-list" style="font-size:9px;color:var(--text-faint);letter-spacing:.05em;">Loading...</div>
+  </div>
 </div>
 
 <!-- ══ EDIT PROFILE MODAL ═════════════════════════════════════════ -->
@@ -763,14 +914,20 @@
 
 <!-- ══ CONTENT TICKER ════════════════════════════════════════════ -->
 <div class="content-ticker" id="content-ticker" style="display:none;">
-  <div class="ticker-label">▸ NEWS</div>
+  <div class="ticker-label tk-dd-trigger" id="tk-dd-trigger" title="Filter news source">▸ NEWS <span class="tk-dd-caret">▾</span></div>
+  <div id="tk-dropdown" class="tk-dropdown" style="display:none;">
+    <div class="tk-dd-item active" data-filter="all">ALL SOURCES</div>
+    <div class="tk-dd-item" data-filter="gold">GOLD &amp; METALS</div>
+    <div class="tk-dd-item" data-filter="whisky">WHISKY &amp; SPIRITS</div>
+    <div class="tk-dd-item" data-filter="property">PROPERTY</div>
+    <div class="tk-dd-item" data-filter="macro">MACRO &amp; RATES</div>
+    <div class="tk-dd-item" data-filter="markets">EQUITIES</div>
+    <div class="tk-dd-item" data-filter="wine">FINE WINE</div>
+  </div>
   <div class="ticker-track-wrap">
     <div class="ticker-track" id="ticker-track"></div>
   </div>
   <div class="ticker-controls">
-    <button class="tk-filter active" data-filter="all">ALL</button>
-    <button class="tk-filter" data-filter="gold">GOLD</button>
-    <button class="tk-filter" data-filter="whisky">WHISKY</button>
     <div class="tk-sep"></div>
     <button class="tk-hide" id="tk-hide-btn" title="Hide ticker">✕</button>
   </div>
@@ -779,6 +936,7 @@
 <!-- ══ TERMINAL CANVAS ═══════════════════════════════════════════ -->
 <div id="tbc-canvas-wrap">
   <div id="tbc-canvas" class="tbc-canvas"></div>
+  <div id="tbc-dock" style="position:absolute;bottom:0;left:0;right:0;height:36px;display:flex;align-items:center;gap:6px;padding:0 12px;background:rgba(0,0,0,0.88);border-top:1px solid #1a1a1a;z-index:8000;pointer-events:none;overflow-x:auto;white-space:nowrap;"></div>
 </div>
 
 <!-- ══ NEWS FEED PANEL (static — shown/hidden by tab JS) ═════════ -->
@@ -1085,7 +1243,8 @@
 
 <script src="site.js"></script>
 <script src="intel-search.js"></script>
-<script src="terminal-canvas.js"></script>
+<script src="assetProfiles.js"></script>
+<script src="terminal-canvas.js?v=20260905d"></script>
 <script src="terminal-chat.js"></script>
 <script src="terminal-notes.js"></script>
 <script>document.addEventListener('DOMContentLoaded',function(){
@@ -1109,6 +1268,65 @@
       window.open('news.html', '_blank');
     });
   }
+
+  /* ── Asset Lens selector ── */
+  (function () {
+    var lensEl   = document.getElementById('ttb-lens-selector');
+    var lensBtn  = document.getElementById('ttb-lens-btn');
+    var lensIcon = document.getElementById('ttb-lens-icon');
+    var lensLab  = document.getElementById('ttb-lens-label');
+    var lensDD   = document.getElementById('ttb-lens-dropdown');
+    if (!lensEl || !window.ASSET_PROFILES) return;
+
+    var LENS_GROUPS = [
+      { hdr: 'PHYSICAL & ALTERNATIVE', keys: ['whisky','wine','gold','art','land'] },
+      { hdr: 'PROPERTY & EQUITY',      keys: ['property','pe','trusts'] },
+      { hdr: 'TAX-EFFICIENT',          keys: ['eis','vct','offshore'] },
+      { hdr: 'CROSS-ASSET',            keys: ['universal'] },
+    ];
+    function buildDropdown() {
+      var profiles = window.ASSET_PROFILES;
+      var html = '';
+      LENS_GROUPS.forEach(function(grp) {
+        var items = grp.keys.map(function(k){ return profiles[k]; }).filter(Boolean);
+        if (!items.length) return;
+        html += '<div class="ttb-lens-group-hdr">' + grp.hdr + '</div>';
+        items.forEach(function(p) {
+          var isActive = window._assetLens && window._assetLens.key === p.key;
+          html += '<div class="ttb-lens-item' + (isActive ? ' active' : '') + '" data-lens="' + p.key + '">' +
+            '<span class="li-icon">◆</span>' +
+            '<span>' + p.label + '</span>' +
+            '<span class="li-sub">' + (p.tag||'').split('·')[0].trim() + '</span>' +
+          '</div>';
+        });
+      });
+      lensDD.innerHTML = html;
+      lensDD.querySelectorAll('.ttb-lens-item').forEach(function (el) {
+        el.addEventListener('click', function () {
+          window._setAssetLens(el.getAttribute('data-lens'));
+          lensEl.classList.remove('open');
+        });
+      });
+    }
+
+    function updateLabel() {
+      var lens = window._assetLens;
+      if (!lens) return;
+      lensIcon.textContent = '◆';
+      lensLab.textContent  = lens.shortLabel.toUpperCase();
+    }
+
+    lensBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      buildDropdown();
+      lensEl.classList.toggle('open');
+    });
+    document.addEventListener('click', function () { lensEl.classList.remove('open'); });
+    window.addEventListener('lens:change', function () { updateLabel(); });
+
+    updateLabel();
+    lensEl.classList.add('visible');
+  })();
 });</script>
 
 <!-- ══ SUPABASE + DASHBOARD JS ════════════════════════════════════ -->
@@ -1507,8 +1725,224 @@
     window._uid      = session.user.id;
     window._userName = userName;
 
+    // ── Auth token for server-side credit checks ──
+    window._authToken = session.access_token;
+    supabase.auth.onAuthStateChange(function (evt, newSession) {
+      window._authToken = newSession ? newSession.access_token : null;
+    });
+
+    // ── CREDIT SYSTEM ────────────────────────────────────────────────────────
+
+    /* Deduct credits — returns {ok, balance} or {ok:false, error, status} */
+    window._deductCredits = async function (amount, description) {
+      try {
+        const { data: { session: s } } = await supabase.auth.getSession();
+        if (!s) return { ok: false, error: 'not_authenticated' };
+        const r = await fetch('/.netlify/functions/credits', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + s.access_token },
+          body: JSON.stringify({ action: 'deduct', amount, description }),
+        });
+        const data = await r.json();
+        if (!r.ok) return { ok: false, error: data.error, status: r.status };
+        /* Update displayed balance */
+        var balEl = document.getElementById('tbt-credit-balance');
+        if (balEl) balEl.textContent = data.balance;
+        return { ok: true, balance: data.balance };
+      } catch (e) { return { ok: false, error: e.message }; }
+    };
+
+    /* Show insufficient credits modal */
+    window._showNoCredits = function (balance) {
+      var m = document.getElementById('tbt-nocredits-modal');
+      var b = document.getElementById('tbt-nocredits-bal');
+      if (b) b.textContent = balance !== undefined ? balance : '0';
+      if (m) { m.style.display = 'flex'; }
+    };
+
+    /* Load and display current balance */
+    window._loadCreditBalance = async function () {
+      try {
+        const { data: { session: s } } = await supabase.auth.getSession();
+        if (!s) return;
+        const r = await fetch('/.netlify/functions/credits?action=balance', {
+          headers: { 'Authorization': 'Bearer ' + s.access_token },
+        });
+        if (r.ok) {
+          const data = await r.json();
+          var balEl = document.getElementById('tbt-credit-balance');
+          var wrap  = document.getElementById('tbt-credit-wrap');
+          if (balEl) balEl.textContent = data.balance;
+          if (wrap)  wrap.style.display = 'flex';
+        }
+      } catch {}
+    };
+
+    /* Load balance on init */
+    window._loadCreditBalance();
+
+    /* Open buy credits modal */
+    window._openBuyCredits = function () {
+      var m = document.getElementById('tbt-buy-credits-modal');
+      var msg = document.getElementById('tbt-buy-credits-msg');
+      if (msg) { msg.style.display = 'none'; msg.textContent = ''; }
+      if (m) m.style.display = 'flex';
+    };
+
+    /* Launch Stripe Checkout for chosen package */
+    window._buyCredits = async function (pkg) {
+      var msg = document.getElementById('tbt-buy-credits-msg');
+      if (msg) { msg.textContent = 'Redirecting to payment…'; msg.style.display = 'block'; }
+      try {
+        const { data: { session: s } } = await supabase.auth.getSession();
+        if (!s) { if (msg) msg.textContent = 'Please sign in first.'; return; }
+        const r = await fetch('/.netlify/functions/stripe-credits?action=create&package=' + pkg, {
+          headers: { 'Authorization': 'Bearer ' + s.access_token },
+        });
+        const data = await r.json();
+        if (data.url) {
+          window.location.href = data.url;
+        } else {
+          if (msg) { msg.textContent = 'Payment setup error. Try again.'; }
+        }
+      } catch (e) {
+        if (msg) { msg.textContent = 'Error: ' + e.message; }
+      }
+    };
+
+    /* Handle ?credits_session= redirect back from Stripe */
+    (async function () {
+      var params = new URLSearchParams(window.location.search);
+      var csId = params.get('credits_session');
+      if (!csId) return;
+      /* Remove param from URL without reload */
+      var cleanUrl = window.location.pathname;
+      window.history.replaceState({}, '', cleanUrl);
+      try {
+        const { data: { session: s } } = await supabase.auth.getSession();
+        if (!s) return;
+        const r = await fetch('/.netlify/functions/stripe-credits?action=verify&session_id=' + csId, {
+          headers: { 'Authorization': 'Bearer ' + s.access_token },
+        });
+        const data = await r.json();
+        if (data.credits_added) {
+          var balEl = document.getElementById('tbt-credit-balance');
+          if (balEl) balEl.textContent = data.balance;
+          /* Show brief success message */
+          var wrap = document.getElementById('tbt-credit-wrap');
+          if (wrap) {
+            var toast = document.createElement('div');
+            toast.textContent = '+' + data.credits_added + ' CREDITS ADDED';
+            toast.style.cssText = 'position:fixed;top:54px;right:16px;background:var(--accent);color:#000;font-family:var(--font);font-size:9px;font-weight:700;letter-spacing:.15em;padding:8px 16px;z-index:20000;';
+            document.body.appendChild(toast);
+            setTimeout(function () { toast.remove(); }, 4000);
+          }
+        }
+      } catch (e) { /* silent — credits still added via webhook */ }
+    })();
+
+    /* ── CREDITS ADMIN ─────────────────────────────────────────────────────── */
+    if (window._isOwner) {
+      var cadBtn = document.getElementById('credits-admin-btn');
+      var cadSep = document.getElementById('credits-admin-sep');
+      if (cadBtn) cadBtn.style.display = '';
+      if (cadSep) cadSep.style.display = '';
+
+      var _caUsers = [];
+      var _caSelected = null;
+
+      window._caOpenAdmin = async function () {
+        var modal = document.getElementById('tbt-credits-admin-modal');
+        if (!modal) return;
+        modal.style.display = 'flex';
+        /* Load user list */
+        var listEl = document.getElementById('ca-user-list');
+        if (listEl) listEl.textContent = 'Loading...';
+        try {
+          const { data: { session: s } } = await supabase.auth.getSession();
+          const r = await fetch('/.netlify/functions/credits?action=users', {
+            headers: { 'Authorization': 'Bearer ' + s.access_token },
+          });
+          if (r.ok) {
+            const data = await r.json();
+            _caUsers = data.users || [];
+            window._caRenderUsers(_caUsers);
+          }
+        } catch (e) { if (listEl) listEl.textContent = 'Error loading users.'; }
+      };
+
+      window._caRenderUsers = function (users) {
+        var listEl = document.getElementById('ca-user-list');
+        if (!listEl) return;
+        if (!users.length) { listEl.textContent = 'No users found.'; return; }
+        listEl.innerHTML = '';
+        users.forEach(function (u) {
+          var row = document.createElement('div');
+          row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border-bottom:1px solid #1a1a1a;cursor:pointer;';
+          row.innerHTML =
+            '<span style="flex:1;color:#ccc;font-size:9px;letter-spacing:.05em;">' + u.email + '</span>' +
+            '<span style="color:var(--accent);font-weight:700;font-size:10px;min-width:50px;text-align:right;">' + u.balance + '</span>';
+          row.addEventListener('click', function () {
+            _caSelected = u;
+            document.querySelectorAll('#ca-user-list div').forEach(function (r2) { r2.style.background = ''; });
+            row.style.background = '#1a1a1a';
+            var selEl = document.getElementById('ca-selected');
+            if (selEl) selEl.textContent = 'SELECTED: ' + u.email + ' · CURRENT BALANCE: ' + u.balance;
+          });
+          listEl.appendChild(row);
+        });
+      };
+
+      window._caFilterUsers = function (q) {
+        var filtered = q ? _caUsers.filter(function (u) { return u.email.toLowerCase().indexOf(q.toLowerCase()) !== -1; }) : _caUsers;
+        window._caRenderUsers(filtered);
+        _caSelected = null;
+        var selEl = document.getElementById('ca-selected');
+        if (selEl) selEl.textContent = '';
+      };
+
+      window._caAllocate = async function () {
+        if (!_caSelected) { alert('Select a user first.'); return; }
+        var amtEl = document.getElementById('ca-amount-input');
+        var amt = parseInt(amtEl ? amtEl.value : '0', 10);
+        if (!amt || amt <= 0) { alert('Enter a valid credit amount.'); return; }
+        try {
+          const { data: { session: s } } = await supabase.auth.getSession();
+          const r = await fetch('/.netlify/functions/credits', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + s.access_token },
+            body: JSON.stringify({ action: 'add', target_user_id: _caSelected.id, amount: amt, description: 'Admin allocation' }),
+          });
+          const data = await r.json();
+          if (r.ok) {
+            _caSelected.balance = data.balance;
+            var selEl = document.getElementById('ca-selected');
+            if (selEl) selEl.textContent = 'ALLOCATED ' + amt + ' CREDITS. NEW BALANCE: ' + data.balance;
+            if (amtEl) amtEl.value = '';
+            /* Refresh list */
+            _caUsers = _caUsers.map(function (u) { return u.id === _caSelected.id ? Object.assign({}, u, { balance: data.balance }) : u; });
+            window._caRenderUsers(_caUsers);
+          } else {
+            alert('Error: ' + (data.error || 'unknown'));
+          }
+        } catch (e) { alert('Error: ' + e.message); }
+      };
+
+      /* Wire admin button in dropdown */
+      if (cadBtn) {
+        cadBtn.addEventListener('click', function (e) {
+          e.preventDefault();
+          var dd = document.getElementById('ttb-user-dropdown');
+          if (dd) dd.style.display = 'none';
+          window._caOpenAdmin();
+        });
+      }
+    }
+
+    // ── END CREDIT SYSTEM ────────────────────────────────────────────────────
+
     // ── Init terminal canvas (firmId now resolved) ──
-    if (window.terminalCanvasInit) terminalCanvasInit(supabase, session.user.id, window._canonicalFirmId, userName);
+    if (window.terminalCanvasInit) terminalCanvasInit(supabase, session.user.id, window._canonicalFirmId, userName, userEmail);
 
     // Log session start for every subscriber
     supabase.from('activity_log').insert({
@@ -2327,8 +2761,12 @@
 
   /* ── Ticker keyword filters ─────────────────────────────────── */
   var TICKER_KW = {
-    gold:   ['gold','silver','platinum','precious metal','xau','bullion','comex','spot gold','gold price','gold etf','mining','miner','gdx','lbma'],
-    whisky: ['whisky','whiskey','scotch','bourbon','distillery','single malt','spirits','diageo','pernod','macallan','glenfiddich','glenlivet','balvenie','ardbeg','dalmore','springbank','bruichladdich','laphroaig','talisker','cask']
+    gold:     ['gold','silver','platinum','precious metal','xau','bullion','comex','spot gold','gold price','gold etf','mining','miner','gdx','lbma'],
+    whisky:   ['whisky','whiskey','scotch','bourbon','distillery','single malt','spirits','diageo','pernod','macallan','glenfiddich','glenlivet','balvenie','ardbeg','dalmore','springbank','bruichladdich','laphroaig','talisker','cask'],
+    property: ['property','real estate','housing','house price','mortgage','reit','land','stamp duty','rental','buy to let','housebuilder','developer','planning'],
+    macro:    ['fed','bank of england','boe','ecb','interest rate','inflation','cpi','rpi','gdp','recession','yield curve','treasury','gilt','debt','fiscal','budget','chancellor','powell','bailey'],
+    markets:  ['s&p','nasdaq','ftse','dow jones','equities','stocks','shares','market rally','sell off','earnings','ipo','dividend','pe ratio','hedge fund'],
+    wine:     ['wine','champagne','bordeaux','burgundy','vintage','liv-ex','fine wine','claret','chateau','domaine','port','sotheby','christie']
   };
 
   var _tickerFilter  = localStorage.getItem('tkFilter')  || 'all';
@@ -2348,17 +2786,23 @@
     var ticker = document.getElementById('content-ticker');
     if (!track || !ticker) return;
 
-    /* Restore saved filter button state */
-    ticker.querySelectorAll('.tk-filter').forEach(function(btn) {
-      btn.classList.toggle('active', btn.dataset.filter === _tickerFilter);
+    /* Restore saved dropdown state */
+    ticker.querySelectorAll('.tk-dd-item').forEach(function(el) {
+      el.classList.toggle('active', el.dataset.filter === _tickerFilter);
     });
+
+    var _tickerGen = 0; /* increment to kill any running loop */
+    var _tickerPaused = false;
+    if (window._tickerPos === undefined) window._tickerPos = 0;
+    track.closest('.ticker-track-wrap').addEventListener('mouseenter', function() { _tickerPaused = true; });
+    track.closest('.ticker-track-wrap').addEventListener('mouseleave', function() { _tickerPaused = false; });
 
     function renderTicker(stories) {
       if (!stories || !stories.length) return;
       window._rssCache = stories;
 
       var filtered = stories.filter(function(s){ return _tickerMatchesCat(s, _tickerFilter); });
-      if (!filtered.length) filtered = stories; /* fallback to all if no matches */
+      if (!filtered.length) filtered = stories;
       var items = filtered.slice(0, 30);
 
       var _decodeEl = document.createElement('textarea');
@@ -2366,34 +2810,35 @@
       function safeText(str) { return decodeEntities(str).replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
       function buildItemHtml(s) {
         var hl = s.title || s.headline || '';
-        var src = s.source || '';
-        return '<span class="ticker-item is-new"><span class="ticker-dot-new">' + safeText(src) + '</span>  ' + safeText(hl) + '</span>';
+        return '<span class="ticker-item is-new">' + safeText(hl) + '</span>';
       }
 
       var setHtml = items.map(buildItemHtml).join('');
       track.innerHTML = setHtml;
 
-      /* Only show if on terminal tab and user hasn't hidden it */
-      var onTerminal = document.querySelector('.tbc-tab[data-tab="terminal"].active') !== null;
-      if (!_tickerHidden && onTerminal) {
+      var terminalTabActive = document.querySelector('.tbc-tab[data-tab="terminal"].active') !== null;
+      if (!_tickerHidden && terminalTabActive) {
         ticker.style.display = 'flex';
         document.body.classList.add('ticker-on');
         var restore = document.getElementById('ttb-ticker-restore');
         if (restore) restore.style.display = 'none';
       }
 
+      var gen = ++_tickerGen; /* this loop's generation — any older loop will bail */
       requestAnimationFrame(function() {
+        if (_tickerGen !== gen) return; /* superseded before we even started */
         var singleWidth = track.scrollWidth;
-        track.innerHTML = setHtml + setHtml;
-        var speed = 60, pos = 0, paused = false, last = null;
-        track.closest('.ticker-track-wrap').addEventListener('mouseenter', function() { paused = true; });
-        track.closest('.ticker-track-wrap').addEventListener('mouseleave', function() { paused = false; });
+        track.innerHTML = setHtml + setHtml; /* double for seamless wrap */
+        var speed = 60, last = null;
+        var pos = window._tickerPos % (singleWidth || 1);
         function step(ts) {
+          if (_tickerGen !== gen) return; /* killed by a newer renderTicker call */
           if (!last) last = ts;
-          var delta = ts - last; last = ts;
-          if (!paused) {
+          var delta = Math.min(ts - last, 100); last = ts; /* clamp delta — avoids jump after tab switch */
+          if (!_tickerPaused) {
             pos += speed * (delta / 1000);
             if (pos >= singleWidth) pos -= singleWidth;
+            window._tickerPos = pos;
             track.style.transform = 'translateX(-' + pos + 'px)';
           }
           requestAnimationFrame(step);
@@ -2402,16 +2847,27 @@
       });
     }
 
-    /* Filter button clicks */
-    ticker.querySelectorAll('.tk-filter').forEach(function(btn) {
-      btn.addEventListener('click', function() {
-        _tickerFilter = btn.dataset.filter;
-        localStorage.setItem('tkFilter', _tickerFilter);
-        ticker.querySelectorAll('.tk-filter').forEach(function(b){ b.classList.remove('active'); });
-        btn.classList.add('active');
-        if (window._rssCache) renderTicker(window._rssCache);
+    /* Ticker source dropdown */
+    var tkDdTrigger = document.getElementById('tk-dd-trigger');
+    var tkDd = document.getElementById('tk-dropdown');
+    if (tkDdTrigger && tkDd) {
+      tkDdTrigger.addEventListener('click', function(e) {
+        e.stopPropagation();
+        tkDd.style.display = tkDd.style.display === 'none' ? 'block' : 'none';
       });
-    });
+      document.addEventListener('click', function() { tkDd.style.display = 'none'; });
+      tkDd.querySelectorAll('.tk-dd-item').forEach(function(item) {
+        item.addEventListener('click', function(e) {
+          e.stopPropagation();
+          _tickerFilter = item.dataset.filter;
+          localStorage.setItem('tkFilter', _tickerFilter);
+          tkDd.querySelectorAll('.tk-dd-item').forEach(function(i){ i.classList.remove('active'); });
+          item.classList.add('active');
+          tkDd.style.display = 'none';
+          if (window._rssCache) renderTicker(window._rssCache);
+        });
+      });
+    }
 
     /* Hide button */
     var hideBtn = document.getElementById('tk-hide-btn');

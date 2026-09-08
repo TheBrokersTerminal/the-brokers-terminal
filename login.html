@@ -110,7 +110,7 @@
     form.addEventListener('submit', async function (e) {
       e.preventDefault();
       var email = document.querySelector('input[type="email"]').value.trim();
-      var password = document.querySelector('input[type="password"]').value;
+      var password = document.getElementById('password').value;
       var errorDiv = document.getElementById('login-error');
       var submitBtn = form.querySelector('button[type="submit"]');
       var originalText = submitBtn.textContent;
@@ -130,6 +130,9 @@
       submitBtn.disabled = true;
 
       try {
+        // Clear any stale auth state from a previous failed attempt
+        try { await supabase.auth.signOut(); } catch (_) {}
+
         // Attempt login
         const { data, error } = await supabase.auth.signInWithPassword({
           email: email,

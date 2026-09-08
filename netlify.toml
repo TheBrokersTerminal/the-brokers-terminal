@@ -1,5 +1,20 @@
 [functions]
   directory = "netlify/functions"
 
+[functions."search"]
+  timeout_seconds = 25
+
+[functions."explain"]
+  timeout_seconds = 25
+
 [functions."purge-old-messages"]
   schedule = "0 3 1 * *"
+
+[functions."cache-seed"]
+  schedule = "0 2 * * *"
+
+[functions."route-history"]
+  timeout_seconds = 26
+
+[functions."fetch-cftc-data"]
+  schedule = "0 21 * * 5"
