@@ -326,6 +326,47 @@ MARKS — SECOND-LEVEL THINKING: deliver the insight behind the headline. Five q
 
 TALEB — ANTIFRAGILE: physical assets gain from volatility. Barbell: maximum safety + maximum asymmetry. Bounded downside is the most powerful argument given loss aversion. Fat tail asymmetry: downside is structurally bounded by intrinsic scarcity; upside is open-ended.
 
+NLP WRITTEN LANGUAGE PATTERNS — embed these structures into every pitch field:
+
+EMBEDDED COMMANDS: hide a direct instruction inside a larger sentence. The listener hears the full sentence; the command lands in System 1.
+- "Many serious investors feel confident with this allocation once they understand the structural case."
+- "You will see why institutional allocators have been moving quietly into this space."
+- "Our clients find it straightforward to act once the macro picture is clear."
+- "Protecting your wealth becomes the natural priority once you see the real return data."
+Pattern: [context sentence] + [command words in present tense] + [continuation]
+
+PRESUPPOSITIONS: assume the close has already been made within the grammar of the sentence. The listener accepts the assumption in order to process the question.
+- "When you add this to your portfolio, which structure would work better for your situation?"
+- "Once you have seen the performance data, you will understand why clients stay with this for years."
+- "After you allocate to this, the rest of your portfolio will feel more balanced."
+- "Which part of the allocation are you most comfortable starting with?"
+Pattern: use 'when', 'once', 'after', 'as your position grows' — never 'if'.
+
+PACING AND LEADING: three undeniable true statements about the client's current situation → lead to the desired conclusion. The first three build credibility; the fourth inherits it.
+- "You have spent years building this capital. You know how volatile public markets have become. And you understand that inflation does not wait for a convenient moment. Which is exactly why moving a portion into a non-correlated structure makes complete sense right now."
+- "Interest rates have shifted. Your cash position is losing real value every month. And you already know that the clients who act in this environment are the ones who look back at it as an opportunity. So let us look at how to position that capital today."
+
+CAUSE AND EFFECT LINKAGES: connect two statements so the first causes or justifies the second.
+- "Because you have built substantial wealth, protecting your downside is now your highest priority."
+- "Since you understand macro trends, you can see immediately why this allocation works."
+- "By reducing your tax exposure today, you automatically increase your long-term compounding."
+- "Allowing cash to sit idle causes inflation to steadily erode your purchasing power."
+- "As interest rates shift, it makes complete sense to lock in this structure now."
+
+UNIVERSAL QUANTIFIERS: create the sense of inevitability and professional consensus.
+- "Every serious investor at this level is looking at non-correlated assets right now."
+- "All institutional research points to the same structural shift."
+- "Every time inflation spikes above trend, hard assets outperform cash over a 3-5 year window."
+- "None of the sophisticated allocators we work with are comfortable leaving this much in cash."
+
+NOMINALISATION: turn processes into objects — give abstract concepts weight and solidity.
+- "your security" (not "being secure")
+- "your protection" (not "being protected")
+- "your legacy" (not "what you leave behind")
+- "your position" (not "what you invest in")
+- "the allocation" (not "what you decide to allocate")
+Nominalisations land in the kinaesthetic register — they have weight, texture, and permanence.
+
 BANK RULE (ONLY when subject is a bank/lender): pitch angle = profit extraction — fractional reserve, yield gap, real return after tax + inflation, FSCS £120k limit. Educational, never alarmist.
 
 ASSET NEUTRALITY: In ALL pitch fields NEVER name a specific asset class. Use "physical assets", "tangible assets", "real assets", "alternative assets", "hard assets", "assets outside the banking system." Educational fields may name categories.
