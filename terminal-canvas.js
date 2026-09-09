@@ -10188,7 +10188,7 @@
           '<div id="wl-mktcta-'+id+'" style="background:#0d0d0d;border:1px solid #1e1e1e;padding:14px 12px;margin-bottom:10px;text-align:center;">' +
             '<div style="font-size:10px;letter-spacing:.16em;color:#fff;opacity:.45;margin-bottom:10px;">MARKET DATA NOT LOADED</div>' +
             '<button id="wl-loadmkt-'+id+'" style="background:#E97132;border:none;color:#000;font-family:var(--font);font-size:10px;letter-spacing:.14em;padding:10px 20px;cursor:pointer;font-weight:bold;">LOAD AUCTION & MARKET DATA</button>' +
-            '<div style="font-size:9px;letter-spacing:.1em;color:#fff;opacity:.3;margin-top:8px;">CACHED 24H AFTER FIRST LOAD</div>' +
+            '<div style="font-size:9px;letter-spacing:.1em;color:#fff;opacity:.3;margin-top:8px;">CACHED 7 DAYS AFTER FIRST LOAD</div>' +
           '</div>' +
           '<div><button id="wl-star-'+id+'" style="background:#111;border:1px solid #252525;color:'+(inWl?'#E97132':'#fff')+';font-family:var(--font);font-size:10px;letter-spacing:.1em;padding:8px 12px;cursor:pointer;">'+(inWl?'★ IN MONITOR':'☆ ADD TO MONITOR')+'</button></div>' +
         '</div>';
@@ -10196,6 +10196,13 @@
       var loadBtn = detailEl.querySelector('#wl-loadmkt-'+id);
       if (loadBtn) loadBtn.addEventListener('click', function(){
         var ctaEl = detailEl.querySelector('#wl-mktcta-'+id);
+        /* Check 7-day cache first — if hit, load free (no credit deduction) */
+        var _mktCacheKey = 'tbt_mkt_'+bgId+'_'+_cur;
+        if (cacheGet(_mktCacheKey, 7 * 24 * 60 * 60 * 1000)) {
+          loadMarket(bgId, item, det, rat);
+          return;
+        }
+        /* Not cached — deduct 40 credits then fetch */
         if (window._deductCredits) {
           window._deductCredits(40, 'WS market: '+bgId).then(function(result) {
             if (!result.ok && result.status === 402) {
@@ -10212,6 +10219,7 @@
       var starBtn = detailEl.querySelector('#wl-star-'+id);
       if (starBtn) starBtn.addEventListener('click', function(){
         toggleWl({whisky_id:item.whisky_id, bg_id:bgId, name:(det.bottler_serie||'')+' '+(det.name||''), currency:_cur}, starBtn);
+        if (isWl(item.whisky_id)) showMonitorView();
       });
     }
 
@@ -10456,7 +10464,7 @@
         })();
       }
 
-      var cached = cacheGet(mktKey, 86400000);
+      var cached = cacheGet(mktKey, 7 * 24 * 60 * 60 * 1000);
       if (cached) { renderMarket(cached); return; }
       fetch('/.netlify/functions/whisky-data?type=market&id='+encodeURIComponent(bgId)+'&currency='+_cur)
         .then(function(r){ return r.json(); })
