@@ -1208,7 +1208,7 @@
     var pitchBtn = d.title ?
       '<button class="sp-pitch-shortcut" data-title="' + escH(d.title) + '" data-ticker="' + escH(d.ticker || '') + '">▌ PITCH PLAYBOOK</button>' : '';
     var chartBtn = isListed ?
-      '<button class="sp-chart-shortcut" data-ticker="' + escH(d.ticker) + '" data-name="' + escH(d.title || d.ticker) + '">▦ VIEW CHART</button>' : '';
+      '<button class="sp-chart-shortcut" data-ticker="' + escH(toYfTicker(d.ticker, d.exchange)) + '" data-name="' + escH(d.title || d.ticker) + '">▦ VIEW CHART</button>' : '';
     body.innerHTML =
       '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">' +
         '<div class="sp-badge ' + (isListed ? 'listed' : 'private') + '" style="margin-bottom:0;">' +
@@ -1258,6 +1258,24 @@
     btn.addEventListener('click', function () {
       window._intelSearchSection(d.title, 'company', d.ticker || '', 'pitch');
     });
+  }
+
+  /* Map exchange name → Yahoo Finance ticker suffix for non-US listings */
+  function toYfTicker(ticker, exchange) {
+    if (!ticker) return '';
+    if (ticker.indexOf('.') !== -1) return ticker; /* already has suffix e.g. BARC.L */
+    var ex = (exchange || '').toUpperCase();
+    if (/LONDON|LSE/.test(ex))     return ticker + '.L';
+    if (/TORONTO|TSX|TSX/.test(ex)) return ticker + '.TO';
+    if (/AUSTRALIA|ASX/.test(ex))  return ticker + '.AX';
+    if (/FRANKFURT|XETRA/.test(ex)) return ticker + '.DE';
+    if (/PARIS|EURONEXT FR/.test(ex)) return ticker + '.PA';
+    if (/AMSTERDAM|EURONEXT AM/.test(ex)) return ticker + '.AS';
+    if (/MILAN|BORSA/.test(ex))    return ticker + '.MI';
+    if (/STOCKHOLM|NASDAQ OM/.test(ex)) return ticker + '.ST';
+    if (/HONG KONG/.test(ex))      return ticker + '.HK';
+    if (/TOKYO|TSE/.test(ex))      return ticker + '.T';
+    return ticker;
   }
 
   function wireChartBtn(d, body) {
