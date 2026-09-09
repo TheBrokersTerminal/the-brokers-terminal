@@ -1153,10 +1153,9 @@ exports.handler = async (event) => {
     }
 
     try {
-      /* Slim concept = 400 tokens; all concept sections = 1800; full searches = 2400 */
-      const maxTok = type === 'concept'
-        ? (!section ? 400 : 1800)
-        : 2400;
+      /* Slim concept overview = 400 tokens (intentionally small fast load).
+         All sections + full searches = 3000 — maximum safe headroom before Netlify 26s kill. */
+      const maxTok = type === 'concept' && !section ? 400 : 3000;
       /* Pitch-playbook uses SEARCH_SYSTEM (full sales methodology incl. Milton Model, Cardone,
          Festinger, Challenger, Shiller, Greene 6 drivers); factual sections use CONCEPT_SYSTEM */
       const sysPrompt = type === 'concept' && section === 'pitch-playbook'
