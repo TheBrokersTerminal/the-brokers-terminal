@@ -1128,10 +1128,14 @@
             return null;
           }
           if ((r.status === 503 || r.status === 504) && retries < 2) {
-            var body = win.querySelector('.intel-popwin-body');
-            if (body) body.innerHTML = '<div class="sp-intel-load">GENERATING BRIEF — PLEASE WAIT<span class="sp-intel-ld"></span></div>';
-            setTimeout(function(){ fetchDetail(query, type, ticker, win, retries + 1); }, 4000);
-            return null;
+            return r.json().then(function(d) {
+              /* parse_error with retryable:false means same broken JSON will repeat — show error now */
+              if (d && d.retryable === false) { _showError(win); return null; }
+              var bdy = win.querySelector('.intel-popwin-body');
+              if (bdy) bdy.innerHTML = '<div class="sp-intel-load">GENERATING BRIEF — PLEASE WAIT<span class="sp-intel-ld"></span></div>';
+              setTimeout(function(){ fetchDetail(query, type, ticker, win, retries + 1); }, 4000);
+              return null;
+            }).catch(function(){ _showError(win); return null; });
           }
           if (!r.ok) { _showError(win); return null; }
           return r.json();

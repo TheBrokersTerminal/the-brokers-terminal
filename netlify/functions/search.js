@@ -1139,6 +1139,16 @@ exports.handler = async (event) => {
       return out + opens.reverse().join('');
     }
 
+    /* Remove trailing commas before } or ] — common Claude output error */
+    function removeTrailingCommas(str) {
+      return str.replace(/,(\s*[}\]])/g, '$1');
+    }
+
+    /* Full repair: trailing commas + close truncation + unescaped quotes */
+    function fullRepair(raw) {
+      return repairJson(closeTruncated(removeTrailingCommas(raw)));
+    }
+
     function repairJson(raw) {
       let fixed = '';
       let inString = false;
@@ -1209,12 +1219,16 @@ exports.handler = async (event) => {
             /* Last resort: close truncated brackets then repair unescaped quotes */
             parsed = JSON.parse(repairJson(closeTruncated(raw)));
           } catch (_e3) {
-            console.warn('[search] JSON unparseable after repair for:', query, '— raw length:', raw.length, '— stop_reason:', data.stop_reason, '— output_tokens:', data.usage?.output_tokens, '— raw_start:', raw.slice(0, 200), '— raw_end:', raw.slice(-200));
-            return {
-              statusCode: 503,
-              headers: { ...CORS, 'Retry-After': '3' },
-              body: JSON.stringify({ error: 'parse_error', retryable: true }),
-            };
+            try {
+              parsed = JSON.parse(fullRepair(raw));
+            } catch (_e4) {
+              console.warn('[search] JSON unparseable after fullRepair for:', query, '— stop_reason:', data.stop_reason, '— tokens:', data.usage?.output_tokens, '— raw_end:', raw.slice(-300));
+              return {
+                statusCode: 503,
+                headers: { ...CORS, 'Retry-After': '3' },
+                body: JSON.stringify({ error: 'parse_error', retryable: false }),
+              };
+            }
           }
         }
       }
