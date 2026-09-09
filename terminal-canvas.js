@@ -14705,6 +14705,8 @@
 
 
 
+window._tbtRenderPriceChart = renderPriceChart;
+
 window.terminalPinSearch = function (query, type, ticker, label) {
     var cfg = {
       id: 'w-intel-' + Date.now(),
