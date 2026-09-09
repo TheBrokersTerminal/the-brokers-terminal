@@ -11,7 +11,7 @@ html, body { height: 100%; overflow: hidden; }
 
 .terminal-wrap {
   display: flex; flex-direction: column;
-  height: calc(100vh - 56px);
+  height: 100%;
   background: #080808; overflow: hidden;
 }
 
@@ -433,13 +433,39 @@ html, body { height: 100%; overflow: hidden; }
 .popwin-body .qp-hdr { padding: 8px 12px; }
 .popwin-body .qp-list { max-height: 180px; overflow-y: auto; }
 
+/* ── MOBILE BACK BUTTON (hidden on desktop) ── */
+.art-mobile-back {
+  display: none; align-items: center; gap: 8px;
+  padding: 9px 14px; background: #0a0a0a; border-bottom: 1px solid #1a1a1a;
+  font-family: var(--font); font-size: 9px; letter-spacing: .22em;
+  text-transform: uppercase; color: var(--accent,#E97132);
+  cursor: pointer; flex-shrink: 0;
+}
+.art-mobile-back:hover { color: #fff; }
+
 @media (max-width:860px) {
-  html, body { overflow: auto; }
-  .terminal-wrap { height: auto; overflow: visible; }
-  .panels { flex-direction: column; }
-  .feed-panel { width: 100%; max-width: 100%; min-width: 0; }
-  .article-panel { display: none; }
-  .feed-list { height: 65vh; }
+  .panels { flex-direction: column; position: relative; flex: 1; overflow: hidden; }
+  .feed-panel {
+    width: 100%; max-width: 100%; min-width: 0;
+    position: absolute; inset: 0;
+    transition: transform .22s ease;
+    z-index: 1;
+  }
+  .feed-list { flex: 1; height: auto; }
+  .article-panel {
+    position: absolute; inset: 0;
+    transform: translateX(100%);
+    transition: transform .22s ease;
+    z-index: 2; display: flex;
+  }
+  .art-mobile-back { display: flex; }
+  /* When article is open: slide feed out left, article in from right */
+  .panels.article-open .feed-panel { transform: translateX(-100%); }
+  .panels.article-open .article-panel { transform: translateX(0); }
+  /* Quotes panel hidden on mobile — too narrow */
+  .quotes-panel { display: none; }
+  /* Toolbar: hide story count and next-refresh on very small screens */
+  .tb-right span:last-child { display: none; }
 }
 </style>
 </head>
@@ -492,6 +518,7 @@ html, body { height: 100%; overflow: hidden; }
 
     <!-- RIGHT: ARTICLE + QUOTES -->
     <div class="article-panel" id="article-panel">
+      <div class="art-mobile-back" id="art-mobile-back" onclick="closeMobileArticle()">◀ BACK TO NEWS</div>
       <div class="art-tab-bar" id="art-tab-bar"></div>
       <div class="art-panel-body">
         <div class="art-scroll" id="art-scroll">
@@ -884,6 +911,8 @@ async function fetchIntelligence(story, elId, directEl) {
     });
     var d=res.ok?await res.json():null;
     if(!d||d.error) { _clearTimer(); el.querySelector('.intel-loading').textContent='Intelligence unavailable.'; return; }
+    /* Refresh balance display in parent dashboard */
+    try { if(window.parent&&window.parent._loadCreditBalance) window.parent._loadCreditBalance(); } catch(e){};
 
     var riskCls=d.risk==='RISK ON'?'on':d.risk==='RISK OFF'?'off':'neu';
     var riskLbl=d.risk||'NEUTRAL';
@@ -1257,11 +1286,23 @@ var _tabs=[], _activeTabId=null;
 function openStoryTab(story) {
   /* If tab already exists, just activate it */
   var existing=_tabs.find(function(t){return t.id===story.id;});
-  if(existing){ activateTab(story.id); return; }
+  if(existing){ activateTab(story.id); openMobileArticle(); return; }
   /* Add new tab */
   _tabs.push(story);
   renderTabBar();
   activateTab(story.id);
+  openMobileArticle();
+}
+
+function openMobileArticle() {
+  if (window.innerWidth > 860) return;
+  var panels = document.querySelector('.panels');
+  if (panels) panels.classList.add('article-open');
+}
+
+function closeMobileArticle() {
+  var panels = document.querySelector('.panels');
+  if (panels) panels.classList.remove('article-open');
 }
 
 function renderTabBar() {
