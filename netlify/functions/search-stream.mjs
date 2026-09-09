@@ -459,7 +459,7 @@ export default async (req) => {
         const lensAppend = !lensContext ? '' : isScenario
           ? `\n\nACTIVE BROKER LENS — SCENARIO CRITICAL OVERRIDE: The broker operates in a specific asset class (see context below). The ASSET NEUTRALITY rule is SUSPENDED for solutionAreas when a lens is active. In your solutionAreas array you MUST include this specific asset class as a dedicated entry — name it explicitly, describe which specific vehicle types or structures within it best fit this client's situation, and set suitability based on the client's actual needs. If the asset class is directly relevant to the client's goals (inflation, IHT, CGT, income, growth), rate it HIGH and explain exactly why. Be specific: name the sub-types (e.g. for investment trusts: infrastructure trusts, private equity trusts, dividend heroes, specialist trusts). The lens asset class context:\n${lensContext}`
           : `\n\nACTIVE BROKER LENS — tailor ALL pitch content specifically to this asset class context:\n${lensContext}`;
-        const maxTok  = type === 'concept' && !isScenario ? 400 : 3000;
+        const maxTok  = type === 'concept' && !isScenario ? 400 : isScenario ? 1800 : 3000;
         const sysPrompt = type === 'concept' ? CONCEPT_SYSTEM : SEARCH_SYSTEM;
         let userMsg;
         if (isScenario)          userMsg = SCENARIO_PROMPT(query) + lensAppend;
