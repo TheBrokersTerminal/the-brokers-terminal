@@ -1056,9 +1056,6 @@
           var reader  = r.body.getReader();
           var decoder = new TextDecoder();
           var lineBuf = '';
-          var streamEl = win.querySelector('.intel-popwin-body');
-          var streamText = '';
-          var streamStarted = false;
 
           function readChunk() {
             return reader.read().then(function(chunk) {
@@ -1074,27 +1071,17 @@
                 try { raw = JSON.parse(line.slice(6)); } catch { continue; }
 
                 if (raw.type === 'cache') {
-                  /* Server cache hit — render immediately, no streaming */
                   if (win._loadingTimer) { clearInterval(win._loadingTimer); win._loadingTimer = null; }
                   _onDetail(raw.data);
                   return;
                 }
 
                 if (raw.type === 'delta') {
-                  /* Show live streaming text */
-                  if (!streamStarted) {
-                    streamStarted = true;
-                    if (win._loadingTimer) { clearInterval(win._loadingTimer); win._loadingTimer = null; }
-                    if (streamEl) streamEl.innerHTML = '<div class="sp-stream-live"></div>';
-                  }
-                  streamText += raw.text;
-                  var liveEl = streamEl && streamEl.querySelector('.sp-stream-live');
-                  if (liveEl) liveEl.textContent = streamText;
+                  /* Spinner stays — render fires when done */
                   return readChunk();
                 }
 
                 if (raw.type === 'done') {
-                  /* Stream complete — transition to structured render */
                   _onDetail(raw.data);
                   return;
                 }
