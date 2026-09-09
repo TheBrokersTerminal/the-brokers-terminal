@@ -214,6 +214,27 @@
 .sp-intel-load { padding: 20px; text-align: center; font-size: 9px; letter-spacing: .2em; color: #E97132; text-transform: uppercase; display: flex; align-items: center; justify-content: center; gap: 6px; }
 .sp-intel-ld::after { content: ''; display: inline-block; width: 12px; animation: sp-ld-dots 1.2s steps(4, end) infinite; }
 @keyframes sp-ld-dots { 0%{content:''} 25%{content:'.'} 50%{content:'..'} 75%{content:'...'} 100%{content:''} }
+
+/* SSE streaming live text */
+.sp-stream-live {
+  padding: 14px 16px;
+  font-family: Consolas, 'Courier New', monospace;
+  font-size: 8.5px;
+  line-height: 1.6;
+  color: #4a9;
+  white-space: pre-wrap;
+  word-break: break-all;
+  max-height: 340px;
+  overflow: hidden;
+  opacity: .85;
+}
+.sp-stream-live::after {
+  content: '▋';
+  animation: sp-cursor-blink .7s step-end infinite;
+  color: #E97132;
+  margin-left: 1px;
+}
+@keyframes sp-cursor-blink { 0%,100%{opacity:1} 50%{opacity:0} }
 /* remove old single SE handle */
 .sp-resize { display: none; }
 

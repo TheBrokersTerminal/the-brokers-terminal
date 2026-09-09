@@ -956,6 +956,10 @@ exports.handler = async (event) => {
 
   /* ── GET: fast suggestions ── */
   if (event.httpMethod === 'GET') {
+    /* Pre-warm ping — keeps the function instance hot */
+    if ((event.queryStringParameters || {}).ping === '1') {
+      return { statusCode: 200, headers: CORS, body: '{}' };
+    }
     const q = (event.queryStringParameters || {}).q || '';
     if (!q || q.length < 2) {
       return { statusCode: 200, headers: CORS, body: JSON.stringify([]) };
