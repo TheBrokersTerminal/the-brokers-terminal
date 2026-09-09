@@ -1154,6 +1154,93 @@
       renderSection(_cache[cacheKey], section, win);
       return;
     }
+
+    /* ── Pitch-playbook: stream via SSE so content appears line by line ── */
+    if (section === 'pitch-playbook' && window.ReadableStream && window.TextDecoder) {
+      var panel = win.querySelector('.intel-sec-panel[data-sec="pitch-playbook"]') || win.querySelector('.intel-popwin-body');
+      var streamBuf = '';
+      var streamDiv = null;
+
+      var fHeaders = { 'Content-Type': 'application/json' };
+      if (window._authToken) fHeaders['Authorization'] = 'Bearer ' + window._authToken;
+
+      fetch('/.netlify/functions/search-stream', {
+        method: 'POST', headers: fHeaders,
+        body: JSON.stringify({ query: query, type: type, ticker: ticker, section: section, lensKey: lensKey, lensContext: lensContext }),
+      }).then(function(r) {
+        if (!r.ok || !r.body) { _fetchSectionBuffered(); return; }
+        var reader  = r.body.getReader();
+        var decoder = new TextDecoder();
+        var lineBuf = '';
+        var gotDone = false;
+
+        function readChunk() {
+          return reader.read().then(function(chunk) {
+            if (chunk.done) { if (!gotDone) _fetchSectionBuffered(); return; }
+            lineBuf += decoder.decode(chunk.value, { stream: true });
+            var lines = lineBuf.split('\n');
+            lineBuf = lines.pop();
+            for (var i = 0; i < lines.length; i++) {
+              var line = lines[i];
+              if (!line.startsWith('data: ')) continue;
+              var raw; try { raw = JSON.parse(line.slice(6)); } catch { continue; }
+              if (raw.type === 'cache') {
+                gotDone = true;
+                _cache[cacheKey] = raw.data;
+                renderSection(raw.data, section, win);
+                window._loadCreditBalance && window._loadCreditBalance();
+                return;
+              }
+              if (raw.type === 'delta') {
+                streamBuf += raw.text;
+                /* Extract readable text: strip JSON structural chars, show words */
+                var readable = raw.text.replace(/^[{\["\s,]+|[}\]",:\s]+$/g, '').trim();
+                if (readable && panel) {
+                  if (!streamDiv) {
+                    streamDiv = document.createElement('div');
+                    streamDiv.className = 'sp-stream-preview';
+                    streamDiv.style.cssText = 'font-family:monospace;font-size:10px;color:#E97132;padding:8px;white-space:pre-wrap;word-break:break-word;line-height:1.6;';
+                    panel.innerHTML = '';
+                    panel.appendChild(streamDiv);
+                  }
+                  streamDiv.textContent += (streamDiv.textContent ? ' ' : '') + readable;
+                }
+              }
+              if (raw.type === 'done') {
+                gotDone = true;
+                _cache[cacheKey] = raw.data;
+                renderSection(raw.data, section, win);
+                window._loadCreditBalance && window._loadCreditBalance();
+                return;
+              }
+              if (raw.type === 'error') { _fetchSectionBuffered(); return; }
+            }
+            return readChunk();
+          });
+        }
+        readChunk().catch(function() { _fetchSectionBuffered(); });
+      }).catch(function() { _fetchSectionBuffered(); });
+
+      function _fetchSectionBuffered() {
+        /* Fallback to buffered search.js if stream fails */
+        var fh2 = { 'Content-Type': 'application/json' };
+        if (window._authToken) fh2['Authorization'] = 'Bearer ' + window._authToken;
+        fetch('/.netlify/functions/search', {
+          method: 'POST', headers: fh2,
+          body: JSON.stringify({ query: query, type: type, ticker: ticker, section: section, lensKey: lensKey, lensContext: lensContext }),
+        }).then(function(r2) {
+          if (r2.status === 402) { win.remove(); r2.json().then(function(d){ window._showNoCredits && window._showNoCredits(d.balance||0); }); return; }
+          return r2.ok ? r2.json() : null;
+        }).then(function(d) {
+          if (!d || d.error) { if (panel) panel.innerHTML = '<div class="sp-loading">INTELLIGENCE UNAVAILABLE</div>'; return; }
+          _cache[cacheKey] = d;
+          renderSection(d, section, win);
+          window._loadCreditBalance && window._loadCreditBalance();
+        }).catch(function() { if (panel) panel.innerHTML = '<div class="sp-loading">INTELLIGENCE UNAVAILABLE</div>'; });
+      }
+      return;
+    }
+
     var retries = _retryCount || 0;
     var fetchHeadersSec = { 'Content-Type': 'application/json' };
     if (window._authToken) fetchHeadersSec['Authorization'] = 'Bearer ' + window._authToken;
