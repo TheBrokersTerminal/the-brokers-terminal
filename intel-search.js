@@ -1260,12 +1260,10 @@
   /* ── RENDER POP-OUT CONTENT ── */
   /* ── SCENARIO / IFA ADVISORY RESULT ── */
   function renderScenario(d, body) {
-    var A = '#E97132', GRN = '#3DAA6A', RED = '#D14040', BLU = '#4A90D9';
+    var A = '#E97132', GRN = '#3DAA6A', RED = '#D14040';
     var suitCol = function(s) { return s === 'HIGH' ? GRN : s === 'MEDIUM' ? A : 'rgba(255,255,255,0.45)'; };
 
-    body.innerHTML =
-      '<div class="sp-badge private" style="margin-bottom:8px;background:rgba(233,113,50,0.12);border-color:' + A + ';color:' + A + ';">▌ IFA ADVISORY BRIEF</div>' +
-
+    var briefHtml =
       '<div class="sp-section">' +
         '<div class="sp-sec-lbl">SITUATION SUMMARY</div>' +
         '<div class="sp-text">' + escH(d.situation || '') + '</div>' +
@@ -1310,11 +1308,39 @@
         '<div class="sp-section">' +
           '<div class="sp-sec-lbl">NEXT STEPS</div>' +
           '<ul class="sp-facts">' + d.nextSteps.map(function(n,i){ return '<li><strong style="color:' + A + ';">' + (i+1) + '.</strong> ' + escH(n) + '</li>'; }).join('') + '</ul>' +
+        '</div>' : '');
+
+    var pitchHtml = d.pitch ? buildPitchPlaybook(d.pitch, null) : '<div class="sp-section"><div class="sp-text" style="color:rgba(255,255,255,0.45);">No pitch playbook generated.</div></div>';
+
+    var hasPitch = !!d.pitch;
+
+    body.innerHTML =
+      '<div class="sp-badge private" style="margin-bottom:8px;background:rgba(233,113,50,0.12);border-color:' + A + ';color:' + A + ';">▌ IFA ADVISORY BRIEF</div>' +
+
+      (hasPitch ?
+        '<div class="concept-sec-bar" style="margin-bottom:8px;">' +
+          '<button class="concept-sec-btn active" data-scen-tab="brief">ADVISORY BRIEF</button>' +
+          '<button class="concept-sec-btn" data-scen-tab="pitch">PITCH PLAYBOOK</button>' +
         '</div>' : '') +
+
+      '<div class="scen-tab-panel" data-scen-panel="brief">' + briefHtml + '</div>' +
+      (hasPitch ? '<div class="scen-tab-panel" data-scen-panel="pitch" hidden>' + pitchHtml + '</div>' : '') +
 
       '<div class="sp-section" style="border-top:1px solid #111;padding-top:10px;">' +
         '<button class="sp-note-btn">✎ SAVE TO NOTES</button>' +
       '</div>';
+
+    /* Tab switching */
+    if (hasPitch) {
+      body.querySelectorAll('.concept-sec-btn[data-scen-tab]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var tab = btn.getAttribute('data-scen-tab');
+          body.querySelectorAll('.concept-sec-btn[data-scen-tab]').forEach(function(b){ b.classList.remove('active'); });
+          btn.classList.add('active');
+          body.querySelectorAll('.scen-tab-panel').forEach(function(p){ p.hidden = (p.getAttribute('data-scen-panel') !== tab); });
+        });
+      });
+    }
   }
 
   function renderPopout(d, win) {
@@ -1418,7 +1444,15 @@
       '</div>';
     }
 
-    /* 4 — SPIN questions */
+    /* 4 — Pain point */
+    if (pitch.painPoint) {
+      html += '<div class="sp-section">' +
+        '<div class="sp-sec-lbl">THEIR PAIN POINT</div>' +
+        '<div class="sp-pitch" style="color:#E97132;">' + escH(pitch.painPoint) + '</div>' +
+      '</div>';
+    }
+
+    /* 5 — SPIN questions */
     if (pitch.spinQuestions && pitch.spinQuestions.length) {
       html += '<div class="sp-section">' +
         '<div class="sp-sec-lbl">QUESTIONS TO ASK FIRST — SPIN INTELLIGENCE</div>' +
@@ -1431,7 +1465,7 @@
       '</div>';
     }
 
-    /* 5 — Handle objections */
+    /* 6 — Handle objections */
     if (pitch.objections && pitch.objections.length) {
       html += '<div class="sp-section">' +
         '<div class="sp-sec-lbl">HANDLE OBJECTIONS — LOOP AND BUILD CERTAINTY</div>' +
@@ -1444,7 +1478,7 @@
       '</div>';
     }
 
-    /* 6 — Urgency + social proof */
+    /* 7 — Urgency + social proof */
     var urgencyRow = '';
     if (pitch.urgencyLine) urgencyRow += '<div class="sp-intel-row"><span class="sp-intel-lbl">TIMING</span><span class="sp-intel-val">' + escH(pitch.urgencyLine) + '</span></div>';
     if (pitch.socialProof) urgencyRow += '<div class="sp-intel-row"><span class="sp-intel-lbl">SOCIAL PROOF</span><span class="sp-intel-val">' + escH(pitch.socialProof) + '</span></div>';
