@@ -1494,104 +1494,76 @@
   }
 
   function renderConcept(d, body, win) {
-    var timelineHTML = '';
-    if (d.timeline && d.timeline.length) {
-      timelineHTML =
-        '<div class="sp-section">' +
-          '<div class="sp-sec-lbl">TIMELINE</div>' +
-          '<div class="sp-timeline">' +
-            d.timeline.map(function (t) {
-              return '<div class="sp-tl-row">' +
-                '<div class="sp-tl-date">' + escH(t.date || '') + '</div>' +
-                '<div class="sp-tl-evt">' + escH(t.event || '') + '</div>' +
-              '</div>';
-            }).join('') +
-          '</div>' +
-        '</div>';
-    }
-
-    var causesHTML = '';
-    if (d.causes && d.causes.length) {
-      causesHTML =
-        '<div class="sp-section">' +
-          '<div class="sp-sec-lbl">CAUSES</div>' +
-          '<ul class="sp-facts">' +
-            d.causes.map(function (c) { return '<li>' + escH(c) + '</li>'; }).join('') +
-          '</ul>' +
-        '</div>';
-    }
-
-    var overviewContent =
-      '<div class="sp-badge event">● ' + escH(d.period || 'CONCEPT') + '</div>' +
-      '<div class="sp-tagline">' + escH(d.tagline || '') + '</div>' +
-      '<div class="sp-section"><div class="sp-sec-lbl">WHAT IS IT?</div>' +
-        '<div class="sp-text">' + escH(d.whatHappened || '') + '</div></div>' +
-      causesHTML +
-      timelineHTML +
-      '<div class="sp-section"><div class="sp-sec-lbl">IMPACT ON ASSET CLASSES</div>' +
-        '<div class="sp-text">' + escH(d.impactOnAssets || '') + '</div></div>' +
-      '<div class="sp-section"><div class="sp-sec-lbl">THE LESSON FOR CLIENTS</div>' +
-        '<div class="sp-text">' + escH(d.lessonForClients || '') + '</div></div>' +
-      '<div class="sp-section" style="border-top:1px solid #111;padding-top:10px;">' +
-        '<button class="sp-note-btn">✎ ADD NOTE</button></div>';
-
-    var pitchContent = d.pitch
-      ? buildPitchPlaybook(d.pitch, d.brokerNote) +
-        '<div class="sp-section" style="border-top:1px solid #111;padding-top:10px;"><button class="sp-note-btn">✎ ADD NOTE</button></div>'
-      : '<div class="sp-loading" style="color:#666;font-size:10px;">Pitch not available</div>';
+    /* Support both slim (overview field) and legacy full (whatHappened field) formats */
+    var overviewText = d.overview || d.whatHappened || '';
+    var conceptQuery = d.title || '';
 
     body.innerHTML =
-      '<div class="dist-tabs">' +
-        '<button class="dist-tab active" data-tab="overview">OVERVIEW</button>' +
-        '<button class="dist-tab" data-tab="pitch">PITCH PLAYBOOK</button>' +
+      '<div class="sp-badge event">● ' + escH(d.period || 'CONCEPT') + '</div>' +
+      '<div class="sp-tagline">' + escH(d.tagline || '') + '</div>' +
+      '<div class="sp-section"><div class="sp-text">' + escH(overviewText) + '</div></div>' +
+      '<div class="concept-sec-bar">' +
+        '<button class="concept-sec-btn" data-sec="the-history">THE HISTORY</button>' +
+        '<button class="concept-sec-btn" data-sec="the-outcome">THE OUTCOME</button>' +
+        '<button class="concept-sec-btn" data-sec="economic-impact">ECONOMIC IMPACT</button>' +
+        '<button class="concept-sec-btn" data-sec="hardship-loss">HARDSHIP & LOSS</button>' +
+        '<button class="concept-sec-btn" data-sec="pitch-playbook">PITCH PLAYBOOK</button>' +
       '</div>' +
-      '<div class="dist-panel" data-panel="overview">' + overviewContent + '</div>' +
-      '<div class="dist-panel" data-panel="pitch" style="display:none;">' + pitchContent + '</div>';
+      '<div class="concept-sec-panel"></div>' +
+      '<div class="sp-section" style="border-top:1px solid #111;padding-top:10px;">' +
+        '<button class="sp-note-btn">✎ ADD NOTE</button>' +
+      '</div>';
 
-    body.querySelectorAll('.dist-tab').forEach(function (tab) {
-      tab.addEventListener('click', function () {
-        body.querySelectorAll('.dist-tab').forEach(function (t) { t.classList.remove('active'); });
-        body.querySelectorAll('.dist-panel').forEach(function (p) { p.style.display = 'none'; });
-        tab.classList.add('active');
-        var panel = body.querySelector('.dist-panel[data-panel="' + tab.dataset.tab + '"]');
-        if (panel) panel.style.display = '';
+    var secPanel = body.querySelector('.concept-sec-panel');
+    body.querySelectorAll('.concept-sec-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        body.querySelectorAll('.concept-sec-btn').forEach(function (b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        fetchConceptSection(conceptQuery, btn.dataset.sec, secPanel);
       });
     });
+
+    /* Auto-load THE HISTORY as the default section */
+    var firstBtn = body.querySelector('.concept-sec-btn[data-sec="the-history"]');
+    if (firstBtn) firstBtn.click();
 
     cascadeType(body);
   }
 
-  /* ── Lazy-load concept pitch on demand ── */
-  function fetchConceptPitch(conceptTitle, win, pitchPanel, _retryCount) {
-    var retries = _retryCount || 0;
+  /* ── Fetch a concept section on demand ── */
+  function fetchConceptSection(conceptTitle, sectionId, panel) {
     var lensKey = (window._assetLens && window._assetLens.key) || 'universal';
     var lensContext = (window._assetLens && window._assetLens.promptContext) || '';
-    var cacheKey = 'concept:' + lensKey + ':pitch:' + conceptTitle.trim().toLowerCase().slice(0, 80);
+    var cacheKey = 'concept-section:' + sectionId + ':' + conceptTitle.trim().toLowerCase().slice(0, 80);
     if (_cache[cacheKey]) {
-      renderConceptPitchPanel(_cache[cacheKey], pitchPanel);
+      renderConceptSection(_cache[cacheKey], sectionId, panel);
       return;
     }
-    var fetchHeaders = { 'Content-Type': 'application/json' };
-    if (window._authToken) fetchHeaders['Authorization'] = 'Bearer ' + window._authToken;
-    fetch('/.netlify/functions/search', {
-      method: 'POST',
-      headers: fetchHeaders,
-      body: JSON.stringify({ query: conceptTitle, type: 'concept', section: 'pitch', lensKey: lensKey, lensContext: lensContext }),
-    })
+    panel.innerHTML = '<div class="sp-intel-load">LOADING<span class="sp-intel-ld"></span></div>';
+    var headers = { 'Content-Type': 'application/json' };
+    if (window._authToken) headers['Authorization'] = 'Bearer ' + window._authToken;
+
+    var retries = 0;
+    function attempt() {
+      fetch('/.netlify/functions/search', {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify({ query: conceptTitle, type: 'concept', section: sectionId, lensKey: lensKey, lensContext: lensContext }),
+      })
       .then(function (r) {
         if (r.status === 402) {
           r.json().then(function (d) { window._showNoCredits && window._showNoCredits(d.balance || 0); });
-          pitchPanel.innerHTML = '<div class="sp-loading" style="color:#E97132;letter-spacing:.1em;">INSUFFICIENT CREDITS</div>';
+          panel.innerHTML = '<div class="sp-loading" style="color:#E97132;letter-spacing:.1em;">INSUFFICIENT CREDITS</div>';
           return null;
         }
-        /* 503 retryable (our timeout) or 504 (Netlify gateway) — auto-retry up to 2 times */
         if ((r.status === 503 || r.status === 504) && retries < 2) {
-          pitchPanel.innerHTML = '<div class="sp-loading">GENERATING BRIEF — PLEASE WAIT<span class="sp-intel-ld"></span></div>';
-          setTimeout(function () { fetchConceptPitch(conceptTitle, win, pitchPanel, retries + 1); }, 4000);
+          retries++;
+          panel.innerHTML = '<div class="sp-intel-load">GENERATING — PLEASE WAIT<span class="sp-intel-ld"></span></div>';
+          setTimeout(attempt, 4000);
           return null;
         }
         if (!r.ok) {
-          pitchPanel.innerHTML = '<div class="sp-loading" style="color:#e05050;">PITCH ERROR · HTTP ' + r.status + '</div>';
+          panel.innerHTML = '<div class="sp-loading" style="color:#e05050;">SECTION UNAVAILABLE</div>';
           return null;
         }
         return r.json();
@@ -1599,20 +1571,85 @@
       .then(function (d) {
         if (!d) return;
         _cache[cacheKey] = d;
-        renderConceptPitchPanel(d, pitchPanel);
+        window._loadCreditBalance && window._loadCreditBalance();
+        renderConceptSection(d, sectionId, panel);
       })
       .catch(function () {
-        pitchPanel.innerHTML = '<div class="sp-loading">PITCH UNAVAILABLE</div>';
+        panel.innerHTML = '<div class="sp-loading">SECTION UNAVAILABLE</div>';
       });
+    }
+    attempt();
   }
 
-  function renderConceptPitchPanel(d, panel) {
-    panel.innerHTML =
-      buildPitchPlaybook(d.pitch, d.brokerNote) +
-      '<div class="sp-section" style="border-top:1px solid #111;padding-top:10px;">' +
-        '<button class="sp-note-btn">✎ ADD NOTE</button>' +
-      '</div>';
+  function renderConceptSection(d, sectionId, panel) {
+    var html = '';
+    if (sectionId === 'the-history') {
+      html = _renderHistorySection(d);
+    } else if (sectionId === 'the-outcome') {
+      html = _renderOutcomeSection(d);
+    } else if (sectionId === 'economic-impact') {
+      html = _renderEconomicSection(d);
+    } else if (sectionId === 'hardship-loss') {
+      html = _renderHardshipSection(d);
+    } else if (sectionId === 'pitch-playbook') {
+      html = buildPitchPlaybook(d, d.brokerNote);
+    }
+    panel.innerHTML = html || '<div class="sp-text">No data available.</div>';
     cascadeType(panel);
+  }
+
+  function _renderHistorySection(d) {
+    var causesHTML = d.causes && d.causes.length
+      ? '<div class="sp-section"><div class="sp-sec-lbl">CAUSES</div><ul class="sp-facts">' +
+          d.causes.map(function (c) { return '<li>' + escH(c) + '</li>'; }).join('') +
+        '</ul></div>' : '';
+    var tlHTML = d.timeline && d.timeline.length
+      ? '<div class="sp-section"><div class="sp-sec-lbl">TIMELINE</div><div class="sp-timeline">' +
+          d.timeline.map(function (t) {
+            return '<div class="sp-tl-row"><div class="sp-tl-date">' + escH(t.date || '') + '</div>' +
+              '<div class="sp-tl-evt">' + escH(t.event || '') + '</div></div>';
+          }).join('') + '</div></div>' : '';
+    return (d.headline ? '<div class="sp-tagline" style="font-size:10px;margin-bottom:8px;">' + escH(d.headline) + '</div>' : '') +
+      (d.background ? '<div class="sp-section"><div class="sp-sec-lbl">BACKGROUND</div><div class="sp-text">' + escH(d.background) + '</div></div>' : '') +
+      causesHTML + tlHTML;
+  }
+
+  function _renderOutcomeSection(d) {
+    var changesHTML = d.whatChanged && d.whatChanged.length
+      ? '<div class="sp-section"><div class="sp-sec-lbl">WHAT CHANGED</div><ul class="sp-facts">' +
+          d.whatChanged.map(function (c) { return '<li>' + escH(c) + '</li>'; }).join('') +
+        '</ul></div>' : '';
+    return (d.headline ? '<div class="sp-tagline" style="font-size:10px;margin-bottom:8px;">' + escH(d.headline) + '</div>' : '') +
+      (d.immediateEffect ? '<div class="sp-section"><div class="sp-sec-lbl">IMMEDIATE EFFECT</div><div class="sp-text">' + escH(d.immediateEffect) + '</div></div>' : '') +
+      (d.recovery ? '<div class="sp-section"><div class="sp-sec-lbl">RECOVERY</div><div class="sp-text">' + escH(d.recovery) + '</div></div>' : '') +
+      changesHTML;
+  }
+
+  function _renderEconomicSection(d) {
+    var impactHTML = d.assetImpacts && d.assetImpacts.length
+      ? '<div class="sp-section"><div class="sp-sec-lbl">IMPACT BY ASSET CLASS</div><div class="sp-timeline">' +
+          d.assetImpacts.map(function (a) {
+            return '<div class="sp-tl-row"><div class="sp-tl-date">' + escH(a.asset || '') + '</div>' +
+              '<div class="sp-tl-evt">' + escH(a.effect || '') + '</div></div>';
+          }).join('') + '</div></div>' : '';
+    return (d.headline ? '<div class="sp-tagline" style="font-size:10px;margin-bottom:8px;">' + escH(d.headline) + '</div>' : '') +
+      (d.overview ? '<div class="sp-section"><div class="sp-sec-lbl">ECONOMIC TRANSMISSION</div><div class="sp-text">' + escH(d.overview) + '</div></div>' : '') +
+      (d.gdpImpact ? '<div class="sp-section"><div class="sp-sec-lbl">GDP & GROWTH</div><div class="sp-text">' + escH(d.gdpImpact) + '</div></div>' : '') +
+      impactHTML;
+  }
+
+  function _renderHardshipSection(d) {
+    var statsHTML = d.statistics && d.statistics.length
+      ? '<div class="sp-section"><div class="sp-sec-lbl">KEY STATISTICS</div><div class="sp-timeline">' +
+          d.statistics.map(function (s) {
+            return '<div class="sp-tl-row"><div class="sp-tl-date">' + escH(s.metric || '') + '</div>' +
+              '<div class="sp-tl-evt">' + escH(s.figure || '') + '</div></div>';
+          }).join('') + '</div></div>' : '';
+    return (d.headline ? '<div class="sp-tagline" style="font-size:10px;margin-bottom:8px;">' + escH(d.headline) + '</div>' : '') +
+      (d.overview ? '<div class="sp-section"><div class="sp-sec-lbl">HUMAN IMPACT</div><div class="sp-text">' + escH(d.overview) + '</div></div>' : '') +
+      statsHTML +
+      (d.pensionImpact ? '<div class="sp-section"><div class="sp-sec-lbl">SAVINGS & PENSIONS</div><div class="sp-text">' + escH(d.pensionImpact) + '</div></div>' : '') +
+      (d.globalReach ? '<div class="sp-section"><div class="sp-sec-lbl">GLOBAL REACH</div><div class="sp-text">' + escH(d.globalReach) + '</div></div>' : '');
   }
 
   /* ── DISTILLERY PANEL ── */
