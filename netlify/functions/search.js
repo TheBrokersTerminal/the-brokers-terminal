@@ -1209,7 +1209,7 @@ exports.handler = async (event) => {
             /* Last resort: close truncated brackets then repair unescaped quotes */
             parsed = JSON.parse(repairJson(closeTruncated(raw)));
           } catch (_e3) {
-            console.warn('[search] JSON unparseable after repair for:', query, '— raw length:', raw.length);
+            console.warn('[search] JSON unparseable after repair for:', query, '— raw length:', raw.length, '— stop_reason:', data.stop_reason, '— output_tokens:', data.usage?.output_tokens, '— raw_start:', raw.slice(0, 200), '— raw_end:', raw.slice(-200));
             return {
               statusCode: 503,
               headers: { ...CORS, 'Retry-After': '3' },
