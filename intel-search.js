@@ -1744,6 +1744,39 @@
     if (_cache[cacheKey]) return;
     var headers = { 'Content-Type': 'application/json' };
     if (window._authToken) headers['Authorization'] = 'Bearer ' + window._authToken;
+
+    /* Pitch-playbook: pre-fetch via SSE stream — avoids buffered search.js timeout */
+    if (sectionId === 'pitch-playbook' && window.ReadableStream && window.TextDecoder) {
+      fetch('/.netlify/functions/search-stream', {
+        method: 'POST', headers: headers,
+        body: JSON.stringify({ query: conceptTitle, type: 'concept', section: sectionId, lensKey: lensKey, lensContext: lensContext }),
+      }).then(function(r) {
+        if (!r.ok || !r.body) return;
+        var reader = r.body.getReader();
+        var decoder = new TextDecoder();
+        var lineBuf = '';
+        function readChunk() {
+          return reader.read().then(function(chunk) {
+            if (chunk.done) return;
+            lineBuf += decoder.decode(chunk.value, { stream: true });
+            var lines = lineBuf.split('\n'); lineBuf = lines.pop();
+            for (var i = 0; i < lines.length; i++) {
+              var line = lines[i];
+              if (!line.startsWith('data: ')) continue;
+              var raw; try { raw = JSON.parse(line.slice(6)); } catch { continue; }
+              if (raw.type === 'cache' || raw.type === 'done') {
+                if (!_cache[cacheKey]) _cache[cacheKey] = raw.data;
+                return;
+              }
+            }
+            return readChunk();
+          });
+        }
+        readChunk().catch(function(){});
+      }).catch(function(){});
+      return;
+    }
+
     fetch('/.netlify/functions/search', {
       method: 'POST',
       headers: headers,
@@ -1763,10 +1796,83 @@
       renderConceptSection(_cache[cacheKey], sectionId, panel);
       return;
     }
-    panel.innerHTML = '<div class="sp-intel-load">LOADING<span class="sp-intel-ld"></span></div>';
     var headers = { 'Content-Type': 'application/json' };
     if (window._authToken) headers['Authorization'] = 'Bearer ' + window._authToken;
 
+    /* Pitch-playbook: stream via SSE so content appears as Claude writes */
+    if (sectionId === 'pitch-playbook' && window.ReadableStream && window.TextDecoder) {
+      panel.innerHTML = '<div class="sp-intel-load">GENERATING PITCH PLAYBOOK<span class="sp-intel-ld"></span></div>';
+      var streamDiv = null;
+      var gotDone = false;
+      fetch('/.netlify/functions/search-stream', {
+        method: 'POST', headers: headers,
+        body: JSON.stringify({ query: conceptTitle, type: 'concept', section: sectionId, lensKey: lensKey, lensContext: lensContext }),
+      }).then(function(r) {
+        if (!r.ok || !r.body) { _conceptSectionFallback(); return; }
+        var reader = r.body.getReader();
+        var decoder = new TextDecoder();
+        var lineBuf = '';
+        function readChunk() {
+          return reader.read().then(function(chunk) {
+            if (chunk.done) { if (!gotDone) _conceptSectionFallback(); return; }
+            lineBuf += decoder.decode(chunk.value, { stream: true });
+            var lines = lineBuf.split('\n'); lineBuf = lines.pop();
+            for (var i = 0; i < lines.length; i++) {
+              var line = lines[i];
+              if (!line.startsWith('data: ')) continue;
+              var raw; try { raw = JSON.parse(line.slice(6)); } catch { continue; }
+              if (raw.type === 'cache' || raw.type === 'done') {
+                gotDone = true;
+                _cache[cacheKey] = raw.data;
+                renderConceptSection(raw.data, sectionId, panel);
+                window._loadCreditBalance && window._loadCreditBalance();
+                return;
+              }
+              if (raw.type === 'delta') {
+                var readable = raw.text.replace(/^[{\["\s,]+|[}\]",:\s]+$/g, '').trim();
+                if (readable) {
+                  if (!streamDiv) {
+                    streamDiv = document.createElement('div');
+                    streamDiv.style.cssText = 'font-family:monospace;font-size:10px;color:#E97132;padding:8px;white-space:pre-wrap;word-break:break-word;line-height:1.6;';
+                    panel.innerHTML = '';
+                    panel.appendChild(streamDiv);
+                  }
+                  streamDiv.textContent += (streamDiv.textContent ? ' ' : '') + readable;
+                }
+              }
+              if (raw.type === 'error') { _conceptSectionFallback(); return; }
+            }
+            return readChunk();
+          });
+        }
+        readChunk().catch(function() { _conceptSectionFallback(); });
+      }).catch(function() { _conceptSectionFallback(); });
+
+      function _conceptSectionFallback() {
+        var h2 = { 'Content-Type': 'application/json' };
+        if (window._authToken) h2['Authorization'] = 'Bearer ' + window._authToken;
+        panel.innerHTML = '<div class="sp-intel-load">GENERATING — PLEASE WAIT<span class="sp-intel-ld"></span></div>';
+        var retries2 = 0;
+        function attempt2() {
+          fetch('/.netlify/functions/search', { method: 'POST', headers: h2,
+            body: JSON.stringify({ query: conceptTitle, type: 'concept', section: sectionId, lensKey: lensKey, lensContext: lensContext }),
+          }).then(function(r) {
+            if (r.status === 402) { r.json().then(function(d){ window._showNoCredits && window._showNoCredits(d.balance||0); }); panel.innerHTML = '<div class="sp-loading" style="color:#E97132;">INSUFFICIENT CREDITS</div>'; return null; }
+            if ((r.status === 503 || r.status === 504) && retries2 < 2) { retries2++; setTimeout(attempt2, 4000); return null; }
+            return r.ok ? r.json() : null;
+          }).then(function(d) {
+            if (!d) { panel.innerHTML = '<div class="sp-loading">SECTION UNAVAILABLE</div>'; return; }
+            _cache[cacheKey] = d;
+            window._loadCreditBalance && window._loadCreditBalance();
+            renderConceptSection(d, sectionId, panel);
+          }).catch(function() { panel.innerHTML = '<div class="sp-loading">SECTION UNAVAILABLE</div>'; });
+        }
+        attempt2();
+      }
+      return;
+    }
+
+    panel.innerHTML = '<div class="sp-intel-load">LOADING<span class="sp-intel-ld"></span></div>';
     var retries = 0;
     function attempt() {
       fetch('/.netlify/functions/search', {
