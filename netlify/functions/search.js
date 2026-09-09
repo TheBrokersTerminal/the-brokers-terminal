@@ -1120,6 +1120,25 @@ exports.handler = async (event) => {
     }
 
     /* Helper: state-machine JSON repair for unescaped quotes / control chars */
+    /* Close any truncated JSON by appending missing brackets/braces */
+    function closeTruncated(str) {
+      const opens = [];
+      let inStr = false, esc = false;
+      for (let i = 0; i < str.length; i++) {
+        const ch = str[i];
+        if (esc) { esc = false; continue; }
+        if (ch === '\\' && inStr) { esc = true; continue; }
+        if (ch === '"') { inStr = !inStr; continue; }
+        if (inStr) continue;
+        if (ch === '{') opens.push('}');
+        else if (ch === '[') opens.push(']');
+        else if (ch === '}' || ch === ']') opens.pop();
+      }
+      let out = str;
+      if (inStr) out += '"';
+      return out + opens.reverse().join('');
+    }
+
     function repairJson(raw) {
       let fixed = '';
       let inString = false;
@@ -1159,7 +1178,7 @@ exports.handler = async (event) => {
     try {
       /* Slim concept overview = 400 tokens (intentionally small fast load).
          All sections + full searches = 3000 — maximum safe headroom before Netlify 26s kill. */
-      const maxTok = type === 'concept' && !section ? 400 : isScenario ? 1200 : 2500;
+      const maxTok = type === 'concept' && !section ? 400 : isScenario ? 1800 : 2500;
       /* Pitch-playbook uses SEARCH_SYSTEM (full sales methodology incl. Milton Model, Cardone,
          Festinger, Challenger, Shiller, Greene 6 drivers); factual sections use CONCEPT_SYSTEM */
       const sysPrompt = type === 'concept' && section === 'pitch-playbook'
@@ -1186,14 +1205,17 @@ exports.handler = async (event) => {
         try {
           parsed = JSON.parse(repairJson(raw));
         } catch (_e2) {
-          /* JSON is genuinely broken — log and return a clean retry signal.
-             Never make a second Claude call here: that guaranteed a 504. */
-          console.warn('[search] JSON unparseable after repair for:', query, '— raw length:', raw.length);
-          return {
-            statusCode: 503,
-            headers: { ...CORS, 'Retry-After': '3' },
-            body: JSON.stringify({ error: 'parse_error', retryable: true }),
-          };
+          try {
+            /* Last resort: close truncated brackets then repair unescaped quotes */
+            parsed = JSON.parse(repairJson(closeTruncated(raw)));
+          } catch (_e3) {
+            console.warn('[search] JSON unparseable after repair for:', query, '— raw length:', raw.length);
+            return {
+              statusCode: 503,
+              headers: { ...CORS, 'Retry-After': '3' },
+              body: JSON.stringify({ error: 'parse_error', retryable: true }),
+            };
+          }
         }
       }
 

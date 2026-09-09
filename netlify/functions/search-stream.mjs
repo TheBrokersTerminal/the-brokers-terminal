@@ -76,6 +76,24 @@ async function serverDeductCredits(authHeader, creditCost, description) {
 }
 
 /* ── JSON repair (same state-machine as search.js) ── */
+function closeTruncated(str) {
+  const opens = [];
+  let inStr = false, esc = false;
+  for (let i = 0; i < str.length; i++) {
+    const ch = str[i];
+    if (esc) { esc = false; continue; }
+    if (ch === '\\' && inStr) { esc = true; continue; }
+    if (ch === '"') { inStr = !inStr; continue; }
+    if (inStr) continue;
+    if (ch === '{') opens.push('}');
+    else if (ch === '[') opens.push(']');
+    else if (ch === '}' || ch === ']') opens.pop();
+  }
+  let out = str;
+  if (inStr) out += '"';
+  return out + opens.reverse().join('');
+}
+
 function repairJson(raw) {
   let fixed = '';
   let inString = false;
@@ -461,7 +479,7 @@ export default async (req) => {
           : '';
         /* Scenarios: 1200 tok (~8-10s generation, safe under 20s kill).
            Concepts slim: 400. Everything else: 2500. */
-        const maxTok  = type === 'concept' && !isScenario ? 400 : isScenario ? 1200 : 2500;
+        const maxTok  = type === 'concept' && !isScenario ? 400 : isScenario ? 1800 : 2500;
         const sysPrompt = type === 'concept' ? CONCEPT_SYSTEM : SEARCH_SYSTEM;
         let userMsg;
         if (isScenario)          userMsg = SCENARIO_PROMPT(query) + lensAppend;
@@ -573,9 +591,13 @@ export default async (req) => {
           try {
             parsed = JSON.parse(repairJson(raw));
           } catch {
-            ctrl.enqueue(sseChunk({ type: 'error', message: 'parse_error' }));
-            ctrl.close();
-            return;
+            try {
+              parsed = JSON.parse(repairJson(closeTruncated(raw)));
+            } catch {
+              ctrl.enqueue(sseChunk({ type: 'error', message: 'parse_error' }));
+              ctrl.close();
+              return;
+            }
           }
         }
 
