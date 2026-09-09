@@ -1061,16 +1061,16 @@ exports.handler = async (event) => {
       };
     }
 
-    /* Lens context appended to prompts */
-    const lensAppend = !lensContext ? '' : isScenario
-      ? `\n\nACTIVE BROKER LENS — SCENARIO CRITICAL OVERRIDE: The broker operates in a specific asset class (see context below). The ASSET NEUTRALITY rule is SUSPENDED for solutionAreas when a lens is active. In your solutionAreas array you MUST include this specific asset class as a dedicated entry — name it explicitly, describe which specific vehicle types or structures within it best fit this client's situation, and set suitability based on the client's actual needs. If the asset class is directly relevant to the client's goals (inflation, IHT, CGT, income, growth), rate it HIGH and explain exactly why. Be specific: name the sub-types (e.g. for investment trusts: infrastructure trusts, private equity trusts, dividend heroes, specialist trusts). The lens asset class context:\n${lensContext}`
-      : (section === 'pitch'
+    /* Lens context appended to non-scenario prompts */
+    const lensAppend = (!isScenario && lensContext)
+      ? (section === 'pitch'
         ? `\n\nACTIVE BROKER LENS — CRITICAL OVERRIDE: The investment destination is the physical asset described below — NOT the company equity. Every single pitch field must use this company's data as the conversation HOOK and explicitly BRIDGE toward this asset as the close. The company is the opener; the asset below is what the client buys:\n${lensContext}`
-        : `\n\nACTIVE BROKER LENS — tailor ALL pitch content (relevance, brokerNote, pitch playbook) specifically to this asset class context:\n${lensContext}`);
+        : `\n\nACTIVE BROKER LENS — tailor ALL pitch content (relevance, brokerNote, pitch playbook) specifically to this asset class context:\n${lensContext}`)
+      : '';
 
     let userMsg;
     if (isScenario) {
-      userMsg = SCENARIO_PROMPT(query) + lensAppend;
+      userMsg = SCENARIO_PROMPT(query);
     } else if (type === 'concept' && section) {
       userMsg = CONCEPT_SECTION_PROMPT(query, section) + (section === 'pitch-playbook' ? lensAppend : '');
     } else if (type === 'concept') {
@@ -1159,7 +1159,7 @@ exports.handler = async (event) => {
     try {
       /* Slim concept overview = 400 tokens (intentionally small fast load).
          All sections + full searches = 3000 — maximum safe headroom before Netlify 26s kill. */
-      const maxTok = type === 'concept' && !section ? 400 : isScenario ? 1800 : 3000;
+      const maxTok = type === 'concept' && !section ? 400 : 3000;
       /* Pitch-playbook uses SEARCH_SYSTEM (full sales methodology incl. Milton Model, Cardone,
          Festinger, Challenger, Shiller, Greene 6 drivers); factual sections use CONCEPT_SYSTEM */
       const sysPrompt = type === 'concept' && section === 'pitch-playbook'
