@@ -1141,12 +1141,15 @@
     var isListed = d.ticker && d.ticker.length > 0;
     var pitchBtn = d.title ?
       '<button class="sp-pitch-shortcut" data-title="' + escH(d.title) + '" data-ticker="' + escH(d.ticker || '') + '">▌ PITCH PLAYBOOK</button>' : '';
+    var chartBtn = isListed ?
+      '<button class="sp-chart-shortcut" data-ticker="' + escH(d.ticker) + '" data-name="' + escH(d.title || d.ticker) + '">▦ VIEW CHART</button>' : '';
     body.innerHTML =
       '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">' +
         '<div class="sp-badge ' + (isListed ? 'listed' : 'private') + '" style="margin-bottom:0;">' +
           (isListed ? '● LISTED · ' + escH(d.ticker) + ' · ' + escH(d.exchange || '') : '● PRIVATE COMPANY') +
         '</div>' +
         pitchBtn +
+        chartBtn +
       '</div>' +
       '<div class="sp-tagline">' + escH(d.tagline || '') + '</div>' +
       '<div class="sp-section">' +
@@ -1191,8 +1194,26 @@
     });
   }
 
+  function wireChartBtn(d, body) {
+    var btn = body.querySelector('.sp-chart-shortcut');
+    if (!btn) return;
+    btn.addEventListener('click', function () {
+      var ticker = btn.dataset.ticker;
+      var name   = btn.dataset.name || ticker;
+      if (!ticker || !window.createGenericPopout) return;
+      window.createGenericPopout(ticker + ' · CHART', '▦', function (popBody) {
+        if (window._tbtRenderPriceChart) {
+          window._tbtRenderPriceChart(popBody, ticker, name);
+        } else {
+          popBody.innerHTML = '<div style="padding:20px;font-size:9px;letter-spacing:.12em;color:#fff;opacity:.5;">OPEN THE TERMINAL TAB TO ENABLE CHARTS</div>';
+        }
+      }, { w: 620, h: 420 });
+    });
+  }
+
   function wireNoteBtn(d, body) {
     wirePitchShortcut(d, body);
+    wireChartBtn(d, body);
     var parts = [];
     if (d.overview)         parts.push(d.overview);
     if (d.relevance)        parts.push('RELEVANCE:\n' + d.relevance);

@@ -195,6 +195,8 @@
 .sp-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 7px; letter-spacing: .15em; text-transform: uppercase; padding: 2px 8px; margin-bottom: 8px; }
 .sp-pitch-shortcut { background: none; border: 1px solid #E97132; color: #E97132; font-size: 7px; letter-spacing: .12em; padding: 2px 8px; cursor: pointer; margin-bottom: 8px; font-family: inherit; transition: background .15s, color .15s; }
 .sp-pitch-shortcut:hover { background: #E97132; color: #fff; }
+.sp-chart-shortcut { background: none; border: 1px solid #555; color: #aaa; font-size: 7px; letter-spacing: .12em; padding: 2px 8px; cursor: pointer; margin-bottom: 8px; font-family: inherit; transition: background .15s, color .15s; }
+.sp-chart-shortcut:hover { background: #333; color: #fff; border-color: #888; }
 .sp-badge.listed { background: rgba(68,204,136,.08); border: 1px solid rgba(68,204,136,.25); color: #44cc88; }
 .sp-badge.private { background: rgba(233,113,50,.08); border: 1px solid rgba(233,113,50,.25); color: #E97132; }
 .sp-badge.event { background: rgba(68,144,204,.08); border: 1px solid rgba(68,144,204,.25); color: #48a0e8; }
