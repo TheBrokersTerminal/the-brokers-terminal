@@ -7726,13 +7726,56 @@
       var emptyHint = !quotes.length ?
         '<div class="wl-empty">NO INSTRUMENTS YET<br><span>Search by name or ticker above · Browse indexes via Quick Add</span></div>' : '';
 
+      /* ── Whisky monitor section (from tbt_whisky_wl localStorage) ── */
+      var _wlMon = (function(){ try{ return JSON.parse(localStorage.getItem('tbt_whisky_wl')||'[]'); }catch(e){ return []; } })();
+      var whiskyHtml = '';
+      if (_wlMon.length) {
+        var _fmtMv = function(v, cur) {
+          var sym = cur==='GBP'?'£':cur==='USD'?'$':cur==='EUR'?'€':cur+' ';
+          return sym + Math.round(v).toLocaleString('en-GB');
+        };
+        var _getMktCache = function(bgId, cur) {
+          try {
+            var raw = JSON.parse(localStorage.getItem('tbt_mkt_'+bgId+'_'+cur)||'null');
+            if (raw && Date.now() - raw.ts < 7*24*60*60*1000) return raw.data;
+          } catch(e){}
+          return null;
+        };
+        whiskyHtml = '<div style="padding:6px 10px 4px;font-size:7px;letter-spacing:.2em;color:#E97132;border-top:1px solid #1a1a1a;margin-top:4px;">WHISKY MONITOR · '+_wlMon.length+' BOTTLE'+((_wlMon.length!==1)?'S':'')+'</div>' +
+          _wlMon.map(function(w) {
+            var cur = w.currency || 'GBP';
+            var bgId = w.bg_id || w.whisky_id;
+            var mkt = _getMktCache(bgId, cur);
+            var mv = mkt && mkt.auction && mkt.auction.market_value != null ? mkt.auction.market_value : null;
+            var chgPct = mkt && mkt.auction && mkt.auction.summary_12mo ? mkt.auction.summary_12mo.market_value_change_pct : null;
+            var priceStr = mv != null ? _fmtMv(mv, cur) : '—';
+            var chgStr = chgPct != null ? (chgPct>=0?'+':'')+chgPct.toFixed(1)+'%' : (mv!=null?'12M N/A':'NO PRICE');
+            var chgCls = chgPct == null ? 'wl-chg-flat' : chgPct >= 0 ? 'wl-pos' : 'wl-neg';
+            var shortName = w.name ? (w.name.length>30?w.name.substring(0,29)+'…':w.name) : w.whisky_id;
+            return '<div class="wl-row wl-whisky-row" data-wid="'+escH(w.whisky_id)+'" data-bgid="'+escH(bgId)+'" data-wname="'+escH(w.name||'')+'" data-cur="'+escH(cur)+'">' +
+              '<div class="wl-bar" style="width:0;"></div>' +
+              '<div class="wl-row-left">' +
+                '<div class="wl-sym" style="font-size:6px;letter-spacing:.12em;color:#E97132;line-height:1.4;">◈ WHISKY</div>' +
+                '<div class="wl-name">'+escH(shortName)+'</div>' +
+              '</div>' +
+              '<div class="wl-row-right">' +
+                '<div class="wl-price">'+priceStr+'</div>' +
+                '<div class="wl-chg '+chgCls+'">'+chgStr+'</div>' +
+              '</div>' +
+              '<div class="wl-row-actions">' +
+                '<button class="wl-whisky-del" data-wid="'+escH(w.whisky_id)+'" title="Remove from monitor">✕</button>' +
+              '</div>' +
+            '</div>';
+          }).join('');
+      }
+
       body.innerHTML =
         '<div class="wl-add-bar">' +
           '<input class="wl-input" id="' + id + '-inp" placeholder="Search company name or ticker…" maxlength="40" autocomplete="off"/>' +
           '<button class="wl-add-btn" id="' + id + '-add">＋</button>' +
         '</div>' +
         qaHtml +
-        '<div class="wl-list">' + (listHtml || emptyHint) + '</div>' +
+        '<div class="wl-list">' + (listHtml || (!whiskyHtml ? emptyHint : '')) + whiskyHtml + '</div>' +
         '<div class="wl-footer">LIVE PRICES · ' + ts + '  ·  CLICK ROW FOR INFO  ·  ℹ FOR COMPANY BRIEF</div>';
 
       /* Preset buttons — open index browser */
@@ -7786,6 +7829,27 @@
           tickers = tickers.filter(function(t){ return t !== btn.dataset.sym; });
           save();
           if (tickers.length) fetchAndRender(); else { draw([]); }
+        });
+      });
+
+      /* Whisky monitor rows — click to open in whisky terminal, ✕ to remove */
+      body.querySelectorAll('.wl-whisky-row').forEach(function(row) {
+        row.addEventListener('click', function(e) {
+          if (e.target.classList.contains('wl-whisky-del')) return;
+          document.dispatchEvent(new CustomEvent('tbt:open-whisky', {
+            detail: { whisky_id: row.dataset.wid, bg_id: row.dataset.bgid, name: row.dataset.wname, currency: row.dataset.cur }
+          }));
+        });
+      });
+      body.querySelectorAll('.wl-whisky-del').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          try {
+            var wl2 = JSON.parse(localStorage.getItem('tbt_whisky_wl')||'[]');
+            wl2 = wl2.filter(function(x){ return x.whisky_id !== btn.dataset.wid; });
+            localStorage.setItem('tbt_whisky_wl', JSON.stringify(wl2));
+          } catch(ex){}
+          draw(_lastQuotes);
         });
       });
 
@@ -10557,6 +10621,37 @@
     /* ── MONITOR button ── */
     var monBtn = body.querySelector('#wl-mon-'+id);
     if (monBtn) monBtn.addEventListener('click', showMonitorView);
+
+    /* ── Cross-widget: MY WATCHLIST whisky row click opens bottle here ── */
+    var _openWhiskyHandler = function(e) {
+      var d = e.detail || {};
+      if (!d.whisky_id) return;
+      if (d.currency && CURRENCIES.indexOf(d.currency) !== -1) {
+        _cur = d.currency;
+        if (curEl) curEl.value = _cur;
+      }
+      showMonitorView();
+      /* Auto-highlight the row if it exists, then load detail */
+      setTimeout(function() {
+        var rows = listEl ? listEl.querySelectorAll('.wl-mon-row') : [];
+        var wl = getWl();
+        var rowIdx = wl.findIndex(function(x){ return x.whisky_id === d.whisky_id; });
+        if (rowIdx >= 0 && rows[rowIdx]) {
+          rows.forEach(function(r){ r.classList.remove('active'); r.style.background=''; });
+          rows[rowIdx].classList.add('active'); rows[rowIdx].style.background='#1a1a1a';
+        }
+        fetchAndShowDetail(d.whisky_id, d.name || d.whisky_id);
+      }, 50);
+    };
+    document.addEventListener('tbt:open-whisky', _openWhiskyHandler);
+    /* Clean up when widget is destroyed */
+    var _bodyObs = new MutationObserver(function(_, obs) {
+      if (!document.body.contains(body)) {
+        document.removeEventListener('tbt:open-whisky', _openWhiskyHandler);
+        obs.disconnect();
+      }
+    });
+    _bodyObs.observe(document.body, {childList:true, subtree:true});
 
     function showMonitorView() {
       /* Highlight MONITOR button, reset INDICES */
