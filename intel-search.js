@@ -201,10 +201,13 @@
     if (!wrap) return;
     wrap.innerHTML =
       '<div class="intel-search-wrap">' +
+        /* Honeypot inputs: absorb Chrome credential autofill so it never reaches the real search field */
+        '<input type="text" name="username" tabindex="-1" aria-hidden="true" style="position:absolute;width:0;height:0;opacity:0;pointer-events:none;overflow:hidden;">' +
+        '<input type="password" name="password" tabindex="-1" aria-hidden="true" style="position:absolute;width:0;height:0;opacity:0;pointer-events:none;overflow:hidden;">' +
         '<div class="intel-search-bar">' +
           '<span class="intel-search-icon">⌕</span>' +
           '<span class="intel-search-lbl">INTEL</span>' +
-          '<input id="intel-search-input" type="search" placeholder="Company, event, or describe a client scenario…" autocomplete="new-password" spellcheck="false" autocorrect="off" autocapitalize="off" readonly>' +
+          '<input id="intel-search-input" type="text" placeholder="Company, event, or describe a client scenario…" autocomplete="off" spellcheck="false" autocorrect="off" autocapitalize="off" readonly>' +
         '</div>' +
       '</div>';
 
