@@ -893,27 +893,16 @@ exports.handler = async (event) => {
 
     const isScenario = type === 'scenario';
 
-    /* ── SERVER-SIDE CREDIT GATE ─────────────────────────────────────── */
     const authHeader = event.headers.authorization || event.headers.Authorization || '';
-    /* Sections cost 10; detect both explicit section param and query suffix (e.g. "— PITCH") */
     const isSection = !!section || /—\s*(PITCH|PROFILE|PLAYBOOK)/i.test(query);
     const creditCost = (type === 'company' && !isSection) ? 25 : 10;
-    const creditCheck = await serverDeductCredits(authHeader, creditCost, `intel:${type}${section ? ':' + section : ''}:${ticker || query.slice(0, 60)}`);
-    if (!creditCheck.ok) {
-      return {
-        statusCode: creditCheck.status || 402,
-        headers: CORS,
-        body: JSON.stringify({ error: creditCheck.error || 'insufficient_credits', balance: creditCheck.balance || 0 }),
-      };
-    }
 
-    /* Scenarios: skip cache (bespoke per query), use more tokens */
-    let cached = null;
+    /* ── CHECK CACHE FIRST — free hit, no credit cost, no Claude call ── */
     const lensTag = lensKey ? ':' + lensKey : '';
     const cacheKey = 'search9:' + type + ':' + (section ? section + ':' : '') + (ticker || query.trim().toLowerCase().slice(0, 80)) + lensTag;
 
     if (!isScenario) {
-      cached = await cacheGet(cacheKey);
+      const cached = await cacheGet(cacheKey);
       if (cached) {
         logSearch(query, type, lensKey, section, true, ticker);
         return {
@@ -922,6 +911,16 @@ exports.handler = async (event) => {
           body: JSON.stringify(cached),
         };
       }
+    }
+
+    /* ── CREDIT GATE — only reached on cache miss ── */
+    const creditCheck = await serverDeductCredits(authHeader, creditCost, `intel:${type}${section ? ':' + section : ''}:${ticker || query.slice(0, 60)}`);
+    if (!creditCheck.ok) {
+      return {
+        statusCode: creditCheck.status || 402,
+        headers: CORS,
+        body: JSON.stringify({ error: creditCheck.error || 'insufficient_credits', balance: creditCheck.balance || 0 }),
+      };
     }
 
     /* Lens context appended to non-scenario prompts */
@@ -944,9 +943,9 @@ exports.handler = async (event) => {
       userMsg = COMPANY_PROMPT(query, null) + lensAppend;
     }
 
-    /* Helper: call Anthropic with automatic retry on transient errors (429/500/529) */
+    /* Helper: call Anthropic with hard 21s timeout + retry on transient errors */
     async function callAnthropic(sysPrompt, userContent, tokens) {
-      const body = JSON.stringify({
+      const reqBody = JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
         max_tokens: tokens,
         system: [{ type: 'text', text: sysPrompt, cache_control: { type: 'ephemeral' } }],
@@ -958,11 +957,24 @@ exports.handler = async (event) => {
         'anthropic-beta': 'prompt-caching-2024-07-31',
         'content-type': 'application/json',
       };
-      let resp = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: hdrs, body });
+      const makeCall = async () => {
+        const ctrl = new AbortController();
+        const timer = setTimeout(() => ctrl.abort(), 21000); /* hard 21s — leaves headroom before Netlify's 26s */
+        try {
+          const resp = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: hdrs, body: reqBody, signal: ctrl.signal });
+          clearTimeout(timer);
+          return resp;
+        } catch (err) {
+          clearTimeout(timer);
+          if (err.name === 'AbortError') throw new Error('TIMEOUT');
+          throw err;
+        }
+      };
+      let resp = await makeCall();
       if (!resp.ok && [429, 500, 529].includes(resp.status)) {
         console.warn('[search] Anthropic transient error', resp.status, '— retrying in 2s');
         await new Promise(r => setTimeout(r, 2000));
-        resp = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: hdrs, body });
+        resp = await makeCall();
       }
       return resp;
     }
@@ -1022,6 +1034,7 @@ exports.handler = async (event) => {
       const stripped = text.replace(/^```(?:json)?\s*/m, '').replace(/```\s*$/m, '').trim();
       const match = stripped.match(/\{[\s\S]*\}/);
       const raw = match ? match[0] : stripped;
+
       let parsed;
       try {
         parsed = JSON.parse(raw);
@@ -1029,22 +1042,14 @@ exports.handler = async (event) => {
         try {
           parsed = JSON.parse(repairJson(raw));
         } catch (_e2) {
-          /* Last resort: ask Claude to repair the broken JSON */
-          console.warn('[search] JSON parse failed after repair, attempting Claude fix for:', query);
-          const fixPrompt = 'The following is invalid JSON. Return ONLY valid JSON with no commentary, correcting any syntax errors. Do not change the meaning or omit fields:\n\n' + raw.slice(0, 6000);
-          const fixResp = await callAnthropic(
-            type === 'concept' ? CONCEPT_SYSTEM : SEARCH_SYSTEM,
-            fixPrompt,
-            1800
-          );
-          if (fixResp.ok) {
-            const fixData = await fixResp.json();
-            const fixText = (fixData.content?.[0]?.text || '').replace(/^```(?:json)?\s*/m, '').replace(/```\s*$/m, '').trim();
-            const fixMatch = fixText.match(/\{[\s\S]*\}/);
-            parsed = JSON.parse(fixMatch ? fixMatch[0] : fixText);
-          } else {
-            throw new Error('Claude repair also failed: ' + claudeResp.status);
-          }
+          /* JSON is genuinely broken — log and return a clean retry signal.
+             Never make a second Claude call here: that guaranteed a 504. */
+          console.warn('[search] JSON unparseable after repair for:', query, '— raw length:', raw.length);
+          return {
+            statusCode: 503,
+            headers: { ...CORS, 'Retry-After': '3' },
+            body: JSON.stringify({ error: 'parse_error', retryable: true }),
+          };
         }
       }
 
@@ -1057,7 +1062,14 @@ exports.handler = async (event) => {
         body: JSON.stringify(parsed),
       };
     } catch (e) {
-      console.error('[search] parse/runtime error', e.message);
+      console.error('[search] runtime error:', e.message);
+      if (e.message === 'TIMEOUT') {
+        return {
+          statusCode: 503,
+          headers: { ...CORS, 'Retry-After': '5' },
+          body: JSON.stringify({ error: 'timeout', retryable: true }),
+        };
+      }
       return { statusCode: 502, headers: CORS, body: JSON.stringify({ error: e.message }) };
     }
   }

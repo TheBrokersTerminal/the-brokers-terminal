@@ -980,7 +980,7 @@
   }
 
   /* ── FETCH FULL DETAIL ── */
-  function fetchDetail(query, type, ticker, win) {
+  function fetchDetail(query, type, ticker, win, _retryCount) {
     var lensKey = (window._assetLens && window._assetLens.key) || 'universal';
     var lensContext = (window._assetLens && window._assetLens.promptContext) || '';
     var cacheKey = type + ':' + lensKey + ':' + (ticker || query);
@@ -988,6 +988,7 @@
       renderPopout(_cache[cacheKey], win);
       return;
     }
+    var retries = _retryCount || 0;
     var fetchHeaders = { 'Content-Type': 'application/json' };
     if (window._authToken) fetchHeaders['Authorization'] = 'Bearer ' + window._authToken;
     fetch('/.netlify/functions/search', {
@@ -1003,12 +1004,21 @@
           });
           return null;
         }
+        /* 503 retryable (our timeout) or 504 (Netlify gateway) — auto-retry once */
+        if ((r.status === 503 || r.status === 504) && retries < 1) {
+          var body = win.querySelector('.intel-popwin-body');
+          if (body) body.innerHTML = '<div class="sp-intel-load">GENERATING BRIEF — PLEASE WAIT<span class="sp-intel-ld"></span></div>';
+          setTimeout(function() { fetchDetail(query, type, ticker, win, retries + 1); }, 4000);
+          return null;
+        }
         if (!r.ok) {
           var body = win.querySelector('.intel-popwin-body');
           if (win._loadingTimer) { clearInterval(win._loadingTimer); win._loadingTimer = null; }
           r.json().catch(function(){return{};}).then(function(eb){
             var detail = eb.anthropic_status ? ' (Anthropic ' + eb.anthropic_status + (eb.detail ? ': ' + eb.detail.slice(0,80) : '') + ')' : '';
-            if (body) body.innerHTML = '<div class="sp-loading" style="color:#e05050;">INTEL ERROR · HTTP ' + r.status + detail + '<br><span style="font-size:8px;color:#666;margin-top:6px;display:block;">Check Netlify function logs</span></div>';
+            if (body) body.innerHTML = '<div class="sp-loading" style="color:#e05050;">INTELLIGENCE UNAVAILABLE<br><span class="intel-retry-btn" style="margin-top:8px;display:inline-block;">↻ RETRY</span></div>';
+            var btn = body && body.querySelector('.intel-retry-btn');
+            if (btn) btn.addEventListener('click', function(){ body.innerHTML='<div class="sp-intel-load">GENERATING BRIEF<span class="sp-intel-ld"></span></div>'; fetchDetail(query, type, ticker, win, 0); });
           });
           return null;
         }
@@ -1074,7 +1084,7 @@
   }
 
   /* ── FETCH SECTION DETAIL (overview or pitch) ── */
-  function fetchDetailSection(query, type, ticker, section, win) {
+  function fetchDetailSection(query, type, ticker, section, win, _retryCount) {
     var lensKey = (window._assetLens && window._assetLens.key) || 'universal';
     var lensContext = (window._assetLens && window._assetLens.promptContext) || '';
     var cacheKey = type + ':' + lensKey + ':' + section + ':' + (ticker || query);
@@ -1082,6 +1092,7 @@
       renderSection(_cache[cacheKey], section, win);
       return;
     }
+    var retries = _retryCount || 0;
     var fetchHeadersSec = { 'Content-Type': 'application/json' };
     if (window._authToken) fetchHeadersSec['Authorization'] = 'Bearer ' + window._authToken;
     fetch('/.netlify/functions/search', {
@@ -1095,9 +1106,16 @@
           r.json().then(function (d) { window._showNoCredits && window._showNoCredits(d.balance || 0); });
           return null;
         }
+        if ((r.status === 503 || r.status === 504) && retries < 1) {
+          var body = win.querySelector('.intel-popwin-body');
+          if (body) body.innerHTML = '<div class="sp-intel-load">GENERATING BRIEF — PLEASE WAIT<span class="sp-intel-ld"></span></div>';
+          setTimeout(function() { fetchDetailSection(query, type, ticker, section, win, retries + 1); }, 4000);
+          return null;
+        }
         return r.ok ? r.json() : null;
       })
       .then(function (d) {
+        if (!d) return;
         if (d && !d.error) {
           _cache[cacheKey] = d;
           window._loadCreditBalance && window._loadCreditBalance();
@@ -1110,8 +1128,8 @@
           body.innerHTML = '<div class="sp-loading">INTELLIGENCE UNAVAILABLE<span class="intel-retry-btn">↻ RETRY</span></div>';
           var btn = body.querySelector('.intel-retry-btn');
           if (btn) btn.addEventListener('click', function() {
-            body.innerHTML = '<div class="sp-loading">LOADING…</div>';
-            fetchDetailSection(query, type, ticker, section, win);
+            body.innerHTML = '<div class="sp-intel-load">GENERATING BRIEF<span class="sp-intel-ld"></span></div>';
+            fetchDetailSection(query, type, ticker, section, win, 0);
           });
         }
       });
