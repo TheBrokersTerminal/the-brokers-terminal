@@ -4,6 +4,9 @@
 [functions."search"]
   timeout_seconds = 26
 
+[functions."search-stream"]
+  timeout_seconds = 26
+
 [functions."explain"]
   timeout_seconds = 26
 

@@ -223,14 +223,22 @@
 
     var input = document.getElementById('intel-search-input');
 
+    /* Pre-warm: fire a ping on first focus to keep the serverless function hot */
+    var _warmSent = false;
+    function _pingWarm() {
+      if (_warmSent) return;
+      _warmSent = true;
+      fetch('/.netlify/functions/search?ping=1').catch(function(){});
+    }
+
     /* Chrome won't autofill readonly inputs — remove readonly on first interaction */
     function unlockInput() {
       input.removeAttribute('readonly');
       input.removeEventListener('mousedown', unlockInput);
       input.removeEventListener('focus', unlockInput);
     }
-    input.addEventListener('mousedown', unlockInput);
-    input.addEventListener('focus', unlockInput);
+    input.addEventListener('mousedown', function() { _pingWarm(); unlockInput(); });
+    input.addEventListener('focus',     function() { _pingWarm(); unlockInput(); });
 
     function positionDropdown() {
       var r = input.getBoundingClientRect();
@@ -979,108 +987,161 @@
     winB.remove();
   }
 
-  /* ── FETCH FULL DETAIL ── */
+  /* ── FETCH FULL DETAIL — SSE streaming with fallback ── */
   function fetchDetail(query, type, ticker, win, _retryCount) {
-    var lensKey = (window._assetLens && window._assetLens.key) || 'universal';
+    var lensKey     = (window._assetLens && window._assetLens.key)         || 'universal';
     var lensContext = (window._assetLens && window._assetLens.promptContext) || '';
-    var cacheKey = type + ':' + lensKey + ':' + (ticker || query);
-    if (_cache[cacheKey]) {
-      renderPopout(_cache[cacheKey], win);
-      return;
-    }
-    var retries = _retryCount || 0;
+    var cacheKey    = type + ':' + lensKey + ':' + (ticker || query);
+
+    /* Session cache hit — render immediately */
+    if (_cache[cacheKey]) { renderPopout(_cache[cacheKey], win); return; }
+
     var fetchHeaders = { 'Content-Type': 'application/json' };
     if (window._authToken) fetchHeaders['Authorization'] = 'Bearer ' + window._authToken;
-    fetch('/.netlify/functions/search', {
-      method: 'POST',
-      headers: fetchHeaders,
-      body: JSON.stringify({ query: query, type: type, ticker: ticker, lensKey: lensKey, lensContext: lensContext }),
-    })
-      .then(function (r) {
-        if (r.status === 402) {
-          win.remove();
-          r.json().then(function (d) {
-            window._showNoCredits && window._showNoCredits(d.balance || 0);
-          });
-          return null;
-        }
-        /* 503 retryable (our timeout) or 504 (Netlify gateway) — auto-retry up to 2 times */
-        if ((r.status === 503 || r.status === 504) && retries < 2) {
-          var body = win.querySelector('.intel-popwin-body');
-          if (body) body.innerHTML = '<div class="sp-intel-load">GENERATING BRIEF — PLEASE WAIT<span class="sp-intel-ld"></span></div>';
-          setTimeout(function() { fetchDetail(query, type, ticker, win, retries + 1); }, 4000);
-          return null;
-        }
-        if (!r.ok) {
-          var body = win.querySelector('.intel-popwin-body');
-          if (win._loadingTimer) { clearInterval(win._loadingTimer); win._loadingTimer = null; }
-          r.json().catch(function(){return{};}).then(function(eb){
-            var detail = eb.anthropic_status ? ' (Anthropic ' + eb.anthropic_status + (eb.detail ? ': ' + eb.detail.slice(0,80) : '') + ')' : '';
-            if (body) body.innerHTML = '<div class="sp-loading" style="color:#e05050;">INTELLIGENCE UNAVAILABLE<br><span class="intel-retry-btn" style="margin-top:8px;display:inline-block;">↻ RETRY</span></div>';
-            var btn = body && body.querySelector('.intel-retry-btn');
-            if (btn) btn.addEventListener('click', function(){ body.innerHTML='<div class="sp-intel-load">GENERATING BRIEF<span class="sp-intel-ld"></span></div>'; fetchDetail(query, type, ticker, win, 0); });
-          });
-          return null;
-        }
-        return r.json();
-      })
-      .then(function (d) {
-        if (!d) return; /* already handled above */
-        if (d && !d.error) {
-          _cache[cacheKey] = d;
-          if (win._popId && _registry[win._popId] && d.ticker) {
-            _registry[win._popId].ticker = d.ticker;
-          }
-          window._loadCreditBalance && window._loadCreditBalance();
-        }
-        /* Distillery: fetch WhiskyStats expressions (page 1 only — 1 credit) */
-        if (d && d.type === 'company' && d.category === 'distillery') {
-          var wsKey = 'ws:' + (d.title || cacheKey);
-          var lsKey = 's_' + (d.title || cacheKey).toLowerCase().replace(/\s+/g, '_');
-          /* 1. Session cache */
-          if (_cache[wsKey]) { d._wsResults = _cache[wsKey]; renderPopout(d, win); return; }
-          /* 2. localStorage cache (survives page refresh) */
-          var lsCached = lsGet(lsKey);
-          if (lsCached) { d._wsResults = lsCached; _cache[wsKey] = lsCached; renderPopout(d, win); return; }
-          var wsQ = encodeURIComponent(d.title || query);
-          var distWords = (d.title || query).toLowerCase().split(/\s+/).filter(function (w) { return w.length > 3; });
-          d._wsDistWords = distWords;
-          d._wsQ = wsQ;
-          d._wsLsKey = lsKey;
-          fetch('/.netlify/functions/whisky-data?type=search&query=' + wsQ + '&page=1')
-            .then(function (r) { return r.ok ? r.json() : null; })
-            .then(function (ws) {
-              var all = [], seen = {};
-              if (ws && ws.results) {
-                ws.results.forEach(function (r) {
-                  if (seen[r.whisky_id]) return;
-                  var n = (r.whisky_name || '').toLowerCase();
-                  if (!distWords.length || distWords.some(function (w) { return n.indexOf(w) !== -1; })) {
-                    seen[r.whisky_id] = true; all.push(r);
+    var reqBody = JSON.stringify({ query: query, type: type, ticker: ticker, lensKey: lensKey, lensContext: lensContext });
+
+    /* Shared handler: once we have a parsed response object d, finish normally */
+    function _onDetail(d) {
+      if (!d) return;
+      if (!d.error) {
+        _cache[cacheKey] = d;
+        if (win._popId && _registry[win._popId] && d.ticker) _registry[win._popId].ticker = d.ticker;
+        window._loadCreditBalance && window._loadCreditBalance();
+      }
+      /* Distillery: fetch WhiskyStats expressions */
+      if (d.type === 'company' && d.category === 'distillery') {
+        var wsKey = 'ws:' + (d.title || cacheKey);
+        var lsKey = 's_' + (d.title || cacheKey).toLowerCase().replace(/\s+/g, '_');
+        if (_cache[wsKey]) { d._wsResults = _cache[wsKey]; renderPopout(d, win); return; }
+        var lsCached = lsGet(lsKey);
+        if (lsCached) { d._wsResults = lsCached; _cache[wsKey] = lsCached; renderPopout(d, win); return; }
+        var wsQ = encodeURIComponent(d.title || query);
+        var distWords = (d.title || query).toLowerCase().split(/\s+/).filter(function(w){ return w.length > 3; });
+        d._wsDistWords = distWords; d._wsQ = wsQ; d._wsLsKey = lsKey;
+        fetch('/.netlify/functions/whisky-data?type=search&query=' + wsQ + '&page=1')
+          .then(function(r){ return r.ok ? r.json() : null; })
+          .then(function(ws){
+            var all = [], seen = {};
+            if (ws && ws.results) {
+              ws.results.forEach(function(r){
+                if (seen[r.whisky_id]) return;
+                var n = (r.whisky_name || '').toLowerCase();
+                if (!distWords.length || distWords.some(function(w){ return n.indexOf(w) !== -1; })) { seen[r.whisky_id] = true; all.push(r); }
+              });
+            }
+            d._wsResults = all; d._wsPage = 1; _cache[wsKey] = all; lsSet(lsKey, all);
+            renderPopout(d, win);
+          }).catch(function(){ renderPopout(d, win); });
+      } else {
+        renderPopout(d, win);
+      }
+    }
+
+    function _showError(win) {
+      var body = win.querySelector('.intel-popwin-body');
+      if (win._loadingTimer) { clearInterval(win._loadingTimer); win._loadingTimer = null; }
+      if (body) {
+        body.innerHTML = '<div class="sp-loading" style="color:#e05050;">INTELLIGENCE UNAVAILABLE<br><span class="intel-retry-btn" style="margin-top:8px;display:inline-block;">↻ RETRY</span></div>';
+        var btn = body.querySelector('.intel-retry-btn');
+        if (btn) btn.addEventListener('click', function(){ body.innerHTML='<div class="sp-intel-load">GENERATING BRIEF<span class="sp-intel-ld"></span></div>'; fetchDetail(query, type, ticker, win, 0); });
+      }
+    }
+
+    /* ── Try SSE streaming endpoint ── */
+    if (window.ReadableStream && window.TextDecoder) {
+      fetch('/.netlify/functions/search-stream', { method: 'POST', headers: fetchHeaders, body: reqBody })
+        .then(function(r) {
+          if (!r.ok || !r.body) { _fallbackFetch(); return; }
+
+          var reader  = r.body.getReader();
+          var decoder = new TextDecoder();
+          var lineBuf = '';
+          var streamEl = win.querySelector('.intel-popwin-body');
+          var streamText = '';
+          var streamStarted = false;
+
+          function readChunk() {
+            return reader.read().then(function(chunk) {
+              if (chunk.done) return;
+              lineBuf += decoder.decode(chunk.value, { stream: true });
+              var lines = lineBuf.split('\n');
+              lineBuf = lines.pop();
+
+              for (var i = 0; i < lines.length; i++) {
+                var line = lines[i];
+                if (!line.startsWith('data: ')) continue;
+                var raw;
+                try { raw = JSON.parse(line.slice(6)); } catch { continue; }
+
+                if (raw.type === 'cache') {
+                  /* Server cache hit — render immediately, no streaming */
+                  if (win._loadingTimer) { clearInterval(win._loadingTimer); win._loadingTimer = null; }
+                  _onDetail(raw.data);
+                  return;
+                }
+
+                if (raw.type === 'delta') {
+                  /* Show live streaming text */
+                  if (!streamStarted) {
+                    streamStarted = true;
+                    if (win._loadingTimer) { clearInterval(win._loadingTimer); win._loadingTimer = null; }
+                    if (streamEl) streamEl.innerHTML = '<div class="sp-stream-live"></div>';
                   }
-                });
+                  streamText += raw.text;
+                  var liveEl = streamEl && streamEl.querySelector('.sp-stream-live');
+                  if (liveEl) liveEl.textContent = streamText;
+                  return readChunk();
+                }
+
+                if (raw.type === 'done') {
+                  /* Stream complete — transition to structured render */
+                  _onDetail(raw.data);
+                  return;
+                }
+
+                if (raw.type === 'error') {
+                  if (raw.code === 402) {
+                    win.remove();
+                    window._showNoCredits && window._showNoCredits(raw.balance || 0);
+                  } else {
+                    _showError(win);
+                  }
+                  return;
+                }
               }
-              d._wsResults = all;
-              d._wsPage = 1;
-              _cache[wsKey] = all;
-              lsSet(lsKey, all);
-              renderPopout(d, win);
-            }).catch(function () { renderPopout(d, win); });
-        } else {
-          renderPopout(d, win);
-        }
-      })
-      .catch(function () {
-        var body = win.querySelector('.intel-popwin-body');
-        if (body) {
-          body.innerHTML = '<div class="sp-loading">INTELLIGENCE UNAVAILABLE<span class="intel-retry-btn">↻ RETRY</span></div>';
-          var btn = body.querySelector('.intel-retry-btn');
-          if (btn) btn.addEventListener('click', function() {
-            body.innerHTML = '<div class="sp-loading">LOADING…</div>';
-            fetchPopout(query, type, ticker, win);
-          });
-        }
-      });
+              return readChunk();
+            });
+          }
+
+          readChunk().catch(function() { _showError(win); });
+        })
+        .catch(function() { _fallbackFetch(); });
+    } else {
+      _fallbackFetch();
+    }
+
+    /* ── Fallback: regular buffered endpoint ── */
+    function _fallbackFetch() {
+      var retries = _retryCount || 0;
+      fetch('/.netlify/functions/search', { method: 'POST', headers: fetchHeaders, body: reqBody })
+        .then(function(r) {
+          if (r.status === 402) {
+            win.remove();
+            r.json().then(function(d){ window._showNoCredits && window._showNoCredits(d.balance || 0); });
+            return null;
+          }
+          if ((r.status === 503 || r.status === 504) && retries < 2) {
+            var body = win.querySelector('.intel-popwin-body');
+            if (body) body.innerHTML = '<div class="sp-intel-load">GENERATING BRIEF — PLEASE WAIT<span class="sp-intel-ld"></span></div>';
+            setTimeout(function(){ fetchDetail(query, type, ticker, win, retries + 1); }, 4000);
+            return null;
+          }
+          if (!r.ok) { _showError(win); return null; }
+          return r.json();
+        })
+        .then(function(d){ if (d) _onDetail(d); })
+        .catch(function(){ _showError(win); });
+    }
   }
 
   /* ── FETCH SECTION DETAIL (overview or pitch) ── */

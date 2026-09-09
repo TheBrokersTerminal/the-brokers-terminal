@@ -8917,8 +8917,8 @@
     ];
 
     function cUrl(s, y) {
-      /* Stock tickers: uppercase letters only (1-6 chars, no digits) → Yahoo Finance route */
-      var isStock = /^[A-Z]{1,6}$/.test(s) && !/^(EURGBP|CFNAI|PAYEMS|WALCL|BOGMBASE|CIVPART|ICSA|INDPRO|UNRATE|GS|SP)$/.test(s);
+      /* Stock tickers: letters + optional exchange suffix (.L .TO .AX etc.) → Yahoo Finance route */
+      var isStock = /^[A-Z0-9]{1,6}(\.[A-Z]{1,2})?$/.test(s) && !/^(EURGBP|CFNAI|PAYEMS|WALCL|BOGMBASE|CIVPART|ICSA|INDPRO|UNRATE|GS|SP|GS10|GS2)$/.test(s);
       var base = '/.netlify/functions/macro-data?type=chart&series=' + encodeURIComponent(s) + '&years=' + y;
       return isStock ? base + '&source=stock' : base;
     }
