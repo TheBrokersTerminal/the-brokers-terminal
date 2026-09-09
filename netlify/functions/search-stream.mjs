@@ -365,7 +365,7 @@ Analyse this as a senior wealth strategist combined with an elite sales psycholo
     "socialProof": "What investors in a similar situation are doing. One sentence."
   }
 }
-CRITICAL: solutionAreas 2-5 areas, only genuinely relevant ones. Pitch must be specific to THIS client. Never use double-quote characters inside string values.`;
+CRITICAL: solutionAreas 2-3 areas only (most relevant). ALL field values must be concise — maximum 2 sentences each. Pitch must be specific to THIS client. Never use double-quote characters inside string values.`;
 
 /* ══════════════════════════════════════════════════════════════════════════
    HANDLER
@@ -459,16 +459,28 @@ export default async (req) => {
         const lensAppend = (!isScenario && lensContext)
           ? `\n\nACTIVE BROKER LENS — tailor ALL pitch content specifically to this asset class context:\n${lensContext}`
           : '';
-        const maxTok  = type === 'concept' && !isScenario ? 400 : 3000;
+        /* Scenarios: 1200 tok (~8-10s generation, safe under 20s kill).
+           Concepts slim: 400. Everything else: 2500. */
+        const maxTok  = type === 'concept' && !isScenario ? 400 : isScenario ? 1200 : 2500;
         const sysPrompt = type === 'concept' ? CONCEPT_SYSTEM : SEARCH_SYSTEM;
         let userMsg;
         if (isScenario)          userMsg = SCENARIO_PROMPT(query) + lensAppend;
         else if (type === 'concept') userMsg = CONCEPT_SLIM_PROMPT(query);
         else                     userMsg = COMPANY_PROMPT(query) + lensAppend;
 
-        /* ── Anthropic streaming call ── */
-        const ctrl21 = new AbortController();
-        const timer  = setTimeout(() => ctrl21.abort(), 21000);
+        /* ── Hard 20s kill for the ENTIRE streaming operation (headers + body).
+           The previous pattern cleared the timer after the initial fetch() resolved
+           (i.e. when HTTP headers arrived), leaving the body-reading loop unguarded.
+           This timer wraps everything — if Anthropic hasn't finished in 20s the
+           client gets an SSE error event and can fall back to the buffered endpoint. ── */
+        let streamTimedOut = false;
+        const streamKill = setTimeout(() => {
+          streamTimedOut = true;
+          try {
+            ctrl.enqueue(sseChunk({ type: 'error', message: 'timeout' }));
+            ctrl.close();
+          } catch {}
+        }, 20000);
 
         let anthropicResp;
         try {
@@ -487,16 +499,23 @@ export default async (req) => {
               system:     [{ type: 'text', text: sysPrompt, cache_control: { type: 'ephemeral' } }],
               messages:   [{ role: 'user', content: userMsg }],
             }),
-            signal: ctrl21.signal,
           });
-        } finally {
-          clearTimeout(timer);
+        } catch (fetchErr) {
+          clearTimeout(streamKill);
+          if (!streamTimedOut) {
+            ctrl.enqueue(sseChunk({ type: 'error', message: 'fetch_error' }));
+            ctrl.close();
+          }
+          return;
         }
 
         if (!anthropicResp || !anthropicResp.ok) {
+          clearTimeout(streamKill);
           const errTxt = anthropicResp ? await anthropicResp.text().catch(() => '') : '';
-          ctrl.enqueue(sseChunk({ type: 'error', message: 'anthropic_error', detail: errTxt.slice(0, 200) }));
-          ctrl.close();
+          if (!streamTimedOut) {
+            ctrl.enqueue(sseChunk({ type: 'error', message: 'anthropic_error', detail: errTxt.slice(0, 200) }));
+            ctrl.close();
+          }
           return;
         }
 
@@ -507,32 +526,40 @@ export default async (req) => {
         let lastEvent = '';
         let fullText  = '';
 
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
+        try {
+          while (true) {
+            if (streamTimedOut) break;
+            const { done, value } = await reader.read();
+            if (done || streamTimedOut) break;
 
-          lineBuf += decoder.decode(value, { stream: true });
-          const lines = lineBuf.split('\n');
-          lineBuf = lines.pop(); /* keep incomplete line */
+            lineBuf += decoder.decode(value, { stream: true });
+            const lines = lineBuf.split('\n');
+            lineBuf = lines.pop();
 
-          for (const line of lines) {
-            if (line.startsWith('event: ')) {
-              lastEvent = line.slice(7).trim();
-            } else if (line.startsWith('data: ')) {
-              if (lastEvent === 'content_block_delta') {
-                try {
-                  const evt = JSON.parse(line.slice(6));
-                  if (evt.delta && evt.delta.type === 'text_delta' && evt.delta.text) {
-                    fullText += evt.delta.text;
-                    ctrl.enqueue(sseChunk({ type: 'delta', text: evt.delta.text }));
-                  }
-                } catch {}
+            for (const line of lines) {
+              if (line.startsWith('event: ')) {
+                lastEvent = line.slice(7).trim();
+              } else if (line.startsWith('data: ')) {
+                if (lastEvent === 'content_block_delta') {
+                  try {
+                    const evt = JSON.parse(line.slice(6));
+                    if (evt.delta && evt.delta.type === 'text_delta' && evt.delta.text) {
+                      fullText += evt.delta.text;
+                      ctrl.enqueue(sseChunk({ type: 'delta', text: evt.delta.text }));
+                    }
+                  } catch {}
+                }
+              } else if (line === '') {
+                lastEvent = '';
               }
-            } else if (line === '') {
-              lastEvent = '';
             }
           }
+        } finally {
+          clearTimeout(streamKill);
+          reader.cancel().catch(() => {});
         }
+
+        if (streamTimedOut) return; /* kill timer already sent error event */
 
         /* ── Parse final JSON ── */
         const stripped = fullText.replace(/^```(?:json)?\s*/m, '').replace(/```\s*$/m, '').trim();
@@ -559,11 +586,10 @@ export default async (req) => {
         ctrl.close();
 
       } catch (err) {
-        ctrl.enqueue(sseChunk({
-          type: 'error',
-          message: err.name === 'AbortError' ? 'timeout' : (err.message || 'unknown_error'),
-        }));
-        try { ctrl.close(); } catch {}
+        try {
+          ctrl.enqueue(sseChunk({ type: 'error', message: err.message || 'unknown_error' }));
+          ctrl.close();
+        } catch {}
       }
     },
   });
