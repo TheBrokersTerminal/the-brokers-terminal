@@ -76,6 +76,14 @@ async function serverDeductCredits(authHeader, creditCost, description) {
 }
 
 /* ── JSON repair (same state-machine as search.js) ── */
+function removeTrailingCommas(str) {
+  return str.replace(/,(\s*[}\]])/g, '$1');
+}
+
+function fullRepair(raw) {
+  return repairJson(closeTruncated(removeTrailingCommas(raw)));
+}
+
 function closeTruncated(str) {
   const opens = [];
   let inStr = false, esc = false;
@@ -592,8 +600,9 @@ export default async (req) => {
             parsed = JSON.parse(repairJson(raw));
           } catch {
             try {
-              parsed = JSON.parse(repairJson(closeTruncated(raw)));
+              parsed = JSON.parse(fullRepair(raw));
             } catch {
+              console.warn('[search-stream] parse failed after fullRepair — raw_end:', raw.slice(-200));
               ctrl.enqueue(sseChunk({ type: 'error', message: 'parse_error' }));
               ctrl.close();
               return;
