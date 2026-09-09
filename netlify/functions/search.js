@@ -712,6 +712,114 @@ Generate a financial concept or historical market event briefing WITH a full sal
 }
 Exactly 3 timeline entries. Every text field: 1-2 sentences maximum.`;
 
+/* ── CONCEPT — slim initial load: title + tagline + 2-sentence overview only ── */
+const CONCEPT_SLIM_PROMPT = (query) => `Research request: "${query}"
+
+Return ONLY this slim JSON — no pitch, no timeline, no causes. Fast brief:
+{
+  "type": "concept",
+  "title": "Full proper name of this concept or historical event",
+  "period": "Time period e.g. 1929-1933 or Ongoing concept",
+  "tagline": "One sentence plain-English — what this is for someone who has never heard of it",
+  "overview": "2-3 sentences. What actually happened or what this concept means. Use ONE vivid analogy from your analogy library. No sales language."
+}
+No markdown. No preamble. Return ONLY the JSON object.`;
+
+/* ── CONCEPT — on-demand section prompts ── */
+const CONCEPT_SECTION_PROMPT = (query, section) => {
+  const schemas = {
+    'the-history': `Research request: "${query}"
+
+Generate THE HISTORY section only. Return this exact JSON:
+{
+  "headline": "One striking sentence — what triggered this, with a specific number or date",
+  "background": "2-3 sentences of context — what was happening before this event or concept emerged",
+  "causes": ["Primary cause — specific and verifiable with a named actor or number", "Second cause — specific", "Third cause — specific"],
+  "timeline": [
+    {"date": "Year or month/year", "event": "What happened and why it mattered — one sentence"},
+    {"date": "Year or month/year", "event": "Second pivotal moment — one sentence"},
+    {"date": "Year or month/year", "event": "Third pivotal moment — one sentence"},
+    {"date": "Year or month/year", "event": "Fourth pivotal moment — one sentence"},
+    {"date": "Year or month/year", "event": "Fifth pivotal moment — one sentence"}
+  ]
+}
+Exactly 5 timeline entries. No preamble. Return ONLY the JSON.`,
+
+    'the-outcome': `Research request: "${query}"
+
+Generate THE OUTCOME section only. Return this exact JSON:
+{
+  "headline": "One sentence — the defining consequence, with a specific verified number",
+  "immediateEffect": "2-3 sentences on what happened immediately after the crisis peaked or concept took hold",
+  "recovery": "2-3 sentences on how long recovery took and what the turning point was. Specific dates and numbers.",
+  "whatChanged": [
+    "Major structural or policy change that followed — specific",
+    "Market structure or regulatory change — specific",
+    "How the world was permanently different afterwards — specific"
+  ]
+}
+No preamble. Return ONLY the JSON.`,
+
+    'economic-impact': `Research request: "${query}"
+
+Generate the ECONOMIC IMPACT section only. Return this exact JSON:
+{
+  "headline": "The scale of economic effect in one sentence with a specific verified number",
+  "overview": "2-3 sentences on the economic transmission mechanism — how this moved through the economy",
+  "gdpImpact": "1-2 sentences on GDP, growth, trade or employment impact with specific verified numbers and years",
+  "assetImpacts": [
+    {"asset": "Equities", "effect": "What happened — specific % decline or gain with index name"},
+    {"asset": "Gold", "effect": "What happened to gold — specific number or direction"},
+    {"asset": "Real Estate", "effect": "Property market impact — specific number or direction"},
+    {"asset": "Bonds", "effect": "Bond market reaction — specific yield change or direction"},
+    {"asset": "Currency / FX", "effect": "Currency impact — specific devaluation or shift"}
+  ]
+}
+No preamble. Return ONLY the JSON.`,
+
+    'hardship-loss': `Research request: "${query}"
+
+Generate the HARDSHIP & LOSS section only. Return this exact JSON:
+{
+  "headline": "The human scale in one sentence — the most shocking verified statistic",
+  "overview": "2-3 sentences on the breadth of human impact — ordinary people, families, small businesses",
+  "statistics": [
+    {"metric": "Unemployment", "figure": "Peak rate with country and year"},
+    {"metric": "Bank failures", "figure": "Number of institutions that failed"},
+    {"metric": "Wealth destroyed", "figure": "Estimated dollars or % of market cap lost"},
+    {"metric": "Business closures", "figure": "Number or % of businesses that failed"},
+    {"metric": "People in poverty", "figure": "Number or % driven into poverty"}
+  ],
+  "pensionImpact": "1-2 sentences specifically on savings and retirement security — what ordinary savers lost",
+  "globalReach": "1-2 sentences on geographic spread — which countries were hit and how contagion spread"
+}
+No preamble. Return ONLY the JSON.`,
+
+    'pitch-playbook': `Research request: "${query}"
+
+Generate the PITCH PLAYBOOK for this concept. Apply ALL sales psychology from your instructions. Return this exact JSON:
+{
+  "openingLine": "One sentence second-level hook — a question or striking fact that stops the client. Never state the obvious.",
+  "brokerNote": "2 sentences. Asset-neutral. How a broker connects this concept to a client situation today.",
+  "logicalCase": ["Most arresting verified fact with specific number", "Historical pattern with verified number or named institution", "Direct implication for client wealth right now"],
+  "emotionalCase": "2 sentences. Loss frame first — specific calculated cost of inaction. Then gain frame — what right positioning delivers. Asset-neutral.",
+  "painPoint": "The specific precise fear this concept triggers in a client. One sentence.",
+  "spinQuestions": [
+    "Situation — how exposed is their portfolio and do they know it",
+    "Problem/Implication — what this has already cost them or could cost them with a specific calculation",
+    "Need-Payoff — starts with So if you had... or What would it mean if..."
+  ],
+  "objections": [
+    {"objection": "The most likely pushback from a sceptical client", "rebuttal": "Acknowledge genuinely then reframe as evidence for action then close with need-payoff question. Conversational."}
+  ],
+  "urgencyLine": "One real verifiable reason acting now is smarter than waiting. Never manufactured. If no genuine urgency, name the next catalyst.",
+  "socialProof": "What sophisticated investors or institutional allocators are doing in response. One sentence."
+}
+No preamble. Return ONLY the JSON.`
+  };
+  return schemas[section] || `Research request: "${query}"\nProvide a concise intelligence brief. Return valid JSON only.`;
+};
+
 const CONCEPT_PROMPT = (query) => `Research request: "${query}"
 
 IMPORTANT: First decide what this query is. Then return the correct format.
@@ -895,11 +1003,17 @@ exports.handler = async (event) => {
 
     const authHeader = event.headers.authorization || event.headers.Authorization || '';
     const isSection = !!section || /—\s*(PITCH|PROFILE|PLAYBOOK)/i.test(query);
-    const creditCost = (type === 'company' && !isSection) ? 25 : 10;
+    /* Concept sections cost 5 credits (small focused call); full/slim loads cost 10; company full costs 25 */
+    const creditCost = (type === 'company' && !isSection) ? 25 : (type === 'concept' && section) ? 5 : 10;
 
     /* ── CHECK CACHE FIRST — free hit, no credit cost, no Claude call ── */
     const lensTag = lensKey ? ':' + lensKey : '';
-    const cacheKey = 'search9:' + type + ':' + (section ? section + ':' : '') + (ticker || query.trim().toLowerCase().slice(0, 80)) + lensTag;
+    /* Concept searches use their own cache key namespace to avoid stale full-concept entries */
+    const cacheKey = type === 'concept'
+      ? (section
+          ? 'search9:concept-section:' + section + ':' + query.trim().toLowerCase().slice(0, 80) + lensTag
+          : 'search9:concept-slim:' + query.trim().toLowerCase().slice(0, 80) + lensTag)
+      : 'search9:' + type + ':' + (section ? section + ':' : '') + (ticker || query.trim().toLowerCase().slice(0, 80)) + lensTag;
 
     if (!isScenario) {
       const cached = await cacheGet(cacheKey);
@@ -933,8 +1047,10 @@ exports.handler = async (event) => {
     let userMsg;
     if (isScenario) {
       userMsg = SCENARIO_PROMPT(query);
+    } else if (type === 'concept' && section) {
+      userMsg = CONCEPT_SECTION_PROMPT(query, section) + (section === 'pitch-playbook' ? lensAppend : '');
     } else if (type === 'concept') {
-      userMsg = CONCEPT_OVERVIEW_PROMPT(query) + lensAppend;
+      userMsg = CONCEPT_SLIM_PROMPT(query); /* slim initial load — no lens needed */
     } else if (section === 'overview') {
       userMsg = OVERVIEW_PROMPT(query, null) + lensAppend;
     } else if (section === 'pitch') {
@@ -1017,11 +1133,14 @@ exports.handler = async (event) => {
     }
 
     try {
-      /* Concept/event responses are longer (timeline + causes + full pitch) so need more tokens */
+      /* Slim concept = 400 tokens; concept sections = 600-800; company searches = 1800 */
+      const maxTok = type === 'concept'
+        ? (!section ? 400 : section === 'pitch-playbook' ? 800 : 600)
+        : 1800;
       const claudeResp = await callAnthropic(
         type === 'concept' ? CONCEPT_SYSTEM : SEARCH_SYSTEM,
         userMsg,
-        type === 'concept' ? 2400 : 1800
+        maxTok
       );
 
       if (!claudeResp.ok) {
