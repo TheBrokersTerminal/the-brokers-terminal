@@ -613,7 +613,21 @@ exports.handler = async (event) => {
     return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'headline required' }) };
   }
 
-  /* ── SERVER-SIDE CREDIT GATE (10 credits per news pitch) ────────── */
+  /* ── Cache key: headline (normalised) + category + lens ── */
+  const lensTag = lensKey ? ':' + lensKey : '';
+  const cacheKey = 'explain4:' + category + lensTag + ':' + headline.trim().toLowerCase().slice(0, 120);
+
+  /* ── CHECK CACHE FIRST — free hit, no credit cost ── */
+  const cached = await cacheGet(cacheKey);
+  if (cached) {
+    return {
+      statusCode: 200,
+      headers: { ...corsHeaders, 'Cache-Control': 'public, max-age=3600', 'X-Cache': 'HIT' },
+      body: JSON.stringify(cached),
+    };
+  }
+
+  /* ── SERVER-SIDE CREDIT GATE — only on cache miss ── */
   if (SUPABASE_KEY) {
     const authHeader = event.headers.authorization || event.headers.Authorization || '';
     const jwt = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
@@ -651,19 +665,6 @@ exports.handler = async (event) => {
     } else {
       return { statusCode: 401, headers: corsHeaders, body: JSON.stringify({ error: 'missing_token' }) };
     }
-  }
-
-  /* ── Cache key: headline (normalised) + category + lens — v2 forces regeneration after lens fix ── */
-  const lensTag = lensKey ? ':' + lensKey : '';
-  const cacheKey = 'explain4:' + category + lensTag + ':' + headline.trim().toLowerCase().slice(0, 120);
-
-  const cached = await cacheGet(cacheKey);
-  if (cached) {
-    return {
-      statusCode: 200,
-      headers: { ...corsHeaders, 'Cache-Control': 'public, max-age=3600', 'X-Cache': 'HIT' },
-      body: JSON.stringify(cached),
-    };
   }
 
   /* Per-lens pitch instructions — specific product language for every non-physical lens */
@@ -848,21 +849,34 @@ CRITICAL: Respond ONLY with the JSON object. Start your response with { and end 
     const systemBlocks = [{ type: 'text', text: STYLE_GUIDE, cache_control: { type: 'ephemeral' } }];
     if (lensOverride) systemBlocks.push({ type: 'text', text: lensOverride });
 
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-beta': 'prompt-caching-2024-07-31',
-        'content-type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 1800,
-        system: systemBlocks,
-        messages: [{ role: 'user', content: userMessage }],
-      }),
-    });
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 21000);
+    let resp;
+    try {
+      resp = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+          'anthropic-beta': 'prompt-caching-2024-07-31',
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'claude-haiku-4-5-20251001',
+          max_tokens: 1800,
+          system: systemBlocks,
+          messages: [{ role: 'user', content: userMessage }],
+        }),
+        signal: ctrl.signal,
+      });
+    } catch (fetchErr) {
+      clearTimeout(timer);
+      if (fetchErr.name === 'AbortError') {
+        return { statusCode: 503, headers: { ...corsHeaders, 'Retry-After': '5' }, body: JSON.stringify({ error: 'timeout', retryable: true }) };
+      }
+      throw fetchErr;
+    }
+    clearTimeout(timer);
 
     if (!resp.ok) {
       const err = await resp.text();
@@ -879,7 +893,7 @@ CRITICAL: Respond ONLY with the JSON object. Start your response with { and end 
       const jsonMatch = stripped.match(/\{[\s\S]*\}/);
       parsed = JSON.parse(jsonMatch ? jsonMatch[0] : stripped);
     } catch {
-      return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({ error: 'parse_failed', raw: text }) };
+      return { statusCode: 503, headers: { ...corsHeaders, 'Retry-After': '3' }, body: JSON.stringify({ error: 'parse_error', retryable: true }) };
     }
 
     cacheSet(cacheKey, parsed); /* fire-and-forget — don't block the response */

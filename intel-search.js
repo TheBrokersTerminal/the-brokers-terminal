@@ -1562,7 +1562,8 @@
   }
 
   /* ── Lazy-load concept pitch on demand ── */
-  function fetchConceptPitch(conceptTitle, win, pitchPanel) {
+  function fetchConceptPitch(conceptTitle, win, pitchPanel, _retryCount) {
+    var retries = _retryCount || 0;
     var lensKey = (window._assetLens && window._assetLens.key) || 'universal';
     var lensContext = (window._assetLens && window._assetLens.promptContext) || '';
     var cacheKey = 'concept:' + lensKey + ':pitch:' + conceptTitle.trim().toLowerCase().slice(0, 80);
@@ -1581,6 +1582,12 @@
         if (r.status === 402) {
           r.json().then(function (d) { window._showNoCredits && window._showNoCredits(d.balance || 0); });
           pitchPanel.innerHTML = '<div class="sp-loading" style="color:#E97132;letter-spacing:.1em;">INSUFFICIENT CREDITS</div>';
+          return null;
+        }
+        /* 503 retryable (our timeout) or 504 (Netlify gateway) — auto-retry once */
+        if ((r.status === 503 || r.status === 504) && retries < 1) {
+          pitchPanel.innerHTML = '<div class="sp-loading">GENERATING BRIEF — PLEASE WAIT<span class="sp-intel-ld"></span></div>';
+          setTimeout(function () { fetchConceptPitch(conceptTitle, win, pitchPanel, retries + 1); }, 4000);
           return null;
         }
         if (!r.ok) {
