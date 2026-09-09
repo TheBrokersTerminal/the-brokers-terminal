@@ -204,7 +204,7 @@
         '<div class="intel-search-bar">' +
           '<span class="intel-search-icon">⌕</span>' +
           '<span class="intel-search-lbl">INTEL</span>' +
-          '<input id="intel-search-input" type="text" placeholder="Company, event, or describe a client scenario…" autocomplete="off" spellcheck="false" readonly>' +
+          '<input id="intel-search-input" type="search" placeholder="Company, event, or describe a client scenario…" autocomplete="new-password" spellcheck="false" autocorrect="off" autocapitalize="off" readonly>' +
         '</div>' +
       '</div>';
 
