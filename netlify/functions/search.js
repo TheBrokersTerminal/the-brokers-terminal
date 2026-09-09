@@ -897,13 +897,13 @@ const SCENARIO_PROMPT = (query) => `An investment professional has described the
 
 "${query}"
 
-Analyse this as a senior wealth strategist would. Return ONLY this exact JSON:
+Analyse this as a senior wealth strategist combined with an elite sales psychologist. Apply ALL sales psychology frameworks from your instructions. Return ONLY this exact JSON:
 {
   "type": "scenario",
   "title": "2-4 word brief title for this scenario",
   "situation": "Plain English summary of the client's situation and key facts (2-3 sentences)",
   "keyConsiderations": [
-    "Most important planning consideration — be specific",
+    "Most important planning consideration — be specific to this client",
     "Second consideration — regulatory, tax, or suitability angle",
     "Third consideration — timing, risk, or portfolio angle"
   ],
@@ -923,11 +923,31 @@ Analyse this as a senior wealth strategist would. Return ONLY this exact JSON:
     "Concrete first action for the broker",
     "Second action — preparation or client follow-up"
   ],
-  "brokerBrief": "2-3 sentence plain English brief: what to say to this client, what angle to lead with, and what need-payoff question to close on. Asset-neutral pitch framing.",
-  "openingLine": "The exact first sentence to say to this client on the call — a question or statement that shows you understand their situation. Not a pitch."
+  "brokerBrief": "2-3 sentence plain English brief: what angle to lead with and what need-payoff question to close on. Asset-neutral.",
+  "openingLine": "The exact first sentence to say to this client — a question or statement that shows you understand their situation. Second-level — not obvious.",
+  "pitch": {
+    "openingLine": "One sentence hook tailored to this client's specific situation — a question or striking fact that stops them. Never generic. Sets the evaluative frame for this specific person.",
+    "logicalCase": [
+      "Most compelling fact specific to this client's situation — their actual numbers or risk if known",
+      "Historical pattern or verified data point that makes the case for them specifically",
+      "The direct implication for their wealth given what they have described"
+    ],
+    "emotionalCase": "2 sentences tailored to this client. Loss frame first — the specific calculated cost of their current position or inaction. Then gain frame — what right positioning delivers for them specifically. Asset-neutral.",
+    "painPoint": "The specific fear or frustration this client is most likely experiencing right now. One sentence. Precise — not generic.",
+    "spinQuestions": [
+      "Situation — establishes where their money is now and surfaces any blind spots in their current thinking",
+      "Problem/Implication — surfaces the specific cost of their current position with a calculated number where possible",
+      "Need-Payoff — lets them articulate the benefit in their own words. Starts with So if you had... or What would it mean if..."
+    ],
+    "objections": [
+      {"objection": "The most likely pushback from this specific type of client given their situation", "rebuttal": "Acknowledge genuinely then reframe as evidence for action then close with need-payoff question. Conversational not scripted."}
+    ],
+    "urgencyLine": "One real verifiable reason why acting now serves this client better than waiting. Specific to their situation — rate window, tax year, portfolio concentration timing. Never manufactured.",
+    "socialProof": "What investors in a similar situation — same life stage, same profile — are doing. One sentence. Grounds the conversation in peer behaviour."
+  }
 }
 
-IMPORTANT: solutionAreas should only include asset classes genuinely relevant to this client's situation. Include 2-5 areas. Be specific to the scenario — not generic. CRITICAL: never use double-quote characters inside string values.`;
+CRITICAL: solutionAreas 2-5 areas, only genuinely relevant ones. Pitch must be specific to THIS client's described situation — not generic asset class marketing. Never use double-quote characters inside string values.`;
 
 exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') {
