@@ -790,8 +790,14 @@ function renderArticle(story) {
   /* Related stories — same category, different story */
   var related=allStories.filter(function(s){return s.id!==story.id&&s._cat===cat;}).slice(0,4);
 
-  /* Chart info */
+  /* Chart info — keyword override for more relevant charts */
   var chartCfg=CAT_CHART[cat];
+  var _hl=(story.headline||'').toLowerCase();
+  if(/flight|airline|airport|aviation|aircraft|airspace|air traffic|nats|runway/.test(_hl)){
+    chartCfg={lbl:'WTI CRUDE OIL  ·  USD / BARREL  ·  AVIATION FUEL PROXY',sym:'USO',mult:1,fred:'DCOILWTICO',fredU:'USD/BBL'};
+  } else if(/sterling|pound|gbp|yen|euro\b|dollar|currency|forex|exchange rate/.test(_hl)){
+    chartCfg={lbl:'GBP / USD  ·  STERLING · DOLLAR',sym:'FXB',mult:1,fred:'DEXUSUK',fredU:'USD'};
+  }
 
   /* Build HTML */
   var bulletHTML=bullets.map(function(b){return '<li>'+b+'</li>';}).join('');
@@ -1024,6 +1030,22 @@ async function finnhubQ(sym){
   finally{clearTimeout(t);}
 }
 
+/* Fetch latest spot price from FRED. Returns {c, pc} or null. */
+async function _fredPrice(series) {
+  try {
+    if (!_fredCache[series]) {
+      var res = await fetch('/.netlify/functions/macro-data?type=chart&series=' + series + '&years=1');
+      var json = res.ok ? await res.json() : {};
+      _fredCache[series] = (json.data && json.data.length) ? json.data : null;
+    }
+    var data = _fredCache[series];
+    if (!data || data.length < 2) return null;
+    var cur = data[data.length - 1].v;
+    var prev = data[data.length - 2].v;
+    return { c: cur, pc: prev };
+  } catch(e) { return null; }
+}
+
 /* open.er-api.com: free, no key, CORS-enabled. rates[GBP]=0.786 means 1 USD = 0.786 GBP */
 var _erRates=null, _erAge=0;
 async function loadFxRates(){
@@ -1171,50 +1193,47 @@ async function _fetchAndPaintChart(storyId, cfg, col, period) {
 }
 
 async function drawChart(storyId, cfg) {
-  /* No _sid guard — pop-out IDs are prefixed and never match _sid */
   var wrap=document.getElementById('cwrap-'+storyId);
   var prEl=document.getElementById('cpr-'+storyId);
   if(!wrap) return;
-  var unavail='<div class="mkt-snap" style="padding:24px;text-align:center;font-family:var(--font);font-size:7px;letter-spacing:.22em;color:#2a2a2a;">MARKET DATA UNAVAILABLE</div>';
-  try {
-    var q=await finnhubQ(cfg.sym);
-    if(!q||(q.c==null&&q.pc==null)){
-      /* Live price unavailable — still render the FRED historical chart */
-      if(document.getElementById('cwrap-'+storyId)===wrap){
-        wrap.innerHTML=buildSnapHTML(storyId,0,0,0,0,0,'#555','–',0,0,cfg);
-        _fetchAndPaintChart(storyId,cfg,'#E97132','1Y');
-        var cw2b=document.getElementById('mkt-chart-'+storyId);
-        if(cw2b) cw2b.querySelectorAll('.mkt-cp').forEach(function(btn){
-          btn.addEventListener('click',function(){
-            cw2b.querySelectorAll('.mkt-cp').forEach(function(b){b.classList.remove('active');});
-            btn.classList.add('active');
-            _fetchAndPaintChart(storyId,cfg,'#E97132',btn.dataset.p);
-          });
-        });
-      }
-      return;
-    }
-    var mult=cfg.mult||1;
-    var rawC=q.c||q.pc||0;
-    var c=rawC*mult, pc=(q.pc||rawC)*mult;
-    var h=(q.h||rawC)*mult, l=(q.l||rawC)*mult, o=(q.o||q.pc||rawC)*mult;
-    var chg=c-pc, pct=pc?(chg/pc*100):0;
-    var col=pct>=0?'#E97132':'#e05050', dir=pct>=0?'▲':'▼';
-    if(prEl) prEl.innerHTML='<span style="color:#aaa;">'+fmtPrice(c)+'</span>&nbsp;<span style="color:'+col+'">'+dir+'&nbsp;'+(pct>=0?'+':'')+pct.toFixed(2)+'%</span>';
-    /* Re-check wrap still exists (user may have navigated away) */
-    if(!document.getElementById('cwrap-'+storyId)) return;
-    wrap.innerHTML=buildSnapHTML(storyId,c,pc,h,l,o,col,dir,chg,pct,cfg);
-    _fetchAndPaintChart(storyId,cfg,col,'1Y');
-    /* wire period buttons */
-    var cw2=document.getElementById('mkt-chart-'+storyId);
-    if(cw2) cw2.querySelectorAll('.mkt-cp').forEach(function(btn){
+
+  /* Render snap immediately so chart appears without waiting for price data */
+  var _col='#E97132';
+  wrap.innerHTML=buildSnapHTML(storyId,0,0,0,0,0,_col,'▲',0,0,cfg);
+  _fetchAndPaintChart(storyId,cfg,_col,'1Y');
+  function _wireBtns(col){
+    var cw=document.getElementById('mkt-chart-'+storyId);
+    if(!cw) return;
+    cw.querySelectorAll('.mkt-cp').forEach(function(btn){
       btn.addEventListener('click',function(){
-        cw2.querySelectorAll('.mkt-cp').forEach(function(b){b.classList.remove('active');});
+        cw.querySelectorAll('.mkt-cp').forEach(function(b){b.classList.remove('active');});
         btn.classList.add('active');
         _fetchAndPaintChart(storyId,cfg,col,btn.dataset.p);
       });
     });
-  } catch(e){ var w=document.getElementById('cwrap-'+storyId); if(w) w.innerHTML=unavail; }
+  }
+  _wireBtns(_col);
+
+  /* Async: fetch accurate price and update in place */
+  try {
+    var fq=null;
+    if(cfg.fred) {
+      fq=await _fredPrice(cfg.fred);
+    }
+    if(!fq && cfg.sym) {
+      var q=await finnhubQ(cfg.sym);
+      if(q&&(q.c||q.pc)){var m=cfg.mult||1;var rc=q.c||q.pc;fq={c:rc*m,pc:(q.pc||rc)*m,h:(q.h||rc)*m,l:(q.l||rc)*m,o:(q.o||q.pc||rc)*m};}
+    }
+    if(!fq||!document.getElementById('cwrap-'+storyId)) return;
+    var c=fq.c,pc=fq.pc,h=fq.h||fq.c,l=fq.l||fq.c,o=fq.o||fq.pc;
+    var chg=c-pc,pct=pc?(chg/pc*100):0;
+    var col=pct>=0?'#E97132':'#e05050',dir=pct>=0?'▲':'▼';
+    if(prEl) prEl.innerHTML='<span style="color:#aaa;">'+fmtPrice(c)+'</span>&nbsp;<span style="color:'+col+'">'+dir+'&nbsp;'+(pct>=0?'+':'')+pct.toFixed(2)+'%</span>';
+    if(!document.getElementById('cwrap-'+storyId)) return;
+    wrap.innerHTML=buildSnapHTML(storyId,c,pc,h,l,o,col,dir,chg,pct,cfg);
+    _fetchAndPaintChart(storyId,cfg,col,'1Y');
+    _wireBtns(col);
+  } catch(e){}
 }
 
 /* ── FETCH QUOTES (Finnhub ETFs + open.er-api.com forex) ───── */
@@ -1229,9 +1248,10 @@ async function fetchQuotes(cat) {
       if(s.kind==='fx'){
         if(!erRates||!erRates[s.p]) return Promise.resolve(null);
         var c=erRate(erRates,s.p,s.inv);
-        return Promise.resolve({l:s.l,c:c,pc:c,noChg:true});
+        return Promise.resolve({l:s.l,c:c,pc:c,noChg:true,fred:s.fred});
       }
-      if(s.sym) return finnhubQ(s.sym).then(function(q){var m=s.mult||1;var raw=q&&(q.c||q.pc);return raw?{l:s.l,c:(q.c||q.pc)*m,pc:(q.pc||q.c||raw)*m}:null;});
+      if(s.fred) return _fredPrice(s.fred).then(function(q){return q?{l:s.l,c:q.c,pc:q.pc,fred:s.fred}:null;});
+      if(s.sym) return finnhubQ(s.sym).then(function(q){var m=s.mult||1;var raw=q&&(q.c||q.pc);return raw?{l:s.l,c:(q.c||q.pc)*m,pc:(q.pc||q.c||raw)*m,fred:null}:null;});
       return Promise.resolve(null);
     }));
     ql.innerHTML='';
@@ -1550,6 +1570,7 @@ async function fetchQuotesInto(cat, container) {
   var ql=qlWrap.querySelector('.qp-list');
   ql.innerHTML='<div class="state-msg" style="padding:10px;font-size:7px;">LOADING<span class="ld"></span></div>';
   var res=await Promise.allSettled(syms.map(function(s){
+    if(s.fred) return _fredPrice(s.fred).then(function(q){return q?{l:s.l,c:q.c,pc:q.pc}:null;});
     if(s.sym) return finnhubQ(s.sym).then(function(q){var m=s.mult||1;var raw=q&&(q.c||q.pc);return raw?{l:s.l,c:(q.c||q.pc)*m,pc:(q.pc||q.c||raw)*m}:null;});
     return Promise.resolve(null);
   }));
