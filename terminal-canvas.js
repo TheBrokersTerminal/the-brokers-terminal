@@ -7726,56 +7726,13 @@
       var emptyHint = !quotes.length ?
         '<div class="wl-empty">NO INSTRUMENTS YET<br><span>Search by name or ticker above · Browse indexes via Quick Add</span></div>' : '';
 
-      /* ── Whisky monitor section (from tbt_whisky_wl localStorage) ── */
-      var _wlMon = (function(){ try{ return JSON.parse(localStorage.getItem('tbt_whisky_wl')||'[]'); }catch(e){ return []; } })();
-      var whiskyHtml = '';
-      if (_wlMon.length) {
-        var _fmtMv = function(v, cur) {
-          var sym = cur==='GBP'?'£':cur==='USD'?'$':cur==='EUR'?'€':cur+' ';
-          return sym + Math.round(v).toLocaleString('en-GB');
-        };
-        var _getMktCache = function(bgId, cur) {
-          try {
-            var raw = JSON.parse(localStorage.getItem('tbt_mkt_'+bgId+'_'+cur)||'null');
-            if (raw && Date.now() - raw.ts < 7*24*60*60*1000) return raw.data;
-          } catch(e){}
-          return null;
-        };
-        whiskyHtml = '<div style="padding:6px 10px 4px;font-size:7px;letter-spacing:.2em;color:#E97132;border-top:1px solid #1a1a1a;margin-top:4px;">WHISKY MONITOR · '+_wlMon.length+' BOTTLE'+((_wlMon.length!==1)?'S':'')+'</div>' +
-          _wlMon.map(function(w) {
-            var cur = w.currency || 'GBP';
-            var bgId = w.bg_id || w.whisky_id;
-            var mkt = _getMktCache(bgId, cur);
-            var mv = mkt && mkt.auction && mkt.auction.market_value != null ? mkt.auction.market_value : null;
-            var chgPct = mkt && mkt.auction && mkt.auction.summary_12mo ? mkt.auction.summary_12mo.market_value_change_pct : null;
-            var priceStr = mv != null ? _fmtMv(mv, cur) : '—';
-            var chgStr = chgPct != null ? (chgPct>=0?'+':'')+chgPct.toFixed(1)+'%' : (mv!=null?'12M N/A':'NO PRICE');
-            var chgCls = chgPct == null ? 'wl-chg-flat' : chgPct >= 0 ? 'wl-pos' : 'wl-neg';
-            var shortName = w.name ? (w.name.length>30?w.name.substring(0,29)+'…':w.name) : w.whisky_id;
-            return '<div class="wl-row wl-whisky-row" data-wid="'+escH(w.whisky_id)+'" data-bgid="'+escH(bgId)+'" data-wname="'+escH(w.name||'')+'" data-cur="'+escH(cur)+'">' +
-              '<div class="wl-bar" style="width:0;"></div>' +
-              '<div class="wl-row-left">' +
-                '<div class="wl-sym" style="font-size:6px;letter-spacing:.12em;color:#E97132;line-height:1.4;">◈ WHISKY</div>' +
-                '<div class="wl-name">'+escH(shortName)+'</div>' +
-              '</div>' +
-              '<div class="wl-row-right">' +
-                '<div class="wl-price">'+priceStr+'</div>' +
-                '<div class="wl-chg '+chgCls+'">'+chgStr+'</div>' +
-              '</div>' +
-              '<div class="wl-row-actions">' +
-                '<button class="wl-whisky-del" data-wid="'+escH(w.whisky_id)+'" title="Remove from monitor">✕</button>' +
-              '</div>' +
-            '</div>';
-          }).join('');
-      }
-
       body.innerHTML =
         '<div class="wl-add-bar">' +
           '<input class="wl-input" id="' + id + '-inp" placeholder="Search company name or ticker…" maxlength="40" autocomplete="off"/>' +
           '<button class="wl-add-btn" id="' + id + '-add">＋</button>' +
         '</div>' +
         qaHtml +
-        '<div class="wl-list">' + (listHtml || (!whiskyHtml ? emptyHint : '')) + whiskyHtml + '</div>' +
+        '<div class="wl-list">' + (listHtml || emptyHint) + '</div>' +
         '<div class="wl-footer">LIVE PRICES · ' + ts + '  ·  CLICK ROW FOR INFO  ·  ℹ FOR COMPANY BRIEF</div>';
 
       /* Preset buttons — open index browser */
@@ -7829,27 +7786,6 @@
           tickers = tickers.filter(function(t){ return t !== btn.dataset.sym; });
           save();
           if (tickers.length) fetchAndRender(); else { draw([]); }
-        });
-      });
-
-      /* Whisky monitor rows — click to open in whisky terminal, ✕ to remove */
-      body.querySelectorAll('.wl-whisky-row').forEach(function(row) {
-        row.addEventListener('click', function(e) {
-          if (e.target.classList.contains('wl-whisky-del')) return;
-          document.dispatchEvent(new CustomEvent('tbt:open-whisky', {
-            detail: { whisky_id: row.dataset.wid, bg_id: row.dataset.bgid, name: row.dataset.wname, currency: row.dataset.cur }
-          }));
-        });
-      });
-      body.querySelectorAll('.wl-whisky-del').forEach(function(btn) {
-        btn.addEventListener('click', function(e) {
-          e.stopPropagation();
-          try {
-            var wl2 = JSON.parse(localStorage.getItem('tbt_whisky_wl')||'[]');
-            wl2 = wl2.filter(function(x){ return x.whisky_id !== btn.dataset.wid; });
-            localStorage.setItem('tbt_whisky_wl', JSON.stringify(wl2));
-          } catch(ex){}
-          draw(_lastQuotes);
         });
       });
 
@@ -9648,6 +9584,8 @@
     var _selectedId = null;
     var _debounce = null;
     var _WL_KEY = 'tbt_whisky_wl';
+    var _wlCache = null;     /* null = not yet loaded */
+    var _wlSbLoaded = false; /* true once Supabase has been queried */
     var _filters = {region:'', age:'', cask:'', distillery:''};
 
     var REGIONS = ['All Regions','Speyside','Islay','Highland','Lowland','Campbeltown','Islands','Japan','Ireland','USA','India','Taiwan'];
@@ -9970,16 +9908,47 @@
       '</div>';
     }
 
-    /* ── Watchlist ── */
-    function getWl() { try { return JSON.parse(localStorage.getItem(_WL_KEY)||'[]'); } catch(e){ return []; } }
-    function saveWl(a) { try { localStorage.setItem(_WL_KEY, JSON.stringify(a)); } catch(e){} }
+    /* ── Watchlist — localStorage + Supabase sync ── */
+    function _wlLocal() { try { return JSON.parse(localStorage.getItem(_WL_KEY)||'[]'); } catch(e){ return []; } }
+    function _wlSaveLocal(a) { try { localStorage.setItem(_WL_KEY, JSON.stringify(a)); } catch(e){} }
+    function getWl() { return _wlCache !== null ? _wlCache : _wlLocal(); }
     function isWl(wid) { return getWl().some(function(x){ return x.whisky_id === wid; }); }
+
+    function _wlLoadFromSupabase(cb) {
+      if (!_sb || !_uid) { if (cb) cb(); return; }
+      _sb.from('whisky_watchlist').select('*').eq('user_id', _uid).order('added_at', {ascending:false})
+        .then(function(res) {
+          if (res.data) { _wlCache = res.data; _wlSaveLocal(res.data); }
+          _wlSbLoaded = true;
+          if (cb) cb();
+        }).catch(function() { _wlSbLoaded = true; if (cb) cb(); });
+    }
+
+    function _wlUpsertSb(item) {
+      if (!_sb || !_uid) return;
+      var row = Object.assign({}, item, {user_id: _uid, added_at: new Date().toISOString()});
+      _sb.from('whisky_watchlist').upsert(row, {onConflict:'user_id,whisky_id'}).then(function(){}).catch(function(){});
+    }
+
+    function _wlDeleteSb(wid) {
+      if (!_sb || !_uid) return;
+      _sb.from('whisky_watchlist').delete().eq('user_id', _uid).eq('whisky_id', wid).then(function(){}).catch(function(){});
+    }
+
     function toggleWl(item, btn) {
-      var wl = getWl();
+      var wl = getWl().slice();
       var idx = wl.findIndex(function(x){ return x.whisky_id === item.whisky_id; });
-      if (idx >= 0) { wl.splice(idx, 1); btn.textContent = '☆ ADD TO MONITOR'; btn.style.color='#fff'; }
-      else { wl.push(item); btn.textContent = '★ IN MONITOR'; btn.style.color='#E97132'; }
-      saveWl(wl);
+      if (idx >= 0) {
+        wl.splice(idx, 1);
+        btn.textContent = '☆ ADD TO MONITOR'; btn.style.color = '#fff';
+        _wlDeleteSb(item.whisky_id);
+      } else {
+        wl.unshift(item);
+        btn.textContent = '★ IN MONITOR'; btn.style.color = '#E97132';
+        _wlUpsertSb(item);
+      }
+      _wlCache = wl;
+      _wlSaveLocal(wl);
     }
 
     /* ── (unused — replaced by paintWhiskyChart above) ── */
@@ -10282,7 +10251,21 @@
       });
       var starBtn = detailEl.querySelector('#wl-star-'+id);
       if (starBtn) starBtn.addEventListener('click', function(){
-        toggleWl({whisky_id:item.whisky_id, bg_id:bgId, name:(det.bottler_serie||'')+' '+(det.name||''), currency:_cur}, starBtn);
+        toggleWl({
+          whisky_id: item.whisky_id,
+          bg_id: bgId,
+          name: ((det.bottler_serie||'') + ' ' + (det.name||'')).trim(),
+          distillery: det.distillery || '',
+          region: det.region || '',
+          age: det.age || '',
+          cask_type: det.cask_type || '',
+          strength: det.strength || '',
+          vintage: det.vintage || '',
+          bottle_year: det.bottle_year || '',
+          image_url: det.whisky_image_url || '',
+          rating: (rat && rat.whiskybase_rating != null) ? rat.whiskybase_rating : null,
+          currency: _cur
+        }, starBtn);
         if (isWl(item.whisky_id)) showMonitorView();
       });
     }
@@ -10653,30 +10636,58 @@
     });
     _bodyObs.observe(document.body, {childList:true, subtree:true});
 
-    function showMonitorView() {
-      /* Highlight MONITOR button, reset INDICES */
+    function _drawMonitorList() {
       monBtn.style.background = '#E97132'; monBtn.style.color = '#000'; monBtn.style.borderColor = '#E97132';
       if (idxBtn) { idxBtn.style.background = ''; idxBtn.style.color = '#fff'; idxBtn.style.borderColor = '#252525'; }
 
       var wl = getWl();
 
       if (!wl.length) {
-        listEl.innerHTML = '<div style="padding:20px 12px;font-size:9px;letter-spacing:.16em;color:#fff;opacity:.35;text-align:center;">NO WHISKIES IN MONITOR<br><br>Search a bottle and click<br>☆ ADD TO MONITOR</div>';
+        listEl.innerHTML =
+          '<div style="padding:8px 12px 4px;font-size:7px;letter-spacing:.2em;color:#E97132;border-bottom:1px solid #181818;">WHISKY WATCHLIST · 0 BOTTLES</div>' +
+          '<div style="padding:28px 16px;text-align:center;">' +
+            '<div style="font-size:9px;letter-spacing:.16em;color:#fff;opacity:.35;line-height:2;">NO BOTTLES SAVED<br>Search a whisky and click<br>☆ ADD TO MONITOR</div>' +
+          '</div>';
         detailEl.innerHTML = '';
         return;
       }
 
-      /* Left panel: list of monitored whiskies */
-      listEl.innerHTML = '<div style="padding:7px 12px 5px;font-size:7px;letter-spacing:.2em;color:#E97132;border-bottom:1px solid #181818;">MONITOR · ' + wl.length + ' BOTTLE' + (wl.length !== 1 ? 'S' : '') + '</div>' +
+      var sym = {GBP:'£',USD:'$',EUR:'€',HKD:'HK$',JPY:'¥',SGD:'S$',CHF:'Fr',AUD:'A$',CAD:'C$',CNY:'¥'};
+      function getMktCache(bgId, cur) {
+        try {
+          var raw = JSON.parse(localStorage.getItem('tbt_mkt_'+bgId+'_'+cur)||'null');
+          if (raw && Date.now() - raw.ts < 7*24*60*60*1000) return raw.data;
+        } catch(e){}
+        return null;
+      }
+
+      listEl.innerHTML =
+        '<div style="padding:8px 12px 4px;font-size:7px;letter-spacing:.2em;color:#E97132;border-bottom:1px solid #181818;">WHISKY WATCHLIST · ' + wl.length + ' BOTTLE' + (wl.length !== 1 ? 'S' : '') + '</div>' +
         wl.map(function(item, i) {
-          var name = item.name || item.whisky_id || 'Unknown';
-          var sub  = [item.region, item.age ? item.age + 'YO' : null, item.cask].filter(Boolean).join(' · ');
-          return '<div class="wl-mon-row" data-i="'+i+'" style="padding:9px 12px;cursor:pointer;border-bottom:1px solid #111;display:flex;justify-content:space-between;align-items:flex-start;">' +
+          var name = (item.name || item.whisky_id || 'Unknown').trim();
+          var bgId = item.bg_id || item.whisky_id;
+          var cur  = item.currency || 'GBP';
+          var mkt  = getMktCache(bgId, cur);
+          var mv   = mkt && mkt.auction ? mkt.auction.market_value : null;
+          var chg  = mkt && mkt.auction && mkt.auction.summary_12mo ? mkt.auction.summary_12mo.market_value_change_pct : null;
+          var priceStr = mv != null ? (sym[cur]||cur+' ') + Math.round(mv).toLocaleString('en-GB') : '';
+          var chgStr   = chg != null ? (chg>=0?'+':'')+chg.toFixed(1)+'%' : '';
+          var chgCol   = chg == null ? 'rgba(255,255,255,0.35)' : chg >= 0 ? '#5aad7a' : '#e05050';
+          var meta = [item.distillery, item.region, item.age ? item.age+'YO' : '', item.cask_type].filter(Boolean).join(' · ');
+          var rating = item.rating != null ? item.rating.toFixed(1) : '';
+          return '<div class="wl-mon-row" data-i="'+i+'" style="padding:10px 12px;cursor:pointer;border-bottom:1px solid #0f0f0f;display:flex;align-items:flex-start;gap:8px;">' +
+            (item.image_url ? '<img src="'+escH(item.image_url)+'" style="width:28px;height:36px;object-fit:contain;flex-shrink:0;opacity:.8;" onerror="this.style.display=\'none\'" />' : '<div style="width:28px;flex-shrink:0;"></div>') +
             '<div style="flex:1;min-width:0;">' +
-              '<div style="font-size:10px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+escH(name)+'</div>' +
-              (sub ? '<div style="font-size:8px;color:#fff;opacity:.4;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+escH(sub)+'</div>' : '') +
+              '<div style="font-size:10px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500;">'+escH(name)+'</div>' +
+              (meta ? '<div style="font-size:8px;color:rgba(255,255,255,0.4);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+escH(meta)+'</div>' : '') +
+              (priceStr || chgStr ?
+                '<div style="display:flex;gap:6px;align-items:baseline;margin-top:4px;">' +
+                  (priceStr ? '<span style="font-size:10px;color:#fff;">'+escH(priceStr)+'</span>' : '') +
+                  (chgStr ? '<span style="font-size:9px;color:'+chgCol+';">'+escH(chgStr)+'</span>' : '') +
+                '</div>' : '') +
             '</div>' +
-            '<button class="wl-mon-del" data-i="'+i+'" title="Remove" style="background:none;border:none;color:#fff;opacity:.3;font-size:12px;cursor:pointer;flex-shrink:0;padding:0 0 0 8px;line-height:1;">✕</button>' +
+            (rating ? '<div style="font-size:13px;color:#E97132;font-weight:bold;flex-shrink:0;align-self:center;">'+escH(rating)+'</div>' : '') +
+            '<button class="wl-mon-del" data-i="'+i+'" title="Remove" style="background:none;border:none;color:rgba(255,255,255,0.25);font-size:12px;cursor:pointer;flex-shrink:0;padding:0 0 0 4px;line-height:1;align-self:flex-start;">✕</button>' +
           '</div>';
         }).join('');
 
@@ -10700,12 +10711,26 @@
         btn.addEventListener('click', function(e) {
           e.stopPropagation();
           var idx = parseInt(btn.dataset.i, 10);
-          var wl2 = getWl();
-          wl2.splice(idx, 1);
-          saveWl(wl2);
-          showMonitorView();
+          var item = getWl()[idx];
+          if (!item) return;
+          var wl2 = getWl().filter(function(x){ return x.whisky_id !== item.whisky_id; });
+          _wlCache = wl2;
+          _wlSaveLocal(wl2);
+          _wlDeleteSb(item.whisky_id);
+          _drawMonitorList();
         });
       });
+    }
+
+    function showMonitorView() {
+      /* First open: load from Supabase, then draw */
+      if (!_wlSbLoaded) {
+        monBtn.style.background = '#E97132'; monBtn.style.color = '#000'; monBtn.style.borderColor = '#E97132';
+        listEl.innerHTML = '<div style="padding:20px 12px;font-size:8px;letter-spacing:.16em;color:#fff;opacity:.35;text-align:center;">LOADING WATCHLIST<span class="ld"></span></div>';
+        _wlLoadFromSupabase(function() { _drawMonitorList(); });
+      } else {
+        _drawMonitorList();
+      }
     }
 
     function fetchAndShowDetail(wid, name) {
