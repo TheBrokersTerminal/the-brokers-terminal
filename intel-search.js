@@ -1004,8 +1004,8 @@
           });
           return null;
         }
-        /* 503 retryable (our timeout) or 504 (Netlify gateway) — auto-retry once */
-        if ((r.status === 503 || r.status === 504) && retries < 1) {
+        /* 503 retryable (our timeout) or 504 (Netlify gateway) — auto-retry up to 2 times */
+        if ((r.status === 503 || r.status === 504) && retries < 2) {
           var body = win.querySelector('.intel-popwin-body');
           if (body) body.innerHTML = '<div class="sp-intel-load">GENERATING BRIEF — PLEASE WAIT<span class="sp-intel-ld"></span></div>';
           setTimeout(function() { fetchDetail(query, type, ticker, win, retries + 1); }, 4000);
@@ -1106,7 +1106,7 @@
           r.json().then(function (d) { window._showNoCredits && window._showNoCredits(d.balance || 0); });
           return null;
         }
-        if ((r.status === 503 || r.status === 504) && retries < 1) {
+        if ((r.status === 503 || r.status === 504) && retries < 2) {
           var body = win.querySelector('.intel-popwin-body');
           if (body) body.innerHTML = '<div class="sp-intel-load">GENERATING BRIEF — PLEASE WAIT<span class="sp-intel-ld"></span></div>';
           setTimeout(function() { fetchDetailSection(query, type, ticker, section, win, retries + 1); }, 4000);
@@ -1584,8 +1584,8 @@
           pitchPanel.innerHTML = '<div class="sp-loading" style="color:#E97132;letter-spacing:.1em;">INSUFFICIENT CREDITS</div>';
           return null;
         }
-        /* 503 retryable (our timeout) or 504 (Netlify gateway) — auto-retry once */
-        if ((r.status === 503 || r.status === 504) && retries < 1) {
+        /* 503 retryable (our timeout) or 504 (Netlify gateway) — auto-retry up to 2 times */
+        if ((r.status === 503 || r.status === 504) && retries < 2) {
           pitchPanel.innerHTML = '<div class="sp-loading">GENERATING BRIEF — PLEASE WAIT<span class="sp-intel-ld"></span></div>';
           setTimeout(function () { fetchConceptPitch(conceptTitle, win, pitchPanel, retries + 1); }, 4000);
           return null;
