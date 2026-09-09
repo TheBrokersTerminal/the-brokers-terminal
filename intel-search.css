@@ -199,10 +199,10 @@
 .sp-chart-shortcut:hover { background: #333; color: #fff; border-color: #888; }
 
 /* ── Concept section navigation ── */
-.concept-sec-bar { display: flex; flex-wrap: wrap; gap: 4px; padding: 10px 0 8px; border-top: 1px solid #1a1a1a; margin-top: 4px; }
-.concept-sec-btn { background: none; border: 1px solid #2a2a2a; color: #666; font-size: 7px; letter-spacing: .12em; padding: 3px 8px; cursor: pointer; font-family: inherit; transition: background .15s, color .15s, border-color .15s; white-space: nowrap; }
-.concept-sec-btn:hover { background: #1a1a1a; color: #bbb; border-color: #444; }
-.concept-sec-btn.active { background: #1a1a1a; color: #fff; border-color: #666; }
+.concept-sec-bar { display: flex; flex-wrap: wrap; gap: 6px; padding: 12px 0 10px; border-top: 1px solid #222; margin-top: 6px; }
+.concept-sec-btn { background: #111; border: 1px solid #333; color: #888; font-size: 9px; letter-spacing: .14em; padding: 7px 14px; cursor: pointer; font-family: inherit; transition: background .15s, color .15s, border-color .15s; white-space: nowrap; }
+.concept-sec-btn:hover { background: #1c1c1c; color: #ccc; border-color: #555; }
+.concept-sec-btn.active { background: #1e1e1e; color: #fff; border-color: #E97132; border-bottom: 2px solid #E97132; }
 .concept-sec-panel { padding: 4px 0 8px; min-height: 30px; }
 
 .sp-badge.listed { background: rgba(68,204,136,.08); border: 1px solid rgba(68,204,136,.25); color: #44cc88; }
