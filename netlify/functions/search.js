@@ -1137,11 +1137,12 @@ exports.handler = async (event) => {
       const maxTok = type === 'concept'
         ? (!section ? 400 : section === 'pitch-playbook' ? 800 : 600)
         : 1800;
-      const claudeResp = await callAnthropic(
-        type === 'concept' ? CONCEPT_SYSTEM : SEARCH_SYSTEM,
-        userMsg,
-        maxTok
-      );
+      /* Pitch-playbook uses SEARCH_SYSTEM (full sales methodology incl. Milton Model, Cardone,
+         Festinger, Challenger, Shiller, Greene 6 drivers); factual sections use CONCEPT_SYSTEM */
+      const sysPrompt = type === 'concept' && section === 'pitch-playbook'
+        ? SEARCH_SYSTEM
+        : type === 'concept' ? CONCEPT_SYSTEM : SEARCH_SYSTEM;
+      const claudeResp = await callAnthropic(sysPrompt, userMsg, maxTok);
 
       if (!claudeResp.ok) {
         const errBody = await claudeResp.text().catch(() => '');
