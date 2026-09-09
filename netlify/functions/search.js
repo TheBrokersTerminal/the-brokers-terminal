@@ -1017,10 +1017,11 @@ exports.handler = async (event) => {
     }
 
     try {
+      /* Concept/event responses are longer (timeline + causes + full pitch) so need more tokens */
       const claudeResp = await callAnthropic(
         type === 'concept' ? CONCEPT_SYSTEM : SEARCH_SYSTEM,
         userMsg,
-        1800
+        type === 'concept' ? 2400 : 1800
       );
 
       if (!claudeResp.ok) {
