@@ -326,6 +326,12 @@ MARKS — SECOND-LEVEL THINKING: deliver the insight behind the headline. Five q
 
 TALEB — ANTIFRAGILE: physical assets gain from volatility. Barbell: maximum safety + maximum asymmetry. Bounded downside is the most powerful argument given loss aversion. Fat tail asymmetry: downside is structurally bounded by intrinsic scarcity; upside is open-ended.
 
+HOT-COLD EMPATHY GAP (Loewenstein): In a calm discovery call, clients systematically underestimate how panicked they will feel during a future market shock. Pre-commit them while they are rational: "The clients who didn't act are the ones calling us during the drawdown — when the entry point has already gone."
+
+DISPOSITION EFFECT (Shefrin & Statman): Investors hold losing positions far too long waiting to get back to even, while selling winners too early. That trapped capital is the broker's opportunity. "That position you've held for three years — what is the real compounding cost of that wait?" Unlock the loser; don't fight the winner.
+
+AMBIGUITY AVERSION: People prefer a known risk over an unfamiliar one, even when the unfamiliar option is mathematically superior. Alternatives feel "ambiguous" versus the stock market. Translate ambiguity into structured, predictable parameters: bounded downside, real scarcity, named institutional precedent. Make the unfamiliar feel measurable.
+
 NLP WRITTEN LANGUAGE PATTERNS — embed these structures into every pitch field:
 
 EMBEDDED COMMANDS: hide a direct instruction inside a larger sentence. The listener hears the full sentence; the command lands in System 1.
@@ -367,12 +373,18 @@ NOMINALISATION: turn processes into objects — give abstract concepts weight an
 - "the allocation" (not "what you decide to allocate")
 Nominalisations land in the kinaesthetic register — they have weight, texture, and permanence.
 
+"AS IF" FRAME: bypass present-state resistance by projecting the client into an assumed future where the decision is already made. "If you knew with complete certainty this structural shift would play out over three years, what would the right allocation size look like?" The client reasons from the future, not from present hesitation.
+
+CONVERSATIONAL POSTULATES: grammatically a yes/no question; functionally a command directive to System 1. "Would it be helpful if we modelled your specific tax exposure on this allocation?" The client processes it as a question but responds with action.
+
+CONSCIOUS/UNCONSCIOUS DISSOCIATION: separates analytical processing from emotional recognition, lowering cognitive friction. "While you review these figures, part of you is already beginning to feel how much more secure this allocation makes your position." Use in asIfFuturePace and emotionalCase fields.
+
 BANK RULE (ONLY when subject is a bank/lender): pitch angle = profit extraction — fractional reserve, yield gap, real return after tax + inflation, FSCS £120k limit. Educational, never alarmist.
 
 ASSET NEUTRALITY: In ALL pitch fields NEVER name a specific asset class. Use "physical assets", "tangible assets", "real assets", "alternative assets", "hard assets", "assets outside the banking system." Educational fields may name categories.
 
 LANGUAGE RULES:
-MUST include: second-level insight, loss frame before gain, specific institutions/numbers/dates, one verbatim Need-Payoff question for immediate broker use, proactive objection inoculation, conviction close, "because" + a specific verifiable reason for every timing claim.
+MUST include: second-level insight, loss frame before gain, specific institutions/numbers/dates, one verbatim Need-Payoff question for immediate broker use, proactive objection inoculation, conviction close, "because" + an external unalterable macroeconomic variable (central bank policy date, fiscal year-end, named tranche closure) — never a marketing countdown.
 MUST NEVER: "The case has never been stronger" / "Now is the time" / "The window is now" / "This is the moment" / manufactured urgency / apologising for fees or minimums / naming a specific asset class in pitch language.
 
 Respond with valid JSON only — no markdown fences, no extra text. CRITICAL: never use double-quote characters inside string values — use single quotes or rephrase instead.`;
@@ -484,9 +496,15 @@ const PITCH_PLAYBOOK_SECTION_PROMPT = (query) =>
 Generate the PITCH PLAYBOOK for this concept. Apply ALL sales psychology from your instructions. Return this exact JSON:
 {
   "openingLine": "One sentence second-level hook — a question or striking fact that stops the client. Never state the obvious.",
+  "dominantDriverTarget": "One word only: Security / Status / Autonomy / Validation / Legacy / Belonging. Every field in this playbook speaks exclusively to this driver.",
   "brokerNote": "2 sentences. Asset-neutral. How a broker connects this concept to a client situation today.",
-  "logicalCase": ["Most arresting verified fact with specific number", "Historical pattern with verified number or named institution", "Direct implication for client wealth right now"],
-  "emotionalCase": "2 sentences. Loss frame first — specific calculated cost of inaction. Then gain frame — what right positioning delivers. Asset-neutral.",
+  "logicalCase": ["Most arresting verified fact with specific number", "Historical pattern with verified number or named institution", "Direct implication: how the client's current position is mathematically an active loss-generating choice"],
+  "socraticDissonancePrompt": "One question that forces the client to confront the gap between what they say they believe and what they actually own. Conversational, not confrontational.",
+  "asIfFuturePace": {
+    "lossFrame": "2 sentences. Sensory and specific. Their financial life in 3 years having stayed unpositioned against this trend.",
+    "gainFrame": "2 sentences. Sensory and specific. Their financial life in 3 years with the allocation safely in place. Asset-neutral."
+  },
+  "entryDefaultArchitecture": "The recommended default starting position — a specific percentage or £ figure that eliminates yes/no and replaces it with a sizing decision.",
   "painPoint": "The specific precise fear this concept triggers in a client. One sentence.",
   "spinQuestions": [
     "Situation — how exposed is their portfolio and do they know it",
@@ -494,10 +512,11 @@ Generate the PITCH PLAYBOOK for this concept. Apply ALL sales psychology from yo
     "Need-Payoff — starts with So if you had... or What would it mean if..."
   ],
   "objections": [
-    {"objection": "The most likely pushback from a sceptical client", "rebuttal": "Acknowledge genuinely then reframe as evidence for action then close with need-payoff question. Conversational."}
+    {"objection": "The most likely pushback from a sceptical client", "rebuttal": "Label the emotion first (It sounds like...), reframe the objection as the primary reason for action, close with a conversational postulate question."}
   ],
-  "urgencyLine": "One real verifiable reason acting now is smarter than waiting. Never manufactured.",
-  "socialProof": "What sophisticated investors or institutional allocators are doing in response. One sentence."
+  "urgencyLine": "One unalterable external trigger — a central bank policy date, fiscal year-end, or named tranche closure. Never manufactured.",
+  "socialProof": "What sovereign wealth funds, university endowments, or UHNW family offices are doing in response to this exact context. One sentence.",
+  "triggerAgreementTemplate": "The conditional commitment for a hesitant client: If [specific external macro event] happens, we execute [specific allocation action]. Verbatim script to convert not now into a structured future commitment."
 }
 No preamble. Return ONLY the JSON. Never use double-quote characters inside string values.`;
 
@@ -598,7 +617,7 @@ export default async (req) => {
           ? `\n\nACTIVE BROKER LENS — tailor ALL pitch content specifically to this asset class context:\n${lensContext}`
           : '';
         /* Scenarios: 1800 tok (~12s). Pitch-playbook: 1500 tok (~10s). Concept slim: 400. Else: 2500. */
-        const maxTok  = isScenario ? 1800 : isPitchPlaybook ? 1500 : (type === 'concept' ? 400 : 2500);
+        const maxTok  = isScenario ? 1800 : isPitchPlaybook ? 2000 : (type === 'concept' ? 400 : 2500);
         const sysPrompt = isPitchPlaybook ? PITCH_SYSTEM : type === 'concept' ? CONCEPT_SYSTEM : SEARCH_SYSTEM;
         let userMsg;
         if (isScenario)           userMsg = SCENARIO_PROMPT(query) + lensAppend;
@@ -618,7 +637,7 @@ export default async (req) => {
             ctrl.enqueue(sseChunk({ type: 'error', message: 'timeout' }));
             ctrl.close();
           } catch {}
-        }, 20000);
+        }, 30000);
 
         let anthropicResp;
         try {

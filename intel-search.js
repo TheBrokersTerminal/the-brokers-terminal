@@ -1193,18 +1193,6 @@
               }
               if (raw.type === 'delta') {
                 streamBuf += raw.text;
-                /* Extract readable text: strip JSON structural chars, show words */
-                var readable = raw.text.replace(/^[{\["\s,]+|[}\]",:\s]+$/g, '').trim();
-                if (readable && panel) {
-                  if (!streamDiv) {
-                    streamDiv = document.createElement('div');
-                    streamDiv.className = 'sp-stream-preview';
-                    streamDiv.style.cssText = 'font-family:monospace;font-size:10px;color:#E97132;padding:8px;white-space:pre-wrap;word-break:break-word;line-height:1.6;';
-                    panel.innerHTML = '';
-                    panel.appendChild(streamDiv);
-                  }
-                  streamDiv.textContent += (streamDiv.textContent ? ' ' : '') + readable;
-                }
               }
               if (raw.type === 'done') {
                 gotDone = true;
@@ -1579,85 +1567,83 @@
   function buildPitchPlaybook(pitch, brokerNote) {
     if (!pitch && !brokerNote) return '';
     if (!pitch) {
-      return '<div class="sp-section">' +
-        '<div class="sp-sec-lbl">BROKER NOTE</div>' +
-        '<div class="sp-pitch">' + escH(brokerNote) + '</div>' +
-      '</div>';
-    }
-    var html = '<div class="sp-pitch-playbook">';
-
-    /* 1 — Opening line */
-    if (pitch.openingLine) {
-      html += '<div class="sp-section">' +
-        '<div class="sp-sec-lbl">OPENING LINE</div>' +
-        '<div class="sp-pitch">“' + escH(pitch.openingLine) + '”</div>' +
-      '</div>';
+      return '<div class=”sp-section”><div class=”sp-sec-lbl”>BROKER NOTE</div><div class=”sp-text”>' + escH(brokerNote) + '</div></div>';
     }
 
-    /* 2 — The logical case */
-    if (pitch.logicalCase && pitch.logicalCase.length) {
-      html += '<div class="sp-section">' +
-        '<div class="sp-sec-lbl">THE LOGICAL CASE — BUILD CERTAINTY FIRST</div>' +
-        '<ul class="sp-facts">' +
-          pitch.logicalCase.map(function (f) { return '<li>' + escH(f) + '</li>'; }).join('') +
-        '</ul>' +
-      '</div>';
+    /* Opening line — top-level sp-tagline, IDENTICAL structure to History/Outcome headline */
+    var openLine = pitch.openingLine || '';
+    var driverBadge = pitch.dominantDriverTarget ? ' — ' + pitch.dominantDriverTarget.toUpperCase() + ' DRIVER' : '';
+    var html = openLine
+      ? '<div class=”sp-tagline” style=”font-size:10px;margin-bottom:8px;”>”' + escH(openLine) + '”</div>' +
+        '<div class=”sp-sec-lbl” style=”font-size:7px;letter-spacing:.3em;color:#E97132;margin-bottom:6px;text-transform:uppercase;”>OPENING LINE' + escH(driverBadge) + '</div>'
+      : '';
+
+    /* All remaining sections: sp-section > sp-sec-lbl + sp-text or sp-facts
+       Identical pattern to _renderHistorySection / _renderOutcomeSection */
+
+    var bn = pitch.brokerNote || brokerNote;
+    if (bn) html +=
+      '<div class=”sp-section”><div class=”sp-sec-lbl”>BROKER NOTE</div><div class=”sp-text”>' + escH(bn) + '</div></div>';
+
+    if (pitch.logicalCase && pitch.logicalCase.length) html +=
+      '<div class=”sp-section”><div class=”sp-sec-lbl”>THE LOGICAL CASE — BUILD CERTAINTY FIRST</div><ul class=”sp-facts”>' +
+        pitch.logicalCase.map(function (f) { return '<li>' + escH(f) + '</li>'; }).join('') +
+      '</ul></div>';
+
+    if (pitch.socraticDissonancePrompt) html +=
+      '<div class=”sp-section”><div class=”sp-sec-lbl”>SOCRATIC QUESTION — EXPOSE THE GAP</div>' +
+      '<div class=”sp-text” style=”color:#E97132;”>”' + escH(pitch.socraticDissonancePrompt) + '”</div></div>';
+
+    var fp = pitch.asIfFuturePace;
+    if (fp && (fp.lossFrame || fp.gainFrame)) {
+      html += '<div class=”sp-section”><div class=”sp-sec-lbl”>FUTURE PACE — WITHOUT VS WITH</div>';
+      if (fp.lossFrame) html += '<div class=”sp-text” style=”color:#E97132;margin-bottom:6px;”><span style=”letter-spacing:.2em;font-size:7px;”>WITHOUT — </span>' + escH(fp.lossFrame) + '</div>';
+      if (fp.gainFrame) html += '<div class=”sp-text” style=”color:#6bcb77;”><span style=”letter-spacing:.2em;font-size:7px;”>WITH — </span>' + escH(fp.gainFrame) + '</div>';
+      html += '</div>';
+    } else if (pitch.emotionalCase) {
+      html += '<div class=”sp-section”><div class=”sp-sec-lbl”>FUTURE PACE</div><div class=”sp-text”>' + escH(pitch.emotionalCase) + '</div></div>';
     }
 
-    /* 3 — Emotional future pace */
-    if (pitch.emotionalCase) {
-      html += '<div class="sp-section">' +
-        '<div class="sp-sec-lbl">FUTURE PACE — MAKE THEM FEEL THE OUTCOME</div>' +
-        '<div class="sp-pitch">' + escH(pitch.emotionalCase) + '</div>' +
-      '</div>';
-    }
+    if (pitch.entryDefaultArchitecture) html +=
+      '<div class=”sp-section”><div class=”sp-sec-lbl”>ENTRY ARCHITECTURE — REMOVE YES/NO</div>' +
+      '<div class=”sp-text”>' + escH(pitch.entryDefaultArchitecture) + '</div></div>';
 
-    /* 4 — Pain point */
-    if (pitch.painPoint) {
-      html += '<div class="sp-section">' +
-        '<div class="sp-sec-lbl">THEIR PAIN POINT</div>' +
-        '<div class="sp-pitch" style="color:#E97132;">' + escH(pitch.painPoint) + '</div>' +
-      '</div>';
-    }
+    if (pitch.painPoint) html +=
+      '<div class=”sp-section”><div class=”sp-sec-lbl”>THEIR PAIN POINT</div>' +
+      '<div class=”sp-text” style=”color:#E97132;”>' + escH(pitch.painPoint) + '</div></div>';
 
-    /* 5 — SPIN questions */
     if (pitch.spinQuestions && pitch.spinQuestions.length) {
-      html += '<div class="sp-section">' +
-        '<div class="sp-sec-lbl">QUESTIONS TO ASK FIRST — SPIN INTELLIGENCE</div>' +
-        '<ul class="sp-facts sp-spin">' +
-          pitch.spinQuestions.map(function (q, i) {
-            var labels = ['SITUATION', 'PROBLEM / IMPLICATION', 'NEED-PAYOFF'];
-            return '<li><span class="sp-spin-lbl">' + (labels[i] || 'Q' + (i + 1)) + '</span>' + escH(q) + '</li>';
-          }).join('') +
-        '</ul>' +
-      '</div>';
+      var spinLabels = ['SITUATION', 'PROBLEM / IMPLICATION', 'NEED-PAYOFF'];
+      html += '<div class=”sp-section”><div class=”sp-sec-lbl”>SPIN QUESTIONS — ASK FIRST</div><ul class=”sp-facts”>' +
+        pitch.spinQuestions.map(function (q, i) {
+          var clean = q.replace(/^(situation|problem\s*[\/]?\s*implication|need[-\s]payoff)[:\s]*/i, '').trim();
+          return '<li><span style=”color:#E97132;font-size:7px;letter-spacing:.2em;text-transform:uppercase;margin-right:6px;”>' + (spinLabels[i] || '') + '</span>' + escH(clean) + '</li>';
+        }).join('') +
+      '</ul></div>';
     }
 
-    /* 6 — Handle objections */
     if (pitch.objections && pitch.objections.length) {
-      html += '<div class="sp-section">' +
-        '<div class="sp-sec-lbl">HANDLE OBJECTIONS — LOOP AND BUILD CERTAINTY</div>' +
+      html += '<div class=”sp-section”><div class=”sp-sec-lbl”>HANDLE OBJECTIONS</div><div class=”sp-timeline”>' +
         pitch.objections.map(function (o) {
-          return '<div class="sp-objection">' +
-            '<div class="sp-obj-q">“' + escH(o.objection || '') + '”</div>' +
-            '<div class="sp-obj-a">' + escH(o.rebuttal || '') + '</div>' +
+          return '<div class=”sp-tl-row”>' +
+            '<div class=”sp-tl-date”>”' + escH(o.objection || '') + '”</div>' +
+            '<div class=”sp-tl-evt”>' + escH(o.rebuttal || '') + '</div>' +
           '</div>';
         }).join('') +
-      '</div>';
+      '</div></div>';
     }
 
-    /* 7 — Urgency + social proof */
-    var urgencyRow = '';
-    if (pitch.urgencyLine) urgencyRow += '<div class="sp-intel-row"><span class="sp-intel-lbl">TIMING</span><span class="sp-intel-val">' + escH(pitch.urgencyLine) + '</span></div>';
-    if (pitch.socialProof) urgencyRow += '<div class="sp-intel-row"><span class="sp-intel-lbl">SOCIAL PROOF</span><span class="sp-intel-val">' + escH(pitch.socialProof) + '</span></div>';
-    if (urgencyRow) {
-      html += '<div class="sp-section">' +
-        '<div class="sp-sec-lbl">CREATE URGENCY</div>' +
-        '<div class="sp-intel-grid">' + urgencyRow + '</div>' +
-      '</div>';
+    if (pitch.urgencyLine || pitch.socialProof) {
+      html += '<div class=”sp-section”><div class=”sp-sec-lbl”>TIMING & SOCIAL PROOF</div><ul class=”sp-facts”>';
+      if (pitch.urgencyLine) html += '<li>' + escH(pitch.urgencyLine) + '</li>';
+      if (pitch.socialProof) html += '<li>' + escH(pitch.socialProof) + '</li>';
+      html += '</ul></div>';
     }
 
-    html += '</div>';
+    if (pitch.triggerAgreementTemplate) html +=
+      '<div class=”sp-section”><div class=”sp-sec-lbl”>TRIGGER AGREEMENT — CONDITIONAL CLOSE</div>' +
+      '<div class=”sp-text” style=”font-style:italic;”>' + escH(pitch.triggerAgreementTemplate) + '</div></div>';
+
     return html;
   }
 
@@ -1802,19 +1788,18 @@
     /* Pitch-playbook: stream via SSE so content appears as Claude writes */
     if (sectionId === 'pitch-playbook' && window.ReadableStream && window.TextDecoder) {
       panel.innerHTML = '<div class="sp-intel-load">GENERATING PITCH PLAYBOOK<span class="sp-intel-ld"></span></div>';
-      var streamDiv = null;
       var gotDone = false;
       fetch('/.netlify/functions/search-stream', {
         method: 'POST', headers: headers,
         body: JSON.stringify({ query: conceptTitle, type: 'concept', section: sectionId, lensKey: lensKey, lensContext: lensContext }),
       }).then(function(r) {
-        if (!r.ok || !r.body) { _conceptSectionFallback(); return; }
+        if (!r.ok || !r.body) { _pitchFailed(); return; }
         var reader = r.body.getReader();
         var decoder = new TextDecoder();
         var lineBuf = '';
         function readChunk() {
           return reader.read().then(function(chunk) {
-            if (chunk.done) { if (!gotDone) _conceptSectionFallback(); return; }
+            if (chunk.done) { if (!gotDone) _pitchFailed(); return; }
             lineBuf += decoder.decode(chunk.value, { stream: true });
             var lines = lineBuf.split('\n'); lineBuf = lines.pop();
             for (var i = 0; i < lines.length; i++) {
@@ -1828,46 +1813,16 @@
                 window._loadCreditBalance && window._loadCreditBalance();
                 return;
               }
-              if (raw.type === 'delta') {
-                var readable = raw.text.replace(/^[{\["\s,]+|[}\]",:\s]+$/g, '').trim();
-                if (readable) {
-                  if (!streamDiv) {
-                    streamDiv = document.createElement('div');
-                    streamDiv.style.cssText = 'font-family:monospace;font-size:10px;color:#E97132;padding:8px;white-space:pre-wrap;word-break:break-word;line-height:1.6;';
-                    panel.innerHTML = '';
-                    panel.appendChild(streamDiv);
-                  }
-                  streamDiv.textContent += (streamDiv.textContent ? ' ' : '') + readable;
-                }
-              }
-              if (raw.type === 'error') { _conceptSectionFallback(); return; }
+              if (raw.type === 'error') { _pitchFailed(); return; }
             }
             return readChunk();
           });
         }
-        readChunk().catch(function() { _conceptSectionFallback(); });
-      }).catch(function() { _conceptSectionFallback(); });
+        readChunk().catch(function() { _pitchFailed(); });
+      }).catch(function() { _pitchFailed(); });
 
-      function _conceptSectionFallback() {
-        var h2 = { 'Content-Type': 'application/json' };
-        if (window._authToken) h2['Authorization'] = 'Bearer ' + window._authToken;
-        panel.innerHTML = '<div class="sp-intel-load">GENERATING — PLEASE WAIT<span class="sp-intel-ld"></span></div>';
-        var retries2 = 0;
-        function attempt2() {
-          fetch('/.netlify/functions/search', { method: 'POST', headers: h2,
-            body: JSON.stringify({ query: conceptTitle, type: 'concept', section: sectionId, lensKey: lensKey, lensContext: lensContext }),
-          }).then(function(r) {
-            if (r.status === 402) { r.json().then(function(d){ window._showNoCredits && window._showNoCredits(d.balance||0); }); panel.innerHTML = '<div class="sp-loading" style="color:#E97132;">INSUFFICIENT CREDITS</div>'; return null; }
-            if ((r.status === 503 || r.status === 504) && retries2 < 2) { retries2++; setTimeout(attempt2, 4000); return null; }
-            return r.ok ? r.json() : null;
-          }).then(function(d) {
-            if (!d) { panel.innerHTML = '<div class="sp-loading">SECTION UNAVAILABLE</div>'; return; }
-            _cache[cacheKey] = d;
-            window._loadCreditBalance && window._loadCreditBalance();
-            renderConceptSection(d, sectionId, panel);
-          }).catch(function() { panel.innerHTML = '<div class="sp-loading">SECTION UNAVAILABLE</div>'; });
-        }
-        attempt2();
+      function _pitchFailed() {
+        if (!gotDone) panel.innerHTML = '<div class="sp-loading">SECTION UNAVAILABLE — CLICK PITCH PLAYBOOK TO RETRY</div>';
       }
       return;
     }
