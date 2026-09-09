@@ -1056,10 +1056,15 @@
           var reader  = r.body.getReader();
           var decoder = new TextDecoder();
           var lineBuf = '';
+          var _streamResolved = false; /* true once cache/done/402 received */
 
           function readChunk() {
             return reader.read().then(function(chunk) {
-              if (chunk.done) return;
+              /* Stream closed — if we never got a done/cache event, fall back */
+              if (chunk.done) {
+                if (!_streamResolved) _fallbackFetch();
+                return;
+              }
               lineBuf += decoder.decode(chunk.value, { stream: true });
               var lines = lineBuf.split('\n');
               lineBuf = lines.pop();
@@ -1071,6 +1076,7 @@
                 try { raw = JSON.parse(line.slice(6)); } catch { continue; }
 
                 if (raw.type === 'cache') {
+                  _streamResolved = true;
                   if (win._loadingTimer) { clearInterval(win._loadingTimer); win._loadingTimer = null; }
                   _onDetail(raw.data);
                   return;
@@ -1082,16 +1088,19 @@
                 }
 
                 if (raw.type === 'done') {
+                  _streamResolved = true;
                   _onDetail(raw.data);
                   return;
                 }
 
                 if (raw.type === 'error') {
                   if (raw.code === 402) {
+                    _streamResolved = true;
                     win.remove();
                     window._showNoCredits && window._showNoCredits(raw.balance || 0);
                   } else {
-                    _showError(win);
+                    /* Server-sent error (timeout, parse_error) — try buffered fallback */
+                    _fallbackFetch();
                   }
                   return;
                 }
@@ -1100,7 +1109,8 @@
             });
           }
 
-          readChunk().catch(function() { _showError(win); });
+          /* Network/reader error — try buffered fallback before showing error */
+          readChunk().catch(function() { _fallbackFetch(); });
         })
         .catch(function() { _fallbackFetch(); });
     } else {

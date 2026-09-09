@@ -947,7 +947,7 @@ Analyse this as a senior wealth strategist combined with an elite sales psycholo
   }
 }
 
-CRITICAL: solutionAreas 2-5 areas, only genuinely relevant ones. Pitch must be specific to THIS client's described situation — not generic asset class marketing. Never use double-quote characters inside string values.`;
+CRITICAL: solutionAreas 2-3 areas only (most relevant). ALL field values must be concise — maximum 2 sentences each. Pitch must be specific to THIS client. Never use double-quote characters inside string values.`;
 
 exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') {
@@ -1159,7 +1159,7 @@ exports.handler = async (event) => {
     try {
       /* Slim concept overview = 400 tokens (intentionally small fast load).
          All sections + full searches = 3000 — maximum safe headroom before Netlify 26s kill. */
-      const maxTok = type === 'concept' && !section ? 400 : 3000;
+      const maxTok = type === 'concept' && !section ? 400 : isScenario ? 1200 : 2500;
       /* Pitch-playbook uses SEARCH_SYSTEM (full sales methodology incl. Milton Model, Cardone,
          Festinger, Challenger, Shiller, Greene 6 drivers); factual sections use CONCEPT_SYSTEM */
       const sysPrompt = type === 'concept' && section === 'pitch-playbook'
