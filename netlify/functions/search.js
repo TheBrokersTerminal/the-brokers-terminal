@@ -1153,10 +1153,10 @@ exports.handler = async (event) => {
     }
 
     try {
-      /* Slim concept = 400 tokens; concept sections = 600-800; company searches = 1800 */
+      /* Slim concept = 400 tokens; all concept sections = 1800; full searches = 2400 */
       const maxTok = type === 'concept'
-        ? (!section ? 400 : (section === 'pitch-playbook' || section === 'the-history') ? 1800 : 700)
-        : 1800;
+        ? (!section ? 400 : 1800)
+        : 2400;
       /* Pitch-playbook uses SEARCH_SYSTEM (full sales methodology incl. Milton Model, Cardone,
          Festinger, Challenger, Shiller, Greene 6 drivers); factual sections use CONCEPT_SYSTEM */
       const sysPrompt = type === 'concept' && section === 'pitch-playbook'
