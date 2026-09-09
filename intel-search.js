@@ -1557,11 +1557,33 @@
       });
     });
 
-    /* Auto-load THE HISTORY as the default section */
+    /* Pre-fetch all 5 sections silently in background — they'll be cached by the time user clicks */
+    var SECTIONS = ['the-history','the-outcome','economic-impact','hardship-loss','pitch-playbook'];
+    SECTIONS.forEach(function(sec) { _prefetchConceptSection(conceptQuery, sec); });
+
+    /* Auto-load THE HISTORY — will serve from cache if pre-fetch already completed, else shows loading */
     var firstBtn = body.querySelector('.concept-sec-btn[data-sec="the-history"]');
     if (firstBtn) firstBtn.click();
 
     cascadeType(body);
+  }
+
+  /* ── Silent background pre-fetch — populates cache only, no UI side effects ── */
+  function _prefetchConceptSection(conceptTitle, sectionId) {
+    var lensKey = (window._assetLens && window._assetLens.key) || 'universal';
+    var lensContext = (window._assetLens && window._assetLens.promptContext) || '';
+    var cacheKey = 'concept-section:' + sectionId + ':' + conceptTitle.trim().toLowerCase().slice(0, 80);
+    if (_cache[cacheKey]) return;
+    var headers = { 'Content-Type': 'application/json' };
+    if (window._authToken) headers['Authorization'] = 'Bearer ' + window._authToken;
+    fetch('/.netlify/functions/search', {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify({ query: conceptTitle, type: 'concept', section: sectionId, lensKey: lensKey, lensContext: lensContext }),
+    })
+    .then(function(r) { return r.ok ? r.json() : null; })
+    .then(function(d) { if (d && !_cache[cacheKey]) _cache[cacheKey] = d; })
+    .catch(function(){});
   }
 
   /* ── Fetch a concept section on demand ── */
