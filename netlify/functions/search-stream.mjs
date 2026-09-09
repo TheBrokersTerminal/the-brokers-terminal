@@ -393,6 +393,29 @@ Analyse this as a senior wealth strategist combined with an elite sales psycholo
 }
 CRITICAL: solutionAreas 2-3 areas only (most relevant). ALL field values must be concise — maximum 2 sentences each. Pitch must be specific to THIS client. Never use double-quote characters inside string values.`;
 
+const PITCH_PLAYBOOK_SECTION_PROMPT = (query) =>
+`Research request: "${query}"
+
+Generate the PITCH PLAYBOOK for this concept. Apply ALL sales psychology from your instructions. Return this exact JSON:
+{
+  "openingLine": "One sentence second-level hook — a question or striking fact that stops the client. Never state the obvious.",
+  "brokerNote": "2 sentences. Asset-neutral. How a broker connects this concept to a client situation today.",
+  "logicalCase": ["Most arresting verified fact with specific number", "Historical pattern with verified number or named institution", "Direct implication for client wealth right now"],
+  "emotionalCase": "2 sentences. Loss frame first — specific calculated cost of inaction. Then gain frame — what right positioning delivers. Asset-neutral.",
+  "painPoint": "The specific precise fear this concept triggers in a client. One sentence.",
+  "spinQuestions": [
+    "Situation — how exposed is their portfolio and do they know it",
+    "Problem/Implication — what this has already cost them or could cost them with a specific calculation",
+    "Need-Payoff — starts with So if you had... or What would it mean if..."
+  ],
+  "objections": [
+    {"objection": "The most likely pushback from a sceptical client", "rebuttal": "Acknowledge genuinely then reframe as evidence for action then close with need-payoff question. Conversational."}
+  ],
+  "urgencyLine": "One real verifiable reason acting now is smarter than waiting. Never manufactured.",
+  "socialProof": "What sophisticated investors or institutional allocators are doing in response. One sentence."
+}
+No preamble. Return ONLY the JSON. Never use double-quote characters inside string values.`;
+
 /* ══════════════════════════════════════════════════════════════════════════
    HANDLER
    ══════════════════════════════════════════════════════════════════════════ */
@@ -418,7 +441,7 @@ export default async (req) => {
     });
   }
 
-  const { query, type, ticker, lensKey, lensContext } = body;
+  const { query, type, ticker, section, lensKey, lensContext } = body;
   if (!query) {
     return new Response(JSON.stringify({ error: 'query required' }), {
       status: 400, headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
@@ -427,12 +450,16 @@ export default async (req) => {
 
   const apiKey   = process.env.ANTHROPIC_API_KEY;
   const isScenario = type === 'scenario';
+  const isPitchPlaybook = type === 'concept' && section === 'pitch-playbook';
 
   /* Cache key — same namespace as search.js */
   const lensTag  = lensKey ? ':' + lensKey : '';
-  const cacheKey = type === 'concept'
-    ? 'search9:concept-slim:' + query.trim().toLowerCase().slice(0, 80) + lensTag
-    : 'search9:' + type + ':' + (ticker || query.trim().toLowerCase().slice(0, 80)) + lensTag;
+  const sectionTag = section ? ':' + section : '';
+  const cacheKey = isPitchPlaybook
+    ? 'search9:pitch-playbook:' + query.trim().toLowerCase().slice(0, 80) + lensTag
+    : type === 'concept'
+      ? 'search9:concept-slim:' + query.trim().toLowerCase().slice(0, 80) + lensTag
+      : 'search9:' + type + ':' + (ticker || query.trim().toLowerCase().slice(0, 80)) + lensTag + sectionTag;
 
   /* Credit cost */
   const creditCost = type === 'company' ? 25 : 10;
@@ -485,14 +512,14 @@ export default async (req) => {
         const lensAppend = (!isScenario && lensContext)
           ? `\n\nACTIVE BROKER LENS — tailor ALL pitch content specifically to this asset class context:\n${lensContext}`
           : '';
-        /* Scenarios: 1200 tok (~8-10s generation, safe under 20s kill).
-           Concepts slim: 400. Everything else: 2500. */
-        const maxTok  = type === 'concept' && !isScenario ? 400 : isScenario ? 1800 : 2500;
-        const sysPrompt = type === 'concept' ? CONCEPT_SYSTEM : SEARCH_SYSTEM;
+        /* Scenarios: 1800 tok (~12s). Pitch-playbook: 1500 tok (~10s). Concept slim: 400. Else: 2500. */
+        const maxTok  = isScenario ? 1800 : isPitchPlaybook ? 1500 : (type === 'concept' ? 400 : 2500);
+        const sysPrompt = isPitchPlaybook ? SEARCH_SYSTEM : type === 'concept' ? CONCEPT_SYSTEM : SEARCH_SYSTEM;
         let userMsg;
-        if (isScenario)          userMsg = SCENARIO_PROMPT(query) + lensAppend;
+        if (isScenario)           userMsg = SCENARIO_PROMPT(query) + lensAppend;
+        else if (isPitchPlaybook) userMsg = PITCH_PLAYBOOK_SECTION_PROMPT(query) + lensAppend;
         else if (type === 'concept') userMsg = CONCEPT_SLIM_PROMPT(query);
-        else                     userMsg = COMPANY_PROMPT(query) + lensAppend;
+        else                      userMsg = COMPANY_PROMPT(query) + lensAppend;
 
         /* ── Hard 20s kill for the ENTIRE streaming operation (headers + body).
            The previous pattern cleared the timer after the initial fetch() resolved
