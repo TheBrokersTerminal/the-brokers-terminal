@@ -1282,8 +1282,9 @@
     var btn = body.querySelector('.sp-chart-shortcut');
     if (!btn) return;
     btn.addEventListener('click', function () {
-      var ticker = btn.dataset.ticker;
-      var name   = btn.dataset.name || ticker;
+      /* Apply Yahoo Finance exchange suffix at click time — d.exchange is in closure */
+      var ticker = toYfTicker(btn.dataset.ticker || d.ticker || '', d.exchange);
+      var name   = btn.dataset.name || d.title || ticker;
       if (!ticker || !window.createGenericPopout) return;
       window.createGenericPopout(ticker + ' · CHART', '▦', function (popBody) {
         if (window._tbtRenderPriceChart) {
