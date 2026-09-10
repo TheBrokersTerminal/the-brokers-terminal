@@ -2855,6 +2855,7 @@
     var y = opts.y != null ? opts.y : (80  + Math.random() * 40);
     var w = opts.w || 420;
     var h = opts.h || 500;
+    if (window._sharedZ < 9000) window._sharedZ = 9000;
     win.style.cssText = 'top:' + y + 'px;left:' + x + 'px;width:' + w + 'px;height:' + h + 'px;z-index:' + (++window._sharedZ) + ';';
 
     win.innerHTML =
