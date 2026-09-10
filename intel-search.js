@@ -623,6 +623,8 @@
   /* ── CREATE DRAGGABLE POP-OUT ── */
   function createPopout(query, type) {
     _popOffset = (_popOffset + 24) % 120;
+    /* Canvas widgets cap at 8000 — intel popouts must always open above them */
+    if (window._sharedZ < 9000) window._sharedZ = 9000;
     window._sharedZ++;
 
     var pid = 'pop-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6);
