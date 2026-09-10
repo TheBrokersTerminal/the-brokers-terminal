@@ -1324,7 +1324,7 @@
 
   function renderOverview(d, body) {
     var isListed = d.ticker && d.ticker.length > 0;
-    var pitchBtn = d.title ?
+    var pitchBtn = (d.title && isListed) ?
       '<button class="sp-pitch-shortcut" data-title="' + escH(d.title) + '" data-ticker="' + escH(d.ticker || '') + '">▌ PITCH PLAYBOOK</button>' : '';
     var chartBtn = isListed ?
       '<button class="sp-chart-shortcut" data-ticker="' + escH(toYfTicker(d.ticker, d.exchange)) + '" data-name="' + escH(d.title || d.ticker) + '">▦ VIEW CHART</button>' : '';
@@ -1679,7 +1679,7 @@
 
   function renderCompany(d, body) {
     var isListed = d.ticker && d.ticker.length > 0;
-    var pitchBtn = d.title ?
+    var pitchBtn = (d.title && isListed) ?
       '<button class="sp-pitch-shortcut" data-title="' + escH(d.title) + '" data-ticker="' + escH(d.ticker || '') + '">▌ PITCH PLAYBOOK</button>' : '';
     var chartBtn = isListed ?
       '<button class="sp-chart-shortcut" data-ticker="' + escH(toYfTicker(d.ticker, d.exchange)) + '" data-name="' + escH(d.title || d.ticker) + '">▦ VIEW CHART</button>' : '';
