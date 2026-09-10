@@ -276,15 +276,18 @@
       return { type: 'concept', label: c.label, query: c.query };
     });
 
+    var companyFreeSearch = { type: 'company', label: q, query: q, ticker: '', private: true };
+
     fetch('/.netlify/functions/search?q=' + encodeURIComponent(q))
       .then(function (r) { return r.ok ? r.json() : []; })
       .then(function (items) {
         var combined = conceptMatches.concat(items || []);
         if (!combined.length) combined.push({ type: 'concept', label: 'Search: "' + q + '"', query: q });
+        combined.push(companyFreeSearch);
         renderDropdown(combined, dropdown);
       })
       .catch(function () {
-        var fallback = conceptMatches.concat([{ type: 'concept', label: 'Search: "' + q + '"', query: q }]);
+        var fallback = conceptMatches.concat([{ type: 'concept', label: 'Search: "' + q + '"', query: q }, companyFreeSearch]);
         renderDropdown(fallback, dropdown);
       });
   }
@@ -296,7 +299,15 @@
       return;
     }
     dropdown.innerHTML = items.map(function (item) {
-      if (item.type === 'company') {
+      if (item.type === 'company' && item.private) {
+        return '<div class="intel-drop-item concept" ' +
+          'data-label="' + escH(item.label) + '" ' +
+          'data-query="' + escH(item.query || item.label) + '" ' +
+          'data-type="company-free">' +
+          '<span class="intel-drop-badge sc">PRIV</span>' +
+          '<span class="intel-drop-label">Company search: ' + escH(item.label) + '</span>' +
+          '</div>';
+      } else if (item.type === 'company') {
         return '<div class="intel-drop-item" ' +
           'data-label="' + escH(item.label) + '" ' +
           'data-ticker="' + escH(item.ticker || '') + '" ' +
@@ -342,6 +353,13 @@
     dropdown.querySelectorAll('.intel-drop-item[data-type="concept"]').forEach(function (row) {
       row.addEventListener('click', function () {
         window._intelSearch(row.dataset.query || row.dataset.label, 'concept', '');
+      });
+    });
+
+    /* Private/free company search: click directly */
+    dropdown.querySelectorAll('.intel-drop-item[data-type="company-free"]').forEach(function (row) {
+      row.addEventListener('click', function () {
+        window._intelSearch(row.dataset.query || row.dataset.label, 'company', '');
       });
     });
 
@@ -1287,6 +1305,18 @@
       renderOverview(d, body);
     } else if (section === 'pitch') {
       renderPitchOnly(d, body);
+    } else if (section === 'pitch-playbook') {
+      /* Render pitch into sub-panel if inside a company brief, otherwise use full body */
+      var pitchPanel = body.querySelector('.intel-sec-panel[data-sec="pitch-playbook"]');
+      if (pitchPanel) {
+        pitchPanel.innerHTML = buildPitchPlaybook(d.pitch || d, d.brokerNote);
+        cascadeType(pitchPanel);
+      } else {
+        renderPitchOnly(d, body);
+        wireNoteBtn(d, body);
+        cascadeType(body);
+      }
+      return;
     }
     wireNoteBtn(d, body);
     cascadeType(body);
@@ -1345,7 +1375,7 @@
     var btn = body.querySelector('.sp-pitch-shortcut');
     if (!btn) return;
     btn.addEventListener('click', function () {
-      window._intelSearchSection(d.title, 'company', d.ticker || '', 'pitch');
+      window._intelSearchSection(d.title, 'company', d.ticker || '', 'pitch-playbook');
     });
   }
 
@@ -1649,17 +1679,23 @@
 
   function renderCompany(d, body) {
     var isListed = d.ticker && d.ticker.length > 0;
+    var pitchBtn = d.title ?
+      '<button class="sp-pitch-shortcut" data-title="' + escH(d.title) + '" data-ticker="' + escH(d.ticker || '') + '">▌ PITCH PLAYBOOK</button>' : '';
+    var chartBtn = isListed ?
+      '<button class="sp-chart-shortcut" data-ticker="' + escH(toYfTicker(d.ticker, d.exchange)) + '" data-name="' + escH(d.title || d.ticker) + '">▦ VIEW CHART</button>' : '';
     body.innerHTML =
-      '<div class="sp-badge ' + (isListed ? 'listed' : 'private') + '">' +
-        (isListed ? '● LISTED · ' + escH(d.ticker) + ' · ' + escH(d.exchange || '') : '● PRIVATE COMPANY') +
+      '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">' +
+        '<div class="sp-badge ' + (isListed ? 'listed' : 'private') + '" style="margin-bottom:0;">' +
+          (isListed ? '● LISTED · ' + escH(d.ticker) + ' · ' + escH(d.exchange || '') : '● PRIVATE COMPANY') +
+        '</div>' +
+        pitchBtn +
+        chartBtn +
       '</div>' +
       '<div class="sp-tagline">' + escH(d.tagline || '') + '</div>' +
-
       '<div class="sp-section">' +
         '<div class="sp-sec-lbl">OVERVIEW</div>' +
         '<div class="sp-text">' + escH(d.overview || '') + '</div>' +
       '</div>' +
-
       (d.keyFacts && d.keyFacts.length ?
         '<div class="sp-section">' +
           '<div class="sp-sec-lbl">KEY FACTS</div>' +
@@ -1667,17 +1703,22 @@
             d.keyFacts.map(function (f) { return '<li>' + escH(f) + '</li>'; }).join('') +
           '</ul>' +
         '</div>' : '') +
-
       '<div class="sp-section">' +
         '<div class="sp-sec-lbl">RELEVANCE TO ALTERNATIVE ASSETS</div>' +
         '<div class="sp-text">' + escH(d.relevance || '') + '</div>' +
       '</div>' +
-
-      buildPitchPlaybook(d.pitch, d.brokerNote) +
-
+      (d.brokerNote ?
+        '<div class="sp-section">' +
+          '<div class="sp-sec-lbl">BROKER NOTE</div>' +
+          '<div class="sp-pitch">' + escH(d.brokerNote) + '</div>' +
+        '</div>' : '') +
       '<div class="sp-section" style="border-top:1px solid #111;padding-top:10px;">' +
         '<button class="sp-note-btn">✎ ADD NOTE</button>' +
       '</div>';
+
+    /* Wire pitch + chart buttons — renderPopout doesn't call wireNoteBtn for company type */
+    wirePitchShortcut(d, body);
+    wireChartBtn(d, body);
     cascadeType(body);
   }
 

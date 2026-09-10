@@ -7695,7 +7695,7 @@
         var cls = q.dp === null ? 'wl-chg-flat' : q.dp >= 0 ? 'wl-pos' : 'wl-neg';
         var barW = q.dp !== null ? Math.min(Math.abs(q.dp) / 5 * 100, 100) + '%' : '0%';
         var barCol = q.dp >= 0 ? '#1a4a2a' : '#3a1010';
-        return '<div class="wl-row" data-sym="' + escH(q.sym) + '">' +
+        return '<div class="wl-row" data-sym="' + escH(q.sym) + '" data-name="' + escH(name) + '">' +
           '<div class="wl-bar" style="width:' + barW + ';background:' + barCol + ';"></div>' +
           '<div class="wl-row-left">' +
             '<div class="wl-sym">' + escH(q.sym) + '</div>' +
@@ -7707,8 +7707,7 @@
           '</div>' +
           '<div class="wl-row-actions">' +
             '<button class="wl-chart-btn" data-sym="' + escH(q.sym) + '" data-name="' + escH(name) + '" title="Price chart">▦</button>' +
-            '<button class="wl-info-btn" data-sym="' + escH(q.sym) + '" data-name="' + escH(name) + '" title="Company info">ℹ</button>' +
-            '<button class="wl-intel-btn" data-sym="' + escH(q.sym) + '" title="INTEL brief">›</button>' +
+            '<button class="wl-intel-btn" data-sym="' + escH(q.sym) + '" data-name="' + escH(name) + '" title="INTEL brief">ℹ</button>' +
             '<button class="wl-del" data-sym="' + escH(q.sym) + '" title="Remove">✕</button>' +
           '</div>' +
           '</div>';
@@ -7733,19 +7732,20 @@
         '</div>' +
         qaHtml +
         '<div class="wl-list">' + (listHtml || emptyHint) + '</div>' +
-        '<div class="wl-footer">LIVE PRICES · ' + ts + '  ·  CLICK ROW FOR INFO  ·  ℹ FOR COMPANY BRIEF</div>';
+        '<div class="wl-footer">LIVE PRICES · ' + ts + '  ·  CLICK ROW OR ℹ FOR INTEL BRIEF</div>';
 
       /* Preset buttons — open index browser */
       body.querySelectorAll('.wl-preset-btn').forEach(function(btn) {
         btn.addEventListener('click', function() { toggleBrowser(btn.dataset.cat); });
       });
 
-      /* Row click → company info (click the row background, not buttons) */
+      /* Row click → open INTEL brief */
       body.querySelectorAll('.wl-row').forEach(function(row) {
         row.addEventListener('click', function(e) {
           if (e.target.closest('button')) return;
           var sym = row.dataset.sym;
-          showInfoPanel(sym, WL_NAMES[sym] || sym);
+          var name = row.dataset.name || sym;
+          window._intelSearch && window._intelSearch(name, 'company', sym);
         });
       });
 
@@ -7762,20 +7762,13 @@
         });
       });
 
-      /* ℹ info button */
-      body.querySelectorAll('.wl-info-btn').forEach(function(btn) {
-        btn.addEventListener('click', function(e) {
-          e.stopPropagation();
-          showInfoPanel(btn.dataset.sym, btn.dataset.name);
-        });
-      });
-
-      /* › INTEL button */
+      /* ℹ INTEL brief button */
       body.querySelectorAll('.wl-intel-btn').forEach(function(btn) {
         btn.addEventListener('click', function(e) {
           e.stopPropagation();
           var sym = btn.dataset.sym;
-          window._intelSearch && window._intelSearch(sym, 'company', sym);
+          var name = btn.dataset.name || sym;
+          window._intelSearch && window._intelSearch(name, 'company', sym);
         });
       });
 
