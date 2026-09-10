@@ -7339,6 +7339,7 @@
             btn.addEventListener('click',function(e) {
               e.stopPropagation();
               var tk=btn.closest('.sh-drill-row').dataset.ticker;
+              window._prefetchCompanyPitch && window._prefetchCompanyPitch(tk, tk);
               window._intelSearch&&window._intelSearch(tk,'company',tk);
             });
           });
@@ -7756,6 +7757,7 @@
           if (e.target.closest('button')) return;
           var sym = row.dataset.sym;
           var name = row.dataset.name || sym;
+          window._prefetchCompanyPitch && window._prefetchCompanyPitch(name, sym);
           window._intelSearch && window._intelSearch(name, 'company', sym);
         });
       });
@@ -7779,6 +7781,7 @@
           e.stopPropagation();
           var sym = btn.dataset.sym;
           var name = btn.dataset.name || sym;
+          window._prefetchCompanyPitch && window._prefetchCompanyPitch(name, sym);
           window._intelSearch && window._intelSearch(name, 'company', sym);
         });
       });
