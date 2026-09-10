@@ -470,7 +470,7 @@
     else if (type === 'gold_intel')     renderGoldIntel(id, body);
     else if (type === 'macro_monitor')  renderMacroMonitor(id, body);
     else if (type === 'sector_heatmap') renderSectorHeatmap(id, body);
-    else if (type === 'watchlist')      renderWatchlist(id, body);
+    else if (type === 'watchlist')      renderWatchlist(id, body, data);
     else if (type === 'live_tv')        renderLiveTVWidget(id, body);
     else if (type === 'global_map')     renderGlobalMap(id, body);
     else if (type === 'macro_intel')    renderMacroIntel(id, body);
@@ -7399,11 +7399,19 @@
   }
 
   /* ── WATCHLIST ───────────────────────────────────────────────── */
-  function renderWatchlist(id, body) {
+  function renderWatchlist(id, body, data) {
     body.style.cssText = 'display:flex;flex-direction:column;overflow:hidden;background:#0a0a0a;position:relative;';
+    data = data || {};
     var STORE = 'tbt-watchlist-v2';
-    var tickers = JSON.parse(localStorage.getItem(STORE) || '[]');
-    function save() { localStorage.setItem(STORE, JSON.stringify(tickers)); }
+    /* Load from cfg.data.tickers (Supabase-persisted) — fall back to localStorage for existing users */
+    var tickers = (data.tickers && data.tickers.length) ? data.tickers.slice()
+                  : JSON.parse(localStorage.getItem(STORE) || '[]');
+    function save() {
+      localStorage.setItem(STORE, JSON.stringify(tickers));
+      /* Persist to Supabase via cfg.data so it survives logout */
+      data.tickers = tickers.slice();
+      if (window.saveLayout) window.saveLayout();
+    }
 
     /* ── Index browser data ── */
     var INDEX_DATA = {
