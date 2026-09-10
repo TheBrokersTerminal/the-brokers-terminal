@@ -456,7 +456,7 @@ exports.handler = async function (event) {
 
     /* ── SINGLE-SERIES PRICE CHART ── */
     if (type === 'chart') {
-      var seriesId = ((p.series || '')).toUpperCase().replace(/[^A-Z0-9.]/g, '');
+      var seriesId = ((p.series || '')).toUpperCase().replace(/[^A-Z0-9.\-=]/g, '');
       if (!seriesId) return { statusCode: 400, headers: hdrs, body: JSON.stringify({ error: 'series required' }) };
 
       var cyRaw = parseInt(p.years || '2');
