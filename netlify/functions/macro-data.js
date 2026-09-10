@@ -686,13 +686,21 @@ exports.handler = async function (event) {
     if (type === 'yh-quote') {
       var yhqSyms = (p.symbols||'').split(',').map(function(s){return s.trim();}).filter(Boolean).slice(0,30);
       if (!yhqSyms.length) return { statusCode:400, headers:hdrs, body:JSON.stringify({error:'No symbols'}) };
-      var yhqH = { 'User-Agent': 'Mozilla/5.0 (compatible)', 'Accept': 'application/json' };
-      var yhqR = await fetchJsonWith('https://query1.finance.yahoo.com/v7/finance/quote?symbols=' + encodeURIComponent(yhqSyms.join(',')), yhqH).catch(function(){ return null; });
-      var yhqMap = {};
-      (((yhqR || {}).quoteResponse || {}).result || []).forEach(function(q) {
-        yhqMap[q.symbol] = { sym:q.symbol, c:q.regularMarketPrice||null, dp:q.regularMarketChangePercent!=null?parseFloat(q.regularMarketChangePercent.toFixed(2)):null, d:q.regularMarketChange!=null?parseFloat(q.regularMarketChange.toFixed(2)):null };
+      /* v7/quote is blocked from server; use v8/chart per ticker (same endpoint charts use) */
+      var yhqH2 = { 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36', 'Accept': 'application/json', 'Referer': 'https://finance.yahoo.com' };
+      var yhqResults = await Promise.allSettled(yhqSyms.map(function(sym) {
+        return fetchJsonWith('https://query2.finance.yahoo.com/v8/finance/chart/' + encodeURIComponent(sym) + '?interval=1d&range=1d', yhqH2);
+      }));
+      var yhqRows = yhqSyms.map(function(sym, i) {
+        var r = yhqResults[i];
+        if (r.status !== 'fulfilled' || !r.value) return { sym:sym, c:null, dp:null, d:null };
+        var m = (((r.value.chart||{}).result||[])[0]||{}).meta||{};
+        var c = m.regularMarketPrice||null;
+        var pc = m.chartPreviousClose||m.previousClose||null;
+        var d = (c && pc) ? parseFloat((c - pc).toFixed(2)) : null;
+        var dp = (c && pc) ? parseFloat(((c - pc) / pc * 100).toFixed(2)) : null;
+        return { sym:sym, c:c, dp:dp, d:d };
       });
-      var yhqRows = yhqSyms.map(function(s) { return yhqMap[s] || { sym:s, c:null, dp:null }; });
       return { statusCode:200, headers:Object.assign({},hdrs,{'Cache-Control':'public,max-age=60'}), body:JSON.stringify(yhqRows) };
     }
 
