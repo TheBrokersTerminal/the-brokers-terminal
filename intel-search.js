@@ -420,6 +420,7 @@
         setTimeout(function () { opt.style.background = ''; }, 200);
 
         if (action === 'profile') {
+          if (ticker) _prefetchCompanyPitch(label, ticker); /* start pitch warm-up immediately */
           window._intelSearchSection(label, 'company', ticker, 'overview');
         } else if (action === 'intel') {
           window._intelSearchSection(label, 'company', ticker, 'pitch');
@@ -1819,7 +1820,7 @@
   }
 
   /* ── Silent background pre-fetch for company pitch playbook ── */
-  function _prefetchCompanyPitch(query, ticker) {
+  window._prefetchCompanyPitch = function _prefetchCompanyPitch(query, ticker) {
     var lensKey = (window._assetLens && window._assetLens.key) || 'universal';
     var lensContext = (window._assetLens && window._assetLens.promptContext) || '';
     var cacheKey = 'company:' + lensKey + ':pitch-playbook:' + (ticker || query);
@@ -1854,7 +1855,7 @@
       }
       readChunk().catch(function(){});
     }).catch(function(){});
-  }
+  };
 
   /* ── Fetch a concept section on demand ── */
   function fetchConceptSection(conceptTitle, sectionId, panel) {
