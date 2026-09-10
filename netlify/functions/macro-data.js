@@ -690,7 +690,7 @@ exports.handler = async function (event) {
       var yhqR = await fetchJsonWith('https://query1.finance.yahoo.com/v7/finance/quote?symbols=' + encodeURIComponent(yhqSyms.join(',')), yhqH).catch(function(){ return null; });
       var yhqMap = {};
       (((yhqR || {}).quoteResponse || {}).result || []).forEach(function(q) {
-        yhqMap[q.symbol] = { sym:q.symbol, c:q.regularMarketPrice||null, dp:q.regularMarketChangePercent!=null?parseFloat(q.regularMarketChangePercent.toFixed(2)):null };
+        yhqMap[q.symbol] = { sym:q.symbol, c:q.regularMarketPrice||null, dp:q.regularMarketChangePercent!=null?parseFloat(q.regularMarketChangePercent.toFixed(2)):null, d:q.regularMarketChange!=null?parseFloat(q.regularMarketChange.toFixed(2)):null };
       });
       var yhqRows = yhqSyms.map(function(s) { return yhqMap[s] || { sym:s, c:null, dp:null }; });
       return { statusCode:200, headers:Object.assign({},hdrs,{'Cache-Control':'public,max-age=60'}), body:JSON.stringify(yhqRows) };
