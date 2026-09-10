@@ -686,10 +686,10 @@ exports.handler = async function (event) {
     if (type === 'yh-quote') {
       var yhqSyms = (p.symbols||'').split(',').map(function(s){return s.trim();}).filter(Boolean).slice(0,30);
       if (!yhqSyms.length) return { statusCode:400, headers:hdrs, body:JSON.stringify({error:'No symbols'}) };
-      /* v7/quote is blocked from server; use v8/chart per ticker (same endpoint charts use) */
-      var yhqH2 = { 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36', 'Accept': 'application/json', 'Referer': 'https://finance.yahoo.com' };
+      /* v7/quote blocked from Netlify — use v8/chart with same headers as working stock chart */
+      var yhqH2 = { 'User-Agent': 'Mozilla/5.0 (compatible)', 'Accept': 'application/json' };
       var yhqResults = await Promise.allSettled(yhqSyms.map(function(sym) {
-        return fetchJsonWith('https://query2.finance.yahoo.com/v8/finance/chart/' + encodeURIComponent(sym) + '?interval=1d&range=1d', yhqH2);
+        return fetchJsonWith('https://query1.finance.yahoo.com/v8/finance/chart/' + encodeURIComponent(sym) + '?interval=1d&range=5d', yhqH2);
       }));
       var yhqRows = yhqSyms.map(function(sym, i) {
         var r = yhqResults[i];
