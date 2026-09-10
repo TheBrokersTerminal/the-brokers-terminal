@@ -12,8 +12,11 @@
   var _widgets = {};  /* id → {el, cfg} */
   var _currentTab = 'terminal'; /* tracks active page for per-page widget visibility */
   window._sharedZ = window._sharedZ || 1000;
-  /* Hard ceiling keeps widgets below topbar (10000) and ticker (9999) */
-  function _nextZ() { window._sharedZ = Math.min(window._sharedZ + 1, 8000); return window._sharedZ; }
+  /* Hard ceiling keeps canvas widgets below popouts (9000+). Never corrupt _sharedZ when popouts are open. */
+  function _nextZ() {
+    if ((window._sharedZ || 0) < 8000) window._sharedZ = (window._sharedZ || 0) + 1;
+    return Math.min(window._sharedZ, 8000);
+  }
 
   var FINNHUB_KEY = 'da6p77hr01qqqkkgl7b0da6p77hr01qqqkkgl7bg';
 
@@ -8918,8 +8921,9 @@
     ];
 
     function cUrl(s, y) {
-      /* Stock tickers: letters + optional exchange suffix (.L .TO .AX etc.) → Yahoo Finance route */
-      var isStock = /^[A-Z0-9]{1,6}(\.[A-Z]{1,2})?$/.test(s) && !/^(EURGBP|CFNAI|PAYEMS|WALCL|BOGMBASE|CIVPART|ICSA|INDPRO|UNRATE|GS|SP|GS10|GS2)$/.test(s);
+      /* Stock/crypto/FX tickers: plain tickers, crypto (BTC-USD), FX pairs (GBPUSD=X) → Yahoo Finance route */
+      var isStock = /^[A-Z0-9]{1,10}(-[A-Z]{2,5}|=[A-Z]{1,2})?(\.[A-Z]{1,2})?$/.test(s)
+                 && !/^(EURGBP|CFNAI|PAYEMS|WALCL|BOGMBASE|CIVPART|ICSA|INDPRO|UNRATE|GS|SP|GS10|GS2)$/.test(s);
       var base = '/.netlify/functions/macro-data?type=chart&series=' + encodeURIComponent(s) + '&years=' + y;
       return isStock ? base + '&source=stock' : base;
     }
