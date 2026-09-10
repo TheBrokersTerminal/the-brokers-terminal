@@ -7800,7 +7800,7 @@
 
     function fetchAndRender() {
       if (!tickers.length) { draw([]); return; }
-      fetch('/.netlify/functions/macro-data?type=quote&symbols=' + encodeURIComponent(tickers.join(',')))
+      fetch('/.netlify/functions/macro-data?type=yh-quote&symbols=' + encodeURIComponent(tickers.join(',')))
         .then(function(r){ return r.ok ? r.json() : null; })
         .then(function(q){ if (q) draw(q); })
         .catch(function(){});
