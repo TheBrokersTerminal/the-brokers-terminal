@@ -1181,10 +1181,11 @@ exports.handler = async (event) => {
       userMsg = CONCEPT_SLIM_PROMPT(query); /* slim initial load — no lens needed */
     } else if (section === 'overview') {
       userMsg = OVERVIEW_PROMPT(query, null) + lensAppend;
-    } else if (section === 'pitch') {
+    } else if (section === 'pitch' || section === 'pitch-playbook') {
       userMsg = PITCH_PROMPT(query) + lensAppend;
     } else {
-      userMsg = COMPANY_PROMPT(query, null) + lensAppend;
+      /* Default company fetch — profile only, no pitch (pitch loaded on demand) */
+      userMsg = OVERVIEW_PROMPT(query, null) + lensAppend;
     }
 
     /* Helper: call Anthropic with hard 21s timeout + retry on transient errors */

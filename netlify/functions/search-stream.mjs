@@ -404,7 +404,7 @@ No markdown. No preamble. Return ONLY the JSON object.`;
 
 const COMPANY_PROMPT = (query) => `Research request: "${query}"
 
-Generate a full company intelligence briefing AND sales pitch playbook. Return this exact JSON:
+Generate a company intelligence brief — profile only, no pitch playbook. Return this exact JSON:
 {
   "type": "company",
   "title": "Full company name",
@@ -415,23 +415,36 @@ Generate a full company intelligence briefing AND sales pitch playbook. Return t
   "overview": "2-3 sentences. Who they are, what they do, why a broker should care. No jargon.",
   "keyFacts": ["Fact 1 — specific number or verified data point", "Fact 2", "Fact 3", "Fact 4"],
   "relevance": "2-3 sentences. The angle that connects this company to physical assets, wealth protection, or macro forces.",
-  "brokerNote": "One paragraph. What the broker says if this subject comes up naturally. Asset-neutral. Plain English. Confident.",
+  "brokerNote": "One paragraph. What the broker says if this subject comes up naturally. Asset-neutral. Plain English. Confident."
+}`;
+
+const COMPANY_PITCH_PROMPT = (query) => `The broker has searched "${query}" as a CONVERSATION HOOK — not as an investment to sell.
+
+CRITICAL FRAMING: This company is intelligence and context. Use ${query.replace(/"/g, "'")} as the starting point; physical/alternative assets as the destination of every pitch field. Do NOT pitch ${query.replace(/"/g, "'")} equity, stock, or shares.
+
+When an ACTIVE BROKER LENS is appended below: every pitch field must bridge from this company's situation to the lens asset as the investment destination.
+Without a lens: every pitch field bridges to "physical assets / tangible assets / real assets outside the banking system."
+
+Return this exact JSON:
+{
+  "type": "company",
+  "title": "${query.replace(/"/g, "'")}",
   "pitch": {
-    "openingLine": "The exact first sentence to open this conversation. A question or provocative statement — not a pitch.",
-    "logicalCase": ["Most compelling fact — specific, verified, simple", "Second pillar — different angle", "The logical conclusion for their wealth"],
-    "emotionalCase": "Future pace in 2 sentences. Their worry gone. The outcome they want, achieved. Asset-neutral.",
-    "painPoint": "The one precise fear this type of client has right now. One sentence.",
+    "openingLine": "One punchy sentence using a striking ${query.replace(/"/g, "'")} data point as the hook — pivots to why physical assets matter right now. A question or provocative statement.",
+    "logicalCase": ["Use this company's data to build logical argument 1 for alternative assets — specific, verifiable", "Argument 2 using a different angle from this company's situation or macro forces", "Logical conclusion: what this company's reality means for the client's allocation"],
+    "emotionalCase": "Future pace in 2 sentences using this company as context. Loss frame first. Gain frame second. Asset-neutral.",
+    "painPoint": "The specific fear a client has about their conventional portfolio given what this company represents. One precise sentence.",
     "spinQuestions": [
-      "Situation — where is their money now and how do they feel about it",
-      "Problem/Implication — the cost of their current situation doing nothing",
-      "Need-Payoff — starts with 'So if you had...' or 'What would it mean if...'"
+      "Situation — how exposed is their portfolio to the macro forces this company represents",
+      "Problem/Implication — what has that exposure cost or could cost — specific and real",
+      "Need-Payoff — starts with So if you had... or What would it mean if..."
     ],
     "objections": [
-      {"objection": "Most common first objection", "rebuttal": "Acknowledge → reframe → need-payoff question. Conversational."},
-      {"objection": "Second objection", "rebuttal": "Same structure, different angle. Asset-neutral."}
+      {"objection": "Most likely pushback when bridging from this company toward physical assets", "rebuttal": "Acknowledge genuinely, reframe using this company's data as evidence for physical assets, close with need-payoff question. Conversational."},
+      {"objection": "Second objection", "rebuttal": "Same three-part structure. Different angle. Asset-neutral."}
     ],
-    "urgencyLine": "One real verifiable reason why now beats later. Never manufactured.",
-    "socialProof": "One sentence. What sophisticated or institutional money is doing relative to this subject."
+    "urgencyLine": "One real verifiable reason acting now is smarter than waiting. Connected to this company or the macro forces it represents. Never manufactured.",
+    "socialProof": "What sophisticated investors or institutional allocators are doing in response to what this company represents. One sentence."
   }
 }`;
 
@@ -554,13 +567,14 @@ export default async (req) => {
 
   const apiKey   = process.env.ANTHROPIC_API_KEY;
   const isScenario = type === 'scenario';
-  const isPitchPlaybook = type === 'concept' && section === 'pitch-playbook';
+  const isPitchPlaybook = section === 'pitch-playbook' && (type === 'concept' || type === 'company');
+  const isCompanyPitch = type === 'company' && section === 'pitch-playbook';
 
   /* Cache key — same namespace as search.js */
   const lensTag  = lensKey ? ':' + lensKey : '';
   const sectionTag = section ? ':' + section : '';
   const cacheKey = isPitchPlaybook
-    ? 'search9:pitch-playbook:' + query.trim().toLowerCase().slice(0, 80) + lensTag
+    ? 'search9:pitch-playbook:' + (ticker || query.trim().toLowerCase().slice(0, 80)) + lensTag
     : type === 'concept'
       ? 'search9:concept-slim:' + query.trim().toLowerCase().slice(0, 80) + lensTag
       : 'search9:' + type + ':' + (ticker || query.trim().toLowerCase().slice(0, 80)) + lensTag + sectionTag;
@@ -614,16 +628,19 @@ export default async (req) => {
 
         /* ── Build prompt ── */
         const lensAppend = (!isScenario && lensContext)
-          ? `\n\nACTIVE BROKER LENS — tailor ALL pitch content specifically to this asset class context:\n${lensContext}`
+          ? (isCompanyPitch
+            ? `\n\nACTIVE BROKER LENS — CRITICAL OVERRIDE: The investment destination is the physical asset described below — NOT the company equity. Every pitch field must use this company's data as the conversation HOOK and explicitly BRIDGE toward this asset as the close:\n${lensContext}`
+            : `\n\nACTIVE BROKER LENS — tailor ALL pitch content specifically to this asset class context:\n${lensContext}`)
           : '';
-        /* Scenarios: 1800 tok (~12s). Pitch-playbook: 1500 tok (~10s). Concept slim: 400. Else: 2500. */
-        const maxTok  = isScenario ? 1800 : isPitchPlaybook ? 2000 : (type === 'concept' ? 400 : 2500);
+        /* Scenarios: 1800 tok. Company/concept pitch-playbook: 2000. Concept slim: 400. Company profile: 1200. */
+        const maxTok  = isScenario ? 1800 : isPitchPlaybook ? 2000 : (type === 'concept' ? 400 : 1200);
         const sysPrompt = isPitchPlaybook ? PITCH_SYSTEM : type === 'concept' ? CONCEPT_SYSTEM : SEARCH_SYSTEM;
         let userMsg;
-        if (isScenario)           userMsg = SCENARIO_PROMPT(query) + lensAppend;
-        else if (isPitchPlaybook) userMsg = PITCH_PLAYBOOK_SECTION_PROMPT(query) + lensAppend;
+        if (isScenario)              userMsg = SCENARIO_PROMPT(query) + lensAppend;
+        else if (isCompanyPitch)     userMsg = COMPANY_PITCH_PROMPT(query) + lensAppend;
+        else if (isPitchPlaybook)    userMsg = PITCH_PLAYBOOK_SECTION_PROMPT(query) + lensAppend;
         else if (type === 'concept') userMsg = CONCEPT_SLIM_PROMPT(query);
-        else                      userMsg = COMPANY_PROMPT(query) + lensAppend;
+        else                         userMsg = COMPANY_PROMPT(query) + lensAppend;
 
         /* ── Hard 20s kill for the ENTIRE streaming operation (headers + body).
            The previous pattern cleared the timer after the initial fetch() resolved
