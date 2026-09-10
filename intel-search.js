@@ -1551,6 +1551,8 @@
       renderDistillery(d, d._wsResults || [], body, win);
     } else if (d.type === 'company') {
       renderCompany(d, body);
+      /* Pre-fetch pitch playbook silently so it's cached when user clicks the button */
+      if (d.ticker && d.ticker.length) _prefetchCompanyPitch(d.title || d.ticker, d.ticker);
     } else {
       renderConcept(d, body, win);
     }
@@ -1814,6 +1816,44 @@
     .then(function(r) { return r.ok ? r.json() : null; })
     .then(function(d) { if (d && !_cache[cacheKey]) _cache[cacheKey] = d; })
     .catch(function(){});
+  }
+
+  /* ── Silent background pre-fetch for company pitch playbook ── */
+  function _prefetchCompanyPitch(query, ticker) {
+    var lensKey = (window._assetLens && window._assetLens.key) || 'universal';
+    var lensContext = (window._assetLens && window._assetLens.promptContext) || '';
+    var cacheKey = 'company:' + lensKey + ':pitch-playbook:' + (ticker || query);
+    if (_cache[cacheKey]) return;
+    var headers = { 'Content-Type': 'application/json' };
+    if (window._authToken) headers['Authorization'] = 'Bearer ' + window._authToken;
+
+    fetch('/.netlify/functions/search-stream', {
+      method: 'POST', headers: headers,
+      body: JSON.stringify({ query: query, type: 'company', ticker: ticker, section: 'pitch-playbook', lensKey: lensKey, lensContext: lensContext }),
+    }).then(function(r) {
+      if (!r.ok || !r.body) return;
+      var reader = r.body.getReader();
+      var decoder = new TextDecoder();
+      var lineBuf = '';
+      function readChunk() {
+        return reader.read().then(function(chunk) {
+          if (chunk.done) return;
+          lineBuf += decoder.decode(chunk.value, { stream: true });
+          var lines = lineBuf.split('\n'); lineBuf = lines.pop();
+          for (var i = 0; i < lines.length; i++) {
+            var line = lines[i];
+            if (!line.startsWith('data: ')) continue;
+            var raw; try { raw = JSON.parse(line.slice(6)); } catch(e) { continue; }
+            if (raw.type === 'cache' || raw.type === 'done') {
+              if (!_cache[cacheKey]) _cache[cacheKey] = raw.data;
+              return;
+            }
+          }
+          return readChunk();
+        });
+      }
+      readChunk().catch(function(){});
+    }).catch(function(){});
   }
 
   /* ── Fetch a concept section on demand ── */
