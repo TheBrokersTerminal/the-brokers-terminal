@@ -564,7 +564,7 @@ export default async (req) => {
     });
   }
 
-  const { query, type, ticker, section, lensKey, lensContext } = body;
+  const { query, type, ticker, section, lensKey, lensContext, prefetch: isPrefetch } = body;
   if (!query) {
     return new Response(JSON.stringify({ error: 'query required' }), {
       status: 400, headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
@@ -606,30 +606,69 @@ export default async (req) => {
   const stream = new ReadableStream({
     async start(ctrl) {
       try {
-        /* ── Cache check ── */
-        if (!isScenario) {
-          const cached = await cacheGet(cacheKey);
-          if (cached) {
-            ctrl.enqueue(sseChunk({ type: 'cache', data: cached }));
-            ctrl.close();
-            return;
-          }
-        }
+        /* ── PREFETCH MODE (background warm-up, no credits charged) ──
+           _prefetchCompanyPitch sends prefetch:true. We populate the cache
+           silently. Credits are only charged when the user actually clicks
+           the Pitch Playbook button (isPrefetch=false below).               */
+        if (isPrefetch && isPitchPlaybook) {
+          const alreadyCached = await cacheGet(cacheKey);
+          if (alreadyCached) { ctrl.close(); return; } /* already warm */
+          /* Fall through to AI call — no credit gate */
+        } else {
+          /* ── Standard flow ── */
 
-        /* ── Credit gate ── */
-        const creditResult = await serverDeductCredits(
-          authHeader, creditCost,
-          `intel:${type}:${ticker || query.slice(0, 60)}`
-        );
-        if (!creditResult.ok) {
-          ctrl.enqueue(sseChunk({
-            type: 'error',
-            code: creditResult.status || 402,
-            message: creditResult.error || 'insufficient_credits',
-            balance: creditResult.balance || 0,
-          }));
-          ctrl.close();
-          return;
+          /* For pitch playbook user clicks: charge credits BEFORE cache check
+             so the user pays whether it's a fresh call or served from prefetch cache. */
+          if (isPitchPlaybook) {
+            const creditResult = await serverDeductCredits(
+              authHeader, creditCost,
+              `intel:${type}:pitch-playbook:${ticker || query.slice(0, 60)}`
+            );
+            if (!creditResult.ok) {
+              ctrl.enqueue(sseChunk({
+                type: 'error',
+                code: creditResult.status || 402,
+                message: creditResult.error || 'insufficient_credits',
+                balance: creditResult.balance || 0,
+              }));
+              ctrl.close();
+              return;
+            }
+            /* Credits deducted — now check cache for instant response */
+            const cached = await cacheGet(cacheKey);
+            if (cached) {
+              ctrl.enqueue(sseChunk({ type: 'cache', data: cached }));
+              ctrl.close();
+              return;
+            }
+            /* Not cached — fall through to AI call */
+          } else {
+            /* All other requests: cache check first (cache hits are free) */
+            if (!isScenario) {
+              const cached = await cacheGet(cacheKey);
+              if (cached) {
+                ctrl.enqueue(sseChunk({ type: 'cache', data: cached }));
+                ctrl.close();
+                return;
+              }
+            }
+
+            /* Credit gate */
+            const creditResult = await serverDeductCredits(
+              authHeader, creditCost,
+              `intel:${type}:${ticker || query.slice(0, 60)}`
+            );
+            if (!creditResult.ok) {
+              ctrl.enqueue(sseChunk({
+                type: 'error',
+                code: creditResult.status || 402,
+                message: creditResult.error || 'insufficient_credits',
+                balance: creditResult.balance || 0,
+              }));
+              ctrl.close();
+              return;
+            }
+          }
         }
 
         /* ── Build prompt ── */

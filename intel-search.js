@@ -1829,7 +1829,7 @@
 
     fetch('/.netlify/functions/search-stream', {
       method: 'POST', headers: headers,
-      body: JSON.stringify({ query: query, type: 'company', ticker: ticker, section: 'pitch-playbook', lensKey: lensKey, lensContext: lensContext }),
+      body: JSON.stringify({ query: query, type: 'company', ticker: ticker, section: 'pitch-playbook', lensKey: lensKey, lensContext: lensContext, prefetch: true }),
     }).then(function(r) {
       if (!r.ok || !r.body) return;
       var reader = r.body.getReader();
