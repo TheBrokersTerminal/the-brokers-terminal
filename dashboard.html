@@ -1303,11 +1303,23 @@
       { hdr: 'TAX-EFFICIENT',          keys: ['eis','vct','offshore'] },
       { hdr: 'CROSS-ASSET',            keys: ['universal'] },
     ];
+    function getAllowedLensSet() {
+      var allowed = window._accessFlags && window._accessFlags.allowed_asset_classes;
+      if (!allowed || !Array.isArray(allowed)) return null; /* null = all */
+      /* Admin stores exact lens keys — direct 1:1 mapping */
+      var set = new Set(allowed);
+      set.add('universal'); /* universal always available */
+      return set;
+    }
+
     function buildDropdown() {
-      var profiles = window.ASSET_PROFILES;
+      var profiles    = window.ASSET_PROFILES;
+      var allowedLens = getAllowedLensSet();
       var html = '';
       LENS_GROUPS.forEach(function(grp) {
-        var items = grp.keys.map(function(k){ return profiles[k]; }).filter(Boolean);
+        var items = grp.keys
+          .map(function(k){ return profiles[k]; })
+          .filter(function(p) { return p && (!allowedLens || allowedLens.has(p.key)); });
         if (!items.length) return;
         html += '<div class="ttb-lens-group-hdr">' + grp.hdr + '</div>';
         items.forEach(function(p) {
@@ -1965,7 +1977,19 @@
       var accessR = await fetch('/.netlify/functions/credits?action=my_access', {
         headers: { Authorization: 'Bearer ' + session.access_token }
       });
-      if (accessR.ok) window._accessFlags = await accessR.json();
+      if (accessR.ok) {
+        window._accessFlags = await accessR.json();
+        /* If the saved lens is not in the user's allowed set, reset to first allowed */
+        var _al = window._accessFlags && window._accessFlags.allowed_asset_classes;
+        if (_al && Array.isArray(_al) && window._assetLens) {
+          var _allowed = new Set(_al);
+          _allowed.add('universal');
+          if (!_allowed.has(window._assetLens.key)) {
+            var _first = _al[0];
+            if (_first) window._setAssetLens(_first);
+          }
+        }
+      }
     } catch(_e) {}
 
     // ── Init terminal canvas (firmId now resolved) ──

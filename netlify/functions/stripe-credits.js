@@ -138,14 +138,15 @@ exports.handler = async function (event) {
       return ok({ already_credited: true, balance: balRows.length ? balRows[0].balance : 0 });
     }
 
-    /* Add credits */
+    /* Add credits — always purchased (carry-over, never expire) */
     const addR = await sbFetch('/rest/v1/rpc/add_credits', {
       method: 'POST',
       body: JSON.stringify({
-        p_user_id: user.id,
-        p_amount: pkg.credits,
-        p_type: 'purchase',
+        p_user_id:     user.id,
+        p_amount:      pkg.credits,
+        p_type:        'purchase',
         p_description: `stripe-topup:${sessionId}:${pkgKey}`,
+        p_credit_type: 'purchased',
       }),
     });
     const addResult = addR.ok ? await addR.json() : null;
