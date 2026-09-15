@@ -609,11 +609,30 @@ export default async (req) => {
         /* ── PREFETCH MODE (background warm-up, no credits charged) ──
            _prefetchCompanyPitch sends prefetch:true. We populate the cache
            silently. Credits are only charged when the user actually clicks
-           the Pitch Playbook button (isPrefetch=false below).               */
+           the Pitch Playbook button (isPrefetch=false below).
+           Auth is still required — only valid subscribers may trigger prefetch. */
         if (isPrefetch && isPitchPlaybook) {
+          /* Verify JWT even on prefetch — no free ride for unauthenticated callers */
+          const sk = process.env.SUPABASE_SERVICE_KEY;
+          if (!sk || !authHeader.startsWith('Bearer ')) {
+            ctrl.enqueue(sseChunk({ type: 'error', code: 401, message: 'unauthorized' }));
+            ctrl.close(); return;
+          }
+          const prefetchUserResp = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+            headers: { apikey: sk, Authorization: authHeader },
+          });
+          if (!prefetchUserResp.ok) {
+            ctrl.enqueue(sseChunk({ type: 'error', code: 401, message: 'unauthorized' }));
+            ctrl.close(); return;
+          }
+          const prefetchUser = await prefetchUserResp.json();
+          if (!prefetchUser || !prefetchUser.id) {
+            ctrl.enqueue(sseChunk({ type: 'error', code: 401, message: 'unauthorized' }));
+            ctrl.close(); return;
+          }
           const alreadyCached = await cacheGet(cacheKey);
           if (alreadyCached) { ctrl.close(); return; } /* already warm */
-          /* Fall through to AI call — no credit gate */
+          /* Auth confirmed — fall through to AI call, no credit deduction */
         } else {
           /* ── Standard flow ── */
 
