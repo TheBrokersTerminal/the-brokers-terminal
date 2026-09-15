@@ -664,9 +664,9 @@
             <div style="font-size:9px;letter-spacing:0.18em;color:var(--text-faint);margin-bottom:6px;">NOTE (OPTIONAL)</div>
             <input id="cd-note" type="text" class="form-input" placeholder="e.g. monthly allocation" style="font-size:11px;padding:8px 12px;">
           </div>
-          <button class="btn btn-solid" onclick="doAddCredits()" style="white-space:nowrap;font-size:9px;padding:8px 16px;" title="Create credits from nothing and give to user (owner only)">＋ CREATE &amp; GIVE</button>
-          <button class="btn" onclick="doDistributeCredits()" style="white-space:nowrap;font-size:9px;padding:8px 16px;color:var(--accent);border-color:var(--accent);" title="Move from your own balance to user">▶ DISTRIBUTE</button>
-          <button class="btn" onclick="doRecallCredits()" style="white-space:nowrap;font-size:9px;padding:8px 16px;color:#e04040;border-color:#e04040;" title="Move from user back to your account">◀ RECALL</button>
+          <button class="btn btn-solid" onclick="doAddCredits()" style="white-space:nowrap;font-size:9px;padding:8px 16px;" title="Gift credits from nothing into user's purchased bucket">＋ GIFT</button>
+          <button class="btn" onclick="doRemoveCredits()" style="white-space:nowrap;font-size:9px;padding:8px 16px;color:#e04040;border-color:#e04040;" title="Remove credits from user's account (voided, not transferred)">✕ REMOVE</button>
+          <button class="btn" onclick="doRecallCredits()" style="white-space:nowrap;font-size:9px;padding:8px 16px;color:#888;border-color:#333;" title="Move credits from user back into your own account">◀ RECALL TO ME</button>
         </div>
         <div id="cd-msg" style="margin-top:10px;font-size:10px;letter-spacing:0.12em;display:none;"></div>
       </div>
@@ -3510,6 +3510,32 @@
       var user = _accessUserMap[userId];
       if (user) { user.balance = res.balance; _updateBalanceDisplay(userId, res.balance); }
       showCdMsg('✓ Created ' + amount + ' credits → ' + _userName(userId) + '. Their balance: ' + res.balance, '#4CAF50');
+    } catch(e) { showCdMsg('✗ ' + e.message, '#e04040'); }
+  }
+
+  /* Owner REMOVE credits from a user (voided, not transferred anywhere) */
+  async function doRemoveCredits() {
+    var userId = document.getElementById('cd-user-select').value;
+    var amount = parseInt(document.getElementById('cd-amount').value, 10);
+    var note   = document.getElementById('cd-note').value.trim() || 'owner removal';
+    if (!userId || !amount || amount <= 0) { showCdMsg('Select a user and enter a valid amount.', '#e04040'); return; }
+    var name = _userName(userId);
+    if (!confirm('Remove ' + amount + ' credits from ' + name + '? These credits will be voided — not transferred.')) return;
+
+    try {
+      showCdMsg('Processing…', 'var(--text-faint)');
+      const sess = await supabase.auth.getSession();
+      const token = sess.data && sess.data.session && sess.data.session.access_token;
+      const r = await fetch('/.netlify/functions/credits', {
+        method: 'POST',
+        headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'remove', target_user_id: userId, amount: amount, description: note })
+      });
+      const res = await r.json();
+      if (!r.ok) throw new Error(res.error === 'insufficient_credits' ? 'User does not have enough credits.' : (res.error || 'Failed'));
+      var user = _accessUserMap[userId];
+      if (user) { user.balance = res.balance; _updateBalanceDisplay(userId, res.balance); }
+      showCdMsg('✓ Removed ' + amount + ' credits from ' + name + '. Their new balance: ' + res.balance, '#4CAF50');
     } catch(e) { showCdMsg('✗ ' + e.message, '#e04040'); }
   }
 
