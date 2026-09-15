@@ -646,98 +646,40 @@
       (async function activateAfterPayment() {
         try {
           var { data: { session } } = await supabase.auth.getSession();
+          var jwt = session ? session.access_token : null;
           var userEmail = session ? session.user.email.toLowerCase() : (localStorage.getItem('pendingEmail') || '').toLowerCase();
-          if (!userEmail) {
+          if (!userEmail || !jwt) {
             document.querySelector('.form-intro').innerHTML = 'Session expired — <a href="login.html" style="color:var(--accent);">click here to log in</a> with the credentials you just created.';
             return;
           }
           localStorage.removeItem('pendingEmail');
-          var domain    = userEmail.split('@')[1];
-          var asset     = localStorage.getItem('pendingAsset') || 'gold';
+          var asset        = localStorage.getItem('pendingAsset') || 'gold';
           localStorage.removeItem('pendingAsset');
-          // Service role key — all DB writes bypass RLS
-          var SR = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9xcG9kaWtlbHhod2NuamR3b2p3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NzQ2NDMyMSwiZXhwIjoyMDkzMDQwMzIxfQ.e-NAEbB0Ick5NeBVT2U4Dy9kw7X1O2BcKlxptbqZNVI';
-          var sbUrl = 'https://oqpodikelxhwcnjdwojw.supabase.co';
-          var srH = { 'apikey': SR, 'Authorization': 'Bearer ' + SR, 'Content-Type': 'application/json' };
-          document.querySelector('.form-intro').textContent = 'Confirming subscription with Stripe...';
-          var firm = null;
-          var firmRole = 'subscriber';
-          var pendingPlan = localStorage.getItem('pendingPlan') || 'individual';
+          var pendingPlan  = localStorage.getItem('pendingPlan') || 'individual';
           localStorage.removeItem('pendingPlan');
+          var referralCode = localStorage.getItem('referralCode') || null;
 
-          if (pendingPlan === 'corporate') {
-            // Poll for corporate firm by domain
-            for (var i = 0; i < 18; i++) {
-              var corpRes = await fetch(sbUrl + '/rest/v1/firms?domain=eq.' + encodeURIComponent(domain) + '&subscription_type=eq.corporate&status=eq.active&select=id,status&order=created_at.desc&limit=1', { headers: srH });
-              var corpData = await corpRes.json();
-              firm = corpData && corpData.length > 0 ? corpData[0] : null;
-              if (firm) { firmRole = 'admin'; break; }
-              await new Promise(function(r) { setTimeout(r, 1500); });
-            }
-          } else {
-            // Poll for individual firm by owner_email
-            for (var i = 0; i < 10; i++) {
-              var { data: firms } = await supabase.from('firms').select('id, status')
-                .eq('owner_email', userEmail).eq('subscription_type', 'individual').eq('status', 'active')
-                .order('created_at', { ascending: false }).limit(1);
-              firm = firms && firms.length > 0 ? firms[0] : null;
-              if (firm) break;
-              await new Promise(function(r) { setTimeout(r, 1500); });
-            }
+          document.querySelector('.form-intro').textContent = 'Confirming subscription with Stripe...';
+
+          /* Poll complete-signup — server handles all service-role DB work */
+          var maxRetries = pendingPlan === 'corporate' ? 18 : 10;
+          var result = null;
+          for (var i = 0; i < maxRetries; i++) {
+            var r = await fetch('/.netlify/functions/complete-signup', {
+              method:  'POST',
+              headers: { Authorization: 'Bearer ' + jwt, 'Content-Type': 'application/json' },
+              body:    JSON.stringify({ plan: pendingPlan, asset: asset, referralCode: referralCode }),
+            });
+            var data = await r.json();
+            if (data.ok) { result = data; break; }
+            if (!data.retry) throw new Error(data.error || 'Signup error');
+            await new Promise(function(resolve) { setTimeout(resolve, 1500); });
           }
 
-          if (!firm && pendingPlan !== 'corporate') {
-            // Individual only: webhook may be delayed — create firm directly as fallback
-            document.querySelector('.form-intro').textContent = 'Finalising your desk...';
-            try {
-              var chkRes = await fetch(sbUrl + '/rest/v1/firms?owner_email=eq.' + encodeURIComponent(userEmail) + '&subscription_type=eq.individual&select=id,status&limit=1', { headers: srH });
-              var chkData = await chkRes.json();
-              var existing = chkData && chkData.length > 0 ? chkData[0] : null;
-              if (existing) {
-                if (existing.status !== 'active') {
-                  await fetch(sbUrl + '/rest/v1/firms?id=eq.' + existing.id, {
-                    method: 'PATCH', headers: srH,
-                    body: JSON.stringify({ status: 'active', access: asset })
-                  });
-                }
-                firm = existing;
-              } else {
-                var newFirmBody = {
-                  company_name: userEmail.split('@')[0], domain: domain, owner_email: userEmail,
-                  subscription_type: 'individual', max_users: 1, status: 'active', access: asset
-                };
-                var refCode2 = localStorage.getItem('referralCode');
-                if (refCode2) { newFirmBody.referral_code = refCode2; localStorage.removeItem('referralCode'); }
-                var crtRes = await fetch(sbUrl + '/rest/v1/firms', {
-                  method: 'POST',
-                  headers: Object.assign({}, srH, { 'Prefer': 'return=representation' }),
-                  body: JSON.stringify(newFirmBody)
-                });
-                var crtData = await crtRes.json();
-                firm = Array.isArray(crtData) ? crtData[0] : null;
-              }
-            } catch(fbErr) { firm = null; }
-          }
-
-          if (firm) {
-            var sessionId = (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36));
-            var firmPatch = { access: asset };
-            var refCode = localStorage.getItem('referralCode');
-            if (refCode) { firmPatch.referral_code = refCode; localStorage.removeItem('referralCode'); }
-            await fetch(sbUrl + '/rest/v1/firms?id=eq.' + firm.id, {
-              method: 'PATCH', headers: srH,
-              body: JSON.stringify(firmPatch)
-            });
-            await fetch(sbUrl + '/rest/v1/users?email=eq.' + encodeURIComponent(userEmail), {
-              method: 'PATCH', headers: srH,
-              body: JSON.stringify({ firm_id: firm.id, role: firmRole, current_session_id: sessionId, last_login_at: new Date().toISOString() })
-            });
-            fetch(sbUrl + '/rest/v1/activity_log', {
-              method: 'POST', headers: srH,
-              body: JSON.stringify({ user_email: userEmail, firm_id: firm.id, action: 'login' })
-            }).catch(function(){});
-            localStorage.setItem('sessionId', sessionId);
-            localStorage.setItem('firmId', firm.id);
+          if (result && result.ok) {
+            if (referralCode) localStorage.removeItem('referralCode');
+            localStorage.setItem('sessionId', result.sessionId);
+            localStorage.setItem('firmId',    result.firmId);
             localStorage.setItem('userEmail', userEmail);
             document.querySelector('.form-title').textContent = 'You\'re In.';
             document.querySelector('.form-intro').textContent = 'Taking you to your desk now...';
