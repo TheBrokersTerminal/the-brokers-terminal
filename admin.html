@@ -649,7 +649,7 @@
       <!-- CREDIT DISTRIBUTION PANEL -->
       <div class="admin-box" style="margin-top:28px;">
         <div class="admin-box-title">▸ DISTRIBUTE / RECALL CREDITS</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr auto auto;gap:12px;align-items:end;">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr auto auto auto;gap:12px;align-items:end;">
           <div>
             <div style="font-size:9px;letter-spacing:0.18em;color:var(--text-faint);margin-bottom:6px;">TARGET USER</div>
             <select id="cd-user-select" class="form-input" style="font-size:11px;padding:8px 12px;">
@@ -664,8 +664,9 @@
             <div style="font-size:9px;letter-spacing:0.18em;color:var(--text-faint);margin-bottom:6px;">NOTE (OPTIONAL)</div>
             <input id="cd-note" type="text" class="form-input" placeholder="e.g. monthly allocation" style="font-size:11px;padding:8px 12px;">
           </div>
-          <button class="btn btn-solid" onclick="doAddCredits()" style="white-space:nowrap;font-size:9px;padding:8px 16px;">＋ ADD</button>
-          <button class="btn" onclick="doDeductCredits()" style="white-space:nowrap;font-size:9px;padding:8px 16px;color:#e04040;border-color:#e04040;">− DEDUCT</button>
+          <button class="btn btn-solid" onclick="doAddCredits()" style="white-space:nowrap;font-size:9px;padding:8px 16px;" title="Create credits from nothing and give to user (owner only)">＋ CREATE &amp; GIVE</button>
+          <button class="btn" onclick="doDistributeCredits()" style="white-space:nowrap;font-size:9px;padding:8px 16px;color:var(--accent);border-color:var(--accent);" title="Move from your own balance to user">▶ DISTRIBUTE</button>
+          <button class="btn" onclick="doRecallCredits()" style="white-space:nowrap;font-size:9px;padding:8px 16px;color:#e04040;border-color:#e04040;" title="Move from user back to your account">◀ RECALL</button>
         </div>
         <div id="cd-msg" style="margin-top:10px;font-size:10px;letter-spacing:0.12em;display:none;"></div>
       </div>
@@ -3422,11 +3423,11 @@
     _patchUserAccess(uid, { is_corp_admin: cb.checked });
   }
 
+  /* Owner CREATE credits (from nothing) for a user */
   async function doAddCredits() {
     var userId = document.getElementById('cd-user-select').value;
     var amount = parseInt(document.getElementById('cd-amount').value, 10);
     var note   = document.getElementById('cd-note').value.trim() || 'owner allocation';
-    var msg    = document.getElementById('cd-msg');
     if (!userId || !amount || amount <= 0) { showCdMsg('Select a user and enter a valid amount.', '#e04040'); return; }
 
     try {
@@ -3440,33 +3441,18 @@
       });
       const res = await r.json();
       if (!r.ok) throw new Error(res.error || 'Failed');
-      /* Update display */
       var user = _accessUserMap[userId];
-      if (user) {
-        user.balance = res.balance;
-        var balEl = document.getElementById('balance-' + userId);
-        if (balEl) { balEl.textContent = res.balance; balEl.style.color = 'var(--accent)'; }
-      }
-      /* Update dropdown */
-      Array.from(document.querySelectorAll('#cd-user-select option')).forEach(function(opt) {
-        if (opt.value === userId) {
-          var u = _accessUserMap[userId];
-          if (u) opt.textContent = ((u.first_name||'') + ' ' + (u.last_name||'')).trim() + ' <' + u.email + '> — ' + (res.balance) + ' credits';
-        }
-      });
-      showCdMsg('✓ Added ' + amount + ' credits. New balance: ' + res.balance, '#4CAF50');
+      if (user) { user.balance = res.balance; _updateBalanceDisplay(userId, res.balance); }
+      showCdMsg('✓ Created ' + amount + ' credits → ' + _userName(userId) + '. Their balance: ' + res.balance, '#4CAF50');
     } catch(e) { showCdMsg('✗ ' + e.message, '#e04040'); }
   }
 
-  async function doDeductCredits() {
+  /* Owner/corp-admin DISTRIBUTE credits from own account to a user */
+  async function doDistributeCredits() {
     var userId = document.getElementById('cd-user-select').value;
     var amount = parseInt(document.getElementById('cd-amount').value, 10);
-    var note   = document.getElementById('cd-note').value.trim() || 'admin deduction';
+    var note   = document.getElementById('cd-note').value.trim() || 'credit distribution';
     if (!userId || !amount || amount <= 0) { showCdMsg('Select a user and enter a valid amount.', '#e04040'); return; }
-
-    var user = _accessUserMap[userId];
-    var name = user ? ((user.first_name||'') + ' ' + (user.last_name||'')).trim() || user.email : userId;
-    if (!confirm('Deduct ' + amount + ' credits from ' + name + '?')) return;
 
     try {
       showCdMsg('Processing…', 'var(--text-faint)');
@@ -3475,23 +3461,57 @@
       const r = await fetch('/.netlify/functions/credits', {
         method: 'POST',
         headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'deduct_from', target_user_id: userId, amount: amount, description: note })
+        body: JSON.stringify({ action: 'distribute', target_user_id: userId, amount: amount, description: note })
       });
       const res = await r.json();
       if (!r.ok) throw new Error(res.error || 'Failed');
-      if (user) {
-        user.balance = res.balance;
-        var balEl2 = document.getElementById('balance-' + userId);
-        if (balEl2) { balEl2.textContent = res.balance; balEl2.style.color = res.balance > 0 ? 'var(--accent)' : 'var(--text-faint)'; }
-      }
-      Array.from(document.querySelectorAll('#cd-user-select option')).forEach(function(opt) {
-        if (opt.value === userId) {
-          var uu = _accessUserMap[userId];
-          if (uu) opt.textContent = ((uu.first_name||'') + ' ' + (uu.last_name||'')).trim() + ' <' + uu.email + '> — ' + res.balance + ' credits';
-        }
-      });
-      showCdMsg('✓ Deducted ' + amount + ' credits. New balance: ' + res.balance, '#4CAF50');
+      var user = _accessUserMap[userId];
+      if (user) { user.balance = res.their_balance; _updateBalanceDisplay(userId, res.their_balance); }
+      showCdMsg('✓ Distributed ' + amount + ' from your account → ' + _userName(userId) + '. Their balance: ' + res.their_balance + ' · Your balance: ' + res.my_balance, '#4CAF50');
     } catch(e) { showCdMsg('✗ ' + e.message, '#e04040'); }
+  }
+
+  /* Owner/corp-admin RECALL credits back into own account from a user */
+  async function doRecallCredits() {
+    var userId = document.getElementById('cd-user-select').value;
+    var amount = parseInt(document.getElementById('cd-amount').value, 10);
+    var note   = document.getElementById('cd-note').value.trim() || 'credit recall';
+    if (!userId || !amount || amount <= 0) { showCdMsg('Select a user and enter a valid amount.', '#e04040'); return; }
+
+    var name = _userName(userId);
+    if (!confirm('Recall ' + amount + ' credits from ' + name + ' back to your account?')) return;
+
+    try {
+      showCdMsg('Processing…', 'var(--text-faint)');
+      const sess = await supabaseAdmin.auth.getSession();
+      const token = sess.data && sess.data.session && sess.data.session.access_token;
+      const r = await fetch('/.netlify/functions/credits', {
+        method: 'POST',
+        headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'recall', target_user_id: userId, amount: amount, description: note })
+      });
+      const res = await r.json();
+      if (!r.ok) throw new Error(res.error || 'Failed');
+      var user = _accessUserMap[userId];
+      if (user) { user.balance = res.their_balance; _updateBalanceDisplay(userId, res.their_balance); }
+      showCdMsg('✓ Recalled ' + amount + ' from ' + name + '. Their balance: ' + res.their_balance + ' · Your balance: ' + res.my_balance, '#4CAF50');
+    } catch(e) { showCdMsg('✗ ' + e.message, '#e04040'); }
+  }
+
+  function _userName(userId) {
+    var u = _accessUserMap[userId];
+    return u ? (((u.first_name||'') + ' ' + (u.last_name||'')).trim() || u.email) : userId;
+  }
+
+  function _updateBalanceDisplay(userId, balance) {
+    var balEl = document.getElementById('balance-' + userId);
+    if (balEl) { balEl.textContent = balance; balEl.style.color = balance > 0 ? 'var(--accent)' : 'var(--text-faint)'; }
+    Array.from(document.querySelectorAll('#cd-user-select option')).forEach(function(opt) {
+      if (opt.value === userId) {
+        var u = _accessUserMap[userId];
+        if (u) opt.textContent = ((u.first_name||'') + ' ' + (u.last_name||'')).trim() + ' <' + u.email + '> — ' + balance + ' credits';
+      }
+    });
   }
 
   function showCdMsg(text, color) {
