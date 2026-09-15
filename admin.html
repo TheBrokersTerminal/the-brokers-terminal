@@ -1014,32 +1014,119 @@
 <script>
   const SUPABASE_URL = 'https://oqpodikelxhwcnjdwojw.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_hJjmJ5MYAj8aCpXL6vCMTQ_zJlxUehl';
-  const SUPABASE_SERVICE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9xcG9kaWtlbHhod2NuamR3b2p3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NzQ2NDMyMSwiZXhwIjoyMDkzMDQwMzIxfQ.e-NAEbB0Ick5NeBVT2U4Dy9kw7X1O2BcKlxptbqZNVI';
-  const supabase      = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-  const supabaseAdmin = window.supabase.createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
-    auth: { autoRefreshToken: false, persistSession: false, detectSessionInUrl: false }
-  });
+  const OWNER_EMAIL  = 'admin@thebrokersterminal.com';
 
-  const ADMIN_PASSWORD = 'Terminal2026';
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  /* ── Admin proxy: all privileged operations go through the server ──────────
+     The service key lives ONLY in the Netlify function environment.
+     All calls here require a valid owner JWT (verified server-side).          */
+  async function _adminJwt() {
+    const { data } = await supabase.auth.getSession();
+    return data && data.session && data.session.access_token;
+  }
+
+  async function adminProxy(body) {
+    const jwt = await _adminJwt();
+    if (!jwt) throw new Error('Not authenticated');
+    const r = await fetch('/.netlify/functions/admin-proxy', {
+      method:  'POST',
+      headers: { Authorization: 'Bearer ' + jwt, 'Content-Type': 'application/json' },
+      body:    JSON.stringify(body),
+    });
+    const json = await r.json();
+    if (!r.ok) throw new Error(json.error || 'admin_proxy_error');
+    return json;
+  }
+
+  /* Supabase-style query builder that routes through admin-proxy.
+     Returns { data, error } to match existing call sites.               */
+  function adminFrom(table) {
+    var q = {
+      _table: table, _filters: [], _select: null, _method: 'GET',
+      _body: null, _single: false, _prefer: null, _upsertConflict: null,
+      select: function(cols, opts) {
+        q._select = cols;
+        if (opts && opts.count === 'exact') { q._count = true; if (opts.head) q._head = true; }
+        return q;
+      },
+      eq:     function(col, val) { q._filters.push(col + '=eq.' + encodeURIComponent(val)); return q; },
+      neq:    function(col, val) { q._filters.push(col + '=neq.' + encodeURIComponent(val)); return q; },
+      in:     function(col, vals) { q._filters.push(col + '=in.(' + vals.join(',') + ')'); return q; },
+      order:  function(col, opts) { q._filters.push('order=' + col + ((opts && opts.ascending === false) ? '.desc' : '')); return q; },
+      limit:  function(n) { q._filters.push('limit=' + n); return q; },
+      single: function() { q._single = true; return q; },
+      insert: function(data) { q._method = 'POST'; q._body = data; q._prefer = 'return=representation'; return q; },
+      update: function(data) { q._method = 'PATCH'; q._body = data; q._prefer = 'return=representation'; return q; },
+      upsert: function(data, opts) {
+        q._method = 'POST'; q._body = data; q._prefer = 'return=representation,resolution=merge-duplicates';
+        if (opts && opts.onConflict) q._upsertConflict = opts.onConflict;
+        return q;
+      },
+      delete: function() { q._method = 'DELETE'; q._prefer = 'return=representation'; return q; },
+      _exec:  async function() {
+        var params = [];
+        if (q._select) params.push('select=' + encodeURIComponent(q._select));
+        if (q._single) params.push('limit=1');
+        if (q._count && q._head) params.push('limit=1');
+        if (q._upsertConflict) params.push('on_conflict=' + q._upsertConflict);
+        q._filters.forEach(function(f) { params.push(f); });
+        var path = '/rest/v1/' + q._table + (params.length ? '?' + params.join('&') : '');
+        var prefer = q._prefer || '';
+        if (q._count) prefer = (prefer ? prefer + ',' : '') + 'count=exact';
+        var method = q._head ? 'HEAD' : q._method;
+        try {
+          var res = await adminProxy({ action: 'rest', path, method, reqBody: q._body, prefer: prefer || null });
+          var d = res.data;
+          if (q._single && Array.isArray(d)) d = d[0] || null;
+          return { data: d, count: res.count != null ? res.count : null, error: null };
+        } catch (err) {
+          return { data: null, count: null, error: { message: err.message } };
+        }
+      }
+    };
+    q.then = function(res, rej) { return q._exec().then(res, rej); };
+    return q;
+  }
 
   // ── All loaded data ─────────────────────────────────────────
   var allReports     = [];
   var allSubscribers = [];
   var allFirms       = [];
 
-  // ══ PASSWORD GATE ═══════════════════════════════════════════
-  document.getElementById('gate-form').addEventListener('submit', function (e) {
-    e.preventDefault();
-    var pw  = document.getElementById('admin-pw').value;
-    var err = document.getElementById('gate-error');
-    if (pw === ADMIN_PASSWORD) {
+  // ══ AUTH GATE — Supabase email/password login ════════════════
+  // Check if already logged in as owner
+  supabase.auth.getSession().then(function({ data }) {
+    var sess = data && data.session;
+    if (sess && sess.user && sess.user.email === OWNER_EMAIL) {
       document.getElementById('admin-gate').style.display  = 'none';
       document.getElementById('admin-panel').style.display = 'block';
       initialLoad();
-    } else {
-      err.textContent  = 'Incorrect password';
-      err.style.display = 'block';
     }
+  });
+
+  document.getElementById('gate-form').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    var email = OWNER_EMAIL;
+    var pw    = document.getElementById('admin-pw').value;
+    var err   = document.getElementById('gate-error');
+    err.style.display = 'none';
+
+    var { data, error } = await supabase.auth.signInWithPassword({ email, password: pw });
+    if (error || !data.user) {
+      err.textContent  = error ? error.message : 'Login failed';
+      err.style.display = 'block';
+      return;
+    }
+    if (data.user.email !== OWNER_EMAIL) {
+      await supabase.auth.signOut();
+      err.textContent  = 'Not authorised';
+      err.style.display = 'block';
+      return;
+    }
+    document.getElementById('admin-gate').style.display  = 'none';
+    document.getElementById('admin-panel').style.display = 'block';
+    initialLoad();
   });
 
   // ══ TAB SWITCHING ═══════════════════════════════════════════
@@ -1077,9 +1164,9 @@
   async function loadStats() {
     try {
       var [reportsRes, usersRes, firmsRes] = await Promise.all([
-        supabaseAdmin.from('reports').select('id, report_type, published_date, status'),
-        supabaseAdmin.from('users').select('id, last_seen, last_login_at, created_at, status'),
-        supabaseAdmin.from('firms').select('id, status, subscription_type, created_at')
+        adminFrom('reports').select('id, report_type, published_date, status'),
+        adminFrom('users').select('id, last_seen, last_login_at, created_at, status'),
+        adminFrom('firms').select('id, status, subscription_type, created_at')
       ]);
 
       var reports = reportsRes.data || [];
@@ -1154,8 +1241,7 @@
       }
 
       // ── Expiring Trials ───────────────────────────────────────
-      var { data: trialFirms } = await supabaseAdmin
-        .from('firms')
+      var { data: trialFirms } = await adminFrom('firms')
         .select('id, company_name, domain, owner_email, subscription_type, created_at')
         .eq('status', 'active')
         .gte('created_at', sevenDaysAgo.toISOString())
@@ -1199,8 +1285,7 @@
   // ══ REPORTS ═════════════════════════════════════════════════
   async function loadReports() {
     try {
-      var { data, error } = await supabaseAdmin
-        .from('reports').select('*').order('published_date', { ascending: false });
+      var { data, error } = await adminFrom('reports').select('*').order('published_date', { ascending: false });
       if (error) throw error;
 
       allReports = data || [];
@@ -1337,8 +1422,7 @@
     if (!feedEl) return;
     try {
       var since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-      var { data } = await supabaseAdmin
-        .from('activity_log')
+      var { data } = await adminFrom('activity_log')
         .select('action, user_email, report_title, asset_class, created_at')
         .gte('created_at', since)
         .order('created_at', { ascending: false })
@@ -1410,16 +1494,10 @@
     if (btn) { btn.textContent = '⏳ GENERATING...'; btn.disabled = true; }
 
     try {
-      var res = await fetch('https://oqpodikelxhwcnjdwojw.supabase.co/functions/v1/generate-report-audio', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + SUPABASE_SERVICE_KEY,
-        },
-        body: JSON.stringify({ reportId: reportId, filePath: filePath }),
-      });
-      var data = await res.json();
-      if (!res.ok || data.error) throw new Error(data.error || 'Generation failed');
+      var proxyRes = await adminProxy({ action: 'functions_invoke', function_name: 'generate-report-audio',
+        fn_body: { reportId, filePath } });
+      var data = proxyRes.data || {};
+      if (proxyRes.status >= 400 || data.error) throw new Error(data.error || 'Generation failed');
 
       if (btn) {
         btn.textContent = '▶ AUDIO READY';
@@ -1457,13 +1535,10 @@
       var r = pending[i];
       status.textContent = 'Processing ' + (i + 1) + ' of ' + pending.length + ' — ' + r.title.substring(0, 40) + '...';
       try {
-        var res = await fetch('https://oqpodikelxhwcnjdwojw.supabase.co/functions/v1/generate-report-audio', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_SERVICE_KEY },
-          body: JSON.stringify({ reportId: r.id, filePath: r.file_path }),
-        });
-        var data = await res.json();
-        if (!res.ok || data.error) throw new Error(data.error);
+        var proxyRes = await adminProxy({ action: 'functions_invoke', function_name: 'generate-report-audio',
+          fn_body: { reportId: r.id, filePath: r.file_path } });
+        var data = proxyRes.data || {};
+        if (proxyRes.status >= 400 || data.error) throw new Error(data.error);
         done++;
       } catch (err) {
         console.error('Audio failed for ' + r.title + ':', err.message);
@@ -1481,8 +1556,8 @@
   async function deleteReport(reportId, filePath) {
     if (!confirm('Delete this report? This cannot be undone.')) return;
     try {
-      await supabaseAdmin.storage.from('Reports').remove([filePath]);
-      var { error } = await supabaseAdmin.from('reports').delete().eq('id', reportId);
+      await adminProxy({ action: 'storage_remove', bucket: 'Reports', paths: [filePath] });
+      var { error } = await adminFrom('reports').delete().eq('id', reportId);
       if (error) throw error;
       await loadReports();
       await loadStats();
@@ -1492,8 +1567,7 @@
   // ══ SUBSCRIBERS ═════════════════════════════════════════════
   async function loadSubscribers() {
     try {
-      var { data, error } = await supabaseAdmin
-        .from('users')
+      var { data, error } = await adminFrom('users')
         .select('*, firms(company_name, subscription_type, status, max_users)')
         .order('created_at', { ascending: false });
 
@@ -1746,8 +1820,7 @@
   // ══ FIRMS ════════════════════════════════════════════════════
   async function loadFirms() {
     try {
-      var { data, error } = await supabaseAdmin
-        .from('firms')
+      var { data, error } = await adminFrom('firms')
         .select('*, users(id, status, last_seen)')
         .order('created_at', { ascending: false });
       if (error) throw error;
@@ -1870,8 +1943,7 @@
 
     container.innerHTML = '<div style="color:var(--text-faint);font-size:10px;letter-spacing:0.18em;">LOADING...</div>';
 
-    const { data: members, error } = await supabaseAdmin
-      .from('users')
+    const { data: members, error } = await adminFrom('users')
       .select('id, first_name, last_name, email, role, status, created_at')
       .eq('firm_id', firmId)
       .order('created_at', { ascending: true });
@@ -1946,7 +2018,7 @@
     resultEl.style.color = 'var(--text-faint)';
     resultEl.textContent = 'ADDING...';
 
-    const { error } = await supabaseAdmin.from('users').upsert({
+    const { error } = await adminFrom('users').upsert({
       email: email,
       firm_id: firmId,
       role: 'subscriber',
@@ -1963,7 +2035,7 @@
       /* Look up firm name for the email */
       var firmName = '';
       try {
-        var { data: firmRow } = await supabaseAdmin.from('firms').select('company_name').eq('id', firmId).single();
+        var { data: firmRow } = await adminFrom('firms').select('company_name').eq('id', firmId).single();
         firmName = (firmRow && firmRow.company_name) || '';
       } catch(e) {}
 
@@ -1990,7 +2062,7 @@
   async function adminRemoveMember(firmId, email) {
     if (!confirm('Remove ' + email + ' from this firm?\n\nThey will be blocked from logging in immediately.')) return;
 
-    const { error } = await supabaseAdmin.from('users')
+    const { error } = await adminFrom('users')
       .update({ status: 'removed' })
       .eq('email', email)
       .eq('firm_id', firmId);
@@ -2009,8 +2081,7 @@
       : 'Remove admin rights from this user?\n\nThey will become a standard broker on the account.';
     if (!confirm(label + '\n\n' + msg)) return;
 
-    var { error } = await supabaseAdmin
-      .from('users')
+    var { error } = await adminFrom('users')
       .update({ role: newRole })
       .eq('id', userId);
 
@@ -2027,8 +2098,7 @@
 
     try {
       // 1. Get all users in this firm to delete their Auth accounts
-      var { data: firmUsers } = await supabaseAdmin
-        .from('users')
+      var { data: firmUsers } = await adminFrom('users')
         .select('id, email')
         .eq('firm_id', firmId);
 
@@ -2036,7 +2106,7 @@
       if (firmUsers && firmUsers.length > 0) {
         for (var user of firmUsers) {
           try {
-            await supabaseAdmin.auth.admin.deleteUser(user.id);
+            await adminProxy({ action: 'auth_delete_user', user_id: user.id });
           } catch (e) {
             console.log('Could not delete auth user ' + user.email + ': ' + e.message);
           }
@@ -2044,15 +2114,13 @@
       }
 
       // 3. Delete all users from database
-      var { error: usersErr } = await supabaseAdmin
-        .from('users')
+      var { error: usersErr } = await adminFrom('users')
         .delete()
         .eq('firm_id', firmId);
       if (usersErr) throw new Error('Failed to delete users: ' + usersErr.message);
 
       // 4. Delete the firm
-      var { error: firmErr } = await supabaseAdmin
-        .from('firms')
+      var { error: firmErr } = await adminFrom('firms')
         .delete()
         .eq('id', firmId);
       if (firmErr) throw new Error('Failed to delete firm: ' + firmErr.message);
@@ -2069,10 +2137,10 @@
     var label = action === 'suspend' ? 'SUSPEND' : 'REINSTATE';
     if (!confirm(label + ' this firm?\n\n' + (action === 'suspend' ? 'All members will be locked out immediately.' : 'All members will regain access immediately.'))) return;
     var newStatus = action === 'suspend' ? 'inactive' : 'active';
-    var { error } = await supabaseAdmin.from('firms').update({ status: newStatus }).eq('id', firmId);
+    var { error } = await adminFrom('firms').update({ status: newStatus }).eq('id', firmId);
     if (error) { alert('Error: ' + error.message); return; }
     if (action === 'suspend') {
-      await supabaseAdmin.functions.invoke('suspend-firm', { body: { firm_id: firmId } });
+      await adminProxy({ action: 'functions_invoke', function_name: 'suspend-firm', fn_body: { firm_id: firmId } });
     }
     await loadSubscribers();
   }
@@ -2081,11 +2149,11 @@
     var label = action === 'suspend' ? 'SUSPEND' : 'REINSTATE';
     if (!confirm(label + ' this user?\n\n' + (action === 'suspend' ? 'They will be locked out immediately but their account will be kept.' : 'They will regain access immediately.'))) return;
     var newStatus = action === 'suspend' ? 'inactive' : 'active';
-    var { error } = await supabaseAdmin.from('firms').update({ status: newStatus }).eq('id', firmId);
+    var { error } = await adminFrom('firms').update({ status: newStatus }).eq('id', firmId);
     if (error) { alert('Error: ' + error.message); return; }
     if (action === 'suspend') {
       // Invalidate JWT tokens server-side — kicks anyone currently logged in immediately
-      await supabaseAdmin.functions.invoke('suspend-firm', { body: { firm_id: firmId } });
+      await adminProxy({ action: 'functions_invoke', function_name: 'suspend-firm', fn_body: { firm_id: firmId } });
     }
     await loadSubscribers();
   }
@@ -2095,11 +2163,10 @@
 
     try {
       // 1. Delete Supabase Auth user
-      await supabaseAdmin.auth.admin.deleteUser(userId);
+      await adminProxy({ action: 'auth_delete_user', user_id: userId });
 
       // 2. Delete user from database
-      var { error: userErr } = await supabaseAdmin
-        .from('users')
+      var { error: userErr } = await adminFrom('users')
         .delete()
         .eq('id', userId);
       if (userErr) throw new Error('Failed to delete user: ' + userErr.message);
@@ -2159,14 +2226,13 @@
     document.getElementById('eu-error').textContent = '';
 
     try {
-      var { error } = await supabaseAdmin
-        .from('users')
+      var { error } = await adminFrom('users')
         .update({ first_name: firstName, last_name: lastName, firm_id: firmId, role: role })
         .eq('id', _editUserId);
       if (error) throw new Error(error.message);
 
-      supabaseAdmin.auth.admin.updateUserById(_editUserId, {
-        user_metadata: { first_name: firstName, last_name: lastName }
+      adminProxy({ action: 'auth_update_user', user_id: _editUserId,
+        updates: { user_metadata: { first_name: firstName, last_name: lastName } }
       }).catch(function(){});
 
       closeEditUser();
@@ -2182,8 +2248,7 @@
   // ══ AFFILIATES ══════════════════════════════════════════════
   async function loadAffiliates() {
     try {
-      var { data: firms, error } = await supabaseAdmin
-        .from('firms')
+      var { data: firms, error } = await adminFrom('firms')
         .select('company_name, subscription_type, status, access, referral_code, created_at')
         .not('referral_code', 'is', null)
         .order('created_at', { ascending: false });
@@ -2259,8 +2324,7 @@
   async function loadActivity() {
     try {
       // Churn risk — active subscribers not seen in 14+ days
-      var { data: churnUsers } = await supabaseAdmin
-        .from('users')
+      var { data: churnUsers } = await adminFrom('users')
         .select('email, last_seen, last_login_at, created_at, firms(company_name, subscription_type, owner_email)')
         .neq('status', 'removed');
 
@@ -2309,14 +2373,12 @@
       }
 
       // Total login count
-      var { count: totalLoginCount } = await supabaseAdmin
-        .from('activity_log').select('*', { count: 'exact', head: true }).eq('action', 'login');
+      var { count: totalLoginCount } = await adminFrom('activity_log').select('*', { count: 'exact', head: true }).eq('action', 'login');
       var loginCountEl = document.getElementById('stat-total-logins');
       if (loginCountEl) loginCountEl.textContent = totalLoginCount || 0;
 
       // Recent logins
-      var { data: logins } = await supabaseAdmin
-        .from('activity_log')
+      var { data: logins } = await adminFrom('activity_log')
         .select('user_email, created_at')
         .eq('action', 'login')
         .order('created_at', { ascending: false })
@@ -2341,8 +2403,7 @@
       }
 
       // Recent report views
-      var { data: views } = await supabaseAdmin
-        .from('activity_log')
+      var { data: views } = await adminFrom('activity_log')
         .select('user_email, report_title, asset_class, created_at')
         .eq('action', 'view_report')
         .order('created_at', { ascending: false })
@@ -2369,8 +2430,7 @@
       }
 
       // Read vs Listen summary stats
-      var { data: allEngagement } = await supabaseAdmin
-        .from('activity_log')
+      var { data: allEngagement } = await adminFrom('activity_log')
         .select('action, report_title, asset_class, report_type')
         .in('action', ['view_report', 'listen_report']);
 
@@ -2411,8 +2471,7 @@
       }
 
       // Recent listens
-      var { data: listens } = await supabaseAdmin
-        .from('activity_log')
+      var { data: listens } = await adminFrom('activity_log')
         .select('user_email, report_title, asset_class, created_at')
         .eq('action', 'listen_report')
         .order('created_at', { ascending: false })
@@ -2439,8 +2498,7 @@
       }
 
       // Downloads
-      var { data: downloads } = await supabaseAdmin
-        .from('activity_log')
+      var { data: downloads } = await adminFrom('activity_log')
         .select('user_email, report_title, asset_class, report_type, created_at')
         .eq('action', 'download_report')
         .order('created_at', { ascending: false })
@@ -2468,8 +2526,7 @@
       }
 
       // Client Monthly opens & downloads
-      var { data: clientActivity } = await supabaseAdmin
-        .from('activity_log')
+      var { data: clientActivity } = await adminFrom('activity_log')
         .select('user_email, firm_id, report_title, asset_class, action, created_at')
         .eq('report_type', 'client_monthly')
         .in('action', ['view_report', 'download_report'])
@@ -2480,7 +2537,7 @@
       var firmNameMap = {};
       var clientFirmIds = [...new Set((clientActivity || []).map(function(a) { return a.firm_id; }).filter(Boolean))];
       if (clientFirmIds.length) {
-        var { data: firmRows } = await supabaseAdmin.from('firms').select('id, company_name').in('id', clientFirmIds);
+        var { data: firmRows } = await adminFrom('firms').select('id, company_name').in('id', clientFirmIds);
         (firmRows || []).forEach(function(f) { firmNameMap[f.id] = f.company_name; });
       }
 
@@ -2488,7 +2545,7 @@
       var userEmails = [...new Set((clientActivity || []).map(function(a) { return a.user_email; }).filter(Boolean))];
       var userNameMap = {};
       if (userEmails.length) {
-        var { data: userRows } = await supabaseAdmin.from('users').select('email, first_name, last_name').in('email', userEmails);
+        var { data: userRows } = await adminFrom('users').select('email, first_name, last_name').in('email', userEmails);
         (userRows || []).forEach(function(u) {
           var name = ((u.first_name || '') + ' ' + (u.last_name || '')).trim();
           userNameMap[u.email] = name || u.email;
@@ -2548,7 +2605,7 @@
     if (isClientMonthly) {
       var container = document.getElementById('doc-firm-checkboxes');
       if (container.children.length === 0) {
-        var { data: firms } = await supabaseAdmin.from('firms').select('id, company_name').eq('status', 'active').order('company_name');
+        var { data: firms } = await adminFrom('firms').select('id, company_name').eq('status', 'active').order('company_name');
         (firms || []).forEach(function(f) {
           var label = document.createElement('label');
           label.style.cssText = 'display:flex;align-items:center;gap:8px;font-size:11px;letter-spacing:0.10em;text-transform:uppercase;color:var(--text);cursor:pointer;';
@@ -2571,7 +2628,7 @@
 
   async function loadFirmDropdown() {
     var sel = document.getElementById('ca-firm-select');
-    var { data: firms } = await supabaseAdmin.from('firms').select('id, company_name').eq('status', 'active').order('company_name');
+    var { data: firms } = await adminFrom('firms').select('id, company_name').eq('status', 'active').order('company_name');
     sel.innerHTML = '<option value="__new__">+ Create new firm</option>';
     (firms || []).forEach(function(f) {
       var opt = document.createElement('option');
@@ -2649,8 +2706,7 @@
           }
         }
 
-        var { data: newFirm, error: firmErr } = await supabaseAdmin
-          .from('firms')
+        var { data: newFirm, error: firmErr } = await adminFrom('firms')
           .insert({
             company_name: firmName,
             domain: domain,
@@ -2667,45 +2723,38 @@
 
       // 2. Pre-clear any stale users table record BEFORE creating the auth user
       // (prevents duplicate key errors when re-adding a previously deleted account)
-      await supabaseAdmin.from('users').delete().eq('email', email);
+      await adminFrom('users').delete().eq('email', email);
 
       // 3. Create the user with a temporary password — no email required
       var authUser;
-      var { data: createData, error: createErr } = await supabaseAdmin.auth.admin.createUser({
-        email: email,
-        password: password,
-        email_confirm: true,
-        user_metadata: { first_name: firstName, last_name: lastName }
-      });
+      var createResult, createErr;
+      try {
+        createResult = await adminProxy({ action: 'auth_create_user', email, password,
+          user_metadata: { first_name: firstName, last_name: lastName } });
+        authUser = createResult.user;
+        createErr = null;
+      } catch (e) { createErr = e; }
 
       if (createErr) {
         // User already exists in Auth — look them up and update their password
         if (createErr.message && (createErr.message.includes('already registered') || createErr.message.includes('already been registered') || createErr.message.includes('already exists'))) {
-          var { data: { users: existingUsers } } = await supabaseAdmin.auth.admin.listUsers();
-          authUser = existingUsers ? existingUsers.find(function(u) { return u.email === email; }) : null;
+          var listResult = await adminProxy({ action: 'auth_list_users' });
+          var existingUsers = listResult.users || [];
+          authUser = existingUsers.find(function(u) { return u.email === email; }) || null;
           if (!authUser) throw new Error('Could not locate existing auth user for ' + email);
-          // Update their password and confirm their email
-          await supabaseAdmin.auth.admin.updateUserById(authUser.id, { password: password, email_confirm: true });
+          await adminProxy({ action: 'auth_update_user', user_id: authUser.id,
+            updates: { password, email_confirm: true } });
         } else {
           throw new Error('Could not create account: ' + createErr.message);
         }
-      } else {
-        authUser = createData.user;
       }
 
       // 4. Insert into users table — also post-clear in case a DB trigger fired during invite
-      await supabaseAdmin.from('users').delete().eq('email', email);
-      var { error: userErr } = await supabaseAdmin
-        .from('users')
-        .insert({
-          id: authUser.id,
-          email: email,
-          firm_id: firmId,
-          first_name: firstName,
-          last_name: lastName,
-          role: 'subscriber',
-          status: 'active'
-        });
+      await adminFrom('users').delete().eq('email', email);
+      var { error: userErr } = await adminFrom('users').insert({
+        id: authUser.id, email, firm_id: firmId,
+        first_name: firstName, last_name: lastName, role: 'subscriber', status: 'active'
+      });
       if (userErr) throw new Error('Could not add user record: ' + userErr.message);
 
       // Success
@@ -2723,8 +2772,7 @@
   });
 
   async function updateFirmAccess(firmId, newAccess) {
-    var { error } = await supabaseAdmin
-      .from('firms')
+    var { error } = await adminFrom('firms')
       .update({ access: newAccess })
       .eq('id', firmId);
     if (error) {
@@ -2738,8 +2786,7 @@
   async function toggleFirmDownload(firmId, newVal, btn) {
     btn.textContent = 'SAVING...';
     btn.disabled = true;
-    var { error } = await supabaseAdmin
-      .from('firms')
+    var { error } = await adminFrom('firms')
       .update({ allow_download: newVal })
       .eq('id', firmId);
     if (error) {
@@ -2818,9 +2865,13 @@
       var assetFolder = assetClass.charAt(0).toUpperCase() + assetClass.substring(1);
       var folderPath = assetFolder + '/' + typeFolder + '/';
 
-      var { error: uploadError } = await supabaseAdmin.storage
-        .from('Reports').upload(folderPath + filename, file, { upsert: true, contentType: 'text/html' });
-      if (uploadError) throw new Error('Upload failed: ' + uploadError.message);
+      // Get a signed upload URL from admin-proxy, then upload directly to Supabase storage
+      var signRes = await adminProxy({ action: 'storage_upload_url', bucket: 'Reports', path: folderPath + filename });
+      var uploadResp = await fetch(signRes.signed_url, {
+        method: 'PUT', headers: { 'Content-Type': 'text/html' }, body: file
+      });
+      if (!uploadResp.ok) throw new Error('Upload failed: ' + uploadResp.status);
+      var uploadError = null;
 
       // Extract plain text from HTML for full-text search
       var contentText = '';
@@ -2837,7 +2888,7 @@
         ? Array.from(document.querySelectorAll('input[name="doc-firm-cb"]:checked')).map(function(cb) { return cb.value; })
         : [];
       var visibleTo = reportType === 'client_monthly' ? (document.getElementById('doc-visible').value || 'all') : 'all';
-      var { data: inserted, error: dbError } = await supabaseAdmin.from('reports').insert([{
+      var { data: inserted, error: dbError } = await adminFrom('reports').insert([{
         title:          title,
         report_type:    reportType,
         asset_class:    assetClass,
@@ -2853,7 +2904,7 @@
       // Insert firm access records if specific firms were ticked
       if (selectedFirmIds.length > 0) {
         var accessRows = selectedFirmIds.map(function(fid) { return { report_id: inserted.id, firm_id: fid }; });
-        var { error: accessErr } = await supabaseAdmin.from('report_firm_access').insert(accessRows);
+        var { error: accessErr } = await adminFrom('report_firm_access').insert(accessRows);
         if (accessErr) throw new Error('Access table error: ' + accessErr.message);
       }
 
@@ -2869,8 +2920,9 @@
       // Notify active subscribers (only if checkbox was ticked at submit time)
       if (shouldNotify) {
         try {
-          const { data: notifyResult } = await supabaseAdmin.functions.invoke('notify-new-report', {
-            body: { title, reportType, assetClass, publishedDate, reportId: inserted.id }
+          const { data: notifyResult } = await adminProxy({ action: 'functions_invoke',
+            function_name: 'notify-new-report',
+            fn_body: { title, reportType, assetClass, publishedDate, reportId: inserted.id }
           });
           if (notifyResult && notifyResult.sent > 0) {
             successDiv.textContent = '✓ UPLOADED — ' + notifyResult.sent + ' subscriber' + (notifyResult.sent !== 1 ? 's' : '') + ' notified by email.';
@@ -2937,7 +2989,7 @@
       access:              document.getElementById('ef-access').value,
     };
 
-    var { error } = await supabaseAdmin.from('firms').update(updates).eq('id', _editFirmId);
+    var { error } = await adminFrom('firms').update(updates).eq('id', _editFirmId);
     if (error) {
       document.getElementById('ef-error').textContent = 'Error: ' + error.message;
       btn.disabled = false;
@@ -2948,7 +3000,7 @@
     // If suspending via status change, also invalidate JWTs
     var firm = allFirms.find(function(f) { return f.id === _editFirmId; });
     if (firm && firm.status === 'active' && updates.status !== 'active') {
-      await supabaseAdmin.functions.invoke('suspend-firm', { body: { firm_id: _editFirmId } });
+      await adminProxy({ action: 'functions_invoke', function_name: 'suspend-firm', fn_body: { firm_id: _editFirmId } });
     }
 
     closeEditFirm();
@@ -3023,15 +3075,22 @@
     saved.style.display = 'block';
 
     var blob = new Blob([JSON.stringify(_vtCfg)], { type: 'application/json' });
-    supabaseAdmin.storage.from('Reports').upload(VT_CONFIG_PATH, blob, { upsert: true, contentType: 'application/json' })
-      .then(function(res) {
-        if (res.error) {
-          saved.textContent = '✗ SAVE FAILED — ' + res.error.message;
-          saved.style.color = 'var(--accent)';
-        } else {
-          saved.textContent = '✓ SAVED — ALL SUBSCRIBERS UPDATED';
-          saved.style.color = '#6BCB77';
-        }
+    adminProxy({ action: 'storage_upload_url', bucket: 'Reports', path: VT_CONFIG_PATH })
+      .then(function(signRes) {
+        return fetch(signRes.signed_url, {
+          method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: blob
+        });
+      })
+      .then(function(r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        saved.textContent = '✓ SAVED — ALL SUBSCRIBERS UPDATED';
+        saved.style.color = '#6BCB77';
+        clearTimeout(saved._t);
+        saved._t = setTimeout(function() { saved.style.display = 'none'; }, 3000);
+      })
+      .catch(function(err) {
+        saved.textContent = '✗ SAVE FAILED — ' + err.message;
+        saved.style.color = 'var(--accent)';
         clearTimeout(saved._t);
         saved._t = setTimeout(function() { saved.style.display = 'none'; }, 3000);
       });
@@ -3173,8 +3232,8 @@
 
     // Load all firms and current access in parallel
     var [{ data: firms }, { data: current }] = await Promise.all([
-      supabaseAdmin.from('firms').select('id, company_name').eq('status', 'active').order('company_name'),
-      supabaseAdmin.from('report_firm_access').select('firm_id').eq('report_id', reportId)
+      adminFrom('firms').select('id, company_name').eq('status', 'active').order('company_name'),
+      adminFrom('report_firm_access').select('firm_id').eq('report_id', reportId)
     ]);
 
     var currentIds = new Set((current || []).map(function(r) { return r.firm_id; }));
@@ -3206,12 +3265,12 @@
 
     try {
       // Delete all existing access rows for this report
-      await supabaseAdmin.from('report_firm_access').delete().eq('report_id', _accessReportId);
+      await adminFrom('report_firm_access').delete().eq('report_id', _accessReportId);
 
       // Insert new ones if any ticked
       if (selectedIds.length > 0) {
         var rows = selectedIds.map(function(fid) { return { report_id: _accessReportId, firm_id: fid }; });
-        var { error } = await supabaseAdmin.from('report_firm_access').insert(rows);
+        var { error } = await adminFrom('report_firm_access').insert(rows);
         if (error) throw error;
       }
 
@@ -3240,7 +3299,7 @@
     document.getElementById('ac-count').textContent = 'LOADING...';
     try {
       /* Use credits.js ?action=users which now returns allowed_features, allowed_asset_classes, is_corp_admin */
-      const sess = await supabaseAdmin.auth.getSession();
+      const sess = await supabase.auth.getSession();
       const token = sess.data && sess.data.session && sess.data.session.access_token;
       const r = await fetch('/.netlify/functions/credits?action=users', {
         headers: { Authorization: 'Bearer ' + token }
@@ -3361,7 +3420,7 @@
     var statusEl = document.getElementById('ac-status-' + userId);
     if (statusEl) { statusEl.textContent = 'SAVING…'; statusEl.style.color = 'var(--text-faint)'; }
     try {
-      const sess = await supabaseAdmin.auth.getSession();
+      const sess = await supabase.auth.getSession();
       const token = sess.data && sess.data.session && sess.data.session.access_token;
       const r = await fetch('/.netlify/functions/credits', {
         method: 'POST',
@@ -3432,7 +3491,7 @@
 
     try {
       showCdMsg('Processing…', 'var(--text-faint)');
-      const sess = await supabaseAdmin.auth.getSession();
+      const sess = await supabase.auth.getSession();
       const token = sess.data && sess.data.session && sess.data.session.access_token;
       const r = await fetch('/.netlify/functions/credits', {
         method: 'POST',
@@ -3456,7 +3515,7 @@
 
     try {
       showCdMsg('Processing…', 'var(--text-faint)');
-      const sess = await supabaseAdmin.auth.getSession();
+      const sess = await supabase.auth.getSession();
       const token = sess.data && sess.data.session && sess.data.session.access_token;
       const r = await fetch('/.netlify/functions/credits', {
         method: 'POST',
@@ -3483,7 +3542,7 @@
 
     try {
       showCdMsg('Processing…', 'var(--text-faint)');
-      const sess = await supabaseAdmin.auth.getSession();
+      const sess = await supabase.auth.getSession();
       const token = sess.data && sess.data.session && sess.data.session.access_token;
       const r = await fetch('/.netlify/functions/credits', {
         method: 'POST',
