@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Canvas DPR Test</title>
+<style>
+body { background: #090909; color: #fff; font-family: monospace; padding: 20px; }
+.label { font-size: 11px; letter-spacing: .1em; margin: 10px 0 4px; opacity: .6; }
+.wl-chart-area { width: 100%; height: 168px; overflow: hidden; margin-bottom: 8px; }
+.wl-chart-canvas { display: block; width: 100%; height: 100%; }
+.mpc-chart-area { width: 100%; height: 168px; overflow: hidden; }
+.mpc-canvas { display: block; width: 100%; height: 100%; }
+#info { font-size: 10px; letter-spacing:.08em; color:#E97132; margin-bottom:16px; }
+</style>
+</head>
+<body>
+<div id="info"></div>
+
+<div class="label">WHISKY CHART (new CSS class approach)</div>
+<div id="wl-chartbox" class="wl-chart-area">
+  <canvas id="wl-canvas" class="wl-chart-canvas"></canvas>
+</div>
+
+<div class="label">MACRO CHART (reference approach)</div>
+<div id="macro-area" class="mpc-chart-area">
+  <canvas id="macro-canvas" class="mpc-canvas"></canvas>
+</div>
+
+<script>
+var dpr = window.devicePixelRatio || 1;
+document.getElementById('info').textContent =
+  'devicePixelRatio = ' + dpr +
+  '  |  screen: ' + screen.width + 'x' + screen.height +
+  '  |  window: ' + window.innerWidth + 'x' + window.innerHeight;
+
+function paintTestCanvas(canvas, label) {
+  var box  = canvas.parentElement;
+  var cssW = box.clientWidth;
+  var cssH = box.clientHeight;
+
+  canvas.width  = Math.round(cssW * dpr);
+  canvas.height = Math.round(cssH * dpr);
+  canvas.style.width  = cssW + 'px';
+  canvas.style.height = cssH + 'px';
+
+  var ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  var W = cssW, H = cssH;
+
+  ctx.fillStyle = '#090909';
+  ctx.fillRect(0, 0, W, H);
+
+  /* Grid */
+  for (var i = 0; i <= 4; i++) {
+    var gy = 20 + (i / 4) * (H - 48);
+    ctx.strokeStyle = 'rgba(255,255,255,0.07)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(52, gy); ctx.lineTo(W - 14, gy); ctx.stroke();
+    ctx.fillStyle = '#fff';
+    ctx.font = '9px monospace';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    ctx.fillText((300 - i * 50).toString(), 48, gy);
+  }
+
+  /* Orange line */
+  var pts = [52, 350, 100, 300, 180, 270, 260, 290, 340, 240, 400, 280, W-14, 260];
+  ctx.beginPath();
+  for (var j = 0; j < pts.length; j += 2) {
+    var px = pts[j], py = 20 + (H - 48) - ((pts[j+1] - 100) / 250) * (H - 48);
+    j === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+  }
+  ctx.strokeStyle = '#E97132';
+  ctx.lineWidth = 1.8;
+  ctx.lineJoin = 'round';
+  ctx.stroke();
+
+  /* Labels */
+  ctx.fillStyle = 'rgba(255,255,255,0.7)';
+  ctx.font = '8px monospace';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'top';
+  ctx.fillText('12M AUCTION RANGE · 99 TRADES', 52, 6);
+
+  ctx.fillStyle = '#E97132';
+  ctx.textAlign = 'right';
+  ctx.fillText('ATH 294', W - 14, 6);
+
+  /* Debug: show actual dimensions used */
+  ctx.fillStyle = 'rgba(90,173,122,0.9)';
+  ctx.textAlign = 'center';
+  ctx.font = '10px monospace';
+  ctx.fillText(label + ' | buf:' + canvas.width + 'x' + canvas.height + ' css:' + cssW + 'x' + cssH + ' dpr:' + dpr, W/2, H/2 - 8);
+}
+
+/* Wait for layout then paint */
+requestAnimationFrame(function() {
+  requestAnimationFrame(function() {
+    paintTestCanvas(document.getElementById('wl-canvas'),   'WHISKY');
+    paintTestCanvas(document.getElementById('macro-canvas'), 'MACRO');
+  });
+});
+</script>
+</body>
+</html>

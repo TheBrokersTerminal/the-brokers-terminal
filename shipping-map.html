@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chokepoint Map</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+  html, body, #map { margin: 0; padding: 0; width: 100%; height: 100%; background: #080808; }
+
+  /* Hide Leaflet default controls */
+  .leaflet-control-attribution { display: none !important; }
+  .leaflet-control-zoom        { display: none !important; }
+
+  /* Pulse animation for critical markers */
+  @keyframes pulse {
+    0%   { transform: scale(1);   opacity: 1; }
+    50%  { transform: scale(1.7); opacity: 0; }
+    100% { transform: scale(1);   opacity: 0; }
+  }
+  .pulse-ring {
+    border-radius: 50%;
+    animation: pulse 2s ease-out infinite;
+    position: absolute;
+    top: 0; left: 0;
+  }
+
+  /* Custom tooltip */
+  .leaflet-tooltip {
+    background: #0d0d0d;
+    border: 1px solid #2a2a2a;
+    border-radius: 0;
+    color: #fff;
+    font-family: Consolas, monospace;
+    font-size: 10px;
+    padding: 7px 10px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.8);
+    max-width: 220px;
+    line-height: 1.6;
+  }
+  .leaflet-tooltip::before { display: none; }
+  .tip-name  { font-size: 9px; letter-spacing: .14em; font-weight: 700; margin-bottom: 3px; }
+  .tip-stat  { font-size: 8px; margin-bottom: 2px; }
+  .tip-gold  { font-size: 7.5px; color: #C9A84C; margin-top: 4px; border-top: 1px solid #1e1e1e; padding-top: 4px; }
+
+  /* Legend */
+  #legend {
+    position: absolute; bottom: 10px; left: 10px; z-index: 1000;
+    font-family: Consolas, monospace; font-size: 8px; color: rgba(255,255,255,0.45);
+    display: flex; gap: 12px; align-items: center;
+  }
+  .leg-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; margin-right: 4px; vertical-align: middle; }
+
+  /* Label div icons */
+  .chk-lbl {
+    font-family: Consolas, monospace; font-size: 7.5px; font-weight: 700;
+    letter-spacing: .06em; white-space: nowrap;
+    text-shadow: 0 0 6px rgba(0,0,0,1), 0 0 3px rgba(0,0,0,1);
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+<div id="map"></div>
+<div id="legend">
+  <span><span class="leg-dot" style="background:#D14040;box-shadow:0 0 5px #D14040;"></span>CRITICAL</span>
+  <span><span class="leg-dot" style="background:#E97132;box-shadow:0 0 5px #E97132;"></span>ELEVATED</span>
+  <span><span class="leg-dot" style="background:#3DAA6A;box-shadow:0 0 5px #3DAA6A;"></span>NORMAL</span>
+  <span style="margin-left:6px;color:rgba(255,255,255,0.22);">MARITIME INTELLIGENCE  ·  TBT</span>
+</div>
+
+<script>
+var CHOKEPOINTS = [
+  {
+    lat: 26.6, lon: 56.3,
+    name: 'STRAIT OF HORMUZ',
+    status: 'CRITICAL', col: '#D14040',
+    vessels: '~21 VLCCs/day', change: '-8% vs normal',
+    desc: 'Iranian naval activity elevated. US 5th Fleet patrol frequency increased. Insurance war-risk premium +340bps.',
+    gold: 'Controls 20% of global oil supply. Sustained closure historically adds $15–25 geopolitical premium to gold within 48hrs.'
+  },
+  {
+    lat: 12.5, lon: 43.3,
+    name: 'BAB-EL-MANDEB',
+    status: 'CRITICAL', col: '#D14040',
+    vessels: '~38 ships/day', change: '-41% vs normal',
+    desc: 'Houthi missile & drone attacks ongoing. 40%+ of container traffic rerouting via Cape of Good Hope. EU naval escort active.',
+    gold: 'Adds 14–21 days and $500k–$1.2m per voyage via Cape. Structural inflation in freight → persistent inflation narrative → gold bullish.'
+  },
+  {
+    lat: 30.6, lon: 32.4,
+    name: 'SUEZ CANAL',
+    status: 'ELEVATED', col: '#E97132',
+    vessels: '~42 ships/day', change: '-28% vs normal',
+    desc: 'Throughput down from 80+ to ~42 ships/day due to Red Sea disruption. Congestion in northbound queue. SCA adapting fees.',
+    gold: 'Connects Europe to Asia for 12% of global trade. Reduced throughput tightens shipping supply → persistent inflationary pressure.'
+  },
+  {
+    lat: -34.1, lon: 18.5,
+    name: 'CAPE OF GOOD HOPE',
+    status: 'ELEVATED', col: '#E97132',
+    vessels: '~90 ships/day', change: '+68% vs normal',
+    desc: 'Surge in vessel traffic as Red Sea rerouting forces Cape passage. Port of Durban and Algoa Bay under increased congestion.',
+    gold: 'Freight cost surge is inflationary. Extended voyage times lock up capital and fuel → structural cost-push inflation → gold supportive.'
+  },
+  {
+    lat: 1.3, lon: 103.9,
+    name: 'STRAIT OF MALACCA',
+    status: 'NORMAL', col: '#3DAA6A',
+    vessels: '~85 ships/day', change: '±2% normal range',
+    desc: 'Flows normal. Indonesia–Singapore coordinated patrol. Piracy incidents remain at decade lows.',
+    gold: 'Carries 25% of global trade. Currently a stabilising factor — no premium being added to Asia–Europe freight.'
+  },
+  {
+    lat: 9.2, lon: -79.8,
+    name: 'PANAMA CANAL',
+    status: 'ELEVATED', col: '#E97132',
+    vessels: '~24 ships/day', change: '-20% vs normal',
+    desc: 'Low water levels limiting draft. Daily transits restricted to 24 vs 36 normal. Waiting times averaging 3–5 days.',
+    gold: 'LNG and dry bulk rerouting via Suez/Cape. Reduced capacity adds freight cost globally — supports inflationary commodity narrative.'
+  },
+];
+
+var map = L.map('map', {
+  center: [15, 45],
+  zoom: 3,
+  zoomControl: false,
+  attributionControl: false,
+  scrollWheelZoom: true,
+  dragging: true,
+});
+
+/* ESRI Dark Gray — free, no API key */
+L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+  maxZoom: 16, attribution: ''
+}).addTo(map);
+/* Reference overlay (country/ocean labels) */
+L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}', {
+  maxZoom: 16, attribution: '', opacity: 0.6
+}).addTo(map);
+
+CHOKEPOINTS.forEach(function(p) {
+  /* Outer pulse ring */
+  var pulseSize = p.status === 'CRITICAL' ? 18 : 14;
+  var pulseIcon = L.divIcon({
+    className: '',
+    html: '<div style="width:' + pulseSize + 'px;height:' + pulseSize + 'px;background:' + p.col + ';border-radius:50%;opacity:0.25;" class="pulse-ring"></div>',
+    iconSize:   [pulseSize, pulseSize],
+    iconAnchor: [pulseSize / 2, pulseSize / 2],
+  });
+  L.marker([p.lat, p.lon], { icon: pulseIcon }).addTo(map);
+
+  /* Core dot */
+  var radius = p.status === 'CRITICAL' ? 6 : 5;
+  L.circleMarker([p.lat, p.lon], {
+    radius:      radius,
+    fillColor:   p.col,
+    fillOpacity: 0.95,
+    color:       p.col,
+    weight:      1.5,
+    opacity:     0.6,
+  }).addTo(map).bindTooltip(
+    '<div class="tip-name" style="color:' + p.col + ';">' + p.name + '</div>' +
+    '<div class="tip-stat"><b>' + p.status + '</b> · ' + p.vessels + ' · ' + p.change + '</div>' +
+    '<div class="tip-stat" style="color:rgba(255,255,255,0.55);">' + p.desc + '</div>' +
+    '<div class="tip-gold">⬡ GOLD: ' + p.gold + '</div>',
+    { direction: 'top', offset: [0, -8], opacity: 1 }
+  );
+
+  /* Label */
+  var lbl = L.divIcon({
+    className: '',
+    html: '<div class="chk-lbl" style="color:' + p.col + ';margin-left:9px;margin-top:-5px;">' +
+            p.name.split(' ').slice(-2).join(' ') +
+          '</div>',
+    iconSize:   [160, 14],
+    iconAnchor: [0, 7],
+  });
+  L.marker([p.lat, p.lon], { icon: lbl, interactive: false }).addTo(map);
+});
+</script>
+</body>
+</html>
