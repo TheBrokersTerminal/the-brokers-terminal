@@ -3,12 +3,24 @@
    GET  ?action=users                — owner: all users + balances + access flags
    GET  ?action=my_access            — current user's allowed_features + allowed_asset_classes
    GET  ?action=firm_members         — corp admin: members of caller's firm + their balances
-   POST {action:'deduct', amount, description}                    — deduct credits (user)
-   POST {action:'add', target_user_id, amount}                    — owner: add credits to user
-   POST {action:'transfer', target_user_id, amount, description}  — move credits to another user
-                                                                     (owner: anyone; corp_admin: own firm)
-   POST {action:'set_access', target_user_id,                     — owner only: set feature/asset flags
+
+   POST {action:'deduct', amount, description}
+     — deduct from own account (usage; all users)
+
+   POST {action:'add', target_user_id, amount}
+     — owner only: create credits from nothing and add to any user
+
+   POST {action:'distribute', target_user_id, amount, description}
+     — corp admin or owner: move credits FROM caller's account TO target
+       (corp admin: own firm members only; owner: anyone)
+
+   POST {action:'recall', target_user_id, amount, description}
+     — corp admin or owner: move credits FROM target BACK TO caller's account
+       (corp admin: own firm members only; owner: anyone)
+
+   POST {action:'set_access', target_user_id,
          allowed_features, allowed_asset_classes, is_corp_admin}
+     — owner only: set feature/asset flags on a user
    ─────────────────────────────────────────────────────────────────────────── */
 
 const SUPABASE_URL  = 'https://oqpodikelxhwcnjdwojw.supabase.co';
@@ -175,45 +187,15 @@ exports.handler = async function (event) {
       return ok({ balance: result.balance });
     }
 
-    /* Deduct credits from a user (owner taking back; negative transfer) */
-    if (action === 'deduct_from') {
-      if (!isOwner && !isCorpAdmin) return fail(403, 'admin_only');
-      const targetId = body.target_user_id;
-      const amount   = parseInt(body.amount, 10);
-      const desc     = String(body.description || 'admin deduction').slice(0, 200);
-      if (!targetId || !amount || amount <= 0) return fail(400, 'invalid_params');
-
-      /* Corp admin can only deduct from own firm */
-      if (!isOwner) {
-        const targetRow = await getUserRow(targetId);
-        if (!targetRow || targetRow.firm_id !== (userRow && userRow.firm_id)) {
-          return fail(403, 'outside_firm');
-        }
-      }
-
-      const r = await sbFetch('/rest/v1/rpc/deduct_credits', {
-        method: 'POST',
-        body: JSON.stringify({ p_user_id: targetId, p_amount: amount, p_description: desc }),
-      });
-      const result = r.ok ? await r.json() : null;
-      if (!result) return fail(500, 'rpc_failed');
-      if (!result.ok) {
-        if (result.error === 'insufficient') return fail(402, 'insufficient_credits');
-        return fail(500, result.error || 'unknown');
-      }
-      return ok({ balance: result.balance });
-    }
-
-    /* Transfer credits: owner → anyone, corp admin → own firm members */
-    if (action === 'transfer') {
+    /* ── Distribute: caller → target (corp admin: own firm; owner: anyone) ── */
+    if (action === 'distribute') {
       if (!isCorpAdmin) return fail(403, 'admin_only');
       const targetId = body.target_user_id;
       const amount   = parseInt(body.amount, 10);
       const desc     = String(body.description || 'credit distribution').slice(0, 200);
       if (!targetId || !amount || amount <= 0) return fail(400, 'invalid_params');
-      if (targetId === authUser.id) return fail(400, 'cannot_transfer_to_self');
+      if (targetId === authUser.id) return fail(400, 'cannot_distribute_to_self');
 
-      /* Corp admin restricted to own firm */
       if (!isOwner) {
         const targetRow = await getUserRow(targetId);
         if (!targetRow || targetRow.firm_id !== (userRow && userRow.firm_id)) {
@@ -223,12 +205,7 @@ exports.handler = async function (event) {
 
       const r = await sbFetch('/rest/v1/rpc/transfer_credits', {
         method: 'POST',
-        body: JSON.stringify({
-          p_from_user_id: authUser.id,
-          p_to_user_id:   targetId,
-          p_amount:       amount,
-          p_description:  desc,
-        }),
+        body: JSON.stringify({ p_from_user_id: authUser.id, p_to_user_id: targetId, p_amount: amount, p_description: desc }),
       });
       const result = r.ok ? await r.json() : null;
       if (!result) return fail(500, 'rpc_failed');
@@ -237,7 +214,38 @@ exports.handler = async function (event) {
         if (result.error === 'no_source_account')    return fail(402, 'no_credits_account');
         return fail(500, result.error || 'unknown');
       }
-      return ok({ from_balance: result.from_balance, to_balance: result.to_balance });
+      return ok({ my_balance: result.from_balance, their_balance: result.to_balance });
+    }
+
+    /* ── Recall: target → caller (credits returned to admin's account) ── */
+    if (action === 'recall') {
+      if (!isCorpAdmin) return fail(403, 'admin_only');
+      const targetId = body.target_user_id;
+      const amount   = parseInt(body.amount, 10);
+      const desc     = String(body.description || 'credit recall').slice(0, 200);
+      if (!targetId || !amount || amount <= 0) return fail(400, 'invalid_params');
+      if (targetId === authUser.id) return fail(400, 'cannot_recall_from_self');
+
+      if (!isOwner) {
+        const targetRow = await getUserRow(targetId);
+        if (!targetRow || targetRow.firm_id !== (userRow && userRow.firm_id)) {
+          return fail(403, 'outside_firm');
+        }
+      }
+
+      /* Reverse direction: target → caller */
+      const r = await sbFetch('/rest/v1/rpc/transfer_credits', {
+        method: 'POST',
+        body: JSON.stringify({ p_from_user_id: targetId, p_to_user_id: authUser.id, p_amount: amount, p_description: desc }),
+      });
+      const result = r.ok ? await r.json() : null;
+      if (!result) return fail(500, 'rpc_failed');
+      if (!result.ok) {
+        if (result.error === 'insufficient_credits') return fail(402, 'insufficient_credits');
+        if (result.error === 'no_source_account')    return fail(402, 'no_credits_account');
+        return fail(500, result.error || 'unknown');
+      }
+      return ok({ my_balance: result.to_balance, their_balance: result.from_balance });
     }
 
     /* Set access flags — owner only */
