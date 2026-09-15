@@ -258,6 +258,28 @@ exports.handler = async function (event) {
       return ok({ my_balance: result.to_balance, their_balance: result.from_balance });
     }
 
+    /* Remove credits — owner only: debit a user's account directly (credits voided, not transferred) */
+    if (action === 'remove') {
+      if (!isOwner) return fail(403, 'owner_only');
+      const targetId = body.target_user_id;
+      const amount   = parseInt(body.amount, 10);
+      const desc     = String(body.description || 'owner removal').slice(0, 200);
+      if (!targetId || !amount || amount <= 0) return fail(400, 'invalid_params');
+
+      const r = await sbFetch('/rest/v1/rpc/deduct_credits', {
+        method: 'POST',
+        body: JSON.stringify({ p_user_id: targetId, p_amount: amount, p_description: desc }),
+      });
+      const result = r.ok ? await r.json() : null;
+      if (!result) return fail(500, 'rpc_failed');
+      if (!result.ok) {
+        if (result.error === 'insufficient') return fail(402, 'insufficient_credits');
+        if (result.error === 'no_account')   return fail(402, 'no_credits_account');
+        return fail(500, result.error || 'unknown');
+      }
+      return ok({ balance: result.balance });
+    }
+
     /* Set access flags — owner only */
     if (action === 'set_access') {
       if (!isOwner) return fail(403, 'owner_only');
