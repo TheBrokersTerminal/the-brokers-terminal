@@ -1,13 +1,19 @@
 /* ── TBT CREDITS — user credit management ──────────────────────────────────
-   GET  ?action=balance           — current user's balance
-   GET  ?action=users             — admin: all users + balances
-   POST {action:'deduct', amount, description}   — deduct credits (user)
-   POST {action:'add', target_user_id, amount}   — admin: add credits to user
+   GET  ?action=balance              — current user's balance
+   GET  ?action=users                — owner: all users + balances + access flags
+   GET  ?action=my_access            — current user's allowed_features + allowed_asset_classes
+   GET  ?action=firm_members         — corp admin: members of caller's firm + their balances
+   POST {action:'deduct', amount, description}                    — deduct credits (user)
+   POST {action:'add', target_user_id, amount}                    — owner: add credits to user
+   POST {action:'transfer', target_user_id, amount, description}  — move credits to another user
+                                                                     (owner: anyone; corp_admin: own firm)
+   POST {action:'set_access', target_user_id,                     — owner only: set feature/asset flags
+         allowed_features, allowed_asset_classes, is_corp_admin}
    ─────────────────────────────────────────────────────────────────────────── */
 
-const SUPABASE_URL = 'https://oqpodikelxhwcnjdwojw.supabase.co';
-const SERVICE_KEY  = process.env.SUPABASE_SERVICE_KEY;
-const ADMIN_EMAIL  = 'admin@thebrokersterminal.com';
+const SUPABASE_URL  = 'https://oqpodikelxhwcnjdwojw.supabase.co';
+const SERVICE_KEY   = process.env.SUPABASE_SERVICE_KEY;
+const OWNER_EMAIL   = 'admin@thebrokersterminal.com';
 
 const CORS = {
   'Access-Control-Allow-Origin':  '*',
@@ -15,14 +21,14 @@ const CORS = {
   'Access-Control-Allow-Headers': 'Authorization,Content-Type',
 };
 
-function ok(data)     { return { statusCode: 200, headers: { ...CORS, 'Content-Type': 'application/json' }, body: JSON.stringify(data) }; }
+function ok(data)        { return { statusCode: 200, headers: { ...CORS, 'Content-Type': 'application/json' }, body: JSON.stringify(data) }; }
 function fail(code, msg) { return { statusCode: code, headers: { ...CORS, 'Content-Type': 'application/json' }, body: JSON.stringify({ error: msg }) }; }
 
 async function sbFetch(path, opts = {}) {
   return fetch(`${SUPABASE_URL}${path}`, {
     ...opts,
     headers: {
-      apikey: SERVICE_KEY,
+      apikey:        SERVICE_KEY,
       Authorization: `Bearer ${SERVICE_KEY}`,
       'Content-Type': 'application/json',
       ...(opts.headers || {}),
@@ -40,6 +46,13 @@ async function getUser(jwt) {
   } catch { return null; }
 }
 
+/* Fetch the users table row for a given auth user id */
+async function getUserRow(userId) {
+  const r = await sbFetch(`/rest/v1/users?id=eq.${userId}&select=id,email,firm_id,role,is_corp_admin,allowed_features,allowed_asset_classes&limit=1`);
+  const rows = r.ok ? await r.json() : [];
+  return rows.length ? rows[0] : null;
+}
+
 exports.handler = async function (event) {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 204, headers: CORS, body: '' };
 
@@ -47,40 +60,71 @@ exports.handler = async function (event) {
   const jwt  = auth.startsWith('Bearer ') ? auth.slice(7) : null;
   if (!jwt) return fail(401, 'missing_token');
 
-  const user = await getUser(jwt);
-  if (!user || !user.id) return fail(401, 'invalid_token');
+  const authUser = await getUser(jwt);
+  if (!authUser || !authUser.id) return fail(401, 'invalid_token');
 
-  const isAdmin = user.email === ADMIN_EMAIL;
+  const isOwner    = authUser.email === OWNER_EMAIL;
+  const userRow    = await getUserRow(authUser.id);
+  const isCorpAdmin = isOwner || !!(userRow && userRow.is_corp_admin);
 
   /* ── GET ── */
   if (event.httpMethod === 'GET') {
     const action = (event.queryStringParameters || {}).action || 'balance';
 
     if (action === 'balance') {
-      const r = await sbFetch(`/rest/v1/user_credits?user_id=eq.${user.id}&select=balance`);
+      const r = await sbFetch(`/rest/v1/user_credits?user_id=eq.${authUser.id}&select=balance`);
       const rows = r.ok ? await r.json() : [];
       return ok({ balance: rows.length ? rows[0].balance : 0 });
     }
 
-    if (action === 'users') {
-      if (!isAdmin) return fail(403, 'admin_only');
-      /* Get all auth users via admin API */
-      const authR = await sbFetch('/auth/v1/admin/users?per_page=1000');
-      const authData = authR.ok ? await authR.json() : { users: [] };
-      const authUsers = authData.users || [];
-
-      /* Get all credit balances */
-      const credR = await sbFetch('/rest/v1/user_credits?select=user_id,balance,updated_at&order=balance.desc');
-      const credits = credR.ok ? await credR.json() : [];
-      const creditMap = {};
-      credits.forEach(function (c) { creditMap[c.user_id] = c; });
-
-      const list = authUsers.map(function (u) {
-        const c = creditMap[u.id] || { balance: 0 };
-        return { id: u.id, email: u.email, balance: c.balance };
+    /* Current user's access flags — used by terminal on load */
+    if (action === 'my_access') {
+      if (isOwner) {
+        return ok({
+          allowed_features:      ['vault', 'terminal', 'news_feed', 'intel'],
+          allowed_asset_classes: null,
+          is_corp_admin:         true,
+        });
+      }
+      return ok({
+        allowed_features:      userRow ? userRow.allowed_features      : null,
+        allowed_asset_classes: userRow ? userRow.allowed_asset_classes : null,
+        is_corp_admin:         userRow ? !!userRow.is_corp_admin        : false,
       });
-      list.sort(function (a, b) { return b.balance - a.balance; });
-      return ok({ users: list });
+    }
+
+    /* Corp admin: list own firm members + their balances */
+    if (action === 'firm_members') {
+      if (!isCorpAdmin) return fail(403, 'corp_admin_only');
+      const firmId = userRow && userRow.firm_id;
+      if (!firmId) return fail(400, 'no_firm');
+
+      const [membersR, creditsR] = await Promise.all([
+        sbFetch(`/rest/v1/users?firm_id=eq.${firmId}&select=id,email,first_name,last_name,status,is_corp_admin,allowed_features,allowed_asset_classes`),
+        sbFetch('/rest/v1/user_credits?select=user_id,balance'),
+      ]);
+      const members = membersR.ok ? await membersR.json() : [];
+      const credits = creditsR.ok ? await creditsR.json() : [];
+      const balMap  = {};
+      credits.forEach(function (c) { balMap[c.user_id] = c.balance; });
+      members.forEach(function (m) { m.balance = balMap[m.id] || 0; });
+      return ok({ members });
+    }
+
+    /* Owner: all users + balances + access flags */
+    if (action === 'users') {
+      if (!isOwner) return fail(403, 'owner_only');
+
+      const [usersR, creditsR] = await Promise.all([
+        sbFetch('/rest/v1/users?select=id,email,first_name,last_name,firm_id,status,role,is_corp_admin,allowed_features,allowed_asset_classes&order=created_at.desc'),
+        sbFetch('/rest/v1/user_credits?select=user_id,balance'),
+      ]);
+      const users   = usersR.ok  ? await usersR.json()   : [];
+      const credits = creditsR.ok ? await creditsR.json() : [];
+      const balMap  = {};
+      credits.forEach(function (c) { balMap[c.user_id] = c.balance; });
+      users.forEach(function (u)   { u.balance = balMap[u.id] || 0; });
+      return ok({ users });
     }
 
     return fail(400, 'unknown_action');
@@ -101,7 +145,7 @@ exports.handler = async function (event) {
 
       const r = await sbFetch('/rest/v1/rpc/deduct_credits', {
         method: 'POST',
-        body: JSON.stringify({ p_user_id: user.id, p_amount: amount, p_description: desc }),
+        body: JSON.stringify({ p_user_id: authUser.id, p_amount: amount, p_description: desc }),
       });
       const result = r.ok ? await r.json() : null;
       if (!result) return fail(500, 'rpc_failed');
@@ -113,12 +157,12 @@ exports.handler = async function (event) {
       return ok({ balance: result.balance });
     }
 
-    /* Add credits — admin only */
+    /* Add credits — owner only (direct allocation, no deduction from anyone) */
     if (action === 'add') {
-      if (!isAdmin) return fail(403, 'admin_only');
+      if (!isOwner) return fail(403, 'owner_only');
       const targetId = body.target_user_id;
       const amount   = parseInt(body.amount, 10);
-      const desc     = String(body.description || 'admin allocation').slice(0, 200);
+      const desc     = String(body.description || 'owner allocation').slice(0, 200);
       const type     = body.type || 'allocation';
       if (!targetId || !amount || amount <= 0) return fail(400, 'invalid_params');
 
@@ -129,6 +173,96 @@ exports.handler = async function (event) {
       const result = r.ok ? await r.json() : null;
       if (!result || !result.ok) return fail(500, 'rpc_failed');
       return ok({ balance: result.balance });
+    }
+
+    /* Deduct credits from a user (owner taking back; negative transfer) */
+    if (action === 'deduct_from') {
+      if (!isOwner && !isCorpAdmin) return fail(403, 'admin_only');
+      const targetId = body.target_user_id;
+      const amount   = parseInt(body.amount, 10);
+      const desc     = String(body.description || 'admin deduction').slice(0, 200);
+      if (!targetId || !amount || amount <= 0) return fail(400, 'invalid_params');
+
+      /* Corp admin can only deduct from own firm */
+      if (!isOwner) {
+        const targetRow = await getUserRow(targetId);
+        if (!targetRow || targetRow.firm_id !== (userRow && userRow.firm_id)) {
+          return fail(403, 'outside_firm');
+        }
+      }
+
+      const r = await sbFetch('/rest/v1/rpc/deduct_credits', {
+        method: 'POST',
+        body: JSON.stringify({ p_user_id: targetId, p_amount: amount, p_description: desc }),
+      });
+      const result = r.ok ? await r.json() : null;
+      if (!result) return fail(500, 'rpc_failed');
+      if (!result.ok) {
+        if (result.error === 'insufficient') return fail(402, 'insufficient_credits');
+        return fail(500, result.error || 'unknown');
+      }
+      return ok({ balance: result.balance });
+    }
+
+    /* Transfer credits: owner → anyone, corp admin → own firm members */
+    if (action === 'transfer') {
+      if (!isCorpAdmin) return fail(403, 'admin_only');
+      const targetId = body.target_user_id;
+      const amount   = parseInt(body.amount, 10);
+      const desc     = String(body.description || 'credit distribution').slice(0, 200);
+      if (!targetId || !amount || amount <= 0) return fail(400, 'invalid_params');
+      if (targetId === authUser.id) return fail(400, 'cannot_transfer_to_self');
+
+      /* Corp admin restricted to own firm */
+      if (!isOwner) {
+        const targetRow = await getUserRow(targetId);
+        if (!targetRow || targetRow.firm_id !== (userRow && userRow.firm_id)) {
+          return fail(403, 'outside_firm');
+        }
+      }
+
+      const r = await sbFetch('/rest/v1/rpc/transfer_credits', {
+        method: 'POST',
+        body: JSON.stringify({
+          p_from_user_id: authUser.id,
+          p_to_user_id:   targetId,
+          p_amount:       amount,
+          p_description:  desc,
+        }),
+      });
+      const result = r.ok ? await r.json() : null;
+      if (!result) return fail(500, 'rpc_failed');
+      if (!result.ok) {
+        if (result.error === 'insufficient_credits') return fail(402, 'insufficient_credits');
+        if (result.error === 'no_source_account')    return fail(402, 'no_credits_account');
+        return fail(500, result.error || 'unknown');
+      }
+      return ok({ from_balance: result.from_balance, to_balance: result.to_balance });
+    }
+
+    /* Set access flags — owner only */
+    if (action === 'set_access') {
+      if (!isOwner) return fail(403, 'owner_only');
+      const targetId = body.target_user_id;
+      if (!targetId) return fail(400, 'missing_target');
+
+      const updates = {};
+      if (body.allowed_features      !== undefined) updates.allowed_features      = body.allowed_features      || null;
+      if (body.allowed_asset_classes !== undefined) updates.allowed_asset_classes = body.allowed_asset_classes || null;
+      if (body.is_corp_admin         !== undefined) updates.is_corp_admin         = !!body.is_corp_admin;
+
+      if (!Object.keys(updates).length) return fail(400, 'nothing_to_update');
+
+      const r = await sbFetch(`/rest/v1/users?id=eq.${targetId}`, {
+        method:  'PATCH',
+        headers: { Prefer: 'return=representation' },
+        body:    JSON.stringify(updates),
+      });
+      if (!r.ok) {
+        const err = await r.text();
+        return fail(500, 'update_failed: ' + err.slice(0, 200));
+      }
+      return ok({ updated: true });
     }
 
     return fail(400, 'unknown_action');

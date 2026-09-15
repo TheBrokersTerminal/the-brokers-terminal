@@ -1681,11 +1681,26 @@ var supabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
   });
   var _ue = sess.data.session.user.email || '';
   window._isOwner = (_ue === 'admin@thebrokersterminal.com' || _ue === 'desk@thebrokersterminal.com');
-  if (!window._isOwner) {
-    /* Hide BROKERS INTELLIGENCE panels for all non-owner accounts */
-    var style = document.createElement('style');
-    style.textContent = '.intel-panel { display: none !important; }';
-    document.head.appendChild(style);
+  /* Fetch per-user access flags and show/hide intel panel based on 'intel' feature */
+  try {
+    var accessR = await fetch('/.netlify/functions/credits?action=my_access', {
+      headers: { Authorization: 'Bearer ' + sess.data.session.access_token }
+    });
+    var accessFlags = accessR.ok ? await accessR.json() : null;
+    var canIntelNews = window._isOwner ||
+      (accessFlags && accessFlags.allowed_features && accessFlags.allowed_features.indexOf('intel') !== -1);
+    if (!canIntelNews) {
+      var style = document.createElement('style');
+      style.textContent = '.intel-panel { display: none !important; }';
+      document.head.appendChild(style);
+    }
+    window._newsAccessFlags = accessFlags;
+  } catch (_e) {
+    if (!window._isOwner) {
+      var style2 = document.createElement('style');
+      style2.textContent = '.intel-panel { display: none !important; }';
+      document.head.appendChild(style2);
+    }
   }
   document.getElementById('nav-logout-btn').addEventListener('click',function(e){e.preventDefault();supabase.auth.signOut().then(function(){window.location.href='login.html';});});
 
