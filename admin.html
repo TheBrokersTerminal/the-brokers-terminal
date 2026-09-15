@@ -3292,8 +3292,8 @@
   var _accessUserMap = {};
   const FEATURE_OPTIONS  = ['vault','terminal','news_feed','intel'];
   const FEATURE_LABELS   = { vault: 'VAULT', terminal: 'TERMINAL', news_feed: 'NEWS FEED', intel: 'INTEL' };
-  const ASSET_OPTIONS    = ['whisky','gold','property','macro','equity','crypto','fx'];
-  const ASSET_LABELS     = { whisky:'WHISKY', gold:'GOLD', property:'PROPERTY', macro:'MACRO', equity:'EQUITY', crypto:'CRYPTO', fx:'FX' };
+  const ASSET_OPTIONS    = ['whisky','wine','gold','art','land','property','pe','trusts','eis','vct','offshore','universal'];
+  const ASSET_LABELS     = { whisky:'WHISKY', wine:'FINE WINE', gold:'GOLD', art:'ART', land:'LAND', property:'PROPERTY', pe:'PRIVATE EQUITY', trusts:'INV. TRUSTS', eis:'EIS / SEIS', vct:'VCT', offshore:'OFFSHORE BONDS', universal:'UNIVERSAL' };
 
   async function loadAccessTab() {
     document.getElementById('ac-count').textContent = 'LOADING...';
@@ -3355,6 +3355,8 @@
       var firm      = (allFirms || []).find(function(f) { return f.id === u.firm_id; });
       var firmName  = firm ? firm.company_name : (u.firm_id ? u.firm_id.slice(0,8)+'…' : '—');
       var balance   = u.balance || 0;
+      var subCreds  = u.subscription_credits || 0;
+      var purCreds  = u.purchased_credits    || 0;
 
       /* Feature flags checkboxes */
       var feats = u.allowed_features || [];
@@ -3392,6 +3394,11 @@
         '<td style="padding:10px 14px;">' +
           '<span id="balance-' + u.id + '" style="font-size:13px;font-weight:700;color:' + (balance > 0 ? 'var(--accent)' : 'var(--text-faint)') + ';">' + balance + '</span>' +
           '<span style="color:var(--text-faint);font-size:9px;margin-left:3px;">TBT</span>' +
+          '<div style="margin-top:3px;font-size:8px;letter-spacing:0.08em;">' +
+            '<span style="color:#888;" title="Subscription credits — reset monthly">' + subCreds + ' sub</span>' +
+            '<span style="color:#555;margin:0 3px;">·</span>' +
+            '<span style="color:#888;" title="Purchased credits — carry over">' + purCreds + ' purch</span>' +
+          '</div>' +
         '</td>' +
         '<td style="padding:10px 14px;">' + featHtml + '</td>' +
         '<td style="padding:10px 14px;">' + assetHtml + '</td>' +

@@ -84,9 +84,14 @@ exports.handler = async function (event) {
     const action = (event.queryStringParameters || {}).action || 'balance';
 
     if (action === 'balance') {
-      const r = await sbFetch(`/rest/v1/user_credits?user_id=eq.${authUser.id}&select=balance`);
+      const r = await sbFetch(`/rest/v1/user_credits?user_id=eq.${authUser.id}&select=balance,subscription_credits,purchased_credits`);
       const rows = r.ok ? await r.json() : [];
-      return ok({ balance: rows.length ? rows[0].balance : 0 });
+      const row = rows.length ? rows[0] : { balance: 0, subscription_credits: 0, purchased_credits: 0 };
+      return ok({
+        balance:              row.balance              || 0,
+        subscription_credits: row.subscription_credits || 0,
+        purchased_credits:    row.purchased_credits    || 0,
+      });
     }
 
     /* Current user's access flags — used by terminal on load */
@@ -129,13 +134,18 @@ exports.handler = async function (event) {
 
       const [usersR, creditsR] = await Promise.all([
         sbFetch('/rest/v1/users?select=id,email,first_name,last_name,firm_id,status,role,is_corp_admin,allowed_features,allowed_asset_classes&order=created_at.desc'),
-        sbFetch('/rest/v1/user_credits?select=user_id,balance'),
+        sbFetch('/rest/v1/user_credits?select=user_id,balance,subscription_credits,purchased_credits'),
       ]);
       const users   = usersR.ok  ? await usersR.json()   : [];
       const credits = creditsR.ok ? await creditsR.json() : [];
       const balMap  = {};
-      credits.forEach(function (c) { balMap[c.user_id] = c.balance; });
-      users.forEach(function (u)   { u.balance = balMap[u.id] || 0; });
+      credits.forEach(function (c) { balMap[c.user_id] = c; });
+      users.forEach(function (u) {
+        const c = balMap[u.id] || {};
+        u.balance              = c.balance              || 0;
+        u.subscription_credits = c.subscription_credits || 0;
+        u.purchased_credits    = c.purchased_credits    || 0;
+      });
       return ok({ users });
     }
 
