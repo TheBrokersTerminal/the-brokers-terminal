@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>API Test</title>
+<style>body{background:#080808;color:#aaa;font-family:Consolas,monospace;font-size:11px;padding:20px;}
+h2{color:#E97132;font-size:9px;letter-spacing:.3em;margin:20px 0 6px;}
+.r{padding:8px 12px;margin:3px 0;border-left:2px solid #222;}
+.ok{border-color:#4caf50;color:#4caf50;}
+.fail{border-color:#e05050;color:#e05050;}
+.wait{border-color:#E97132;color:#555;}
+pre{margin:4px 0 0;color:#555;font-size:9px;}
+</style></head>
+<body>
+<h1 style="color:#fff;font-size:13px;letter-spacing:.2em;">API DIAGNOSTIC</h1>
+
+<h2>FRANKFURTER — FOREX (EUR/USD, GBP/USD)</h2>
+<div id="fx1" class="r wait">Testing...</div>
+<div id="fx2" class="r wait">Testing...</div>
+<div id="fxhist" class="r wait">Testing historical...</div>
+
+<h2>FINNHUB — US STOCK QUOTE (GLD, BNO)</h2>
+<div id="gld" class="r wait">Testing...</div>
+<div id="bno" class="r wait">Testing...</div>
+
+<h2>FINNHUB — STOCK CANDLE (GLD 30-day daily)</h2>
+<div id="gld_candle" class="r wait">Testing...</div>
+
+<h2>FINNHUB — FOREX QUOTE (OANDA:GBP_USD)</h2>
+<div id="oanda" class="r wait">Testing...</div>
+
+<script>
+var KEY='da6p77hr01qqqkkgl7b0da6p77hr01qqqkkgl7bg';
+function pass(id,msg,data){var el=document.getElementById(id);el.className='r ok';el.innerHTML='✓ '+msg+(data?'<pre>'+JSON.stringify(data,null,2).slice(0,300)+'</pre>':'');}
+function fail(id,msg){var el=document.getElementById(id);el.className='r fail';el.innerHTML='✗ '+msg;}
+
+async function run(){
+  // Frankfurter latest
+  try{
+    var r=await fetch('https://api.frankfurter.app/latest?from=USD&to=GBP,EUR,JPY');
+    var d=await r.json();
+    if(d.rates&&d.rates.GBP) pass('fx1','Frankfurter latest OK — GBP/USD='+(1/d.rates.GBP).toFixed(5),d.rates);
+    else fail('fx1','Frankfurter returned but no rates: '+JSON.stringify(d));
+  }catch(e){fail('fx1','Frankfurter FAILED: '+e.message);}
+
+  // Frankfurter EUR/USD
+  try{
+    var r=await fetch('https://api.frankfurter.app/latest?from=EUR&to=USD');
+    var d=await r.json();
+    if(d.rates&&d.rates.USD) pass('fx2','EUR/USD='+(d.rates.USD).toFixed(5));
+    else fail('fx2','No EUR/USD rate: '+JSON.stringify(d));
+  }catch(e){fail('fx2','EUR/USD FAILED: '+e.message);}
+
+  // Frankfurter historical
+  try{
+    var start=new Date(Date.now()-30*86400000).toISOString().slice(0,10);
+    var r=await fetch('https://api.frankfurter.app/'+start+'..?from=GBP&to=USD');
+    var d=await r.json();
+    var keys=Object.keys(d.rates||{});
+    if(keys.length>0) pass('fxhist','Frankfurter 30-day history OK — '+keys.length+' days',Object.fromEntries(Object.entries(d.rates).slice(-3)));
+    else fail('fxhist','No historical data: '+JSON.stringify(d));
+  }catch(e){fail('fxhist','Frankfurter history FAILED: '+e.message);}
+
+  // Finnhub GLD
+  try{
+    var r=await fetch('https://finnhub.io/api/v1/quote?symbol=GLD&token='+KEY);
+    var d=await r.json();
+    if(d.c) pass('gld','GLD c='+d.c+' pc='+d.pc+' (gold proxy ≈ $'+(d.c*10).toFixed(0)+'/oz)',d);
+    else fail('gld','GLD returned but c=0 or null: '+JSON.stringify(d));
+  }catch(e){fail('gld','GLD FAILED: '+e.message);}
+
+  // Finnhub BNO
+  try{
+    var r=await fetch('https://finnhub.io/api/v1/quote?symbol=BNO&token='+KEY);
+    var d=await r.json();
+    if(d.c) pass('bno','BNO c='+d.c+' pc='+d.pc,d);
+    else fail('bno','BNO returned but c=0 or null: '+JSON.stringify(d));
+  }catch(e){fail('bno','BNO FAILED: '+e.message);}
+
+  // Finnhub GLD candle
+  try{
+    var now=Math.floor(Date.now()/1000), from=now-30*86400;
+    var r=await fetch('https://finnhub.io/api/v1/stock/candle?symbol=GLD&resolution=D&from='+from+'&to='+now+'&token='+KEY);
+    var d=await r.json();
+    if(d.s==='ok'&&d.c&&d.c.length) pass('gld_candle','GLD candle OK — '+d.c.length+' days, last='+d.c[d.c.length-1],{s:d.s,count:d.c.length,last3:d.c.slice(-3)});
+    else fail('gld_candle','GLD candle bad: '+JSON.stringify(d));
+  }catch(e){fail('gld_candle','GLD candle FAILED: '+e.message);}
+
+  // Finnhub OANDA
+  try{
+    var r=await fetch('https://finnhub.io/api/v1/quote?symbol=OANDA:GBP_USD&token='+KEY);
+    var d=await r.json();
+    if(d.c) pass('oanda','OANDA GBP_USD c='+d.c,d);
+    else fail('oanda','OANDA returned but c=0: '+JSON.stringify(d));
+  }catch(e){fail('oanda','OANDA FAILED: '+e.message);}
+}
+run();
+</script>
+</body></html>
