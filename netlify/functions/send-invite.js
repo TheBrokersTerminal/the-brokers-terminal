@@ -1,7 +1,39 @@
 const https = require('https');
 
+const SUPABASE_URL = 'https://oqpodikelxhwcnjdwojw.supabase.co';
+const SERVICE_KEY  = process.env.SUPABASE_SERVICE_KEY;
+const OWNER_EMAIL  = 'admin@thebrokersterminal.com';
+
+async function verifyAdminCaller(authHeader) {
+  if (!authHeader || !authHeader.startsWith('Bearer ')) return null;
+  const jwt = authHeader.slice(7);
+  try {
+    const r = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+      headers: { apikey: SERVICE_KEY, Authorization: `Bearer ${jwt}` },
+    });
+    if (!r.ok) return null;
+    const user = await r.json();
+    if (!user || !user.id) return null;
+    if (user.email === OWNER_EMAIL) return user;
+    /* Check is_corp_admin in users table */
+    const ur = await fetch(
+      `${SUPABASE_URL}/rest/v1/users?id=eq.${user.id}&select=is_corp_admin&limit=1`,
+      { headers: { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}` } }
+    );
+    const rows = ur.ok ? await ur.json() : [];
+    if (rows.length && rows[0].is_corp_admin) return user;
+    return null;
+  } catch { return null; }
+}
+
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') return { statusCode: 405, body: 'Method not allowed' };
+
+  /* Only corp admins and the owner may send invite emails */
+  const caller = await verifyAdminCaller(
+    event.headers.authorization || event.headers.Authorization || ''
+  );
+  if (!caller) return { statusCode: 403, body: JSON.stringify({ error: 'admin_only' }) };
 
   let body;
   try { body = JSON.parse(event.body); } catch { return { statusCode: 400, body: 'Invalid JSON' }; }

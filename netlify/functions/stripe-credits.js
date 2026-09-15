@@ -120,6 +120,8 @@ exports.handler = async function (event) {
     const ref = session.client_reference_id || '';
     const parts = ref.split(':');
     if (parts[0] !== 'credits') return fail(400, 'invalid_reference');
+    /* Prevent credit hijacking: session must belong to the authenticated user */
+    if (parts[1] !== user.id) return fail(403, 'session_belongs_to_different_user');
     const pkgKey = parts[2];
     const pkg = PACKAGES[pkgKey];
     if (!pkg) return fail(400, 'unknown_package');
