@@ -1960,6 +1960,14 @@
 
     // ── END CREDIT SYSTEM ────────────────────────────────────────────────────
 
+    // ── Fetch per-user access flags (needed before report load + canvas init) ──
+    try {
+      var accessR = await fetch('/.netlify/functions/credits?action=my_access', {
+        headers: { Authorization: 'Bearer ' + session.access_token }
+      });
+      if (accessR.ok) window._accessFlags = await accessR.json();
+    } catch(_e) {}
+
     // ── Init terminal canvas (firmId now resolved) ──
     if (window.terminalCanvasInit) terminalCanvasInit(supabase, session.user.id, window._canonicalFirmId, userName, userEmail);
 
@@ -2650,14 +2658,20 @@
 
       if (error) { console.error('Error loading reports:', error); return; }
 
-      // Filter reports to only what this firm can access (fetched live from DB — not cached)
+      // Filter reports to only what this firm/user can access
       var firmAccess = window.firmAccess || 'both';
+      var userAllowedAssets = window._accessFlags && window._accessFlags.allowed_asset_classes; /* null = all */
       var filteredReports = (reports || []).filter(function(r) {
         if (r.report_type === 'client_monthly') return false; // shown in Client Edition panel only
         var ac = (r.asset_class || '').toLowerCase();
-        if (firmAccess === 'gold')   return ac !== 'whisky'; // show gold + shared; exclude whisky-only
-        if (firmAccess === 'whisky') return ac !== 'gold';   // show whisky + shared; exclude gold-only
-        return true; // 'both' — see everything
+        // Firm-level filter
+        if (firmAccess === 'gold')   { if (ac === 'whisky') return false; }
+        if (firmAccess === 'whisky') { if (ac === 'gold')   return false; }
+        // Per-user asset class restriction (null = unrestricted)
+        if (userAllowedAssets && userAllowedAssets.length) {
+          if (userAllowedAssets.indexOf(ac) === -1) return false;
+        }
+        return true;
       });
 
       allReports = filteredReports;

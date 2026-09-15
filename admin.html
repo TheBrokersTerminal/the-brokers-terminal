@@ -206,6 +206,7 @@
   <a class="nav-brand" href="index.html">█ THE BROKERS TERMINAL</a>
   <ul class="nav-links">
     <li><a href="dashboard.html">SUBSCRIBER DESK</a></li>
+    <li><a href="dashboard.html#terminal" style="color:var(--accent);font-weight:700;">▌ TERMINAL</a></li>
     <li><a href="login.html">LOG OUT</a></li>
   </ul>
 </nav>
@@ -276,6 +277,7 @@
     <button class="admin-tab" data-tab="upload">UPLOAD DOCUMENT</button>
     <button class="admin-tab" data-tab="reports">REPORTS</button>
     <button class="admin-tab" data-tab="subscribers">SUBSCRIBERS</button>
+    <button class="admin-tab" data-tab="access">▸ ACCESS &amp; CREDITS</button>
     <button class="admin-tab" data-tab="firms">FIRMS</button>
     <button class="admin-tab" data-tab="activity">ACTIVITY</button>
     <button class="admin-tab" data-tab="affiliates">AFFILIATES</button>
@@ -611,6 +613,61 @@
             <tr class="loading-row"><td colspan="7">LOADING SUBSCRIBERS...</td></tr>
           </tbody>
         </table>
+      </div>
+    </div>
+
+    <!-- ═══════════ ACCESS & CREDITS ════════════════════════════ -->
+    <div class="admin-section" id="tab-access">
+
+      <div class="filter-bar">
+        <input type="text" id="ac-search" placeholder="Search name or email..." oninput="filterAccessUsers()" style="min-width:260px;">
+        <select id="ac-filter-firm" onchange="filterAccessUsers()">
+          <option value="all">ALL FIRMS</option>
+        </select>
+        <span style="color:var(--text-faint);font-size:10px;letter-spacing:0.14em;margin-left:8px;" id="ac-count"></span>
+      </div>
+
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th style="min-width:160px;">NAME / EMAIL</th>
+              <th>FIRM</th>
+              <th style="min-width:90px;">CREDITS</th>
+              <th style="min-width:260px;">FEATURE ACCESS</th>
+              <th style="min-width:220px;">ASSET CLASSES</th>
+              <th>CORP ADMIN</th>
+              <th>ACTIONS</th>
+            </tr>
+          </thead>
+          <tbody id="access-tbody">
+            <tr class="loading-row"><td colspan="7">LOADING USERS...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- CREDIT DISTRIBUTION PANEL -->
+      <div class="admin-box" style="margin-top:28px;">
+        <div class="admin-box-title">▸ DISTRIBUTE / RECALL CREDITS</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr auto auto;gap:12px;align-items:end;">
+          <div>
+            <div style="font-size:9px;letter-spacing:0.18em;color:var(--text-faint);margin-bottom:6px;">TARGET USER</div>
+            <select id="cd-user-select" class="form-input" style="font-size:11px;padding:8px 12px;">
+              <option value="">SELECT USER...</option>
+            </select>
+          </div>
+          <div>
+            <div style="font-size:9px;letter-spacing:0.18em;color:var(--text-faint);margin-bottom:6px;">AMOUNT (CREDITS)</div>
+            <input id="cd-amount" type="number" min="1" class="form-input" placeholder="e.g. 500" style="font-size:11px;padding:8px 12px;">
+          </div>
+          <div>
+            <div style="font-size:9px;letter-spacing:0.18em;color:var(--text-faint);margin-bottom:6px;">NOTE (OPTIONAL)</div>
+            <input id="cd-note" type="text" class="form-input" placeholder="e.g. monthly allocation" style="font-size:11px;padding:8px 12px;">
+          </div>
+          <button class="btn btn-solid" onclick="doAddCredits()" style="white-space:nowrap;font-size:9px;padding:8px 16px;">＋ ADD</button>
+          <button class="btn" onclick="doDeductCredits()" style="white-space:nowrap;font-size:9px;padding:8px 16px;color:#e04040;border-color:#e04040;">− DEDUCT</button>
+        </div>
+        <div id="cd-msg" style="margin-top:10px;font-size:10px;letter-spacing:0.12em;display:none;"></div>
       </div>
     </div>
 
@@ -994,6 +1051,7 @@
       document.getElementById('tab-' + tabName).classList.add('active');
       if (tabName === 'activity') { loadActivity(); startActivityRefresh(); }
       if (tabName === 'affiliates') loadAffiliates();
+      if (tabName === 'access') loadAccessTab();
       if (tabName === 'create-account') loadFirmDropdown();
       if (tabName === 'settings') loadVaultTabSettings();
     });
@@ -3167,6 +3225,282 @@
       btn.disabled = false;
     }
   }
+
+  /* ══ ACCESS & CREDITS TAB ════════════════════════════════════════════════ */
+
+  var _accessUsers = [];
+  var _accessUserMap = {};
+  const FEATURE_OPTIONS  = ['vault','terminal','news_feed','intel'];
+  const FEATURE_LABELS   = { vault: 'VAULT', terminal: 'TERMINAL', news_feed: 'NEWS FEED', intel: 'INTEL' };
+  const ASSET_OPTIONS    = ['whisky','gold','property','macro','equity','crypto','fx'];
+  const ASSET_LABELS     = { whisky:'WHISKY', gold:'GOLD', property:'PROPERTY', macro:'MACRO', equity:'EQUITY', crypto:'CRYPTO', fx:'FX' };
+
+  async function loadAccessTab() {
+    document.getElementById('ac-count').textContent = 'LOADING...';
+    try {
+      /* Use credits.js ?action=users which now returns allowed_features, allowed_asset_classes, is_corp_admin */
+      const sess = await supabaseAdmin.auth.getSession();
+      const token = sess.data && sess.data.session && sess.data.session.access_token;
+      const r = await fetch('/.netlify/functions/credits?action=users', {
+        headers: { Authorization: 'Bearer ' + token }
+      });
+      if (!r.ok) throw new Error('Failed to load users');
+      const data = await r.json();
+      _accessUsers = data.users || [];
+      _accessUserMap = {};
+      _accessUsers.forEach(function(u) { _accessUserMap[u.id] = u; });
+
+      /* Populate firm filter */
+      var firmFilter = document.getElementById('ac-filter-firm');
+      var firmNames = {};
+      _accessUsers.forEach(function(u) { if (u.firm_id) firmNames[u.firm_id] = u.firm_id; });
+      /* We need firm names — join from allFirms if loaded */
+      firmFilter.innerHTML = '<option value="all">ALL FIRMS</option>';
+      if (allFirms && allFirms.length) {
+        allFirms.forEach(function(f) {
+          var opt = document.createElement('option');
+          opt.value = f.id;
+          opt.textContent = f.company_name || f.id;
+          firmFilter.appendChild(opt);
+        });
+      }
+
+      /* Populate credit distribution dropdown */
+      var cdSelect = document.getElementById('cd-user-select');
+      cdSelect.innerHTML = '<option value="">SELECT USER...</option>' +
+        _accessUsers.filter(function(u) { return u.email !== 'admin@thebrokersterminal.com'; })
+          .map(function(u) {
+            var name = ((u.first_name || '') + ' ' + (u.last_name || '')).trim() || u.email;
+            return '<option value="' + u.id + '">' + name + ' &lt;' + u.email + '&gt; — ' + (u.balance||0) + ' credits</option>';
+          }).join('');
+
+      renderAccessTable(_accessUsers);
+    } catch(e) {
+      document.getElementById('ac-count').textContent = 'ERROR';
+      console.error('Access tab load error:', e);
+    }
+  }
+
+  function renderAccessTable(users) {
+    var tbody = document.getElementById('access-tbody');
+    document.getElementById('ac-count').textContent = users.length + ' USERS';
+
+    if (!users.length) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-faint);padding:24px;font-size:10px;letter-spacing:0.16em;">NO USERS FOUND</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = users.map(function(u) {
+      var name      = ((u.first_name||'') + ' ' + (u.last_name||'')).trim() || '—';
+      var firm      = (allFirms || []).find(function(f) { return f.id === u.firm_id; });
+      var firmName  = firm ? firm.company_name : (u.firm_id ? u.firm_id.slice(0,8)+'…' : '—');
+      var balance   = u.balance || 0;
+
+      /* Feature flags checkboxes */
+      var feats = u.allowed_features || [];
+      var featHtml = FEATURE_OPTIONS.map(function(f) {
+        var checked = feats.indexOf(f) !== -1;
+        return '<label style="display:inline-flex;align-items:center;gap:4px;font-size:9px;letter-spacing:0.12em;margin-right:6px;cursor:pointer;">' +
+          '<input type="checkbox" data-uid="' + u.id + '" data-type="feature" data-key="' + f + '"' + (checked ? ' checked' : '') + ' onchange="saveAccessFlag(this)">' +
+          FEATURE_LABELS[f] + '</label>';
+      }).join('');
+
+      /* Asset class checkboxes */
+      var assets = u.allowed_asset_classes; /* null = all */
+      var allAssets = !assets;
+      var assetHtml = '<label style="display:inline-flex;align-items:center;gap:4px;font-size:9px;letter-spacing:0.12em;margin-right:4px;cursor:pointer;">' +
+        '<input type="checkbox" data-uid="' + u.id + '" data-type="all_assets"' + (allAssets ? ' checked' : '') + ' onchange="toggleAllAssets(this)"> ALL</label>' +
+        ASSET_OPTIONS.map(function(a) {
+          var checked = allAssets || (assets && assets.indexOf(a) !== -1);
+          return '<label style="display:inline-flex;align-items:center;gap:4px;font-size:9px;letter-spacing:0.12em;margin-right:4px;cursor:pointer;">' +
+            '<input type="checkbox" data-uid="' + u.id + '" data-type="asset" data-key="' + a + '"' + (checked ? ' checked' : '') + (allAssets ? ' disabled' : '') + ' onchange="saveAssetFlag(this)">' +
+            ASSET_LABELS[a] + '</label>';
+        }).join('');
+
+      /* Corp admin toggle */
+      var isCorpAdmin = !!u.is_corp_admin;
+      var corpHtml = '<label style="display:inline-flex;align-items:center;gap:6px;font-size:9px;letter-spacing:0.12em;cursor:pointer;">' +
+        '<input type="checkbox" data-uid="' + u.id + '" data-type="corp_admin"' + (isCorpAdmin ? ' checked' : '') + ' onchange="saveCorpAdmin(this)">' +
+        'CORP ADMIN</label>';
+
+      return '<tr style="border-bottom:1px solid var(--border-dim);">' +
+        '<td style="padding:10px 14px;">' +
+          '<div style="font-weight:600;color:var(--text);font-size:12px;">' + name + '</div>' +
+          '<div style="color:var(--text-faint);font-size:10px;">' + u.email + '</div>' +
+        '</td>' +
+        '<td style="padding:10px 14px;color:var(--text-muted);font-size:11px;">' + firmName + '</td>' +
+        '<td style="padding:10px 14px;">' +
+          '<span id="balance-' + u.id + '" style="font-size:13px;font-weight:700;color:' + (balance > 0 ? 'var(--accent)' : 'var(--text-faint)') + ';">' + balance + '</span>' +
+          '<span style="color:var(--text-faint);font-size:9px;margin-left:3px;">TBT</span>' +
+        '</td>' +
+        '<td style="padding:10px 14px;">' + featHtml + '</td>' +
+        '<td style="padding:10px 14px;">' + assetHtml + '</td>' +
+        '<td style="padding:10px 14px;text-align:center;">' + corpHtml + '</td>' +
+        '<td style="padding:10px 14px;">' +
+          '<span id="ac-status-' + u.id + '" style="font-size:9px;letter-spacing:0.12em;color:var(--text-faint);"></span>' +
+        '</td>' +
+      '</tr>';
+    }).join('');
+  }
+
+  function filterAccessUsers() {
+    var search = document.getElementById('ac-search').value.toLowerCase();
+    var firmF  = document.getElementById('ac-filter-firm').value;
+    var filtered = _accessUsers.filter(function(u) {
+      var name  = ((u.first_name||'') + ' ' + (u.last_name||'')).toLowerCase();
+      var email = (u.email||'').toLowerCase();
+      var matchSearch = !search || name.includes(search) || email.includes(search);
+      var matchFirm   = firmF === 'all' || u.firm_id === firmF;
+      return matchSearch && matchFirm;
+    });
+    renderAccessTable(filtered);
+  }
+
+  async function _patchUserAccess(userId, updates) {
+    var statusEl = document.getElementById('ac-status-' + userId);
+    if (statusEl) { statusEl.textContent = 'SAVING…'; statusEl.style.color = 'var(--text-faint)'; }
+    try {
+      const sess = await supabaseAdmin.auth.getSession();
+      const token = sess.data && sess.data.session && sess.data.session.access_token;
+      const r = await fetch('/.netlify/functions/credits', {
+        method: 'POST',
+        headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'set_access', target_user_id: userId, ...updates })
+      });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      if (statusEl) { statusEl.textContent = '✓ SAVED'; statusEl.style.color = '#4CAF50'; setTimeout(function(){ if(statusEl) statusEl.textContent=''; }, 2500); }
+    } catch(e) {
+      if (statusEl) { statusEl.textContent = '✗ ERROR'; statusEl.style.color = '#e04040'; }
+    }
+  }
+
+  function saveAccessFlag(cb) {
+    var uid  = cb.dataset.uid;
+    var key  = cb.dataset.key;
+    var user = _accessUserMap[uid];
+    if (!user) return;
+    var feats = (user.allowed_features || []).slice();
+    if (cb.checked) { if (feats.indexOf(key) === -1) feats.push(key); }
+    else            { feats = feats.filter(function(f) { return f !== key; }); }
+    user.allowed_features = feats.length ? feats : null;
+    _patchUserAccess(uid, { allowed_features: user.allowed_features });
+  }
+
+  function saveAssetFlag(cb) {
+    var uid   = cb.dataset.uid;
+    var key   = cb.dataset.key;
+    var user  = _accessUserMap[uid];
+    if (!user) return;
+    var assets = (user.allowed_asset_classes || ASSET_OPTIONS.slice()).slice();
+    if (cb.checked) { if (assets.indexOf(key) === -1) assets.push(key); }
+    else            { assets = assets.filter(function(a) { return a !== key; }); }
+    user.allowed_asset_classes = assets.length === ASSET_OPTIONS.length ? null : (assets.length ? assets : null);
+    _patchUserAccess(uid, { allowed_asset_classes: user.allowed_asset_classes });
+  }
+
+  function toggleAllAssets(cb) {
+    var uid  = cb.dataset.uid;
+    var user = _accessUserMap[uid];
+    if (!user) return;
+    /* Find the row and toggle individual asset checkboxes */
+    var row = cb.closest('tr');
+    if (row) {
+      row.querySelectorAll('input[data-type="asset"]').forEach(function(ac) {
+        ac.checked  = cb.checked;
+        ac.disabled = cb.checked;
+      });
+    }
+    user.allowed_asset_classes = cb.checked ? null : ASSET_OPTIONS.slice();
+    _patchUserAccess(uid, { allowed_asset_classes: user.allowed_asset_classes });
+  }
+
+  function saveCorpAdmin(cb) {
+    var uid  = cb.dataset.uid;
+    var user = _accessUserMap[uid];
+    if (!user) return;
+    user.is_corp_admin = cb.checked;
+    _patchUserAccess(uid, { is_corp_admin: cb.checked });
+  }
+
+  async function doAddCredits() {
+    var userId = document.getElementById('cd-user-select').value;
+    var amount = parseInt(document.getElementById('cd-amount').value, 10);
+    var note   = document.getElementById('cd-note').value.trim() || 'owner allocation';
+    var msg    = document.getElementById('cd-msg');
+    if (!userId || !amount || amount <= 0) { showCdMsg('Select a user and enter a valid amount.', '#e04040'); return; }
+
+    try {
+      showCdMsg('Processing…', 'var(--text-faint)');
+      const sess = await supabaseAdmin.auth.getSession();
+      const token = sess.data && sess.data.session && sess.data.session.access_token;
+      const r = await fetch('/.netlify/functions/credits', {
+        method: 'POST',
+        headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'add', target_user_id: userId, amount: amount, description: note })
+      });
+      const res = await r.json();
+      if (!r.ok) throw new Error(res.error || 'Failed');
+      /* Update display */
+      var user = _accessUserMap[userId];
+      if (user) {
+        user.balance = res.balance;
+        var balEl = document.getElementById('balance-' + userId);
+        if (balEl) { balEl.textContent = res.balance; balEl.style.color = 'var(--accent)'; }
+      }
+      /* Update dropdown */
+      Array.from(document.querySelectorAll('#cd-user-select option')).forEach(function(opt) {
+        if (opt.value === userId) {
+          var u = _accessUserMap[userId];
+          if (u) opt.textContent = ((u.first_name||'') + ' ' + (u.last_name||'')).trim() + ' <' + u.email + '> — ' + (res.balance) + ' credits';
+        }
+      });
+      showCdMsg('✓ Added ' + amount + ' credits. New balance: ' + res.balance, '#4CAF50');
+    } catch(e) { showCdMsg('✗ ' + e.message, '#e04040'); }
+  }
+
+  async function doDeductCredits() {
+    var userId = document.getElementById('cd-user-select').value;
+    var amount = parseInt(document.getElementById('cd-amount').value, 10);
+    var note   = document.getElementById('cd-note').value.trim() || 'admin deduction';
+    if (!userId || !amount || amount <= 0) { showCdMsg('Select a user and enter a valid amount.', '#e04040'); return; }
+
+    var user = _accessUserMap[userId];
+    var name = user ? ((user.first_name||'') + ' ' + (user.last_name||'')).trim() || user.email : userId;
+    if (!confirm('Deduct ' + amount + ' credits from ' + name + '?')) return;
+
+    try {
+      showCdMsg('Processing…', 'var(--text-faint)');
+      const sess = await supabaseAdmin.auth.getSession();
+      const token = sess.data && sess.data.session && sess.data.session.access_token;
+      const r = await fetch('/.netlify/functions/credits', {
+        method: 'POST',
+        headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'deduct_from', target_user_id: userId, amount: amount, description: note })
+      });
+      const res = await r.json();
+      if (!r.ok) throw new Error(res.error || 'Failed');
+      if (user) {
+        user.balance = res.balance;
+        var balEl2 = document.getElementById('balance-' + userId);
+        if (balEl2) { balEl2.textContent = res.balance; balEl2.style.color = res.balance > 0 ? 'var(--accent)' : 'var(--text-faint)'; }
+      }
+      Array.from(document.querySelectorAll('#cd-user-select option')).forEach(function(opt) {
+        if (opt.value === userId) {
+          var uu = _accessUserMap[userId];
+          if (uu) opt.textContent = ((uu.first_name||'') + ' ' + (uu.last_name||'')).trim() + ' <' + uu.email + '> — ' + res.balance + ' credits';
+        }
+      });
+      showCdMsg('✓ Deducted ' + amount + ' credits. New balance: ' + res.balance, '#4CAF50');
+    } catch(e) { showCdMsg('✗ ' + e.message, '#e04040'); }
+  }
+
+  function showCdMsg(text, color) {
+    var msg = document.getElementById('cd-msg');
+    msg.textContent = text;
+    msg.style.color = color || 'var(--text)';
+    msg.style.display = 'block';
+  }
+
 </script>
 
 </body>

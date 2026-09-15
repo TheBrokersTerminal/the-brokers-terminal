@@ -32,16 +32,43 @@
   var _firmId   = null;
   var _userName = null;
 
+  /* Access flags loaded from server — set synchronously once received */
+  window._accessFlags = null; /* {allowed_features:[], allowed_asset_classes:[], is_corp_admin:bool} */
+  function hasFeature(f) {
+    if (!window._accessFlags) return false;
+    var feats = window._accessFlags.allowed_features;
+    if (!feats) return false;
+    return feats.indexOf(f) !== -1;
+  }
+  function getAllowedAssetClasses() {
+    return window._accessFlags && window._accessFlags.allowed_asset_classes || null;
+  }
+  window._getAllowedAssetClasses = getAllowedAssetClasses;
+
   window.terminalCanvasInit = function (supabaseClient, userId, firmId, userName, userEmail) {
     _sb       = supabaseClient;
     _uid      = userId;
     _firmId   = firmId   || null;
     _userName = userName || 'BROKER';
+    /* Temporary: owner flag from email while access flags load */
     window._isOwner = (userEmail === 'admin@thebrokersterminal.com' || userEmail === 'desk@thebrokersterminal.com');
     _canvas = document.getElementById('tbc-canvas');
     if (!_canvas) return;
 
+    /* _accessFlags is pre-populated by dashboard.html before this call.
+       If not set (e.g. standalone load), derive from owner email. */
+    if (!window._accessFlags) {
+      if (window._isOwner) {
+        window._accessFlags = { allowed_features: ['vault','terminal','news_feed','intel'], allowed_asset_classes: null, is_corp_admin: true };
+      }
+    }
+    /* Keep _isOwner consistent with terminal feature flag */
+    if (window._accessFlags && window._accessFlags.allowed_features &&
+        window._accessFlags.allowed_features.indexOf('terminal') !== -1) {
+      window._isOwner = true;
+    }
     buildTabBar();
+
     loadPreferences().then(function (prefs) {
       var layout = (prefs && prefs.dashboard_layout) ? prefs.dashboard_layout : DEFAULT_LAYOUT;
       var notes  = (prefs && prefs.notes_content)    ? prefs.notes_content    : '';
@@ -74,15 +101,24 @@
     var bar = document.getElementById('tbc-tab-bar');
     if (!bar) return;
 
-    if (window._isOwner) {
-      /* Owner: full terminal access — on mobile default to VAULT (TERMINAL too complex) */
+    var canTerminal = hasFeature('terminal');
+    var canVault    = !window._accessFlags || hasFeature('vault');
+    var canNews     = hasFeature('news_feed');
+    var canIntel    = hasFeature('intel');
+    /* If no flags set at all (null), default to vault only */
+    if (!window._accessFlags || !window._accessFlags.allowed_features) {
+      canTerminal = false; canVault = true; canNews = false; canIntel = false;
+    }
+
+    if (canTerminal) {
+      /* Terminal-enabled: build tabs for everything the user has access to */
       var isMobile = window.innerWidth <= 768;
-      bar.innerHTML =
-        '<button class="tbc-tab' + (isMobile ? '' : ' active') + '" data-tab="terminal">▌ TERMINAL</button>' +
-        '<div class="tbc-tab-sep"></div>' +
-        '<button class="tbc-tab' + (isMobile ? ' active' : '') + '" data-tab="vault">VAULT</button>' +
-        '<button class="tbc-tab" data-tab="news">NEWS FEED</button>' +
-        '<button class="tbc-tab-add" id="tbc-add-btn">＋ ADD WIDGET</button>';
+      var tabs = '<button class="tbc-tab' + (isMobile ? '' : ' active') + '" data-tab="terminal">▌ TERMINAL</button>' +
+                 '<div class="tbc-tab-sep"></div>';
+      if (canVault)    tabs += '<button class="tbc-tab' + (isMobile ? ' active' : '') + '" data-tab="vault">VAULT</button>';
+      if (canNews)     tabs += '<button class="tbc-tab" data-tab="news">NEWS FEED</button>';
+      tabs += '<button class="tbc-tab-add" id="tbc-add-btn">＋ ADD WIDGET</button>';
+      bar.innerHTML = tabs;
       if (isMobile) {
         _currentTab = 'vault';
         var vaultMob = document.getElementById('vault-section');
@@ -96,25 +132,39 @@
         var tickerMob = document.getElementById('content-ticker');
         if (tickerMob) { tickerMob.style.display = 'none'; document.body.classList.remove('ticker-on'); }
       }
+      if (!canIntel) {
+        var intelCtrT = document.getElementById('intel-search-container');
+        if (intelCtrT) intelCtrT.style.display = 'none';
+      }
     } else {
-      /* SANDBOX MODE — Vault only for all other users */
-      bar.innerHTML =
-        '<button class="tbc-tab active" data-tab="vault">VAULT</button>';
+      /* Vault-only (or restricted) mode */
+      var vaultTabs = '';
+      if (canVault) {
+        vaultTabs += '<button class="tbc-tab active" data-tab="vault">VAULT</button>';
+      }
+      if (canNews) {
+        vaultTabs += '<button class="tbc-tab" data-tab="news">NEWS FEED</button>';
+      }
+      if (!vaultTabs) {
+        /* No features at all — show locked message */
+        vaultTabs = '<span style="font-size:10px;letter-spacing:0.14em;color:var(--text-faint);padding:0 16px;">NO ACCESS — CONTACT SUPPORT</span>';
+      }
+      bar.innerHTML = vaultTabs;
 
-      /* Force vault visible, hide everything else immediately */
+      /* Hide terminal-only elements */
       var vaultEl = document.getElementById('vault-section');
-      if (vaultEl) vaultEl.style.display = 'block';
+      if (vaultEl) vaultEl.style.display = canVault ? 'block' : 'none';
       var canvasWrap = document.getElementById('tbc-canvas-wrap');
       if (canvasWrap) canvasWrap.style.display = 'none';
       var newsPanel = document.getElementById('tbc-news-panel');
-      if (newsPanel) newsPanel.style.display = 'none';
-      /* Hide terminal-only features */
+      if (newsPanel) newsPanel.style.display = canNews && _currentTab === 'news' ? 'block' : 'none';
       var intelCtr = document.getElementById('intel-search-container');
       if (intelCtr) intelCtr.style.display = 'none';
       var ticker = document.getElementById('content-ticker');
       if (ticker) { ticker.style.display = 'none'; document.body.classList.remove('ticker-on'); }
       var tickerRestore = document.getElementById('ttb-ticker-restore');
       if (tickerRestore) tickerRestore.style.display = 'none';
+      _currentTab = canVault ? 'vault' : (canNews ? 'news' : '');
     }
 
     bar.querySelectorAll('.tbc-tab[data-tab]').forEach(function (btn) {
@@ -861,6 +911,14 @@
       if (!reports.length) {
         body.innerHTML = '<div class="tbw-rep-empty">NO REPORTS AVAILABLE</div>';
         return;
+      }
+
+      /* Filter by allowed asset classes if restricted */
+      var allowedAssets = getAllowedAssetClasses();
+      if (allowedAssets && allowedAssets.length) {
+        reports = reports.filter(function(r) {
+          return allowedAssets.indexOf((r.asset_class || '').toLowerCase()) !== -1;
+        });
       }
 
       /* Build type filter tabs */
