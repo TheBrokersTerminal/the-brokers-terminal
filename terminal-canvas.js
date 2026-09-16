@@ -368,6 +368,11 @@
     _canvas.appendChild(el);
     _widgets[cfg.id] = {el: el, cfg: cfg};
 
+    /* Always bring the freshly-spawned widget to the very front, even if the
+       click that opened it also triggered mousedown on another widget in the
+       same tick (which would otherwise push that widget's z-index above ours). */
+    setTimeout(function () { el.style.zIndex = _nextZ(); }, 0);
+
     el.addEventListener('mousedown', function () {
       el.style.zIndex = _nextZ();
     });
@@ -1195,6 +1200,7 @@
 
     handle.addEventListener('mousedown', function (e) {
       if (e.target.classList.contains('tbc-widget-btn')) return;
+      el.style.zIndex = _nextZ();
       ox = el.offsetLeft; oy = el.offsetTop;
       startX = e.clientX; startY = e.clientY;
       var _hasMoved = false;
