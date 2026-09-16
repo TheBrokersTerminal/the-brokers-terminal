@@ -21,3 +21,15 @@
 
 [functions."fetch-cftc-data"]
   schedule = "0 21 * * 5"
+
+[functions."monitor-health"]
+  schedule = "*/30 * * * *"
+
+[functions."monitor-whiskystats"]
+  schedule = "0 9 * * *"
+
+[functions."monitor-stripe"]
+  schedule = "0 8 * * *"
+
+[functions."monitor-users"]
+  schedule = "0 7 * * *"
