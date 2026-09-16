@@ -1757,8 +1757,8 @@
       });
     });
 
-    /* Pre-fetch all 5 sections silently in background — they'll be cached by the time user clicks */
-    var SECTIONS = ['the-history','the-outcome','economic-impact','hardship-loss','pitch-playbook'];
+    /* Pre-fetch remaining 4 sections silently — the-history is loaded immediately by auto-click below */
+    var SECTIONS = ['the-outcome','economic-impact','hardship-loss','pitch-playbook'];
     SECTIONS.forEach(function(sec) { _prefetchConceptSection(conceptQuery, sec); });
 
     /* Auto-load THE HISTORY — will serve from cache if pre-fetch already completed, else shows loading */

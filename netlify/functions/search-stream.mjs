@@ -585,8 +585,8 @@ export default async (req) => {
       ? 'search9:concept-slim:' + query.trim().toLowerCase().slice(0, 80) + lensTag
       : 'search9:' + type + ':' + (ticker || query.trim().toLowerCase().slice(0, 80)) + lensTag + sectionTag;
 
-  /* Credit cost */
-  const creditCost = type === 'company' ? 25 : 10;
+  /* Credit cost — concept sections cost 5 (focused); concept overview/scenario cost 10; company costs 25 */
+  const creditCost = (type === 'company') ? 25 : (type === 'concept' && section) ? 5 : 10;
 
   const authHeader = req.headers.get('Authorization') || '';
 
