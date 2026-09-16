@@ -649,11 +649,12 @@ exports.handler = async (event) => {
             const rawDr = await deductResp.json();
             const dr = Array.isArray(rawDr) ? rawDr[0] : rawDr;
             console.log('[explain-credits] deduct result:', JSON.stringify(dr));
-            if (!dr || (!dr.ok && (dr.error === 'insufficient' || dr.error === 'no_account'))) {
+            if (!dr || !dr.ok) {
               return { statusCode: 402, headers: corsHeaders, body: JSON.stringify({ error: (dr && dr.error) || 'insufficient_credits', balance: (dr && dr.balance) || 0 }) };
             }
           } else {
             console.error('[explain-credits] deduct_credits HTTP error', deductResp.status);
+            return { statusCode: 503, headers: corsHeaders, body: JSON.stringify({ error: 'credit_service_error' }) };
           }
         } else if (user && user.email === ADMIN_EMAIL) {
           console.log('[explain-credits] admin bypass for', user.email);

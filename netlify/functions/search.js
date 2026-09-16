@@ -94,7 +94,7 @@ async function serverDeductCredits(authHeader, creditCost, description) {
   if (!deductResp.ok) {
     const errText = await deductResp.text().catch(() => '');
     console.error('[credits] deduct_credits RPC HTTP error', deductResp.status, errText);
-    return { ok: true }; /* Allow through on RPC error to avoid blocking users */
+    return { ok: false, status: 503, error: 'credit_service_error' };
   }
 
   const rawResult = await deductResp.json();
@@ -102,7 +102,7 @@ async function serverDeductCredits(authHeader, creditCost, description) {
   const result = Array.isArray(rawResult) ? rawResult[0] : rawResult;
   console.log('[credits] deduct result:', JSON.stringify(result));
 
-  if (!result || (!result.ok && (result.error === 'insufficient' || result.error === 'no_account'))) {
+  if (!result || !result.ok) {
     return { ok: false, status: 402, error: (result && result.error) || 'insufficient_credits', balance: (result && result.balance) || 0 };
   }
   return { ok: true, balance: result.balance };
