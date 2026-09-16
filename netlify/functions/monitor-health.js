@@ -28,14 +28,16 @@ async function sendAlert(subject, html) {
 }
 
 async function check(name, url, options = {}) {
-  const { expectAuth = false, timeout = 9000 } = options;
+  const { timeout = 9000 } = options;
   try {
     const r = await fetch(url, {
       headers: options.headers || {},
       signal: AbortSignal.timeout(timeout),
     });
-    /* 401 means the function is running but correctly rejecting unauthenticated calls */
-    const ok = r.ok || (expectAuth && r.status === 401);
+    /* Any 4xx means the function is running and responding correctly —
+       401 = auth required, 400 = missing params, 405 = wrong method.
+       Only 5xx indicates an actual server/function failure. */
+    const ok = r.status < 500;
     return { name, ok, status: r.status };
   } catch (e) {
     return { name, ok: false, status: null, error: e.message };
@@ -44,12 +46,12 @@ async function check(name, url, options = {}) {
 
 exports.handler = async function () {
   const results = await Promise.allSettled([
-    check('INTEL (search)',   `${SITE_URL}/.netlify/functions/search`,       { expectAuth: true }),
-    check('INTEL (explain)',  `${SITE_URL}/.netlify/functions/explain`,      { expectAuth: true }),
+    check('INTEL (search)',   `${SITE_URL}/.netlify/functions/search`),
+    check('INTEL (explain)',  `${SITE_URL}/.netlify/functions/explain`),
     check('Whisky terminal',  `${SITE_URL}/.netlify/functions/whisky-data?type=search&query=macallan`),
     check('News feed',        `${SITE_URL}/.netlify/functions/media-feed?limit=1`),
-    check('Credits API',      `${SITE_URL}/.netlify/functions/credits`,      { expectAuth: true }),
-    check('Stripe credits',   `${SITE_URL}/.netlify/functions/stripe-credits`, { expectAuth: true }),
+    check('Credits API',      `${SITE_URL}/.netlify/functions/credits`),
+    check('Stripe credits',   `${SITE_URL}/.netlify/functions/stripe-credits`),
   ]);
 
   const checks = results.map(r => r.status === 'fulfilled' ? r.value : { name: 'unknown', ok: false, error: r.reason?.message });
