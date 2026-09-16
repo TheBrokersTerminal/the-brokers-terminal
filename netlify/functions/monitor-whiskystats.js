@@ -54,9 +54,12 @@ exports.handler = async function () {
     }
 
     const data = await r.json();
-    /* WhiskyStats returns credits_remaining or similar — handle both shapes */
-    balance = data.credits_remaining ?? data.credits ?? data.balance ?? null;
-    used    = data.credits_used ?? (balance !== null ? MONTHLY_ALLOWANCE - balance : null);
+    /* API returns {credit_usage, credit_limit, credit_cycle}
+       credit_limit 0 = unlimited/pre-paid plan */
+    used    = data.credit_usage ?? null;
+    const limit = data.credit_limit || 0;
+    balance = limit > 0 ? limit - (used || 0) : null; /* null = unlimited */
+    console.log('[ws-monitor] usage:', used, '| limit:', limit || 'unlimited', '| resets:', data.credit_cycle);
   } catch (e) {
     console.error('[ws-monitor] fetch failed:', e.message);
     await sendAlert(
@@ -66,8 +69,9 @@ exports.handler = async function () {
     return { statusCode: 200 };
   }
 
+  /* Unlimited plan (credit_limit = 0) — just log usage, no threshold alerts */
   if (balance === null) {
-    console.warn('[ws-monitor] Could not parse balance from response');
+    console.log(`[ws-monitor] Unlimited plan — ${used ?? '?'} credits used this cycle`);
     return { statusCode: 200 };
   }
 
