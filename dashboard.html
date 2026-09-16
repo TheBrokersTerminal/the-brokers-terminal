@@ -1796,13 +1796,19 @@
       try {
         const { data: { session: s } } = await supabase.auth.getSession();
         if (!s) return;
+        var balEl = document.getElementById('tbt-credit-balance');
+        var wrap  = document.getElementById('tbt-credit-wrap');
+        /* Admin account bypasses credits entirely — show ADMIN instead of a number */
+        if (s.user && s.user.email === 'admin@thebrokersterminal.com') {
+          if (balEl) { balEl.textContent = 'ADMIN'; balEl.style.fontSize = '8px'; balEl.style.letterSpacing = '.14em'; }
+          if (wrap)  { wrap.style.display = 'flex'; wrap.style.cursor = 'default'; wrap.onclick = null; wrap.title = ''; }
+          return;
+        }
         const r = await fetch('/.netlify/functions/credits?action=balance&_=' + Date.now(), {
           headers: { 'Authorization': 'Bearer ' + s.access_token, 'Cache-Control': 'no-cache' },
         });
         if (r.ok) {
           const data = await r.json();
-          var balEl = document.getElementById('tbt-credit-balance');
-          var wrap  = document.getElementById('tbt-credit-wrap');
           if (balEl) balEl.textContent = data.balance;
           if (wrap)  wrap.style.display = 'flex';
         }
