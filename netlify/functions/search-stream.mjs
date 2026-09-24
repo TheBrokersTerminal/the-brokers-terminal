@@ -994,19 +994,18 @@ export default async (req) => {
         else if (type === 'concept') userMsg = CONCEPT_SLIM_PROMPT(query);
         else                         userMsg = COMPANY_PROMPT(query) + lensAppend;
 
-        /* ── Hard 20s kill for the ENTIRE streaming operation (headers + body).
-           The previous pattern cleared the timer after the initial fetch() resolved
-           (i.e. when HTTP headers arrived), leaving the body-reading loop unguarded.
-           This timer wraps everything — if Anthropic hasn't finished in 20s the
-           client gets an SSE error event and can fall back to the buffered endpoint. ── */
+        /* ── Kill timer for the ENTIRE streaming operation.
+           CFA analysis can produce ~3000 tokens — allow 50s before giving up.
+           Other calls are faster but we keep a generous ceiling. ── */
         let streamTimedOut = false;
+        const killMs = isCfaAnalysis ? 50000 : 30000;
         const streamKill = setTimeout(() => {
           streamTimedOut = true;
           try {
             ctrl.enqueue(sseChunk({ type: 'error', message: 'timeout' }));
             ctrl.close();
           } catch {}
-        }, 30000);
+        }, killMs);
 
         let anthropicResp;
         try {

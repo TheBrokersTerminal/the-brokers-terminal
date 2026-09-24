@@ -1764,12 +1764,19 @@
                   if (cfaPanel && !cfaPanel.hidden) _renderScenCfa(raw.data);
                   return;
                 }
-                if (raw.type === 'error' && raw.code === 402) {
-                  window._showNoCredits && window._showNoCredits(raw.balance || 0);
+                if (raw.type === 'error') {
+                  if (raw.code === 402) { window._showNoCredits && window._showNoCredits(raw.balance || 0); }
+                  else {
+                    var cfaPanelErr = body.querySelector('.scen-cfa-panel');
+                    if (cfaPanelErr) cfaPanelErr.innerHTML = '<div style="padding:12px;font-size:10px;color:#D14040;line-height:1.7;">Analysis timed out — please try again.<br><span style="color:#555;font-size:9px;">Large analyses occasionally take longer. Click Institutional Analysis again to retry.</span></div>';
+                  }
                   return;
                 }
               }
               return readChunk();
+            }).catch(function() {
+              var cfaPanelErr = body.querySelector('.scen-cfa-panel');
+              if (cfaPanelErr && cfaPanelErr.querySelector('.sp-intel-load')) cfaPanelErr.innerHTML = '<div style="padding:12px;font-size:10px;color:#D14040;">Connection lost — please try again.</div>';
             });
           }
           readChunk().catch(function(){});
