@@ -2865,12 +2865,14 @@
       var assetFolder = assetClass.charAt(0).toUpperCase() + assetClass.substring(1);
       var folderPath = assetFolder + '/' + typeFolder + '/';
 
-      // Get a signed upload URL from admin-proxy, then upload directly to Supabase storage
-      var signRes = await adminProxy({ action: 'storage_upload_url', bucket: 'Reports', path: folderPath + filename });
-      var uploadResp = await fetch(signRes.signed_url, {
-        method: 'PUT', headers: { 'Content-Type': 'text/html' }, body: file
+      // Read file as base64 and upload via admin-proxy (service key, no signed URL needed)
+      var fileBase64 = await new Promise(function(resolve, reject) {
+        var reader = new FileReader();
+        reader.onload = function(e) { resolve(e.target.result.split(',')[1]); };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
       });
-      if (!uploadResp.ok) throw new Error('Upload failed: ' + uploadResp.status);
+      await adminProxy({ action: 'storage_upload', bucket: 'Reports', path: folderPath + filename, content: fileBase64, contentType: 'text/html' });
       var uploadError = null;
 
       // Extract plain text from HTML for full-text search
@@ -3074,15 +3076,10 @@
     saved.style.color = 'var(--text-faint)';
     saved.style.display = 'block';
 
-    var blob = new Blob([JSON.stringify(_vtCfg)], { type: 'application/json' });
-    adminProxy({ action: 'storage_upload_url', bucket: 'Reports', path: VT_CONFIG_PATH })
-      .then(function(signRes) {
-        return fetch(signRes.signed_url, {
-          method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: blob
-        });
-      })
-      .then(function(r) {
-        if (!r.ok) throw new Error('HTTP ' + r.status);
+    var vtJson = JSON.stringify(_vtCfg);
+    var vtBase64 = btoa(unescape(encodeURIComponent(vtJson)));
+    adminProxy({ action: 'storage_upload', bucket: 'Reports', path: VT_CONFIG_PATH, content: vtBase64, contentType: 'application/json' })
+      .then(function() {
         saved.textContent = '✓ SAVED — ALL SUBSCRIBERS UPDATED';
         saved.style.color = '#6BCB77';
         clearTimeout(saved._t);

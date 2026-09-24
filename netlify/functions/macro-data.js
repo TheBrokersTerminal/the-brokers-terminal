@@ -6,6 +6,29 @@
 const https = require('https');
 const url_module = require('url');
 
+/* ── Module-level response cache (shared across warm Lambda invocations) ── */
+var _responseCache = {};
+function _cacheGet(key) {
+  var e = _responseCache[key];
+  return (e && Date.now() < e.exp) ? e.body : null;
+}
+function _cacheSet(key, body, ttlMs) {
+  _responseCache[key] = { body: body, exp: Date.now() + ttlMs };
+}
+var TTL = {
+  prices:           3 * 60 * 1000,   /* 3 min  — live prices       */
+  intel:           10 * 60 * 1000,   /* 10 min — FRED daily data    */
+  catalogue:    6 * 3600 * 1000,     /* 6 hr   — static metadata    */
+  monitor_live: 10 * 60 * 1000,      /* 10 min — FRED + Yahoo       */
+  sectors:          3 * 60 * 1000,   /* 3 min  — Yahoo sector ETFs  */
+  market_sectors_1d: 3 * 60 * 1000,  /* 3 min  — daily heatmap      */
+  market_sectors:   15 * 60 * 1000,  /* 15 min — weekly/monthly     */
+  yh_quote:         3 * 60 * 1000,   /* 3 min  — watchlist YTD      */
+  quote:            2 * 60 * 1000,   /* 2 min  — Finnhub live       */
+  global_macro:    10 * 60 * 1000,   /* 10 min — world map FRED     */
+  history:         30 * 60 * 1000,   /* 30 min — 10Y chart data     */
+};
+
 function fetchJson(url) {
   return new Promise(function (resolve, reject) {
     https.get(url, function (res) {
@@ -95,6 +118,10 @@ exports.handler = async function (event) {
   try {
     /* ── LIVE PRICES ── */
     if (type === 'prices') {
+      var _ck = 'prices';
+      var _ch = _cacheGet(_ck);
+      if (_ch) return { statusCode: 200, headers: hdrs, body: _ch };
+
       /* FRED base URL helper */
       var F = 'https://api.stlouisfed.org/fred/series/observations?file_type=json&sort_order=desc&api_key=' + FRED + '&series_id=';
 
@@ -140,22 +167,25 @@ exports.handler = async function (event) {
       var fedObs  = clean((fedRaw  || {}).observations);
       var giltObs = clean((giltRaw || {}).observations);
 
-      return {
-        statusCode: 200, headers: hdrs,
-        body: JSON.stringify({
-          gold:   { usd: goldUSD, gbp: goldGBP, pct: goldPct },
-          gbpusd: gbpusd ? { price: gbpusd } : null,
-          eurgbp: eurgbp ? { price: eurgbp } : null,
-          boe:    { rate: boeObs[0] ? boeObs[0].v : null, prev: boeObs[1] ? boeObs[1].v : null, date: boeObs[0] ? boeObs[0].d : null },
-          fed:    { rate: fedObs[0] ? fedObs[0].v : null, date: fedObs[0] ? fedObs[0].d : null },
-          ukcpi:  { yoy: cpiYoy, date: cpiObs[0] ? cpiObs[0].d : null },
-          ukgilt: { rate: giltObs[0] ? giltObs[0].v.toFixed(2) : null, date: giltObs[0] ? giltObs[0].d : null },
-        }),
-      };
+      var _pb = JSON.stringify({
+        gold:   { usd: goldUSD, gbp: goldGBP, pct: goldPct },
+        gbpusd: gbpusd ? { price: gbpusd } : null,
+        eurgbp: eurgbp ? { price: eurgbp } : null,
+        boe:    { rate: boeObs[0] ? boeObs[0].v : null, prev: boeObs[1] ? boeObs[1].v : null, date: boeObs[0] ? boeObs[0].d : null },
+        fed:    { rate: fedObs[0] ? fedObs[0].v : null, date: fedObs[0] ? fedObs[0].d : null },
+        ukcpi:  { yoy: cpiYoy, date: cpiObs[0] ? cpiObs[0].d : null },
+        ukgilt: { rate: giltObs[0] ? giltObs[0].v.toFixed(2) : null, date: giltObs[0] ? giltObs[0].d : null },
+      });
+      _cacheSet(_ck, _pb, TTL.prices);
+      return { statusCode: 200, headers: hdrs, body: _pb };
     }
 
     /* ── MACRO INTELLIGENCE (five professor/sales themes) ── */
     if (type === 'intel') {
+      var _ick = 'intel';
+      var _ich = _cacheGet(_ick);
+      if (_ich) return { statusCode: 200, headers: hdrs, body: _ich };
+
       var FI = 'https://api.stlouisfed.org/fred/series/observations?file_type=json&sort_order=desc&limit=3&api_key=' + FRED + '&series_id=';
 
       var iRes = await Promise.allSettled([
@@ -196,28 +226,35 @@ exports.handler = async function (event) {
         ? { cur: parseFloat((ukGilt.cur - usTsy.cur).toFixed(2)) }
         : { cur: null };
 
-      return {
-        statusCode: 200, headers: hdrs,
-        body: JSON.stringify({
-          repression: { ukReal: ukReal, ukGilt: ukGilt, ukCpi: ukCpi, tips: tips },
-          debasement: { m2: m2, usFed: usFed },
-          cycle:      { curve: curve, claims: claims },
-          ukdebt:     { ukGilt: ukGilt, ukCpi: ukCpi, ukRate: ukRate },
-          gilts:      { ukGilt: ukGilt, usTsy: usTsy, giltSpread: giltSpread },
-        }),
-      };
+      var _ib = JSON.stringify({
+        repression: { ukReal: ukReal, ukGilt: ukGilt, ukCpi: ukCpi, tips: tips },
+        debasement: { m2: m2, usFed: usFed },
+        cycle:      { curve: curve, claims: claims },
+        ukdebt:     { ukGilt: ukGilt, ukCpi: ukCpi, ukRate: ukRate },
+        gilts:      { ukGilt: ukGilt, usTsy: usTsy, giltSpread: giltSpread },
+      });
+      _cacheSet(_ick, _ib, TTL.intel);
+      return { statusCode: 200, headers: hdrs, body: _ib };
     }
 
     /* ── CATALOGUE — return all available series metadata ── */
     if (type === 'catalogue') {
+      var _catck = 'catalogue';
+      var _catch = _cacheGet(_catck);
+      if (_catch) return { statusCode: 200, headers: Object.assign({}, hdrs, { 'Cache-Control': 'public, max-age=86400' }), body: _catch };
       var catOut = MM_CATALOGUE.map(function(s) {
         return { s: s.s, n: s.n, u: s.u, cat: s.cat, def: s.def };
       });
-      return { statusCode: 200, headers: Object.assign({}, hdrs, { 'Cache-Control': 'public, max-age=86400' }), body: JSON.stringify(catOut) };
+      var _catb = JSON.stringify(catOut);
+      _cacheSet(_catck, _catb, TTL.catalogue);
+      return { statusCode: 200, headers: Object.assign({}, hdrs, { 'Cache-Control': 'public, max-age=86400' }), body: _catb };
     }
 
     /* ── MACRO MONITOR LIVE (FRED + open.er-api.com FX overlay) ── */
     if (type === 'monitor-live') {
+      var _mlck = 'monitor-live:' + (p.series || 'default');
+      var _mlch = _cacheGet(_mlck);
+      if (_mlch) return { statusCode: 200, headers: hdrs, body: _mlch };
       var mlNow = new Date();
       var mlYearStart = mlNow.getFullYear() + '-01-01';
       var mlQm = Math.floor(mlNow.getMonth() / 3) * 3;
@@ -387,7 +424,9 @@ exports.handler = async function (event) {
       });
 
       var liveHdrs = Object.assign({}, hdrs, { 'Cache-Control': 'public, max-age=60' });
-      return { statusCode: 200, headers: liveHdrs, body: JSON.stringify(mlRows) };
+      var _mlb = JSON.stringify(mlRows);
+      _cacheSet(_mlck, _mlb, TTL.monitor_live);
+      return { statusCode: 200, headers: liveHdrs, body: _mlb };
     }
 
     /* ── MACRO MONITOR (cross-asset heatmap table) ── */
@@ -596,6 +635,9 @@ exports.handler = async function (event) {
 
     /* ── SECTOR HEATMAP ── */
     if (type === 'sectors') {
+      var _sck = 'sectors';
+      var _sch = _cacheGet(_sck);
+      if (_sch) return { statusCode: 200, headers: Object.assign({},hdrs,{'Cache-Control':'public,max-age=60'}), body: _sch };
       var SECTORS = [
         {etf:'XLK',  name:'Technology',       span:4},
         {etf:'XLV',  name:'Healthcare',        span:2},
@@ -624,13 +666,18 @@ exports.handler = async function (event) {
         var dp = (c && pc) ? parseFloat(((c - pc) / pc * 100).toFixed(2)) : null;
         return { etf:s.etf, name:s.name, span:s.span, c:c, pc:pc, h:h, l:l, dp:dp };
       });
-      return { statusCode:200, headers:Object.assign({},hdrs,{'Cache-Control':'public,max-age=60'}), body:JSON.stringify(sRows) };
+      var _sb2 = JSON.stringify(sRows);
+      _cacheSet(_sck, _sb2, TTL.sectors);
+      return { statusCode:200, headers:Object.assign({},hdrs,{'Cache-Control':'public,max-age=60'}), body: _sb2 };
     }
 
     /* ── MULTI-MARKET SECTOR HEATMAP ── */
     if (type === 'market-sectors') {
       var mkt = (p.market || 'US').toUpperCase();
       var per = (p.period || '1D').toUpperCase();
+      var _msck = 'market-sectors:' + mkt + ':' + per;
+      var _msch = _cacheGet(_msck);
+      if (_msch) return { statusCode: 200, headers: Object.assign({},hdrs,{'Cache-Control':'public,max-age=60'}), body: _msch };
       var yhH2 = { 'User-Agent': 'Mozilla/5.0 (compatible)', 'Accept': 'application/json' };
 
       /* Proxy ticker per sector-key for each market */
@@ -654,7 +701,9 @@ exports.handler = async function (event) {
           var d = qMap[proxies[k]] || {};
           return { etf: k, c: d.c || null, dp: d.dp != null ? d.dp : null };
         });
-        return { statusCode:200, headers:Object.assign({},hdrs,{'Cache-Control':'public,max-age=60'}), body:JSON.stringify(msR1) };
+        var _ms1b = JSON.stringify(msR1);
+        _cacheSet(_msck, _ms1b, TTL.market_sectors_1d);
+        return { statusCode:200, headers:Object.assign({},hdrs,{'Cache-Control':'public,max-age=60'}), body: _ms1b };
       } else {
         var now3 = Date.now();
         var pStart;
@@ -678,47 +727,66 @@ exports.handler = async function (event) {
           var f = cls[0], l = cls[cls.length-1];
           return { etf:k, c:parseFloat(l.toFixed(2)), dp:parseFloat(((l-f)/f*100).toFixed(2)) };
         });
-        return { statusCode:200, headers:Object.assign({},hdrs,{'Cache-Control':'public,max-age=300'}), body:JSON.stringify(msR2) };
+        var _ms2b = JSON.stringify(msR2);
+        _cacheSet(_msck, _ms2b, TTL.market_sectors);
+        return { statusCode:200, headers:Object.assign({},hdrs,{'Cache-Control':'public,max-age=300'}), body: _ms2b };
       }
     }
 
     /* ── YAHOO FINANCE BATCH QUOTE (any exchange) ── */
     if (type === 'yh-quote') {
       var yhqSyms = (p.symbols||'').split(',').map(function(s){return s.trim();}).filter(Boolean).slice(0,30);
+      var _yhqck = 'yh-quote:' + yhqSyms.slice().sort().join(',');
+      var _yhqch = _cacheGet(_yhqck);
+      if (_yhqch) return { statusCode:200, headers:Object.assign({},hdrs,{'Cache-Control':'public,max-age=60'}), body: _yhqch };
       if (!yhqSyms.length) return { statusCode:400, headers:hdrs, body:JSON.stringify({error:'No symbols'}) };
       /* v7/quote blocked from Netlify — use v8/chart with same headers as working stock chart */
       var yhqH2 = { 'User-Agent': 'Mozilla/5.0 (compatible)', 'Accept': 'application/json' };
       var yhqResults = await Promise.allSettled(yhqSyms.map(function(sym) {
-        return fetchJsonWith('https://query1.finance.yahoo.com/v8/finance/chart/' + encodeURIComponent(sym) + '?interval=1d&range=5d', yhqH2);
+        return fetchJsonWith('https://query1.finance.yahoo.com/v8/finance/chart/' + encodeURIComponent(sym) + '?interval=1d&range=ytd', yhqH2);
       }));
       var yhqRows = yhqSyms.map(function(sym, i) {
         var r = yhqResults[i];
         if (r.status !== 'fulfilled' || !r.value) return { sym:sym, c:null, dp:null, d:null };
-        var m = (((r.value.chart||{}).result||[])[0]||{}).meta||{};
+        var res0 = (((r.value.chart||{}).result||[])[0])||{};
+        var m = res0.meta||{};
         var c = m.regularMarketPrice||null;
-        var pc = m.chartPreviousClose||m.previousClose||null;
-        var d = (c && pc) ? parseFloat((c - pc).toFixed(2)) : null;
-        var dp = (c && pc) ? parseFloat(((c - pc) / pc * 100).toFixed(2)) : null;
+        /* YTD: compare current price to first trading day close of the year */
+        var closes = (((res0.indicators||{}).quote||[])[0]||{}).close||[];
+        var ytdOpen = closes.find(function(v){ return v != null; }) || null;
+        var d = (c && ytdOpen) ? parseFloat((c - ytdOpen).toFixed(2)) : null;
+        var dp = (c && ytdOpen) ? parseFloat(((c - ytdOpen) / ytdOpen * 100).toFixed(2)) : null;
         return { sym:sym, c:c, dp:dp, d:d };
       });
-      return { statusCode:200, headers:Object.assign({},hdrs,{'Cache-Control':'public,max-age=60'}), body:JSON.stringify(yhqRows) };
+      var _yhqb = JSON.stringify(yhqRows);
+      _cacheSet(_yhqck, _yhqb, TTL.yh_quote);
+      return { statusCode:200, headers:Object.assign({},hdrs,{'Cache-Control':'public,max-age=60'}), body: _yhqb };
     }
 
     /* ── WATCHLIST BATCH QUOTES ── */
     if (type === 'quote') {
       var qSyms = (p.symbols||'').split(',').map(function(s){return s.trim().toUpperCase();}).filter(Boolean).slice(0,20);
       if (!qSyms.length) return { statusCode:400, headers:hdrs, body:JSON.stringify({error:'No symbols'}) };
+      var _qck = 'quote:' + qSyms.slice().sort().join(',');
+      var _qch = _cacheGet(_qck);
+      if (_qch) return { statusCode:200, headers:Object.assign({},hdrs,{'Cache-Control':'public,max-age=60'}), body: _qch };
       var FHQ2 = 'https://finnhub.io/api/v1/quote?token=' + FINN + '&symbol=';
       var wqRes = await Promise.allSettled(qSyms.map(function(s){ return fetchJson(FHQ2 + s); }));
       var wqRows = qSyms.map(function(sym, i){
         var r = wqRes[i], q = r.status === 'fulfilled' ? r.value : null;
         return { sym:sym, c:(q&&q.c)?q.c:null, pc:(q&&q.pc)?q.pc:null, dp:(q&&q.dp)?q.dp:null, h:(q&&q.h)?q.h:null, l:(q&&q.l)?q.l:null };
       });
-      return { statusCode:200, headers:Object.assign({},hdrs,{'Cache-Control':'public,max-age=60'}), body:JSON.stringify(wqRows) };
+      var _qb = JSON.stringify(wqRows);
+      _cacheSet(_qck, _qb, TTL.quote);
+      return { statusCode:200, headers:Object.assign({},hdrs,{'Cache-Control':'public,max-age=60'}), body: _qb };
     }
 
     /* ── GLOBAL MACRO (rates + CPI + live gold + FX for world map) ── */
     if (type === 'global-macro') {
+      var _gmck = 'global-macro';
+      var _gmch = _cacheGet(_gmck);
+      if (_gmch) return { statusCode:200, headers:Object.assign({},hdrs,{'Cache-Control':'public,max-age=60'}), body: _gmch };
+
       var GM = 'https://api.stlouisfed.org/fred/series/observations?file_type=json&sort_order=desc&limit=3&api_key=' + FRED + '&series_id=';
       /* Extended country coverage: [iso2, field, fredSeries] */
       var GM_SERIES = [
@@ -777,8 +845,9 @@ exports.handler = async function (event) {
       var fxRates3 = (fxR.status==='fulfilled'&&fxR.value&&fxR.value.rates) ? fxR.value.rates : {};
       var goldUSD  = (goldR.status==='fulfilled'&&goldR.value&&goldR.value.c) ? goldR.value.c : null;
 
-      return { statusCode:200, headers:Object.assign({},hdrs,{'Cache-Control':'public,max-age=60'}),
-        body:JSON.stringify({countries:gmData, fx:fxRates3, goldUSD:goldUSD}) };
+      var _gmb = JSON.stringify({countries:gmData, fx:fxRates3, goldUSD:goldUSD});
+      _cacheSet(_gmck, _gmb, TTL.global_macro);
+      return { statusCode:200, headers:Object.assign({},hdrs,{'Cache-Control':'public,max-age=60'}), body: _gmb };
     }
 
 return { statusCode: 400, headers: hdrs, body: JSON.stringify({ error: 'Unknown type' }) };

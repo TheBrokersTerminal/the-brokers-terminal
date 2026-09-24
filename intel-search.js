@@ -2482,6 +2482,7 @@
           if (briefs.length > 50) briefs.length = 50;
         }
         try { localStorage.setItem('tbt_briefs', JSON.stringify(briefs)); } catch(e) {}
+        _sbSaveBrief(saved);
         saveBriefBtn.textContent = '✓ SAVED';
         saveBriefBtn.style.borderColor = '#3d8c5a';
         saveBriefBtn.style.color = '#3d8c5a';
@@ -2497,6 +2498,69 @@
   /* ── SAVED CLIENT BRIEFS ── */
   function _loadBriefs() {
     try { return JSON.parse(localStorage.getItem('tbt_briefs') || '[]'); } catch(e) { return []; }
+  }
+
+  /* ── Supabase persistence helpers ── */
+  function _sbSaveBrief(brief) {
+    var sb = window._sbClient, uid = window._uid;
+    if (!sb || !uid) return;
+    sb.from('client_briefs').upsert({
+      id: String(brief.id),
+      user_id: uid,
+      query: brief.query || '',
+      custom_name: brief.customName || null,
+      saved_at: brief.savedAt || '',
+      intake: brief.intake || {},
+      brief_data: brief.briefData || {},
+      pitch_data: brief.pitchData || null,
+      cfa_data: brief.cfaData || null,
+      brief_history: brief.briefHistory || [],
+      cfa_history: brief.cfaHistory || [],
+      pitch_history: brief.pitchHistory || []
+    }, { onConflict: 'user_id,id' }).then(function(){}).catch(function(){});
+  }
+
+  function _sbDeleteBriefById(id) {
+    var sb = window._sbClient, uid = window._uid;
+    if (!sb || !uid) return;
+    sb.from('client_briefs').delete().eq('user_id', uid).eq('id', String(id)).then(function(){}).catch(function(){});
+  }
+
+  function _sbClearAllBriefs() {
+    var sb = window._sbClient, uid = window._uid;
+    if (!sb || !uid) return;
+    sb.from('client_briefs').delete().eq('user_id', uid).then(function(){}).catch(function(){});
+  }
+
+  function _syncBriefsFromSupabase(callback) {
+    var sb = window._sbClient, uid = window._uid;
+    if (!sb || !uid) { if (callback) callback(null); return; }
+    sb.from('client_briefs')
+      .select('*')
+      .eq('user_id', uid)
+      .order('created_at', { ascending: false })
+      .limit(50)
+      .then(function(res) {
+        if (res.error || !res.data) { if (callback) callback(null); return; }
+        var briefs = res.data.map(function(r) {
+          return {
+            id: r.id,
+            savedAt: r.saved_at || '',
+            intake: r.intake || {},
+            query: r.query || '',
+            customName: r.custom_name || null,
+            briefData: r.brief_data || {},
+            pitchData: r.pitch_data || null,
+            cfaData: r.cfa_data || null,
+            briefHistory: r.brief_history || [],
+            cfaHistory: r.cfa_history || [],
+            pitchHistory: r.pitch_history || []
+          };
+        });
+        try { localStorage.setItem('tbt_briefs', JSON.stringify(briefs)); } catch(e) {}
+        if (callback) callback(briefs);
+      })
+      .catch(function() { if (callback) callback(null); });
   }
 
   function _openSavedBrief(saved) {
@@ -2570,6 +2634,33 @@
     renderScenario(saved.briefData, bodyEl);
   }
 
+  function _buildClientsListHtml(briefs) {
+    if (!briefs.length) {
+      return '<div style="padding:20px 14px;font-size:9.5px;color:#444;text-align:center;line-height:1.8;">No saved client briefs yet.<br><span style="color:#333;">Run an IFA Intel brief and click<br>▌ SAVE CLIENT BRIEF to store it here.</span></div>';
+    }
+    return briefs.map(function(b, i) {
+      var ref       = b.customName || (b.intake && b.intake.ref) || b.briefData.title || 'Client';
+      var age       = (b.intake && b.intake.age)       || '';
+      var portfolio = (b.intake && b.intake.portfolio) || '';
+      var hasPitch  = !!b.pitchData;
+      var hasCfa    = !!b.cfaData;
+      return '<div class="clients-row" data-idx="' + i + '" style="padding:10px 14px;border-bottom:1px solid #111;cursor:pointer;transition:background .15s;">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;gap:6px;">' +
+          '<div class="clients-row-name" style="font-size:10px;color:#fff;font-weight:700;letter-spacing:.05em;flex:1;">' + escH(ref) + '</div>' +
+          '<button class="clients-rename-btn" data-idx="' + i + '" title="Rename" style="background:none;border:none;color:#444;font-size:11px;cursor:pointer;padding:0 2px;flex-shrink:0;line-height:1;">✎</button>' +
+          '<div style="font-size:8px;color:#444;flex-shrink:0;">' + escH(b.savedAt) + '</div>' +
+        '</div>' +
+        (age       ? '<div style="font-size:8.5px;color:#888;">' + escH(age) + '</div>' : '') +
+        (portfolio ? '<div style="font-size:8.5px;color:#E97132;">' + escH(portfolio) + '</div>' : '') +
+        '<div style="margin-top:4px;display:flex;gap:4px;">' +
+          '<span style="font-size:7px;letter-spacing:.1em;padding:1px 5px;border:1px solid #1f1f1f;color:#555;">BRIEF</span>' +
+          (hasPitch ? '<span style="font-size:7px;letter-spacing:.1em;padding:1px 5px;border:1px solid #2a1a0a;color:#E97132;">PITCH</span>' : '') +
+          (hasCfa   ? '<span style="font-size:7px;letter-spacing:.1em;padding:1px 5px;border:1px solid #0a1a2a;color:#4A9EDD;">CFA</span>' : '') +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
   function _openClientsModal() {
     var existing = document.getElementById('intel-clients-modal');
     if (existing) { existing.remove(); }
@@ -2580,8 +2671,6 @@
     modal.id = 'intel-clients-modal';
     modal.style.cssText = 'position:fixed;z-index:99999;top:60px;right:20px;background:#0a0a0a;border:1px solid #2a2a2a;border-top:2px solid #E97132;width:320px;max-height:70vh;display:flex;flex-direction:column;box-shadow:0 8px 32px rgba(0,0,0,.7);';
 
-    var panel = modal; /* panel === modal now — no wrapper needed */
-
     var hdr = '<div id="intel-clients-titlebar" style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid #1a1a1a;cursor:move;user-select:none;">' +
       '<div>' +
         '<div style="font-size:7px;letter-spacing:.3em;color:#E97132;font-weight:700;margin-bottom:2px;">IFA INTEL</div>' +
@@ -2590,47 +2679,27 @@
       '<button id="intel-clients-close" style="background:none;border:none;color:#555;font-size:14px;cursor:pointer;padding:4px;">✕</button>' +
     '</div>';
 
-    var listHtml = '';
-    if (!briefs.length) {
-      listHtml = '<div style="padding:20px 14px;font-size:9.5px;color:#444;text-align:center;line-height:1.8;">No saved client briefs yet.<br><span style="color:#333;">Run an IFA Intel brief and click<br>▌ SAVE CLIENT BRIEF to store it here.</span></div>';
-    } else {
-      listHtml = briefs.map(function(b, i) {
-        var ref       = b.customName || (b.intake && b.intake.ref) || b.briefData.title || 'Client';
-        var age       = (b.intake && b.intake.age)       || '';
-        var portfolio = (b.intake && b.intake.portfolio) || '';
-        var hasPitch  = !!b.pitchData;
-        var hasCfa    = !!b.cfaData;
-        return '<div class="clients-row" data-idx="' + i + '" style="padding:10px 14px;border-bottom:1px solid #111;cursor:pointer;transition:background .15s;">' +
-          '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;gap:6px;">' +
-            '<div class="clients-row-name" style="font-size:10px;color:#fff;font-weight:700;letter-spacing:.05em;flex:1;">' + escH(ref) + '</div>' +
-            '<button class="clients-rename-btn" data-idx="' + i + '" title="Rename" style="background:none;border:none;color:#444;font-size:11px;cursor:pointer;padding:0 2px;flex-shrink:0;line-height:1;">✎</button>' +
-            '<div style="font-size:8px;color:#444;flex-shrink:0;">' + escH(b.savedAt) + '</div>' +
-          '</div>' +
-          (age       ? '<div style="font-size:8.5px;color:#888;">' + escH(age) + '</div>' : '') +
-          (portfolio ? '<div style="font-size:8.5px;color:#E97132;">' + escH(portfolio) + '</div>' : '') +
-          '<div style="margin-top:4px;display:flex;gap:4px;">' +
-            '<span style="font-size:7px;letter-spacing:.1em;padding:1px 5px;border:1px solid #1f1f1f;color:#555;">BRIEF</span>' +
-            (hasPitch ? '<span style="font-size:7px;letter-spacing:.1em;padding:1px 5px;border:1px solid #2a1a0a;color:#E97132;">PITCH</span>' : '') +
-            (hasCfa   ? '<span style="font-size:7px;letter-spacing:.1em;padding:1px 5px;border:1px solid #0a1a2a;color:#4A9EDD;">CFA</span>' : '') +
-          '</div>' +
-        '</div>';
-      }).join('');
-    }
-
-    var deleteRowHtml = briefs.length ?
-      '<div style="padding:10px 14px;border-top:1px solid #1a1a1a;">' +
-        '<button id="intel-clients-clear" style="background:none;border:none;color:#444;font-size:8px;letter-spacing:.1em;cursor:pointer;padding:0;">✕ CLEAR ALL SAVED CLIENTS</button>' +
-      '</div>' : '';
-
     modal.innerHTML = hdr +
-      '<div style="overflow-y:auto;flex:1;">' + listHtml + '</div>' +
-      deleteRowHtml;
+      '<div id="intel-clients-list" style="overflow-y:auto;flex:1;">' + _buildClientsListHtml(briefs) + '</div>' +
+      (briefs.length ? '<div id="intel-clients-footer" style="padding:10px 14px;border-top:1px solid #1a1a1a;"><button id="intel-clients-clear" style="background:none;border:none;color:#444;font-size:8px;letter-spacing:.1em;cursor:pointer;padding:0;">✕ CLEAR ALL SAVED CLIENTS</button></div>' : '<div id="intel-clients-footer"></div>');
 
     document.body.appendChild(modal);
     makeDraggable(modal, modal.querySelector('#intel-clients-titlebar'));
 
-    /* Hover effect + open brief on row click */
-    modal.querySelectorAll('.clients-row').forEach(function(row) {
+    /* Sync from Supabase in background — refresh list if data comes back */
+    _syncBriefsFromSupabase(function(sbBriefs) {
+      if (!sbBriefs || !document.contains(modal)) return;
+      briefs = sbBriefs;
+      var listEl = modal.querySelector('#intel-clients-list');
+      var footerEl = modal.querySelector('#intel-clients-footer');
+      if (listEl) listEl.innerHTML = _buildClientsListHtml(briefs);
+      if (footerEl) footerEl.innerHTML = briefs.length ? '<button id="intel-clients-clear" style="background:none;border:none;color:#444;font-size:8px;letter-spacing:.1em;cursor:pointer;padding:0;">✕ CLEAR ALL SAVED CLIENTS</button>' : '';
+      attachClientsHandlers();
+    });
+
+    function attachClientsHandlers() {
+      /* Hover effect + open brief on row click */
+      modal.querySelectorAll('.clients-row').forEach(function(row) {
       row.addEventListener('mouseenter', function() { row.style.background = '#111'; });
       row.addEventListener('mouseleave', function() { row.style.background = ''; });
       row.addEventListener('click', function() {
@@ -2660,6 +2729,7 @@
           var newName = inp.value.trim() || current;
           briefs[idx].customName = newName;
           try { localStorage.setItem('tbt_briefs', JSON.stringify(briefs)); } catch(e2) {}
+          _sbSaveBrief(briefs[idx]);
           nameEl.textContent = newName;
         }
         inp.addEventListener('blur', save);
@@ -2670,19 +2740,21 @@
       });
     });
 
-    var closeBtn = modal.querySelector('#intel-clients-close');
-    if (closeBtn) closeBtn.addEventListener('click', function() { modal.remove(); });
+      var clearBtn = modal.querySelector('#intel-clients-clear');
+      if (clearBtn) {
+        clearBtn.addEventListener('click', function() {
+          if (confirm('Clear all saved client briefs? This cannot be undone.')) {
+            try { localStorage.removeItem('tbt_briefs'); } catch(e) {}
+            _sbClearAllBriefs();
+            modal.remove();
+          }
+        });
+      }
+    } /* end attachClientsHandlers */
 
-    var clearBtn = modal.querySelector('#intel-clients-clear');
-    if (clearBtn) {
-      clearBtn.addEventListener('click', function() {
-        if (confirm('Clear all saved client briefs? This cannot be undone.')) {
-          try { localStorage.removeItem('tbt_briefs'); } catch(e) {}
-          modal.remove();
-        }
-      });
-    }
+    attachClientsHandlers();
 
+    modal.querySelector('#intel-clients-close').addEventListener('click', function() { modal.remove(); });
     modal.addEventListener('click', function(e) { if (e.target === modal) modal.remove(); });
   }
 

@@ -167,19 +167,29 @@ exports.handler = async function (event) {
 
   /* ── Storage: create signed upload URL (browser uploads directly) ──────── */
   if (action === 'storage_upload_url') {
-    const { bucket, path: filePath } = body;
-    if (!bucket || !filePath) return fail(400, 'missing_params');
+    /* Legacy alias — now handled by storage_upload directly */
+    return fail(400, 'use_storage_upload');
+  }
 
-    const r = await sbFetch(`/storage/v1/object/sign/upload/${encodeURIComponent(bucket)}/${filePath}`, {
+  if (action === 'storage_upload') {
+    const { bucket, path: filePath, content, contentType } = body;
+    if (!bucket || !filePath || !content) return fail(400, 'missing_params');
+    const fileBuffer = Buffer.from(content, 'base64');
+    const r = await fetch(`${SUPABASE_URL}/storage/v1/object/${encodeURIComponent(bucket)}/${filePath}`, {
       method: 'POST',
-      body:   JSON.stringify({}),
+      headers: {
+        apikey:         SERVICE_KEY,
+        Authorization:  `Bearer ${SERVICE_KEY}`,
+        'Content-Type': contentType || 'text/html',
+        'x-upsert':     'true',
+      },
+      body: fileBuffer,
     });
     if (!r.ok) {
       const err = await r.text();
       return fail(r.status, err.slice(0, 200));
     }
-    const result = await r.json();
-    return ok({ signed_url: SUPABASE_URL + result.url, token: result.token });
+    return ok({ path: filePath });
   }
 
   /* ── Edge Functions: invoke ────────────────────────────────────────────── */

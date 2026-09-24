@@ -12,10 +12,9 @@
   var _widgets = {};  /* id → {el, cfg} */
   var _currentTab = 'terminal'; /* tracks active page for per-page widget visibility */
   window._sharedZ = window._sharedZ || 1000;
-  /* Hard ceiling keeps canvas widgets below popouts (9000+). Never corrupt _sharedZ when popouts are open. */
   function _nextZ() {
-    if ((window._sharedZ || 0) < 8000) window._sharedZ = (window._sharedZ || 0) + 1;
-    return Math.min(window._sharedZ, 8000);
+    window._sharedZ = (window._sharedZ || 1000) + 1;
+    return window._sharedZ;
   }
 
   var FINNHUB_KEY = 'da6p77hr01qqqkkgl7b0da6p77hr01qqqkkgl7bg';
@@ -7769,7 +7768,7 @@
         var chg = q.dp !== null ? (q.dp >= 0 ? '+' : '') + q.dp.toFixed(2) + '%' : '—';
         var chgAbs = (q.d !== undefined && q.d !== null) ? (q.d >= 0 ? '+' : '') + parseFloat(q.d).toFixed(2) : '';
         var cls = q.dp === null ? 'wl-chg-flat' : q.dp >= 0 ? 'wl-pos' : 'wl-neg';
-        var barW = q.dp !== null ? Math.min(Math.abs(q.dp) / 5 * 100, 100) + '%' : '0%';
+        var barW = q.dp !== null ? Math.min(Math.abs(q.dp) / 20 * 100, 100) + '%' : '0%';
         var barCol = q.dp >= 0 ? '#1a4a2a' : '#3a1010';
         return '<div class="wl-row" data-sym="' + escH(q.sym) + '" data-name="' + escH(name) + '">' +
           '<div class="wl-bar" style="width:' + barW + ';background:' + barCol + ';"></div>' +
@@ -7808,7 +7807,7 @@
         '</div>' +
         qaHtml +
         '<div class="wl-list">' + (listHtml || emptyHint) + '</div>' +
-        '<div class="wl-footer">LIVE PRICES · ' + ts + '  ·  CLICK ROW OR ℹ FOR INTEL BRIEF</div>';
+        '<div class="wl-footer">LIVE PRICES · ' + ts + '  ·  % CHANGE = YTD  ·  CLICK ROW OR ℹ FOR INTEL BRIEF</div>';
 
       /* Preset buttons — open index browser */
       body.querySelectorAll('.wl-preset-btn').forEach(function(btn) {
