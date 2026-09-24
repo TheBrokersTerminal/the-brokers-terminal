@@ -1506,6 +1506,7 @@
       '<div class="concept-sec-bar" style="margin-bottom:8px;">' +
         '<button class="concept-sec-btn active" data-scen-tab="brief">ADVISORY BRIEF</button>' +
         '<button class="concept-sec-btn" data-scen-tab="pitch">PITCH PLAYBOOK</button>' +
+        '<span class="scen-pitch-info-btn" title="What is Pitch Playbook?" style="display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border:1px solid #E97132;border-radius:50%;color:#E97132;font-size:8px;font-weight:700;cursor:pointer;letter-spacing:0;flex-shrink:0;margin-left:2px;margin-top:2px;font-family:Georgia,serif;line-height:1;user-select:none;">i</span>' +
         '<button class="concept-sec-btn" data-scen-tab="cfa" style="color:#4A9EDD;">INSTITUTIONAL ANALYSIS</button>' +
         '<span class="scen-ia-info-btn" title="What is Institutional Analysis?" style="display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border:1px solid #4A9EDD;border-radius:50%;color:#4A9EDD;font-size:8px;font-weight:700;cursor:pointer;letter-spacing:0;flex-shrink:0;margin-left:2px;margin-top:2px;font-family:Georgia,serif;line-height:1;user-select:none;">i</span>' +
       '</div>' +
@@ -1891,6 +1892,41 @@
         body.querySelectorAll('.scen-tab-panel').forEach(function(p){ p.hidden = (p.getAttribute('data-scen-panel') !== tab); });
       });
     });
+
+    /* ── Pitch Playbook info button ── */
+    var pitchInfoBtn = body.querySelector('.scen-pitch-info-btn');
+    if (pitchInfoBtn) {
+      pitchInfoBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        var existing = body.querySelector('.scen-pitch-tooltip');
+        if (existing) { existing.remove(); return; }
+        var tip = document.createElement('div');
+        tip.className = 'scen-pitch-tooltip';
+        tip.style.cssText = 'position:absolute;z-index:9999;background:#0d0d0d;border:1px solid #E97132;padding:14px 16px;width:280px;font-size:9.5px;line-height:1.7;color:#c8c8c8;box-shadow:0 4px 20px rgba(0,0,0,.6);';
+        tip.innerHTML =
+          '<div style="font-size:7.5px;letter-spacing:.2em;color:#E97132;margin-bottom:10px;font-weight:700;">PITCH PLAYBOOK — WHAT\'S INCLUDED</div>' +
+          '<div style="margin-bottom:6px;"><span style="color:#E97132;">▸</span> <strong style="color:#fff;">Opening Line</strong> — Second-level hook tailored to this client\'s dominant driver</div>' +
+          '<div style="margin-bottom:6px;"><span style="color:#E97132;">▸</span> <strong style="color:#fff;">Broker Note</strong> — The angle and opening gambit for this exact client</div>' +
+          '<div style="margin-bottom:6px;"><span style="color:#E97132;">▸</span> <strong style="color:#fff;">The Logical Case</strong> — Three verified data points building certainty before the ask</div>' +
+          '<div style="margin-bottom:6px;"><span style="color:#E97132;">▸</span> <strong style="color:#fff;">Socratic Question</strong> — Exposes the gap between what they believe and what they own</div>' +
+          '<div style="margin-bottom:6px;"><span style="color:#E97132;">▸</span> <strong style="color:#fff;">Future Pace</strong> — Loss frame and gain frame specific to this client\'s situation</div>' +
+          '<div style="margin-bottom:6px;"><span style="color:#E97132;">▸</span> <strong style="color:#fff;">Entry Architecture</strong> — Removes yes/no — replaces it with a sizing decision</div>' +
+          '<div style="margin-bottom:6px;"><span style="color:#E97132;">▸</span> <strong style="color:#fff;">SPIN Questions</strong> — Situation, Problem/Implication, Need-Payoff scripted for this client</div>' +
+          '<div style="margin-bottom:6px;"><span style="color:#E97132;">▸</span> <strong style="color:#fff;">Objection Handling</strong> — Most likely pushbacks with verbatim rebuttals</div>' +
+          '<div style="margin-bottom:10px;"><span style="color:#E97132;">▸</span> <strong style="color:#fff;">Trigger Agreement</strong> — Conditional close script for the hesitant client</div>' +
+          '<div style="font-size:8px;color:#E97132;letter-spacing:.1em;border-top:1px solid #1a1a1a;padding-top:8px;">Frameworks: SPIN · Cialdini · Voss · SLP Three Tens · Belfort Straight Line</div>';
+        var btnRect = pitchInfoBtn.getBoundingClientRect();
+        var bodyRect = (body.closest('.intel-popwin') || document.body).getBoundingClientRect();
+        tip.style.top  = (btnRect.bottom - bodyRect.top + 6) + 'px';
+        tip.style.left = Math.max(0, (btnRect.left - bodyRect.left - 220)) + 'px';
+        (body.closest('.intel-popwin') || document.body).appendChild(tip);
+        setTimeout(function() {
+          document.addEventListener('click', function _closePitchTip() {
+            tip.remove(); document.removeEventListener('click', _closePitchTip);
+          });
+        }, 10);
+      });
+    }
 
     /* ── Institutional Analysis info button ── */
     var iaInfoBtn = body.querySelector('.scen-ia-info-btn');
