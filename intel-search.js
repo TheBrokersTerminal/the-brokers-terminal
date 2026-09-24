@@ -1537,11 +1537,17 @@
         '<button class="sp-note-btn">✎ SAVE TO NOTES</button>' +
       '</div>';
 
-    /* Prefetch scenario pitch in background */
+    /* Background prefetch for pitch + CFA — fires immediately on card load.
+       In-flight deduplication: if a fetch is already running when the user clicks,
+       we queue the render callback rather than firing a second Anthropic request. */
     var pitchCharged = false;
     var scenPitchQuery = d.situation ? (d.title ? d.title + ': ' + d.situation : d.situation) : (d.title || '');
     var lensKeyNow = (window._assetLens && window._assetLens.key) || 'universal';
     var lensCtxNow = (window._assetLens && window._assetLens.promptContext) || '';
+
+    /* null = idle, [] = in-flight (callbacks queued until resolved) */
+    var _pitchInFlight = null;
+    var _cfaInFlight   = null;
 
     function _renderScenPitch(pitchData) {
       var pitchPanel = body.querySelector('.scen-pitch-panel');
@@ -1549,21 +1555,30 @@
     }
 
     function _fetchScenPitch(onDemand) {
-      if (_cache[scenPitchCacheKey]) { _renderScenPitch(_cache[scenPitchCacheKey]); return; }
+      if (_cache[scenPitchCacheKey]) {
+        if (onDemand) _renderScenPitch(_cache[scenPitchCacheKey]);
+        return;
+      }
+      /* already in-flight — register render callback and wait, don't fire another request */
+      if (_pitchInFlight !== null) {
+        if (onDemand) _pitchInFlight.push(_renderScenPitch);
+        return;
+      }
+      _pitchInFlight = onDemand ? [_renderScenPitch] : [];
+
       var headers = { 'Content-Type': 'application/json' };
       if (window._authToken) headers['Authorization'] = 'Bearer ' + window._authToken;
-      /* prefetch:true always — credits are charged client-side via credits endpoint */
       var reqBody = JSON.stringify({ query: scenPitchQuery, type: 'scenario', section: 'pitch-playbook', lensKey: lensKeyNow, lensContext: lensCtxNow, prefetch: true });
 
       fetch('/.netlify/functions/search-stream', { method: 'POST', headers: headers, body: reqBody })
         .then(function(r) {
-          if (!r.ok || !r.body) return;
+          if (!r.ok || !r.body) { _pitchInFlight = null; return; }
           var reader = r.body.getReader();
           var decoder = new TextDecoder();
           var lineBuf = '';
           function readChunk() {
             return reader.read().then(function(chunk) {
-              if (chunk.done) return;
+              if (chunk.done) { _pitchInFlight = null; return; }
               lineBuf += decoder.decode(chunk.value, { stream: true });
               var lines = lineBuf.split('\n'); lineBuf = lines.pop();
               for (var i = 0; i < lines.length; i++) {
@@ -1572,12 +1587,14 @@
                 var raw; try { raw = JSON.parse(line.slice(6)); } catch { continue; }
                 if (raw.type === 'cache' || raw.type === 'done') {
                   _cache[scenPitchCacheKey] = raw.data;
-                  /* Only render if pitch tab is currently visible */
+                  var cbs = _pitchInFlight || []; _pitchInFlight = null;
                   var pitchPanel = body.querySelector('.scen-tab-panel[data-scen-panel="pitch"]');
                   if (pitchPanel && !pitchPanel.hidden) _renderScenPitch(raw.data);
+                  cbs.forEach(function(cb) { cb(raw.data); });
                   return;
                 }
                 if (raw.type === 'error' && raw.code === 402) {
+                  _pitchInFlight = null;
                   window._showNoCredits && window._showNoCredits(raw.balance || 0);
                   return;
                 }
@@ -1585,8 +1602,8 @@
               return readChunk();
             });
           }
-          readChunk().catch(function(){});
-        }).catch(function(){});
+          readChunk().catch(function() { _pitchInFlight = null; });
+        }).catch(function() { _pitchInFlight = null; });
     }
 
     /* Start background prefetch immediately */
@@ -1738,20 +1755,30 @@
     }
 
     function _fetchScenCfa(onDemand) {
-      if (_cache[scenCfaCacheKey]) { _renderScenCfa(_cache[scenCfaCacheKey]); return; }
+      if (_cache[scenCfaCacheKey]) {
+        if (onDemand) _renderScenCfa(_cache[scenCfaCacheKey]);
+        return;
+      }
+      /* already in-flight — register render callback and wait, don't fire another request */
+      if (_cfaInFlight !== null) {
+        if (onDemand) _cfaInFlight.push(_renderScenCfa);
+        return;
+      }
+      _cfaInFlight = onDemand ? [_renderScenCfa] : [];
+
       var headers = { 'Content-Type': 'application/json' };
       if (window._authToken) headers['Authorization'] = 'Bearer ' + window._authToken;
       var cfaReqBody = JSON.stringify({ query: scenPitchQuery, type: 'scenario', section: 'cfa-analysis', lensKey: lensKeyNow, lensContext: lensCtxNow, prefetch: true });
 
       fetch('/.netlify/functions/search-stream', { method: 'POST', headers: headers, body: cfaReqBody })
         .then(function(r) {
-          if (!r.ok || !r.body) return;
+          if (!r.ok || !r.body) { _cfaInFlight = null; return; }
           var reader = r.body.getReader();
           var decoder = new TextDecoder();
           var lineBuf = '';
           function readChunk() {
             return reader.read().then(function(chunk) {
-              if (chunk.done) return;
+              if (chunk.done) { _cfaInFlight = null; return; }
               lineBuf += decoder.decode(chunk.value, { stream: true });
               var lines = lineBuf.split('\n'); lineBuf = lines.pop();
               for (var i = 0; i < lines.length; i++) {
@@ -1760,27 +1787,35 @@
                 var raw; try { raw = JSON.parse(line.slice(6)); } catch { continue; }
                 if (raw.type === 'cache' || raw.type === 'done') {
                   _cache[scenCfaCacheKey] = raw.data;
+                  var cbs = _cfaInFlight || []; _cfaInFlight = null;
                   var cfaPanel = body.querySelector('.scen-tab-panel[data-scen-panel="cfa"]');
                   if (cfaPanel && !cfaPanel.hidden) _renderScenCfa(raw.data);
+                  cbs.forEach(function(cb) { cb(raw.data); });
                   return;
                 }
                 if (raw.type === 'error') {
-                  if (raw.code === 402) { window._showNoCredits && window._showNoCredits(raw.balance || 0); }
-                  else {
-                    var cfaPanelErr = body.querySelector('.scen-cfa-panel');
-                    if (cfaPanelErr) cfaPanelErr.innerHTML = '<div style="padding:12px;font-size:10px;color:#D14040;line-height:1.7;">Analysis timed out — please try again.<br><span style="color:#555;font-size:9px;">Large analyses occasionally take longer. Click Institutional Analysis again to retry.</span></div>';
+                  var cbs = _cfaInFlight || []; _cfaInFlight = null;
+                  if (raw.code === 402) {
+                    window._showNoCredits && window._showNoCredits(raw.balance || 0);
+                  } else {
+                    /* timeout or other error — show retry message in panel if visible */
+                    if (cbs.length) {
+                      var cfaPanelErr = body.querySelector('.scen-cfa-panel');
+                      if (cfaPanelErr) cfaPanelErr.innerHTML = '<div style="padding:12px;font-size:10px;color:#D14040;line-height:1.7;">Analysis timed out — please try again.<br><span style="color:#555;font-size:9px;">Large analyses occasionally take longer. Click the tab again to retry.</span></div>';
+                    }
                   }
                   return;
                 }
               }
               return readChunk();
             }).catch(function() {
+              _cfaInFlight = null;
               var cfaPanelErr = body.querySelector('.scen-cfa-panel');
               if (cfaPanelErr && cfaPanelErr.querySelector('.sp-intel-load')) cfaPanelErr.innerHTML = '<div style="padding:12px;font-size:10px;color:#D14040;">Connection lost — please try again.</div>';
             });
           }
-          readChunk().catch(function(){});
-        }).catch(function(){});
+          readChunk().catch(function() { _cfaInFlight = null; });
+        }).catch(function() { _cfaInFlight = null; });
     }
 
     /* Start CFA background prefetch immediately */
