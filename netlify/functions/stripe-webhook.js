@@ -23,15 +23,15 @@ const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
 
 /* Credits granted per plan — keyed by monthly amount in pence */
 const PLAN_CREDITS = {
-  4900:  4900,   /* £49/month  individual */
-  49900: 49000,  /* £499/month corporate  */
+  4900:  1000,   /* £49/month  individual */
+  49900: 5000,   /* £499/month corporate  */
 };
 
 function creditsForAmount(amountPaid) {
   if (PLAN_CREDITS[amountPaid] !== undefined) return PLAN_CREDITS[amountPaid];
   /* Fallback: scale nearest bracket */
-  if (amountPaid >= 49900) return 49000;
-  if (amountPaid >= 4900)  return 4900;
+  if (amountPaid >= 49900) return 5000;
+  if (amountPaid >= 4900)  return 1000;
   return 0;
 }
 

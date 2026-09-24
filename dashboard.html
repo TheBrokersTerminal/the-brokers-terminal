@@ -809,6 +809,7 @@
         <span id="manage-team-sep" style="display:none;"></span>
         <a href="#" id="credits-admin-btn" style="display:none;" class="ttb-dd-item">CREDITS ADMIN</a>
         <span id="credits-admin-sep" style="display:none;"></span>
+        <a href="#" id="costs-btn" class="ttb-dd-item" style="color:#E97132;">CREDIT COSTS</a>
         <div class="ttb-dd-sep"></div>
         <a href="#" id="logout-btn" class="ttb-dd-item ttb-dd-logout">LOG OUT</a>
         <a href="#" id="nav-logout-btn" style="display:none;"></a>
@@ -925,6 +926,53 @@
       <button onclick="document.getElementById('edit-profile-modal').style.display='none'" style="background:none;border:1px solid var(--border-dim);color:var(--text-muted);font-family:var(--font);font-size:9px;letter-spacing:0.18em;padding:8px 18px;cursor:pointer;">CANCEL</button>
       <button id="profile-save-btn" onclick="saveProfile()" style="background:var(--accent);border:none;color:#000;font-family:var(--font);font-size:9px;letter-spacing:0.18em;padding:8px 18px;cursor:pointer;font-weight:700;">SAVE CHANGES</button>
     </div>
+  </div>
+</div>
+
+<!-- ══ CREDIT COSTS MODAL ════════════════════════════════════════ -->
+<div id="costs-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:#0d0d0d;border:1px solid #2a2a2a;border-top:2px solid #E97132;width:100%;max-width:520px;max-height:85vh;overflow-y:auto;padding:28px 28px 24px;font-family:Consolas,Menlo,monospace;position:relative;">
+    <div style="font-size:11px;letter-spacing:.26em;color:#E97132;margin-bottom:6px;font-weight:700;">CREDIT COSTS</div>
+    <div style="font-size:9px;color:#555;letter-spacing:.12em;margin-bottom:22px;">All features and their per-use cost</div>
+
+    <!-- INTEL -->
+    <div style="font-size:8px;letter-spacing:.22em;color:#E97132;margin-bottom:10px;border-bottom:1px solid #1a1a1a;padding-bottom:6px;">INTEL SEARCH</div>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:20px;">
+      <tr><td style="padding:7px 0;border-bottom:1px solid #111;font-size:9.5px;color:#c8c8c8;">IFA Advisory Brief</td><td style="padding:7px 0;border-bottom:1px solid #111;font-size:9.5px;color:#fff;text-align:right;font-weight:700;">25</td><td style="padding:7px 0 7px 8px;border-bottom:1px solid #111;font-size:8px;color:#555;white-space:nowrap;">credits</td></tr>
+      <tr><td style="padding:7px 0;border-bottom:1px solid #111;font-size:9.5px;color:#c8c8c8;">IFA Pitch Playbook tab</td><td style="padding:7px 0;border-bottom:1px solid #111;font-size:9.5px;color:#fff;text-align:right;font-weight:700;">25</td><td style="padding:7px 0 7px 8px;border-bottom:1px solid #111;font-size:8px;color:#555;white-space:nowrap;">credits</td></tr>
+      <tr><td style="padding:7px 0;border-bottom:1px solid #111;font-size:9.5px;color:#c8c8c8;">IFA Institutional Analysis tab</td><td style="padding:7px 0;border-bottom:1px solid #111;font-size:9.5px;color:#fff;text-align:right;font-weight:700;">25</td><td style="padding:7px 0 7px 8px;border-bottom:1px solid #111;font-size:8px;color:#555;white-space:nowrap;">credits</td></tr>
+      <tr><td style="padding:7px 0;border-bottom:1px solid #111;font-size:9.5px;color:#c8c8c8;">Follow-up question (IFA / Institutional)</td><td style="padding:7px 0;border-bottom:1px solid #111;font-size:9.5px;color:#fff;text-align:right;font-weight:700;">10</td><td style="padding:7px 0 7px 8px;border-bottom:1px solid #111;font-size:8px;color:#555;white-space:nowrap;">credits each</td></tr>
+      <tr><td style="padding:7px 0;border-bottom:1px solid #111;font-size:9.5px;color:#c8c8c8;">Company profile &amp; intelligence</td><td style="padding:7px 0;border-bottom:1px solid #111;font-size:9.5px;color:#fff;text-align:right;font-weight:700;">25</td><td style="padding:7px 0 7px 8px;border-bottom:1px solid #111;font-size:8px;color:#555;white-space:nowrap;">credits</td></tr>
+      <tr><td style="padding:7px 0;border-bottom:1px solid #111;font-size:9.5px;color:#c8c8c8;">Company pitch playbook</td><td style="padding:7px 0;border-bottom:1px solid #111;font-size:9.5px;color:#fff;text-align:right;font-weight:700;">25</td><td style="padding:7px 0 7px 8px;border-bottom:1px solid #111;font-size:8px;color:#555;white-space:nowrap;">credits</td></tr>
+      <tr><td style="padding:7px 0;border-bottom:1px solid #111;font-size:9.5px;color:#c8c8c8;">Concept overview</td><td style="padding:7px 0;border-bottom:1px solid #111;font-size:9.5px;color:#fff;text-align:right;font-weight:700;">25</td><td style="padding:7px 0 7px 8px;border-bottom:1px solid #111;font-size:8px;color:#555;white-space:nowrap;">credits</td></tr>
+      <tr><td style="padding:7px 0;border-bottom:1px solid #111;font-size:9.5px;color:#c8c8c8;">Concept sections (History / Outcome / Economic Impact / Hardship)</td><td style="padding:7px 0;border-bottom:1px solid #111;font-size:9.5px;color:#fff;text-align:right;font-weight:700;">10</td><td style="padding:7px 0 7px 8px;border-bottom:1px solid #111;font-size:8px;color:#555;white-space:nowrap;">credits each</td></tr>
+      <tr><td style="padding:7px 0;font-size:9.5px;color:#c8c8c8;">Concept pitch playbook</td><td style="padding:7px 0;font-size:9.5px;color:#fff;text-align:right;font-weight:700;">25</td><td style="padding:7px 0 7px 8px;font-size:8px;color:#555;white-space:nowrap;">credits</td></tr>
+    </table>
+
+    <!-- NEWS -->
+    <div style="font-size:8px;letter-spacing:.22em;color:#E97132;margin-bottom:10px;border-bottom:1px solid #1a1a1a;padding-bottom:6px;">NEWS FEED</div>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:20px;">
+      <tr><td style="padding:7px 0;font-size:9.5px;color:#c8c8c8;">Article pitch brief</td><td style="padding:7px 0;font-size:9.5px;color:#fff;text-align:right;font-weight:700;">10</td><td style="padding:7px 0 7px 8px;font-size:8px;color:#555;white-space:nowrap;">credits</td></tr>
+    </table>
+
+    <!-- WHISKY -->
+    <div style="font-size:8px;letter-spacing:.22em;color:#E97132;margin-bottom:10px;border-bottom:1px solid #1a1a1a;padding-bottom:6px;">WHISKY DATA</div>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:24px;">
+      <tr><td style="padding:7px 0;border-bottom:1px solid #111;font-size:9.5px;color:#c8c8c8;">Distillery expressions AI analysis (INTEL)</td><td style="padding:7px 0;border-bottom:1px solid #111;font-size:9.5px;color:#fff;text-align:right;font-weight:700;">40</td><td style="padding:7px 0 7px 8px;border-bottom:1px solid #111;font-size:8px;color:#555;white-space:nowrap;">credits</td></tr>
+      <tr><td style="padding:7px 0;border-bottom:1px solid #111;font-size:9.5px;color:#c8c8c8;">Market prices + chart (INTEL / Terminal)</td><td style="padding:7px 0;border-bottom:1px solid #111;font-size:9.5px;color:#fff;text-align:right;font-weight:700;">40</td><td style="padding:7px 0 7px 8px;border-bottom:1px solid #111;font-size:8px;color:#555;white-space:nowrap;">credits</td></tr>
+      <tr><td style="padding:7px 0;border-bottom:1px solid #111;font-size:9.5px;color:#c8c8c8;">Auction listings (INTEL)</td><td style="padding:7px 0;border-bottom:1px solid #111;font-size:9.5px;color:#fff;text-align:right;font-weight:700;">20</td><td style="padding:7px 0 7px 8px;border-bottom:1px solid #111;font-size:8px;color:#555;white-space:nowrap;">credits</td></tr>
+      <tr><td style="padding:7px 0;border-bottom:1px solid #111;font-size:9.5px;color:#c8c8c8;">Retail listings (INTEL)</td><td style="padding:7px 0;border-bottom:1px solid #111;font-size:9.5px;color:#fff;text-align:right;font-weight:700;">20</td><td style="padding:7px 0 7px 8px;border-bottom:1px solid #111;font-size:8px;color:#555;white-space:nowrap;">credits</td></tr>
+      <tr><td style="padding:7px 0;border-bottom:1px solid #111;font-size:9.5px;color:#c8c8c8;">Bottle details / rating (INTEL / Terminal)</td><td style="padding:7px 0;border-bottom:1px solid #111;font-size:9.5px;color:#fff;text-align:right;font-weight:700;">3</td><td style="padding:7px 0 7px 8px;border-bottom:1px solid #111;font-size:8px;color:#555;white-space:nowrap;">credits</td></tr>
+      <tr><td style="padding:7px 0;border-bottom:1px solid #111;font-size:9.5px;color:#c8c8c8;">Market index history (Terminal)</td><td style="padding:7px 0;border-bottom:1px solid #111;font-size:9.5px;color:#fff;text-align:right;font-weight:700;">5</td><td style="padding:7px 0 7px 8px;border-bottom:1px solid #111;font-size:8px;color:#555;white-space:nowrap;">credits</td></tr>
+      <tr><td style="padding:7px 0;font-size:9.5px;color:#c8c8c8;">Bottle search (Terminal)</td><td style="padding:7px 0;font-size:9.5px;color:#fff;text-align:right;font-weight:700;">2</td><td style="padding:7px 0 7px 8px;font-size:8px;color:#555;white-space:nowrap;">credits</td></tr>
+    </table>
+
+    <!-- Note -->
+    <div style="font-size:8.5px;color:#444;line-height:1.7;border-top:1px solid #1a1a1a;padding-top:14px;">
+      Credits are charged on every request. TBT caches responses server-side to reduce costs — your credits always apply. Admin account is not charged.
+    </div>
+
+    <button onclick="document.getElementById('costs-modal').style.display='none'" style="margin-top:20px;background:none;border:1px solid #2a2a2a;color:#555;font-family:Consolas,Menlo,monospace;font-size:9px;letter-spacing:.18em;padding:8px 18px;cursor:pointer;display:block;width:100%;">CLOSE</button>
   </div>
 </div>
 
@@ -2307,6 +2355,16 @@
     }
 
     if (logoutBtn) logoutBtn.addEventListener('click', doLogout, { once: true });
+
+    var costsBtn = document.getElementById('costs-btn');
+    if (costsBtn) costsBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      var dd = document.getElementById('ttb-user-dropdown');
+      var menu = dd && dd.closest('.ttb-user-menu');
+      if (menu) menu.classList.remove('open');
+      var modal = document.getElementById('costs-modal');
+      if (modal) modal.style.display = 'flex';
+    });
 
     var navLogoutBtn = document.getElementById('nav-logout-btn');
     if (navLogoutBtn) navLogoutBtn.addEventListener('click', doLogout);

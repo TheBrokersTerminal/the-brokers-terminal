@@ -624,9 +624,7 @@
   /* ── CREATE DRAGGABLE POP-OUT ── */
   function createPopout(query, type) {
     _popOffset = (_popOffset + 24) % 120;
-    /* Canvas widgets cap at 8000 — intel popouts must always open above them */
-    if (window._sharedZ < 9000) window._sharedZ = 9000;
-    window._sharedZ++;
+    window._sharedZ = (window._sharedZ || 1000) + 1;
 
     var pid = 'pop-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6);
     var x   = 200 + _popOffset;
@@ -1367,7 +1365,7 @@
 
   function renderPitchOnly(d, body) {
     body.innerHTML =
-      '<div class="sp-tagline">' + escH((d.title || '') + ' — PITCH PLAYBOOK') + '</div>' +
+      '<div class="sp-badge event" style="margin-bottom:8px;">▌ PITCH PLAYBOOK</div>' +
       buildPitchPlaybook(d.pitch, d.brokerNote) +
       '<div class="sp-section" style="border-top:1px solid #111;padding-top:10px;">' +
         '<button class="sp-note-btn">✎ ADD NOTE</button>' +
@@ -1499,37 +1497,519 @@
           '<ul class="sp-facts">' + d.nextSteps.map(function(n,i){ return '<li><strong style="color:' + A + ';">' + (i+1) + '.</strong> ' + escH(n) + '</li>'; }).join('') + '</ul>' +
         '</div>' : '');
 
-    var pitchHtml = d.pitch ? buildPitchPlaybook(d.pitch, null) : '<div class="sp-section"><div class="sp-text" style="color:rgba(255,255,255,0.45);">No pitch playbook generated.</div></div>';
-
-    var hasPitch = !!d.pitch;
+    /* IFA pitch is always a separate full-quality fetch — always show the tab */
+    var scenPitchCacheKey = 'scenario:pitch:' + (d.title || (d.situation || '').slice(0, 60));
 
     body.innerHTML =
       '<div class="sp-badge private" style="margin-bottom:8px;background:rgba(233,113,50,0.12);border-color:' + A + ';color:' + A + ';">▌ IFA ADVISORY BRIEF</div>' +
 
-      (hasPitch ?
-        '<div class="concept-sec-bar" style="margin-bottom:8px;">' +
-          '<button class="concept-sec-btn active" data-scen-tab="brief">ADVISORY BRIEF</button>' +
-          '<button class="concept-sec-btn" data-scen-tab="pitch">PITCH PLAYBOOK</button>' +
-        '</div>' : '') +
+      '<div class="concept-sec-bar" style="margin-bottom:8px;">' +
+        '<button class="concept-sec-btn active" data-scen-tab="brief">ADVISORY BRIEF</button>' +
+        '<button class="concept-sec-btn" data-scen-tab="pitch">PITCH PLAYBOOK</button>' +
+        '<button class="concept-sec-btn" data-scen-tab="cfa" style="color:#4A9EDD;">INSTITUTIONAL ANALYSIS</button>' +
+        '<span class="scen-ia-info-btn" title="What is Institutional Analysis?" style="display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border:1px solid #4A9EDD;border-radius:50%;color:#4A9EDD;font-size:8px;font-weight:700;cursor:pointer;letter-spacing:0;flex-shrink:0;margin-left:2px;margin-top:2px;font-family:Georgia,serif;line-height:1;user-select:none;">i</span>' +
+      '</div>' +
 
-      '<div class="scen-tab-panel" data-scen-panel="brief">' + briefHtml + '</div>' +
-      (hasPitch ? '<div class="scen-tab-panel" data-scen-panel="pitch" hidden>' + pitchHtml + '</div>' : '') +
+      '<div class="scen-tab-panel" data-scen-panel="brief">' + briefHtml +
+
+        /* Follow-up thread */
+        '<div class="scen-thread" style="margin-top:4px;"></div>' +
+
+        /* Follow-up input */
+        '<div class="scen-followup-bar" style="border-top:1px solid #1a1a1a;padding-top:10px;margin-top:8px;">' +
+          '<div style="font-size:7px;letter-spacing:.25em;color:#E97132;margin-bottom:6px;">ASK A FOLLOW-UP QUESTION</div>' +
+          '<div style="display:flex;gap:6px;">' +
+            '<input class="scen-fu-input" type="text" placeholder="e.g. How do I handle the objection about timing?" ' +
+              'style="flex:1;background:#0c0c0c;border:1px solid #2a2a2a;color:#e0e0e0;font-size:10px;padding:7px 10px;outline:none;font-family:inherit;" />' +
+            '<button class="scen-fu-send" style="background:#E97132;color:#000;font-size:7px;letter-spacing:.2em;padding:7px 10px;border:none;cursor:pointer;white-space:nowrap;">ASK ›</button>' +
+          '</div>' +
+        '</div>' +
+
+      '</div>' +
+      '<div class="scen-tab-panel" data-scen-panel="pitch" hidden>' +
+        '<div class="scen-pitch-panel"><div class="sp-intel-load">GENERATING PITCH PLAYBOOK<span class="sp-intel-ld"></span></div></div>' +
+      '</div>' +
+      '<div class="scen-tab-panel" data-scen-panel="cfa" hidden>' +
+        '<div class="scen-cfa-panel"><div class="sp-intel-load">RUNNING INSTITUTIONAL ANALYSIS<span class="sp-intel-ld"></span></div></div>' +
+      '</div>' +
 
       '<div class="sp-section" style="border-top:1px solid #111;padding-top:10px;">' +
         '<button class="sp-note-btn">✎ SAVE TO NOTES</button>' +
       '</div>';
 
-    /* Tab switching */
-    if (hasPitch) {
-      body.querySelectorAll('.concept-sec-btn[data-scen-tab]').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-          var tab = btn.getAttribute('data-scen-tab');
-          body.querySelectorAll('.concept-sec-btn[data-scen-tab]').forEach(function(b){ b.classList.remove('active'); });
-          btn.classList.add('active');
-          body.querySelectorAll('.scen-tab-panel').forEach(function(p){ p.hidden = (p.getAttribute('data-scen-panel') !== tab); });
+    /* Prefetch scenario pitch in background */
+    var pitchCharged = false;
+    var scenPitchQuery = d.situation ? (d.title ? d.title + ': ' + d.situation : d.situation) : (d.title || '');
+    var lensKeyNow = (window._assetLens && window._assetLens.key) || 'universal';
+    var lensCtxNow = (window._assetLens && window._assetLens.promptContext) || '';
+
+    function _renderScenPitch(pitchData) {
+      var pitchPanel = body.querySelector('.scen-pitch-panel');
+      if (pitchPanel) pitchPanel.innerHTML = buildPitchPlaybook(pitchData, null);
+    }
+
+    function _fetchScenPitch(onDemand) {
+      if (_cache[scenPitchCacheKey]) { _renderScenPitch(_cache[scenPitchCacheKey]); return; }
+      var headers = { 'Content-Type': 'application/json' };
+      if (window._authToken) headers['Authorization'] = 'Bearer ' + window._authToken;
+      /* prefetch:true always — credits are charged client-side via credits endpoint */
+      var reqBody = JSON.stringify({ query: scenPitchQuery, type: 'scenario', section: 'pitch-playbook', lensKey: lensKeyNow, lensContext: lensCtxNow, prefetch: true });
+
+      fetch('/.netlify/functions/search-stream', { method: 'POST', headers: headers, body: reqBody })
+        .then(function(r) {
+          if (!r.ok || !r.body) return;
+          var reader = r.body.getReader();
+          var decoder = new TextDecoder();
+          var lineBuf = '';
+          function readChunk() {
+            return reader.read().then(function(chunk) {
+              if (chunk.done) return;
+              lineBuf += decoder.decode(chunk.value, { stream: true });
+              var lines = lineBuf.split('\n'); lineBuf = lines.pop();
+              for (var i = 0; i < lines.length; i++) {
+                var line = lines[i];
+                if (!line.startsWith('data: ')) continue;
+                var raw; try { raw = JSON.parse(line.slice(6)); } catch { continue; }
+                if (raw.type === 'cache' || raw.type === 'done') {
+                  _cache[scenPitchCacheKey] = raw.data;
+                  /* Only render if pitch tab is currently visible */
+                  var pitchPanel = body.querySelector('.scen-tab-panel[data-scen-panel="pitch"]');
+                  if (pitchPanel && !pitchPanel.hidden) _renderScenPitch(raw.data);
+                  return;
+                }
+                if (raw.type === 'error' && raw.code === 402) {
+                  window._showNoCredits && window._showNoCredits(raw.balance || 0);
+                  return;
+                }
+              }
+              return readChunk();
+            });
+          }
+          readChunk().catch(function(){});
+        }).catch(function(){});
+    }
+
+    /* Start background prefetch immediately */
+    _fetchScenPitch(false);
+
+    /* ── CFA Technical Analysis ── */
+    var cfaCharged = false;
+    var scenCfaCacheKey = 'scenario:cfa:' + (d.title || (d.situation || '').slice(0, 60));
+
+    function _renderScenCfa(cfaData) {
+      var cfaPanel = body.querySelector('.scen-cfa-panel');
+      if (!cfaPanel) return;
+      cfaPanel.innerHTML = buildCfaAnalysis(cfaData) +
+        '<div class="scen-cfa-thread" style="margin-top:4px;"></div>' +
+        '<div class="scen-followup-bar" style="border-top:1px solid #1a1a1a;padding-top:10px;margin-top:8px;">' +
+          '<div style="font-size:7px;letter-spacing:.25em;color:#4A9EDD;margin-bottom:6px;">ASK A FOLLOW-UP QUESTION</div>' +
+          '<div style="display:flex;gap:6px;">' +
+            '<input class="scen-cfa-fu-input" type="text" placeholder="e.g. How does the BPR allocation affect IHT?" ' +
+              'style="flex:1;background:#0c0c0c;border:1px solid #2a2a2a;color:#e0e0e0;font-size:10px;padding:7px 10px;outline:none;font-family:inherit;" />' +
+            '<button class="scen-cfa-fu-send" style="background:#4A9EDD;color:#000;font-size:7px;letter-spacing:.2em;padding:7px 10px;border:none;cursor:pointer;white-space:nowrap;">ASK ›</button>' +
+          '</div>' +
+        '</div>';
+      _wireCfaFollowUp(cfaData, cfaPanel);
+    }
+
+    function _wireCfaFollowUp(cfaData, cfaPanel) {
+      var cfaFuInput  = cfaPanel.querySelector('.scen-cfa-fu-input');
+      var cfaFuSend   = cfaPanel.querySelector('.scen-cfa-fu-send');
+      var cfaThread   = cfaPanel.querySelector('.scen-cfa-thread');
+      var winEl = body.closest('.intel-popwin') || body.parentElement;
+      if (!winEl._cfaHistory) winEl._cfaHistory = [];
+
+      function _submitCfaFollowUp() {
+        var q = cfaFuInput.value.trim();
+        if (!q || cfaFuSend.disabled) return;
+        cfaFuInput.value = '';
+        cfaFuSend.disabled = true;
+        cfaFuSend.textContent = '…';
+
+        var userBubble = document.createElement('div');
+        userBubble.style.cssText = 'text-align:right;margin-bottom:8px;';
+        userBubble.innerHTML = '<span style="display:inline-block;background:#1a1a1a;border:1px solid #2a2a2a;color:#e0e0e0;font-size:10px;padding:6px 10px;line-height:1.6;max-width:85%;text-align:left;">' + escH(q) + '</span>';
+        cfaThread.appendChild(userBubble);
+
+        var asstBubble = document.createElement('div');
+        asstBubble.style.cssText = 'margin-bottom:12px;';
+        asstBubble.innerHTML = '<div style="display:flex;gap:6px;align-items:flex-start;"><span style="color:#4A9EDD;font-size:7px;letter-spacing:.2em;padding-top:4px;white-space:nowrap;">CFA</span><div class="scen-cfa-resp" style="font-size:10px;color:#c8c8c8;line-height:1.7;flex:1;min-height:14px;">▍</div></div>';
+        cfaThread.appendChild(asstBubble);
+        cfaThread.scrollTop = cfaThread.scrollHeight;
+
+        var respEl = asstBubble.querySelector('.scen-cfa-resp');
+        var accumulated = '';
+
+        var fuHeaders = { 'Content-Type': 'application/json' };
+        if (window._authToken) fuHeaders['Authorization'] = 'Bearer ' + window._authToken;
+
+        var activeLensKey     = (window._assetLens && window._assetLens.key)          || 'universal';
+        var activeLensContext = (window._assetLens && window._assetLens.promptContext)  || '';
+        var activeLensLabel   = (window._assetLens && window._assetLens.label)          || '';
+
+        /* Build scenarioContext from CFA data so backend has full analytical context */
+        var cfaScenCtx = {
+          situation: (cfaData.suitabilityVerdict || '') + (cfaData.ipsAssessment ? ' Risk profile: ' + (cfaData.ipsAssessment.riskProfile || '') + '. Time horizon: ' + (cfaData.ipsAssessment.timeHorizon || '') + '.' : ''),
+          brokerBrief: cfaData.technicalVerdict || '',
+          keyConsiderations: [
+            cfaData.allocationFramework && cfaData.allocationFramework.recommendedAllocation ? 'Recommended allocation: ' + cfaData.allocationFramework.recommendedAllocation : null,
+            cfaData.allocationFramework && cfaData.allocationFramework.portfolioRationale    ? cfaData.allocationFramework.portfolioRationale : null,
+            cfaData.taxOptimisation && cfaData.taxOptimisation.length ? 'Tax: ' + cfaData.taxOptimisation.join('; ') : null,
+          ].filter(Boolean),
+          riskFlags: cfaData.riskFlags || [],
+        };
+
+        fetch('/.netlify/functions/search-stream', {
+          method: 'POST',
+          headers: fuHeaders,
+          body: JSON.stringify({
+            type: 'follow-up',
+            query: d.title ? (d.title + ': ' + d.situation) : (d.situation || ''),
+            question: q,
+            scenarioContext: cfaScenCtx,
+            conversationHistory: winEl._cfaHistory.slice(),
+            lensKey: activeLensKey,
+            lensContext: activeLensContext,
+            lensLabel: activeLensLabel,
+          }),
+        }).then(function(r) {
+          if (!r.ok || !r.body) {
+            respEl.textContent = 'Failed to get response. Please try again.';
+            respEl.style.color = '#D14040';
+            cfaFuSend.disabled = false; cfaFuSend.textContent = 'ASK ›';
+            return;
+          }
+          var reader  = r.body.getReader();
+          var decoder = new TextDecoder();
+          var lineBuf = '';
+
+          function readChunk() {
+            return reader.read().then(function(chunk) {
+              if (chunk.done) { cfaFuSend.disabled = false; cfaFuSend.textContent = 'ASK ›'; return; }
+              lineBuf += decoder.decode(chunk.value, { stream: true });
+              var lines = lineBuf.split('\n'); lineBuf = lines.pop();
+              for (var i = 0; i < lines.length; i++) {
+                var line = lines[i];
+                if (!line.startsWith('data: ')) continue;
+                var raw; try { raw = JSON.parse(line.slice(6)); } catch { continue; }
+                if (raw.type === 'text-delta') {
+                  accumulated += raw.text;
+                  respEl.textContent = accumulated + '▍';
+                  cfaThread.scrollTop = cfaThread.scrollHeight;
+                } else if (raw.type === 'text-done') {
+                  accumulated = raw.text || accumulated;
+                  respEl.textContent = accumulated;
+                  winEl._cfaHistory.push({ role: 'user', content: q });
+                  winEl._cfaHistory.push({ role: 'assistant', content: accumulated });
+                  if (winEl._cfaHistory.length > 20) winEl._cfaHistory = winEl._cfaHistory.slice(-20);
+                  cfaFuSend.disabled = false; cfaFuSend.textContent = 'ASK ›';
+                  window._loadCreditBalance && window._loadCreditBalance();
+                } else if (raw.type === 'error') {
+                  if (raw.code === 402) {
+                    respEl.textContent = 'Not enough credits (5 required).';
+                    respEl.style.color = '#D14040';
+                    window._showNoCredits && window._showNoCredits(raw.balance || 0);
+                  } else {
+                    respEl.textContent = 'Error — please try again.';
+                    respEl.style.color = '#D14040';
+                  }
+                  cfaFuSend.disabled = false; cfaFuSend.textContent = 'ASK ›';
+                }
+              }
+              return readChunk();
+            }).catch(function() {
+              respEl.textContent = 'Connection error — please try again.';
+              respEl.style.color = '#D14040';
+              cfaFuSend.disabled = false; cfaFuSend.textContent = 'ASK ›';
+            });
+          }
+          readChunk();
+        }).catch(function() {
+          respEl.textContent = 'Request failed — please try again.';
+          respEl.style.color = '#D14040';
+          cfaFuSend.disabled = false; cfaFuSend.textContent = 'ASK ›';
         });
+      }
+
+      cfaFuSend.addEventListener('click', _submitCfaFollowUp);
+      cfaFuInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') { e.preventDefault(); _submitCfaFollowUp(); }
       });
     }
+
+    function _fetchScenCfa(onDemand) {
+      if (_cache[scenCfaCacheKey]) { _renderScenCfa(_cache[scenCfaCacheKey]); return; }
+      var headers = { 'Content-Type': 'application/json' };
+      if (window._authToken) headers['Authorization'] = 'Bearer ' + window._authToken;
+      var cfaReqBody = JSON.stringify({ query: scenPitchQuery, type: 'scenario', section: 'cfa-analysis', lensKey: lensKeyNow, lensContext: lensCtxNow, prefetch: true });
+
+      fetch('/.netlify/functions/search-stream', { method: 'POST', headers: headers, body: cfaReqBody })
+        .then(function(r) {
+          if (!r.ok || !r.body) return;
+          var reader = r.body.getReader();
+          var decoder = new TextDecoder();
+          var lineBuf = '';
+          function readChunk() {
+            return reader.read().then(function(chunk) {
+              if (chunk.done) return;
+              lineBuf += decoder.decode(chunk.value, { stream: true });
+              var lines = lineBuf.split('\n'); lineBuf = lines.pop();
+              for (var i = 0; i < lines.length; i++) {
+                var line = lines[i];
+                if (!line.startsWith('data: ')) continue;
+                var raw; try { raw = JSON.parse(line.slice(6)); } catch { continue; }
+                if (raw.type === 'cache' || raw.type === 'done') {
+                  _cache[scenCfaCacheKey] = raw.data;
+                  var cfaPanel = body.querySelector('.scen-tab-panel[data-scen-panel="cfa"]');
+                  if (cfaPanel && !cfaPanel.hidden) _renderScenCfa(raw.data);
+                  return;
+                }
+                if (raw.type === 'error' && raw.code === 402) {
+                  window._showNoCredits && window._showNoCredits(raw.balance || 0);
+                  return;
+                }
+              }
+              return readChunk();
+            });
+          }
+          readChunk().catch(function(){});
+        }).catch(function(){});
+    }
+
+    /* Start CFA background prefetch immediately */
+    _fetchScenCfa(false);
+
+    /* Tab switching — charge 25 credits on first pitch click, 25 on first CFA click */
+    body.querySelectorAll('.concept-sec-btn[data-scen-tab]').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var tab = btn.getAttribute('data-scen-tab');
+
+        if (tab === 'pitch' && !pitchCharged) {
+          var chHeaders = { 'Content-Type': 'application/json' };
+          if (window._authToken) chHeaders['Authorization'] = 'Bearer ' + window._authToken;
+          fetch('/.netlify/functions/credits', {
+            method: 'POST', headers: chHeaders,
+            body: JSON.stringify({ action: 'deduct', amount: 25, description: 'intel:ifa-pitch-playbook' }),
+          }).then(function(r) { return r.json(); })
+          .then(function(res) {
+            if (res && res.error === 'insufficient') {
+              window._showNoCredits && window._showNoCredits(res.balance || 0);
+              return;
+            }
+            pitchCharged = true;
+            window._loadCreditBalance && window._loadCreditBalance();
+            body.querySelectorAll('.concept-sec-btn[data-scen-tab]').forEach(function(b){ b.classList.remove('active'); });
+            btn.classList.add('active');
+            body.querySelectorAll('.scen-tab-panel').forEach(function(p){ p.hidden = (p.getAttribute('data-scen-panel') !== tab); });
+            if (_cache[scenPitchCacheKey]) _renderScenPitch(_cache[scenPitchCacheKey]);
+            else _fetchScenPitch(true);
+          }).catch(function() {
+            pitchCharged = true;
+            body.querySelectorAll('.concept-sec-btn[data-scen-tab]').forEach(function(b){ b.classList.remove('active'); });
+            btn.classList.add('active');
+            body.querySelectorAll('.scen-tab-panel').forEach(function(p){ p.hidden = (p.getAttribute('data-scen-panel') !== tab); });
+            if (_cache[scenPitchCacheKey]) _renderScenPitch(_cache[scenPitchCacheKey]);
+            else _fetchScenPitch(true);
+          });
+          return;
+        }
+
+        if (tab === 'cfa' && !cfaCharged) {
+          var cfaChHeaders = { 'Content-Type': 'application/json' };
+          if (window._authToken) cfaChHeaders['Authorization'] = 'Bearer ' + window._authToken;
+          fetch('/.netlify/functions/credits', {
+            method: 'POST', headers: cfaChHeaders,
+            body: JSON.stringify({ action: 'deduct', amount: 25, description: 'intel:ifa-cfa-analysis' }),
+          }).then(function(r) { return r.json(); })
+          .then(function(res) {
+            if (res && res.error === 'insufficient') {
+              window._showNoCredits && window._showNoCredits(res.balance || 0);
+              return;
+            }
+            cfaCharged = true;
+            window._loadCreditBalance && window._loadCreditBalance();
+            body.querySelectorAll('.concept-sec-btn[data-scen-tab]').forEach(function(b){ b.classList.remove('active'); });
+            btn.classList.add('active');
+            body.querySelectorAll('.scen-tab-panel').forEach(function(p){ p.hidden = (p.getAttribute('data-scen-panel') !== tab); });
+            if (_cache[scenCfaCacheKey]) _renderScenCfa(_cache[scenCfaCacheKey]);
+            else _fetchScenCfa(true);
+          }).catch(function() {
+            cfaCharged = true;
+            body.querySelectorAll('.concept-sec-btn[data-scen-tab]').forEach(function(b){ b.classList.remove('active'); });
+            btn.classList.add('active');
+            body.querySelectorAll('.scen-tab-panel').forEach(function(p){ p.hidden = (p.getAttribute('data-scen-panel') !== tab); });
+            if (_cache[scenCfaCacheKey]) _renderScenCfa(_cache[scenCfaCacheKey]);
+            else _fetchScenCfa(true);
+          });
+          return;
+        }
+
+        body.querySelectorAll('.concept-sec-btn[data-scen-tab]').forEach(function(b){ b.classList.remove('active'); });
+        btn.classList.add('active');
+        body.querySelectorAll('.scen-tab-panel').forEach(function(p){ p.hidden = (p.getAttribute('data-scen-panel') !== tab); });
+      });
+    });
+
+    /* ── Institutional Analysis info button ── */
+    var iaInfoBtn = body.querySelector('.scen-ia-info-btn');
+    if (iaInfoBtn) {
+      iaInfoBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        var existing = body.querySelector('.scen-ia-tooltip');
+        if (existing) { existing.remove(); return; }
+        var tip = document.createElement('div');
+        tip.className = 'scen-ia-tooltip';
+        tip.style.cssText = 'position:absolute;z-index:9999;background:#0d0d0d;border:1px solid #4A9EDD;padding:14px 16px;width:280px;font-size:9.5px;line-height:1.7;color:#c8c8c8;box-shadow:0 4px 20px rgba(0,0,0,.6);';
+        tip.innerHTML =
+          '<div style="font-size:7.5px;letter-spacing:.2em;color:#4A9EDD;margin-bottom:10px;font-weight:700;">INSTITUTIONAL ANALYSIS — WHAT\'S INCLUDED</div>' +
+          '<div style="margin-bottom:6px;"><span style="color:#4A9EDD;">▸</span> <strong style="color:#fff;">Suitability Verdict</strong> — IPS/KYC ruling on this client</div>' +
+          '<div style="margin-bottom:6px;"><span style="color:#4A9EDD;">▸</span> <strong style="color:#fff;">Investment Policy Statement</strong> — Risk profile, time horizon, liquidity, tax points</div>' +
+          '<div style="margin-bottom:6px;"><span style="color:#4A9EDD;">▸</span> <strong style="color:#fff;">Allocation Framework</strong> — Recommended % with Markowitz / endowment model rationale</div>' +
+          '<div style="margin-bottom:6px;"><span style="color:#4A9EDD;">▸</span> <strong style="color:#fff;">Risk & Return Metrics</strong> — Sharpe, VaR, real return, duration — current vs with allocation</div>' +
+          '<div style="margin-bottom:6px;"><span style="color:#4A9EDD;">▸</span> <strong style="color:#fff;">Behavioural Risk Profile</strong> — Biases this client is most likely showing (Kahneman / Thaler) and how to counter them</div>' +
+          '<div style="margin-bottom:6px;"><span style="color:#4A9EDD;">▸</span> <strong style="color:#fff;">Tax Optimisation</strong> — CFP-level actions: BPR, EIS, CGT wrappers, IHT planning</div>' +
+          '<div style="margin-bottom:6px;"><span style="color:#4A9EDD;">▸</span> <strong style="color:#fff;">Technical Risk Flags</strong> — Concentration, liquidity, suitability, regulatory</div>' +
+          '<div style="margin-bottom:10px;"><span style="color:#4A9EDD;">▸</span> <strong style="color:#fff;">Technical Verdict</strong> — CFA / CFP / CWA analytical case in plain English</div>' +
+          '<div style="font-size:8px;color:#4A9EDD;letter-spacing:.1em;border-top:1px solid #1a1a1a;padding-top:8px;">Frameworks: CFA L1 · L2 · L3 · CFP · CWA · Kahneman · Thaler · Markowitz</div>' +
+          '<div style="font-size:8px;color:#555;margin-top:4px;">25 credits · follow-up questions 10 credits each · prefetched in background</div>';
+        /* Position relative to the button */
+        var btnRect = iaInfoBtn.getBoundingClientRect();
+        var bodyRect = (body.closest('.intel-popwin') || document.body).getBoundingClientRect();
+        tip.style.top  = (btnRect.bottom - bodyRect.top + 6) + 'px';
+        tip.style.left = Math.max(0, (btnRect.left - bodyRect.left - 220)) + 'px';
+        (body.closest('.intel-popwin') || document.body).appendChild(tip);
+        /* Close on outside click */
+        setTimeout(function() {
+          document.addEventListener('click', function _closeTip() {
+            tip.remove(); document.removeEventListener('click', _closeTip);
+          });
+        }, 10);
+      });
+    }
+
+    /* Follow-up conversation handler */
+    var fuInput  = body.querySelector('.scen-fu-input');
+    var fuSend   = body.querySelector('.scen-fu-send');
+    var fuThread = body.querySelector('.scen-thread');
+
+    /* Store original scenario data on body element for context */
+    body._scenData = d;
+    /* Init history if not already set (preserves thread across tab switches) */
+    var win = body.closest('.intel-popwin') || body.parentElement;
+    if (!win._scenHistory) win._scenHistory = [];
+
+    function _submitFollowUp() {
+      var q = fuInput.value.trim();
+      if (!q || fuSend.disabled) return;
+      fuInput.value = '';
+      fuSend.disabled = true;
+      fuSend.textContent = '…';
+
+      /* User bubble */
+      var userBubble = document.createElement('div');
+      userBubble.style.cssText = 'text-align:right;margin-bottom:8px;';
+      userBubble.innerHTML = '<span style="display:inline-block;background:#1a1a1a;border:1px solid #2a2a2a;color:#e0e0e0;font-size:10px;padding:6px 10px;line-height:1.6;max-width:85%;text-align:left;">' + escH(q) + '</span>';
+      fuThread.appendChild(userBubble);
+
+      /* Assistant bubble */
+      var asstBubble = document.createElement('div');
+      asstBubble.style.cssText = 'margin-bottom:12px;';
+      asstBubble.innerHTML = '<div style="display:flex;gap:6px;align-items:flex-start;"><span style="color:#E97132;font-size:7px;letter-spacing:.2em;padding-top:4px;white-space:nowrap;">IFA</span><div class="scen-fu-resp" style="font-size:10px;color:#c8c8c8;line-height:1.7;flex:1;min-height:14px;">▍</div></div>';
+      fuThread.appendChild(asstBubble);
+      fuThread.scrollTop = fuThread.scrollHeight;
+
+      var respEl = asstBubble.querySelector('.scen-fu-resp');
+      var accumulated = '';
+
+      var fuHeaders = { 'Content-Type': 'application/json' };
+      if (window._authToken) fuHeaders['Authorization'] = 'Bearer ' + window._authToken;
+
+      var activeLensKey     = (window._assetLens && window._assetLens.key)          || 'universal';
+      var activeLensContext = (window._assetLens && window._assetLens.promptContext)  || '';
+      var activeLensLabel   = (window._assetLens && window._assetLens.label)          || '';
+
+      fetch('/.netlify/functions/search-stream', {
+        method: 'POST',
+        headers: fuHeaders,
+        body: JSON.stringify({
+          type: 'follow-up',
+          query: d.title ? (d.title + ': ' + d.situation) : (d.situation || ''),
+          question: q,
+          scenarioContext: { situation: d.situation, brokerBrief: d.brokerBrief, keyConsiderations: d.keyConsiderations, riskFlags: d.riskFlags },
+          conversationHistory: win._scenHistory.slice(),
+          lensKey: activeLensKey,
+          lensContext: activeLensContext,
+          lensLabel: activeLensLabel,
+        }),
+      }).then(function(r) {
+        if (!r.ok || !r.body) {
+          respEl.textContent = 'Failed to get response. Please try again.';
+          respEl.style.color = '#D14040';
+          fuSend.disabled = false; fuSend.textContent = 'ASK ›';
+          return;
+        }
+        var reader  = r.body.getReader();
+        var decoder = new TextDecoder();
+        var lineBuf = '';
+
+        function readChunk() {
+          return reader.read().then(function(chunk) {
+            if (chunk.done) {
+              fuSend.disabled = false; fuSend.textContent = 'ASK ›';
+              return;
+            }
+            lineBuf += decoder.decode(chunk.value, { stream: true });
+            var lines = lineBuf.split('\n');
+            lineBuf = lines.pop();
+            for (var i = 0; i < lines.length; i++) {
+              var line = lines[i];
+              if (!line.startsWith('data: ')) continue;
+              var raw;
+              try { raw = JSON.parse(line.slice(6)); } catch { continue; }
+              if (raw.type === 'text-delta') {
+                accumulated += raw.text;
+                respEl.textContent = accumulated + '▍';
+                fuThread.scrollTop = fuThread.scrollHeight;
+              } else if (raw.type === 'text-done') {
+                accumulated = raw.text || accumulated;
+                respEl.textContent = accumulated;
+                win._scenHistory.push({ role: 'user', content: q });
+                win._scenHistory.push({ role: 'assistant', content: accumulated });
+                /* Keep last 10 exchanges (20 messages) */
+                if (win._scenHistory.length > 20) win._scenHistory = win._scenHistory.slice(-20);
+                fuSend.disabled = false; fuSend.textContent = 'ASK ›';
+                window._loadCreditBalance && window._loadCreditBalance();
+              } else if (raw.type === 'error') {
+                if (raw.code === 402) {
+                  respEl.textContent = 'Not enough credits (5 required).';
+                  respEl.style.color = '#D14040';
+                  window._showNoCredits && window._showNoCredits(raw.balance || 0);
+                } else {
+                  respEl.textContent = 'Error — please try again.';
+                  respEl.style.color = '#D14040';
+                }
+                fuSend.disabled = false; fuSend.textContent = 'ASK ›';
+              }
+            }
+            return readChunk();
+          }).catch(function() {
+            respEl.textContent = 'Connection error — please try again.';
+            respEl.style.color = '#D14040';
+            fuSend.disabled = false; fuSend.textContent = 'ASK ›';
+          });
+        }
+        readChunk();
+      }).catch(function() {
+        respEl.textContent = 'Request failed — please try again.';
+        respEl.style.color = '#D14040';
+        fuSend.disabled = false; fuSend.textContent = 'ASK ›';
+      });
+    }
+
+    fuSend.addEventListener('click', _submitFollowUp);
+    fuInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') { e.preventDefault(); _submitFollowUp(); }
+    });
   }
 
   function renderPopout(d, win) {
@@ -1602,39 +2082,38 @@
   function buildPitchPlaybook(pitch, brokerNote) {
     if (!pitch && !brokerNote) return '';
     if (!pitch) {
-      return '<div class=”sp-section”><div class=”sp-sec-lbl”>BROKER NOTE</div><div class=”sp-text”>' + escH(brokerNote) + '</div></div>';
+      return '<div class=”sp-section”><div class=”sp-sec-lbl”>BROKER NOTE</div><div class=”sp-pitch”>' + escH(brokerNote) + '</div></div>';
     }
 
-    /* Opening line — top-level sp-tagline, IDENTICAL structure to History/Outcome headline */
+    var OB = '<span style=”color:#E97132;flex-shrink:0;margin-right:6px;”>▪</span>'; /* inline orange bullet */
+
     var openLine = pitch.openingLine || '';
     var driverBadge = pitch.dominantDriverTarget ? ' — ' + pitch.dominantDriverTarget.toUpperCase() + ' DRIVER' : '';
     var html = openLine
-      ? '<div class=”sp-tagline” style=”font-size:10px;margin-bottom:8px;”>”' + escH(openLine) + '”</div>' +
-        '<div class=”sp-sec-lbl” style=”font-size:7px;letter-spacing:.3em;color:#E97132;margin-bottom:6px;text-transform:uppercase;”>OPENING LINE' + escH(driverBadge) + '</div>'
+      ? '<div class=”sp-section”><div class=”sp-sec-lbl”>OPENING LINE' + escH(driverBadge) + '</div>' +
+        '<div style=”font-size:10px;color:#E97132;letter-spacing:.06em;line-height:1.6;margin-bottom:4px;”>”' + escH(openLine) + '”</div></div>'
       : '';
-
-    /* All remaining sections: sp-section > sp-sec-lbl + sp-text or sp-facts
-       Identical pattern to _renderHistorySection / _renderOutcomeSection */
 
     var bn = pitch.brokerNote || brokerNote;
     if (bn) html +=
-      '<div class=”sp-section”><div class=”sp-sec-lbl”>BROKER NOTE</div><div class=”sp-text”>' + escH(bn) + '</div></div>';
+      '<div class=”sp-section”><div class=”sp-sec-lbl”>BROKER NOTE</div><div class=”sp-pitch”>' + escH(bn) + '</div></div>';
 
     if (pitch.logicalCase && pitch.logicalCase.length) html +=
-      '<div class=”sp-section”><div class=”sp-sec-lbl”>THE LOGICAL CASE — BUILD CERTAINTY FIRST</div><ul class=”sp-facts”>' +
-        pitch.logicalCase.map(function (f) { return '<li>' + escH(f) + '</li>'; }).join('') +
-      '</ul></div>';
+      '<div class=”sp-section”><div class=”sp-sec-lbl”>THE LOGICAL CASE — BUILD CERTAINTY FIRST</div>' +
+      pitch.logicalCase.map(function (f) {
+        return '<div style=”display:flex;gap:6px;padding:3px 0;border-bottom:1px solid #181818;font-size:10px;color:#c8c8c8;line-height:1.6;”>' + OB + escH(f) + '</div>';
+      }).join('') + '</div>';
 
     if (pitch.socraticDissonancePrompt) html +=
       '<div class=”sp-section”><div class=”sp-sec-lbl”>SOCRATIC QUESTION — EXPOSE THE GAP</div>' +
-      '<div class=”sp-text” style=”color:#E97132;”>”' + escH(pitch.socraticDissonancePrompt) + '”</div></div>';
+      '<div class=”sp-pitch” style=”color:#E97132;border-left-color:#E97132;”>”' + escH(pitch.socraticDissonancePrompt) + '”</div></div>';
 
     var fp = pitch.asIfFuturePace;
     if (fp && (fp.lossFrame || fp.gainFrame)) {
-      html += '<div class=”sp-section”><div class=”sp-sec-lbl”>FUTURE PACE — WITHOUT VS WITH</div>';
-      if (fp.lossFrame) html += '<div class=”sp-text” style=”color:#E97132;margin-bottom:6px;”><span style=”letter-spacing:.2em;font-size:7px;”>WITHOUT — </span>' + escH(fp.lossFrame) + '</div>';
-      if (fp.gainFrame) html += '<div class=”sp-text” style=”color:#6bcb77;”><span style=”letter-spacing:.2em;font-size:7px;”>WITH — </span>' + escH(fp.gainFrame) + '</div>';
-      html += '</div>';
+      var fpRows = '';
+      if (fp.lossFrame) fpRows += '<div style=”display:flex;gap:6px;padding:3px 0;border-bottom:1px solid #181818;font-size:10px;color:#c8c8c8;line-height:1.6;”><span style=”color:#E97132;font-size:7px;letter-spacing:.2em;text-transform:uppercase;flex-shrink:0;padding-top:2px;”>WITHOUT</span>' + escH(fp.lossFrame) + '</div>';
+      if (fp.gainFrame) fpRows += '<div style=”display:flex;gap:6px;padding:3px 0;border-bottom:1px solid #181818;font-size:10px;color:#c8c8c8;line-height:1.6;”><span style=”color:#6bcb77;font-size:7px;letter-spacing:.2em;text-transform:uppercase;flex-shrink:0;padding-top:2px;”>WITH</span>' + escH(fp.gainFrame) + '</div>';
+      html += '<div class=”sp-section”><div class=”sp-sec-lbl”>FUTURE PACE — WITHOUT VS WITH</div>' + fpRows + '</div>';
     } else if (pitch.emotionalCase) {
       html += '<div class=”sp-section”><div class=”sp-sec-lbl”>FUTURE PACE</div><div class=”sp-text”>' + escH(pitch.emotionalCase) + '</div></div>';
     }
@@ -1645,41 +2124,118 @@
 
     if (pitch.painPoint) html +=
       '<div class=”sp-section”><div class=”sp-sec-lbl”>THEIR PAIN POINT</div>' +
-      '<div class=”sp-text” style=”color:#E97132;”>' + escH(pitch.painPoint) + '</div></div>';
+      '<div class=”sp-pitch” style=”color:#E97132;border-left-color:#E97132;”>' + escH(pitch.painPoint) + '</div></div>';
 
     if (pitch.spinQuestions && pitch.spinQuestions.length) {
       var spinLabels = ['SITUATION', 'PROBLEM / IMPLICATION', 'NEED-PAYOFF'];
-      html += '<div class=”sp-section”><div class=”sp-sec-lbl”>SPIN QUESTIONS — ASK FIRST</div><ul class=”sp-facts”>' +
+      html += '<div class=”sp-section”><div class=”sp-sec-lbl”>SPIN QUESTIONS — ASK FIRST</div>' +
         pitch.spinQuestions.map(function (q, i) {
           var clean = q.replace(/^(situation|problem\s*[\/]?\s*implication|need[-\s]payoff)[:\s]*/i, '').trim();
-          return '<li><span style=”color:#E97132;font-size:7px;letter-spacing:.2em;text-transform:uppercase;margin-right:6px;”>' + (spinLabels[i] || '') + '</span>' + escH(clean) + '</li>';
-        }).join('') +
-      '</ul></div>';
+          return '<div style=”display:flex;gap:6px;padding:3px 0;border-bottom:1px solid #181818;font-size:10px;color:#c8c8c8;line-height:1.6;”><span style=”color:#E97132;font-size:7px;letter-spacing:.2em;text-transform:uppercase;flex-shrink:0;padding-top:2px;”>' + (spinLabels[i] || '') + '</span>' + escH(clean) + '</div>';
+        }).join('') + '</div>';
     }
 
     if (pitch.objections && pitch.objections.length) {
-      html += '<div class=”sp-section”><div class=”sp-sec-lbl”>HANDLE OBJECTIONS</div><div class=”sp-timeline”>' +
+      html += '<div class=”sp-section”><div class=”sp-sec-lbl”>HANDLE OBJECTIONS</div>' +
         pitch.objections.map(function (o) {
-          return '<div class=”sp-tl-row”>' +
-            '<div class=”sp-tl-date”>”' + escH(o.objection || '') + '”</div>' +
-            '<div class=”sp-tl-evt”>' + escH(o.rebuttal || '') + '</div>' +
-          '</div>';
-        }).join('') +
-      '</div></div>';
+          return '<div style=”display:flex;gap:6px;padding:4px 0;border-bottom:1px solid #181818;font-size:10px;color:#c8c8c8;line-height:1.6;”>' + OB + '<span><span style=”color:#E97132;font-style:italic;”>”' + escH(o.objection || '') + '”</span> — ' + escH(o.rebuttal || '') + '</span></div>';
+        }).join('') + '</div>';
     }
 
     if (pitch.urgencyLine || pitch.socialProof) {
-      html += '<div class=”sp-section”><div class=”sp-sec-lbl”>TIMING & SOCIAL PROOF</div><ul class=”sp-facts”>';
-      if (pitch.urgencyLine) html += '<li>' + escH(pitch.urgencyLine) + '</li>';
-      if (pitch.socialProof) html += '<li>' + escH(pitch.socialProof) + '</li>';
-      html += '</ul></div>';
+      var usp = '';
+      if (pitch.urgencyLine) usp += '<div style=”display:flex;gap:6px;padding:3px 0;border-bottom:1px solid #181818;font-size:10px;color:#c8c8c8;line-height:1.6;”>' + OB + escH(pitch.urgencyLine) + '</div>';
+      if (pitch.socialProof) usp += '<div style=”display:flex;gap:6px;padding:3px 0;border-bottom:1px solid #181818;font-size:10px;color:#c8c8c8;line-height:1.6;”>' + OB + escH(pitch.socialProof) + '</div>';
+      html += '<div class=”sp-section”><div class=”sp-sec-lbl”>TIMING & SOCIAL PROOF</div>' + usp + '</div>';
     }
 
     if (pitch.triggerAgreementTemplate) html +=
       '<div class=”sp-section”><div class=”sp-sec-lbl”>TRIGGER AGREEMENT — CONDITIONAL CLOSE</div>' +
-      '<div class=”sp-text” style=”font-style:italic;”>' + escH(pitch.triggerAgreementTemplate) + '</div></div>';
+      '<div class=”sp-pitch”>' + escH(pitch.triggerAgreementTemplate) + '</div></div>';
 
     return html;
+  }
+
+  function buildCfaAnalysis(data) {
+    if (!data) return '<div class="sp-intel-load">ANALYSIS UNAVAILABLE<span class="sp-intel-ld"></span></div>';
+    var BLU = '#4A9EDD', A = '#E97132', GRN = '#6bcb77', RED = '#D14040';
+    var html = '';
+
+    if (data.suitabilityVerdict) html +=
+      '<div class="sp-section">' +
+        '<div class="sp-sec-lbl" style="color:' + BLU + ';">SUITABILITY VERDICT — CFA/KYC</div>' +
+        '<div class="sp-pitch" style="border-left-color:' + BLU + ';color:#c8c8c8;">' + escH(data.suitabilityVerdict) + '</div>' +
+      '</div>';
+
+    var ips = data.ipsAssessment;
+    if (ips) {
+      var ipsRows = [
+        { key: 'riskProfile',        label: 'RISK PROFILE' },
+        { key: 'timeHorizon',        label: 'TIME HORIZON' },
+        { key: 'liquidityNeeds',     label: 'LIQUIDITY' },
+        { key: 'taxConsiderations',  label: 'TAX POINTS' },
+      ];
+      html += '<div class="sp-section"><div class="sp-sec-lbl" style="color:' + BLU + ';">INVESTMENT POLICY STATEMENT</div>' +
+        ipsRows.map(function(r) {
+          return ips[r.key] ? '<div style="display:flex;gap:8px;padding:4px 0;border-bottom:1px solid #181818;font-size:10px;color:#c8c8c8;line-height:1.6;">' +
+            '<span style="color:' + BLU + ';font-size:7px;letter-spacing:.12em;flex-shrink:0;padding-top:2px;min-width:80px;">' + r.label + '</span>' +
+            escH(ips[r.key]) + '</div>' : '';
+        }).join('') +
+      '</div>';
+    }
+
+    var af = data.allocationFramework;
+    if (af) {
+      html += '<div class="sp-section"><div class="sp-sec-lbl" style="color:' + BLU + ';">ALLOCATION FRAMEWORK — MARKOWITZ / ENDOWMENT MODEL</div>' +
+        (af.recommendedAllocation ? '<div style="display:flex;gap:8px;padding:4px 0;border-bottom:1px solid #181818;font-size:10px;color:#c8c8c8;line-height:1.6;"><span style="color:' + BLU + ';font-size:7px;letter-spacing:.12em;flex-shrink:0;padding-top:2px;min-width:80px;">RECOMMENDED</span>' + escH(af.recommendedAllocation) + '</div>' : '') +
+        (af.portfolioRationale ? '<div style="display:flex;gap:8px;padding:4px 0;border-bottom:1px solid #181818;font-size:10px;color:#c8c8c8;line-height:1.6;"><span style="color:' + BLU + ';font-size:7px;letter-spacing:.12em;flex-shrink:0;padding-top:2px;min-width:80px;">RATIONALE</span>' + escH(af.portfolioRationale) + '</div>' : '') +
+        (af.modelComparison ? '<div style="display:flex;gap:8px;padding:4px 0;font-size:10px;color:#c8c8c8;line-height:1.6;"><span style="color:' + BLU + ';font-size:7px;letter-spacing:.12em;flex-shrink:0;padding-top:2px;min-width:80px;">vs BENCHMARK</span>' + escH(af.modelComparison) + '</div>' : '') +
+      '</div>';
+    }
+
+    if (data.keyMetrics && data.keyMetrics.length) {
+      html += '<div class="sp-section"><div class="sp-sec-lbl" style="color:' + BLU + ';">RISK / RETURN METRICS</div>' +
+        data.keyMetrics.map(function(m) {
+          return '<div style="margin-bottom:8px;padding:8px;background:#0c0c0c;border:1px solid #1a1a1a;border-left:2px solid ' + BLU + ';">' +
+            '<div style="font-size:8px;color:' + BLU + ';letter-spacing:.12em;font-weight:700;margin-bottom:5px;">' + escH(m.metric || '') + '</div>' +
+            (m.currentPosition ? '<div style="font-size:9.5px;color:rgba(255,255,255,0.5);margin-bottom:2px;"><span style="color:#444;font-size:8px;">NOW → </span>' + escH(m.currentPosition) + '</div>' : '') +
+            (m.withAllocation  ? '<div style="font-size:9.5px;color:' + GRN + ';"><span style="color:#444;font-size:8px;">WITH → </span>' + escH(m.withAllocation) + '</div>' : '') +
+          '</div>';
+        }).join('') +
+      '</div>';
+    }
+
+    if (data.behaviouralProfile && data.behaviouralProfile.length) {
+      html += '<div class="sp-section"><div class="sp-sec-lbl" style="color:' + BLU + ';">BEHAVIOURAL RISK — KAHNEMAN / THALER</div>' +
+        data.behaviouralProfile.map(function(b) {
+          return '<div style="margin-bottom:8px;padding:8px;background:#0c0c0c;border:1px solid #1a1a1a;">' +
+            '<div style="font-size:8px;color:' + A + ';letter-spacing:.12em;font-weight:700;margin-bottom:3px;">' + escH(b.bias || '') + '</div>' +
+            (b.signal         ? '<div style="font-size:9.5px;color:rgba(255,255,255,0.45);margin-bottom:4px;">' + escH(b.signal) + '</div>' : '') +
+            (b.advisorResponse ? '<div style="font-size:9.5px;color:#c8c8c8;border-left:2px solid ' + BLU + ';padding-left:7px;">' + escH(b.advisorResponse) + '</div>' : '') +
+          '</div>';
+        }).join('') +
+      '</div>';
+    }
+
+    if (data.taxOptimisation && data.taxOptimisation.length) html +=
+      '<div class="sp-section">' +
+        '<div class="sp-sec-lbl" style="color:' + BLU + ';">TAX OPTIMISATION — CFP LENS</div>' +
+        '<ul class="sp-facts">' + data.taxOptimisation.map(function(t){ return '<li>' + escH(t) + '</li>'; }).join('') + '</ul>' +
+      '</div>';
+
+    if (data.riskFlags && data.riskFlags.length) html +=
+      '<div class="sp-section">' +
+        '<div class="sp-sec-lbl" style="color:' + RED + ';">TECHNICAL RISK FLAGS</div>' +
+        '<ul class="sp-facts">' + data.riskFlags.map(function(r){ return '<li style="color:' + RED + ';">' + escH(r) + '</li>'; }).join('') + '</ul>' +
+      '</div>';
+
+    if (data.technicalVerdict) html +=
+      '<div class="sp-section">' +
+        '<div class="sp-sec-lbl" style="color:' + BLU + ';">TECHNICAL VERDICT</div>' +
+        '<div class="sp-pitch" style="border-left-color:' + BLU + ';color:#c8c8c8;">' + escH(data.technicalVerdict) + '</div>' +
+      '</div>';
+
+    return html || '<div style="padding:10px;font-size:10px;color:#555;">Analysis unavailable.</div>';
   }
 
   function renderCompany(d, body) {
@@ -2856,7 +3412,6 @@
     var y = opts.y != null ? opts.y : (80  + Math.random() * 40);
     var w = opts.w || 420;
     var h = opts.h || 500;
-    if (window._sharedZ < 9000) window._sharedZ = 9000;
     win.style.cssText = 'top:' + y + 'px;left:' + x + 'px;width:' + w + 'px;height:' + h + 'px;z-index:' + (++window._sharedZ) + ';';
 
     win.innerHTML =

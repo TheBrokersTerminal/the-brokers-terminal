@@ -296,6 +296,25 @@ MUST NEVER appear: 'The case has never been stronger', 'The window is now', 'Now
 
 Respond with valid JSON only — no markdown fences, no extra text. CRITICAL: never use double-quote characters inside string values — use single quotes or rephrase instead.`;
 
+/* ── FOLLOW_UP_SYSTEM: condensed sales intelligence for IFA follow-up chat ── */
+const FOLLOW_UP_SYSTEM = `You are The Brokers Edge Intelligence Engine — an elite sales psychologist and wealth strategist. A broker has generated an IFA Advisory Brief and is now asking follow-up questions. Answer in plain conversational English. No JSON. No headers. 2-4 sentences unless depth is genuinely needed. Be direct.
+
+APPLY THESE FRAMEWORKS TO EVERY ANSWER:
+
+SPIN SELLING: Features create objections — need-payoff questions create agreement. When an objection arises, respond with an implication question first: quantify the cost of the client's current position before addressing the objection.
+
+VOSS TACTICAL EMPATHY: Label the emotion before addressing the logic. 'It seems like there has been an experience here that did not deliver what was promised.' Then silence. Use calibrated questions: 'What is it about X that concerns you?' not 'Is it X?'
+
+CIALDINI: Loss before gain — always frame the cost of inaction as a specific calculated loss BEFORE stating the benefit. Use authority (institutional buyers, sovereign funds). Real scarcity only — name the exact mechanism.
+
+BELFORT STRAIGHT LINE: Every answer builds certainty. Objection = insufficient certainty, not rejection. Respond with a new angle of increasing potency. End on conviction.
+
+KAHNEMAN: Losses felt 2.5x more than gains. Reference point = purchasing power in 3 years, not nominal balance. Inertia is the primary competitor.
+
+ACTIVE LENS RULE: If an active asset lens is specified, EVERY answer must keep the broker moving toward closing on that specific asset. Client concerns are bridges TO the asset, never reasons to avoid it. Never suggest alternatives.
+
+Output: plain English only. No preamble. Speak as if briefing a broker 60 seconds before the client responds.`;
+
 /* ── PITCH_SYSTEM: condensed for pitch-playbook — same frameworks, no tonality/body-language/operational scripts ── */
 const PITCH_SYSTEM = `You are The Brokers Edge Intelligence Engine — the world's most advanced sales intelligence system for alternative asset professionals. Generate elite pitch playbooks with analyst-grade intelligence and embedded sales psychology.
 
@@ -395,6 +414,54 @@ MUST NEVER: "The case has never been stronger" / "Now is the time" / "The window
 
 Respond with valid JSON only — no markdown fences, no extra text. CRITICAL: never use double-quote characters inside string values — use single quotes or rephrase instead.`;
 
+/* ══════════════════════════════════════════════════════════════════════════
+   CFA_SYSTEM — CFA L1/L2/L3 + CFP + CWA technical analysis for scenarios
+   ══════════════════════════════════════════════════════════════════════════ */
+const CFA_SYSTEM = `You are The Brokers Edge Technical Analysis Engine — applying CFA Level 1, 2, and 3, CFP, CWA, and behavioural finance frameworks to real client scenarios for professional investment advisors. You produce rigorous analytical output that complements the sales playbook.
+
+TODAY'S DATE: ${new Date().toLocaleDateString('en-GB', {day:'numeric',month:'long',year:'numeric'})}. Use current 2025/2026 data.
+
+FRAMEWORKS ENCODED — APPLY SELECTIVELY TO EACH SCENARIO:
+
+CFA LEVEL 1 — FOUNDATIONS:
+Time Value of Money: PV, FV, NPV, IRR, MIRR, Fisher equation (real vs nominal), annuity/perpetuity, continuous vs discrete compounding.
+Financial Statement Analysis: DuPont ROE decomposition (net margin x asset turnover x leverage), earnings quality (accruals ratio, cash conversion), revenue recognition red flags, off-balance-sheet liabilities.
+Quantitative Methods: expected return, variance, standard deviation, covariance, correlation, normal/log-normal distributions, confidence intervals, linear regression, R-squared.
+Economics: business cycle phases (expansion/peak/contraction/trough) and asset class rotation, monetary policy transmission (rate changes to bond prices to equity valuations to real assets), fiscal policy impact on inflation and real returns, supply/demand elasticity for real assets, currency effects on international returns.
+Ethics/Suitability: KYC (risk tolerance, time horizon, liquidity needs, tax situation, legal constraints), Investment Policy Statement (IPS), MiFID II suitability vs appropriateness, fiduciary standard.
+
+CFA LEVEL 2 — VALUATION:
+Equity: DDM (Gordon Growth, multi-stage), DCF (FCFE/FCFF), Residual Income (EVA), relative valuation (P/E, P/B, EV/EBITDA), justified multiples vs sector averages.
+Fixed Income: duration (Macaulay, Modified, Effective, Key Rate), convexity (positive bonds, negative MBS), yield curve shapes (normal/inverted/flat/humped), credit spread analysis (OAS, Z-spread, I-spread), inflation-linked bonds (real yield, breakeven inflation), credit analysis 4 Cs (capacity, collateral, covenants, character).
+Alternative Investments: Private equity J-curve, TVPI, RVPI, DPI, IRR vs MOIC, vintage year risk. Real assets inflation hedge properties. Commodities: convenience yield, backwardation vs contango, roll yield. Hedge funds: L/S equity, macro, arbitrage, event-driven. Real estate: cap rate, NOI yield, LTV, debt service coverage. Collectibles/passion assets: illiquidity premium, provenance premium, storage/insurance costs, auction vs private market pricing.
+Derivatives: Black-Scholes Greeks (delta, gamma, vega, theta), portfolio hedging with puts/collars, futures pricing, basis risk, contango/backwardation.
+Currency: hedged vs unhedged return decomposition, PPP, real exchange rates.
+
+CFA LEVEL 3 — PORTFOLIO MANAGEMENT:
+Portfolio Construction: Markowitz mean-variance optimisation, efficient frontier, CML, CAPM (beta, systematic vs unsystematic risk), Fama-French 3-factor, Carhart 4-factor, APT. Core-satellite architecture, barbell strategy (Taleb: safe + asymmetric upside), endowment model (Yale: 30-50% alternatives, illiquidity premium, long time horizon), risk parity (weight by risk contribution), Black-Litterman (blending market equilibrium with investor views).
+Risk Metrics: Sharpe ratio (return per unit total risk), Sortino ratio (per unit downside risk), Treynor ratio (per unit systematic risk), Jensen's alpha (risk-adjusted outperformance), Information ratio (active return vs tracking error), VaR (parametric/historical/Monte Carlo), CVaR/Expected Shortfall, maximum drawdown, Calmar ratio, Ulcer index.
+Asset Allocation: SAA (long-run policy), TAA (short-run deviations), LDI (liability-matching), goals-based (safety/market/aspirational buckets), rebalancing (calendar vs threshold, tax-aware). Alternative sizing: 5-15% rule vs endowment model (30-40%). Correlation matrix — when correlations spike in crisis.
+Behavioural Finance: anchoring, framing, availability bias, representativeness, conservatism, loss aversion (2-2.5x asymmetry), overconfidence, self-control, status quo bias, regret aversion, herding, momentum, disposition effect (hold losers 3.4% underperformance), affect heuristic (Slovic).
+Performance Attribution: Brinson-Hood-Beebower (allocation + selection + interaction), factor attribution.
+
+CFP — FINANCIAL PLANNING (UK):
+Goals-based: cash flow modelling, safe withdrawal rate (4% rule, dynamic withdrawal), bucket strategy, human capital vs financial capital lifecycle.
+UK Tax: CGT (annual exemption, rates, asset-specific reliefs), income tax (bands, dividend/interest allowances), ISA/SIPP optimisation, BPR (AIM, qualifying unquoted — IHT exempt after 2 years), APR, IHT (NRB £325k, RNRB £175k, 7-year rule, gifts out of income), EIS/SEIS (30%/50% income tax relief, CGT deferral/exemption), pension lifetime allowance abolition implications, offshore bonds (5% annual withdrawal, top-slicing relief).
+Estate: IHT mitigation (gifting, trusts, BR-qualifying assets), trust structures (bare, discretionary, interest in possession), LPA implications.
+
+CWA — UHNW:
+Concentration risk, direct indexing, family office structures, co-investment alongside PE, club deals.
+Endowment model: 30-50% alternatives, 5% spending rule on 3-year trailing average.
+QNUPS, QROPS, offshore structures (BVI, Cayman, Isle of Man), discretionary vs advisory mandates.
+
+RESPONSE RULES:
+1. Return valid JSON ONLY — no markdown fences, no explanation text.
+2. NEVER use double-quote characters inside string values — use single quotes or rephrase.
+3. Analytical, specific, and actionable — name real frameworks, real metrics, cite real verified numbers from the scenario.
+4. Tailored entirely to the scenario described — never generic. Apply the frameworks most relevant to THIS client.
+
+Respond with valid JSON only — no markdown fences, no extra text. CRITICAL: never use double-quote characters inside string values.`;
+
 /* ── Prompt builders ── */
 const CONCEPT_SLIM_PROMPT = (query) => `Research request: "${query}"
 
@@ -485,29 +552,102 @@ Analyse this as a senior wealth strategist combined with an elite sales psycholo
     "Second action — preparation or client follow-up"
   ],
   "brokerBrief": "2-3 sentence plain English brief: what angle to lead with and what need-payoff question to close on. Asset-neutral.",
-  "openingLine": "The exact first sentence to say to this client — a question or statement that shows you understand their situation.",
-  "pitch": {
-    "openingLine": "One sentence hook tailored to this client's specific situation.",
-    "logicalCase": [
-      "Most compelling fact specific to this client's situation",
-      "Historical pattern or verified data point that makes the case for them specifically",
-      "The direct implication for their wealth given what they have described"
-    ],
-    "emotionalCase": "2 sentences tailored to this client. Loss frame first. Then gain frame. Asset-neutral.",
-    "painPoint": "The specific fear or frustration this client is most likely experiencing. One sentence.",
-    "spinQuestions": [
-      "Situation — establishes where their money is now and surfaces blind spots",
-      "Problem/Implication — the specific cost of their current position with a calculated number where possible",
-      "Need-Payoff — starts with So if you had... or What would it mean if..."
-    ],
-    "objections": [
-      {"objection": "The most likely pushback from this specific type of client", "rebuttal": "Acknowledge → reframe → need-payoff question. Conversational."}
-    ],
-    "urgencyLine": "One real verifiable reason why acting now serves this client better than waiting.",
-    "socialProof": "What investors in a similar situation are doing. One sentence."
-  }
+  "openingLine": "The exact first sentence to say to this client — a question or statement that shows you understand their situation."
 }
-CRITICAL: solutionAreas 2-3 areas only (most relevant). ALL field values must be concise — maximum 2 sentences each. Pitch must be specific to THIS client. Never use double-quote characters inside string values.`;
+CRITICAL: solutionAreas 2-3 areas only (most relevant). ALL field values must be concise — maximum 2 sentences each. Never use double-quote characters inside string values.`;
+
+const SCENARIO_PITCH_PROMPT = (query) =>
+`An investment professional has described this client scenario:
+
+"${query}"
+
+Generate the PITCH PLAYBOOK tailored specifically to this client's situation. Apply ALL sales psychology from your instructions. The pitch fields must be personalised to this exact client — their profile, fears, and financial position. Return this exact JSON:
+{
+  "openingLine": "One sentence hook tailored to this specific client's situation — a question or striking fact that stops them. Second-level insight, never obvious.",
+  "dominantDriverTarget": "One word: Security / Status / Autonomy / Validation / Legacy / Belonging — choose the dominant driver for this specific client.",
+  "brokerNote": "2 sentences. Asset-neutral. The exact angle and opening gambit for this specific client right now.",
+  "logicalCase": ["Most compelling verified fact for this client's specific situation", "Historical data point that proves the case for their exact position", "Direct implication: what their current position is costing them, with a specific calculated number"],
+  "socraticDissonancePrompt": "One question that surfaces the gap between what this client believes and what they actually own — personalised to what they have described.",
+  "asIfFuturePace": {
+    "lossFrame": "2 sentences. Sensory and specific to this client. Their financial life in 3 years having done nothing.",
+    "gainFrame": "2 sentences. Sensory and specific to this client. Their financial life in 3 years with the allocation in place. Asset-neutral."
+  },
+  "entryDefaultArchitecture": "A specific starting position for this client — a percentage or £ figure based on what they have described. Eliminates yes/no.",
+  "painPoint": "The specific fear this client is most likely experiencing based on what they said. One sentence.",
+  "spinQuestions": [
+    "Situation — establishes where their money is and surfaces the blind spot in their specific situation",
+    "Problem/Implication — the specific cost of their current position with a calculated number based on what they described",
+    "Need-Payoff — starts with So if you had... or What would it mean if... and speaks directly to their stated concern"
+  ],
+  "objections": [
+    {"objection": "The most likely pushback from this specific type of client based on what they have described", "rebuttal": "Label the emotion first, reframe using their own stated beliefs, close with a need-payoff question."}
+  ],
+  "urgencyLine": "One real external trigger relevant to this client's situation — a rate decision, fiscal deadline, or macro event. Never manufactured.",
+  "socialProof": "What sophisticated investors comparable to this client are doing right now. One sentence.",
+  "triggerAgreementTemplate": "A conditional commitment script personalised to this client: If [specific event relevant to their concern] happens, we execute [specific action]. Convert not now into a structured commitment."
+}
+No preamble. Return ONLY the JSON. Never use double-quote characters inside string values.`;
+
+const CFA_ANALYSIS_PROMPT = (query) =>
+`An investment professional has described this client scenario:
+
+"${query}"
+
+Generate a TECHNICAL FINANCIAL ANALYSIS applying CFA L1/L2/L3, CFP, CWA, and behavioural finance frameworks. Tailor every field to this specific client — their profile, financials, and situation. Return this exact JSON:
+{
+  "suitabilityVerdict": "One clear sentence — suitable candidate for alternative/physical assets at what allocation level? Cite specific IPS/KYC factors from what they described.",
+  "ipsAssessment": {
+    "riskProfile": "Conservative/Moderate/Aggressive — with specific rationale from the scenario",
+    "timeHorizon": "Short/Medium/Long-term — state approximate years and why based on what they said",
+    "liquidityNeeds": "High/Medium/Low — what liquidity events are coming and when for this specific client",
+    "taxConsiderations": "The 2-3 most important UK tax points specific to this client right now"
+  },
+  "allocationFramework": {
+    "recommendedAllocation": "Specific percentage (e.g. 8-12% of investable assets) with the analytical basis from portfolio theory",
+    "portfolioRationale": "Why this allocation improves the efficient frontier for this specific portfolio — cite diversification benefit, correlation, or Sharpe ratio improvement",
+    "modelComparison": "How this compares to endowment model, standard 60/40, or IFA benchmark allocation for a client of this exact profile"
+  },
+  "keyMetrics": [
+    {
+      "metric": "Most relevant risk or return metric for this client (e.g. Sharpe ratio, VaR reduction, duration exposure, real return after inflation)",
+      "currentPosition": "What their current position looks like on this metric based on what they described",
+      "withAllocation": "How the metric changes with the recommended allocation — be specific"
+    },
+    {
+      "metric": "Second relevant metric — different angle",
+      "currentPosition": "Current state",
+      "withAllocation": "Improved state with specific figure or direction"
+    },
+    {
+      "metric": "Third metric — tax-adjusted return, IHT exposure, or estate planning metric if applicable to this client",
+      "currentPosition": "Current state",
+      "withAllocation": "Improved state"
+    }
+  ],
+  "behaviouralProfile": [
+    {
+      "bias": "The dominant behavioural bias this client is most likely exhibiting based on what they said",
+      "signal": "The specific thing they said or failed to say that reveals this bias",
+      "advisorResponse": "The exact analytical reframe or question the advisor should use with this specific client"
+    },
+    {
+      "bias": "Second most likely bias for this client type",
+      "signal": "How it shows up in their described situation",
+      "advisorResponse": "How to address it with data or a calibrated question"
+    }
+  ],
+  "taxOptimisation": [
+    "Highest-impact tax action available to this client right now — specific and actionable with the relevant UK relief or wrapper",
+    "Second action — different mechanism",
+    "Third action if applicable — estate, pension, or offshore angle specific to this client"
+  ],
+  "riskFlags": [
+    "Most significant technical risk flag for this client — concentration, duration, regulatory suitability, or liquidity concern",
+    "Second risk flag — different type"
+  ],
+  "technicalVerdict": "3 sentences: the full CFA/CFP analytical case for this client. State the portfolio construction benefit (which framework justifies it), the primary risk to manage and how, and the optimal implementation approach for this specific client right now."
+}
+No preamble. Return ONLY the JSON. Never use double-quote characters inside string values.`;
 
 const PITCH_PLAYBOOK_SECTION_PROMPT = (query) =>
 `Research request: "${query}"
@@ -564,7 +704,150 @@ export default async (req) => {
     });
   }
 
-  const { query, type, ticker, section, lensKey, lensContext, prefetch: isPrefetch } = body;
+  const { query, type, ticker, section, lensKey, lensContext, prefetch: isPrefetch,
+          scenarioContext, conversationHistory, question } = body;
+
+  /* ── FOLLOW-UP CONVERSATION (IFA Advisory Brief thread) ── */
+  if (type === 'follow-up') {
+    if (!question) {
+      return new Response(JSON.stringify({ error: 'question required' }), {
+        status: 400, headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+      });
+    }
+    const { lensContext: fuLensContext, lensLabel: fuLensLabel } = body;
+
+    const apiKey = process.env.ANTHROPIC_API_KEY;
+    const authHeader = req.headers.get('Authorization') || '';
+    const sseHeaders = {
+      ...CORS_HEADERS,
+      'Content-Type':  'text/event-stream',
+      'Cache-Control': 'no-cache',
+      'Connection':    'keep-alive',
+    };
+    const enc = new TextEncoder();
+    const sseChunkFU = (obj) => enc.encode('data: ' + JSON.stringify(obj) + '\n\n');
+
+    const fuStream = new ReadableStream({
+      async start(ctrl) {
+        try {
+          /* Credit gate — 10 credits per follow-up */
+          const creditResult = await serverDeductCredits(
+            authHeader, 10,
+            `intel:follow-up:${(query || '').slice(0, 60)}`
+          );
+          console.log('[follow-up] creditResult:', JSON.stringify(creditResult));
+          if (!creditResult.ok) {
+            ctrl.enqueue(sseChunkFU({ type: 'error', code: creditResult.status || 402, message: creditResult.error || 'insufficient_credits', balance: creditResult.balance || 0 }));
+            ctrl.close(); return;
+          }
+
+          /* Build context block — goes into first user message, not system prompt */
+          const ctxLines = [];
+          if (query) ctxLines.push('ORIGINAL SCENARIO: "' + query + '"');
+          if (scenarioContext) {
+            if (scenarioContext.situation)        ctxLines.push('SITUATION: ' + scenarioContext.situation);
+            if (scenarioContext.brokerBrief)       ctxLines.push('HOW TO POSITION: ' + scenarioContext.brokerBrief);
+            if (scenarioContext.keyConsiderations && scenarioContext.keyConsiderations.length)
+              ctxLines.push('KEY CONSIDERATIONS:\n' + scenarioContext.keyConsiderations.map(c => '- ' + c).join('\n'));
+            if (scenarioContext.riskFlags && scenarioContext.riskFlags.length)
+              ctxLines.push('RISK FLAGS:\n' + scenarioContext.riskFlags.map(r => '- ' + r).join('\n'));
+          }
+          if (fuLensContext) ctxLines.push('⚠ ACTIVE ASSET LENS — PITCH THIS ASSET ONLY: ' + (fuLensLabel || '') + '\n' + fuLensContext);
+
+          const contextBlock = ctxLines.join('\n\n');
+
+          /* Build messages: inject context into first user turn, then history, then new question */
+          const history = Array.isArray(conversationHistory) ? conversationHistory : [];
+          const msgs = [];
+          if (history.length >= 2) {
+            /* Subsequent question — prepend context to first history message */
+            msgs.push({ role: 'user', content: contextBlock + '\n\n' + history[0].content });
+            for (let i = 1; i < history.length; i++) msgs.push(history[i]);
+            msgs.push({ role: 'user', content: question });
+          } else {
+            /* First question — context + question as one message */
+            msgs.push({ role: 'user', content: contextBlock + '\n\nBROKER QUESTION: ' + question });
+          }
+
+          const sysPrompt = FOLLOW_UP_SYSTEM;
+
+          let fuTimedOut = false;
+          const fuKill = setTimeout(() => {
+            fuTimedOut = true;
+            try { ctrl.enqueue(sseChunkFU({ type: 'error', message: 'timeout' })); ctrl.close(); } catch {}
+          }, 25000);
+
+          let anthropicResp;
+          try {
+            anthropicResp = await fetch('https://api.anthropic.com/v1/messages', {
+              method: 'POST',
+              headers: { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-beta': 'prompt-caching-2024-07-31', 'content-type': 'application/json' },
+              body: JSON.stringify({
+                model:      'claude-haiku-4-5-20251001',
+                max_tokens: 600,
+                stream:     true,
+                system:     [{ type: 'text', text: sysPrompt, cache_control: { type: 'ephemeral' } }],
+                messages:   msgs,
+              }),
+            });
+          } catch (fetchErr) {
+            clearTimeout(fuKill);
+            ctrl.enqueue(sseChunkFU({ type: 'error', message: 'fetch_error' }));
+            ctrl.close(); return;
+          }
+
+          if (!anthropicResp || !anthropicResp.ok) {
+            clearTimeout(fuKill);
+            ctrl.enqueue(sseChunkFU({ type: 'error', message: 'anthropic_error' }));
+            ctrl.close(); return;
+          }
+
+          const reader  = anthropicResp.body.getReader();
+          const decoder = new TextDecoder();
+          let lineBuf   = '';
+          let lastEvent = '';
+          let fullText  = '';
+
+          try {
+            while (true) {
+              if (fuTimedOut) break;
+              const { done, value } = await reader.read();
+              if (done || fuTimedOut) break;
+              lineBuf += decoder.decode(value, { stream: true });
+              const lines = lineBuf.split('\n');
+              lineBuf = lines.pop();
+              for (const line of lines) {
+                if (line.startsWith('event: '))      { lastEvent = line.slice(7).trim(); }
+                else if (line.startsWith('data: ')) {
+                  if (lastEvent === 'content_block_delta') {
+                    try {
+                      const evt = JSON.parse(line.slice(6));
+                      if (evt.delta && evt.delta.type === 'text_delta' && evt.delta.text) {
+                        fullText += evt.delta.text;
+                        ctrl.enqueue(sseChunkFU({ type: 'text-delta', text: evt.delta.text }));
+                      }
+                    } catch {}
+                  }
+                } else if (line === '') { lastEvent = ''; }
+              }
+            }
+          } finally {
+            clearTimeout(fuKill);
+            reader.cancel().catch(() => {});
+          }
+
+          if (!fuTimedOut) {
+            ctrl.enqueue(sseChunkFU({ type: 'text-done', text: fullText }));
+          }
+          ctrl.close();
+        } catch (err) {
+          try { ctrl.enqueue(sseChunkFU({ type: 'error', message: err.message || 'unknown' })); ctrl.close(); } catch {}
+        }
+      },
+    });
+    return new Response(fuStream, { headers: sseHeaders });
+  }
+
   if (!query) {
     return new Response(JSON.stringify({ error: 'query required' }), {
       status: 400, headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
@@ -573,8 +856,9 @@ export default async (req) => {
 
   const apiKey   = process.env.ANTHROPIC_API_KEY;
   const isScenario = type === 'scenario';
-  const isPitchPlaybook = section === 'pitch-playbook' && (type === 'concept' || type === 'company');
+  const isPitchPlaybook = section === 'pitch-playbook' && (type === 'concept' || type === 'company' || type === 'scenario');
   const isCompanyPitch = type === 'company' && section === 'pitch-playbook';
+  const isCfaAnalysis = isScenario && section === 'cfa-analysis';
 
   /* Cache key — same namespace as search.js */
   const lensTag  = lensKey ? ':' + lensKey : '';
@@ -585,8 +869,8 @@ export default async (req) => {
       ? 'search9:concept-slim:' + query.trim().toLowerCase().slice(0, 80) + lensTag
       : 'search9:' + type + ':' + (ticker || query.trim().toLowerCase().slice(0, 80)) + lensTag + sectionTag;
 
-  /* Credit cost — concept sections cost 5 (focused); concept overview/scenario cost 10; company costs 25 */
-  const creditCost = (type === 'company') ? 25 : (type === 'concept' && section) ? 5 : 10;
+  /* Credit cost — concept sections 10; all AI briefs (IFA/scenario/concept/CFA) 25; company 25 */
+  const creditCost = (type === 'company') ? 25 : (type === 'concept' && section) ? 10 : 25;
 
   const authHeader = req.headers.get('Authorization') || '';
 
@@ -611,7 +895,7 @@ export default async (req) => {
            silently. Credits are only charged when the user actually clicks
            the Pitch Playbook button (isPrefetch=false below).
            Auth is still required — only valid subscribers may trigger prefetch. */
-        if (isPrefetch && isPitchPlaybook) {
+        if (isPrefetch && (isPitchPlaybook || isCfaAnalysis)) {
           /* Verify JWT even on prefetch — no free ride for unauthenticated callers */
           const sk = process.env.SUPABASE_SERVICE_KEY;
           if (!sk || !authHeader.startsWith('Bearer ')) {
@@ -636,54 +920,29 @@ export default async (req) => {
         } else {
           /* ── Standard flow ── */
 
-          /* For pitch playbook user clicks: charge credits BEFORE cache check
-             so the user pays whether it's a fresh call or served from prefetch cache. */
-          if (isPitchPlaybook) {
-            const creditResult = await serverDeductCredits(
-              authHeader, creditCost,
-              `intel:${type}:pitch-playbook:${ticker || query.slice(0, 60)}`
-            );
-            if (!creditResult.ok) {
-              ctrl.enqueue(sseChunk({
-                type: 'error',
-                code: creditResult.status || 402,
-                message: creditResult.error || 'insufficient_credits',
-                balance: creditResult.balance || 0,
-              }));
-              ctrl.close();
-              return;
-            }
-            /* Credits deducted — now check cache for instant response */
+          /* Credits always charged first — cache is TBT's cost-saver, not a free ride for users.
+             User pays on every request; if cached, served instantly (TBT saves the AI call). */
+          const desc = isCfaAnalysis
+            ? `intel:ifa-cfa-analysis:${query.slice(0, 60)}`
+            : isPitchPlaybook
+              ? `intel:${type}:pitch-playbook:${ticker || query.slice(0, 60)}`
+              : `intel:${type}:${ticker || query.slice(0, 60)}`;
+          const creditResult = await serverDeductCredits(authHeader, creditCost, desc);
+          if (!creditResult.ok) {
+            ctrl.enqueue(sseChunk({
+              type: 'error',
+              code: creditResult.status || 402,
+              message: creditResult.error || 'insufficient_credits',
+              balance: creditResult.balance || 0,
+            }));
+            ctrl.close();
+            return;
+          }
+          /* Credits deducted — check cache for instant response (no AI cost to TBT) */
+          if (!isScenario || isPitchPlaybook || isCfaAnalysis) {
             const cached = await cacheGet(cacheKey);
             if (cached) {
               ctrl.enqueue(sseChunk({ type: 'cache', data: cached }));
-              ctrl.close();
-              return;
-            }
-            /* Not cached — fall through to AI call */
-          } else {
-            /* All other requests: cache check first (cache hits are free) */
-            if (!isScenario) {
-              const cached = await cacheGet(cacheKey);
-              if (cached) {
-                ctrl.enqueue(sseChunk({ type: 'cache', data: cached }));
-                ctrl.close();
-                return;
-              }
-            }
-
-            /* Credit gate */
-            const creditResult = await serverDeductCredits(
-              authHeader, creditCost,
-              `intel:${type}:${ticker || query.slice(0, 60)}`
-            );
-            if (!creditResult.ok) {
-              ctrl.enqueue(sseChunk({
-                type: 'error',
-                code: creditResult.status || 402,
-                message: creditResult.error || 'insufficient_credits',
-                balance: creditResult.balance || 0,
-              }));
               ctrl.close();
               return;
             }
@@ -696,11 +955,14 @@ export default async (req) => {
             ? `\n\nACTIVE BROKER LENS — CRITICAL OVERRIDE: The investment destination is the physical asset described below — NOT the company equity. Every pitch field must use this company's data as the conversation HOOK and explicitly BRIDGE toward this asset as the close:\n${lensContext}`
             : `\n\nACTIVE BROKER LENS — tailor ALL pitch content specifically to this asset class context:\n${lensContext}`)
           : '';
-        /* Scenarios: 1800 tok. Company/concept pitch-playbook: 2000. Concept slim: 400. Company profile: 1200. */
-        const maxTok  = isScenario ? 1800 : isPitchPlaybook ? 2000 : (type === 'concept' ? 400 : 1200);
-        const sysPrompt = isPitchPlaybook ? PITCH_SYSTEM : type === 'concept' ? CONCEPT_SYSTEM : SEARCH_SYSTEM;
+        const isScenarioPitch = isScenario && isPitchPlaybook;
+        /* CFA: 2200 tok. Pitch: 2000. Scenarios: 1800. Concept slim: 400. Company: 1200. */
+        const maxTok  = isCfaAnalysis ? 2200 : isPitchPlaybook ? 2000 : isScenario ? 1800 : (type === 'concept' ? 400 : 1200);
+        const sysPrompt = isCfaAnalysis ? CFA_SYSTEM : isPitchPlaybook ? PITCH_SYSTEM : type === 'concept' ? CONCEPT_SYSTEM : SEARCH_SYSTEM;
         let userMsg;
-        if (isScenario)              userMsg = SCENARIO_PROMPT(query) + lensAppend;
+        if (isCfaAnalysis)           userMsg = CFA_ANALYSIS_PROMPT(query);
+        else if (isScenarioPitch)    userMsg = SCENARIO_PITCH_PROMPT(query) + lensAppend;
+        else if (isScenario)         userMsg = SCENARIO_PROMPT(query) + lensAppend;
         else if (isCompanyPitch)     userMsg = COMPANY_PITCH_PROMPT(query) + lensAppend;
         else if (isPitchPlaybook)    userMsg = PITCH_PLAYBOOK_SECTION_PROMPT(query) + lensAppend;
         else if (type === 'concept') userMsg = CONCEPT_SLIM_PROMPT(query);
