@@ -2127,12 +2127,12 @@
       return '<div class=”sp-section”><div class=”sp-sec-lbl”>BROKER NOTE</div><div class=”sp-pitch”>' + escH(brokerNote) + '</div></div>';
     }
 
-    var A = '#E97132', GRN = '#6bcb77', BLU = '#4A9EDD';
+    var A = '#E97132';
 
-    /* card helper — coloured left border, dark background, label + body */
-    function card(label, body, borderCol) {
-      return '<div style=”margin-bottom:8px;padding:8px 10px;background:#0c0c0c;border:1px solid #1a1a1a;border-left:2px solid ' + (borderCol || A) + ';”>' +
-        (label ? '<div style=”font-size:7px;color:' + (borderCol || A) + ';letter-spacing:.14em;font-weight:700;margin-bottom:5px;text-transform:uppercase;”>' + label + '</div>' : '') +
+    /* card helper — orange left border, dark background, label + body */
+    function card(label, body) {
+      return '<div style=”margin-bottom:8px;padding:8px 10px;background:#0c0c0c;border:1px solid #1a1a1a;border-left:2px solid ' + A + ';”>' +
+        (label ? '<div style=”font-size:7px;color:' + A + ';letter-spacing:.14em;font-weight:700;margin-bottom:5px;text-transform:uppercase;”>' + label + '</div>' : '') +
         '<div style=”font-size:10px;color:#c8c8c8;line-height:1.7;”>' + body + '</div>' +
       '</div>';
     }
@@ -2141,50 +2141,50 @@
     var driverBadge = pitch.dominantDriverTarget ? ' — ' + pitch.dominantDriverTarget.toUpperCase() + ' DRIVER' : '';
     var html = openLine
       ? '<div class=”sp-section”><div class=”sp-sec-lbl”>' + 'OPENING LINE' + escH(driverBadge) + '</div>' +
-        card('', '”' + escH(openLine) + '”', A) + '</div>'
+        card('', '”' + escH(openLine) + '”') + '</div>'
       : '';
 
     var bn = pitch.brokerNote || brokerNote;
     if (bn) html +=
       '<div class=”sp-section”><div class=”sp-sec-lbl”>BROKER NOTE</div>' +
-      card('', escH(bn), A) + '</div>';
+      card('', escH(bn)) + '</div>';
 
     if (pitch.logicalCase && pitch.logicalCase.length) html +=
       '<div class=”sp-section”><div class=”sp-sec-lbl”>THE LOGICAL CASE — BUILD CERTAINTY FIRST</div>' +
       pitch.logicalCase.map(function(f, i) {
-        return card('POINT ' + (i + 1), escH(f), A);
+        return card('POINT ' + (i + 1), escH(f));
       }).join('') + '</div>';
 
     if (pitch.socraticDissonancePrompt) html +=
       '<div class=”sp-section”><div class=”sp-sec-lbl”>SOCRATIC QUESTION — EXPOSE THE GAP</div>' +
-      card('', '<span style=”color:' + A + ';font-style:italic;”>”' + escH(pitch.socraticDissonancePrompt) + '”</span>', A) +
+      card('', '<span style=”color:' + A + ';font-style:italic;”>”' + escH(pitch.socraticDissonancePrompt) + '”</span>') +
       '</div>';
 
     var fp = pitch.asIfFuturePace;
     if (fp && (fp.lossFrame || fp.gainFrame)) {
       html += '<div class=”sp-section”><div class=”sp-sec-lbl”>FUTURE PACE — WITHOUT VS WITH</div>';
-      if (fp.lossFrame) html += card('WITHOUT', escH(fp.lossFrame), A);
-      if (fp.gainFrame) html += card('WITH', escH(fp.gainFrame), GRN);
+      if (fp.lossFrame) html += card('WITHOUT', escH(fp.lossFrame));
+      if (fp.gainFrame) html += card('WITH', escH(fp.gainFrame));
       html += '</div>';
     } else if (pitch.emotionalCase) {
       html += '<div class=”sp-section”><div class=”sp-sec-lbl”>FUTURE PACE</div>' +
-        card('', escH(pitch.emotionalCase), A) + '</div>';
+        card('', escH(pitch.emotionalCase)) + '</div>';
     }
 
     if (pitch.entryDefaultArchitecture) html +=
       '<div class=”sp-section”><div class=”sp-sec-lbl”>ENTRY ARCHITECTURE — REMOVE YES/NO</div>' +
-      card('', escH(pitch.entryDefaultArchitecture), GRN) + '</div>';
+      card('', escH(pitch.entryDefaultArchitecture)) + '</div>';
 
     if (pitch.painPoint) html +=
       '<div class=”sp-section”><div class=”sp-sec-lbl”>THEIR PAIN POINT</div>' +
-      card('', escH(pitch.painPoint), A) + '</div>';
+      card('', escH(pitch.painPoint)) + '</div>';
 
     if (pitch.spinQuestions && pitch.spinQuestions.length) {
       var spinLabels = ['SITUATION', 'PROBLEM / IMPLICATION', 'NEED-PAYOFF'];
       html += '<div class=”sp-section”><div class=”sp-sec-lbl”>SPIN QUESTIONS — ASK FIRST</div>' +
         pitch.spinQuestions.map(function(q, i) {
           var clean = q.replace(/^(situation|problem\s*[\/]?\s*implication|need[-\s]payoff)[:\s]*/i, '').trim();
-          return card(spinLabels[i] || '', escH(clean), i === 2 ? GRN : A);
+          return card(spinLabels[i] || '', escH(clean));
         }).join('') + '</div>';
     }
 
@@ -2193,20 +2193,20 @@
         pitch.objections.map(function(o) {
           var body = '<div style=”color:' + A + ';font-style:italic;margin-bottom:6px;”>”' + escH(o.objection || '') + '”</div>' +
                      '<div style=”color:#c8c8c8;”>' + escH(o.rebuttal || '') + '</div>';
-          return card('OBJECTION / REBUTTAL', body, A);
+          return card('OBJECTION / REBUTTAL', body);
         }).join('') + '</div>';
     }
 
     if (pitch.urgencyLine || pitch.socialProof) {
       html += '<div class=”sp-section”><div class=”sp-sec-lbl”>TIMING & SOCIAL PROOF</div>';
-      if (pitch.urgencyLine) html += card('URGENCY', escH(pitch.urgencyLine), BLU);
-      if (pitch.socialProof) html += card('SOCIAL PROOF', escH(pitch.socialProof), BLU);
+      if (pitch.urgencyLine) html += card('URGENCY', escH(pitch.urgencyLine));
+      if (pitch.socialProof) html += card('SOCIAL PROOF', escH(pitch.socialProof));
       html += '</div>';
     }
 
     if (pitch.triggerAgreementTemplate) html +=
       '<div class=”sp-section”><div class=”sp-sec-lbl”>TRIGGER AGREEMENT — CONDITIONAL CLOSE</div>' +
-      card('', escH(pitch.triggerAgreementTemplate), BLU) + '</div>';
+      card('', escH(pitch.triggerAgreementTemplate)) + '</div>';
 
     return html;
   }
