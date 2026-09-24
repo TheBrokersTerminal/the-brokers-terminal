@@ -207,9 +207,10 @@
         '<div class="intel-search-bar">' +
           '<span class="intel-search-icon">⌕</span>' +
           '<span class="intel-search-lbl">INTEL</span>' +
-          '<input id="intel-search-input" type="text" placeholder="Company, concept, or macro event…" autocomplete="off" spellcheck="false" autocorrect="off" autocapitalize="off" readonly>' +
+          '<input type="text" id="intel-search-input" placeholder="Company, asset, concept or IFA scenario…" autocomplete="off" spellcheck="false" autocorrect="off" autocapitalize="off" readonly>' +
         '</div>' +
         '<button id="intel-ifa-btn" title="Open IFA client intake form">▌ IFA INTEL</button>' +
+        '<button id="intel-clients-btn" title="View saved client briefs">CLIENTS</button>' +
       '</div>';
 
     /* Append dropdown to body so it escapes any parent stacking context */
@@ -309,6 +310,10 @@
     }
 
     function _openIfaModal() {
+      /* Reset all fields so previous client data never bleeds through */
+      ['ifa-ref','ifa-age','ifa-portfolio','ifa-horizon','ifa-holdings','ifa-goals','ifa-concerns','ifa-tax','ifa-focus'].forEach(function(id) {
+        var el = document.getElementById(id); if (el) el.value = '';
+      });
       ifaModal.style.display = 'flex';
       setTimeout(function() { ifaModal.querySelector('.ifa-modal-panel').classList.add('ifa-panel-in'); }, 10);
       document.getElementById('ifa-age').focus();
@@ -347,8 +352,32 @@
       prev.style.display = q ? 'block' : 'none';
     }
 
+    function _resetIfaBtn() {
+      if (ifaBtn) { ifaBtn.textContent = '▌ IFA INTEL'; ifaBtn.style.background = '#E97132'; }
+    }
+
     if (ifaBtn) {
-      ifaBtn.addEventListener('click', function(e) { e.stopPropagation(); _openIfaModal(); });
+      ifaBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        var typed = input.value.trim();
+        var isLong = typed.split(/\s+/).filter(Boolean).length > 5;
+        if (isLong) {
+          /* User typed a scenario — run it directly as an IFA brief */
+          window._lastIfaIntake = { query: typed, composedAt: Date.now() };
+          input.value = '';
+          _resetIfaBtn();
+          dropdown.style.display = 'none';
+          window._intelSearch(typed, 'scenario', '');
+        } else {
+          _openIfaModal();
+        }
+      });
+    }
+
+
+    var clientsBtn = document.getElementById('intel-clients-btn');
+    if (clientsBtn) {
+      clientsBtn.addEventListener('click', function(e) { e.stopPropagation(); _openClientsModal(); });
     }
     document.getElementById('intel-ifa-close') && document.getElementById('intel-ifa-close').addEventListener('click', _closeIfaModal);
     document.getElementById('intel-ifa-overlay') && document.getElementById('intel-ifa-overlay').addEventListener('click', _closeIfaModal);
@@ -365,6 +394,14 @@
       ifaRunBtn.addEventListener('click', function() {
         var q = _buildIfaQuery();
         if (!q) return;
+        /* Snapshot intake fields for client brief saving */
+        window._lastIfaIntake = {
+          ref: _getIfaVal('ifa-ref'), age: _getIfaVal('ifa-age'),
+          portfolio: _getIfaVal('ifa-portfolio'), horizon: _getIfaVal('ifa-horizon'),
+          holdings: _getIfaVal('ifa-holdings'), goals: _getIfaVal('ifa-goals'),
+          concerns: _getIfaVal('ifa-concerns'), tax: _getIfaVal('ifa-tax'),
+          focus: _getIfaVal('ifa-focus'), query: q, composedAt: Date.now(),
+        };
         _closeIfaModal();
         /* Small delay so modal closes cleanly before result appears */
         setTimeout(function() { window._intelSearch(q, 'scenario', ''); }, 200);
@@ -397,15 +434,54 @@
     input.addEventListener('input', function () {
       clearTimeout(_debounce);
       var q = this.value.trim();
+      var wc = q.split(/\s+/).filter(Boolean).length;
+      /* Relabel IFA INTEL button when query is long enough to be a scenario */
+      if (ifaBtn) {
+        if (wc > 5) {
+          ifaBtn.textContent = '▌ RUN IFA BRIEF →';
+          ifaBtn.style.background = '#c05a1e';
+        } else {
+          ifaBtn.textContent = '▌ IFA INTEL';
+          ifaBtn.style.background = '#E97132';
+        }
+      }
       if (!q || q.length < 2) { dropdown.style.display = 'none'; return; }
       positionDropdown();
       dropdown.style.display = 'block';
-      dropdown.innerHTML = '<div class="intel-drop-loading">SEARCHING<span>...</span></div>';
-      _debounce = setTimeout(function () { fetchSuggestions(q, dropdown); }, 320);
+      if (wc > 5) {
+        /* Scenario — render immediately from local text, no server call */
+        var label = 'Advisory brief: "' + q + '"';
+        var scenWords = label.split(' ');
+        var scenLines = [];
+        for (var wi = 0; wi < scenWords.length; wi += 10) {
+          scenLines.push(escH(scenWords.slice(wi, wi + 10).join(' ')));
+        }
+        dropdown.innerHTML = '<div class="intel-drop-item concept intel-drop-scenario" ' +
+          'data-label="' + escH(label) + '" ' +
+          'data-query="' + escH(q) + '" ' +
+          'data-type="scenario">' +
+          '<span class="intel-drop-badge sc">IFA</span>' +
+          '<span class="intel-drop-label">' + scenLines.join('<br>') + '</span>' +
+          '</div>';
+        /* Wire click on the locally-rendered scenario item */
+        dropdown.querySelector('[data-type="scenario"]').addEventListener('click', function () {
+          dropdown.style.display = 'none';
+          window._intelSearch(q, 'scenario', '');
+        });
+      } else {
+        dropdown.innerHTML = '<div class="intel-drop-loading">SEARCHING<span>...</span></div>';
+        _debounce = setTimeout(function () { fetchSuggestions(q, dropdown); }, 320);
+      }
     });
 
     input.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape') { dropdown.style.display = 'none'; input.value = ''; }
+      /* Prevent textarea newlines — Enter submits, Shift+Enter is blocked too */
+      if (e.key === 'Enter') { e.preventDefault(); }
+      if (e.key === 'Escape') {
+        dropdown.style.display = 'none';
+        input.value = '';
+        _resetIfaBtn();
+      }
     });
 
     document.addEventListener('click', function (e) {
@@ -424,18 +500,20 @@
       return { type: 'concept', label: c.label, query: c.query };
     });
 
-    var companyFreeSearch = { type: 'company', label: q, query: q, ticker: '', private: true };
+    var wordCount = q.trim().split(/\s+/).length;
+    var companyFreeSearch = wordCount <= 5 ? { type: 'company', label: q, query: q, ticker: '', private: true } : null;
 
     fetch('/.netlify/functions/search?q=' + encodeURIComponent(q))
       .then(function (r) { return r.ok ? r.json() : []; })
       .then(function (items) {
         var combined = conceptMatches.concat(items || []);
         if (!combined.length) combined.push({ type: 'concept', label: 'Search: "' + q + '"', query: q });
-        combined.push(companyFreeSearch);
+        if (companyFreeSearch) combined.push(companyFreeSearch);
         renderDropdown(combined, dropdown);
       })
       .catch(function () {
-        var fallback = conceptMatches.concat([{ type: 'concept', label: 'Search: "' + q + '"', query: q }, companyFreeSearch]);
+        var fallback = conceptMatches.concat([{ type: 'concept', label: 'Search: "' + q + '"', query: q }]);
+        if (companyFreeSearch) fallback.push(companyFreeSearch);
         renderDropdown(fallback, dropdown);
       });
   }
@@ -466,12 +544,17 @@
           '<span class="intel-drop-arrow">›</span>' +
           '</div>';
       } else if (item.type === 'scenario') {
-        return '<div class="intel-drop-item concept" ' +
+        var scenWords = item.label.split(' ');
+        var scenLines = [];
+        for (var wi = 0; wi < scenWords.length; wi += 10) {
+          scenLines.push(escH(scenWords.slice(wi, wi + 10).join(' ')));
+        }
+        return '<div class="intel-drop-item concept intel-drop-scenario" ' +
           'data-label="' + escH(item.label) + '" ' +
           'data-query="' + escH(item.query || item.label) + '" ' +
           'data-type="scenario">' +
           '<span class="intel-drop-badge sc">IFA</span>' +
-          '<span class="intel-drop-label">' + escH(item.label) + '</span>' +
+          '<span class="intel-drop-label">' + scenLines.join('<br>') + '</span>' +
           '</div>';
       } else {
         return '<div class="intel-drop-item concept" ' +
@@ -1208,7 +1291,8 @@
       var body = win.querySelector('.intel-popwin-body');
       if (win._loadingTimer) { clearInterval(win._loadingTimer); win._loadingTimer = null; }
       if (body) {
-        body.innerHTML = '<div class="sp-loading" style="color:#e05050;">INTELLIGENCE UNAVAILABLE<br><span class="intel-retry-btn" style="margin-top:8px;display:inline-block;">↻ RETRY</span></div>';
+        var msg = type === 'scenario' ? 'BRIEF GENERATION FAILED<br><span style="font-size:9px;color:#888;letter-spacing:.05em;">Generation timed out — click to try again</span>' : 'INTELLIGENCE UNAVAILABLE';
+        body.innerHTML = '<div class="sp-loading" style="color:#e05050;">' + msg + '<br><span class="intel-retry-btn" style="margin-top:8px;display:inline-block;">↻ RETRY</span></div>';
         var btn = body.querySelector('.intel-retry-btn');
         if (btn) btn.addEventListener('click', function(){ body.innerHTML='<div class="sp-intel-load">GENERATING BRIEF<span class="sp-intel-ld"></span></div>'; fetchDetail(query, type, ticker, win, 0); });
       }
@@ -1653,10 +1737,8 @@
 
       '<div class="concept-sec-bar" style="margin-bottom:8px;">' +
         '<button class="concept-sec-btn active" data-scen-tab="brief">ADVISORY BRIEF</button>' +
-        '<button class="concept-sec-btn" data-scen-tab="pitch">PITCH PLAYBOOK</button>' +
-        '<span class="scen-pitch-info-btn" title="What is Pitch Playbook?" style="display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border:1px solid #E97132;border-radius:50%;color:#E97132;font-size:8px;font-weight:700;cursor:pointer;letter-spacing:0;flex-shrink:0;margin-left:2px;margin-top:2px;font-family:Georgia,serif;line-height:1;user-select:none;">i</span>' +
-        '<button class="concept-sec-btn" data-scen-tab="cfa" style="color:#4A9EDD;">INSTITUTIONAL ANALYSIS</button>' +
-        '<span class="scen-ia-info-btn" title="What is Institutional Analysis?" style="display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border:1px solid #4A9EDD;border-radius:50%;color:#4A9EDD;font-size:8px;font-weight:700;cursor:pointer;letter-spacing:0;flex-shrink:0;margin-left:2px;margin-top:2px;font-family:Georgia,serif;line-height:1;user-select:none;">i</span>' +
+        '<button class="concept-sec-btn" data-scen-tab="pitch" style="display:inline-flex;align-items:center;gap:5px;">PITCH PLAYBOOK<span class="scen-tab-i" data-info="pitch" style="font-family:Georgia,serif;font-size:9px;font-style:italic;opacity:.6;font-weight:400;cursor:pointer;padding:0 1px;">i</span></button>' +
+        '<button class="concept-sec-btn" data-scen-tab="cfa" style="color:#4A9EDD;display:inline-flex;align-items:center;gap:5px;">INSTITUTIONAL ANALYSIS<span class="scen-tab-i" data-info="cfa" style="font-family:Georgia,serif;font-size:9px;font-style:italic;opacity:.6;font-weight:400;cursor:pointer;padding:0 1px;color:#4A9EDD;">i</span></button>' +
       '</div>' +
 
       '<div class="scen-tab-panel" data-scen-panel="brief">' + briefHtml +
@@ -1682,8 +1764,9 @@
         '<div class="scen-cfa-panel"><div class="sp-intel-load">RUNNING INSTITUTIONAL ANALYSIS<span class="sp-intel-ld"></span></div></div>' +
       '</div>' +
 
-      '<div class="sp-section" style="border-top:1px solid #111;padding-top:10px;">' +
-        '<button class="sp-note-btn">✎ SAVE TO NOTES</button>' +
+      '<div class="sp-section" style="border-top:1px solid #111;padding-top:10px;display:flex;gap:8px;align-items:center;">' +
+        '<button class="sp-save-brief-btn" style="background:none;border:1px solid #E97132;color:#E97132;font-size:7.5px;letter-spacing:.18em;padding:6px 12px;cursor:pointer;font-family:inherit;white-space:nowrap;">▌ SAVE CLIENT BRIEF</button>' +
+        '<button class="sp-note-btn" style="background:none;border:none;color:#555;font-size:7.5px;letter-spacing:.12em;padding:6px 0;cursor:pointer;font-family:inherit;">✎ ADD NOTE</button>' +
       '</div>';
 
     /* Background prefetch for pitch + CFA — fires immediately on card load.
@@ -1700,7 +1783,138 @@
 
     function _renderScenPitch(pitchData) {
       var pitchPanel = body.querySelector('.scen-pitch-panel');
-      if (pitchPanel) pitchPanel.innerHTML = buildPitchPlaybook(pitchData, null);
+      if (!pitchPanel) return;
+      pitchPanel.innerHTML = buildPitchPlaybook(pitchData, null) +
+        '<div class="scen-pitch-thread" style="margin-top:4px;"></div>' +
+        '<div class="scen-followup-bar" style="border-top:1px solid #1a1a1a;padding-top:10px;margin-top:8px;">' +
+          '<div style="font-size:7px;letter-spacing:.25em;color:#E97132;margin-bottom:6px;">ASK A FOLLOW-UP QUESTION</div>' +
+          '<div style="display:flex;gap:6px;">' +
+            '<input class="scen-pitch-fu-input" type="text" placeholder="e.g. How do I handle the objection about fees?" ' +
+              'style="flex:1;background:#0c0c0c;border:1px solid #2a2a2a;color:#e0e0e0;font-size:10px;padding:7px 10px;outline:none;font-family:inherit;" />' +
+            '<button class="scen-pitch-fu-send" style="background:#E97132;color:#000;font-size:7px;letter-spacing:.2em;padding:7px 10px;border:none;cursor:pointer;white-space:nowrap;">ASK ›</button>' +
+          '</div>' +
+        '</div>';
+      _wirePitchFollowUp(pitchData, pitchPanel);
+    }
+
+    function _wirePitchFollowUp(pitchData, pitchPanel) {
+      var pitchFuInput = pitchPanel.querySelector('.scen-pitch-fu-input');
+      var pitchFuSend  = pitchPanel.querySelector('.scen-pitch-fu-send');
+      var pitchThread  = pitchPanel.querySelector('.scen-pitch-thread');
+      var winEl = body.closest('.intel-popwin') || body.parentElement;
+      if (!winEl._pitchHistory) winEl._pitchHistory = [];
+
+      function _submitPitchFollowUp() {
+        var q = pitchFuInput.value.trim();
+        if (!q || pitchFuSend.disabled) return;
+        pitchFuInput.value = '';
+        pitchFuSend.disabled = true;
+        pitchFuSend.textContent = '…';
+
+        var userBubble = document.createElement('div');
+        userBubble.style.cssText = 'text-align:right;margin-bottom:8px;';
+        userBubble.innerHTML = '<span style="display:inline-block;background:#1a1a1a;border:1px solid #2a2a2a;color:#e0e0e0;font-size:10px;padding:6px 10px;line-height:1.6;max-width:85%;text-align:left;">' + escH(q) + '</span>';
+        pitchThread.appendChild(userBubble);
+
+        var asstBubble = document.createElement('div');
+        asstBubble.style.cssText = 'margin-bottom:12px;';
+        asstBubble.innerHTML = '<div style="display:flex;gap:6px;align-items:flex-start;"><span style="color:#E97132;font-size:7px;letter-spacing:.2em;padding-top:4px;white-space:nowrap;">PITCH</span><div class="scen-pitch-resp" style="font-size:10px;color:#c8c8c8;line-height:1.7;flex:1;min-height:14px;">▍</div></div>';
+        pitchThread.appendChild(asstBubble);
+        pitchThread.scrollTop = pitchThread.scrollHeight;
+
+        var respEl = asstBubble.querySelector('.scen-pitch-resp');
+        var accumulated = '';
+
+        var fuHeaders = { 'Content-Type': 'application/json' };
+        if (window._authToken) fuHeaders['Authorization'] = 'Bearer ' + window._authToken;
+
+        var activeLensKey     = (window._assetLens && window._assetLens.key)         || 'universal';
+        var activeLensContext = (window._assetLens && window._assetLens.promptContext) || '';
+        var activeLensLabel   = (window._assetLens && window._assetLens.label)         || '';
+
+        var pitchScenCtx = {
+          situation: (pitchData.openingLine || '') + ' ' + (pitchData.logicalCase || ''),
+          brokerBrief: pitchData.logicalCase || '',
+          keyConsiderations: (pitchData.spinQuestions || []).map(function(sq) { return sq.question || sq; }).filter(Boolean),
+          riskFlags: (pitchData.objections || []).map(function(o) { return o.objection || o; }).filter(Boolean),
+        };
+
+        fetch('/.netlify/functions/search-stream', {
+          method: 'POST',
+          headers: fuHeaders,
+          body: JSON.stringify({
+            type: 'follow-up',
+            query: d.title ? (d.title + ': ' + d.situation) : (d.situation || ''),
+            question: q,
+            scenarioContext: pitchScenCtx,
+            conversationHistory: winEl._pitchHistory.slice(),
+            lensKey: activeLensKey,
+            lensContext: activeLensContext,
+            lensLabel: activeLensLabel,
+          }),
+        }).then(function(r) {
+          if (!r.ok || !r.body) {
+            respEl.textContent = 'Failed to get response. Please try again.';
+            respEl.style.color = '#D14040';
+            pitchFuSend.disabled = false; pitchFuSend.textContent = 'ASK ›';
+            return;
+          }
+          var reader  = r.body.getReader();
+          var decoder = new TextDecoder();
+          var lineBuf = '';
+
+          function readChunk() {
+            return reader.read().then(function(chunk) {
+              if (chunk.done) { pitchFuSend.disabled = false; pitchFuSend.textContent = 'ASK ›'; return; }
+              lineBuf += decoder.decode(chunk.value, { stream: true });
+              var lines = lineBuf.split('\n'); lineBuf = lines.pop();
+              for (var i = 0; i < lines.length; i++) {
+                var line = lines[i];
+                if (!line.startsWith('data: ')) continue;
+                var raw; try { raw = JSON.parse(line.slice(6)); } catch { continue; }
+                if (raw.type === 'text-delta') {
+                  accumulated += raw.text;
+                  respEl.textContent = accumulated + '▍';
+                  pitchThread.scrollTop = pitchThread.scrollHeight;
+                } else if (raw.type === 'text-done') {
+                  accumulated = raw.text || accumulated;
+                  respEl.textContent = accumulated;
+                  winEl._pitchHistory.push({ role: 'user', content: q });
+                  winEl._pitchHistory.push({ role: 'assistant', content: accumulated });
+                  if (winEl._pitchHistory.length > 20) winEl._pitchHistory = winEl._pitchHistory.slice(-20);
+                  pitchFuSend.disabled = false; pitchFuSend.textContent = 'ASK ›';
+                  window._loadCreditBalance && window._loadCreditBalance();
+                } else if (raw.type === 'error') {
+                  if (raw.code === 402) {
+                    respEl.textContent = 'Not enough credits (5 required).';
+                    respEl.style.color = '#D14040';
+                    window._showNoCredits && window._showNoCredits(raw.balance || 0);
+                  } else {
+                    respEl.textContent = 'Error — please try again.';
+                    respEl.style.color = '#D14040';
+                  }
+                  pitchFuSend.disabled = false; pitchFuSend.textContent = 'ASK ›';
+                }
+              }
+              return readChunk();
+            }).catch(function() {
+              respEl.textContent = 'Connection error — please try again.';
+              respEl.style.color = '#D14040';
+              pitchFuSend.disabled = false; pitchFuSend.textContent = 'ASK ›';
+            });
+          }
+          readChunk();
+        }).catch(function() {
+          respEl.textContent = 'Request failed — please try again.';
+          respEl.style.color = '#D14040';
+          pitchFuSend.disabled = false; pitchFuSend.textContent = 'ASK ›';
+        });
+      }
+
+      pitchFuSend.addEventListener('click', _submitPitchFollowUp);
+      pitchFuInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') { e.preventDefault(); _submitPitchFollowUp(); }
+      });
     }
 
     function _fetchScenPitch(onDemand) {
@@ -1972,7 +2186,8 @@
 
     /* Tab switching — charge 25 credits on first pitch click, 25 on first CFA click */
     body.querySelectorAll('.concept-sec-btn[data-scen-tab]').forEach(function(btn) {
-      btn.addEventListener('click', function() {
+      btn.addEventListener('click', function(e) {
+        if (e.target.closest('.scen-tab-i')) return; /* clicking the i — tooltip handles it */
         var tab = btn.getAttribute('data-scen-tab');
 
         if (tab === 'pitch' && !pitchCharged) {
@@ -2042,7 +2257,7 @@
     });
 
     /* ── Pitch Playbook info button ── */
-    var pitchInfoBtn = body.querySelector('.scen-pitch-info-btn');
+    var pitchInfoBtn = body.querySelector('.scen-tab-i[data-info="pitch"]');
     if (pitchInfoBtn) {
       pitchInfoBtn.addEventListener('click', function(e) {
         e.stopPropagation();
@@ -2059,10 +2274,10 @@
           '<div style="margin-bottom:6px;"><span style="color:#E97132;">▸</span> <strong style="color:#fff;">Socratic Question</strong> — Exposes the gap between what they believe and what they own</div>' +
           '<div style="margin-bottom:6px;"><span style="color:#E97132;">▸</span> <strong style="color:#fff;">Future Pace</strong> — Loss frame and gain frame specific to this client\'s situation</div>' +
           '<div style="margin-bottom:6px;"><span style="color:#E97132;">▸</span> <strong style="color:#fff;">Entry Architecture</strong> — Removes yes/no — replaces it with a sizing decision</div>' +
-          '<div style="margin-bottom:6px;"><span style="color:#E97132;">▸</span> <strong style="color:#fff;">SPIN Questions</strong> — Situation, Problem/Implication, Need-Payoff scripted for this client</div>' +
+          '<div style="margin-bottom:6px;"><span style="color:#E97132;">▸</span> <strong style="color:#fff;">Discovery Questions</strong> — Situation, implication and need-payoff questions scripted for this client</div>' +
           '<div style="margin-bottom:6px;"><span style="color:#E97132;">▸</span> <strong style="color:#fff;">Objection Handling</strong> — Most likely pushbacks with verbatim rebuttals</div>' +
           '<div style="margin-bottom:10px;"><span style="color:#E97132;">▸</span> <strong style="color:#fff;">Trigger Agreement</strong> — Conditional close script for the hesitant client</div>' +
-          '<div style="font-size:8px;color:#E97132;letter-spacing:.1em;border-top:1px solid #1a1a1a;padding-top:8px;">Frameworks: SPIN · Cialdini · Voss · SLP Three Tens · Belfort Straight Line</div>';
+          '<div style="font-size:8px;color:#E97132;letter-spacing:.1em;border-top:1px solid #1a1a1a;padding-top:8px;">Methodology: Diagnostic questioning · Influence & compliance · Negotiation empathy · Conviction-building · Loss-aversion framing</div>';
         var btnRect = pitchInfoBtn.getBoundingClientRect();
         var bodyRect = (body.closest('.intel-popwin') || document.body).getBoundingClientRect();
         tip.style.top  = (btnRect.bottom - bodyRect.top + 6) + 'px';
@@ -2077,7 +2292,7 @@
     }
 
     /* ── Institutional Analysis info button ── */
-    var iaInfoBtn = body.querySelector('.scen-ia-info-btn');
+    var iaInfoBtn = body.querySelector('.scen-tab-i[data-info="cfa"]');
     if (iaInfoBtn) {
       iaInfoBtn.addEventListener('click', function(e) {
         e.stopPropagation();
@@ -2090,13 +2305,13 @@
           '<div style="font-size:7.5px;letter-spacing:.2em;color:#4A9EDD;margin-bottom:10px;font-weight:700;">INSTITUTIONAL ANALYSIS — WHAT\'S INCLUDED</div>' +
           '<div style="margin-bottom:6px;"><span style="color:#4A9EDD;">▸</span> <strong style="color:#fff;">Suitability Verdict</strong> — IPS/KYC ruling on this client</div>' +
           '<div style="margin-bottom:6px;"><span style="color:#4A9EDD;">▸</span> <strong style="color:#fff;">Investment Policy Statement</strong> — Risk profile, time horizon, liquidity, tax points</div>' +
-          '<div style="margin-bottom:6px;"><span style="color:#4A9EDD;">▸</span> <strong style="color:#fff;">Allocation Framework</strong> — Recommended % with modern portfolio theory / endowment model rationale</div>' +
-          '<div style="margin-bottom:6px;"><span style="color:#4A9EDD;">▸</span> <strong style="color:#fff;">Risk & Return Metrics</strong> — Sharpe, VaR, real return, duration — current vs with allocation</div>' +
+          '<div style="margin-bottom:6px;"><span style="color:#4A9EDD;">▸</span> <strong style="color:#fff;">Allocation Framework</strong> — Recommended % with diversification rationale and asset-class correlation analysis</div>' +
+          '<div style="margin-bottom:6px;"><span style="color:#4A9EDD;">▸</span> <strong style="color:#fff;">Risk & Return Metrics</strong> — Risk-adjusted return, drawdown exposure, real return, duration — current vs with allocation</div>' +
           '<div style="margin-bottom:6px;"><span style="color:#4A9EDD;">▸</span> <strong style="color:#fff;">Behavioural Risk Profile</strong> — Biases this client is most likely showing and how to counter them</div>' +
-          '<div style="margin-bottom:6px;"><span style="color:#4A9EDD;">▸</span> <strong style="color:#fff;">Tax Optimisation</strong> — CFP-level actions: BPR, EIS, CGT wrappers, IHT planning</div>' +
+          '<div style="margin-bottom:6px;"><span style="color:#4A9EDD;">▸</span> <strong style="color:#fff;">Tax Optimisation</strong> — Structural planning actions: BPR, EIS, CGT wrappers, IHT planning</div>' +
           '<div style="margin-bottom:6px;"><span style="color:#4A9EDD;">▸</span> <strong style="color:#fff;">Technical Risk Flags</strong> — Concentration, liquidity, suitability, regulatory</div>' +
-          '<div style="margin-bottom:10px;"><span style="color:#4A9EDD;">▸</span> <strong style="color:#fff;">Technical Verdict</strong> — CFA / CFP / CWA analytical case in plain English</div>' +
-          '<div style="font-size:8px;color:#4A9EDD;letter-spacing:.1em;border-top:1px solid #1a1a1a;padding-top:8px;">Frameworks: CFA L1 · L2 · L3 · CFP · CWA</div>' +
+          '<div style="margin-bottom:10px;"><span style="color:#4A9EDD;">▸</span> <strong style="color:#fff;">Technical Verdict</strong> — Institutional-grade analytical case in plain English</div>' +
+          '<div style="font-size:8px;color:#4A9EDD;letter-spacing:.1em;border-top:1px solid #1a1a1a;padding-top:8px;">Methodology: Portfolio theory · Risk analytics · Tax optimisation · Behavioural finance · Regulatory suitability</div>' +
           '';
         /* Position relative to the button */
         var btnRect = iaInfoBtn.getBoundingClientRect();
@@ -2236,6 +2451,239 @@
     fuInput.addEventListener('keydown', function(e) {
       if (e.key === 'Enter') { e.preventDefault(); _submitFollowUp(); }
     });
+
+    /* ── SAVE CLIENT BRIEF ── */
+    var saveBriefBtn = body.querySelector('.sp-save-brief-btn');
+    if (saveBriefBtn) {
+      saveBriefBtn.addEventListener('click', function() {
+        var winEl = body.closest('.intel-popwin') || body.parentElement;
+        var pitchKey = 'scenario:pitch:' + (d.title || (d.situation || '').slice(0, 60));
+        var cfaKey   = 'scenario:cfa:'   + (d.title || (d.situation || '').slice(0, 60));
+        var intake   = window._lastIfaIntake || {};
+        var saved = {
+          id:           Date.now(),
+          savedAt:      new Date().toLocaleDateString('en-GB', {day:'2-digit',month:'short',year:'numeric'}),
+          intake:       intake,
+          query:        intake.query || (d.title || d.situation || ''),
+          briefData:    d,
+          pitchData:    _cache[pitchKey] || null,
+          cfaData:      _cache[cfaKey]   || null,
+          briefHistory: (winEl._scenHistory  || []).slice(),
+          cfaHistory:   (winEl._cfaHistory   || []).slice(),
+          pitchHistory: (winEl._pitchHistory || []).slice(),
+        };
+        var briefs = _loadBriefs();
+        var existingIdx = briefs.findIndex(function(b) { return b.query === saved.query; });
+        if (existingIdx !== -1) {
+          saved.id = briefs[existingIdx].id; /* keep original id so it stays in place */
+          briefs[existingIdx] = saved;
+        } else {
+          briefs.unshift(saved);
+          if (briefs.length > 50) briefs.length = 50;
+        }
+        try { localStorage.setItem('tbt_briefs', JSON.stringify(briefs)); } catch(e) {}
+        saveBriefBtn.textContent = '✓ SAVED';
+        saveBriefBtn.style.borderColor = '#3d8c5a';
+        saveBriefBtn.style.color = '#3d8c5a';
+        setTimeout(function() {
+          saveBriefBtn.textContent = '▌ SAVE CLIENT BRIEF';
+          saveBriefBtn.style.borderColor = '#E97132';
+          saveBriefBtn.style.color = '#E97132';
+        }, 2000);
+      });
+    }
+  }
+
+  /* ── SAVED CLIENT BRIEFS ── */
+  function _loadBriefs() {
+    try { return JSON.parse(localStorage.getItem('tbt_briefs') || '[]'); } catch(e) { return []; }
+  }
+
+  function _openSavedBrief(saved) {
+    /* Pre-populate cache so pitch/CFA load instantly from saved data (no API call) */
+    var pitchKey = 'scenario:pitch:' + (saved.briefData.title || (saved.briefData.situation || '').slice(0, 60));
+    var cfaKey   = 'scenario:cfa:'   + (saved.briefData.title || (saved.briefData.situation || '').slice(0, 60));
+    if (saved.pitchData) _cache[pitchKey] = saved.pitchData;
+    if (saved.cfaData)   _cache[cfaKey]   = saved.cfaData;
+
+    /* Bring existing window to front if already open */
+    var pid = 'saved-' + saved.id;
+    var existing = document.querySelector('.intel-popwin[data-pop-saved="' + saved.id + '"]');
+    if (existing) { window._sharedZ++; existing.style.zIndex = window._sharedZ; return; }
+
+    var x = 80 + (Object.keys(_registry).length % 5) * 44;
+    var y = 80 + (Object.keys(_registry).length % 5) * 32;
+
+    var win = document.createElement('div');
+    win.className  = 'intel-popwin';
+    win._itTitle   = (saved.intake.ref || saved.briefData.title || 'SAVED BRIEF').toUpperCase();
+    win._popId     = pid;
+    win.dataset.popSaved = saved.id;
+    win.style.cssText = 'top:' + y + 'px;left:' + x + 'px;z-index:' + (++window._sharedZ) + ';';
+
+    var popZoom = 1;
+    win.innerHTML =
+      '<div class="intel-popwin-titlebar">' +
+        '<span class="intel-popwin-icon">▌ INTEL</span>' +
+        '<span class="intel-popwin-title">' + escH(win._itTitle) + '</span>' +
+        '<div style="display:flex;gap:4px;margin-left:auto;align-items:center;">' +
+          '<button class="intel-popwin-btn intel-popwin-zoom-out" title="Zoom out">−</button>' +
+          '<button class="intel-popwin-btn intel-popwin-zoom-in"  title="Zoom in">+</button>' +
+          '<button class="intel-popwin-close">✕</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="intel-popwin-body"></div>';
+
+    _registry[pid] = { query: win._itTitle, type: 'scenario', ticker: '', x: x, y: y, w: 440, h: 500 };
+    document.body.appendChild(win);
+
+    var zoomInBtn  = win.querySelector('.intel-popwin-zoom-in');
+    var zoomOutBtn = win.querySelector('.intel-popwin-zoom-out');
+    var bodyEl     = win.querySelector('.intel-popwin-body');
+
+    function applyZoom(z) {
+      popZoom = Math.min(2, Math.max(0.4, z));
+      bodyEl.style.zoom = popZoom;
+    }
+    zoomInBtn.addEventListener('click',  function(e) { e.stopPropagation(); applyZoom(popZoom + 0.1); });
+    zoomOutBtn.addEventListener('click', function(e) { e.stopPropagation(); applyZoom(popZoom - 0.1); });
+
+    makeDraggable(win, win.querySelector('.intel-popwin-titlebar'));
+    makeResizablePop(win);
+    win.addEventListener('mousedown', function() { window._sharedZ++; win.style.zIndex = window._sharedZ; });
+
+    win.querySelector('.intel-popwin-close').addEventListener('click', function() {
+      delete _registry[pid];
+      win.remove();
+    });
+
+    /* Restore conversation histories before rendering */
+    win._scenHistory  = (saved.briefHistory  || []).slice();
+    win._cfaHistory   = (saved.cfaHistory    || []).slice();
+    win._pitchHistory = (saved.pitchHistory  || []).slice();
+
+    /* Tag the last intake so the save button updates correctly from a re-opened brief */
+    window._lastIfaIntake = saved.intake || {};
+
+    bodyEl.style.cssText += 'opacity:0;transition:opacity .35s ease;';
+    requestAnimationFrame(function() { requestAnimationFrame(function() { bodyEl.style.opacity = '1'; }); });
+    renderScenario(saved.briefData, bodyEl);
+  }
+
+  function _openClientsModal() {
+    var existing = document.getElementById('intel-clients-modal');
+    if (existing) { existing.remove(); }
+
+    var briefs = _loadBriefs();
+
+    var modal = document.createElement('div');
+    modal.id = 'intel-clients-modal';
+    modal.style.cssText = 'position:fixed;z-index:99999;top:60px;right:20px;background:#0a0a0a;border:1px solid #2a2a2a;border-top:2px solid #E97132;width:320px;max-height:70vh;display:flex;flex-direction:column;box-shadow:0 8px 32px rgba(0,0,0,.7);';
+
+    var panel = modal; /* panel === modal now — no wrapper needed */
+
+    var hdr = '<div id="intel-clients-titlebar" style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid #1a1a1a;cursor:move;user-select:none;">' +
+      '<div>' +
+        '<div style="font-size:7px;letter-spacing:.3em;color:#E97132;font-weight:700;margin-bottom:2px;">IFA INTEL</div>' +
+        '<div style="font-size:12px;color:#fff;letter-spacing:.06em;font-weight:700;">SAVED CLIENTS</div>' +
+      '</div>' +
+      '<button id="intel-clients-close" style="background:none;border:none;color:#555;font-size:14px;cursor:pointer;padding:4px;">✕</button>' +
+    '</div>';
+
+    var listHtml = '';
+    if (!briefs.length) {
+      listHtml = '<div style="padding:20px 14px;font-size:9.5px;color:#444;text-align:center;line-height:1.8;">No saved client briefs yet.<br><span style="color:#333;">Run an IFA Intel brief and click<br>▌ SAVE CLIENT BRIEF to store it here.</span></div>';
+    } else {
+      listHtml = briefs.map(function(b, i) {
+        var ref       = b.customName || (b.intake && b.intake.ref) || b.briefData.title || 'Client';
+        var age       = (b.intake && b.intake.age)       || '';
+        var portfolio = (b.intake && b.intake.portfolio) || '';
+        var hasPitch  = !!b.pitchData;
+        var hasCfa    = !!b.cfaData;
+        return '<div class="clients-row" data-idx="' + i + '" style="padding:10px 14px;border-bottom:1px solid #111;cursor:pointer;transition:background .15s;">' +
+          '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;gap:6px;">' +
+            '<div class="clients-row-name" style="font-size:10px;color:#fff;font-weight:700;letter-spacing:.05em;flex:1;">' + escH(ref) + '</div>' +
+            '<button class="clients-rename-btn" data-idx="' + i + '" title="Rename" style="background:none;border:none;color:#444;font-size:11px;cursor:pointer;padding:0 2px;flex-shrink:0;line-height:1;">✎</button>' +
+            '<div style="font-size:8px;color:#444;flex-shrink:0;">' + escH(b.savedAt) + '</div>' +
+          '</div>' +
+          (age       ? '<div style="font-size:8.5px;color:#888;">' + escH(age) + '</div>' : '') +
+          (portfolio ? '<div style="font-size:8.5px;color:#E97132;">' + escH(portfolio) + '</div>' : '') +
+          '<div style="margin-top:4px;display:flex;gap:4px;">' +
+            '<span style="font-size:7px;letter-spacing:.1em;padding:1px 5px;border:1px solid #1f1f1f;color:#555;">BRIEF</span>' +
+            (hasPitch ? '<span style="font-size:7px;letter-spacing:.1em;padding:1px 5px;border:1px solid #2a1a0a;color:#E97132;">PITCH</span>' : '') +
+            (hasCfa   ? '<span style="font-size:7px;letter-spacing:.1em;padding:1px 5px;border:1px solid #0a1a2a;color:#4A9EDD;">CFA</span>' : '') +
+          '</div>' +
+        '</div>';
+      }).join('');
+    }
+
+    var deleteRowHtml = briefs.length ?
+      '<div style="padding:10px 14px;border-top:1px solid #1a1a1a;">' +
+        '<button id="intel-clients-clear" style="background:none;border:none;color:#444;font-size:8px;letter-spacing:.1em;cursor:pointer;padding:0;">✕ CLEAR ALL SAVED CLIENTS</button>' +
+      '</div>' : '';
+
+    modal.innerHTML = hdr +
+      '<div style="overflow-y:auto;flex:1;">' + listHtml + '</div>' +
+      deleteRowHtml;
+
+    document.body.appendChild(modal);
+    makeDraggable(modal, modal.querySelector('#intel-clients-titlebar'));
+
+    /* Hover effect + open brief on row click */
+    modal.querySelectorAll('.clients-row').forEach(function(row) {
+      row.addEventListener('mouseenter', function() { row.style.background = '#111'; });
+      row.addEventListener('mouseleave', function() { row.style.background = ''; });
+      row.addEventListener('click', function() {
+        var idx = parseInt(row.getAttribute('data-idx'), 10);
+        if (briefs[idx]) {
+          modal.remove();
+          _openSavedBrief(briefs[idx]);
+        }
+      });
+    });
+
+    /* Rename buttons */
+    modal.querySelectorAll('.clients-rename-btn').forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        var idx = parseInt(btn.getAttribute('data-idx'), 10);
+        var nameEl = btn.closest('.clients-row').querySelector('.clients-row-name');
+        var current = briefs[idx].customName || nameEl.textContent;
+        var inp = document.createElement('input');
+        inp.value = current;
+        inp.style.cssText = 'background:#111;border:none;border-bottom:1px solid #E97132;color:#fff;font-size:10px;font-weight:700;letter-spacing:.05em;outline:none;width:100%;font-family:Consolas,Menlo,monospace;';
+        nameEl.innerHTML = '';
+        nameEl.appendChild(inp);
+        inp.focus();
+        inp.select();
+        function save() {
+          var newName = inp.value.trim() || current;
+          briefs[idx].customName = newName;
+          try { localStorage.setItem('tbt_briefs', JSON.stringify(briefs)); } catch(e2) {}
+          nameEl.textContent = newName;
+        }
+        inp.addEventListener('blur', save);
+        inp.addEventListener('keydown', function(e2) {
+          if (e2.key === 'Enter') { e2.preventDefault(); inp.blur(); }
+          if (e2.key === 'Escape') { inp.value = current; inp.blur(); }
+        });
+      });
+    });
+
+    var closeBtn = modal.querySelector('#intel-clients-close');
+    if (closeBtn) closeBtn.addEventListener('click', function() { modal.remove(); });
+
+    var clearBtn = modal.querySelector('#intel-clients-clear');
+    if (clearBtn) {
+      clearBtn.addEventListener('click', function() {
+        if (confirm('Clear all saved client briefs? This cannot be undone.')) {
+          try { localStorage.removeItem('tbt_briefs'); } catch(e) {}
+          modal.remove();
+        }
+      });
+    }
+
+    modal.addEventListener('click', function(e) { if (e.target === modal) modal.remove(); });
   }
 
   function renderPopout(d, win) {
@@ -2279,7 +2727,7 @@
                             parts.push('LOGICAL CASE:\n' + p.logicalCase.map(function (f, i) { return (i + 1) + '. ' + f; }).join('\n'));
       if (p.emotionalCase)  parts.push('FUTURE PACE:\n' + p.emotionalCase);
       if (p.spinQuestions && p.spinQuestions.length)
-                            parts.push('SPIN QUESTIONS:\n' + p.spinQuestions.map(function (q, i) { return ['Situation', 'Problem/Implication', 'Need-Payoff'][i] + ': ' + q; }).join('\n'));
+                            parts.push('DISCOVERY QUESTIONS:\n' + p.spinQuestions.map(function (q, i) { return ['Situation', 'Problem/Implication', 'Need-Payoff'][i] + ': ' + q; }).join('\n'));
       if (p.objections && p.objections.length)
                             parts.push('OBJECTIONS:\n' + p.objections.map(function (o) { return '"' + o.objection + '"\n→ ' + o.rebuttal; }).join('\n\n'));
       if (p.urgencyLine)    parts.push('TIMING: ' + p.urgencyLine);
@@ -2365,7 +2813,7 @@
 
     if (pitch.spinQuestions && pitch.spinQuestions.length) {
       var spinLabels = ['SITUATION', 'PROBLEM / IMPLICATION', 'NEED-PAYOFF'];
-      html += '<div class=”sp-section”><div class=”sp-sec-lbl”>SPIN QUESTIONS — ASK FIRST</div>' +
+      html += '<div class=”sp-section”><div class=”sp-sec-lbl”>DISCOVERY QUESTIONS — ASK FIRST</div>' +
         pitch.spinQuestions.map(function(q, i) {
           var clean = q.replace(/^(situation|problem\s*[\/]?\s*implication|need[-\s]payoff)[:\s]*/i, '').trim();
           return card(spinLabels[i] || '', escH(clean));
@@ -2402,7 +2850,7 @@
 
     if (data.suitabilityVerdict) html +=
       '<div class="sp-section">' +
-        '<div class="sp-sec-lbl" style="color:' + BLU + ';">SUITABILITY VERDICT — CFA/KYC</div>' +
+        '<div class="sp-sec-lbl" style="color:' + BLU + ';">SUITABILITY VERDICT — REGULATORY REVIEW</div>' +
         '<div class="sp-pitch" style="border-left-color:' + BLU + ';color:#c8c8c8;">' + escH(data.suitabilityVerdict) + '</div>' +
       '</div>';
 
@@ -2458,7 +2906,7 @@
 
     if (data.taxOptimisation && data.taxOptimisation.length) html +=
       '<div class="sp-section">' +
-        '<div class="sp-sec-lbl" style="color:' + BLU + ';">TAX OPTIMISATION — CFP LENS</div>' +
+        '<div class="sp-sec-lbl" style="color:' + BLU + ';">TAX OPTIMISATION — STRUCTURAL PLANNING</div>' +
         '<ul class="sp-facts">' + data.taxOptimisation.map(function(t){ return '<li>' + escH(t) + '</li>'; }).join('') + '</ul>' +
       '</div>';
 

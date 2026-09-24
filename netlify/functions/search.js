@@ -1084,7 +1084,7 @@ exports.handler = async (event) => {
         statusCode: 200,
         headers: { ...CORS, 'Cache-Control': 'no-store' },
         body: JSON.stringify([
-          { type: 'scenario', label: `Advisory brief: "${q.length > 60 ? q.slice(0, 60) + '…' : q}"`, query: q },
+          { type: 'scenario', label: `Advisory brief: "${q}"`, query: q },
         ]),
       };
     }
