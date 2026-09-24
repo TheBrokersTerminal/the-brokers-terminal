@@ -207,8 +207,9 @@
         '<div class="intel-search-bar">' +
           '<span class="intel-search-icon">⌕</span>' +
           '<span class="intel-search-lbl">INTEL</span>' +
-          '<input id="intel-search-input" type="text" placeholder="Company, event, or describe a client scenario…" autocomplete="off" spellcheck="false" autocorrect="off" autocapitalize="off" readonly>' +
+          '<input id="intel-search-input" type="text" placeholder="Company, concept, or macro event…" autocomplete="off" spellcheck="false" autocorrect="off" autocapitalize="off" readonly>' +
         '</div>' +
+        '<button id="intel-ifa-btn" title="Open IFA client intake form">▌ IFA INTEL</button>' +
       '</div>';
 
     /* Append dropdown to body so it escapes any parent stacking context */
@@ -222,6 +223,153 @@
     }
 
     var input = document.getElementById('intel-search-input');
+
+    /* ── IFA INTEL INTAKE FORM ── */
+    var ifaBtn = document.getElementById('intel-ifa-btn');
+    var ifaModal = document.getElementById('intel-ifa-modal');
+    if (!ifaModal) {
+      ifaModal = document.createElement('div');
+      ifaModal.id = 'intel-ifa-modal';
+      ifaModal.innerHTML =
+        '<div class="ifa-modal-overlay" id="intel-ifa-overlay"></div>' +
+        '<div class="ifa-modal-panel">' +
+          '<div class="ifa-modal-hdr">' +
+            '<div style="display:flex;flex-direction:column;gap:2px;">' +
+              '<div style="font-size:7px;letter-spacing:.3em;color:#E97132;font-weight:700;">IFA INTEL</div>' +
+              '<div style="font-size:13px;color:#fff;letter-spacing:.06em;font-weight:700;">CLIENT INTAKE</div>' +
+            '</div>' +
+            '<button class="ifa-modal-close" id="intel-ifa-close">✕</button>' +
+          '</div>' +
+
+          '<div class="ifa-modal-body">' +
+
+            '<div class="ifa-row2">' +
+              '<div class="ifa-field">' +
+                '<label class="ifa-lbl">CLIENT REFERENCE <span class="ifa-opt">optional</span></label>' +
+                '<input class="ifa-input" id="ifa-ref" type="text" placeholder="e.g. Client A, JB47…" autocomplete="off">' +
+              '</div>' +
+              '<div class="ifa-field">' +
+                '<label class="ifa-lbl">AGE / BACKGROUND</label>' +
+                '<input class="ifa-input" id="ifa-age" type="text" placeholder="e.g. 54, retired surgeon, married" autocomplete="off">' +
+              '</div>' +
+            '</div>' +
+
+            '<div class="ifa-row2">' +
+              '<div class="ifa-field">' +
+                '<label class="ifa-lbl">PORTFOLIO VALUE</label>' +
+                '<input class="ifa-input" id="ifa-portfolio" type="text" placeholder="e.g. £1.2m investable" autocomplete="off">' +
+              '</div>' +
+              '<div class="ifa-field">' +
+                '<label class="ifa-lbl">TIME HORIZON</label>' +
+                '<select class="ifa-input ifa-select" id="ifa-horizon">' +
+                  '<option value="">Select…</option>' +
+                  '<option value="short-term (under 3 years)">Short-term — under 3 years</option>' +
+                  '<option value="medium-term (3–7 years)">Medium-term — 3–7 years</option>' +
+                  '<option value="long-term (7+ years)">Long-term — 7+ years</option>' +
+                  '<option value="wealth preservation / multigenerational">Multigenerational / preservation</option>' +
+                '</select>' +
+              '</div>' +
+            '</div>' +
+
+            '<div class="ifa-field">' +
+              '<label class="ifa-lbl">CURRENT HOLDINGS</label>' +
+              '<input class="ifa-input" id="ifa-holdings" type="text" placeholder="e.g. 70% UK equities, 20% cash, 10% property" autocomplete="off">' +
+            '</div>' +
+
+            '<div class="ifa-row2">' +
+              '<div class="ifa-field">' +
+                '<label class="ifa-lbl">GOALS</label>' +
+                '<textarea class="ifa-input ifa-ta" id="ifa-goals" placeholder="e.g. Preserve capital, generate income, fund retirement in 8 years…" rows="3"></textarea>' +
+              '</div>' +
+              '<div class="ifa-field">' +
+                '<label class="ifa-lbl">CONCERNS / PAIN POINTS</label>' +
+                '<textarea class="ifa-input ifa-ta" id="ifa-concerns" placeholder="e.g. Worried about inflation eroding savings, no diversification outside stocks…" rows="3"></textarea>' +
+              '</div>' +
+            '</div>' +
+
+            '<div class="ifa-row2">' +
+              '<div class="ifa-field">' +
+                '<label class="ifa-lbl">TAX SITUATION <span class="ifa-opt">optional</span></label>' +
+                '<input class="ifa-input" id="ifa-tax" type="text" placeholder="e.g. ISA fully used, large GIA, IHT concern, SIPP drawdown" autocomplete="off">' +
+              '</div>' +
+              '<div class="ifa-field">' +
+                '<label class="ifa-lbl">FOCUS FOR THIS BRIEF <span class="ifa-opt">optional</span></label>' +
+                '<input class="ifa-input" id="ifa-focus" type="text" placeholder="e.g. Alternative allocation case, IHT mitigation, opening pitch" autocomplete="off">' +
+              '</div>' +
+            '</div>' +
+
+          '</div>' +
+
+          '<div class="ifa-modal-ftr">' +
+            '<div class="ifa-preview" id="ifa-preview"></div>' +
+            '<button class="ifa-run-btn" id="ifa-run-btn">▌ RUN INTEL BRIEF</button>' +
+          '</div>' +
+        '</div>';
+      document.body.appendChild(ifaModal);
+    }
+
+    function _openIfaModal() {
+      ifaModal.style.display = 'flex';
+      setTimeout(function() { ifaModal.querySelector('.ifa-modal-panel').classList.add('ifa-panel-in'); }, 10);
+      document.getElementById('ifa-age').focus();
+      _updateIfaPreview();
+    }
+    function _closeIfaModal() {
+      ifaModal.querySelector('.ifa-modal-panel').classList.remove('ifa-panel-in');
+      setTimeout(function() { ifaModal.style.display = 'none'; }, 180);
+    }
+
+    function _getIfaVal(id) { var el = document.getElementById(id); return el ? el.value.trim() : ''; }
+
+    function _buildIfaQuery() {
+      var parts = [];
+      var age = _getIfaVal('ifa-age'), portfolio = _getIfaVal('ifa-portfolio'),
+          holdings = _getIfaVal('ifa-holdings'), horizon = _getIfaVal('ifa-horizon'),
+          goals = _getIfaVal('ifa-goals'), concerns = _getIfaVal('ifa-concerns'),
+          tax = _getIfaVal('ifa-tax'), focus = _getIfaVal('ifa-focus'), ref = _getIfaVal('ifa-ref');
+      if (ref)       parts.push('Client: ' + ref + '.');
+      if (age)       parts.push('Profile: ' + age + '.');
+      if (portfolio) parts.push('Portfolio: ' + portfolio + '.');
+      if (holdings)  parts.push('Current holdings: ' + holdings + '.');
+      if (horizon)   parts.push('Time horizon: ' + horizon + '.');
+      if (goals)     parts.push('Goals: ' + goals + '.');
+      if (concerns)  parts.push('Concerns: ' + concerns + '.');
+      if (tax)       parts.push('Tax situation: ' + tax + '.');
+      if (focus)     parts.push('Focus: ' + focus + '.');
+      return parts.join(' ');
+    }
+
+    function _updateIfaPreview() {
+      var prev = document.getElementById('ifa-preview');
+      if (!prev) return;
+      var q = _buildIfaQuery();
+      prev.textContent = q || '';
+      prev.style.display = q ? 'block' : 'none';
+    }
+
+    if (ifaBtn) {
+      ifaBtn.addEventListener('click', function(e) { e.stopPropagation(); _openIfaModal(); });
+    }
+    document.getElementById('intel-ifa-close') && document.getElementById('intel-ifa-close').addEventListener('click', _closeIfaModal);
+    document.getElementById('intel-ifa-overlay') && document.getElementById('intel-ifa-overlay').addEventListener('click', _closeIfaModal);
+
+    /* Live preview update */
+    ['ifa-ref','ifa-age','ifa-portfolio','ifa-horizon','ifa-holdings','ifa-goals','ifa-concerns','ifa-tax','ifa-focus'].forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) el.addEventListener('input', _updateIfaPreview);
+    });
+
+    /* Run button */
+    var ifaRunBtn = document.getElementById('ifa-run-btn');
+    if (ifaRunBtn) {
+      ifaRunBtn.addEventListener('click', function() {
+        var q = _buildIfaQuery();
+        if (!q) return;
+        _closeIfaModal();
+        /* Small delay so modal closes cleanly before result appears */
+        setTimeout(function() { window._intelSearch(q, 'scenario', ''); }, 200);
+      });
+    }
 
     /* Pre-warm: fire a ping on first focus to keep the serverless function hot */
     var _warmSent = false;
