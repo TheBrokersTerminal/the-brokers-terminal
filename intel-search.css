@@ -95,16 +95,17 @@
   gap: 5px;
 }
 .ifa-lbl {
-  font-size: 7px;
-  letter-spacing: .2em;
+  font-size: 9px;
+  letter-spacing: .18em;
   color: #E97132;
   font-weight: 700;
   text-transform: uppercase;
 }
 .ifa-opt {
-  color: #444;
-  letter-spacing: .1em;
+  color: #555;
+  letter-spacing: .08em;
   font-weight: 400;
+  font-size: 9px;
   text-transform: lowercase;
 }
 .ifa-input {
@@ -112,15 +113,15 @@
   border: 1px solid #252525;
   color: #e0e0e0;
   font-family: 'Consolas','Menlo',monospace;
-  font-size: 10.5px;
-  padding: 8px 10px;
+  font-size: 12px;
+  padding: 9px 11px;
   outline: none;
   transition: border-color .15s;
   width: 100%;
   box-sizing: border-box;
 }
 .ifa-input:focus { border-color: #E97132; }
-.ifa-input::placeholder { color: #3a3a3a; }
+.ifa-input::placeholder { color: #484848; font-size: 11px; }
 .ifa-select { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23E97132'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px; }
 .ifa-select option { background: #111; color: #e0e0e0; }
 .ifa-ta { resize: vertical; min-height: 68px; }
@@ -133,8 +134,8 @@
 }
 .ifa-preview {
   display: none;
-  font-size: 9px;
-  color: #444;
+  font-size: 10.5px;
+  color: #555;
   font-family: 'Consolas','Menlo',monospace;
   line-height: 1.6;
   padding: 8px 10px;
