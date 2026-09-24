@@ -2127,73 +2127,86 @@
       return '<div class=”sp-section”><div class=”sp-sec-lbl”>BROKER NOTE</div><div class=”sp-pitch”>' + escH(brokerNote) + '</div></div>';
     }
 
-    var OB = '<span style=”color:#E97132;flex-shrink:0;margin-right:6px;”>▪</span>'; /* inline orange bullet */
+    var A = '#E97132', GRN = '#6bcb77', BLU = '#4A9EDD';
+
+    /* card helper — coloured left border, dark background, label + body */
+    function card(label, body, borderCol) {
+      return '<div style=”margin-bottom:8px;padding:8px 10px;background:#0c0c0c;border:1px solid #1a1a1a;border-left:2px solid ' + (borderCol || A) + ';”>' +
+        (label ? '<div style=”font-size:7px;color:' + (borderCol || A) + ';letter-spacing:.14em;font-weight:700;margin-bottom:5px;text-transform:uppercase;”>' + label + '</div>' : '') +
+        '<div style=”font-size:10px;color:#c8c8c8;line-height:1.7;”>' + body + '</div>' +
+      '</div>';
+    }
 
     var openLine = pitch.openingLine || '';
     var driverBadge = pitch.dominantDriverTarget ? ' — ' + pitch.dominantDriverTarget.toUpperCase() + ' DRIVER' : '';
     var html = openLine
-      ? '<div class=”sp-section”><div class=”sp-sec-lbl”>OPENING LINE' + escH(driverBadge) + '</div>' +
-        '<div style=”font-size:10px;color:#E97132;letter-spacing:.06em;line-height:1.6;margin-bottom:4px;”>”' + escH(openLine) + '”</div></div>'
+      ? '<div class=”sp-section”><div class=”sp-sec-lbl”>' + 'OPENING LINE' + escH(driverBadge) + '</div>' +
+        card('', '”' + escH(openLine) + '”', A) + '</div>'
       : '';
 
     var bn = pitch.brokerNote || brokerNote;
     if (bn) html +=
-      '<div class=”sp-section”><div class=”sp-sec-lbl”>BROKER NOTE</div><div class=”sp-pitch”>' + escH(bn) + '</div></div>';
+      '<div class=”sp-section”><div class=”sp-sec-lbl”>BROKER NOTE</div>' +
+      card('', escH(bn), A) + '</div>';
 
     if (pitch.logicalCase && pitch.logicalCase.length) html +=
       '<div class=”sp-section”><div class=”sp-sec-lbl”>THE LOGICAL CASE — BUILD CERTAINTY FIRST</div>' +
-      pitch.logicalCase.map(function (f) {
-        return '<div style=”display:flex;gap:6px;padding:3px 0;border-bottom:1px solid #181818;font-size:10px;color:#c8c8c8;line-height:1.6;”>' + OB + escH(f) + '</div>';
+      pitch.logicalCase.map(function(f, i) {
+        return card('POINT ' + (i + 1), escH(f), A);
       }).join('') + '</div>';
 
     if (pitch.socraticDissonancePrompt) html +=
       '<div class=”sp-section”><div class=”sp-sec-lbl”>SOCRATIC QUESTION — EXPOSE THE GAP</div>' +
-      '<div class=”sp-pitch” style=”color:#E97132;border-left-color:#E97132;”>”' + escH(pitch.socraticDissonancePrompt) + '”</div></div>';
+      card('', '<span style=”color:' + A + ';font-style:italic;”>”' + escH(pitch.socraticDissonancePrompt) + '”</span>', A) +
+      '</div>';
 
     var fp = pitch.asIfFuturePace;
     if (fp && (fp.lossFrame || fp.gainFrame)) {
-      var fpRows = '';
-      if (fp.lossFrame) fpRows += '<div style=”display:flex;gap:6px;padding:3px 0;border-bottom:1px solid #181818;font-size:10px;color:#c8c8c8;line-height:1.6;”><span style=”color:#E97132;font-size:7px;letter-spacing:.2em;text-transform:uppercase;flex-shrink:0;padding-top:2px;”>WITHOUT</span>' + escH(fp.lossFrame) + '</div>';
-      if (fp.gainFrame) fpRows += '<div style=”display:flex;gap:6px;padding:3px 0;border-bottom:1px solid #181818;font-size:10px;color:#c8c8c8;line-height:1.6;”><span style=”color:#6bcb77;font-size:7px;letter-spacing:.2em;text-transform:uppercase;flex-shrink:0;padding-top:2px;”>WITH</span>' + escH(fp.gainFrame) + '</div>';
-      html += '<div class=”sp-section”><div class=”sp-sec-lbl”>FUTURE PACE — WITHOUT VS WITH</div>' + fpRows + '</div>';
+      html += '<div class=”sp-section”><div class=”sp-sec-lbl”>FUTURE PACE — WITHOUT VS WITH</div>';
+      if (fp.lossFrame) html += card('WITHOUT', escH(fp.lossFrame), A);
+      if (fp.gainFrame) html += card('WITH', escH(fp.gainFrame), GRN);
+      html += '</div>';
     } else if (pitch.emotionalCase) {
-      html += '<div class=”sp-section”><div class=”sp-sec-lbl”>FUTURE PACE</div><div class=”sp-text”>' + escH(pitch.emotionalCase) + '</div></div>';
+      html += '<div class=”sp-section”><div class=”sp-sec-lbl”>FUTURE PACE</div>' +
+        card('', escH(pitch.emotionalCase), A) + '</div>';
     }
 
     if (pitch.entryDefaultArchitecture) html +=
       '<div class=”sp-section”><div class=”sp-sec-lbl”>ENTRY ARCHITECTURE — REMOVE YES/NO</div>' +
-      '<div class=”sp-text”>' + escH(pitch.entryDefaultArchitecture) + '</div></div>';
+      card('', escH(pitch.entryDefaultArchitecture), GRN) + '</div>';
 
     if (pitch.painPoint) html +=
       '<div class=”sp-section”><div class=”sp-sec-lbl”>THEIR PAIN POINT</div>' +
-      '<div class=”sp-pitch” style=”color:#E97132;border-left-color:#E97132;”>' + escH(pitch.painPoint) + '</div></div>';
+      card('', escH(pitch.painPoint), A) + '</div>';
 
     if (pitch.spinQuestions && pitch.spinQuestions.length) {
       var spinLabels = ['SITUATION', 'PROBLEM / IMPLICATION', 'NEED-PAYOFF'];
       html += '<div class=”sp-section”><div class=”sp-sec-lbl”>SPIN QUESTIONS — ASK FIRST</div>' +
-        pitch.spinQuestions.map(function (q, i) {
+        pitch.spinQuestions.map(function(q, i) {
           var clean = q.replace(/^(situation|problem\s*[\/]?\s*implication|need[-\s]payoff)[:\s]*/i, '').trim();
-          return '<div style=”display:flex;gap:6px;padding:3px 0;border-bottom:1px solid #181818;font-size:10px;color:#c8c8c8;line-height:1.6;”><span style=”color:#E97132;font-size:7px;letter-spacing:.2em;text-transform:uppercase;flex-shrink:0;padding-top:2px;”>' + (spinLabels[i] || '') + '</span>' + escH(clean) + '</div>';
+          return card(spinLabels[i] || '', escH(clean), i === 2 ? GRN : A);
         }).join('') + '</div>';
     }
 
     if (pitch.objections && pitch.objections.length) {
       html += '<div class=”sp-section”><div class=”sp-sec-lbl”>HANDLE OBJECTIONS</div>' +
-        pitch.objections.map(function (o) {
-          return '<div style=”display:flex;gap:6px;padding:4px 0;border-bottom:1px solid #181818;font-size:10px;color:#c8c8c8;line-height:1.6;”>' + OB + '<span><span style=”color:#E97132;font-style:italic;”>”' + escH(o.objection || '') + '”</span> — ' + escH(o.rebuttal || '') + '</span></div>';
+        pitch.objections.map(function(o) {
+          var body = '<div style=”color:' + A + ';font-style:italic;margin-bottom:6px;”>”' + escH(o.objection || '') + '”</div>' +
+                     '<div style=”color:#c8c8c8;”>' + escH(o.rebuttal || '') + '</div>';
+          return card('OBJECTION / REBUTTAL', body, A);
         }).join('') + '</div>';
     }
 
     if (pitch.urgencyLine || pitch.socialProof) {
-      var usp = '';
-      if (pitch.urgencyLine) usp += '<div style=”display:flex;gap:6px;padding:3px 0;border-bottom:1px solid #181818;font-size:10px;color:#c8c8c8;line-height:1.6;”>' + OB + escH(pitch.urgencyLine) + '</div>';
-      if (pitch.socialProof) usp += '<div style=”display:flex;gap:6px;padding:3px 0;border-bottom:1px solid #181818;font-size:10px;color:#c8c8c8;line-height:1.6;”>' + OB + escH(pitch.socialProof) + '</div>';
-      html += '<div class=”sp-section”><div class=”sp-sec-lbl”>TIMING & SOCIAL PROOF</div>' + usp + '</div>';
+      html += '<div class=”sp-section”><div class=”sp-sec-lbl”>TIMING & SOCIAL PROOF</div>';
+      if (pitch.urgencyLine) html += card('URGENCY', escH(pitch.urgencyLine), BLU);
+      if (pitch.socialProof) html += card('SOCIAL PROOF', escH(pitch.socialProof), BLU);
+      html += '</div>';
     }
 
     if (pitch.triggerAgreementTemplate) html +=
       '<div class=”sp-section”><div class=”sp-sec-lbl”>TRIGGER AGREEMENT — CONDITIONAL CLOSE</div>' +
-      '<div class=”sp-pitch”>' + escH(pitch.triggerAgreementTemplate) + '</div></div>';
+      card('', escH(pitch.triggerAgreementTemplate), BLU) + '</div>';
 
     return html;
   }
