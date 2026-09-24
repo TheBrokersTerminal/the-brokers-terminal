@@ -1864,14 +1864,14 @@
           '<div style="font-size:7.5px;letter-spacing:.2em;color:#4A9EDD;margin-bottom:10px;font-weight:700;">INSTITUTIONAL ANALYSIS — WHAT\'S INCLUDED</div>' +
           '<div style="margin-bottom:6px;"><span style="color:#4A9EDD;">▸</span> <strong style="color:#fff;">Suitability Verdict</strong> — IPS/KYC ruling on this client</div>' +
           '<div style="margin-bottom:6px;"><span style="color:#4A9EDD;">▸</span> <strong style="color:#fff;">Investment Policy Statement</strong> — Risk profile, time horizon, liquidity, tax points</div>' +
-          '<div style="margin-bottom:6px;"><span style="color:#4A9EDD;">▸</span> <strong style="color:#fff;">Allocation Framework</strong> — Recommended % with Markowitz / endowment model rationale</div>' +
+          '<div style="margin-bottom:6px;"><span style="color:#4A9EDD;">▸</span> <strong style="color:#fff;">Allocation Framework</strong> — Recommended % with modern portfolio theory / endowment model rationale</div>' +
           '<div style="margin-bottom:6px;"><span style="color:#4A9EDD;">▸</span> <strong style="color:#fff;">Risk & Return Metrics</strong> — Sharpe, VaR, real return, duration — current vs with allocation</div>' +
-          '<div style="margin-bottom:6px;"><span style="color:#4A9EDD;">▸</span> <strong style="color:#fff;">Behavioural Risk Profile</strong> — Biases this client is most likely showing (Kahneman / Thaler) and how to counter them</div>' +
+          '<div style="margin-bottom:6px;"><span style="color:#4A9EDD;">▸</span> <strong style="color:#fff;">Behavioural Risk Profile</strong> — Biases this client is most likely showing and how to counter them</div>' +
           '<div style="margin-bottom:6px;"><span style="color:#4A9EDD;">▸</span> <strong style="color:#fff;">Tax Optimisation</strong> — CFP-level actions: BPR, EIS, CGT wrappers, IHT planning</div>' +
           '<div style="margin-bottom:6px;"><span style="color:#4A9EDD;">▸</span> <strong style="color:#fff;">Technical Risk Flags</strong> — Concentration, liquidity, suitability, regulatory</div>' +
           '<div style="margin-bottom:10px;"><span style="color:#4A9EDD;">▸</span> <strong style="color:#fff;">Technical Verdict</strong> — CFA / CFP / CWA analytical case in plain English</div>' +
-          '<div style="font-size:8px;color:#4A9EDD;letter-spacing:.1em;border-top:1px solid #1a1a1a;padding-top:8px;">Frameworks: CFA L1 · L2 · L3 · CFP · CWA · Kahneman · Thaler · Markowitz</div>' +
-          '<div style="font-size:8px;color:#555;margin-top:4px;">25 credits · follow-up questions 10 credits each · prefetched in background</div>';
+          '<div style="font-size:8px;color:#4A9EDD;letter-spacing:.1em;border-top:1px solid #1a1a1a;padding-top:8px;">Frameworks: CFA L1 · L2 · L3 · CFP · CWA</div>' +
+          '';
         /* Position relative to the button */
         var btnRect = iaInfoBtn.getBoundingClientRect();
         var bodyRect = (body.closest('.intel-popwin') || document.body).getBoundingClientRect();
@@ -2206,7 +2206,7 @@
     }
 
     if (data.behaviouralProfile && data.behaviouralProfile.length) {
-      html += '<div class="sp-section"><div class="sp-sec-lbl" style="color:' + BLU + ';">BEHAVIOURAL RISK — KAHNEMAN / THALER</div>' +
+      html += '<div class="sp-section"><div class="sp-sec-lbl" style="color:' + BLU + ';">BEHAVIOURAL RISK PROFILE</div>' +
         data.behaviouralProfile.map(function(b) {
           return '<div style="margin-bottom:8px;padding:8px;background:#0c0c0c;border:1px solid #1a1a1a;">' +
             '<div style="font-size:8px;color:' + A + ';letter-spacing:.12em;font-weight:700;margin-bottom:3px;">' + escH(b.bias || '') + '</div>' +
@@ -2228,6 +2228,44 @@
         '<div class="sp-sec-lbl" style="color:' + RED + ';">TECHNICAL RISK FLAGS</div>' +
         '<ul class="sp-facts">' + data.riskFlags.map(function(r){ return '<li style="color:' + RED + ';">' + escH(r) + '</li>'; }).join('') + '</ul>' +
       '</div>';
+
+    if (data.stressTest && data.stressTest.length) {
+      html += '<div class="sp-section"><div class="sp-sec-lbl" style="color:' + RED + ';">STRESS TEST — SCENARIO ANALYSIS</div>' +
+        data.stressTest.map(function(s) {
+          return '<div style="margin-bottom:8px;padding:8px;background:#0c0c0c;border:1px solid #1a1a1a;border-left:2px solid ' + RED + ';">' +
+            '<div style="font-size:8px;color:' + RED + ';letter-spacing:.12em;font-weight:700;margin-bottom:5px;">' + escH(s.scenario || '') + '</div>' +
+            (s.portfolioImpact ? '<div style="font-size:9.5px;color:rgba(255,255,255,0.5);margin-bottom:4px;"><span style="color:#444;font-size:8px;">CURRENT → </span>' + escH(s.portfolioImpact) + '</div>' : '') +
+            (s.withAllocation  ? '<div style="font-size:9.5px;color:' + GRN + ';"><span style="color:#444;font-size:8px;">WITH ALLOC → </span>' + escH(s.withAllocation) + '</div>' : '') +
+          '</div>';
+        }).join('') +
+      '</div>';
+    }
+
+    var iht = data.estateIht;
+    if (iht) {
+      html += '<div class="sp-section"><div class="sp-sec-lbl" style="color:' + A + ';">ESTATE PLANNING — IHT ASSESSMENT</div>' +
+        (iht.estimatedExposure ? '<div style="display:flex;gap:8px;padding:4px 0;border-bottom:1px solid #181818;font-size:10px;color:#c8c8c8;line-height:1.6;"><span style="color:' + A + ';font-size:7px;letter-spacing:.12em;flex-shrink:0;padding-top:2px;min-width:80px;">EXPOSURE</span>' + escH(iht.estimatedExposure) + '</div>' : '') +
+        (iht.mitigationOptions && iht.mitigationOptions.length ? '<div style="display:flex;gap:8px;padding:4px 0;border-bottom:1px solid #181818;font-size:10px;color:#c8c8c8;line-height:1.6;"><span style="color:' + A + ';font-size:7px;letter-spacing:.12em;flex-shrink:0;padding-top:2px;min-width:80px;">MITIGATION</span><div>' + iht.mitigationOptions.map(function(m,i){ return '<div style="margin-bottom:4px;">' + (i+1) + '. ' + escH(m) + '</div>'; }).join('') + '</div></div>' : '') +
+        (iht.urgencyFlag ? '<div style="display:flex;gap:8px;padding:4px 0;font-size:10px;color:#c8c8c8;line-height:1.6;"><span style="color:' + A + ';font-size:7px;letter-spacing:.12em;flex-shrink:0;padding-top:2px;min-width:80px;">TIMING</span>' + escH(iht.urgencyFlag) + '</div>' : '') +
+      '</div>';
+    }
+
+    var impl = data.implementationPathway;
+    if (impl) {
+      var implRows = [
+        { key: 'recommendedWrapper', label: 'WRAPPER' },
+        { key: 'fundingSource',      label: 'FUNDING' },
+        { key: 'sequencing',         label: 'SEQUENCE' },
+        { key: 'minimumEntry',       label: 'MINIMUM' },
+      ];
+      html += '<div class="sp-section"><div class="sp-sec-lbl" style="color:' + GRN + ';">IMPLEMENTATION PATHWAY</div>' +
+        implRows.map(function(r) {
+          return impl[r.key] ? '<div style="display:flex;gap:8px;padding:4px 0;border-bottom:1px solid #181818;font-size:10px;color:#c8c8c8;line-height:1.6;">' +
+            '<span style="color:' + GRN + ';font-size:7px;letter-spacing:.12em;flex-shrink:0;padding-top:2px;min-width:80px;">' + r.label + '</span>' +
+            escH(impl[r.key]) + '</div>' : '';
+        }).join('') +
+      '</div>';
+    }
 
     if (data.technicalVerdict) html +=
       '<div class="sp-section">' +

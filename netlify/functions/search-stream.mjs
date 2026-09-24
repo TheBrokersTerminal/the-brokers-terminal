@@ -645,6 +645,32 @@ Generate a TECHNICAL FINANCIAL ANALYSIS applying CFA L1/L2/L3, CFP, CWA, and beh
     "Most significant technical risk flag for this client — concentration, duration, regulatory suitability, or liquidity concern",
     "Second risk flag — different type"
   ],
+  "stressTest": [
+    {
+      "scenario": "Named stress scenario 1 — use a real historical analogue (e.g. 2022-style inflation shock: 40-year high CPI, BoE rates to 5.25%, equity/bond correlation breakdown). Make it relevant to this client's actual holdings.",
+      "portfolioImpact": "Estimated drawdown or real-terms loss for their CURRENT portfolio in this scenario — specific percentage or £ range based on what they described",
+      "withAllocation": "How the recommended allocation changes the outcome — hedge benefit, safe-haven correlation, or reduced maximum drawdown with a specific figure"
+    },
+    {
+      "scenario": "Named stress scenario 2 — different type (e.g. 2008-style credit event: 50% equity drawdown, credit markets seize, forced deleveraging). Different risk vector to scenario 1.",
+      "portfolioImpact": "Estimated impact on their current portfolio — be specific",
+      "withAllocation": "How the recommended allocation buffers this event — correlation benefit, real asset role, or duration protection with a specific improvement figure"
+    }
+  ],
+  "estateIht": {
+    "estimatedExposure": "Estimated IHT liability based on what they described. Apply NRB £325k, RNRB £175k (if applicable), any spousal exemption. Give a specific £ figure or range — do not avoid the number.",
+    "mitigationOptions": [
+      "Highest-impact mitigation: specific relief, qualifying vehicle, the relevant clock (2-year BR, 7-year gift), and estimated IHT saving in £",
+      "Second option: different mechanism (gifting strategy, discretionary trust, pension death benefits, or offshore bond) with specific saving or benefit figure"
+    ],
+    "urgencyFlag": "Is a time-sensitive clock running for this client? State whether the 2-year BR qualifying period or 7-year gift taper has started or should start now — and what the cost of waiting 12 months is in IHT terms."
+  },
+  "implementationPathway": {
+    "recommendedWrapper": "The optimal wrapper for this client (ISA, SIPP, GIA, offshore bond, or combination) with the specific tax reason — CGT base, IHT treatment, income tax efficiency, or pension death benefit angle",
+    "fundingSource": "Where the capital should come from for this specific client — existing cash, GIA crystallisation (trigger CGT now vs defer), SIPP drawdown, or new capital. State the tax-optimal sequence.",
+    "sequencing": "Step 1: what to do first and why (regulatory, tax year, or timing reason). Step 2: what follows. Step 3: what can wait and until when.",
+    "minimumEntry": "Practical minimum to execute this recommendation meaningfully given this client's described portfolio size — and the optimal tranche size if they want to phase entry."
+  },
   "technicalVerdict": "3 sentences: the full CFA/CFP analytical case for this client. State the portfolio construction benefit (which framework justifies it), the primary risk to manage and how, and the optimal implementation approach for this specific client right now."
 }
 No preamble. Return ONLY the JSON. Never use double-quote characters inside string values.`;
@@ -957,7 +983,7 @@ export default async (req) => {
           : '';
         const isScenarioPitch = isScenario && isPitchPlaybook;
         /* CFA: 2200 tok. Pitch: 2000. Scenarios: 1800. Concept slim: 400. Company: 1200. */
-        const maxTok  = isCfaAnalysis ? 2200 : isPitchPlaybook ? 2000 : isScenario ? 1800 : (type === 'concept' ? 400 : 1200);
+        const maxTok  = isCfaAnalysis ? 3000 : isPitchPlaybook ? 2000 : isScenario ? 1800 : (type === 'concept' ? 400 : 1200);
         const sysPrompt = isCfaAnalysis ? CFA_SYSTEM : isPitchPlaybook ? PITCH_SYSTEM : type === 'concept' ? CONCEPT_SYSTEM : SEARCH_SYSTEM;
         let userMsg;
         if (isCfaAnalysis)           userMsg = CFA_ANALYSIS_PROMPT(query);
