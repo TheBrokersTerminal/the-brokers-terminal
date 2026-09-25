@@ -831,7 +831,9 @@ window.addEventListener('blur', function() {
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9xcG9kaWtlbHhod2NuamR3b2p3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjI4NzIyNDMsImV4cCI6MjAzODQ0ODI0M30.BovNzOJHBoJAFGEt-wONiKg_ikV4bpJLqE6OOcXjxLM'
   );
   sb.auth.onAuthStateChange(function(event, session) {
-    if (session && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED')) {
+    if (event === 'PASSWORD_RECOVERY') {
+      window.location.href = '/reset-password.html';
+    } else if (session && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED')) {
       window.location.href = '/dashboard.html';
     }
   });
