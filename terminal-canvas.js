@@ -4455,7 +4455,7 @@
           '<div style="padding:10px 14px;display:flex;align-items:flex-start;gap:10px;">' +
             '<div style="flex:1;min-width:0;">' +
               '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">' +
-                (a.asset ? '<span style="font-size:8px;letter-spacing:.14em;color:' + col + ';">' + a.asset + '</span><span style="color:#333;">·</span>' : '') +
+                (a.asset ? '<span style="font-size:8px;letter-spacing:.14em;color:' + col + ';">' + a.asset + '</span><span style="color:#fff;">·</span>' : '') +
                 '<span style="font-size:7px;letter-spacing:.11em;color:#ffffff;">' + a.cat + '</span>' +
               '</div>' +
               '<div style="font-size:10px;color:#ffffff;font-weight:600;letter-spacing:.04em;margin-bottom:6px;">' + escH(getTitle(a)) + '</div>' +
@@ -4731,7 +4731,7 @@
 
     function renderView() {
       if (!_events.length) {
-        body.innerHTML = buildShell('<div style="padding:40px;text-align:center;font-family:Consolas,monospace;font-size:10px;color:#555;letter-spacing:0.2em;">NO UPCOMING EVENTS</div>');
+        body.innerHTML = buildShell('<div style="padding:40px;text-align:center;font-family:Consolas,monospace;font-size:10px;color:#fff;letter-spacing:0.2em;">NO UPCOMING EVENTS</div>');
         wireToolbar();
         return;
       }
@@ -4742,7 +4742,7 @@
     function buildShell(inner) {
       return '<div style="display:flex;flex-direction:column;height:100%;font-family:Consolas,monospace;">' +
         '<div id="tec-toolbar-' + id + '" style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid #2a2a2a;flex-shrink:0;">' +
-          '<span style="font-size:8px;letter-spacing:0.25em;color:#555;flex:1;">ECONOMIC CALENDAR</span>' +
+          '<span style="font-size:8px;letter-spacing:0.25em;color:#fff;flex:1;">ECONOMIC CALENDAR</span>' +
           '<button id="tec-week-' + id + '" style="padding:3px 10px;font-size:8px;letter-spacing:0.15em;border:1px solid ' + (_view==='week'?'#E97132':'#333') + ';background:' + (_view==='week'?'#E97132':'transparent') + ';color:' + (_view==='week'?'#fff':'#ffffff') + ';cursor:pointer;font-family:Consolas,monospace;">WEEK</button>' +
           '<button id="tec-month-' + id + '" style="padding:3px 10px;font-size:8px;letter-spacing:0.15em;border:1px solid ' + (_view==='month'?'#E97132':'#333') + ';background:' + (_view==='month'?'#E97132':'transparent') + ';color:' + (_view==='month'?'#fff':'#ffffff') + ';cursor:pointer;font-family:Consolas,monospace;">MONTH</button>' +
           '<button id="tec-filt-high-' + id + '" style="padding:3px 8px;font-size:8px;border:1px solid #c0392b;background:transparent;color:#e05050;cursor:pointer;font-family:Consolas,monospace;">●HIGH</button>' +
@@ -4783,15 +4783,15 @@
       /* Bloomberg-style column headers — sticky */
       var COLS = 'grid-template-columns:36px 22px 10px 1fr 34px 50px 54px 44px 40px';
       var hdr = '<div style="display:grid;' + COLS + ';padding:4px 8px;border-bottom:1px solid #222;background:#0a0a0a;position:sticky;top:0;z-index:2;">' +
-        '<div style="font-size:6.5px;color:rgba(255,255,255,0.35);letter-spacing:.1em;">TIME</div>' +
-        '<div style="font-size:6.5px;color:rgba(255,255,255,0.35);letter-spacing:.1em;">C</div>' +
+        '<div style="font-size:6.5px;color:#fff;letter-spacing:.1em;">TIME</div>' +
+        '<div style="font-size:6.5px;color:#fff;letter-spacing:.1em;">C</div>' +
         '<div></div>' +
-        '<div style="font-size:6.5px;color:rgba(255,255,255,0.35);letter-spacing:.1em;">EVENT</div>' +
-        '<div style="font-size:6.5px;color:rgba(255,255,255,0.35);letter-spacing:.1em;text-align:right;padding-right:4px;">PRD</div>' +
-        '<div style="font-size:6.5px;color:rgba(255,255,255,0.35);letter-spacing:.1em;text-align:right;padding-right:5px;">SURVEY</div>' +
-        '<div style="font-size:6.5px;color:rgba(255,255,255,0.35);letter-spacing:.1em;text-align:right;padding-right:5px;">ACTUAL</div>' +
-        '<div style="font-size:6.5px;color:rgba(255,255,255,0.35);letter-spacing:.1em;text-align:right;padding-right:4px;">PRIOR</div>' +
-        '<div style="font-size:6.5px;color:rgba(255,255,255,0.35);letter-spacing:.1em;text-align:right;">REV</div>' +
+        '<div style="font-size:6.5px;color:#fff;letter-spacing:.1em;">EVENT</div>' +
+        '<div style="font-size:6.5px;color:#fff;letter-spacing:.1em;text-align:right;padding-right:4px;">PRD</div>' +
+        '<div style="font-size:6.5px;color:#fff;letter-spacing:.1em;text-align:right;padding-right:5px;">SURVEY</div>' +
+        '<div style="font-size:6.5px;color:#fff;letter-spacing:.1em;text-align:right;padding-right:5px;">ACTUAL</div>' +
+        '<div style="font-size:6.5px;color:#fff;letter-spacing:.1em;text-align:right;padding-right:4px;">PRIOR</div>' +
+        '<div style="font-size:6.5px;color:#fff;letter-spacing:.1em;text-align:right;">REV</div>' +
       '</div>';
 
       var html = hdr;
@@ -4804,7 +4804,7 @@
           html += buildEventRow(e);
         });
       });
-      return html.length > hdr.length ? html : (hdr + '<div style="padding:40px;text-align:center;font-size:10px;color:#555;font-family:Consolas,monospace;letter-spacing:0.2em;">NO EVENTS IN NEXT 14 DAYS</div>');
+      return html.length > hdr.length ? html : (hdr + '<div style="padding:40px;text-align:center;font-size:10px;color:#fff;font-family:Consolas,monospace;letter-spacing:0.2em;">NO EVENTS IN NEXT 14 DAYS</div>');
     }
 
     function buildMonthView() {
@@ -4831,7 +4831,7 @@
       html += '<div style="text-align:center;font-size:10px;letter-spacing:0.25em;color:#fff;margin-bottom:10px;">' + monthName + '</div>';
       html += '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:8px;">';
       ['SUN','MON','TUE','WED','THU','FRI','SAT'].forEach(function(d) {
-        html += '<div style="text-align:center;font-size:7px;letter-spacing:0.15em;color:#555;padding:4px 0;">' + d + '</div>';
+        html += '<div style="text-align:center;font-size:7px;letter-spacing:0.15em;color:#fff;padding:4px 0;">' + d + '</div>';
       });
       html += '</div>';
       html += '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;">';
@@ -4866,7 +4866,7 @@
             var nm  = (e.event||'').replace(/\(.*?\)/g,'').trim().split(' ').slice(0,3).join(' ');
             return '<div style="font-size:6.5px;color:' + ec + ';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.5;letter-spacing:.03em;">●&nbsp;' + escH(nm) + '</div>';
           }).join('') +
-          (evs.length > 4 ? '<div style="font-size:6px;color:#444;margin-top:1px;">+' + (evs.length-4) + ' more</div>' : '')
+          (evs.length > 4 ? '<div style="font-size:6px;color:#fff;margin-top:1px;">+' + (evs.length-4) + ' more</div>' : '')
           : '') +
         '</div>';
       }
@@ -4905,25 +4905,25 @@
       var released = actual !== '';
       var script   = getSalesScript(e.event || '', impact);
       var eid      = 'tec-e-' + (e.date||'').replace(/[^0-9]/g,'') + '-' + (e.event||'').replace(/[^a-zA-Z]/g,'').slice(0,12);
-      var impDot   = impact === 'high' ? '<span style="color:#D14040;">●</span>' : impact === 'medium' ? '<span style="color:#E97132;">●</span>' : '<span style="color:#444;">●</span>';
+      var impDot   = impact === 'high' ? '<span style="color:#D14040;">●</span>' : impact === 'medium' ? '<span style="color:#E97132;">●</span>' : '<span style="color:#fff;">●</span>';
 
       /* Grid: TIME | C | IMP | EVENT | PRD | SURVEY | ACTUAL | PRIOR | REV */
       var row = '<div style="display:grid;grid-template-columns:36px 22px 10px 1fr 34px 50px 54px 44px 40px;' +
         'align-items:center;padding:5px 8px;gap:0;min-height:26px;border-bottom:1px solid #111;' +
         'cursor:' + (script?'pointer':'default') + ';" ' +
         (script ? 'data-tec-toggle="' + eid + '"' : '') + '>' +
-        '<div style="font-size:7.5px;color:#666;font-variant-numeric:tabular-nums;">' + (timeStr||'—') + '</div>' +
-        '<div style="font-size:7.5px;color:#888;font-weight:600;">' + escH(country) + '</div>' +
+        '<div style="font-size:7.5px;color:#fff;font-variant-numeric:tabular-nums;">' + (timeStr||'—') + '</div>' +
+        '<div style="font-size:7.5px;color:#fff;font-weight:600;">' + escH(country) + '</div>' +
         '<div>' + impDot + '</div>' +
         '<div style="font-size:9px;color:#fff;padding-right:4px;line-height:1.3;">' + escH(e.event||'') +
           (script ? '<span style="font-size:7px;color:#E97132;margin-left:3px;" id="tec-arr-' + eid + '">▼</span>' : '') +
         '</div>' +
-        '<div style="font-size:7.5px;color:#555;text-align:right;padding-right:4px;">' + escH(period) + '</div>' +
-        '<div style="font-size:7.5px;color:#888;text-align:right;padding-right:5px;font-variant-numeric:tabular-nums;">' + (survey||'—') + '</div>' +
+        '<div style="font-size:7.5px;color:#fff;text-align:right;padding-right:4px;">' + escH(period) + '</div>' +
+        '<div style="font-size:7.5px;color:#fff;text-align:right;padding-right:5px;font-variant-numeric:tabular-nums;">' + (survey||'—') + '</div>' +
         '<div style="font-size:7.5px;font-weight:700;color:' + (released ? actualCol : '#383838') + ';text-align:right;padding-right:5px;font-variant-numeric:tabular-nums;">' +
           (released ? (actual + beatArrow) : '—') +
         '</div>' +
-        '<div style="font-size:7.5px;color:#555;text-align:right;padding-right:4px;font-variant-numeric:tabular-nums;">' + (prior||'—') + '</div>' +
+        '<div style="font-size:7.5px;color:#fff;text-align:right;padding-right:4px;font-variant-numeric:tabular-nums;">' + (prior||'—') + '</div>' +
         '<div style="font-size:7.5px;color:' + (revised ? '#9B6FD4' : '#2a2a2a') + ';text-align:right;font-variant-numeric:tabular-nums;">' + (revised||'—') + '</div>' +
       '</div>';
 
@@ -4935,7 +4935,7 @@
             '<div style="font-size:8.5px;color:#fff;line-height:1.6;font-style:italic;margin-bottom:8px;">' + escH(script.beats) + '</div>' +
             '<div style="font-size:7.5px;color:#3DAA6A;letter-spacing:0.12em;margin-bottom:3px;">IF MISSES FORECAST</div>' +
             '<div style="font-size:8.5px;color:#fff;line-height:1.6;font-style:italic;margin-bottom:6px;">' + escH(script.misses) + '</div>' +
-            '<div style="font-size:7px;color:#555;letter-spacing:0.12em;border-top:1px solid #222;padding-top:5px;">' + escH(script.note) + '</div>' +
+            '<div style="font-size:7px;color:#fff;letter-spacing:0.12em;border-top:1px solid #222;padding-top:5px;">' + escH(script.note) + '</div>' +
           '</div>' +
         '</div>' : '';
 
@@ -5006,7 +5006,7 @@
     }
 
     var _allEvents = [];
-    body.innerHTML = '<div style="padding:20px;text-align:center;font-family:Consolas,monospace;font-size:10px;color:#555;letter-spacing:0.2em;">FETCHING EVENTS…</div>';
+    body.innerHTML = '<div style="padding:20px;text-align:center;font-family:Consolas,monospace;font-size:10px;color:#fff;letter-spacing:0.2em;">FETCHING EVENTS…</div>';
 
     fetch('/.netlify/functions/econ-calendar')
       .then(function(r) { return r.ok ? r.json() : r.json().then(function(e){ return Promise.reject(e.error || r.status); }); })
@@ -5016,7 +5016,7 @@
         renderView();
       })
       .catch(function(err) {
-        body.innerHTML = '<div style="padding:20px;text-align:center;font-family:Consolas,monospace;font-size:10px;color:#555;">COULD NOT LOAD — ' + escH(String(err)) + '</div>';
+        body.innerHTML = '<div style="padding:20px;text-align:center;font-family:Consolas,monospace;font-size:10px;color:#fff;">COULD NOT LOAD — ' + escH(String(err)) + '</div>';
       });
   }
 
@@ -5221,15 +5221,15 @@
     function secHdr(label, src) {
       return '<div style="display:flex;align-items:baseline;gap:10px;margin:14px 0 6px;">' +
                '<div style="font-size:7.5px;letter-spacing:.22em;color:' + A + ';font-weight:600;">' + label + '</div>' +
-               (src ? '<div style="font-size:6px;color:rgba(255,255,255,0.28);letter-spacing:.06em;">' + src + '</div>' : '') +
+               (src ? '<div style="font-size:6px;color:#fff;letter-spacing:.06em;">' + src + '</div>' : '') +
              '</div>';
     }
 
     function kpiCard(label, value, sub, col, border) {
       return '<div style="background:#0d0d0d;border:1px solid ' + (border||'#1e1e1e') + ';padding:9px 10px 7px;display:flex;flex-direction:column;gap:2px;">' +
-               '<div style="font-size:6px;color:rgba(255,255,255,0.4);letter-spacing:.18em;">' + label + '</div>' +
+               '<div style="font-size:6px;color:#fff;letter-spacing:.18em;">' + label + '</div>' +
                '<div style="font-size:14px;font-weight:700;color:' + (col||'#fff') + ';font-variant-numeric:tabular-nums;">' + value + '</div>' +
-               '<div style="font-size:6.5px;color:rgba(255,255,255,0.3);">' + sub + '</div>' +
+               '<div style="font-size:6.5px;color:#fff;">' + sub + '</div>' +
              '</div>';
     }
 
@@ -5319,18 +5319,18 @@
       /* Core Funds Table with live price placeholders */
       html += secHdr('CORE FUNDS \u2014 LIVE', 'YAHOO FINANCE  \u00b7  REFRESHES EVERY 15 MIN');
       html += '<div style="border:1px solid #1a1a1a;margin-bottom:14px;">';
-      html += '<div style="display:grid;grid-template-columns:52px 1fr 70px 60px 54px 56px;font-size:6px;color:rgba(255,255,255,0.28);letter-spacing:.14em;padding:6px 8px;background:#0d0d0d;border-bottom:1px solid #1a1a1a;">'
+      html += '<div style="display:grid;grid-template-columns:52px 1fr 70px 60px 54px 56px;font-size:6px;color:#fff;letter-spacing:.14em;padding:6px 8px;background:#0d0d0d;border-bottom:1px solid #1a1a1a;">'
             + '<div>TICKER</div><div>FUND</div><div style="text-align:right;">HOLDINGS</div><div style="text-align:right;">EXP RATIO</div><div style="text-align:right;">PRICE</div><div style="text-align:right;">CHG</div></div>';
       ETF_FUNDS.forEach(function(f, i) {
         html += '<div style="display:grid;grid-template-columns:52px 1fr 70px 60px 54px 56px;align-items:center;padding:8px;border-bottom:' + (i < ETF_FUNDS.length-1 ? '1px solid #111' : 'none') + ';">';
         html += '<div style="font-size:9px;font-weight:700;color:' + A + ';letter-spacing:.06em;">' + f.tk + '</div>';
-        html += '<div><div style="font-size:7.5px;color:#fff;">' + f.n + '</div><div style="font-size:6px;color:rgba(255,255,255,0.3);margin-top:1px;">' + f.mgr + '</div></div>';
+        html += '<div><div style="font-size:7.5px;color:#fff;">' + f.n + '</div><div style="font-size:6px;color:#fff;margin-top:1px;">' + f.mgr + '</div></div>';
         html += '<div style="font-size:8px;font-weight:600;color:#fff;text-align:right;font-variant-numeric:tabular-nums;">' + f.t.toLocaleString() + 't</div>';
-        html += '<div style="font-size:7.5px;color:rgba(255,255,255,0.45);text-align:right;">' + f.er + '</div>';
+        html += '<div style="font-size:7.5px;color:#fff;text-align:right;">' + f.er + '</div>';
         html += '<div id="etfp-' + f.tk + '-' + id + '" style="text-align:right;">'
-             +  '<div style="font-size:7px;color:rgba(255,255,255,0.25);letter-spacing:.06em;">LOADING</div></div>';
+             +  '<div style="font-size:7px;color:#fff;letter-spacing:.06em;">LOADING</div></div>';
         html += '<div id="etfc-' + f.tk + '-' + id + '" style="text-align:right;">'
-             +  '<div style="width:8px;height:8px;border:1px solid #333;border-top-color:rgba(255,255,255,0.3);border-radius:50%;display:inline-block;"></div></div>';
+             +  '<div style="width:8px;height:8px;border:1px solid #333;border-top-color:#fff;border-radius:50%;display:inline-block;"></div></div>';
         html += '</div>';
       });
       html += '</div>';
@@ -5345,7 +5345,7 @@
         html += '<div style="height:8px;background:#111;border-radius:1px;overflow:hidden;">'
              +  '<div style="height:100%;width:' + reg.pct + '%;background:' + reg.col + ';opacity:.8;border-radius:1px;"></div></div>';
         html += '<div style="font-size:8px;font-weight:600;color:#fff;text-align:right;font-variant-numeric:tabular-nums;">' + reg.t.toLocaleString() + 't</div>';
-        html += '<div style="font-size:7px;color:rgba(255,255,255,0.35);text-align:right;">' + reg.pct + '%</div>';
+        html += '<div style="font-size:7px;color:#fff;text-align:right;">' + reg.pct + '%</div>';
         html += '<div style="font-size:7.5px;font-weight:600;color:' + flowCol + ';text-align:right;">' + (reg.flow > 0 ? '+' : '') + (reg.flow || '\u2014') + (reg.flow ? 't' : '') + '</div>';
         html += '</div>';
       });
@@ -5422,7 +5422,7 @@
               var cEl = body.querySelector('#etfc-' + f.tk + '-' + id);
               if (!pEl || !cEl) return;
               if (!q || q.error || !q.price) {
-                pEl.innerHTML = '<div style="font-size:7px;color:rgba(255,255,255,0.2);">N/A</div>';
+                pEl.innerHTML = '<div style="font-size:7px;color:#fff;">N/A</div>';
                 cEl.innerHTML = '';
                 return;
               }
@@ -5435,7 +5435,7 @@
           .catch(function() {
             ETF_FUNDS.forEach(function(f) {
               var pEl = body.querySelector('#etfp-' + f.tk + '-' + id);
-              if (pEl) pEl.innerHTML = '<div style="font-size:7px;color:rgba(255,255,255,0.2);">offline</div>';
+              if (pEl) pEl.innerHTML = '<div style="font-size:7px;color:#fff;">offline</div>';
             });
           });
       }, 80);
@@ -5482,7 +5482,7 @@
       html += '<div id="gi-news-hint-' + id + '" style="' +
         'position:absolute;bottom:10px;right:10px;z-index:3;' +
         'font-size:6px;letter-spacing:.12em;font-family:Consolas,monospace;' +
-        'color:rgba(255,255,255,0.4);background:rgba(0,0,0,0.6);' +
+        'color:#fff;background:rgba(0,0,0,0.6);' +
         'padding:3px 7px;pointer-events:none;transition:opacity 1s;" ' +
         '>MUTED BY DEFAULT · CLICK STREAM TO UNMUTE</div>';
 
@@ -5490,10 +5490,10 @@
 
       /* Stream info bar */
       html += '<div style="flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:5px 10px;background:#090909;border-top:1px solid #1a1a1a;">';
-      html += '<div style="font-size:6px;letter-spacing:.1em;color:' + A + ';">' + ch.label + '  <span style="color:rgba(255,255,255,0.25);">·  ' + ch.sub.toUpperCase() + '</span></div>';
+      html += '<div style="font-size:6px;letter-spacing:.1em;color:' + A + ';">' + ch.label + '  <span style="color:#fff;">·  ' + ch.sub.toUpperCase() + '</span></div>';
       html += '<div style="display:flex;align-items:center;gap:5px;">' +
         '<div style="width:5px;height:5px;border-radius:50%;background:' + A + ';animation:blink 1.4s step-start infinite;"></div>' +
-        '<div style="font-size:6px;letter-spacing:.12em;color:rgba(255,255,255,0.3);">LIVE</div>' +
+        '<div style="font-size:6px;letter-spacing:.12em;color:#fff;">LIVE</div>' +
       '</div>';
       html += '</div>';
 
@@ -5554,8 +5554,8 @@
       /* ── Composite score header ─────────────────────────────────────── */
       html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#0c0c0c;border:1px solid #1e1e1e;margin-bottom:14px;margin-top:4px;">';
       html += '<div>';
-      html += '<div style="font-size:7px;letter-spacing:.2em;color:rgba(255,255,255,0.35);margin-bottom:5px;">GOLD INTELLIGENCE COMPOSITE SCORE</div>';
-      html += '<div style="font-size:8px;letter-spacing:.12em;color:rgba(255,255,255,0.4);">9 ACTIVE SIGNALS · ' +
+      html += '<div style="font-size:7px;letter-spacing:.2em;color:#fff;margin-bottom:5px;">GOLD INTELLIGENCE COMPOSITE SCORE</div>';
+      html += '<div style="font-size:8px;letter-spacing:.12em;color:#fff;">9 ACTIVE SIGNALS · ' +
         (live ? '<span style="color:' + GRN + ';">LIVE DATA</span>' : (_catalystLive === 'loading' ? '<span style="color:' + A + ';">FETCHING…</span>' : '<span style="color:rgba(255,255,255,.25);">ESTIMATES</span>')) + '</div>';
       html += '</div>';
       html += '<div style="text-align:right;">';
@@ -5570,7 +5570,7 @@
         return '<div style="display:grid;grid-template-columns:1fr 72px 40px 58px 66px;align-items:center;padding:8px 10px;border-bottom:1px solid #0f0f0f;">' +
           '<div>' +
             '<div style="font-size:7.5px;letter-spacing:.08em;color:#fff;">' + label + '</div>' +
-            (sub ? '<div style="font-size:5.5px;color:rgba(255,255,255,0.26);margin-top:1.5px;letter-spacing:.04em;">' + sub + '</div>' : '') +
+            (sub ? '<div style="font-size:5.5px;color:#fff;margin-top:1.5px;letter-spacing:.04em;">' + sub + '</div>' : '') +
           '</div>' +
           '<div style="font-size:8px;font-weight:600;color:#fff;text-align:right;font-variant-numeric:tabular-nums;">' + val + '</div>' +
           '<div style="font-size:6.5px;font-weight:600;color:' + (chgPos ? GRN : RED) + ';text-align:right;">' + chgStr + '</div>' +
@@ -5622,7 +5622,7 @@
       /* Live chokepoint map */
       html += '<div style="position:relative;margin-bottom:8px;border:1px solid #1a1a1a;overflow:hidden;">';
       html += '<iframe src="/shipping-map.html" style="width:100%;height:220px;border:none;display:block;" scrolling="no"></iframe>';
-      html += '<div style="position:absolute;top:6px;right:8px;font-size:5.5px;letter-spacing:.14em;font-family:Consolas,monospace;color:rgba(255,255,255,0.3);">HOVER CHOKEPOINTS FOR DETAIL</div>';
+      html += '<div style="position:absolute;top:6px;right:8px;font-size:5.5px;letter-spacing:.14em;font-family:Consolas,monospace;color:#fff;">HOVER CHOKEPOINTS FOR DETAIL</div>';
       html += '</div>';
 
       html += '<div style="border:1px solid #1a1a1a;margin-bottom:8px;">';
@@ -5651,7 +5651,7 @@
 
       html += '</div>';
 
-      html += '<div style="font-size:6px;color:rgba(255,255,255,0.25);margin-bottom:14px;line-height:1.7;border-left:2px solid #1e1e1e;padding-left:8px;">' +
+      html += '<div style="font-size:6px;color:#fff;margin-bottom:14px;line-height:1.7;border-left:2px solid #1e1e1e;padding-left:8px;">' +
         'VLCC & container rate elevation reflects Red Sea routing disruption (Houthi activity) and Strait of Hormuz tension — both historically correlated with gold\'s geopolitical risk premium. ' +
         'Capesize strength signals Chinese industrial demand recovery. BDI at ' + bdi.value.toLocaleString() + ' is neutral-to-firm; sustained moves below 1,200 signal global demand destruction historically followed by defensive gold inflows.' +
         '</div>';
@@ -5664,7 +5664,7 @@
         return '<div style="border:1px solid ' + col + '28;background:' + bg + ';padding:10px 10px 8px;">' +
           '<div style="font-size:5.5px;letter-spacing:.2em;color:' + col + ';margin-bottom:6px;">' + lbl + '</div>' +
           '<div style="font-size:18px;font-weight:700;color:#fff;margin-bottom:3px;font-variant-numeric:tabular-nums;">' + target + '</div>' +
-          '<div style="font-size:5.5px;color:rgba(255,255,255,0.3);margin-bottom:8px;line-height:1.5;">' + driver + '</div>' +
+          '<div style="font-size:5.5px;color:#fff;margin-bottom:8px;line-height:1.5;">' + driver + '</div>' +
           '<div style="height:2px;background:#111;margin-bottom:5px;">' +
             '<div style="height:100%;width:' + prob + '%;background:' + col + ';"></div>' +
           '</div>' +
@@ -5696,7 +5696,7 @@
       [{c:BLU,l:'Standard'},{c:A,l:'≥ 900t'},{c:REC,l:'Record 2022'},{c:GRN,l:'2026 H1'}].forEach(function(l) {
         html += '<div style="display:flex;align-items:center;gap:4px;">' +
                   '<div style="width:9px;height:6px;background:' + l.c + ';opacity:.8;border-radius:1px;flex-shrink:0;"></div>' +
-                  '<div style="font-size:6.5px;color:rgba(255,255,255,0.38);">' + l.l + '</div>' +
+                  '<div style="font-size:6.5px;color:#fff;">' + l.l + '</div>' +
                 '</div>';
       });
       html += '</div>';
@@ -5724,10 +5724,10 @@
       buyerSet.buyers.forEach(function(b, i) {
         var pct = Math.round(b.t / maxBuy * 100);
         html += '<div style="display:grid;grid-template-columns:18px 130px 1fr 42px;align-items:center;gap:6px;">' +
-                  '<div style="font-size:7px;color:rgba(255,255,255,0.22);text-align:right;">' + (i+1) + '</div>' +
+                  '<div style="font-size:7px;color:#fff;text-align:right;">' + (i+1) + '</div>' +
                   '<div>' +
                     '<div style="font-size:8.5px;color:#fff;letter-spacing:.04em;">' + b.name + '</div>' +
-                    (b.note ? '<div style="font-size:6px;color:rgba(255,255,255,0.28);margin-top:1px;">' + b.note + '</div>' : '') +
+                    (b.note ? '<div style="font-size:6px;color:#fff;margin-top:1px;">' + b.note + '</div>' : '') +
                   '</div>' +
                   '<div style="height:7px;background:#111;border-radius:1px;overflow:hidden;">' +
                     '<div style="height:100%;width:' + pct + '%;background:linear-gradient(90deg,' + A + ',' + GOLD + ');border-radius:1px;"></div>' +
@@ -5792,7 +5792,7 @@
       } else if (sourceLabel === 'LOADING') {
         html += '<div style="display:inline-block;font-size:5.5px;letter-spacing:.16em;color:' + A + ';background:rgba(233,113,50,.1);border:1px solid rgba(233,113,50,.25);padding:2px 6px;margin-bottom:8px;">FETCHING IMF DATA…</div>';
       } else {
-        html += '<div style="display:inline-block;font-size:5.5px;letter-spacing:.16em;color:rgba(255,255,255,0.3);background:#111;border:1px solid #222;padding:2px 6px;margin-bottom:8px;">IMF OFFLINE · Q2 2026 ESTIMATES</div>';
+        html += '<div style="display:inline-block;font-size:5.5px;letter-spacing:.16em;color:#fff;background:#111;border:1px solid #222;padding:2px 6px;margin-bottom:8px;">IMF OFFLINE · Q2 2026 ESTIMATES</div>';
       }
 
       html += '<div style="display:flex;flex-direction:column;gap:3px;margin-bottom:12px;">';
@@ -5805,7 +5805,7 @@
           : (pctRsv >= 60 ? ('linear-gradient(90deg,' + A + ',#6B3010)') : ('linear-gradient(90deg,' + BLU + ',#1a3560)'));
         var noteStr = h.note || '';
         html += '<div style="display:grid;grid-template-columns:16px 104px 1fr 58px 54px;align-items:center;gap:5px;padding:3px 0;border-bottom:1px solid #0f0f0f;">' +
-                  '<div style="font-size:6.5px;color:rgba(255,255,255,0.2);text-align:right;">' + (i+1) + '</div>' +
+                  '<div style="font-size:6.5px;color:#fff;text-align:right;">' + (i+1) + '</div>' +
                   '<div style="font-size:8px;color:' + (i===0?REC:'#fff') + ';font-weight:' + (i===0?700:400) + ';">' + h.name + '</div>' +
                   '<div style="height:6px;background:#111;border-radius:1px;overflow:hidden;">' +
                     '<div style="height:100%;width:' + barPct + '%;background:' + barCol + ';border-radius:1px;"></div>' +
@@ -5813,7 +5813,7 @@
                   '<div style="font-size:8px;font-weight:600;color:' + (i===0?REC:'#fff') + ';text-align:right;font-variant-numeric:tabular-nums;">' + tStr + 't</div>' +
                   '<div style="font-size:6.5px;color:' + (pctRsv>=60?A:(pctRsv?'rgba(255,255,255,0.3)':'rgba(255,255,255,0.15)')) + ';text-align:right;">' + (pctRsv != null ? pctRsv + '% rsv' : '—') + '</div>' +
                 '</div>' +
-                (noteStr ? '<div style="font-size:6px;color:rgba(255,255,255,0.22);padding-left:124px;margin-top:-1px;margin-bottom:1px;">' + noteStr + '</div>' : '');
+                (noteStr ? '<div style="font-size:6px;color:#fff;padding-left:124px;margin-top:-1px;margin-bottom:1px;">' + noteStr + '</div>' : '');
       });
       html += '</div>';
 
@@ -5834,7 +5834,7 @@
         var opacity = Math.min(1, x.v / 80);
         html += '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;">' +
                   '<div style="width:100%;height:26px;background:rgba(233,113,50,' + opacity.toFixed(2) + ');border:1px solid rgba(233,113,50,' + (opacity*0.5).toFixed(2) + ');" title="' + x.n + ': ' + x.v + '%"></div>' +
-                  '<div style="font-size:5px;color:rgba(255,255,255,0.32);">' + x.n + '</div>' +
+                  '<div style="font-size:5px;color:#fff;">' + x.n + '</div>' +
                   '<div style="font-size:5.5px;color:rgba(255,255,255,0.5);">' + x.v + '%</div>' +
                 '</div>';
       });
@@ -5887,7 +5887,7 @@
         }, 80);
 
         return '<div style="padding:40px 20px;text-align:center;">' +
-               '<div style="font-size:8px;color:rgba(255,255,255,0.3);letter-spacing:.2em;margin-bottom:8px;">LOADING CFTC DATA</div>' +
+               '<div style="font-size:8px;color:#fff;letter-spacing:.2em;margin-bottom:8px;">LOADING CFTC DATA</div>' +
                '<div style="width:24px;height:24px;border:2px solid #222;border-top-color:' + A + ';border-radius:50%;margin:0 auto;animation:spin 1s linear infinite;"></div>' +
                '</div>';
       }
@@ -5895,7 +5895,7 @@
       if (_cotLive === 'empty') {
         return '<div style="padding:40px 20px;text-align:center;">' +
                '<div style="font-size:9px;color:' + A + ';letter-spacing:.16em;margin-bottom:10px;">NO DATA YET</div>' +
-               '<div style="font-size:8px;color:rgba(255,255,255,0.45);line-height:1.7;max-width:320px;margin:0 auto;">' +
+               '<div style="font-size:8px;color:#fff;line-height:1.7;max-width:320px;margin:0 auto;">' +
                'The <span style="color:#fff;">gold_cot_reports</span> table is empty.<br>' +
                'Run the SQL migration in Supabase, then visit<br>' +
                '<span style="color:' + A + ';">/.netlify/functions/fetch-cftc-data</span><br>' +
@@ -5904,7 +5904,7 @@
       }
 
       if (_cotLive === 'error') {
-        return '<div style="padding:40px 20px;text-align:center;"><div style="font-size:8px;color:rgba(255,255,255,0.3);letter-spacing:.2em;">CFTC DATA UNAVAILABLE</div></div>';
+        return '<div style="padding:40px 20px;text-align:center;"><div style="font-size:8px;color:#fff;letter-spacing:.2em;">CFTC DATA UNAVAILABLE</div></div>';
       }
 
       var cot     = _cotLive;
@@ -5930,15 +5930,15 @@
 
       html += '<div style="margin-bottom:14px;">';
       html += '<div style="display:flex;justify-content:space-between;margin-bottom:5px;">';
-      html += '<div style="font-size:6.5px;color:rgba(255,255,255,0.38);letter-spacing:.14em;">MM POSITIONING — DISTANCE TO HISTORICAL EXTREME</div>';
+      html += '<div style="font-size:6.5px;color:#fff;letter-spacing:.14em;">MM POSITIONING — DISTANCE TO HISTORICAL EXTREME</div>';
       html += '<div style="font-size:7px;color:' + A + ';font-weight:600;">' + gaugePct + '% of extreme</div>';
       html += '</div>';
       html += '<div style="height:10px;background:#111;border-radius:2px;overflow:hidden;">' +
               '<div style="height:100%;width:' + gaugePct + '%;background:linear-gradient(90deg,' + GRN + ' 0%,' + A + ' 60%,' + RED + ' 100%);border-radius:2px;"></div>' +
               '</div>';
       html += '<div style="display:flex;justify-content:space-between;margin-top:3px;">' +
-              '<div style="font-size:6px;color:rgba(255,255,255,0.22);">NEUTRAL</div>' +
-              '<div style="font-size:6px;color:rgba(255,255,255,0.22);">EXTREME</div>' +
+              '<div style="font-size:6px;color:#fff;">NEUTRAL</div>' +
+              '<div style="font-size:6px;color:#fff;">EXTREME</div>' +
               '</div></div>';
 
       html += secHdr('DISAGGREGATED POSITIONING', '');
@@ -5948,7 +5948,7 @@
         {lbl:'SWAP DEALERS',     long:cot.sd_long, short:cot.sd_short, net:cot.sd_net, col:GRN},
       ];
       html += '<div style="border:1px solid #1a1a1a;margin-bottom:12px;">';
-      html += '<div style="display:grid;grid-template-columns:108px 72px 72px 78px 1fr;font-size:6px;color:rgba(255,255,255,0.28);letter-spacing:.14em;padding:6px 8px;background:#0d0d0d;border-bottom:1px solid #1a1a1a;">' +
+      html += '<div style="display:grid;grid-template-columns:108px 72px 72px 78px 1fr;font-size:6px;color:#fff;letter-spacing:.14em;padding:6px 8px;background:#0d0d0d;border-bottom:1px solid #1a1a1a;">' +
               '<div>CATEGORY</div><div style="text-align:right;">LONG</div><div style="text-align:right;">SHORT</div><div style="text-align:right;">NET</div><div style="padding-left:8px;">POSITIONING</div></div>';
       rows.forEach(function(r, i) {
         var isLong = r.net > 0;
@@ -6062,7 +6062,7 @@
                   '<div style="height:100%;width:' + barW + '%;background:' + sup.col + ';opacity:.8;border-radius:1px;"></div>' +
                 '</div>' +
                 '<div style="font-size:8.5px;font-weight:600;color:#fff;text-align:right;font-variant-numeric:tabular-nums;">' + (sup.t < 0 ? '−' : '+') + Math.abs(sup.t).toLocaleString() + 't</div>' +
-                '<div style="font-size:6.5px;color:rgba(255,255,255,0.3);text-align:right;">' + (pct > 0 ? '+' : '') + pct + '%</div>' +
+                '<div style="font-size:6.5px;color:#fff;text-align:right;">' + (pct > 0 ? '+' : '') + pct + '%</div>' +
                 '</div>';
       });
       html += '</div>';
@@ -6340,12 +6340,12 @@
 
     window.addEventListener('lens:change', function () { if (_allData) refresh(_allData); });
 
-    body.innerHTML = '<div style="padding:20px;text-align:center;font-family:Consolas,monospace;font-size:10px;color:#555;letter-spacing:0.2em;">LOADING SIGNAL…</div>';
+    body.innerHTML = '<div style="padding:20px;text-align:center;font-family:Consolas,monospace;font-size:10px;color:#fff;letter-spacing:0.2em;">LOADING SIGNAL…</div>';
 
     fetch('/.netlify/functions/fred-data?series=CPIAUCSL,T10Y2YM,FEDFUNDS,UNRATE,CFNAI,M2SL&limit=24')
       .then(function(r){ return r.json(); })
       .then(function(d){ refresh(d.series || {}); })
-      .catch(function(){ body.innerHTML='<div style="padding:20px;font-family:Consolas,monospace;font-size:10px;color:#555;text-align:center;">SIGNAL DATA UNAVAILABLE</div>'; });
+      .catch(function(){ body.innerHTML='<div style="padding:20px;font-family:Consolas,monospace;font-size:10px;color:#fff;text-align:center;">SIGNAL DATA UNAVAILABLE</div>'; });
   }
 
   /* ── OBJECTION HANDLER ── */
@@ -7357,7 +7357,7 @@
       panel.innerHTML=
         '<div class="sh-drill-hdr">' +
           '<span class="sh-drill-title">'+escH(s.name)+' <span style="color:'+pc+'">'+pct+'</span></span>' +
-          '<span style="font-size:7px;letter-spacing:.14em;color:rgba(255,255,255,0.3);flex:1;padding-left:8px;">'+escH(s.etf)+' · '+currentMarket+' · '+currentPeriod+'</span>' +
+          '<span style="font-size:7px;letter-spacing:.14em;color:#fff;flex:1;padding-left:8px;">'+escH(s.etf)+' · '+currentMarket+' · '+currentPeriod+'</span>' +
           '<button class="sh-drill-close">✕</button>' +
         '</div>' +
         '<div class="sh-drill-label">TOP HOLDINGS — LOADING…</div>' +
@@ -7669,7 +7669,7 @@
         '<div style="padding:10px 12px;border-bottom:1px solid #111;display:flex;align-items:center;gap:8px;">' +
           '<button class="wl-info-back">← BACK</button>' +
           '<span style="font-size:10px;color:#fff;font-weight:700;letter-spacing:.08em;">' + escH(sym) + '</span>' +
-          '<span style="font-size:9px;color:rgba(255,255,255,0.4);">' + escH(name) + '</span>' +
+          '<span style="font-size:9px;color:#fff;">' + escH(name) + '</span>' +
         '</div>' +
         '<div class="wl-info-body"><div class="tbw-loading" style="font-size:8px;padding:16px 12px;">LOADING INTEL…</div></div>';
       list.querySelector('.wl-info-back').addEventListener('click', function() {
@@ -7969,7 +7969,7 @@
           /* channel name */
           '<div style="font-size:20px;font-weight:700;letter-spacing:.06em;color:#fff;font-family:Consolas,monospace;line-height:1.1;">' + ch.label + '</div>' +
           /* tag */
-          '<div style="font-size:7px;letter-spacing:.2em;color:rgba(255,255,255,0.3);font-family:Consolas,monospace;">' + ch.tag + '  ·  ' + ch.sub.toUpperCase() + '</div>' +
+          '<div style="font-size:7px;letter-spacing:.2em;color:#fff;font-family:Consolas,monospace;">' + ch.tag + '  ·  ' + ch.sub.toUpperCase() + '</div>' +
           /* divider */
           '<div style="width:40px;height:1px;background:rgba(233,113,50,0.4);"></div>' +
           /* description */
@@ -7984,7 +7984,7 @@
             ' onmouseover="this.style.opacity=\'0.85\'" onmouseout="this.style.opacity=\'1\'">' +
             '▶  OPEN LIVE STREAM' +
           '</a>' +
-          '<div style="font-size:7px;color:rgba(255,255,255,0.2);letter-spacing:.08em;font-family:Consolas,monospace;">Opens in new window · no account required</div>' +
+          '<div style="font-size:7px;color:#fff;letter-spacing:.08em;font-family:Consolas,monospace;">Opens in new window · no account required</div>' +
         '</div>' +
       '</div>';
     }
@@ -7995,7 +7995,7 @@
         '<div style="display:flex;flex-direction:column;height:100%;background:#0a0a0a;">' +
           '<div style="flex-shrink:0;display:flex;align-items:center;gap:8px;padding:6px 10px;background:#0a0a0a;border-bottom:1px solid #1a1a1a;">' +
             '<button id="tv-back-' + id + '" style="background:none;border:none;color:' + A + ';font-size:8px;letter-spacing:.1em;font-family:Consolas,monospace;cursor:pointer;padding:0;">← BACK</button>' +
-            '<span style="font-size:7.5px;color:rgba(255,255,255,0.4);font-family:Consolas,monospace;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' +
+            '<span style="font-size:7.5px;color:#fff;font-family:Consolas,monospace;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' +
               (vid.tag ? '[' + vid.tag + ']  ' : '') + (vid.title || '') +
             '</span>' +
           '</div>' +
@@ -8025,9 +8025,9 @@
 
       var gridHtml;
       if (!_clipsLoaded) {
-        gridHtml = '<div style="display:flex;align-items:center;justify-content:center;flex:1;color:rgba(255,255,255,0.3);font-size:8px;letter-spacing:.1em;font-family:Consolas,monospace;">LOADING CLIPS…</div>';
+        gridHtml = '<div style="display:flex;align-items:center;justify-content:center;flex:1;color:#fff;font-size:8px;letter-spacing:.1em;font-family:Consolas,monospace;">LOADING CLIPS…</div>';
       } else if (visible.length === 0) {
-        gridHtml = '<div style="display:flex;align-items:center;justify-content:center;flex:1;color:rgba(255,255,255,0.3);font-size:8px;letter-spacing:.1em;font-family:Consolas,monospace;">NO CLIPS AVAILABLE</div>';
+        gridHtml = '<div style="display:flex;align-items:center;justify-content:center;flex:1;color:#fff;font-size:8px;letter-spacing:.1em;font-family:Consolas,monospace;">NO CLIPS AVAILABLE</div>';
       } else {
         var cards = visible.map(function(v) {
           var ago = '';
@@ -8049,7 +8049,7 @@
             '</div>' +
             '<div style="padding:6px 8px;flex:1;display:flex;flex-direction:column;gap:3px;">' +
               '<div style="font-size:8px;line-height:1.4;color:rgba(255,255,255,0.85);font-family:Consolas,monospace;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">' + (v.title||'') + '</div>' +
-              '<div style="font-size:6.5px;color:rgba(255,255,255,0.3);font-family:Consolas,monospace;">' + (v.channel||v.tag||'') + '  ·  ' + ago + '</div>' +
+              '<div style="font-size:6.5px;color:#fff;font-family:Consolas,monospace;">' + (v.channel||v.tag||'') + '  ·  ' + ago + '</div>' +
             '</div>' +
           '</div>';
         }).join('');
@@ -8122,13 +8122,13 @@
           '</div>';
         }
         return '<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:#0a0a0a;padding:30px;box-sizing:border-box;">' +
-          '<div style="font-size:9px;letter-spacing:.2em;color:rgba(255,255,255,0.4);font-family:Consolas,monospace;">PASTE ANY YOUTUBE URL</div>' +
+          '<div style="font-size:9px;letter-spacing:.2em;color:#fff;font-family:Consolas,monospace;">PASTE ANY YOUTUBE URL</div>' +
           '<div style="display:flex;gap:6px;width:100%;max-width:360px;">' +
             '<input id="tv-custom-input-' + id + '" type="text" placeholder="https://www.youtube.com/watch?v=…" ' +
               'style="flex:1;background:#111;border:1px solid #333;color:#fff;font-family:Consolas,monospace;font-size:8px;letter-spacing:.04em;padding:8px 12px;outline:none;border-radius:1px;">' +
             '<button id="tv-custom-go-' + id + '" style="background:' + A + ';color:#000;border:none;font-family:Consolas,monospace;font-size:7.5px;font-weight:700;letter-spacing:.12em;padding:8px 16px;cursor:pointer;border-radius:1px;">PLAY</button>' +
           '</div>' +
-          '<div style="font-size:7px;color:rgba(255,255,255,0.2);font-family:Consolas,monospace;">Works with any public YouTube video, live stream, or channel</div>' +
+          '<div style="font-size:7px;color:#fff;font-family:Consolas,monospace;">Works with any public YouTube video, live stream, or channel</div>' +
         '</div>';
       }
       /* official iframe embed */
@@ -8144,7 +8144,7 @@
           return '<div style="flex:1;display:flex;align-items:center;justify-content:center;background:#0a0a0a;">' +
             '<div style="text-align:center;">' +
               '<div style="width:5px;height:5px;border-radius:50%;background:' + A + ';animation:blink 1.4s step-start infinite;margin:0 auto 10px;"></div>' +
-              '<div style="font-size:8px;letter-spacing:.1em;color:rgba(255,255,255,0.35);font-family:Consolas,monospace;">CONNECTING TO LIVE FEED…</div>' +
+              '<div style="font-size:8px;letter-spacing:.1em;color:#fff;font-family:Consolas,monospace;">CONNECTING TO LIVE FEED…</div>' +
             '</div>' +
           '</div>';
         }
@@ -8204,10 +8204,10 @@
 
       var statusBar =
         '<div style="flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:5px 10px;background:#0a0a0a;border-top:1px solid #1a1a1a;">' +
-          '<div style="font-size:6px;letter-spacing:.1em;color:' + A + ';">' + ch.label + '  <span style="color:rgba(255,255,255,0.22);">·  ' + ch.sub.toUpperCase() + '</span></div>' +
+          '<div style="font-size:6px;letter-spacing:.1em;color:' + A + ';">' + ch.label + '  <span style="color:#fff;">·  ' + ch.sub.toUpperCase() + '</span></div>' +
           '<div style="display:flex;align-items:center;gap:5px;">' +
             '<div style="width:5px;height:5px;border-radius:50%;background:' + A + ';animation:blink 1.4s step-start infinite;"></div>' +
-            '<div style="font-size:6px;letter-spacing:.12em;color:rgba(255,255,255,0.3);">LIVE</div>' +
+            '<div style="font-size:6px;letter-spacing:.12em;color:#fff;">LIVE</div>' +
           '</div>' +
         '</div>';
 
@@ -8532,8 +8532,8 @@
         '<div style="font-size:8.5px;letter-spacing:.13em;color:#bbb;text-transform:uppercase;margin-bottom:3px">'+(CNAME[iso]||iso)+'</div>' +
         (v!==null
           ? '<div style="font-size:12px;color:#c8901a;margin-bottom:2px">'+fmtVal(iso,v)+'</div>'
-          : '<div style="font-size:9px;color:#333;margin-bottom:2px">NO DATA</div>') +
-        (bl ? '<div style="font-size:7.5px;color:#555;border-top:1px solid #1c1c1c;padding-top:4px;margin-top:4px;line-height:1.5">'+bl+'</div>' : '') +
+          : '<div style="font-size:9px;color:#fff;margin-bottom:2px">NO DATA</div>') +
+        (bl ? '<div style="font-size:7.5px;color:#fff;border-top:1px solid #1c1c1c;padding-top:4px;margin-top:4px;line-height:1.5">'+bl+'</div>' : '') +
         '</div>';
     }
 
@@ -8624,7 +8624,7 @@
       return '<div style="display:grid;grid-template-columns:1fr 72px 40px 58px 66px;align-items:center;padding:8px 10px;border-bottom:1px solid #0f0f0f;">' +
         '<div>' +
           '<div style="font-size:7.5px;letter-spacing:.08em;color:#fff;">' + label + '</div>' +
-          (sub ? '<div style="font-size:5.5px;color:rgba(255,255,255,0.26);margin-top:1.5px;letter-spacing:.04em;">' + sub + '</div>' : '') +
+          (sub ? '<div style="font-size:5.5px;color:#fff;margin-top:1.5px;letter-spacing:.04em;">' + sub + '</div>' : '') +
         '</div>' +
         '<div style="font-size:8px;font-weight:600;color:#fff;text-align:right;font-variant-numeric:tabular-nums;">' + val + '</div>' +
         '<div style="font-size:6.5px;font-weight:600;color:' + (chgPos ? GRN : RED) + ';text-align:right;">' + chgStr + '</div>' +
@@ -8651,7 +8651,7 @@
       var html = '<div style="padding:12px 14px 16px;overflow-y:auto;height:100%;box-sizing:border-box;background:#0a0a0a;">';
       html += '<div style="font-size:7px;letter-spacing:.2em;color:' + A + ';margin-bottom:12px;border-bottom:1px solid #1a1a1a;padding-bottom:8px;">CATALYST WATCH  ·  ' +
         (live ? '<span style="color:' + GRN + ';">LIVE DATA</span>' : (_catLive === 'loading' ? '<span style="color:' + A + ';">FETCHING…</span>' : 'ESTIMATES')) + '</div>';
-      html += '<div style="font-size:6.5px;letter-spacing:.14em;color:rgba(255,255,255,0.4);margin-bottom:6px;padding-left:2px;">GOLD PRICE DRIVERS</div>';
+      html += '<div style="font-size:6.5px;letter-spacing:.14em;color:#fff;margin-bottom:6px;padding-left:2px;">GOLD PRICE DRIVERS</div>';
       html += '<div style="border:1px solid #1a1a1a;margin-bottom:12px;">';
       html += catRowGM('DXY US DOLLAR INDEX', 'Inverse — weaker dollar = higher gold',
         dxy.value.toFixed(1), (dxy.chgPct >= 0 ? '+' : '') + dxy.chgPct.toFixed(2) + '%', dxy.chgPct < 0, dxy.spark, BLU, dxyS);
@@ -8664,7 +8664,7 @@
       html += catRowGM('GEOPOLITICAL RISK', 'Active conflicts + EM de-dollarisation',
         'ELEVATED', '↑ Active', true, [62,65,68,70,72,74,76,74,77,79,81,80,83,82,84], RED, 'WATCH');
       html += '</div>';
-      html += '<div style="font-size:6.5px;letter-spacing:.14em;color:rgba(255,255,255,0.4);margin-bottom:6px;padding-left:2px;">SHIPPING INTELLIGENCE</div>';
+      html += '<div style="font-size:6.5px;letter-spacing:.14em;color:#fff;margin-bottom:6px;padding-left:2px;">SHIPPING INTELLIGENCE</div>';
       html += '<div style="border:1px solid #1a1a1a;margin-bottom:12px;">';
       html += catRowGM('BALTIC DRY INDEX · BDI', 'Dry bulk — falling BDI → demand slowdown → gold bullish',
         bdi.value.toLocaleString(), (bdi.chgPct >= 0 ? '+' : '') + bdi.chgPct.toFixed(1) + '%', bdi.chgPct < 0, bdi.spark, BLU, bdiS);
@@ -10750,7 +10750,7 @@
             (item.image_url ? '<img src="'+escH(item.image_url)+'" style="width:28px;height:36px;object-fit:contain;flex-shrink:0;opacity:.8;" onerror="this.style.display=\'none\'" />' : '<div style="width:28px;flex-shrink:0;"></div>') +
             '<div style="flex:1;min-width:0;">' +
               '<div style="font-size:10px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500;">'+escH(name)+'</div>' +
-              (meta ? '<div style="font-size:8px;color:rgba(255,255,255,0.4);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+escH(meta)+'</div>' : '') +
+              (meta ? '<div style="font-size:8px;color:#fff;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+escH(meta)+'</div>' : '') +
               (priceStr || chgStr ?
                 '<div style="display:flex;gap:6px;align-items:baseline;margin-top:4px;">' +
                   (priceStr ? '<span style="font-size:10px;color:#fff;">'+escH(priceStr)+'</span>' : '') +
@@ -10758,7 +10758,7 @@
                 '</div>' : '') +
             '</div>' +
             (rating ? '<div style="font-size:13px;color:#E97132;font-weight:bold;flex-shrink:0;align-self:center;">'+escH(rating)+'</div>' : '') +
-            '<button class="wl-mon-del" data-i="'+i+'" title="Remove" style="background:none;border:none;color:rgba(255,255,255,0.25);font-size:12px;cursor:pointer;flex-shrink:0;padding:0 0 0 4px;line-height:1;align-self:flex-start;">✕</button>' +
+            '<button class="wl-mon-del" data-i="'+i+'" title="Remove" style="background:none;border:none;color:#fff;font-size:12px;cursor:pointer;flex-shrink:0;padding:0 0 0 4px;line-height:1;align-self:flex-start;">✕</button>' +
           '</div>';
         }).join('');
 
@@ -12346,7 +12346,7 @@
       html += '<div style="display:flex;align-items:center;gap:10px;padding:7px 12px;border-bottom:1px solid #181818;flex-shrink:0;background:#0d0d0d;">' +
         '<button class="oweb-back" style="'+F+'font-size:9px;letter-spacing:.14em;padding:4px 12px;border:1px solid #3a3a3a;background:transparent;color:#ffffff;cursor:pointer;white-space:nowrap;flex-shrink:0;">← BACK</button>' +
         '<span style="'+F+'font-size:11px;color:#E97132;font-weight:700;letter-spacing:.14em;">'+OD[current].label+'</span>' +
-        '<span style="'+F+'font-size:11px;color:#555;margin:0 2px;">→</span>' +
+        '<span style="'+F+'font-size:11px;color:#fff;margin:0 2px;">→</span>' +
         '<span style="'+F+'font-size:11px;color:#ffffff;font-weight:700;letter-spacing:.14em;">'+drillKey.toUpperCase()+'</span>' +
         (exp?'<span style="'+F+'font-size:9px;color:#ffffff;margin-left:auto;white-space:nowrap;">'+(Math.round(exp.pct*10)/10)+'% OF EXPORTS'+(exp.val?' · '+exp.val:exp.valueGBP?' · £'+Math.round(exp.valueGBP/1e6)+'m':'')+'</span>':'') +
         '</div>';
@@ -12511,7 +12511,7 @@
         '<span style="color:#ffffff;">SUPPLY</span> = aging stock health · ' +
         '<span style="color:#ffffff;">REACH</span> = global market breadth' +
         '</div>' +
-        '<div style="'+F+'font-size:7px;color:rgba(255,255,255,0.4);margin-top:3px;letter-spacing:.04em;">Hover the origin labels below to spotlight each country\'s profile</div>' +
+        '<div style="'+F+'font-size:7px;color:#fff;margin-top:3px;letter-spacing:.04em;">Hover the origin labels below to spotlight each country\'s profile</div>' +
         '</div>';
 
       /* Radar legend — HTML rows */
@@ -12578,14 +12578,14 @@
       /* Donut explanation strip — mirrors radarExpl */
       var liveSource = _le
         ? '<span style="color:#44cc64;"> · UN Comtrade HS 220830'+liveLabel+'</span>'
-        : '<span style="color:rgba(255,255,255,0.3);"> · loading live data…</span>';
+        : '<span style="color:#fff;"> · loading live data…</span>';
       var donutExpl = '<div style="padding:6px 10px 4px;border-top:1px solid #181818;border-bottom:1px solid #181818;background:#0b0b0b;flex-shrink:0;">' +
         '<div style="'+F+'font-size:7.5px;color:#ffffff;letter-spacing:.04em;line-height:1.7;">' +
         '<span style="color:'+curCol+';font-weight:700;">DESTINATION MIX</span> — Slice size = % of total exports. ' +
         'Colour = YoY growth: <span style="color:#44cc64;">green ≥20%</span> · <span style="color:#2ea84a;">mid 10–20%</span> · <span style="color:#3a7ccc;">blue 5–10%</span>' +
         liveSource +
         '</div>' +
-        '<div style="'+F+'font-size:7px;color:rgba(255,255,255,0.4);margin-top:3px;letter-spacing:.04em;">Hover slice or row to highlight</div>' +
+        '<div style="'+F+'font-size:7px;color:#fff;margin-top:3px;letter-spacing:.04em;">Hover slice or row to highlight</div>' +
         '</div>';
 
       /* Donut legend HTML */
@@ -12599,7 +12599,7 @@
           '<div style="width:5px;height:24px;background:'+lec+';flex-shrink:0;"></div>' +
           '<div style="flex:1;min-width:0;">' +
             '<div style="'+F+'font-size:10px;color:#ffffff;font-weight:700;white-space:nowrap;">'+le.country+'</div>' +
-            (yoyStr ? '<div style="'+F+'font-size:8px;color:'+lec+';">'+yoyStr+'</div>' : '<div style="'+F+'font-size:8px;color:rgba(255,255,255,0.3);">—</div>') +
+            (yoyStr ? '<div style="'+F+'font-size:8px;color:'+lec+';">'+yoyStr+'</div>' : '<div style="'+F+'font-size:8px;color:#fff;">—</div>') +
           '</div>' +
           '<div style="text-align:right;flex-shrink:0;">' +
             '<div style="'+F+'font-size:15px;color:#ffffff;font-weight:700;line-height:1;">'+(Math.round(le.pct*10)/10)+'<span style="'+F+'font-size:9px;color:rgba(255,255,255,0.5);">%</span></div>' +
@@ -12705,7 +12705,7 @@
       if (mode === 'exports' && drillKey) {
         content = '<div style="flex:1;overflow:auto;">'+buildDrillDown()+'</div>';
       } else if (mode === 'supply') {
-        var supplyNote = '<div style="font-family:Consolas,monospace;font-size:7px;color:rgba(255,255,255,0.28);padding:4px 10px;text-align:right;letter-spacing:.06em;">Auction market share — industry estimates · No public API available</div>';
+        var supplyNote = '<div style="font-family:Consolas,monospace;font-size:7px;color:#fff;padding:4px 10px;text-align:right;letter-spacing:.06em;">Auction market share — industry estimates · No public API available</div>';
         content = '<div style="flex:1;overflow:auto;padding:2px 4px 4px;display:flex;flex-direction:column;">'+buildWebSVG(d.markets, 'AUCTION MARKETS', 'rgba(68,144,220,0.3)')+supplyNote+'</div>';
       } else if (mode === 'exports') {
         var liveNodes = _getExportNodes(current) || d.exports;
@@ -14226,9 +14226,9 @@
             '<select id="fred-cmp-sel" style="background:#181818;color:#ffffff;border:1px solid #2a2a2a;border-radius:3px;padding:3px 6px;font-size:9px;font-family:Consolas,monospace;">' + buildCmpOptgroups() + '</select>' +
             '<div id="fred-cmp-chips" style="display:flex;gap:4px;flex-wrap:wrap;max-width:240px;"></div>' +
             '<div style="display:flex;gap:2px;margin-right:4px;">' +
-              '<button id="bc-dep-b" style="padding:2px 8px;font-size:8px;letter-spacing:.1em;border:1px solid #2a2a2a;background:transparent;color:#666;cursor:pointer;font-family:Consolas,monospace;">BRIEF</button>' +
+              '<button id="bc-dep-b" style="padding:2px 8px;font-size:8px;letter-spacing:.1em;border:1px solid #2a2a2a;background:transparent;color:#fff;cursor:pointer;font-family:Consolas,monospace;">BRIEF</button>' +
               '<button id="bc-dep-f" style="padding:2px 8px;font-size:8px;letter-spacing:.1em;border:1px solid #E97132;background:#E97132;color:#fff;cursor:pointer;font-family:Consolas,monospace;">FULL</button>' +
-              '<button id="bc-dep-d" style="padding:2px 8px;font-size:8px;letter-spacing:.1em;border:1px solid #2a2a2a;background:transparent;color:#666;cursor:pointer;font-family:Consolas,monospace;">DEEP</button>' +
+              '<button id="bc-dep-d" style="padding:2px 8px;font-size:8px;letter-spacing:.1em;border:1px solid #2a2a2a;background:transparent;color:#fff;cursor:pointer;font-family:Consolas,monospace;">DEEP</button>' +
             '</div>' +
             '<button id="fred-modal-close" style="background:none;border:none;color:#ffffff;font-size:16px;cursor:pointer;padding:0 4px;line-height:1;">&times;</button>' +
           '</div>' +

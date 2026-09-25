@@ -3,11 +3,11 @@
    ============================================================ */
 
 :root {
-  --bg:         #0A0A0A;
-  --bg-raised:  #121212;
-  --bg-deep:    #0E0E0E;
+  --bg:         #1a1a1a;
+  --bg-raised:  #222222;
+  --bg-deep:    #161616;
   --border:     #E97132;
-  --border-dim: #2a2a2a;
+  --border-dim: #333333;
   --text:       #FFFFFF;
   --text-muted: #E6E6E6;
   --text-faint: #999999;
@@ -31,8 +31,8 @@ body {
   letter-spacing: 0.01em;
   -webkit-font-smoothing: antialiased;
   background-image:
-    linear-gradient(rgba(233,113,50,0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(233,113,50,0.04) 1px, transparent 1px);
+    linear-gradient(rgba(233,113,50,0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(233,113,50,0.08) 1px, transparent 1px);
   background-size: 72px 72px;
   background-attachment: fixed;
 }

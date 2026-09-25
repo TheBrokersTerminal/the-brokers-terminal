@@ -210,6 +210,7 @@
           '<input type="text" id="intel-search-input" placeholder="Company, asset, concept or IFA scenario…" autocomplete="off" spellcheck="false" autocorrect="off" autocapitalize="off" readonly>' +
         '</div>' +
         '<button id="intel-ifa-btn" title="Open IFA client intake form">▌ IFA INTEL</button>' +
+        '<button id="intel-ff-btn" title="Open client fact find">FACT FIND</button>' +
         '<button id="intel-clients-btn" title="View saved client briefs">CLIENTS</button>' +
       '</div>';
 
@@ -378,6 +379,11 @@
     var clientsBtn = document.getElementById('intel-clients-btn');
     if (clientsBtn) {
       clientsBtn.addEventListener('click', function(e) { e.stopPropagation(); _openClientsModal(); });
+    }
+
+    var ffBtn = document.getElementById('intel-ff-btn');
+    if (ffBtn) {
+      ffBtn.addEventListener('click', function(e) { e.stopPropagation(); _openFactFind(); });
     }
     document.getElementById('intel-ifa-close') && document.getElementById('intel-ifa-close').addEventListener('click', _closeIfaModal);
     document.getElementById('intel-ifa-overlay') && document.getElementById('intel-ifa-overlay').addEventListener('click', _closeIfaModal);
@@ -668,7 +674,7 @@
   function openNewsPopout(label, ticker) {
     var win = createPopout(label + ' — NEWS', 'news');
     var body = win.querySelector('.intel-popwin-body');
-    body.innerHTML = '<div style="font-size:9px;color:#444;letter-spacing:.2em;padding:10px 0;text-transform:uppercase;">Searching news feeds...</div>';
+    body.innerHTML = '<div style="font-size:9px;color:#fff;letter-spacing:.2em;padding:10px 0;text-transform:uppercase;">Searching news feeds...</div>';
 
     var keyword = label.split(' ')[0]; /* use first word as search term */
 
@@ -702,12 +708,12 @@
           body.innerHTML =
             '<div style="padding:8px 0;font-size:10px;color:#d0d0d0;line-height:1.7;">' +
               'No recent stories found for <strong style="color:#E97132;">' + escH(label) + '</strong> in the current feed.' +
-              '<br><br><span style="color:#555;font-size:9px;">Stories refresh every 60 seconds. Try searching a shorter name or use the news terminal search bar.</span>' +
+              '<br><br><span style="color:#fff;font-size:9px;">Stories refresh every 60 seconds. Try searching a shorter name or use the news terminal search bar.</span>' +
             '</div>';
         }
       })
       .catch(function () {
-        body.innerHTML = '<div style="font-size:10px;color:#555;padding:8px 0;">News unavailable.</div>';
+        body.innerHTML = '<div style="font-size:10px;color:#fff;padding:8px 0;">News unavailable.</div>';
       });
   }
 
@@ -734,7 +740,7 @@
     var body = win.querySelector('.intel-popwin-body');
 
     if (!ticker) {
-      body.innerHTML = '<div style="padding:10px 0;font-size:10px;color:#555;">No exchange listing found for this company.</div>';
+      body.innerHTML = '<div style="padding:10px 0;font-size:10px;color:#fff;">No exchange listing found for this company.</div>';
       return;
     }
 
@@ -752,7 +758,7 @@
             ' Live price data for international exchanges requires a premium data subscription.' +
           '</div>' +
         '</div>' +
-        '<div style="font-size:10px;color:#888;line-height:1.7;margin-bottom:10px;">You can view live prices for <strong style="color:#fff;">' + escH(label) + '</strong> at:</div>' +
+        '<div style="font-size:10px;color:#fff;line-height:1.7;margin-bottom:10px;">You can view live prices for <strong style="color:#fff;">' + escH(label) + '</strong> at:</div>' +
         '<div style="display:flex;flex-direction:column;gap:6px;">' +
           mkLink('Reuters', 'https://www.reuters.com/markets/companies/' + ticker) +
           mkLink('Financial Times', 'https://markets.ft.com/data/equities/tearsheet/summary?s=' + ticker) +
@@ -761,14 +767,14 @@
       return;
     }
 
-    body.innerHTML = '<div style="font-size:9px;color:#444;letter-spacing:.2em;padding:10px 0;text-transform:uppercase;">Loading market data...</div>';
+    body.innerHTML = '<div style="font-size:9px;color:#fff;letter-spacing:.2em;padding:10px 0;text-transform:uppercase;">Loading market data...</div>';
 
     var key = 'da6p77hr01qqqkkgl7b0da6p77hr01qqqkkgl7bg';
     fetch('https://finnhub.io/api/v1/quote?symbol=' + encodeURIComponent(ticker) + '&token=' + key)
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (q) {
         if (!q || (!q.c && !q.pc)) {
-          body.innerHTML = '<div style="font-size:10px;color:#555;padding:8px 0;">Market data unavailable for <strong style="color:#E97132;">' + escH(ticker) + '</strong>.</div>';
+          body.innerHTML = '<div style="font-size:10px;color:#fff;padding:8px 0;">Market data unavailable for <strong style="color:#E97132;">' + escH(ticker) + '</strong>.</div>';
           return;
         }
         var price = q.c || q.pc;
@@ -780,7 +786,7 @@
         var arr   = up ? '▲' : '▼';
         body.innerHTML =
           '<div style="margin-bottom:16px;">' +
-            '<div style="font-size:8px;letter-spacing:.2em;color:#555;margin-bottom:6px;text-transform:uppercase;">Last Price · ' + escH(ticker) + '</div>' +
+            '<div style="font-size:8px;letter-spacing:.2em;color:#fff;margin-bottom:6px;text-transform:uppercase;">Last Price · ' + escH(ticker) + '</div>' +
             '<div style="font-size:28px;font-weight:700;color:#fff;line-height:1;">' + price.toFixed(2) + '</div>' +
             '<div style="font-size:12px;color:' + col + ';margin-top:6px;">' + arr + ' ' + (chg >= 0 ? '+' : '') + chg.toFixed(2) + ' (' + (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%) TODAY</div>' +
           '</div>' +
@@ -788,10 +794,10 @@
             mkTile('OPEN', q.o) + mkTile('HIGH', q.h) +
             mkTile('LOW',  q.l) + mkTile('PREV CLOSE', q.pc) +
           '</div>' +
-          '<div style="font-size:7px;color:#333;letter-spacing:.15em;margin-top:12px;text-transform:uppercase;">Indicative · ' + escH(ticker) + '</div>';
+          '<div style="font-size:7px;color:#fff;letter-spacing:.15em;margin-top:12px;text-transform:uppercase;">Indicative · ' + escH(ticker) + '</div>';
       })
       .catch(function () {
-        body.innerHTML = '<div style="font-size:10px;color:#555;padding:8px 0;">Market data unavailable.</div>';
+        body.innerHTML = '<div style="font-size:10px;color:#fff;padding:8px 0;">Market data unavailable.</div>';
       });
   }
 
@@ -804,7 +810,7 @@
 
   function mkTile(lbl, val) {
     return '<div style="background:#111;border:1px solid #1e1e1e;padding:8px 10px;">' +
-      '<div style="font-size:7px;letter-spacing:.2em;color:#555;margin-bottom:4px;">' + lbl + '</div>' +
+      '<div style="font-size:7px;letter-spacing:.2em;color:#fff;margin-bottom:4px;">' + lbl + '</div>' +
       '<div style="font-size:13px;color:#d0d0d0;">' + (val != null ? val.toFixed(2) : '—') + '</div>' +
     '</div>';
   }
@@ -988,10 +994,10 @@
             '</button>';
           }).join('') +
           '<div style="margin-left:auto;display:flex;gap:2px;align-items:center;">' +
-            '<button class="intel-tg-zoom-out" title="Zoom out" style="background:none;border:1px solid #222;color:#555;font-size:11px;cursor:pointer;padding:1px 6px;font-family:Consolas,Menlo,monospace;">−</button>' +
-            '<button class="intel-tg-zoom-in"  title="Zoom in"  style="background:none;border:1px solid #222;color:#555;font-size:11px;cursor:pointer;padding:1px 6px;font-family:Consolas,Menlo,monospace;">+</button>' +
-            '<button class="intel-tg-minimize" title="Minimise to dock" style="background:none;border:1px solid #222;color:#555;font-size:11px;cursor:pointer;padding:1px 6px;font-family:Consolas,Menlo,monospace;">─</button>' +
-            '<button class="intel-tg-fullscreen" title="Full screen" style="background:none;border:1px solid #222;color:#555;font-size:11px;cursor:pointer;padding:1px 6px;font-family:Consolas,Menlo,monospace;">⛶</button>' +
+            '<button class="intel-tg-zoom-out" title="Zoom out" style="background:none;border:1px solid #222;color:#fff;font-size:11px;cursor:pointer;padding:1px 6px;font-family:Consolas,Menlo,monospace;">−</button>' +
+            '<button class="intel-tg-zoom-in"  title="Zoom in"  style="background:none;border:1px solid #222;color:#fff;font-size:11px;cursor:pointer;padding:1px 6px;font-family:Consolas,Menlo,monospace;">+</button>' +
+            '<button class="intel-tg-minimize" title="Minimise to dock" style="background:none;border:1px solid #222;color:#fff;font-size:11px;cursor:pointer;padding:1px 6px;font-family:Consolas,Menlo,monospace;">─</button>' +
+            '<button class="intel-tg-fullscreen" title="Full screen" style="background:none;border:1px solid #222;color:#fff;font-size:11px;cursor:pointer;padding:1px 6px;font-family:Consolas,Menlo,monospace;">⛶</button>' +
             '<button class="intel-tg-close-all" style="margin-left:4px;">✕</button>' +
           '</div>' +
         '</div>' +
@@ -1291,7 +1297,7 @@
       var body = win.querySelector('.intel-popwin-body');
       if (win._loadingTimer) { clearInterval(win._loadingTimer); win._loadingTimer = null; }
       if (body) {
-        var msg = type === 'scenario' ? 'BRIEF GENERATION FAILED<br><span style="font-size:9px;color:#888;letter-spacing:.05em;">Generation timed out — click to try again</span>' : 'INTELLIGENCE UNAVAILABLE';
+        var msg = type === 'scenario' ? 'BRIEF GENERATION FAILED<br><span style="font-size:9px;color:#fff;letter-spacing:.05em;">Generation timed out — click to try again</span>' : 'INTELLIGENCE UNAVAILABLE';
         body.innerHTML = '<div class="sp-loading" style="color:#e05050;">' + msg + '<br><span class="intel-retry-btn" style="margin-top:8px;display:inline-block;">↻ RETRY</span></div>';
         var btn = body.querySelector('.intel-retry-btn');
         if (btn) btn.addEventListener('click', function(){ body.innerHTML='<div class="sp-intel-load">GENERATING BRIEF<span class="sp-intel-ld"></span></div>'; fetchDetail(query, type, ticker, win, 0); });
@@ -1766,7 +1772,7 @@
 
       '<div class="sp-section" style="border-top:1px solid #111;padding-top:10px;display:flex;gap:8px;align-items:center;">' +
         '<button class="sp-save-brief-btn" style="background:none;border:1px solid #E97132;color:#E97132;font-size:7.5px;letter-spacing:.18em;padding:6px 12px;cursor:pointer;font-family:inherit;white-space:nowrap;">▌ SAVE CLIENT BRIEF</button>' +
-        '<button class="sp-note-btn" style="background:none;border:none;color:#555;font-size:7.5px;letter-spacing:.12em;padding:6px 0;cursor:pointer;font-family:inherit;">✎ ADD NOTE</button>' +
+        '<button class="sp-note-btn" style="background:none;border:none;color:#fff;font-size:7.5px;letter-spacing:.12em;padding:6px 0;cursor:pointer;font-family:inherit;">✎ ADD NOTE</button>' +
       '</div>';
 
     /* Background prefetch for pitch + CFA — fires immediately on card load.
@@ -2164,7 +2170,7 @@
                     /* timeout or other error — show retry message in panel if visible */
                     if (cbs.length) {
                       var cfaPanelErr = body.querySelector('.scen-cfa-panel');
-                      if (cfaPanelErr) cfaPanelErr.innerHTML = '<div style="padding:12px;font-size:10px;color:#D14040;line-height:1.7;">Analysis timed out — please try again.<br><span style="color:#555;font-size:9px;">Large analyses occasionally take longer. Click the tab again to retry.</span></div>';
+                      if (cfaPanelErr) cfaPanelErr.innerHTML = '<div style="padding:12px;font-size:10px;color:#D14040;line-height:1.7;">Analysis timed out — please try again.<br><span style="color:#fff;font-size:9px;">Large analyses occasionally take longer. Click the tab again to retry.</span></div>';
                     }
                   }
                   return;
@@ -2634,9 +2640,238 @@
     renderScenario(saved.briefData, bodyEl);
   }
 
+  /* ── FACT FIND ─────────────────────────────────────────────── */
+  var FF_LS_KEY = 'tbt_factfind_last';
+
+  function _ffSave(data) {
+    try { localStorage.setItem(FF_LS_KEY, JSON.stringify(data)); } catch(e) {}
+  }
+  function _ffLoad() {
+    try { return JSON.parse(localStorage.getItem(FF_LS_KEY) || 'null'); } catch(e) { return null; }
+  }
+
+  function _buildFfQuery(d) {
+    var parts = [];
+    if (d.ref)        parts.push('Client: ' + d.ref + '.');
+    if (d.age)        parts.push('Age: ' + d.age + '.');
+    if (d.marital)    parts.push('Marital status: ' + d.marital + (d.dependants ? ', ' + d.dependants + ' dependant(s)' : '') + '.');
+    else if (d.dependants) parts.push(d.dependants + ' dependant(s).');
+    if (d.income)     parts.push('Annual income: ' + d.income + '.');
+    if (d.assets)     parts.push('Investable assets: ' + d.assets + '.');
+    if (d.risk)       parts.push('Risk attitude: ' + d.risk + '.');
+    if (d.horizon)    parts.push('Time horizon: ' + d.horizon + '.');
+    if (d.objective)  parts.push('Primary objective: ' + d.objective + '.');
+    if (d.taxBand)    parts.push('Tax band: ' + d.taxBand + '.');
+    if (d.assetClass && d.assetClass.length) parts.push('Asset class focus: ' + d.assetClass.join(', ') + '.');
+    return parts.join(' ');
+  }
+
+  function _openFactFind() {
+    var existing = document.getElementById('intel-ff-panel');
+    if (existing) { window._sharedZ++; existing.style.zIndex = window._sharedZ; return; }
+
+    var saved = _ffLoad() || {};
+
+    var panel = document.createElement('div');
+    panel.id = 'intel-ff-panel';
+    panel.style.cssText = 'position:fixed;z-index:' + (++window._sharedZ) + ';top:70px;left:calc(50% - 240px);width:480px;max-width:calc(100vw - 32px);background:#0a0a0a;border:1px solid #2a2a2a;border-top:2px solid #E97132;box-shadow:0 8px 32px rgba(0,0,0,.8);display:flex;flex-direction:column;max-height:90vh;';
+
+    var RISK_OPTS    = ['Cautious','Balanced','Growth','Aggressive'];
+    var HORIZON_OPTS = ['Under 2 years','2–5 years','5–10 years','10+ years'];
+    var INCOME_OPTS  = ['Under £30k','£30k – £50k','£50k – £100k','£100k – £150k','Over £150k'];
+    var ASSETS_OPTS  = ['Under £50k','£50k – £100k','£100k – £250k','£250k – £500k','£500k – £1m','Over £1m'];
+    var OBJ_OPTS     = ['Income','Growth','Capital Preservation','Retirement Planning','Tax Efficiency','Estate / IHT Planning'];
+    var TAX_OPTS     = ['Non-taxpayer','Basic rate — 20%','Higher rate — 40%','Additional rate — 45%'];
+    var MARITAL_OPTS = ['Single','Married','Civil Partnership','Divorced','Widowed'];
+    var DEP_OPTS     = ['0','1','2','3','4+'];
+    var AC_OPTS      = ['UK Equities','Global Equities','Fixed Income','Property','Alternatives','SIPP / Pension','ISA','Offshore Bond','Multi-Asset'];
+
+    function selOpts(opts, val) {
+      return '<option value="">Select…</option>' + opts.map(function(o) {
+        return '<option value="' + escH(o) + '"' + (val === o ? ' selected' : '') + '>' + escH(o) + '</option>';
+      }).join('');
+    }
+
+    function pillRow(opts, current, name) {
+      return opts.map(function(o) {
+        var active = o === current;
+        return '<button type="button" class="ff-pill' + (active ? ' ff-pill-on' : '') + '" data-ff-group="' + name + '" data-ff-val="' + escH(o) + '">' + escH(o) + '</button>';
+      }).join('');
+    }
+
+    function acPill(o, sel) {
+      var on = sel.indexOf(o) !== -1;
+      return '<button type="button" class="ff-pill ff-pill-ac' + (on ? ' ff-pill-on' : '') + '" data-ff-ac="' + escH(o) + '">' + escH(o) + '</button>';
+    }
+
+    var selAc = saved.assetClass || [];
+
+    panel.innerHTML =
+      '<div id="intel-ff-bar" style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid #1a1a1a;cursor:move;user-select:none;flex-shrink:0;">' +
+        '<div>' +
+          '<div style="font-size:7px;letter-spacing:.3em;color:#E97132;font-weight:700;margin-bottom:2px;">IFA INTEL</div>' +
+          '<div style="font-size:12px;color:#fff;letter-spacing:.06em;font-weight:700;">CLIENT FACT FIND <span style="font-size:8px;color:#fff;letter-spacing:.1em;font-weight:400;">QUICK MODE</span></div>' +
+        '</div>' +
+        '<button id="ff-close" style="background:none;border:none;color:#fff;font-size:14px;cursor:pointer;padding:4px;flex-shrink:0;">✕</button>' +
+      '</div>' +
+
+      '<div style="overflow-y:auto;flex:1;padding:16px;">' +
+
+        /* Row 1: ref + age */
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">' +
+          '<div>' +
+            '<div class="ff-lbl">CLIENT REFERENCE</div>' +
+            '<input class="ff-inp" id="ff-ref" type="text" placeholder="e.g. Client A, JB47…" value="' + escH(saved.ref || '') + '" autocomplete="off">' +
+          '</div>' +
+          '<div>' +
+            '<div class="ff-lbl">AGE</div>' +
+            '<input class="ff-inp" id="ff-age" type="number" min="18" max="99" placeholder="e.g. 54" value="' + escH(saved.age || '') + '" autocomplete="off">' +
+          '</div>' +
+        '</div>' +
+
+        /* Row 2: marital + dependants */
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">' +
+          '<div>' +
+            '<div class="ff-lbl">MARITAL STATUS</div>' +
+            '<select class="ff-inp ff-sel" id="ff-marital">' + selOpts(MARITAL_OPTS, saved.marital) + '</select>' +
+          '</div>' +
+          '<div>' +
+            '<div class="ff-lbl">DEPENDANTS</div>' +
+            '<select class="ff-inp ff-sel" id="ff-dep">' + selOpts(DEP_OPTS, saved.dependants) + '</select>' +
+          '</div>' +
+        '</div>' +
+
+        /* Row 3: income + assets */
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">' +
+          '<div>' +
+            '<div class="ff-lbl">ANNUAL INCOME</div>' +
+            '<select class="ff-inp ff-sel" id="ff-income">' + selOpts(INCOME_OPTS, saved.income) + '</select>' +
+          '</div>' +
+          '<div>' +
+            '<div class="ff-lbl">INVESTABLE ASSETS</div>' +
+            '<select class="ff-inp ff-sel" id="ff-assets">' + selOpts(ASSETS_OPTS, saved.assets) + '</select>' +
+          '</div>' +
+        '</div>' +
+
+        /* Risk attitude */
+        '<div style="margin-bottom:12px;">' +
+          '<div class="ff-lbl">RISK ATTITUDE</div>' +
+          '<div class="ff-pill-row" id="ff-risk-row">' + pillRow(RISK_OPTS, saved.risk, 'risk') + '</div>' +
+        '</div>' +
+
+        /* Row 4: horizon + objective */
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">' +
+          '<div>' +
+            '<div class="ff-lbl">TIME HORIZON</div>' +
+            '<select class="ff-inp ff-sel" id="ff-horizon">' + selOpts(HORIZON_OPTS, saved.horizon) + '</select>' +
+          '</div>' +
+          '<div>' +
+            '<div class="ff-lbl">PRIMARY OBJECTIVE</div>' +
+            '<select class="ff-inp ff-sel" id="ff-obj">' + selOpts(OBJ_OPTS, saved.objective) + '</select>' +
+          '</div>' +
+        '</div>' +
+
+        /* Tax band */
+        '<div style="margin-bottom:16px;">' +
+          '<div class="ff-lbl">TAX BAND</div>' +
+          '<div class="ff-pill-row" id="ff-tax-row">' + pillRow(TAX_OPTS, saved.taxBand, 'tax') + '</div>' +
+        '</div>' +
+
+        /* Asset class focus */
+        '<div style="margin-bottom:4px;">' +
+          '<div class="ff-lbl">ASSET CLASS FOCUS <span style="color:#fff;font-weight:400;">— select all that apply</span></div>' +
+          '<div class="ff-pill-row" id="ff-ac-row" style="flex-wrap:wrap;">' + AC_OPTS.map(function(o){ return acPill(o, selAc); }).join('') + '</div>' +
+        '</div>' +
+
+      '</div>' +
+
+      '<div style="padding:12px 16px;border-top:1px solid #1a1a1a;display:flex;gap:8px;align-items:center;flex-shrink:0;">' +
+        '<div id="ff-status" style="flex:1;font-size:8px;color:#fff;letter-spacing:.05em;"></div>' +
+        '<button id="ff-clear-btn" style="background:none;border:1px solid #2a2a2a;color:#fff;font-size:8px;letter-spacing:.1em;padding:6px 10px;cursor:pointer;font-family:inherit;">CLEAR</button>' +
+        '<button id="ff-run-btn" style="background:#E97132;border:none;color:#fff;font-size:8.5px;letter-spacing:.15em;padding:8px 18px;cursor:pointer;font-family:inherit;font-weight:700;">▌ GENERATE IFA INTEL</button>' +
+      '</div>';
+
+    document.body.appendChild(panel);
+    makeDraggable(panel, panel.querySelector('#intel-ff-bar'));
+
+    /* ── State tracking ── */
+    var _ffState = {
+      ref: saved.ref || '', age: saved.age || '',
+      marital: saved.marital || '', dependants: saved.dependants || '',
+      income: saved.income || '', assets: saved.assets || '',
+      risk: saved.risk || '', horizon: saved.horizon || '',
+      objective: saved.objective || '', taxBand: saved.taxBand || '',
+      assetClass: selAc.slice()
+    };
+
+    function _ffSync() {
+      _ffState.ref        = panel.querySelector('#ff-ref').value.trim();
+      _ffState.age        = panel.querySelector('#ff-age').value.trim();
+      _ffState.marital    = panel.querySelector('#ff-marital').value;
+      _ffState.dependants = panel.querySelector('#ff-dep').value;
+      _ffState.income     = panel.querySelector('#ff-income').value;
+      _ffState.assets     = panel.querySelector('#ff-assets').value;
+      _ffState.horizon    = panel.querySelector('#ff-horizon').value;
+      _ffState.objective  = panel.querySelector('#ff-obj').value;
+    }
+
+    /* Pill click handlers */
+    panel.querySelectorAll('.ff-pill:not(.ff-pill-ac)').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var grp = btn.getAttribute('data-ff-group');
+        panel.querySelectorAll('.ff-pill[data-ff-group="' + grp + '"]').forEach(function(b){ b.classList.remove('ff-pill-on'); });
+        btn.classList.add('ff-pill-on');
+        if (grp === 'risk') _ffState.risk = btn.getAttribute('data-ff-val');
+        if (grp === 'tax')  _ffState.taxBand = btn.getAttribute('data-ff-val');
+      });
+    });
+
+    /* Asset class multi-select */
+    panel.querySelectorAll('.ff-pill-ac').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var val = btn.getAttribute('data-ff-ac');
+        btn.classList.toggle('ff-pill-on');
+        var idx = _ffState.assetClass.indexOf(val);
+        if (idx === -1) _ffState.assetClass.push(val);
+        else _ffState.assetClass.splice(idx, 1);
+      });
+    });
+
+    /* Close */
+    panel.querySelector('#ff-close').addEventListener('click', function() { panel.remove(); });
+
+    /* Clear */
+    panel.querySelector('#ff-clear-btn').addEventListener('click', function() {
+      ['ff-ref','ff-age','ff-marital','ff-dep','ff-income','ff-assets','ff-horizon','ff-obj'].forEach(function(id) {
+        var el = panel.querySelector('#' + id); if (el) el.value = '';
+      });
+      panel.querySelectorAll('.ff-pill').forEach(function(b){ b.classList.remove('ff-pill-on'); });
+      _ffState = { ref:'', age:'', marital:'', dependants:'', income:'', assets:'', risk:'', horizon:'', objective:'', taxBand:'', assetClass:[] };
+      panel.querySelector('#ff-status').textContent = '';
+    });
+
+    /* Generate */
+    panel.querySelector('#ff-run-btn').addEventListener('click', function() {
+      _ffSync();
+      var q = _buildFfQuery(_ffState);
+      if (!q) { panel.querySelector('#ff-status').textContent = 'Please fill in at least a few fields.'; return; }
+      _ffSave(_ffState);
+      window._lastIfaIntake = {
+        ref: _ffState.ref, age: _ffState.age, portfolio: _ffState.assets,
+        query: q, composedAt: Date.now(),
+        ffData: Object.assign({}, _ffState)
+      };
+      panel.remove();
+      window._intelSearch(q, 'scenario', '');
+    });
+
+    /* Bring to front on click */
+    panel.addEventListener('mousedown', function() { window._sharedZ++; panel.style.zIndex = window._sharedZ; });
+  }
+
   function _buildClientsListHtml(briefs) {
     if (!briefs.length) {
-      return '<div style="padding:20px 14px;font-size:9.5px;color:#444;text-align:center;line-height:1.8;">No saved client briefs yet.<br><span style="color:#333;">Run an IFA Intel brief and click<br>▌ SAVE CLIENT BRIEF to store it here.</span></div>';
+      return '<div style="padding:20px 14px;font-size:9.5px;color:#fff;text-align:center;line-height:1.8;">No saved client briefs yet.<br><span style="color:#fff;">Run an IFA Intel brief and click<br>▌ SAVE CLIENT BRIEF to store it here.</span></div>';
     }
     return briefs.map(function(b, i) {
       var ref       = b.customName || (b.intake && b.intake.ref) || b.briefData.title || 'Client';
@@ -2647,13 +2882,13 @@
       return '<div class="clients-row" data-idx="' + i + '" style="padding:10px 14px;border-bottom:1px solid #111;cursor:pointer;transition:background .15s;">' +
         '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;gap:6px;">' +
           '<div class="clients-row-name" style="font-size:10px;color:#fff;font-weight:700;letter-spacing:.05em;flex:1;">' + escH(ref) + '</div>' +
-          '<button class="clients-rename-btn" data-idx="' + i + '" title="Rename" style="background:none;border:none;color:#444;font-size:11px;cursor:pointer;padding:0 2px;flex-shrink:0;line-height:1;">✎</button>' +
-          '<div style="font-size:8px;color:#444;flex-shrink:0;">' + escH(b.savedAt) + '</div>' +
+          '<button class="clients-rename-btn" data-idx="' + i + '" title="Rename" style="background:none;border:none;color:#fff;font-size:11px;cursor:pointer;padding:0 2px;flex-shrink:0;line-height:1;">✎</button>' +
+          '<div style="font-size:8px;color:#fff;flex-shrink:0;">' + escH(b.savedAt) + '</div>' +
         '</div>' +
-        (age       ? '<div style="font-size:8.5px;color:#888;">' + escH(age) + '</div>' : '') +
+        (age       ? '<div style="font-size:8.5px;color:#fff;">' + escH(age) + '</div>' : '') +
         (portfolio ? '<div style="font-size:8.5px;color:#E97132;">' + escH(portfolio) + '</div>' : '') +
         '<div style="margin-top:4px;display:flex;gap:4px;">' +
-          '<span style="font-size:7px;letter-spacing:.1em;padding:1px 5px;border:1px solid #1f1f1f;color:#555;">BRIEF</span>' +
+          '<span style="font-size:7px;letter-spacing:.1em;padding:1px 5px;border:1px solid #1f1f1f;color:#fff;">BRIEF</span>' +
           (hasPitch ? '<span style="font-size:7px;letter-spacing:.1em;padding:1px 5px;border:1px solid #2a1a0a;color:#E97132;">PITCH</span>' : '') +
           (hasCfa   ? '<span style="font-size:7px;letter-spacing:.1em;padding:1px 5px;border:1px solid #0a1a2a;color:#4A9EDD;">CFA</span>' : '') +
         '</div>' +
@@ -2676,12 +2911,12 @@
         '<div style="font-size:7px;letter-spacing:.3em;color:#E97132;font-weight:700;margin-bottom:2px;">IFA INTEL</div>' +
         '<div style="font-size:12px;color:#fff;letter-spacing:.06em;font-weight:700;">SAVED CLIENTS</div>' +
       '</div>' +
-      '<button id="intel-clients-close" style="background:none;border:none;color:#555;font-size:14px;cursor:pointer;padding:4px;">✕</button>' +
+      '<button id="intel-clients-close" style="background:none;border:none;color:#fff;font-size:14px;cursor:pointer;padding:4px;">✕</button>' +
     '</div>';
 
     modal.innerHTML = hdr +
       '<div id="intel-clients-list" style="overflow-y:auto;flex:1;">' + _buildClientsListHtml(briefs) + '</div>' +
-      (briefs.length ? '<div id="intel-clients-footer" style="padding:10px 14px;border-top:1px solid #1a1a1a;"><button id="intel-clients-clear" style="background:none;border:none;color:#444;font-size:8px;letter-spacing:.1em;cursor:pointer;padding:0;">✕ CLEAR ALL SAVED CLIENTS</button></div>' : '<div id="intel-clients-footer"></div>');
+      (briefs.length ? '<div id="intel-clients-footer" style="padding:10px 14px;border-top:1px solid #1a1a1a;"><button id="intel-clients-clear" style="background:none;border:none;color:#fff;font-size:8px;letter-spacing:.1em;cursor:pointer;padding:0;">✕ CLEAR ALL SAVED CLIENTS</button></div>' : '<div id="intel-clients-footer"></div>');
 
     document.body.appendChild(modal);
     makeDraggable(modal, modal.querySelector('#intel-clients-titlebar'));
@@ -2693,7 +2928,7 @@
       var listEl = modal.querySelector('#intel-clients-list');
       var footerEl = modal.querySelector('#intel-clients-footer');
       if (listEl) listEl.innerHTML = _buildClientsListHtml(briefs);
-      if (footerEl) footerEl.innerHTML = briefs.length ? '<button id="intel-clients-clear" style="background:none;border:none;color:#444;font-size:8px;letter-spacing:.1em;cursor:pointer;padding:0;">✕ CLEAR ALL SAVED CLIENTS</button>' : '';
+      if (footerEl) footerEl.innerHTML = briefs.length ? '<button id="intel-clients-clear" style="background:none;border:none;color:#fff;font-size:8px;letter-spacing:.1em;cursor:pointer;padding:0;">✕ CLEAR ALL SAVED CLIENTS</button>' : '';
       attachClientsHandlers();
     });
 
@@ -2957,8 +3192,8 @@
         data.keyMetrics.map(function(m) {
           return '<div style="margin-bottom:8px;padding:8px;background:#0c0c0c;border:1px solid #1a1a1a;border-left:2px solid ' + BLU + ';">' +
             '<div style="font-size:8px;color:' + BLU + ';letter-spacing:.12em;font-weight:700;margin-bottom:5px;">' + escH(m.metric || '') + '</div>' +
-            (m.currentPosition ? '<div style="font-size:9.5px;color:rgba(255,255,255,0.5);margin-bottom:2px;"><span style="color:#444;font-size:8px;">NOW → </span>' + escH(m.currentPosition) + '</div>' : '') +
-            (m.withAllocation  ? '<div style="font-size:9.5px;color:' + GRN + ';"><span style="color:#444;font-size:8px;">WITH → </span>' + escH(m.withAllocation) + '</div>' : '') +
+            (m.currentPosition ? '<div style="font-size:9.5px;color:rgba(255,255,255,0.5);margin-bottom:2px;"><span style="color:#fff;font-size:8px;">NOW → </span>' + escH(m.currentPosition) + '</div>' : '') +
+            (m.withAllocation  ? '<div style="font-size:9.5px;color:' + GRN + ';"><span style="color:#fff;font-size:8px;">WITH → </span>' + escH(m.withAllocation) + '</div>' : '') +
           '</div>';
         }).join('') +
       '</div>';
@@ -2969,7 +3204,7 @@
         data.behaviouralProfile.map(function(b) {
           return '<div style="margin-bottom:8px;padding:8px;background:#0c0c0c;border:1px solid #1a1a1a;">' +
             '<div style="font-size:8px;color:' + A + ';letter-spacing:.12em;font-weight:700;margin-bottom:3px;">' + escH(b.bias || '') + '</div>' +
-            (b.signal         ? '<div style="font-size:9.5px;color:rgba(255,255,255,0.45);margin-bottom:4px;">' + escH(b.signal) + '</div>' : '') +
+            (b.signal         ? '<div style="font-size:9.5px;color:#fff;margin-bottom:4px;">' + escH(b.signal) + '</div>' : '') +
             (b.advisorResponse ? '<div style="font-size:9.5px;color:#c8c8c8;border-left:2px solid ' + BLU + ';padding-left:7px;">' + escH(b.advisorResponse) + '</div>' : '') +
           '</div>';
         }).join('') +
@@ -2993,8 +3228,8 @@
         data.stressTest.map(function(s) {
           return '<div style="margin-bottom:8px;padding:8px;background:#0c0c0c;border:1px solid #1a1a1a;border-left:2px solid ' + RED + ';">' +
             '<div style="font-size:8px;color:' + RED + ';letter-spacing:.12em;font-weight:700;margin-bottom:5px;">' + escH(s.scenario || '') + '</div>' +
-            (s.portfolioImpact ? '<div style="font-size:9.5px;color:rgba(255,255,255,0.5);margin-bottom:4px;"><span style="color:#444;font-size:8px;">CURRENT → </span>' + escH(s.portfolioImpact) + '</div>' : '') +
-            (s.withAllocation  ? '<div style="font-size:9.5px;color:' + GRN + ';"><span style="color:#444;font-size:8px;">WITH ALLOC → </span>' + escH(s.withAllocation) + '</div>' : '') +
+            (s.portfolioImpact ? '<div style="font-size:9.5px;color:rgba(255,255,255,0.5);margin-bottom:4px;"><span style="color:#fff;font-size:8px;">CURRENT → </span>' + escH(s.portfolioImpact) + '</div>' : '') +
+            (s.withAllocation  ? '<div style="font-size:9.5px;color:' + GRN + ';"><span style="color:#fff;font-size:8px;">WITH ALLOC → </span>' + escH(s.withAllocation) + '</div>' : '') +
           '</div>';
         }).join('') +
       '</div>';
@@ -3032,7 +3267,7 @@
         '<div class="sp-pitch" style="border-left-color:' + BLU + ';color:#c8c8c8;">' + escH(data.technicalVerdict) + '</div>' +
       '</div>';
 
-    return html || '<div style="padding:10px;font-size:10px;color:#555;">Analysis unavailable.</div>';
+    return html || '<div style="padding:10px;font-size:10px;color:#fff;">Analysis unavailable.</div>';
   }
 
   function renderCompany(d, body) {
@@ -3709,7 +3944,7 @@
                   lb.remove();
                   if (!lots.length) {
                     var none = document.createElement('div');
-                    none.style.cssText = 'font-size:8px;color:#555;padding:4px 0;letter-spacing:.08em;';
+                    none.style.cssText = 'font-size:8px;color:#fff;padding:4px 0;letter-spacing:.08em;';
                     none.textContent = isAuction ? 'NO LIVE AUCTION LOTS' : 'NO RETAIL LISTINGS';
                     mktEl.appendChild(none);
                     return;
@@ -4167,7 +4402,7 @@
     var rect = win.getBoundingClientRect();
     picker.style.top  = (rect.top + 36) + 'px';
     picker.style.left = rect.left + 'px';
-    picker.innerHTML = '<div style="font-size:7px;letter-spacing:.22em;color:#555;padding:8px 12px 4px;text-transform:uppercase;">MERGE WITH:</div>';
+    picker.innerHTML = '<div style="font-size:7px;letter-spacing:.22em;color:#fff;padding:8px 12px 4px;text-transform:uppercase;">MERGE WITH:</div>';
 
     candidates.forEach(function (other) {
       var item = document.createElement('div');
