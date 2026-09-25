@@ -826,13 +826,24 @@ window.addEventListener('blur', function() {
 <script>
 (function() {
   var hash = window.location.hash;
+  var search = window.location.search;
+  // Hash fragment format (#access_token=...)
   if (hash && hash.includes('access_token=')) {
-    var params = new URLSearchParams(hash.substring(1));
-    var type = params.get('type');
-    if (type === 'recovery') {
+    var p = new URLSearchParams(hash.substring(1));
+    if (p.get('type') === 'recovery') {
       window.location.replace('/reset-password.html' + hash);
     } else {
       window.location.replace('/dashboard.html' + hash);
+    }
+    return;
+  }
+  // Query param format (?token_hash=... or ?code=...)
+  if (search && (search.includes('token_hash=') || search.includes('code='))) {
+    var p = new URLSearchParams(search);
+    if (p.get('type') === 'recovery') {
+      window.location.replace('/reset-password.html' + search);
+    } else {
+      window.location.replace('/dashboard.html' + search);
     }
   }
 })();
