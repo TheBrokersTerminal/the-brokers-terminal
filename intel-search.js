@@ -1685,8 +1685,8 @@
   /* ── RENDER POP-OUT CONTENT ── */
   /* ── SCENARIO / IFA ADVISORY RESULT ── */
   function renderScenario(d, body) {
-    var A = '#E97132', GRN = '#3DAA6A', RED = '#D14040';
-    var suitCol = function(s) { return s === 'HIGH' ? GRN : s === 'MEDIUM' ? A : 'rgba(255,255,255,0.45)'; };
+    var A = '#E97132', RED = '#D14040';
+    var suitCol = function(s) { return s === 'HIGH' ? A : s === 'MEDIUM' ? A : '#fff'; };
 
     var briefHtml =
       '<div class="sp-section">' +
@@ -1694,7 +1694,7 @@
         '<div class="sp-text">' + escH(d.situation || '') + '</div>' +
       '</div>' +
 
-      (d.openingLine ? '<div class="sp-section"><div class="sp-sec-lbl">OPEN WITH</div><div class="sp-pitch-quote" style="font-size:11px;">"' + escH(d.openingLine) + '"</div></div>' : '') +
+      (d.openingLine ? '<div class="sp-section"><div class="sp-sec-lbl">OPEN WITH</div><div class="sp-pitch">"' + escH(d.openingLine) + '"</div></div>' : '') +
 
       (d.keyConsiderations && d.keyConsiderations.length ?
         '<div class="sp-section">' +
@@ -1708,11 +1708,11 @@
           d.solutionAreas.map(function(s) {
             return '<div style="margin-bottom:10px;padding:10px;background:#0c0c0c;border:1px solid #1a1a1a;border-left:2px solid ' + suitCol(s.suitability) + ';">' +
               '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px;">' +
-                '<div style="font-size:9px;font-weight:700;letter-spacing:.1em;color:#fff;">' + escH(s.asset || '') + '</div>' +
-                '<div style="font-size:7px;letter-spacing:.12em;color:' + suitCol(s.suitability) + ';">' + escH(s.suitability || '') + '</div>' +
+                '<div style="font-size:11px;font-weight:700;letter-spacing:.08em;color:#fff;">' + escH(s.asset || '') + '</div>' +
+                '<div style="font-size:8px;letter-spacing:.12em;color:' + suitCol(s.suitability) + ';font-weight:700;">' + escH(s.suitability || '') + '</div>' +
               '</div>' +
-              '<div style="font-size:10px;color:rgba(255,255,255,0.75);line-height:1.6;margin-bottom:5px;">' + escH(s.rationale || '') + '</div>' +
-              (s.keyPoint ? '<div style="font-size:9px;color:' + A + ';font-style:italic;">"' + escH(s.keyPoint) + '"</div>' : '') +
+              '<div style="font-size:12px;color:#fff;line-height:1.7;margin-bottom:6px;">' + escH(s.rationale || '') + '</div>' +
+              (s.keyPoint ? '<div style="font-size:11px;color:' + A + ';font-style:italic;">"' + escH(s.keyPoint) + '"</div>' : '') +
             '</div>';
           }).join('') +
         '</div>' : '') +
@@ -3066,7 +3066,7 @@
       return '<div class=”sp-section”><div class=”sp-sec-lbl”>BROKER NOTE</div><div class=”sp-text”>' + escH(brokerNote) + '</div></div>';
     }
 
-    var A = '#E97132', RED = '#D14040', GRN = '#3DAA6A';
+    var A = '#E97132', RED = '#D14040';
     var html = '';
 
     /* Opening Line — blockquote style matching “OPEN WITH” in advisory brief */
@@ -3119,8 +3119,8 @@
         '</div>';
       if (fp.gainFrame) html +=
         '<div>' +
-          '<div style=”font-size:7px;letter-spacing:.22em;color:' + GRN + ';font-weight:700;margin-bottom:5px;”>WITH</div>' +
-          '<div class=”sp-text” style=”border-left:2px solid ' + GRN + ';padding-left:10px;”>' + escH(fp.gainFrame) + '</div>' +
+          '<div style=”font-size:7px;letter-spacing:.22em;color:' + A + ';font-weight:700;margin-bottom:5px;”>WITH</div>' +
+          '<div class=”sp-text” style=”border-left:2px solid ' + A + ';padding-left:10px;”>' + escH(fp.gainFrame) + '</div>' +
         '</div>';
       html += '</div>';
     } else if (pitch.emotionalCase) {
@@ -3152,7 +3152,7 @@
           var clean = q.replace(/^(situation|problem\s*[\/]?\s*implication|need[-\s]payoff)[:\s]*/i, '').trim();
           return '<div style=”padding:7px 0;border-bottom:1px solid #181818;”>' +
             '<div style=”font-size:7px;letter-spacing:.18em;color:' + A + ';font-weight:700;margin-bottom:4px;”>' + (spinLabels[i] || '') + '</div>' +
-            '<div class=”sp-text” style=”font-size:10px;”>' + escH(clean) + '</div>' +
+            '<div class=”sp-text”>' + escH(clean) + '</div>' +
           '</div>';
         }).join('') +
       '</div>';
@@ -3200,13 +3200,20 @@
 
   function buildCfaAnalysis(data) {
     if (!data) return '<div class="sp-intel-load">ANALYSIS UNAVAILABLE<span class="sp-intel-ld"></span></div>';
-    var BLU = '#4A9EDD', A = '#E97132', GRN = '#6bcb77', RED = '#D14040';
+    var BLU = '#4A9EDD', A = '#E97132', RED = '#D14040';
     var html = '';
+
+    /* Reusable helpers for consistent row styling */
+    var rowStyle = 'display:flex;gap:8px;padding:6px 0;border-bottom:1px solid #181818;font-size:12px;color:#fff;line-height:1.6;';
+    var rowStyleLast = 'display:flex;gap:8px;padding:6px 0;font-size:12px;color:#fff;line-height:1.6;';
+    function lbl(col, text) {
+      return '<span style="color:' + col + ';font-size:8px;letter-spacing:.12em;flex-shrink:0;padding-top:3px;min-width:90px;font-weight:700;">' + text + '</span>';
+    }
 
     if (data.suitabilityVerdict) html +=
       '<div class="sp-section">' +
         '<div class="sp-sec-lbl" style="color:' + BLU + ';">SUITABILITY VERDICT — REGULATORY REVIEW</div>' +
-        '<div class="sp-pitch" style="border-left-color:' + BLU + ';color:#c8c8c8;">' + escH(data.suitabilityVerdict) + '</div>' +
+        '<div class="sp-pitch" style="border-left-color:' + BLU + ';">' + escH(data.suitabilityVerdict) + '</div>' +
       '</div>';
 
     var ips = data.ipsAssessment;
@@ -3218,10 +3225,9 @@
         { key: 'taxConsiderations',  label: 'TAX POINTS' },
       ];
       html += '<div class="sp-section"><div class="sp-sec-lbl" style="color:' + BLU + ';">INVESTMENT POLICY STATEMENT</div>' +
-        ipsRows.map(function(r) {
-          return ips[r.key] ? '<div style="display:flex;gap:8px;padding:4px 0;border-bottom:1px solid #181818;font-size:10px;color:#c8c8c8;line-height:1.6;">' +
-            '<span style="color:' + BLU + ';font-size:7px;letter-spacing:.12em;flex-shrink:0;padding-top:2px;min-width:80px;">' + r.label + '</span>' +
-            escH(ips[r.key]) + '</div>' : '';
+        ipsRows.map(function(r, i) {
+          var last = (i === ipsRows.length - 1) || !ipsRows.slice(i+1).some(function(x){ return ips[x.key]; });
+          return ips[r.key] ? '<div style="' + (last ? rowStyleLast : rowStyle) + '">' + lbl(BLU, r.label) + escH(ips[r.key]) + '</div>' : '';
         }).join('') +
       '</div>';
     }
@@ -3229,19 +3235,19 @@
     var af = data.allocationFramework;
     if (af) {
       html += '<div class="sp-section"><div class="sp-sec-lbl" style="color:' + BLU + ';">ALLOCATION FRAMEWORK — MARKOWITZ / ENDOWMENT MODEL</div>' +
-        (af.recommendedAllocation ? '<div style="display:flex;gap:8px;padding:4px 0;border-bottom:1px solid #181818;font-size:10px;color:#c8c8c8;line-height:1.6;"><span style="color:' + BLU + ';font-size:7px;letter-spacing:.12em;flex-shrink:0;padding-top:2px;min-width:80px;">RECOMMENDED</span>' + escH(af.recommendedAllocation) + '</div>' : '') +
-        (af.portfolioRationale ? '<div style="display:flex;gap:8px;padding:4px 0;border-bottom:1px solid #181818;font-size:10px;color:#c8c8c8;line-height:1.6;"><span style="color:' + BLU + ';font-size:7px;letter-spacing:.12em;flex-shrink:0;padding-top:2px;min-width:80px;">RATIONALE</span>' + escH(af.portfolioRationale) + '</div>' : '') +
-        (af.modelComparison ? '<div style="display:flex;gap:8px;padding:4px 0;font-size:10px;color:#c8c8c8;line-height:1.6;"><span style="color:' + BLU + ';font-size:7px;letter-spacing:.12em;flex-shrink:0;padding-top:2px;min-width:80px;">vs BENCHMARK</span>' + escH(af.modelComparison) + '</div>' : '') +
+        (af.recommendedAllocation ? '<div style="' + rowStyle + '">' + lbl(BLU, 'RECOMMENDED') + escH(af.recommendedAllocation) + '</div>' : '') +
+        (af.portfolioRationale    ? '<div style="' + rowStyle + '">' + lbl(BLU, 'RATIONALE')    + escH(af.portfolioRationale)    + '</div>' : '') +
+        (af.modelComparison       ? '<div style="' + rowStyleLast + '">' + lbl(BLU, 'vs BENCHMARK') + escH(af.modelComparison)  + '</div>' : '') +
       '</div>';
     }
 
     if (data.keyMetrics && data.keyMetrics.length) {
       html += '<div class="sp-section"><div class="sp-sec-lbl" style="color:' + BLU + ';">RISK / RETURN METRICS</div>' +
         data.keyMetrics.map(function(m) {
-          return '<div style="margin-bottom:8px;padding:8px;background:#0c0c0c;border:1px solid #1a1a1a;border-left:2px solid ' + BLU + ';">' +
-            '<div style="font-size:8px;color:' + BLU + ';letter-spacing:.12em;font-weight:700;margin-bottom:5px;">' + escH(m.metric || '') + '</div>' +
-            (m.currentPosition ? '<div style="font-size:9.5px;color:rgba(255,255,255,0.5);margin-bottom:2px;"><span style="color:#fff;font-size:8px;">NOW → </span>' + escH(m.currentPosition) + '</div>' : '') +
-            (m.withAllocation  ? '<div style="font-size:9.5px;color:' + GRN + ';"><span style="color:#fff;font-size:8px;">WITH → </span>' + escH(m.withAllocation) + '</div>' : '') +
+          return '<div style="margin-bottom:8px;padding:10px;background:#0c0c0c;border:1px solid #1a1a1a;border-left:2px solid ' + BLU + ';">' +
+            '<div style="font-size:9px;color:' + BLU + ';letter-spacing:.12em;font-weight:700;margin-bottom:6px;">' + escH(m.metric || '') + '</div>' +
+            (m.currentPosition ? '<div style="font-size:12px;color:#fff;margin-bottom:4px;line-height:1.6;"><span style="color:' + A + ';font-size:8px;font-weight:700;">NOW → </span>' + escH(m.currentPosition) + '</div>' : '') +
+            (m.withAllocation  ? '<div style="font-size:12px;color:#fff;line-height:1.6;"><span style="color:' + BLU + ';font-size:8px;font-weight:700;">WITH → </span>' + escH(m.withAllocation) + '</div>' : '') +
           '</div>';
         }).join('') +
       '</div>';
@@ -3250,10 +3256,10 @@
     if (data.behaviouralProfile && data.behaviouralProfile.length) {
       html += '<div class="sp-section"><div class="sp-sec-lbl" style="color:' + BLU + ';">BEHAVIOURAL RISK PROFILE</div>' +
         data.behaviouralProfile.map(function(b) {
-          return '<div style="margin-bottom:8px;padding:8px;background:#0c0c0c;border:1px solid #1a1a1a;">' +
-            '<div style="font-size:8px;color:' + A + ';letter-spacing:.12em;font-weight:700;margin-bottom:3px;">' + escH(b.bias || '') + '</div>' +
-            (b.signal         ? '<div style="font-size:9.5px;color:#fff;margin-bottom:4px;">' + escH(b.signal) + '</div>' : '') +
-            (b.advisorResponse ? '<div style="font-size:9.5px;color:#c8c8c8;border-left:2px solid ' + BLU + ';padding-left:7px;">' + escH(b.advisorResponse) + '</div>' : '') +
+          return '<div style="margin-bottom:8px;padding:10px;background:#0c0c0c;border:1px solid #1a1a1a;">' +
+            '<div style="font-size:9px;color:' + A + ';letter-spacing:.12em;font-weight:700;margin-bottom:5px;">' + escH(b.bias || '') + '</div>' +
+            (b.signal         ? '<div style="font-size:12px;color:#fff;margin-bottom:6px;line-height:1.6;">' + escH(b.signal) + '</div>' : '') +
+            (b.advisorResponse ? '<div style="font-size:12px;color:#fff;border-left:2px solid ' + BLU + ';padding-left:10px;line-height:1.6;">' + escH(b.advisorResponse) + '</div>' : '') +
           '</div>';
         }).join('') +
       '</div>';
@@ -3274,10 +3280,10 @@
     if (data.stressTest && data.stressTest.length) {
       html += '<div class="sp-section"><div class="sp-sec-lbl" style="color:' + RED + ';">STRESS TEST — SCENARIO ANALYSIS</div>' +
         data.stressTest.map(function(s) {
-          return '<div style="margin-bottom:8px;padding:8px;background:#0c0c0c;border:1px solid #1a1a1a;border-left:2px solid ' + RED + ';">' +
-            '<div style="font-size:8px;color:' + RED + ';letter-spacing:.12em;font-weight:700;margin-bottom:5px;">' + escH(s.scenario || '') + '</div>' +
-            (s.portfolioImpact ? '<div style="font-size:9.5px;color:rgba(255,255,255,0.5);margin-bottom:4px;"><span style="color:#fff;font-size:8px;">CURRENT → </span>' + escH(s.portfolioImpact) + '</div>' : '') +
-            (s.withAllocation  ? '<div style="font-size:9.5px;color:' + GRN + ';"><span style="color:#fff;font-size:8px;">WITH ALLOC → </span>' + escH(s.withAllocation) + '</div>' : '') +
+          return '<div style="margin-bottom:8px;padding:10px;background:#0c0c0c;border:1px solid #1a1a1a;border-left:2px solid ' + RED + ';">' +
+            '<div style="font-size:9px;color:' + RED + ';letter-spacing:.12em;font-weight:700;margin-bottom:6px;">' + escH(s.scenario || '') + '</div>' +
+            (s.portfolioImpact ? '<div style="font-size:12px;color:#fff;margin-bottom:4px;line-height:1.6;"><span style="color:' + A + ';font-size:8px;font-weight:700;">CURRENT → </span>' + escH(s.portfolioImpact) + '</div>' : '') +
+            (s.withAllocation  ? '<div style="font-size:12px;color:#fff;line-height:1.6;"><span style="color:' + BLU + ';font-size:8px;font-weight:700;">WITH ALLOC → </span>' + escH(s.withAllocation) + '</div>' : '') +
           '</div>';
         }).join('') +
       '</div>';
@@ -3286,9 +3292,9 @@
     var iht = data.estateIht;
     if (iht) {
       html += '<div class="sp-section"><div class="sp-sec-lbl" style="color:' + A + ';">ESTATE PLANNING — IHT ASSESSMENT</div>' +
-        (iht.estimatedExposure ? '<div style="display:flex;gap:8px;padding:4px 0;border-bottom:1px solid #181818;font-size:10px;color:#c8c8c8;line-height:1.6;"><span style="color:' + A + ';font-size:7px;letter-spacing:.12em;flex-shrink:0;padding-top:2px;min-width:80px;">EXPOSURE</span>' + escH(iht.estimatedExposure) + '</div>' : '') +
-        (iht.mitigationOptions && iht.mitigationOptions.length ? '<div style="display:flex;gap:8px;padding:4px 0;border-bottom:1px solid #181818;font-size:10px;color:#c8c8c8;line-height:1.6;"><span style="color:' + A + ';font-size:7px;letter-spacing:.12em;flex-shrink:0;padding-top:2px;min-width:80px;">MITIGATION</span><div>' + iht.mitigationOptions.map(function(m,i){ return '<div style="margin-bottom:4px;">' + (i+1) + '. ' + escH(m) + '</div>'; }).join('') + '</div></div>' : '') +
-        (iht.urgencyFlag ? '<div style="display:flex;gap:8px;padding:4px 0;font-size:10px;color:#c8c8c8;line-height:1.6;"><span style="color:' + A + ';font-size:7px;letter-spacing:.12em;flex-shrink:0;padding-top:2px;min-width:80px;">TIMING</span>' + escH(iht.urgencyFlag) + '</div>' : '') +
+        (iht.estimatedExposure ? '<div style="' + rowStyle + '">' + lbl(A, 'EXPOSURE') + escH(iht.estimatedExposure) + '</div>' : '') +
+        (iht.mitigationOptions && iht.mitigationOptions.length ? '<div style="' + rowStyle + '">' + lbl(A, 'MITIGATION') + '<div>' + iht.mitigationOptions.map(function(m,i){ return '<div style="margin-bottom:4px;">' + (i+1) + '. ' + escH(m) + '</div>'; }).join('') + '</div></div>' : '') +
+        (iht.urgencyFlag ? '<div style="' + rowStyleLast + '">' + lbl(A, 'TIMING') + escH(iht.urgencyFlag) + '</div>' : '') +
       '</div>';
     }
 
@@ -3300,11 +3306,10 @@
         { key: 'sequencing',         label: 'SEQUENCE' },
         { key: 'minimumEntry',       label: 'MINIMUM' },
       ];
-      html += '<div class="sp-section"><div class="sp-sec-lbl" style="color:' + GRN + ';">IMPLEMENTATION PATHWAY</div>' +
-        implRows.map(function(r) {
-          return impl[r.key] ? '<div style="display:flex;gap:8px;padding:4px 0;border-bottom:1px solid #181818;font-size:10px;color:#c8c8c8;line-height:1.6;">' +
-            '<span style="color:' + GRN + ';font-size:7px;letter-spacing:.12em;flex-shrink:0;padding-top:2px;min-width:80px;">' + r.label + '</span>' +
-            escH(impl[r.key]) + '</div>' : '';
+      html += '<div class="sp-section"><div class="sp-sec-lbl" style="color:' + BLU + ';">IMPLEMENTATION PATHWAY</div>' +
+        implRows.map(function(r, i) {
+          var last = (i === implRows.length - 1) || !implRows.slice(i+1).some(function(x){ return impl[x.key]; });
+          return impl[r.key] ? '<div style="' + (last ? rowStyleLast : rowStyle) + '">' + lbl(BLU, r.label) + escH(impl[r.key]) + '</div>' : '';
         }).join('') +
       '</div>';
     }
@@ -3312,10 +3317,10 @@
     if (data.technicalVerdict) html +=
       '<div class="sp-section">' +
         '<div class="sp-sec-lbl" style="color:' + BLU + ';">TECHNICAL VERDICT</div>' +
-        '<div class="sp-pitch" style="border-left-color:' + BLU + ';color:#c8c8c8;">' + escH(data.technicalVerdict) + '</div>' +
+        '<div class="sp-pitch" style="border-left-color:' + BLU + ';">' + escH(data.technicalVerdict) + '</div>' +
       '</div>';
 
-    return html || '<div style="padding:10px;font-size:10px;color:#fff;">Analysis unavailable.</div>';
+    return html || '<div style="padding:10px;font-size:12px;color:#fff;">Analysis unavailable.</div>';
   }
 
   function renderCompany(d, body) {

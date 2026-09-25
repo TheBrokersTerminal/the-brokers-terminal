@@ -435,15 +435,15 @@
 .intel-popwin-body .sp-tagline { font-size: 10px; color: #E97132; letter-spacing: .08em; margin-bottom: 12px; line-height: 1.5; }
 .intel-popwin-body .sp-section { margin-bottom: 14px; }
 .intel-popwin-body .sp-sec-lbl { font-size: 7px; letter-spacing: .3em; text-transform: uppercase; color: #E97132; margin-bottom: 6px; }
-.intel-popwin-body .sp-text { font-size: 10.5px; color: #d0d0d0; line-height: 1.8; }
+.intel-popwin-body .sp-text { font-size: 12px; color: #fff; line-height: 1.8; }
 .intel-popwin-body .sp-facts { list-style: none; padding: 0; margin: 0; }
-.intel-popwin-body .sp-facts li { font-size: 10px; color: #c8c8c8; padding: 4px 0; border-bottom: 1px solid #181818; line-height: 1.6; display: flex; gap: 8px; }
+.intel-popwin-body .sp-facts li { font-size: 12px; color: #fff; padding: 4px 0; border-bottom: 1px solid #181818; line-height: 1.6; display: flex; gap: 8px; }
 .intel-popwin-body .sp-facts li::before { content: '▪'; color: #E97132; flex-shrink: 0; }
 .intel-popwin-body .sp-timeline { display: flex; flex-direction: column; gap: 4px; }
 .intel-popwin-body .sp-tl-row { display: grid; grid-template-columns: 90px 1fr; gap: 0; border: 1px solid #181818; }
 .intel-popwin-body .sp-tl-date { background: #222; padding: 5px 8px; font-size: 8px; color: #E97132; letter-spacing: .08em; border-right: 1px solid #1e1e1e; display: flex; align-items: center; }
-.intel-popwin-body .sp-tl-evt { padding: 5px 10px; font-size: 9.5px; color: #c0c0c0; line-height: 1.5; }
-.intel-popwin-body .sp-pitch { background: #1c1c1c; border-left: 2px solid #E97132; padding: 10px 12px; font-size: 10.5px; color: #e0e0e0; line-height: 1.8; font-style: italic; }
+.intel-popwin-body .sp-tl-evt { padding: 5px 10px; font-size: 12px; color: #fff; line-height: 1.5; }
+.intel-popwin-body .sp-pitch { background: #1c1c1c; border-left: 2px solid #E97132; padding: 10px 12px; font-size: 12px; color: #fff; line-height: 1.8; font-style: italic; }
 .sp-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 7px; letter-spacing: .15em; text-transform: uppercase; padding: 2px 8px; margin-bottom: 8px; }
 .sp-pitch-shortcut { background: none; border: 1px solid #E97132; color: #E97132; font-size: 7px; letter-spacing: .12em; padding: 2px 8px; cursor: pointer; margin-bottom: 8px; font-family: inherit; transition: background .15s, color .15s; }
 .sp-pitch-shortcut:hover { background: #E97132; color: #fff; }
@@ -753,15 +753,15 @@
   margin-bottom: 8px;
 }
 .sp-obj-q {
-  font-size: 9.5px;
-  color: rgba(255,255,255,.5);
+  font-size: 12px;
+  color: #fff;
   font-style: italic;
   margin-bottom: 6px;
-  line-height: 1.5;
+  line-height: 1.6;
 }
 .sp-obj-a {
-  font-size: 10px;
-  color: #d8d8d8;
+  font-size: 12px;
+  color: #fff;
   line-height: 1.7;
 }
 .sp-intel-grid { display: flex; flex-direction: column; gap: 6px; }
@@ -776,7 +776,7 @@
   min-width: 76px;
 }
 .sp-intel-val {
-  font-size: 10px;
-  color: #c8c8c8;
+  font-size: 12px;
+  color: #fff;
   line-height: 1.6;
 }
