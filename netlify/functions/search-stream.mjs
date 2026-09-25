@@ -554,7 +554,7 @@ Analyse this as a senior wealth strategist combined with an elite sales psycholo
   "brokerBrief": "2-3 sentence plain English brief: what angle to lead with and what need-payoff question to close on. Asset-neutral.",
   "openingLine": "The exact first sentence to say to this client — a question or statement that shows you understand their situation."
 }
-CRITICAL: solutionAreas 2-3 areas only (most relevant). ALL field values must be concise — maximum 2 sentences each. Never use double-quote characters inside string values.`;
+CRITICAL: solutionAreas 2-3 areas only. ALL text fields: 1 sentence maximum. keyConsiderations: 3 bullets, 1 sentence each. riskFlags: 1-2 bullets. nextSteps: 2 bullets. Be direct. Never use double-quote characters inside string values.`;
 
 const SCENARIO_PITCH_PROMPT = (query) =>
 `An investment professional has described this client scenario:
@@ -982,8 +982,8 @@ export default async (req) => {
             : `\n\nACTIVE BROKER LENS — tailor ALL pitch content specifically to this asset class context:\n${lensContext}`)
           : '';
         const isScenarioPitch = isScenario && isPitchPlaybook;
-        /* CFA: 2200 tok. Pitch: 2000. Scenarios: 1800. Concept slim: 400. Company: 1200. */
-        const maxTok  = isCfaAnalysis ? 3000 : isPitchPlaybook ? 2000 : isScenario ? 1800 : (type === 'concept' ? 400 : 1200);
+        /* CFA: 3000 tok. Pitch: 1400. Scenarios: 1100. Concept slim: 400. Company: 1200. */
+        const maxTok  = isCfaAnalysis ? 3000 : isPitchPlaybook ? 1400 : isScenario ? 1100 : (type === 'concept' ? 400 : 1200);
         const sysPrompt = isCfaAnalysis ? CFA_SYSTEM : isPitchPlaybook ? PITCH_SYSTEM : type === 'concept' ? CONCEPT_SYSTEM : SEARCH_SYSTEM;
         let userMsg;
         if (isCfaAnalysis)           userMsg = CFA_ANALYSIS_PROMPT(query);
