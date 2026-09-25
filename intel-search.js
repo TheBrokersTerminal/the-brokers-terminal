@@ -3063,89 +3063,137 @@
   function buildPitchPlaybook(pitch, brokerNote) {
     if (!pitch && !brokerNote) return '';
     if (!pitch) {
-      return '<div class=”sp-section”><div class=”sp-sec-lbl”>BROKER NOTE</div><div class=”sp-pitch”>' + escH(brokerNote) + '</div></div>';
+      return '<div class=”sp-section”><div class=”sp-sec-lbl”>BROKER NOTE</div><div class=”sp-text”>' + escH(brokerNote) + '</div></div>';
     }
 
-    var A = '#E97132';
+    var A = '#E97132', RED = '#D14040', GRN = '#3DAA6A';
+    var html = '';
 
-    /* card helper — orange left border, dark background, label + body */
-    function card(label, body) {
-      return '<div style=”margin-bottom:8px;padding:8px 10px;background:#0c0c0c;border:1px solid #1a1a1a;border-left:2px solid ' + A + ';”>' +
-        (label ? '<div style=”font-size:7px;color:' + A + ';letter-spacing:.14em;font-weight:700;margin-bottom:5px;text-transform:uppercase;”>' + label + '</div>' : '') +
-        '<div style=”font-size:10px;color:#c8c8c8;line-height:1.7;”>' + body + '</div>' +
+    /* Opening Line — blockquote style matching “OPEN WITH” in advisory brief */
+    if (pitch.openingLine) {
+      var driverBadge = pitch.dominantDriverTarget ? ' — ' + pitch.dominantDriverTarget.toUpperCase() + ' DRIVER' : '';
+      html += '<div class=”sp-section”>' +
+        '<div class=”sp-sec-lbl”>OPENING LINE' + escH(driverBadge) + '</div>' +
+        '<div class=”sp-pitch”>“' + escH(pitch.openingLine) + '”</div>' +
       '</div>';
     }
 
-    var openLine = pitch.openingLine || '';
-    var driverBadge = pitch.dominantDriverTarget ? ' — ' + pitch.dominantDriverTarget.toUpperCase() + ' DRIVER' : '';
-    var html = openLine
-      ? '<div class=”sp-section”><div class=”sp-sec-lbl”>' + 'OPENING LINE' + escH(driverBadge) + '</div>' +
-        card('', '”' + escH(openLine) + '”') + '</div>'
-      : '';
-
+    /* Broker Note — plain text, no italic box */
     var bn = pitch.brokerNote || brokerNote;
     if (bn) html +=
-      '<div class=”sp-section”><div class=”sp-sec-lbl”>BROKER NOTE</div>' +
-      card('', escH(bn)) + '</div>';
-
-    if (pitch.logicalCase && pitch.logicalCase.length) html +=
-      '<div class=”sp-section”><div class=”sp-sec-lbl”>THE LOGICAL CASE — BUILD CERTAINTY FIRST</div>' +
-      pitch.logicalCase.map(function(f, i) {
-        return card('POINT ' + (i + 1), escH(f));
-      }).join('') + '</div>';
-
-    if (pitch.socraticDissonancePrompt) html +=
-      '<div class=”sp-section”><div class=”sp-sec-lbl”>SOCRATIC QUESTION — EXPOSE THE GAP</div>' +
-      card('', '<span style=”color:' + A + ';font-style:italic;”>”' + escH(pitch.socraticDissonancePrompt) + '”</span>') +
+      '<div class=”sp-section”>' +
+        '<div class=”sp-sec-lbl”>BROKER NOTE</div>' +
+        '<div class=”sp-text”>' + escH(bn) + '</div>' +
       '</div>';
 
+    /* Logical Case — key-value rows matching Institutional Analysis IPS table */
+    if (pitch.logicalCase && pitch.logicalCase.length) {
+      html += '<div class=”sp-section”>' +
+        '<div class=”sp-sec-lbl”>THE LOGICAL CASE — BUILD CERTAINTY FIRST</div>' +
+        '<div class=”sp-intel-grid”>' +
+        pitch.logicalCase.map(function(f, i) {
+          return '<div class=”sp-intel-row” style=”padding:6px 0;border-bottom:1px solid #181818;”>' +
+            '<span class=”sp-intel-lbl”>POINT ' + (i + 1) + '</span>' +
+            '<span class=”sp-intel-val”>' + escH(f) + '</span>' +
+          '</div>';
+        }).join('') +
+        '</div>' +
+      '</div>';
+    }
+
+    /* Socratic Question — orange italic blockquote */
+    if (pitch.socraticDissonancePrompt) html +=
+      '<div class=”sp-section”>' +
+        '<div class=”sp-sec-lbl”>SOCRATIC QUESTION — EXPOSE THE GAP</div>' +
+        '<div class=”sp-pitch” style=”color:' + A + ';”>“' + escH(pitch.socraticDissonancePrompt) + '”</div>' +
+      '</div>';
+
+    /* Future Pace — two colour-coded subsections (red / green left border) */
     var fp = pitch.asIfFuturePace;
     if (fp && (fp.lossFrame || fp.gainFrame)) {
       html += '<div class=”sp-section”><div class=”sp-sec-lbl”>FUTURE PACE — WITHOUT VS WITH</div>';
-      if (fp.lossFrame) html += card('WITHOUT', escH(fp.lossFrame));
-      if (fp.gainFrame) html += card('WITH', escH(fp.gainFrame));
+      if (fp.lossFrame) html +=
+        '<div style=”margin-bottom:10px;”>' +
+          '<div style=”font-size:7px;letter-spacing:.22em;color:' + RED + ';font-weight:700;margin-bottom:5px;”>WITHOUT</div>' +
+          '<div class=”sp-text” style=”border-left:2px solid ' + RED + ';padding-left:10px;”>' + escH(fp.lossFrame) + '</div>' +
+        '</div>';
+      if (fp.gainFrame) html +=
+        '<div>' +
+          '<div style=”font-size:7px;letter-spacing:.22em;color:' + GRN + ';font-weight:700;margin-bottom:5px;”>WITH</div>' +
+          '<div class=”sp-text” style=”border-left:2px solid ' + GRN + ';padding-left:10px;”>' + escH(fp.gainFrame) + '</div>' +
+        '</div>';
       html += '</div>';
     } else if (pitch.emotionalCase) {
       html += '<div class=”sp-section”><div class=”sp-sec-lbl”>FUTURE PACE</div>' +
-        card('', escH(pitch.emotionalCase)) + '</div>';
+        '<div class=”sp-text”>' + escH(pitch.emotionalCase) + '</div>' +
+      '</div>';
     }
 
+    /* Entry Architecture — italic blockquote */
     if (pitch.entryDefaultArchitecture) html +=
-      '<div class=”sp-section”><div class=”sp-sec-lbl”>ENTRY ARCHITECTURE — REMOVE YES/NO</div>' +
-      card('', escH(pitch.entryDefaultArchitecture)) + '</div>';
+      '<div class=”sp-section”>' +
+        '<div class=”sp-sec-lbl”>ENTRY ARCHITECTURE — REMOVE YES/NO</div>' +
+        '<div class=”sp-pitch”>' + escH(pitch.entryDefaultArchitecture) + '</div>' +
+      '</div>';
 
+    /* Pain Point — plain text */
     if (pitch.painPoint) html +=
-      '<div class=”sp-section”><div class=”sp-sec-lbl”>THEIR PAIN POINT</div>' +
-      card('', escH(pitch.painPoint)) + '</div>';
+      '<div class=”sp-section”>' +
+        '<div class=”sp-sec-lbl”>THEIR PAIN POINT</div>' +
+        '<div class=”sp-text”>' + escH(pitch.painPoint) + '</div>' +
+      '</div>';
 
+    /* Discovery Questions — label-above + text matching Institutional Analysis section style */
     if (pitch.spinQuestions && pitch.spinQuestions.length) {
       var spinLabels = ['SITUATION', 'PROBLEM / IMPLICATION', 'NEED-PAYOFF'];
-      html += '<div class=”sp-section”><div class=”sp-sec-lbl”>DISCOVERY QUESTIONS — ASK FIRST</div>' +
+      html += '<div class=”sp-section”>' +
+        '<div class=”sp-sec-lbl”>DISCOVERY QUESTIONS — ASK FIRST</div>' +
         pitch.spinQuestions.map(function(q, i) {
           var clean = q.replace(/^(situation|problem\s*[\/]?\s*implication|need[-\s]payoff)[:\s]*/i, '').trim();
-          return card(spinLabels[i] || '', escH(clean));
-        }).join('') + '</div>';
+          return '<div style=”padding:7px 0;border-bottom:1px solid #181818;”>' +
+            '<div style=”font-size:7px;letter-spacing:.18em;color:' + A + ';font-weight:700;margin-bottom:4px;”>' + (spinLabels[i] || '') + '</div>' +
+            '<div class=”sp-text” style=”font-size:10px;”>' + escH(clean) + '</div>' +
+          '</div>';
+        }).join('') +
+      '</div>';
     }
 
+    /* Objections — existing .sp-objection class (already correctly styled) */
     if (pitch.objections && pitch.objections.length) {
-      html += '<div class=”sp-section”><div class=”sp-sec-lbl”>HANDLE OBJECTIONS</div>' +
+      html += '<div class=”sp-section”>' +
+        '<div class=”sp-sec-lbl”>HANDLE OBJECTIONS</div>' +
         pitch.objections.map(function(o) {
-          var body = '<div style=”color:' + A + ';font-style:italic;margin-bottom:6px;”>”' + escH(o.objection || '') + '”</div>' +
-                     '<div style=”color:#c8c8c8;”>' + escH(o.rebuttal || '') + '</div>';
-          return card('OBJECTION / REBUTTAL', body);
-        }).join('') + '</div>';
+          return '<div class=”sp-objection” style=”border-left-color:' + A + ';margin-bottom:8px;”>' +
+            '<div class=”sp-obj-q”>“' + escH(o.objection || '') + '”</div>' +
+            '<div class=”sp-obj-a”>' + escH(o.rebuttal || '') + '</div>' +
+          '</div>';
+        }).join('') +
+      '</div>';
     }
 
+    /* Timing & Social Proof — key-value rows */
     if (pitch.urgencyLine || pitch.socialProof) {
-      html += '<div class=”sp-section”><div class=”sp-sec-lbl”>TIMING & SOCIAL PROOF</div>';
-      if (pitch.urgencyLine) html += card('URGENCY', escH(pitch.urgencyLine));
-      if (pitch.socialProof) html += card('SOCIAL PROOF', escH(pitch.socialProof));
-      html += '</div>';
+      html += '<div class=”sp-section”><div class=”sp-sec-lbl”>TIMING & SOCIAL PROOF</div>' +
+        '<div class=”sp-intel-grid”>';
+      if (pitch.urgencyLine) html +=
+        '<div class=”sp-intel-row” style=”padding:4px 0;border-bottom:1px solid #181818;”>' +
+          '<span class=”sp-intel-lbl”>URGENCY</span>' +
+          '<span class=”sp-intel-val”>' + escH(pitch.urgencyLine) + '</span>' +
+        '</div>';
+      if (pitch.socialProof) html +=
+        '<div class=”sp-intel-row” style=”padding:4px 0;”>' +
+          '<span class=”sp-intel-lbl”>SOCIAL PROOF</span>' +
+          '<span class=”sp-intel-val”>' + escH(pitch.socialProof) + '</span>' +
+        '</div>';
+      html += '</div></div>';
     }
 
+    /* Trigger Agreement — italic blockquote */
     if (pitch.triggerAgreementTemplate) html +=
-      '<div class=”sp-section”><div class=”sp-sec-lbl”>TRIGGER AGREEMENT — CONDITIONAL CLOSE</div>' +
-      card('', escH(pitch.triggerAgreementTemplate)) + '</div>';
+      '<div class=”sp-section”>' +
+        '<div class=”sp-sec-lbl”>TRIGGER AGREEMENT — CONDITIONAL CLOSE</div>' +
+        '<div class=”sp-pitch”>' + escH(pitch.triggerAgreementTemplate) + '</div>' +
+      '</div>';
 
     return html;
   }
